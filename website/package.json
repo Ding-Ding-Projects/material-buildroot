@@ -1,0 +1,19 @@
+{
+  "name": "material-buildroot-documentation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node check.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/roboto": "5.2.9",
+    "@material/web": "2.4.1",
+    "esbuild": "0.28.2",
+    "markdown-it": "15.0.2"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

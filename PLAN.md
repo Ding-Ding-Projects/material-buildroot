@@ -1,6 +1,6 @@
 # Material Buildroot implementation plan
 
-Status: planning. Application implementation belongs to the next development session.
+Status: planning plus initial documentation website implementation. Application and authenticated companion implementation belong to the next development session. The owner separately authorized creating the public documentation website now.
 
 ## Confirmed owner decisions
 
@@ -11,7 +11,7 @@ Status: planning. Application implementation belongs to the next development ses
 5. The public repository is `Ding-Ding-Projects/material-buildroot`.
 6. A GitHub Pages documentation companion is required, with its deployed URL in the repository About homepage.
 7. Work stays on `main`. Publish recoverable planning checkpoints frequently.
-8. This session prepares the plan and interviews the owner. The next development session implements it.
+8. This session prepares the plan, interviews the owner and creates the initial documentation website. The next development session implements the application and complete shared surface coverage.
 9. Serve both beginners and experienced builders through guided and advanced access to the same validated actions.
 10. The central workflow is board selection, configuration, build and image export.
 11. Ask for WSL or Docker when creating a project and remember the selection per project.
@@ -111,17 +111,13 @@ Every row requires its own implementation, packaged capability and runtime/GUI e
 | Minecraft | Java/Bedrock discovery, version/flavour/plugin descriptors, rich configuration, lifecycle/logs/console/backup and all four execution targets |
 | Security services | Vault references, bounded downloads, two-key-plus-slider destructive confirmation, authenticator and private-data exclusions |
 
-## Proposed milestones
+## Ordered implementation phases
 
-- [ ] Resolve the planning questions and approve the next session's first milestone.
-- [ ] Review the target-owned design handoff and exact component inventory.
-- [ ] Establish the secure desktop shell, transactional storage, file capabilities and job services.
-- [ ] Implement a complete source-to-image Buildroot workflow with WSL and Docker adapters.
-- [ ] Complete development, recovery, output and advanced Buildroot workflows.
-- [ ] Complete every shared feature family without silent deferral.
-- [ ] Produce the packaged Windows application and unsigned Squirrel.Windows installer.
-- [ ] Verify actual Windows installation, cancellation, updates and existing-installation preservation.
-- [ ] Publish and verify the documentation website, wiki, downloads and About homepage.
+[ROADMAP.md](ROADMAP.md) is the authoritative task checklist. It contains PH00–PH10, stable task IDs, prerequisites, phase exit requirements and a primary-phase map for all 105 shared identities. This plan describes scope; it does not maintain a competing completion list.
+
+Implementers take the lowest eligible unchecked task, split large work into stable child tasks, implement one reviewable unit, attach its required evidence and only then check it off. Keep blocked items unchecked and continue independent eligible work. Record current and next task IDs in the handoff after each verified checkpoint.
+
+PH00 delivers the plan and initial documentation website now. Subsequent phases cover detailed contracts, secure foundations, the shared interface and records, real runtime/configuration/build workflows, VM/image/deployment adapters, built-in tools, complete visitor/companion parity and final native packaging/release acceptance. A phase is an ordering mechanism and never removes unfinished scope. The initial website does not complete full D/C coverage.
 
 ## Evidence and release acceptance
 

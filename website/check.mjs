@@ -1,0 +1,61 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const docs=path.join(root,'docs');
+const base='/material-buildroot/';
+const failures=[];
+const meta=JSON.parse(await fs.readFile(path.join(docs,'site/build-info.json'),'utf8'));
+const inventory=JSON.parse(await fs.readFile(path.join(docs,'site/document-inventory.json'),'utf8'));
+const roadmap=JSON.parse(await fs.readFile(path.join(docs,'site/roadmap.json'),'utf8'));
+const digest=createHash('sha256');
+for(const file of meta.source_inputs)digest.update(file+'\0').update(await fs.readFile(path.join(root,file))).update('\0');
+if(digest.digest('hex')!==meta.input_snapshot_sha256)failures.push('Website source snapshot is stale; rebuild after documentation changes.');
+if(!/^[a-f0-9]{40}$/.test(meta.base_commit)||!Number.isFinite(Date.parse(meta.built_at)))failures.push('Invalid build provenance.');
+const tasks=roadmap.phases.flatMap(p=>p.tasks);
+if(new Set(tasks.map(t=>t.id)).size!==tasks.length)failures.push('Duplicate task IDs.');
+if(tasks.length!==roadmap.task_count || tasks.filter(t=>t.done).length!==roadmap.verified_count)failures.push('Roadmap counts disagree.');
+const htmlFiles=['index.html','site/library.html',...inventory.map(d=>d.url.slice(base.length))];
+const htmlByFile=new Map();
+for(const file of htmlFiles)htmlByFile.set(file,await fs.readFile(path.join(docs,file),'utf8'));
+let checkedLinks=0;
+for(const [file,html] of htmlByFile){
+  if (/<(?:button|select|input|details|summary)\b/i.test(html)) failures.push(`${file}: native interactive control substitutes are not allowed; use the admitted Material component.`);
+  for(const match of html.matchAll(/\b(?:href|src)="([^"]+)"/g)){
+    const link=match[1].replace(/&amp;/g,'&');
+    if(/^(?:https?:|mailto:|data:)/.test(link))continue;
+    const [pathname,fragment]=link.split('#');
+    let target=pathname?pathname.startsWith(base)?pathname.slice(base.length):path.posix.normalize(path.posix.join(path.posix.dirname(file),pathname)):file;
+    if(!target||target.endsWith('/'))target+='index.html';
+    if(pathname.startsWith('/')&&!pathname.startsWith(base)){failures.push(`${file}: link outside site base ${link}`);continue;}
+    try{await fs.access(path.join(docs,target));}catch{failures.push(`${file}: missing ${target}`);continue;}
+    if(fragment && target.endsWith('.html')){
+      const targetHTML=htmlByFile.get(target)??await fs.readFile(path.join(docs,target),'utf8');
+      if(!targetHTML.includes(`id="${decodeURIComponent(fragment)}"`))failures.push(`${file}: missing fragment ${target}#${fragment}`);
+    }
+    checkedLinks++;
+  }
+}
+const featureContent=await fs.readFile(path.join(root,'docs/planning/feature-coverage.md'),'utf8');
+const identities=[...featureContent.matchAll(/^\| ([a-z][a-z0-9-]+) \|/gm)].map(m=>m[1]);
+if(identities.length!==105||new Set(identities).size!==105)failures.push('Feature inventory no longer has 105 unique identities; reconcile the phase map.');
+const sourceRoadmap=await fs.readFile(path.join(root,'ROADMAP.md'),'utf8');
+const phaseMap=sourceRoadmap.split('## Primary-phase map for all 105 catalogue identities')[1]?.split('## Current checkpoint')[0]||'';
+const mapped=[...phaseMap.matchAll(/`([a-z][a-z0-9-]+)`/g)].map(m=>m[1]).filter(id=>identities.includes(id));
+if(mapped.length!==105||new Set(mapped).size!==105)failures.push('Roadmap must map each of the 105 feature identities exactly once.');
+if(process.argv.includes('--with-browser')){
+  const receipt=JSON.parse(await fs.readFile(path.join(root,'website/evidence/browser-check.json'),'utf8'));
+  if(receipt.verdict!=='passed'||receipt.input_snapshot_sha256!==meta.input_snapshot_sha256)failures.push('Browser receipt is missing, failed or bound to another source snapshot.');
+  for(const [key,file] of Object.entries({html_sha256:'docs/index.html',javascript_sha256:'docs/site/assets/app.js',css_sha256:'docs/site/assets/app.css'})){
+    const hash=createHash('sha256').update(await fs.readFile(path.join(root,file))).digest('hex');
+    if(receipt.artifacts[key]!==hash)failures.push(`${file}: browser evidence artifact hash mismatch.`);
+  }
+  for(const capture of receipt.captures){
+    if(!/^website\/evidence\/[a-z-]+\.png$/.test(capture.file)){failures.push('Unexpected capture location.');continue;}
+    const hash=createHash('sha256').update(await fs.readFile(path.join(root,capture.file))).digest('hex');
+    if(capture.sha256!==hash)failures.push(`${capture.file}: capture hash mismatch.`);
+  }
+}
+if(failures.length){console.error(failures.join('\n'));process.exit(1);}
+console.log(`PASS: ${htmlFiles.length} HTML pages, ${checkedLinks} internal links/assets/fragments, ${tasks.length} unique tasks, ${identities.length} feature identities and current snapshot provenance.`);

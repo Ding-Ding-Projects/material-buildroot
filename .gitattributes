@@ -1,0 +1,4 @@
+# Generated dependency bundles contain meaningful whitespace in template literals.
+docs/site/** linguist-generated=true
+docs/index.html linguist-generated=true
+docs/site/assets/app.js -whitespace

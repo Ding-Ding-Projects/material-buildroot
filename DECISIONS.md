@@ -61,6 +61,9 @@
 | P40 | Cloud destinations | S3-compatible, Azure Blob, Google Cloud Storage, GitHub Releases | Pending |
 | P41 | Remote execution targets | SSH Linux/Docker and Windows SSH with WSL/Docker | Pending |
 | P42 | Flashing/installation routes | USB/SD/disk flashing and guided ISO/guest installation | Pending |
+| P43 | Execution plan | Ordered work units with prerequisite and acceptance evidence | Structure implementation into phases and a checklist; check off items one by one |
+| P44 | Immediate website scope | Planning website before desktop implementation | Create the public documentation website now; desktop implementation remains next session |
+| P45 | Phone and component requirements | Responsive layout and genuine Material controls | Phone-friendly website and pure Material Design 3 controls, no generic control substitutes |
 
 ## Additional explicit interface requirement
 

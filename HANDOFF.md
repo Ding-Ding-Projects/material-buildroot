@@ -2,11 +2,15 @@
 
 ## Current objective
 
-Plan a Windows desktop Buildroot application with complete Material Design 3 controls, WSL and Docker execution, the full shared feature baseline and a GitHub Pages documentation companion. Implementation is reserved for the next development session.
+Plan a Windows desktop Buildroot application with complete Material Design 3 controls, WSL and Docker execution, the full shared feature baseline and a GitHub Pages documentation companion. The owner authorized the initial documentation website now. Desktop application and authenticated companion implementation remain reserved for the next development session.
 
 ## Verification
 
-Planning interview is active. A minimal scaffold was created before the planning-only clarification. Implementation lanes stopped before backend or renderer code was written. No build, runtime, installer or release verification has completed.
+The initial documentation website is built with genuine registered Material Web controls, phone-friendly layouts, rendered current articles/wiki and an interactive source-derived roadmap. Local generated-site and browser checks passed; exact current artifacts and limitations are in [the evidence record](docs/evidence/planning-site.md). The checklist has 11 phases, 77 stable tasks and 105 mapped feature identities.
+
+PH00-T01 through T04 and T06 are locally verified or completed records. PH00-T05 remains unchecked because GitHub denied Pages activation. The first application task for the next session is PH01-T01. Each task is implemented and verified before its checkbox is ticked; missing evidence stays open.
+
+A minimal application scaffold predates the planning clarification. No application build, native runtime, installer, guest boot or product release verification has completed.
 
 ## Working policy
 
@@ -25,7 +29,7 @@ The complete specified application, all shared features, public website and auth
 
 ## External-state evidence
 
-Source publication to `main` works. Enabling Discussions through the connected account returned HTTP 403 `Resource not accessible by integration`; no Discussion was created. Native Windows host access, exact newest-stable Windows/VMware/VirtualBox versions, Pages settings, live website and installer/runtime capability remain unverified.
+Source publication to `main` works. Pages creation with `main` → `/docs` returned HTTP 403 `Resource not accessible by integration`; no live website is claimed. Enabling Discussions also returned 403; no Discussion was created. Native Windows host access, exact newest-stable Windows/VMware/VirtualBox versions and installer/runtime capability remain unverified. Source wiki content exists and renders locally; GitHub's separate wiki service was not accessible as an initialized repository.
 
 ## Earlier isolation artifacts
 
@@ -33,4 +37,4 @@ Three linked planning/implementation lanes were created before the owner require
 
 ## Publication dependency
 
-Public target: `Ding-Ding-Projects/material-buildroot`, provided by the repository owner. Publication verification is pending.
+Public target: `Ding-Ding-Projects/material-buildroot`, provided by the repository owner. The generated site is prepared in `docs/` for Pages branch publishing from `main` → `/docs`, with `.nojekyll`. Owner settings access is needed to activate this route. Verify actual live routes/assets and the exact About homepage before checking PH00-T05. The intended home URL is `https://ding-ding-projects.github.io/material-buildroot/`.

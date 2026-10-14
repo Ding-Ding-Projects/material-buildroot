@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "scope": "Initial documentation site only; no desktop, full shared feature parity, native host or companion proof.",
+  "route": "local-headless-chromium",
+  "browser": "154.0.8037.57",
+  "built_at": "2026-10-14T22:56:36.759Z",
+  "input_snapshot_sha256": "15286fde704b68270493c25b1914ee5a278f65e59b4b9a9a592bbf116c93d1d7",
+  "base_commit": "595e579843bdb663fd400bea65efa05c699d963f",
+  "inputs_differ_from_base": true,
+  "checks": [
+    "Stable roadmap IDs, phase filters and expand/collapse use the generated source checklist.",
+    "Document search finds content and opens a fully rendered article.",
+    "Heading language and explicit theme preferences survive reload; fresh system theme is light in this test context.",
+    "Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation opens and Escape closes it.",
+    "All 23 current document routes render their complete article at mobile width without page overflow.",
+    "All authored interactive controls use registered Material Web components; standard document hyperlinks remain semantic links.",
+    "No browser JavaScript errors or HTTP asset/route failures observed."
+  ],
+  "captures": [
+    {
+      "file": "website/evidence/home-desktop-dark.png",
+      "sha256": "bb3cb908899424e2e89dd614dbf7f90c4c4a4731b4d6356862fb73e91ac43dd9",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "dark",
+      "language": "en"
+    },
+    {
+      "file": "website/evidence/home-desktop.png",
+      "sha256": "303f905fe6b8d04a4413faaa38eaea6fe14de595336568924961da06a8bb0a90",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/home-mobile.png",
+      "sha256": "22d31838f2c5dee08052393ed1a93b26d08d49a85fab068f036affd089ba4200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/roadmap-article.png",
+      "sha256": "e94842912507f9e9582a866051e92b15c5356092d92a618ae317e9be0cb2ba2a",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    }
+  ],
+  "artifacts": {
+    "html_sha256": "67c52bdd5d9600261b791fe77eca46497c13812a1efcf155302b208b02aa6219",
+    "javascript_sha256": "eab298132ca1bca325b4419f8e3d5ae6fa8c4fc15f0e0b245511f7f32395f0c1",
+    "css_sha256": "77256a37a5224267610570b5cf85a4b315042d00e4bcdae37d1eeb8480de13e2"
+  },
+  "geometry": [
+    {
+      "width": 320,
+      "language": "both",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "en",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "zh",
+      "document_width": 320
+    },
+    {
+      "width": 390,
+      "language": "both",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "zh",
+      "document_width": 390
+    },
+    {
+      "width": 768,
+      "language": "both",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "en",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "zh",
+      "document_width": 768
+    },
+    {
+      "width": 1440,
+      "language": "both",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "en",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "zh",
+      "document_width": 1440
+    }
+  ],
+  "document_routes": [
+    {
+      "source": "README.md",
+      "status": 200
+    },
+    {
+      "source": "PLAN.md",
+      "status": 200
+    },
+    {
+      "source": "DECISIONS.md",
+      "status": 200
+    },
+    {
+      "source": "ROADMAP.md",
+      "status": 200
+    },
+    {
+      "source": "NEXT_SESSION.md",
+      "status": 200
+    },
+    {
+      "source": "HANDOFF.md",
+      "status": 200
+    },
+    {
+      "source": "CLOSEOUT_PROMPT.md",
+      "status": 200
+    },
+    {
+      "source": "AGENTS.md",
+      "status": 200
+    },
+    {
+      "source": "docs/README.md",
+      "status": 200
+    },
+    {
+      "source": "website/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/architecture.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/buildroot-constraints.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/feature-coverage.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/surfaces.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/FAQ.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Getting-started.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Home.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/planning-site.md",
+      "status": 200
+    },
+    {
+      "source": "design/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/REVIEW.md",
+      "status": 200
+    },
+    {
+      "source": "design/acceptance.md",
+      "status": 200
+    },
+    {
+      "source": "design/components.md",
+      "status": 200
+    },
+    {
+      "source": "design/screens.md",
+      "status": 200
+    }
+  ],
+  "verdict": "passed",
+  "checked_at": "2026-10-14T22:56:58.178Z"
+}

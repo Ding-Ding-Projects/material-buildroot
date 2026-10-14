@@ -1,0 +1,140 @@
+[
+  {
+    "source": "README.md",
+    "title": "Material Buildroot",
+    "url": "/material-buildroot/site/articles/README.html",
+    "category": "Planning"
+  },
+  {
+    "source": "PLAN.md",
+    "title": "Material Buildroot implementation plan",
+    "url": "/material-buildroot/site/articles/PLAN.html",
+    "category": "Planning"
+  },
+  {
+    "source": "DECISIONS.md",
+    "title": "Owner decisions",
+    "url": "/material-buildroot/site/articles/DECISIONS.html",
+    "category": "Planning"
+  },
+  {
+    "source": "ROADMAP.md",
+    "title": "Phased implementation roadmap",
+    "url": "/material-buildroot/site/articles/ROADMAP.html",
+    "category": "Planning"
+  },
+  {
+    "source": "NEXT_SESSION.md",
+    "title": "Next development session",
+    "url": "/material-buildroot/site/articles/NEXT_SESSION.html",
+    "category": "Planning"
+  },
+  {
+    "source": "HANDOFF.md",
+    "title": "Handoff",
+    "url": "/material-buildroot/site/articles/HANDOFF.html",
+    "category": "Planning"
+  },
+  {
+    "source": "CLOSEOUT_PROMPT.md",
+    "title": "Continuation prompt",
+    "url": "/material-buildroot/site/articles/CLOSEOUT_PROMPT.html",
+    "category": "Planning"
+  },
+  {
+    "source": "AGENTS.md",
+    "title": "Development instructions",
+    "url": "/material-buildroot/site/articles/AGENTS.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/README.md",
+    "title": "Documentation",
+    "url": "/material-buildroot/site/articles/docs/README.html",
+    "category": "Planning"
+  },
+  {
+    "source": "website/README.md",
+    "title": "Documentation website",
+    "url": "/material-buildroot/site/articles/website/README.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/architecture.md",
+    "title": "Architecture and implementation handoff",
+    "url": "/material-buildroot/site/articles/docs/planning/architecture.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/buildroot-constraints.md",
+    "title": "Official-source Buildroot constraints",
+    "url": "/material-buildroot/site/articles/docs/planning/buildroot-constraints.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/feature-coverage.md",
+    "title": "Complete feature planning inventory",
+    "url": "/material-buildroot/site/articles/docs/planning/feature-coverage.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/surfaces.md",
+    "title": "Surface identities and capability boundaries",
+    "url": "/material-buildroot/site/articles/docs/planning/surfaces.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/wiki/FAQ.md",
+    "title": "Common questions",
+    "url": "/material-buildroot/site/articles/docs/wiki/FAQ.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/wiki/Getting-started.md",
+    "title": "Getting started with the plan",
+    "url": "/material-buildroot/site/articles/docs/wiki/Getting-started.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/wiki/Home.md",
+    "title": "Project wiki",
+    "url": "/material-buildroot/site/articles/docs/wiki/Home.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/evidence/planning-site.md",
+    "title": "Initial planning website evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/planning-site.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "design/README.md",
+    "title": "Application design handoff",
+    "url": "/material-buildroot/site/articles/design/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/REVIEW.md",
+    "title": "Independent planning review",
+    "url": "/material-buildroot/site/articles/design/REVIEW.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/acceptance.md",
+    "title": "Design and runtime acceptance plan",
+    "url": "/material-buildroot/site/articles/design/acceptance.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/components.md",
+    "title": "Planned component provenance",
+    "url": "/material-buildroot/site/articles/design/components.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/screens.md",
+    "title": "Screen and state inventory",
+    "url": "/material-buildroot/site/articles/design/screens.html",
+    "category": "Design"
+  }
+]
