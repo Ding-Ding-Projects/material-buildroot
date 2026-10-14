@@ -19,6 +19,7 @@ Work on `main` only and publish planning checkpoints frequently. Preserve existi
 - [105 individually identified feature obligations](docs/planning/feature-coverage.md), each unverified for production.
 - [Official-source Buildroot/runtime constraints](docs/planning/buildroot-constraints.md); recheck current versions before pinning.
 - [Repository issue handoff](https://github.com/Ding-Ding-Projects/material-buildroot/issues/1).
+- [Next-session operating prompt](NEXT_SESSION.md).
 
 The complete specified application, all shared features, public website and authenticated LAN companion remain in scope. Internal sequencing never waives unfinished rows. Interactive rich controls and appropriate canvas editors are explicit requirements.
 
