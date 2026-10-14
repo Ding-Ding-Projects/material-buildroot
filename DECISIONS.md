@@ -44,17 +44,25 @@
 | P23 | Offline bundle delivery | Complete installer or complete capability packs | One complete installer, accepting a large download |
 | P24 | Fresh language/theme | Bilingual and system theme | Bilingual and system theme |
 | P25 | Native acceptance host | Exact Windows/VMware/VirtualBox versions and accessible host | Newest stable versions; exact versions and host access must be discovered |
-| P26 | Concurrent projects/builds | Multiple projects with global resource limits | Pending |
-| P27 | Expert terminal | Scoped embedded terminal supplement | Pending |
-| P28 | Desktop presets | Several genuinely supported desktop/compositor choices | Pending |
-| P29 | Guest networking | NAT default, bridged/host-only/advanced controls | Pending |
-| P30 | Guest account/SSH provisioning | Guided accounts/keys, no shared default password | Pending |
-| P31 | Reproducibility | Locks/hashes/manifests/SBOM/licenses/repeat-build comparisons | Pending |
-| P32 | Buildroot model assistance | Explanations and reviewed change proposals | Pending |
-| P33 | Browser companion | Secure opt-in desktop connection | Pending |
+| P26 | Concurrent projects/builds | Multiple projects with global resource limits | Per-project queues and global CPU/RAM/storage limits |
+| P27 | Expert terminal | Scoped embedded terminal supplement | Embedded terminal scoped to selected runtime/project |
+| P28 | Desktop presets | Several genuinely supported desktop/compositor choices | Several supported choices with previews |
+| P29 | Guest networking | NAT default, bridged/host-only/advanced controls | NAT default, bridged/host-only and advanced controls |
+| P30 | Guest account/SSH provisioning | Guided accounts/keys, no shared default password | Full configurable account/SSH presets with security explanations |
+| P31 | Reproducibility | Locks/hashes/manifests/SBOM/licenses/repeat-build comparisons | Complete first-class reproducibility workflow |
+| P32 | Buildroot model assistance | Explanations and reviewed change proposals | Full local assistant workflows with checkpoints and reviewed actions |
+| P33 | Browser companion | Secure opt-in desktop connection | Secure opt-in companion alongside full website coverage |
+| P34 | Companion browsers | Edge and Chrome first | Pending |
+| P35 | Companion reachability | Local-only pairing and revocable scoped permissions | Pending |
+| P36 | Guest boot acceptance | Boot/login/networking/disk persistence/graceful guest shutdown | Pending |
+| P37 | Secure Boot | Explicit support states and required-format signing only | Pending |
+| P38 | Cleanup policy | Configurable budgets, preserve records, confirm destructive cleanup | Pending |
+| P39 | Additional first-delivery workflows | Owner can name additional essentials | Pending |
 
 ## Additional explicit interface requirement
 
 The application must be interactive with rich controls and productive workflows. Textbox collections cannot substitute for trees, pickers, graphs, previews, visual editors, queues or lifecycle controls. Text and code editing are appropriate only where the underlying task needs them.
+
+Canvas editors are required where appropriate. Proposed applicable surfaces are VM/network topology, disk/partition layouts, build pipelines, package dependencies, image/logo editing and appearance timelines. Each canvas requires keyboard-accessible alternatives, an inspector, validation, undo/redo and a preview of the changes it applies.
 
 Recommendations are not approvals. Further questions will be recorded as the interview proceeds.

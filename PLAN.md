@@ -32,6 +32,13 @@ Status: planning. Application implementation belongs to the next development ses
 26. Provide every feasible safe output preview, including genuine guest screenshots after actual boot tests.
 27. Verify the newest stable Windows, VMware Workstation and VirtualBox versions observed during implementation. Exact versions and actual host access are currently unverified.
 28. The application must be interactive. Collections of editable text fields are not an acceptable substitute for rich workflows.
+29. Support multiple concurrent projects with per-project queues and global CPU/RAM/storage limits, plus a terminal scoped to the selected runtime/project.
+30. Offer several genuinely supported desktop/compositor choices with previews, NAT by default, and bridged/host-only/advanced networking controls.
+31. Include full configurable account and SSH provisioning with security explanations and protected credentials.
+32. Treat reproducibility as a first-class workflow: source/config locks, hashes, manifests, SBOM/license output and repeat-build comparisons.
+33. Include full local assistant workflows with checkpoints and reviewed actions. Model proposals never silently gain privileged execution authority.
+34. The website includes a secure opt-in local companion connection, alongside complete documentation, downloads and independent shared-feature coverage.
+35. Include canvas editors where appropriate, backed by actual validated configuration consumers.
 
 ## Interactive control contract
 
@@ -46,8 +53,17 @@ Status: planning. Application implementation belongs to the next development ses
 | Builds | Selectable targets, queue reorder/pause/cancel where supported, actual resource/progress states and actionable errors |
 | Outputs | File/graph/image/archive/filesystem viewers, selectable export bundles, real conversion progress and checksum validation |
 | Shared tools | Complete tool-specific editors and previews, durable queues, discoverable real actions and recovery states |
+| Spatial/graph work | Interactive VM/network topology, disk/partition layouts, pipelines, package dependencies, image/logo editing and appearance timelines |
 
 Use text/code editors for values that require them, preserve exact technical syntax, and provide clear validation. Each workflow must have a meaningful interaction test. A negative substitution test must fail when required rich controls are replaced by generic textbox forms.
+
+Canvas controls support pan/zoom, selection, snapping where meaningful, an inspector, keyboard editing, accessible structured equivalents and undo/redo. A dependency viewer is labelled a viewer until actual package/configuration edits are validated and previewed. Generated pipelines may invoke only reviewed allowlisted operations. Spatial editing must preserve unknown source metadata and show exact output changes.
+
+## Browser companion security proposal
+
+GitHub Pages is static hosting; it does not itself run Buildroot or obtain arbitrary host privileges. The companion requires explicit pairing to a running desktop broker, bounded typed actions, scoped capability grants, revocation and a visible connection state. Browser transport, TLS trust, origin checks, CSRF/replay protection, browser private-network restrictions and any extension requirement need a separately reviewed implementation design. Never solve transport restrictions with permissive CORS, trust-all TLS, shared tokens or an unauthenticated localhost service.
+
+The desktop remains the privileged consumer. The website retains its own complete shared-feature inventory; a link or redirect to desktop features does not count as website delivery. Show truthful disconnected and offline states, and provide browser-native capability implementations where the feature can run locally without the broker.
 
 ## Product architecture proposal
 
