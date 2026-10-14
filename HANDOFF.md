@@ -10,4 +10,4 @@ Implementation has started. No runtime, installer or release verification has co
 
 ## Publication dependency
 
-Repository creation was rejected by the connected GitHub account with `Resource not accessible by integration (createRepository)`. Work is retained locally while an empty public target is made available.
+Public target: `Ding-Ding-Projects/material-buildroot`, provided by the repository owner. Publication verification is pending.

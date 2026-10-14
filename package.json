@@ -1,5 +1,5 @@
 {
-  "name": "buildroot-studio",
+  "name": "material-buildroot",
   "version": "0.1.0",
   "description": "Windows desktop workspace for Buildroot with WSL and Docker execution.",
   "author": "Ding-Ding Projects",
@@ -27,13 +27,13 @@
     "@playwright/test": "1.56.1"
   },
   "build": {
-    "appId": "com.dingdingprojects.buildrootstudio",
-    "productName": "Buildroot Studio",
+    "appId": "com.dingdingprojects.materialbuildroot",
+    "productName": "Material Buildroot",
     "asar": true,
     "directories": {"output": "release"},
     "files": ["dist/**/*", "src/main/**/*", "src/shared/**/*", "package.json"],
     "extraResources": [{"from": "runtime", "to": "runtime"}],
     "win": {"target": [{"target": "squirrel", "arch": ["x64"]}], "forceCodeSigning": false, "signAndEditExecutable": false},
-    "squirrelWindows": {"name": "BuildrootStudio", "artifactName": "Setup.${ext}", "iconUrl": "https://github.com/favicon.ico", "msi": false}
+    "squirrelWindows": {"name": "MaterialBuildroot", "artifactName": "Setup.${ext}", "iconUrl": "https://github.com/favicon.ico", "msi": false}
   }
 }

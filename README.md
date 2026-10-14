@@ -1,4 +1,4 @@
-# Buildroot Studio
+# Material Buildroot
 
 A Windows desktop workspace for configuring Buildroot and running builds through WSL 2 or Docker Linux containers.
 
