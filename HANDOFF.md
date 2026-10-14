@@ -2,11 +2,15 @@
 
 ## Current objective
 
-Create a Windows desktop Buildroot application with complete Material Design 3 controls, WSL and Docker execution, and the shared feature baseline.
+Plan a Windows desktop Buildroot application with complete Material Design 3 controls, WSL and Docker execution, the full shared feature baseline and a GitHub Pages documentation companion. Implementation is reserved for the next development session.
 
 ## Verification
 
-Implementation has started. No runtime, installer or release verification has completed.
+Planning interview is active. A minimal scaffold was created before the planning-only clarification. Implementation lanes stopped before backend or renderer code was written. No build, runtime, installer or release verification has completed.
+
+## Working policy
+
+Work on `main` only and publish planning checkpoints frequently. Preserve existing work. Read [PLAN.md](PLAN.md) and [DECISIONS.md](DECISIONS.md) before implementation, and resolve pending owner answers rather than guessing.
 
 ## Publication dependency
 
