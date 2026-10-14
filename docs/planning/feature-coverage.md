@@ -2,7 +2,7 @@
 
 Status: every production feature below is planned and unverified. This hand-written inventory expands the shared feature catalogue into individual obligations; it is not implementation evidence.
 
-Surfaces: **A** Windows application; **W** documentation website/browser companion; **R** repository/build/release/operating process. A+W means independent delivery on both surfaces, with shared source permitted but no sibling-surface substitution. Platform capability limitations need exact documented reasons and tested alternative behavior; they never become silent omissions.
+Surfaces: **A** Windows application; **D** public documentation visitor surface; **C** authenticated browser companion; **R** repository/build/release/operating process. A+D+C means separate delivery records and proof for all three surfaces. Shared implementation libraries are permitted; a sibling surface, redirect or shared state claim never substitutes for coverage. See [surface boundaries](surfaces.md). Platform capability limitations need exact documented reasons and tested alternative behavior; they never become silent omissions.
 
 Before implementation, the next session must reread the current owner-managed canonical contracts and reconcile this planning inventory. The canonical contracts control detailed behavior. Public documentation uses neutral identifiers and never includes private vocabulary values or operational machine details.
 
@@ -10,113 +10,113 @@ Before implementation, the next session must reread the current owner-managed ca
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| language | Persisted English/Cantonese/bilingual and complete localization | A+W |
-| funny-emoji | Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference | A+W |
-| personal-vocabulary | Visible local-only bounded JSON upload, atomic validation, replace/clear/corrupt states and leak exclusions | A+W |
-| school-mode | Shared renamed mode, live propagation, protected exit, complete suppression/restoration | A+W |
-| narration | Real per-language voice discovery, serialized speech, rate/pitch, screen-reader coexistence | A+W |
-| scheduled-settings | Timezone/DST/precedence/base restoration and protected external sources for settings | A+W |
-| display-name | Display-only rename preserving installed identity and data | A+W |
-| adhd-modes | Five independently persisted modes, off by default, actual attention behavior | A+W |
-| dim-sum | Required discovery/surprise behavior, accurate catalogue state and mode suppression | A+W |
-| dim-sum-photo-source | Verified public catalogue URLs and licenses; consumer source contains no copied photographs | A+W+R |
+| language | Persisted English/Cantonese/bilingual and complete localization | A+D+C |
+| funny-emoji | Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference | A+D+C |
+| personal-vocabulary | Visible local-only bounded JSON upload, atomic validation, replace/clear/corrupt states and leak exclusions | A+D+C |
+| school-mode | Shared renamed mode, live propagation, protected exit, complete suppression/restoration | A+D+C |
+| narration | Real per-language voice discovery, serialized speech, rate/pitch, screen-reader coexistence | A+D+C |
+| scheduled-settings | Timezone/DST/precedence/base restoration and protected external sources for settings | A+D+C |
+| display-name | Display-only rename preserving installed identity and data | A+D+C |
+| adhd-modes | Five independently persisted modes, off by default, actual attention behavior | A+D+C |
+| dim-sum | Required discovery/surprise behavior, accurate catalogue state and mode suppression | A+D+C |
+| dim-sum-photo-source | Verified public catalogue URLs and licenses; consumer source contains no copied photographs | A+D+C+R |
 
 ## Material, appearance and layout
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| material-design | Complete Material Design 3 Expressive, registered genuine component provenance | A+W |
-| workflow-navigation | Productive workspaces, task reachability and real application window controls | A+W |
-| motion | Complete motion behavior with equivalent reduced-motion paths | A+W |
-| appearance-editor | Every-element typography/layers/geometry/states/effects/motion editor, timeline, undo and resets | A+W |
-| color-picker | Continuous color control/translation, contrast, history and exact entry | A+W |
-| logo-customization | Safe local image conversion, crop/focal/fit/background, derivatives and rollback | A+W |
-| overlay-panels | Bounded own-surface overlays, accessible move/resize/focus/restore | A+W |
-| collapse-filters | Collapsible filters/statistics without losing state or discovery | A+W |
-| accessibility-sizing | Accessible controls, target sizing, zoom and layout without clipping | A+W |
-| functional-ui | Real action consumers and truthful empty/loading/error/unsupported states | A+W |
+| material-design | Complete Material Design 3 Expressive, registered genuine component provenance | A+D+C |
+| workflow-navigation | Productive workspaces, task reachability and real application window controls | A+D+C |
+| motion | Complete motion behavior with equivalent reduced-motion paths | A+D+C |
+| appearance-editor | Every-element typography/layers/geometry/states/effects/motion editor, timeline, undo and resets | A+D+C |
+| color-picker | Continuous color control/translation, contrast, history and exact entry | A+D+C |
+| logo-customization | Safe local image conversion, crop/focal/fit/background, derivatives and rollback | A+D+C |
+| overlay-panels | Bounded own-surface overlays, accessible move/resize/focus/restore | A+D+C |
+| collapse-filters | Collapsible filters/statistics without losing state or discovery | A+D+C |
+| accessibility-sizing | Accessible controls, target sizing, zoom and layout without clipping | A+D+C |
+| functional-ui | Real action consumers and truthful empty/loading/error/unsupported states | A+D+C |
 
 ## Navigation, search and commands
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| tabs | Four edges, left default, group/reorder/pin/overflow/four discovery searches and bulk close | A+W |
-| regex-search | Independent anchored full regex workbench at every search/menu/picker | A+W |
-| command-palette | Ctrl+Shift+F, live rich controls, navigation/focus and shared action consumers | A+W |
-| context-menus | Pointer/keyboard/touch menus on every element, appearance and lock routes | A+W |
-| menu-shortcuts | Real working shortcut labels in menus | A+W |
-| rich-controls | Typed interactive controls, visual editors and applicable canvases with actual consumers | A+W |
-| guided-forms | Contextual stepwise help, shared validation/actions and isolated resettable playgrounds | A+W |
-| settings-explanations | Current/default provenance, plain explanations and meaningful disabled reasons | A+W |
-| blank-editors | Useful real presets and guided starting points in empty editors | A+W |
+| tabs | Four edges, left default, group/reorder/pin/overflow/four discovery searches and bulk close | A+D+C |
+| regex-search | Independent anchored full regex workbench at every search/menu/picker | A+D+C |
+| command-palette | Ctrl+Shift+F, live rich controls, navigation/focus and shared action consumers | A+D+C |
+| context-menus | Pointer/keyboard/touch menus on every element, appearance and lock routes | A+D+C |
+| menu-shortcuts | Real working shortcut labels in menus | A+D+C |
+| rich-controls | Typed interactive controls, visual editors and applicable canvases with actual consumers | A+D+C |
+| guided-forms | Contextual stepwise help, shared validation/actions and isolated resettable playgrounds | A+D+C |
+| settings-explanations | Current/default provenance, plain explanations and meaningful disabled reasons | A+D+C |
+| blank-editors | Useful real presets and guided starting points in empty editors | A+D+C |
 
 ## Safety, locks and authentication
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| super-confirmation | Exact affected destination/data, two independent keys then full slider, cancel and focus return | A+W |
-| element-locks | Independent per-element policies, protected enrollment and honest experience-lock limits | A+W |
-| support-tickets | Searchable recovery desk, actual records, status/actions and exports | A+W |
-| unlock-ladder | Preserved budgets, real timing, single-use challenges and correct escalation | A+W |
-| authenticator | Protected local OTP management, real standards vectors and clock diagnosis | A+W |
-| qr-pairing | Actual scannable pairing and manual equivalent, private secret handling | A+W |
-| honest-monetization | Free defaults and accurate unavoidable upstream licensing/cost disclosure | A+W+R |
+| super-confirmation | Exact affected destination/data, two independent keys then full slider, cancel and focus return | A+D+C |
+| element-locks | Independent per-element policies, protected enrollment and honest experience-lock limits | A+D+C |
+| support-tickets | Searchable recovery desk, actual records, status/actions and exports | A+D+C |
+| unlock-ladder | Preserved budgets, real timing, single-use challenges and correct escalation | A+D+C |
+| authenticator | Protected local OTP management, real standards vectors and clock diagnosis | A+D+C |
+| qr-pairing | Actual scannable pairing and manual equivalent, private secret handling | A+D+C |
+| honest-monetization | Free defaults and accurate unavoidable upstream licensing/cost disclosure | A+D+C+R |
 
 ## Records, history and messages
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| local-history | Isolated append-only local history, protected sensitive access, restore-as-new-revision | A+W |
-| exports | Complete formats, loss disclosure, selected/filtered scope and protected-data exclusions | A+W |
-| bulk-actions | Selection/range/inverse/all-matches, per-item outcomes and partial/cancel/retry | A+W |
-| changelog | Factual dates/releases/source links, filters/search and export | A+W |
-| offline-docs | Complete bundled rendered articles, internal navigation and search | A+W |
-| rendered-provider-text | Safe rendered upstream content instead of raw markup | A+W |
-| notifications | Nonblocking messages, persistent errors, accessible review centre and actual recovery | A+W |
+| local-history | Isolated append-only local history, protected sensitive access, restore-as-new-revision | A+D+C |
+| exports | Complete formats, loss disclosure, selected/filtered scope and protected-data exclusions | A+D+C |
+| bulk-actions | Selection/range/inverse/all-matches, per-item outcomes and partial/cancel/retry | A+D+C |
+| changelog | Factual dates/releases/source links, filters/search and export | A+D+C |
+| offline-docs | Complete bundled rendered articles, internal navigation and search | A+D+C |
+| rendered-provider-text | Safe rendered upstream content instead of raw markup | A+D+C |
+| notifications | Nonblocking messages, persistent errors, accessible review centre and actual recovery | A+D+C |
 
 ## Built-in tools and handoff
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| file-converter | All eight categories, offline verified adapters, PDF tools, unlimited disk-backed paged queue | A+W |
-| minecraft-server-manager | Java/Bedrock versions/flavours/plugins and local-process/local-container/SSH-process/SSH-container targets | A+W |
-| ollama-suite | Managed install/recovery, full catalogue/tags, hardware fit, durable pulls/chat/harness checkpoints | A+W |
-| external-editor | Discovered configurable editors, actual file handoff and recovery | A+W |
-| download-handoff | Distinct start/progress/complete download states and truthful paired-client transfer | A+W |
-| forge-publishing | Previewed authenticated publication, exact destination/source and readback | A+W |
-| progress-recovery | Progress at initiator, durable jobs/re-entry protection and contextual partial-result recovery | A+W |
+| file-converter | All eight categories, offline verified adapters, PDF tools, unlimited disk-backed paged queue | A+D+C |
+| minecraft-server-manager | Java/Bedrock versions/flavours/plugins and local-process/local-container/SSH-process/SSH-container targets | A+D+C |
+| ollama-suite | Managed install/recovery, full catalogue/tags, hardware fit, durable pulls/chat/harness checkpoints | A+D+C |
+| external-editor | Discovered configurable editors, actual file handoff and recovery | A+D+C |
+| download-handoff | Distinct start/progress/complete download states and truthful paired-client transfer | A+D+C |
+| forge-publishing | Previewed authenticated publication, exact destination/source and readback | A+D+C |
+| progress-recovery | Progress at initiator, durable jobs/re-entry protection and contextual partial-result recovery | A+D+C |
 
 ## Completeness and evidence
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| completeness-parity | Hand-written per-surface identity/evidence manifests and exact-boundary negative tests | A+W+R |
-| front-provenance | Actual front-screen version and updated-at/build provenance | A+W |
-| product-evidence | Current genuine source/hash-bound screenshots in product descriptions | A+W+R |
-| screen-recording | Genuine retained screen recording with provenance and safe large-file transport | A+W+R |
-| design-reference-parity | Deterministic checked-in screen/state/theme/viewport/scale references and comparisons | A+W+R |
+| completeness-parity | Hand-written per-surface identity/evidence manifests and exact-boundary negative tests | A+D+C+R |
+| front-provenance | Actual front-screen version and updated-at/build provenance | A+D+C |
+| product-evidence | Current genuine source/hash-bound screenshots in product descriptions | A+D+C+R |
+| screen-recording | Genuine retained screen recording with provenance and safe large-file transport | A+D+C+R |
+| design-reference-parity | Deterministic checked-in screen/state/theme/viewport/scale references and comparisons | A+D+C+R |
 | design-folder | Target-owned design files and implementation handoff | R |
-| layout-matrix | Full normal/minimum × three languages × two themes × four scales, geometry receipts | A+W+R |
+| layout-matrix | Full normal/minimum × three languages × two themes × four scales, geometry receipts | A+D+C+R |
 | public-screenshot-gallery | Genuine reviewed public capture gallery at the applicable preservation milestone | R |
 
 ## Website and shared links
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| landing-site | Separate complete Material documentation/browser companion with independent feature coverage | W |
-| mobile-site | Responsive touch/keyboard website from approximately 320 pixels | W |
-| installer-download-button | Verified current installer download on the home surface | W |
-| feature-articles | Full detailed feature articles and Cantonese twins rendered in the website | W+R |
-| vendored-fonts | Scripted complete canonical font acquisition, licenses/hashes and local runtime consumption | A+W+R |
-| shared-link-embed | Genuine current safe image and metadata for shared links | W+R |
-| homepage-link | Verified GitHub Pages URL stored in repository About homepage | W+R |
-| vocabulary-unlock-boundary | Private local language mapping only after the correct authenticated/local opt-in boundary | A+W |
+| landing-site | Separate complete Material documentation/browser companion with independent feature coverage | D |
+| mobile-site | Responsive touch/keyboard website from approximately 320 pixels | D |
+| installer-download-button | Verified current installer download on the home surface | D |
+| feature-articles | Full detailed feature articles and Cantonese twins rendered in the website | D+C+R |
+| vendored-fonts | Scripted complete canonical font acquisition, licenses/hashes and local runtime consumption | A+D+C+R |
+| shared-link-embed | Genuine current safe image and metadata for shared links | D+C+R |
+| homepage-link | Verified GitHub Pages URL stored in repository About homepage | D+C+R |
+| vocabulary-unlock-boundary | Private local language mapping only after the correct authenticated/local opt-in boundary | A+D+C |
 
 ## Status integration
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
-| status-hub | Authenticated current status, interactive questions/replies and truthful unavailable integration | A+W+R |
+| status-hub | Authenticated current status, interactive questions/replies and truthful unavailable integration | A+D+C+R |
 | discord-status-bridge | Scoped protected bridge and accurate delivery/readback evidence | R |
 | panic-webhooks | Verified protected dispatch, immutable evidence and bounded safe destinations | R |
 | tidbyt-displays | Registered owner-authorized factual event frames and actual delivery evidence | R |
@@ -132,7 +132,7 @@ Before implementation, the next session must reread the current owner-managed ca
 | squirrel-installer | Real unsigned Squirrel.Windows Setup.exe/RELEASES/full packages/deltas | A+R |
 | self-signing | Required-format project-owned signing only; no invented trust or secret exposure | A+R |
 | auto-updates | Background discovery/download, unsigned ready banner, explicit restart, rollback and unsaved protection | A+R |
-| app-icon | Original product identity, packaged icons, actual installed rendering | A+W+R |
+| app-icon | Original product identity, packaged icons, actual installed rendering | A+D+C+R |
 
 ## Release process
 
@@ -159,7 +159,7 @@ Before implementation, the next session must reread the current owner-managed ca
 | roadmap-checklist | Factual checklist, complete backlog and evidence-based completion | R |
 | feature-docs | Categorized per-feature Markdown articles and indexes | R |
 | postman-collections | Actual HTTP APIs receive category/master collections; document non-HTTP IPC separately | R |
-| wiki-site-sync | Complete current wiki content and website articles with internal routes | W+R |
+| wiki-site-sync | Complete current wiki content and website articles with internal routes | D+C+R |
 | handoff-record | Current handoff document and titled repository-issue handoff | R |
 | closeout-prompt | Published source-bound next-session prompt without private data | R |
 | discussion-records | One rolling task record and per-release records when supported | R |
@@ -178,6 +178,6 @@ Before implementation, the next session must reread the current owner-managed ca
 
 ## Required row expansion before delivery
 
-Every applicable A/W row expands into separate surface records naming implementation paths, detailed/localized articles, copy resources, persistence, focused tests, red-then-green negative checks, exact built interaction receipts and genuine captures. Record unsupported capabilities with their actual limits; never mark a family complete from registry presence.
+Every applicable A/D/C row expands into distinct A, D and C records naming implementation paths, detailed/localized articles, copy resources, persistence, focused tests, red-then-green negative checks, exact built interaction receipts and genuine captures. Record unsupported capabilities with their actual limits; never mark a family complete from registry presence.
 
 The planning-only owner instruction defers builds, installers, application/site implementation and release wiring to the next development session. Planning checkpoints are source preservation and do not claim delivered product releases.
