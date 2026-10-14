@@ -1,0 +1,39 @@
+{
+  "name": "buildroot-studio",
+  "version": "0.1.0",
+  "description": "Windows desktop workspace for Buildroot with WSL and Docker execution.",
+  "author": "Ding-Ding Projects",
+  "license": "GPL-3.0-or-later",
+  "main": "src/main/index.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "start": "electron .",
+    "build": "vite build",
+    "test": "node --test tests/*.test.cjs",
+    "package:win": "npm run build && electron-builder --win dir --publish never",
+    "dist:win": "npm run build && electron-builder --win squirrel --publish never"
+  },
+  "dependencies": {
+    "@material/web": "2.4.1",
+    "lit": "3.3.1",
+    "electron-squirrel-startup": "1.0.1"
+  },
+  "devDependencies": {
+    "electron": "37.10.3",
+    "electron-builder": "26.0.12",
+    "electron-builder-squirrel-windows": "26.0.12",
+    "typescript": "5.9.3",
+    "vite": "6.4.1",
+    "@playwright/test": "1.56.1"
+  },
+  "build": {
+    "appId": "com.dingdingprojects.buildrootstudio",
+    "productName": "Buildroot Studio",
+    "asar": true,
+    "directories": {"output": "release"},
+    "files": ["dist/**/*", "src/main/**/*", "src/shared/**/*", "package.json"],
+    "extraResources": [{"from": "runtime", "to": "runtime"}],
+    "win": {"target": [{"target": "squirrel", "arch": ["x64"]}], "forceCodeSigning": false, "signAndEditExecutable": false},
+    "squirrelWindows": {"name": "BuildrootStudio", "artifactName": "Setup.${ext}", "iconUrl": "https://github.com/favicon.ico", "msi": false}
+  }
+}
