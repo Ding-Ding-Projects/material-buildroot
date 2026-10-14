@@ -36,22 +36,28 @@ async function chooseLanguage(value){
  ]);
 }
 async function ready(){await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('*')].filter(e=>e.localName.startsWith('md-')).map(e=>customElements.whenDefined(e.localName)));await Promise.all([...document.querySelectorAll('*')].filter(e=>e.updateComplete).map(e=>e.updateComplete));await document.fonts.ready;});}
-async function capture(name){const file=path.join(out,name+'.png');await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:'website/evidence/'+name+'.png',sha256:sha(await fs.readFile(file)),viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
+async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:'website/evidence/'+name+'.png',sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
 try{
  assert.equal((await page.goto(target)).status(),200);await ready();
- assert.equal(await page.locator('.phase').count(),11);
+ assert.equal(await page.locator('.phase, .task-mark').count(),0,'Home must not contain the full checklist');
+ await page.locator('.actions md-filled-button').click();await ready();
+ assert.match(page.url(),/site\/roadmap\.html$/);
+ assert.equal(await page.locator('.category-card').count(),4);
+ await page.locator('.category-card md-list-item').first().click();await ready();
+ assert.equal(await page.locator('.phase').count(),5);
  await page.locator('[data-phase-filter="planned"]').click();
- assert.equal(await page.locator('.phase:not([hidden])').count(),10);
+ assert.equal(await page.locator('.phase:not([hidden])').count(),4);
  await page.locator('[data-phase-filter="started"]').click();
  assert.equal(await page.locator('.phase:not([hidden])').count(),1);
- await page.locator('#expand-phases').click();
- assert.equal(await page.locator('.phase:not([hidden]).open').count(),1);
- assert.match(await page.locator('.phase:not([hidden])').innerText(),/PH00-T01/);
- await page.locator('[data-phase-filter="all"]').click();
- await page.locator('#expand-phases').click();
- assert.equal(await page.locator('.phase.open').count(),11);
- await page.locator('#expand-phases').click();
- receipt.checks.push('Stable roadmap IDs, phase filters and expand/collapse use the generated source checklist.');
+ await page.locator('.phase:not([hidden]) .phase-link').click();await ready();
+ assert.match(page.url(),/site\/phases\/ph00\.html$/);
+ assert.equal(await page.locator('.task-mark').count(),6);
+ assert.match(await page.locator('article').innerText(),/PH00-T01/);
+ await page.locator('.phase-pagination md-filled-button').click();await ready();
+ assert.match(page.url(),/site\/phases\/ph01\.html$/);
+ await page.locator('.phase-pagination md-outlined-button').click();await ready();
+ assert.match(page.url(),/site\/phases\/ph00\.html$/);
+ receipt.checks.push('Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.');
  await page.locator('#doc-search').locator('input').fill('Kconfig');
  assert.ok(await page.locator('#search-results md-list-item').count()>0);
  await page.locator('#search-results md-list-item').first().click();
@@ -110,7 +116,25 @@ try{
  }
  receipt.document_routes=routes;
  receipt.checks.push(`All ${routes.length} current document routes render their complete article at mobile width without page overflow.`);
- await page.goto(new URL('site/articles/ROADMAP.html',target).href);await ready();
+ const pageInventory=JSON.parse(await fs.readFile(path.join(root,'docs/site/page-inventory.json'),'utf8'));
+ const extraRoutes=pageInventory.filter(route=>!route.startsWith('site/articles/'));
+ for(const route of extraRoutes){
+  const relative=route==='index.html'?'':route;
+  assert.equal((await page.goto(new URL(relative,target).href)).status(),200);await ready();
+  assert.equal(await page.locator('main h1').count(),1);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),route+' overflows phone width');
+ }
+ receipt.navigation_routes=extraRoutes;
+ receipt.checks.push('All '+extraRoutes.length+' overview/category/phase/status routes fit 320px and use real dedicated pages.');
+ await page.goto(new URL('site/library.html',target).href);await ready();
+ assert.equal(await page.locator('.category-card').count(),4);
+ await page.locator('.category-card md-list-item').first().click();await ready();
+ assert.match(page.url(),/site\/categories\/planning\.html$/);
+ assert.ok(await page.locator('.library-item').count()>0);
+ await page.goto(new URL('site/roadmap.html',target).href);await ready();
+ await page.setViewportSize({width:1440,height:1100});
+ await capture('roadmap-categories');
+ await page.goto(new URL('site/phases/ph00.html',target).href);await ready();
  await page.setViewportSize({width:1440,height:1100});
  await capture('roadmap-article');
  assert.deepEqual(errors,[]);

@@ -3,16 +3,44 @@
   "version": "2.4.1",
   "provenance": "https://github.com/material-components/material-web",
   "controls": {
-    "primary and secondary actions": ["md-filled-button", "md-outlined-button", "md-text-button"],
-    "mobile drawer open and close": ["md-icon-button", "md-icon"],
-    "documentation search": ["md-outlined-text-field"],
-    "heading language selection": ["md-outlined-select", "md-select-option"],
-    "theme selection": ["md-switch"],
-    "phase filtering": ["md-chip-set", "md-filter-chip"],
-    "navigation, document cards, library and search result links": ["md-list", "md-list-item"],
-    "phase disclosure with state and accessible name": ["md-list", "md-list-item", "md-icon"],
-    "source-controlled completion status": ["md-checkbox"],
-    "verified task count progress": ["md-linear-progress"]
+    "primary and secondary actions": [
+      "md-filled-button",
+      "md-outlined-button",
+      "md-text-button"
+    ],
+    "mobile drawer open and close": [
+      "md-icon-button",
+      "md-icon"
+    ],
+    "documentation search": [
+      "md-outlined-text-field"
+    ],
+    "heading language selection": [
+      "md-outlined-select",
+      "md-select-option"
+    ],
+    "theme selection": [
+      "md-switch"
+    ],
+    "phase filtering": [
+      "md-chip-set",
+      "md-filter-chip"
+    ],
+    "navigation, document cards, library and search result links": [
+      "md-list",
+      "md-list-item"
+    ],
+    "source-controlled completion status": [
+      "md-checkbox"
+    ],
+    "verified task count progress": [
+      "md-linear-progress"
+    ],
+    "phase category summaries and per-phase navigation": [
+      "md-list",
+      "md-list-item",
+      "md-icon"
+    ]
   },
   "content_boundary": "Headings, prose, ordinary document hyperlinks, tables and the labelled architecture illustration use semantic HTML/SVG. They are content, not substitute form or action controls.",
   "scope": "Initial documentation website. This registry does not claim the complete production feature catalogue or final Material Design 3 Expressive acceptance."

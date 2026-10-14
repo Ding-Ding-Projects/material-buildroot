@@ -6,7 +6,7 @@ Plan a Windows desktop Buildroot application with complete Material Design 3 con
 
 ## Verification
 
-The initial documentation website is built with genuine registered Material Web controls, phone-friendly layouts, rendered current articles/wiki and an interactive source-derived roadmap. Local generated-site and browser checks passed; exact current artifacts and limitations are in [the evidence record](docs/evidence/planning-site.md). The checklist has 11 phases, 77 stable tasks and 105 mapped feature identities.
+The initial documentation website is built with genuine registered Material Web controls, phone-friendly layouts and separate categorized pages. A short overview leads to four roadmap categories, individual phase checklists, four documentation categories, articles/wiki and a separate downloads/status page. Local generated-site and browser checks passed; exact current artifacts and limitations are in [the evidence record](docs/evidence/planning-site.md). The checklist has 11 phases, 77 stable tasks and 105 mapped feature identities.
 
 PH00-T01 through T04 and T06 are locally verified or completed records. PH00-T05 remains unchecked because GitHub denied Pages activation. The first application task for the next session is PH01-T01. Each task is implemented and verified before its checkbox is ticked; missing evidence stays open.
 

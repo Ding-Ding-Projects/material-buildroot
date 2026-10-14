@@ -110,21 +110,6 @@ document.querySelectorAll('[data-phase-filter]').forEach(chip => chip.addEventLi
   document.querySelectorAll('[data-phase-filter]').forEach(c => c.selected = c === chip);
   applyPhaseFilter();
 }));
-const setPhaseOpen = (phase, open) => {
-  phase.classList.toggle('open', open);
-  phase.querySelector('.phase-toggle').setAttribute('aria-expanded', String(open));
-  phase.querySelector('.phase-body').hidden = !open;
-};
-document.querySelectorAll('.phase-toggle').forEach(button => button.addEventListener('click', () => {
-  const phase = button.closest('.phase');
-  setPhaseOpen(phase, !phase.classList.contains('open'));
-}));
-document.querySelector('#expand-phases')?.addEventListener('click', event => {
-  const phases = [...document.querySelectorAll('.phase:not([hidden])')];
-  const open = phases.some(p => !p.classList.contains('open'));
-  phases.forEach(p => setPhaseOpen(p, open));
-  event.currentTarget.textContent = open ? 'Collapse phases' : 'Expand phases';
-});
 document.querySelectorAll('time[data-local]').forEach(time => {
   const date = new Date(time.dateTime);
   if (Number.isNaN(date.valueOf())) return;

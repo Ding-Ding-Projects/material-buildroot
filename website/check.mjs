@@ -16,7 +16,9 @@ if(!/^[a-f0-9]{40}$/.test(meta.base_commit)||!Number.isFinite(Date.parse(meta.bu
 const tasks=roadmap.phases.flatMap(p=>p.tasks);
 if(new Set(tasks.map(t=>t.id)).size!==tasks.length)failures.push('Duplicate task IDs.');
 if(tasks.length!==roadmap.task_count || tasks.filter(t=>t.done).length!==roadmap.verified_count)failures.push('Roadmap counts disagree.');
-const htmlFiles=['index.html','site/library.html',...inventory.map(d=>d.url.slice(base.length))];
+const htmlFiles=JSON.parse(await fs.readFile(path.join(docs,'site/page-inventory.json'),'utf8'));
+for(const doc of inventory)if(!htmlFiles.includes(doc.url.slice(base.length)))failures.push(`${doc.source}: document route missing from page inventory.`);
+for(const phase of roadmap.phases)if(!htmlFiles.includes('site/phases/'+phase.id.toLowerCase()+'.html'))failures.push(`${phase.id}: dedicated phase page missing.`);
 const htmlByFile=new Map();
 for(const file of htmlFiles)htmlByFile.set(file,await fs.readFile(path.join(docs,file),'utf8'));
 let checkedLinks=0;

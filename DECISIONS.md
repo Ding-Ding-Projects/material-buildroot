@@ -64,6 +64,7 @@
 | P43 | Execution plan | Ordered work units with prerequisite and acceptance evidence | Structure implementation into phases and a checklist; check off items one by one |
 | P44 | Immediate website scope | Planning website before desktop implementation | Create the public documentation website now; desktop implementation remains next session |
 | P45 | Phone and component requirements | Responsive layout and genuine Material controls | Phone-friendly website and pure Material Design 3 controls, no generic control substitutes |
+| P46 | Website information structure | Category and individual-document navigation | Use separate categorized pages rather than one long page |
 
 ## Additional explicit interface requirement
 
