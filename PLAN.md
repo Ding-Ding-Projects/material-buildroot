@@ -12,6 +12,13 @@ Status: planning. Application implementation belongs to the next development ses
 6. A GitHub Pages documentation companion is required, with its deployed URL in the repository About homepage.
 7. Work stays on `main`. Publish recoverable planning checkpoints frequently.
 8. This session prepares the plan and interviews the owner. The next development session implements it.
+9. Serve both beginners and experienced builders through guided and advanced access to the same validated actions.
+10. The central workflow is board selection, configuration, build and image export.
+11. Ask for WSL or Docker when creating a project and remember the selection per project.
+12. Manage existing sources, official releases, Git clones, branches and upgrades.
+13. Initial image targets are VMware Workstation and VirtualBox guests.
+14. Include full package, overlay and external-tree editors.
+15. The next development session's requested delivery is the complete specified application and every shared feature. Internal milestones do not reduce that scope.
 
 ## Product architecture proposal
 
@@ -29,13 +36,14 @@ Configuration writes are atomic and preceded by snapshots. Reconciliation failur
 
 | Workspace | Required workflow |
 | --- | --- |
-| Projects | Create/open a tree, choose a runtime, validate prerequisites, select output storage and external trees |
+| Projects | Create/open/clone a tree, manage source branches and upgrades, choose and remember a runtime, validate prerequisites, select output storage and external trees |
 | Configuration | Browse every menu and symbol, search, edit typed values and choices, inspect dependencies/help, reconcile and compare changes |
 | Presets | Browse real defconfigs, apply them safely, save a minimal defconfig and track provenance |
-| Development | Package and external-tree workflows, overlays, patches, hooks and external-editor integration according to owner decisions |
+| Development | Full package and external-tree editors, overlays, patches, hooks and external-editor integration |
 | Builds | Source acquisition, build, selected package actions, clean targets, progress, logs, cancellation and recoverable history |
 | Outputs | Inspect/export images and metadata, checksums, graphs, license information and safe previews |
 | Recovery | Restore configuration snapshots, revisit failed operations and retain partial results truthfully |
+| Virtual machines | VMware Workstation and VirtualBox guest-image workflows; guest content, formats, lifecycle, firmware and architecture choices await owner answers |
 
 ## Shared feature inventory
 
