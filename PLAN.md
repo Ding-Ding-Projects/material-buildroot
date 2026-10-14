@@ -19,6 +19,12 @@ Status: planning. Application implementation belongs to the next development ses
 13. Initial image targets are VMware Workstation and VirtualBox guests.
 14. Include full package, overlay and external-tree editors.
 15. The next development session's requested delivery is the complete specified application and every shared feature. Internal milestones do not reduce that scope.
+16. Guest presets cover minimal, desktop, server and appliance systems. First-class exports are bootable ISO, VMDK, VDI and OVA.
+17. Rich controls create, import, configure and launch VMware Workstation and VirtualBox guests.
+18. Verify x86_64 guests with both legacy BIOS and UEFI compatibility presets. Preserve broader architecture configuration access.
+19. Offer a dedicated managed WSL distribution and support existing distributions.
+20. Support current stable, maintained LTS and selected Git refs, with explicit verified compatibility boundaries.
+21. Reconcile configuration immediately after every edit, with undo and history. Upgrade migration remains a separate snapshot/preview/explicit-Apply operation.
 
 ## Product architecture proposal
 
@@ -30,7 +36,7 @@ A Linux bridge reads Buildroot's actual Kconfig environment. A pinned Kconfig li
 
 WSL and Docker adapters share typed requests, persistent jobs and output inspection, but keep distinct path semantics and lifecycle handling. Fixed executable arguments and structured stdin requests replace shell interpolation. Configuration mutations are serialized per canonical output tree. Independent output trees may run concurrently.
 
-Configuration writes are atomic and preceded by snapshots. Reconciliation failure restores the previous usable configuration. Cancellation verifies task ownership before stopping the complete process group or container. Existing projects, installations and settings are preserved.
+Configuration writes are atomic and preceded by snapshots. Immediate reconciliation is queued/debounced and serialized per output tree so rapid edits cannot race; visible pending state preserves user intent and undo order. Reconciliation failure restores the previous usable configuration. Cancellation verifies task ownership before stopping the complete process group or container. Existing projects, installations and settings are preserved.
 
 ## Buildroot workflow inventory
 
@@ -43,7 +49,7 @@ Configuration writes are atomic and preceded by snapshots. Reconciliation failur
 | Builds | Source acquisition, build, selected package actions, clean targets, progress, logs, cancellation and recoverable history |
 | Outputs | Inspect/export images and metadata, checksums, graphs, license information and safe previews |
 | Recovery | Restore configuration snapshots, revisit failed operations and retain partial results truthfully |
-| Virtual machines | VMware Workstation and VirtualBox guest-image workflows; guest content, formats, lifecycle, firmware and architecture choices await owner answers |
+| Virtual machines | Minimal/desktop/server/appliance presets; ISO/VMDK/VDI/OVA export; create/import/configure/launch in VMware Workstation and VirtualBox; BIOS/UEFI x86_64 boot verification |
 
 ## Shared feature inventory
 
