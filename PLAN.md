@@ -39,6 +39,10 @@ Status: planning. Application implementation belongs to the next development ses
 33. Include full local assistant workflows with checkpoints and reviewed actions. Model proposals never silently gain privileged execution authority.
 34. The website includes a secure opt-in local companion connection, alongside complete documentation, downloads and independent shared-feature coverage.
 35. Include canvas editors where appropriate, backed by actual validated configuration consumers.
+36. Support explicitly paired Edge/Chrome clients and authenticated access from other devices on the LAN. Internet control exposure is not part of this decision.
+37. Guest acceptance requires actual boot, login/console, networking, disk persistence and graceful guest shutdown. BIOS/UEFI support initially excludes Secure Boot.
+38. Keep all sources/history/artifacts/caches until the user chooses cleanup; resource-budget notifications do not authorize automatic pruning.
+39. Include SDK/toolchain export, image flashing, guest install wizards, remote Buildroot execution and cloud upload. Exact provider/target routes are being finalized in the decision log.
 
 ## Interactive control contract
 
@@ -63,7 +67,7 @@ Canvas controls support pan/zoom, selection, snapping where meaningful, an inspe
 
 GitHub Pages is static hosting; it does not itself run Buildroot or obtain arbitrary host privileges. The companion requires explicit pairing to a running desktop broker, bounded typed actions, scoped capability grants, revocation and a visible connection state. Browser transport, TLS trust, origin checks, CSRF/replay protection, browser private-network restrictions and any extension requirement need a separately reviewed implementation design. Never solve transport restrictions with permissive CORS, trust-all TLS, shared tokens or an unauthenticated localhost service.
 
-The desktop remains the privileged consumer. The website retains its own complete shared-feature inventory; a link or redirect to desktop features does not count as website delivery. Show truthful disconnected and offline states, and provide browser-native capability implementations where the feature can run locally without the broker.
+The desktop remains the privileged consumer. Explicit paired authentication and scoped permissions also cover supported LAN devices. The website retains its own complete shared-feature inventory; a link or redirect to desktop features does not count as website delivery. Show truthful disconnected and offline states, and provide browser-native capability implementations where the feature can run locally without the broker.
 
 ## Product architecture proposal
 

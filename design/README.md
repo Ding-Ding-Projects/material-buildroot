@@ -32,5 +32,6 @@ Keep dependency inspection read-only where the underlying relationship is derive
 - [Component provenance](components.md)
 - [Acceptance and evidence matrix](acceptance.md)
 - [Complete feature inventory](../docs/planning/feature-coverage.md)
+- [Architecture, typed actions and security boundaries](../docs/planning/architecture.md)
 
 The separate website has its own screen, feature and evidence inventory. Application references never establish website parity or Windows runtime proof.

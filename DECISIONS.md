@@ -52,12 +52,15 @@
 | P31 | Reproducibility | Locks/hashes/manifests/SBOM/licenses/repeat-build comparisons | Complete first-class reproducibility workflow |
 | P32 | Buildroot model assistance | Explanations and reviewed change proposals | Full local assistant workflows with checkpoints and reviewed actions |
 | P33 | Browser companion | Secure opt-in desktop connection | Secure opt-in companion alongside full website coverage |
-| P34 | Companion browsers | Edge and Chrome first | Pending |
-| P35 | Companion reachability | Local-only pairing and revocable scoped permissions | Pending |
-| P36 | Guest boot acceptance | Boot/login/networking/disk persistence/graceful guest shutdown | Pending |
-| P37 | Secure Boot | Explicit support states and required-format signing only | Pending |
-| P38 | Cleanup policy | Configurable budgets, preserve records, confirm destructive cleanup | Pending |
-| P39 | Additional first-delivery workflows | Owner can name additional essentials | Pending |
+| P34 | Companion browsers | Edge and Chrome first | Edge and Chrome, explicit pairing |
+| P35 | Companion reachability | Local-only pairing and revocable scoped permissions | Also authenticated access from other LAN devices |
+| P36 | Guest boot acceptance | Boot/login/networking/disk persistence/graceful guest shutdown | All five checks required |
+| P37 | Secure Boot | Explicit support states and required-format signing only | BIOS/UEFI without Secure Boot first |
+| P38 | Cleanup policy | Configurable budgets, preserve records, confirm destructive cleanup | Keep everything until the user chooses cleanup |
+| P39 | Additional first-delivery workflows | Owner can name additional essentials | All listed: SDK/toolchain export, image flashing, guest installers, remote Buildroot execution and cloud upload |
+| P40 | Cloud destinations | S3-compatible, Azure Blob, Google Cloud Storage, GitHub Releases | Pending |
+| P41 | Remote execution targets | SSH Linux/Docker and Windows SSH with WSL/Docker | Pending |
+| P42 | Flashing/installation routes | USB/SD/disk flashing and guided ISO/guest installation | Pending |
 
 ## Additional explicit interface requirement
 

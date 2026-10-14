@@ -41,6 +41,9 @@ All screens are proposed and unimplemented. Every collection/search/menu/picker 
 | S35 | Local assistant | Model readiness/checkpoints/reviewed proposals/diffs/Apply, cancel/rollback and tool permissions |
 | S36 | Browser companion | Opt-in pair/connected/disconnected/revoked, permission review and browser transport failures |
 | S37 | Pipeline/partition canvases | Typed operations/disk constraints, accessible alternative, preview/validation/undo |
+| S38 | Accessibility tools | Persistent/proxied entry, immediate preferences, explicit hide/Cancel focus, locked-state restore and secret-safe read-aloud |
+| S39 | Authenticated status integration | Session registration, current status, scoped replies/questions and truthful disconnected/unsupported states |
+| S40 | Cloud/remote/flash/install | Typed target selection, destination preview, credentials by reference, progress/cancel/partial/readback and destructive confirmation |
 
 ## Search inventory
 

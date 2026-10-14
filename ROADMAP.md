@@ -1,5 +1,16 @@
 # Roadmap
 
+## Planning handoff
+
+- [x] Record Windows-only desktop delivery, WSL/Docker, complete shared features, website and main-only policy.
+- [x] Record audience, interactive/canvas workflows, VM formats/lifecycle and full configuration/development scope.
+- [x] Record concurrency, reproducibility, local assistance, LAN companion and additional export/flash/install/remote/cloud workflows.
+- [x] Expand the shared catalogue into 105 individually identified planning obligations.
+- [x] Write proposed screens, component responsibilities, architecture and evidence requirements.
+- [ ] Finish exact cloud/remote/flashing target selections and final planning review.
+
+These checks describe planning records only. Product implementation/evidence items below remain unchecked.
+
 ## Buildroot workflows
 
 - [ ] Windows desktop shell and secure IPC.
