@@ -25,6 +25,29 @@ Status: planning. Application implementation belongs to the next development ses
 19. Offer a dedicated managed WSL distribution and support existing distributions.
 20. Support current stable, maintained LTS and selected Git refs, with explicit verified compatibility boundaries.
 21. Reconcile configuration immediately after every edit, with undo and history. Upgrade migration remains a separate snapshot/preview/explicit-Apply operation.
+22. Cover every supported configuration system with full rich controls, including Linux kernel, BusyBox and U-Boot.
+23. Default to Linux-side WSL storage or Docker volumes, with Windows browsing/export. Recommend maintained LTS when creating projects.
+24. Explain configuration changes requiring a clean rebuild and obtain explicit confirmation for that operation.
+25. Deliver Windows x64 first in one complete installer, accepting a large download. Fresh defaults are bilingual language and system theme.
+26. Provide every feasible safe output preview, including genuine guest screenshots after actual boot tests.
+27. Verify the newest stable Windows, VMware Workstation and VirtualBox versions observed during implementation. Exact versions and actual host access are currently unverified.
+28. The application must be interactive. Collections of editable text fields are not an acceptable substitute for rich workflows.
+
+## Interactive control contract
+
+| Task | Required interaction |
+| --- | --- |
+| Sources and versions | Selectable source tree, branch/ref browser, revision comparison, clone progress and upgrade preview |
+| Board/guest selection | Filterable real profiles, previewable preset details, architecture/firmware/storage compatibility controls |
+| Kconfig | Navigable menu tree, Boolean switches, tristate/choice pickers, ranged numeric controls, dependency graph and help inspector |
+| Package development | Structured source/build/license editor, dependency graph, patch ordering, hash validation and previewable changes |
+| Overlay development | File tree, drag/drop import, destination mapping, permissions controls and staged diff preview |
+| VM hardware | CPU/RAM sliders with exact numeric entry, storage/controller editors, firmware/network choices and live compatibility feedback |
+| Builds | Selectable targets, queue reorder/pause/cancel where supported, actual resource/progress states and actionable errors |
+| Outputs | File/graph/image/archive/filesystem viewers, selectable export bundles, real conversion progress and checksum validation |
+| Shared tools | Complete tool-specific editors and previews, durable queues, discoverable real actions and recovery states |
+
+Use text/code editors for values that require them, preserve exact technical syntax, and provide clear validation. Each workflow must have a meaningful interaction test. A negative substitution test must fail when required rich controls are replaced by generic textbox forms.
 
 ## Product architecture proposal
 

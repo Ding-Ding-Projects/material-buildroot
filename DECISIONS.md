@@ -35,14 +35,26 @@
 | P14 | Buildroot versions | Current stable, maintained LTS and chosen Git refs | Current stable, maintained LTS and chosen Git refs |
 | P15 | Configuration reconciliation | Staged edits, preview and Apply | Immediately after every edit, with undo/history |
 | P16 | Upgrade safety | Snapshot/preview migration or separate upgraded project | Snapshot first, preview migration, require Apply |
-| P17 | Kernel/BusyBox/U-Boot editors | Full supported configuration editors | Pending |
-| P18 | Project storage | Linux-side sources/output, Windows browse/export | Pending |
-| P19 | Rebuild policy | Explain required clean rebuild and confirm | Pending |
-| P20 | Default release channel | Maintained LTS | Pending |
-| P21 | Windows application architecture | x64 and ARM64 | Pending |
-| P22 | Output previews | Safe text/graphs/archives/read-only filesystems | Pending |
-| P23 | Offline bundle delivery | Complete installer or complete capability packs | Pending |
-| P24 | Fresh language/theme | Bilingual and system theme | Pending |
-| P25 | Native acceptance host | Exact Windows/VMware/VirtualBox versions and accessible host | Pending |
+| P17 | Kernel/BusyBox/U-Boot editors | Full supported configuration editors | Full rich editors for all supported configuration systems |
+| P18 | Project storage | Linux-side sources/output, Windows browse/export | Linux-side WSL storage or Docker volumes, Windows browse/export |
+| P19 | Rebuild policy | Explain required clean rebuild and confirm | Explain why and offer a confirmed clean rebuild |
+| P20 | Default release channel | Maintained LTS | Maintained Buildroot LTS |
+| P21 | Windows application architecture | x64 and ARM64 | Windows x64 first |
+| P22 | Output previews | Safe text/graphs/archives/read-only filesystems | Everything feasible, including genuine screenshots after guest boot tests |
+| P23 | Offline bundle delivery | Complete installer or complete capability packs | One complete installer, accepting a large download |
+| P24 | Fresh language/theme | Bilingual and system theme | Bilingual and system theme |
+| P25 | Native acceptance host | Exact Windows/VMware/VirtualBox versions and accessible host | Newest stable versions; exact versions and host access must be discovered |
+| P26 | Concurrent projects/builds | Multiple projects with global resource limits | Pending |
+| P27 | Expert terminal | Scoped embedded terminal supplement | Pending |
+| P28 | Desktop presets | Several genuinely supported desktop/compositor choices | Pending |
+| P29 | Guest networking | NAT default, bridged/host-only/advanced controls | Pending |
+| P30 | Guest account/SSH provisioning | Guided accounts/keys, no shared default password | Pending |
+| P31 | Reproducibility | Locks/hashes/manifests/SBOM/licenses/repeat-build comparisons | Pending |
+| P32 | Buildroot model assistance | Explanations and reviewed change proposals | Pending |
+| P33 | Browser companion | Secure opt-in desktop connection | Pending |
+
+## Additional explicit interface requirement
+
+The application must be interactive with rich controls and productive workflows. Textbox collections cannot substitute for trees, pickers, graphs, previews, visual editors, queues or lifecycle controls. Text and code editing are appropriate only where the underlying task needs them.
 
 Recommendations are not approvals. Further questions will be recorded as the interview proceeds.
