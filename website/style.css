@@ -79,6 +79,7 @@ md-linear-progress.progress-track{height:6px}
 .preview-link img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain}
 .preview-link:focus-visible{outline-offset:5px}
 .preview-caption{font-size:.74rem;line-height:1.65;color:var(--muted);padding:15px 2px 0;overflow-wrap:anywhere}
+.preview-caption>span{display:block}
 .preview-caption p{margin:0 0 8px}
 .preview-caption p:last-child{margin-bottom:0}
 .preview-caption-title{display:block;color:var(--ink);font-weight:600;margin-bottom:4px}
