@@ -25,6 +25,9 @@ function createDeploymentService(options) {
       virtual,
       [
         "discoverHypervisors",
+        "discoverNetworks",
+        "previewGuestEdit",
+        "createDiskArtifact",
         "listGuests",
         "createGuest",
         "importGuest",

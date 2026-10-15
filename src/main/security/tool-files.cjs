@@ -40,7 +40,9 @@ function inspect(absolute) {
 }
 
 /** Session authority comes only from the native picker, never renderer paths. */
-function createToolFiles({ dialog, parentWindow }) {
+function createToolFiles({ dialog, parentWindow, purpose = "server" }) {
+  if (!["server", "external-tree"].includes(purpose))
+    throw new TypeError("Unknown directory purpose.");
   const records = new Map();
   let choosing = false,
     closed = false;
@@ -69,7 +71,9 @@ function createToolFiles({ dialog, parentWindow }) {
           const result = await dialog.showOpenDialog(parentWindow, {
             title:
               kind === "directory"
-                ? "Choose the server working directory"
+                ? purpose === "external-tree"
+                  ? "Choose a prepared Buildroot external tree"
+                  : "Choose the server working directory"
                 : "Choose an input file",
             properties: [
               kind === "directory" ? "openDirectory" : "openFile",
@@ -102,18 +106,20 @@ function createToolFiles({ dialog, parentWindow }) {
         }
         if (kind === "directory" && access === "write") {
           if (selected === path.parse(selected).root) fail("UNSAFE_PATH");
-          const review = await dialog.showMessageBox(parentWindow, {
-            type: "warning",
-            title: "Authorize this server directory",
-            message:
-              "Allow the server manager to modify and run server files in this directory?",
-            detail: `${selected}\n\nServer software and plugins execute code with your account permissions. Choose a directory whose contents you trust. This permission lasts until the application closes.`,
-            buttons: ["Cancel", "Authorize directory"],
-            defaultId: 0,
-            cancelId: 0,
-            noLink: true,
-          });
-          if (review.response !== 1) fail("SOURCE_CONSENT_REQUIRED");
+          if (purpose === "server") {
+            const review = await dialog.showMessageBox(parentWindow, {
+              type: "warning",
+              title: "Authorize this server directory",
+              message:
+                "Allow the server manager to modify and run server files in this directory?",
+              detail: `${selected}\n\nServer software and plugins execute code with your account permissions. Choose a directory whose contents you trust. This permission lasts until the application closes.`,
+              buttons: ["Cancel", "Authorize directory"],
+              defaultId: 0,
+              cancelId: 0,
+              noLink: true,
+            });
+            if (review.response !== 1) fail("SOURCE_CONSENT_REQUIRED");
+          }
         }
         if (closed) fail("UNAVAILABLE");
         const id = randomUUID();
@@ -150,7 +156,12 @@ function createToolFiles({ dialog, parentWindow }) {
     },
     serverAuthorized(id) {
       const record = records.get(id);
-      if (!record || record.kind !== "directory" || record.access !== "write")
+      if (
+        purpose !== "server" ||
+        !record ||
+        record.kind !== "directory" ||
+        record.access !== "write"
+      )
         return false;
       this.resolve(id, "write");
       return true;

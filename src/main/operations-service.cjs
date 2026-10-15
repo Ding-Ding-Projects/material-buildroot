@@ -15,9 +15,15 @@ const {
 const { createUpdateService } = require("./updates/service.cjs");
 const { createFileGrants } = require("./security/file-grants.cjs");
 const { createProjectStore } = require("./storage/project-store.cjs");
+const {
+  createCanvasLayoutStore,
+} = require("./storage/canvas-layout-store.cjs");
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
 const { createSourceOperations } = require("./source-operations.cjs");
+const {
+  createPackageAuthoringService,
+} = require("./configuration/package-authoring.cjs");
 const contract = require("./security/workspace-contract.cjs");
 
 const owner = "desktop-owner";
@@ -28,6 +34,8 @@ const fields = {
   "project.choose": [],
   "project.adopt": ["selectionId", "trust"],
   "project.runtime": ["workspaceId", "runtime"],
+  "canvas.read": ["workspaceId", "canvasId"],
+  "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
   "jobs.list": [],
   "jobs.page": ["id", "after", "limit"],
@@ -47,7 +55,19 @@ const fields = {
   "file.choose": ["access", "kind"],
   companion: ["request"],
   source: ["request"],
+  "external.choose": ["workspaceId"],
+  "package.preview": ["workspaceId", "externalTreeId", "model"],
+  "package.apply": [
+    "workspaceId",
+    "externalTreeId",
+    "model",
+    "revision",
+    "previewHash",
+  ],
   "guest.discover": ["workspaceId"],
+  "guest.networks": ["workspaceId"],
+  "guest.preview": ["workspaceId", "request"],
+  "guest.disk.create": ["workspaceId", "request"],
   "guest.list": ["workspaceId"],
   "guest.create": ["workspaceId", "request"],
   "guest.import": ["workspaceId", "request"],
@@ -117,6 +137,9 @@ function createOperationsService({
     running = new Set();
   const projectStore = createProjectStore({
     filePath: path.join(directory, "projects.json"),
+  });
+  const canvasLayouts = createCanvasLayoutStore({
+    directory: path.join(directory, "canvas-layouts"),
   });
   let kconfigAdapter;
   let choosing = false,
@@ -285,6 +308,24 @@ function createOperationsService({
     parentWindow,
   });
   const toolFiles = createToolFiles({ dialog, parentWindow });
+  const externalFiles = createToolFiles({
+    dialog,
+    parentWindow,
+    purpose: "external-tree",
+  });
+  const externalWorkspaces = new Map();
+  const packageAuthoring = createPackageAuthoringService({
+    resolveExternalTree: (workspaceId, externalTreeId) => {
+      project(workspaceId);
+      if (externalWorkspaces.get(externalTreeId) !== workspaceId)
+        reject("EXTERNAL_TREE_NOT_GRANTED");
+      return {
+        granted: true,
+        root: externalFiles.resolve(externalTreeId, "write"),
+      };
+    },
+    withLock: async (_root, work) => changeConfig(work),
+  });
   const tools = createToolsService({
     queueDirectory: path.join(directory, "tool-queue"),
     payloadManager,
@@ -330,13 +371,11 @@ function createOperationsService({
               }
               case "projects.list":
                 return {
-                  projects: projectStore
-                    .list()
-                    .map(({ id, name }) => ({
-                      id,
-                      name,
-                      authorized: projects.has(id),
-                    })),
+                  projects: projectStore.list().map(({ id, name }) => ({
+                    id,
+                    name,
+                    authorized: projects.has(id),
+                  })),
                 };
               case "jobs.list":
                 return {
@@ -508,6 +547,20 @@ function createOperationsService({
       case "project.runtime":
         project(request.workspaceId).runtime = runtime(request.runtime);
         return { configured: true };
+      case "canvas.read":
+        project(request.workspaceId);
+        return canvasLayouts.get({
+          workspaceId: request.workspaceId,
+          canvasId: request.canvasId,
+        });
+      case "canvas.write":
+        project(request.workspaceId);
+        return canvasLayouts.save({
+          workspaceId: request.workspaceId,
+          canvasId: request.canvasId,
+          expectedRevision: request.expectedRevision,
+          layout: request.layout,
+        });
       case "build.submit": {
         const item = project(request.workspaceId);
         if (
@@ -571,6 +624,16 @@ function createOperationsService({
         });
       case "guest.discover":
         return deployment(request.workspaceId).discoverHypervisors();
+      case "guest.networks":
+        return deployment(request.workspaceId).discoverNetworks();
+      case "guest.preview":
+        return deployment(request.workspaceId).previewGuestEdit(
+          request.request,
+        );
+      case "guest.disk.create":
+        return deployment(request.workspaceId).createDiskArtifact(
+          request.request,
+        );
       case "guest.list":
         return deployment(request.workspaceId).listGuests();
       case "guest.create":
@@ -630,6 +693,21 @@ function createOperationsService({
       }
       case "payload.list":
         return payloadManager.list();
+      case "external.choose": {
+        project(request.workspaceId);
+        const choice = await externalFiles.choose({
+          access: "write",
+          kind: "directory",
+        });
+        if (disposed) reject("UNAVAILABLE");
+        project(request.workspaceId);
+        externalWorkspaces.set(choice.id, request.workspaceId);
+        return { externalTreeId: choice.id, name: choice.name };
+      }
+      case "package.preview":
+        return packageAuthoring.preview(request);
+      case "package.apply":
+        return packageAuthoring.apply(request);
       case "source": {
         const result = await sources.handle(request.request);
         if (!result.ok) reject(result.code);
@@ -662,11 +740,18 @@ function createOperationsService({
       try {
         return { ok: true, result: await perform(contract.parse(serialized)) };
       } catch (error) {
+        const deploymentCode =
+          typeof error.message === "string" &&
+          /^(?:guest|artifact|conversion|hypervisor|network|storage|legacy-storage|disk|new-disk|invalid|owned-media|vmware|unsupported|dependent-or|appliance|conflicting|unexpected|vmdk)-[a-z0-9-]{1,48}$/.test(
+            error.message,
+          )
+            ? error.message.toUpperCase().replaceAll("-", "_")
+            : undefined;
         const code =
           typeof error.code === "string" &&
           /^[A-Z][A-Z0-9_]{0,63}$/.test(error.code)
             ? error.code
-            : "OPERATION_FAILED";
+            : deploymentCode || "OPERATION_FAILED";
         return { ok: false, code };
       }
     },
@@ -676,6 +761,8 @@ function createOperationsService({
       fileGrants.clear();
       updates.cancel();
       toolFiles.dispose();
+      externalFiles.dispose();
+      externalWorkspaces.clear();
       sources.dispose();
       disposal = Promise.allSettled([
         tools.dispose?.(),
