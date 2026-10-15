@@ -1,3 +1,4 @@
 .githooks/* text eol=lf
 docs/index.html -text
 docs/site/** -text
+docs/site/source-assets/** whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
