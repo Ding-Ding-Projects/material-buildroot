@@ -226,6 +226,8 @@ Each identity has exactly one primary acceptance phase below. Cross-phase depend
 
 ## Current checkpoint
 
+The requested first downloadable desktop milestone is being packaged as version 0.1.0. Source-only release wiring does not close installer, update, release or full-product acceptance. The additional focused packaged pass on `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd` passed six keyboard/accessibility combinations, reload/replay and stale-revision recovery, and two preserved invalid/foreign storage cases; native display-scale and elapsed-time expiry evidence remain separate and open.
+
 The bounded PH02-T02-C02 desktop-shell child is verified against the source and capture record linked above; its broad parent remains unchecked. The earlier data-only broker child retains its separate evidence. All wider phase and per-surface acceptance requirements remain open unless their own checkbox and evidence explicitly say otherwise.
 
 The initial documentation deployment remains historical in [its hosting evidence](docs/evidence/hosting/initial-live.json). The current desktop articles and captures were delivered at `ae1951d18a29ea3ba5aab726cee20e896ad89cc2`, built from `53a37011c04e46536c882bc79dae751ff56f9757`: all 103 live files matched expected and published-source bytes, and deployment [38679631020](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38679631020) succeeded. This bounded delivery does not close broad phase or per-surface requirements.

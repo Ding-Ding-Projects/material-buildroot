@@ -15,7 +15,7 @@ else {
   const broker=store?createBroker({capabilities,store}):null;
   const url=pathToFileURL(path.join(app.getAppPath(),'dist/index.html')).href;
   let metadata={version:app.getVersion(),source:null,updatedAt:null};try{const value=JSON.parse(fs.readFileSync(path.join(app.getAppPath(),'dist/build-info.json'),'utf8'));if(/^[0-9a-f]{40}$/.test(value.source)&&typeof value.updatedAt==='string'&&new Date(value.updatedAt).toISOString()===value.updatedAt)metadata={...metadata,source:value.source,updatedAt:value.updatedAt};}catch{}
-  window=new BrowserWindow({width:1440,height:960,minWidth:960,minHeight:640,frame:false,show:false,backgroundColor:'#17151b',webPreferences:{preload:path.join(__dirname,'preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,devTools:false}});
+  window=new BrowserWindow({icon:path.join(app.getAppPath(),'assets/branding/icon.ico'),width:1440,height:960,minWidth:960,minHeight:640,frame:false,show:false,backgroundColor:'#17151b',webPreferences:{preload:path.join(__dirname,'preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,devTools:false}});
   desktop=createDesktopSession({webContents:window.webContents,url,capabilities,broker,metadata,storageReady:!!store});
   ipcMain.handle('studio:bootstrap',event=>desktop.bootstrap(event));ipcMain.handle('studio:request',(event,value)=>desktop.request(event,value));ipcMain.handle('studio:window',(event,value)=>desktop.windowControl(event,value,window));
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));

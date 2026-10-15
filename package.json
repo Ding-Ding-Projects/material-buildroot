@@ -39,7 +39,8 @@
       "dist/**/*",
       "src/main/**/*",
       "src/shared/**/*",
-      "package.json"
+      "package.json",
+      "assets/branding/icon.ico"
     ],
     "win": {
       "target": [
@@ -51,12 +52,13 @@
         }
       ],
       "forceCodeSigning": false,
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true,
+      "icon": "assets/branding/icon.ico"
     },
     "squirrelWindows": {
       "name": "MaterialBuildroot",
       "artifactName": "Setup.${ext}",
-      "iconUrl": "https://github.com/favicon.ico",
+      "iconUrl": "https://ding-ding-projects.github.io/material-buildroot/site/assets/icon.ico",
       "msi": false
     }
   }

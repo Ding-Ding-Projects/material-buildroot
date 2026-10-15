@@ -1,5 +1,11 @@
 # Continuation handoff
 
+## Latest release request and acceptance result
+
+The owner additionally requested fixing the empty Releases page. The source now prepares the first version 0.1.0 unsigned Squirrel.Windows release and a build/publication workflow, with an original product icon and exact-source asset verification. No build or publication is implied by source preparation. Run the exact installer entrypoint from a fixed commit and verify actual output and remote assets before claiming a download exists. Automatic updates and the wider product remain unfinished.
+
+The additional focused packaged pass against `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd` passed six keyboard/AX combinations with zero unnamed controls, real stale-revision review/retry, document reload with old-authority rejection, fresh event delivery with replay deduplication, and two byte-preserved invalid/foreign storage cases. All three product trees and desktops closed. Profiles remain retained; native resizing/scaling and elapsed-time expiry remain outside this proof. Later icon-only production changes require separate package identity evidence.
+
 ## Objective and current steering
 
 Continue the bounded Material Buildroot desktop GUI milestone and closeout on main with one tracked-source writer. The owner now says to continue and skip blocker tasks. Preserve the delivered GUI and documentation evidence, record skipped cleanup and unsupported native per-scale proof honestly, and complete only nonblocked work within this bounded objective. Do not adopt the wider product backlog. This record precedes its own future commit/publication, which require separate verification. Incorporate independent acceptance-review limits when available.

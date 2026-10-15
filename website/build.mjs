@@ -85,7 +85,7 @@ md.renderer.rules.image = (tokens,i,options,env,self) => {
 const render = (text, source='README.md', headings=[]) => md.render(text,{source,headings}).replace(/<table>/g,'<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>').replace(/<\/table>/g,'</table></div>').replace(/<li>(\s*(?:<p>)?<md-checkbox class="task-mark)/g,'<li class="task-item">$1');
 // Render once to discover every linked asset before computing source provenance.
 for (const doc of documents) render(doc.content,doc.source);
-const inputs = [...sources, ...localAssets, 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json'].sort();
+const inputs = [...sources, ...localAssets, 'assets/branding/icon.ico','assets/branding/icon.png', 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json'].sort();
 const snapshot = sourceSnapshot(root,inputs,sourceIndex);
 const sourceCommit = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const dirty = Boolean(execFileSync('git',['status','--porcelain','--',...inputs],{cwd:root,encoding:'utf8'}).trim());
@@ -131,6 +131,8 @@ const statusBody = `<p class="eyebrow">PROJECT AVAILABILITY</p><h1>${label('Down
 await fs.mkdir(outputRoot,{recursive:true});
 if ((await fs.readdir(outputRoot)).length) throw new Error('Documentation staging output must be empty.');
 await fs.mkdir(path.join(out,'assets'),{recursive:true});
+await fs.copyFile(admittedSource(root,'assets/branding/icon.ico',sourceIndex),path.join(out,'assets/icon.ico'));
+await fs.copyFile(admittedSource(root,'assets/branding/icon.png',sourceIndex),path.join(out,'assets/icon.png'));
 await build({entryPoints:[path.join(here,'app.js')],bundle:true,minify:true,outdir:path.join(out,'assets'),entryNames:'app',assetNames:'[name]-[hash]',loader:{'.woff2':'file','.woff':'file'},target:['chrome120','edge120'],legalComments:'eof'});
 await fs.writeFile(path.join(out,'assets/icon.svg'),`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="13" fill="#4052d6"/><path d="m10 16 14-7 14 7-14 7Z" fill="#fff"/><path d="m10 24 14 7 14-7v8l-14 7-14-7Z" fill="#bfc9ff"/></svg>`);
 for (const [packageName,license] of [['@material/web','LICENSE'],['@fontsource-variable/roboto','LICENSE'],['lit','LICENSE']]) {

@@ -1,5 +1,13 @@
 # Handoff
 
+## First downloadable release preparation and focused desktop acceptance
+
+The owner additionally requested a real release because the Releases page was empty. The first unsigned Squirrel.Windows package and automatic publication route are prepared in source; actual build, installation and published-asset proof must be recorded separately. Version 0.1.0 remains an early desktop milestone, not a complete Buildroot manager. Read [the release procedure](docs/build/releases.md).
+
+A further packaged pass against unchanged desktop source `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd` completed six keyboard/accessibility combinations: each of the three languages at 1440x960/light and 960x640/dark. Each accessibility tree had eight named interactive controls and no unnamed control. Native background Tab/Enter opened Settings, focused its heading, traversed controls and saved language. The smaller viewport used recorded CDP emulation because native hidden-window resize was unavailable.
+
+Real stale-revision recovery retained the pending language, displayed review guidance and accepted the second Save. Actual document reload rejected old authority and admitted a fresh change; exact replay produced no duplicate event. Invalid and foreign SQLite fixtures displayed the unavailable-storage state with disabled Save and remained byte-identical after shutdown. All three product process trees, desktops and CDP ports were closed. New profiles and fixture originals remain intentionally preserved; no retained website profile was touched. Wall-clock expiry and native display-scale variation remain unrun. Private receipts are retained outside published source.
+
 ## Current bounded desktop GUI closeout, 2026-10-15 America/Toronto
 
 The current task is the bounded desktop GUI milestone and its evidence/documentation delivery, not implementation of the remaining product backlog. Preserve the verified source bindings below. Continue nonblocked closeout work while recording the owner's skipped blockers explicitly. Independent acceptance review may add factual limits; this record does not pre-empt that review.

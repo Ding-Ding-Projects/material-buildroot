@@ -2,7 +2,7 @@ node_modules/
 dist/
 dist-design/
 dist-design.previous-*/
-release/
+/release/
 .cache/
 .agent/
 *.log
