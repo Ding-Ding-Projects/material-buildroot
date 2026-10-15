@@ -1,0 +1,12 @@
+{
+  "format": "unintegrated-renderer-recovery-v1",
+  "capturedAt": "2026-10-15T22:50:38.963525+00:00",
+  "baseRevision": "009354b177a74e9ca9a12306771287243a3cc556",
+  "patchSha256": "8d3a7ed70a3fced68739822b642d413c4126d5094195bee6ceed3abceb752e2f",
+  "files": {
+    "src/renderer/main.ts": "535f14a8fadc68fe49e6010fa72a3a68573dd96765dfec5b22e6efe80528f96a",
+    "src/renderer/scheduled-preferences-panel.ts": "52bc1cb867c878c877483695e1d45fd9f68d9e57622cd9f07b9fcc8eb84a7315"
+  },
+  "verification": "Patch applied to committed main.ts in a temporary directory; both reconstructed files were byte-identical to original draft files.",
+  "status": "Draft only. TypeScript passed; no browser acceptance. Not part of active renderer."
+}

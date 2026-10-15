@@ -1,5 +1,7 @@
 # Development continuation
 
+The latest owner request stopped new implementation for preservation and scoped cleanup. Read `CLOSEOUT_PROMPT.md` and the newest `HANDOFF.md` entry first. The schedule GUI draft is inactive and preserved under `design/archive/schedule-editor-in-progress/`; source-enrollment forms have not been started. The host enrollment checkpoint is `8c0c15e`. Only the required public screenshot gallery publication continues in the closeout lane. Do not interpret earlier active-work statements below as a direction to restart implementation during that pass.
+
 ## Active delivery instructions
 
 Continue the full application roadmap on `main` only, preserving all work. The latest owner instruction defers Windows runtime testing and prioritizes application implementation. Each roadmap phase has its own implementation owner; desktop GUI uses the designated GUI model, other implementation uses the designated coding model, and website work uses the designated website model. Keep source comments and published records professional and free of private conversation vocabulary.

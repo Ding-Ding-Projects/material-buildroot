@@ -1,5 +1,11 @@
 # Handoff
 
+## Requested preservation and scoped cleanup, 2026-10-15
+
+New implementation stopped at the owner's explicit preservation request. Reviewed schedule enrollment is published at `8c0c15edd7ed45cd3ffa02cd1032f52922e1396c`. The unfinished schedule GUI is retained as a byte-verified, inactive [recovery patch](design/archive/schedule-editor-in-progress/README.md); it passed TypeScript but has no browser acceptance. Source-enrollment forms were not started. The active renderer preserves the existing working controls. Independent queue/catalogue motion and capture-alignment fixes passed two focused viewport checks.
+
+The source and private reference checkouts each have main only, one primary worktree and no stashes. No redundant task-owned deletion candidate exists; retain the primary checkouts, recovery draft and evidence. A dedicated public screenshot gallery is the sole continuing publication lane. The updated [continuation prompt](CLOSEOUT_PROMPT.md) records implemented, verified and unfinished work. The complete roadmap is not finished.
+
 ## Explicit schedule-source enrollment, 2026-10-15
 
 The schedule host now persists deliberate HTTPS/Home Assistant source enrollments with exact origins, explicit private-address choices, revision conflicts and protected credential references. Tokens are transient operation input; safe settings replies contain no token or vault reference. Setup makes no DNS or socket request. Rotation writes a fresh protected reference; prior references are preserved. The narrow bridge exposes list/save/remove with live authority checks and generic failures.
