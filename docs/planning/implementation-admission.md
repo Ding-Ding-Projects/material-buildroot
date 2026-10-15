@@ -1,6 +1,6 @@
 # Concrete implementation admission
 
-The [phase registry](implementation-admission.json) binds existing architecture consumers, focused tests and documentation to SHA-256 file contents. It complements the 105-identity, 420-surface feature ledger; it does not replace its independent acceptance requirements or complete canonical reconciliation.
+The [phase registry](implementation-admission.json) binds existing architecture consumers, focused tests and documentation to SHA-256 file contents. It complements the 107-identity, 428-surface feature ledger; it does not replace its independent acceptance requirements or complete canonical reconciliation.
 
 Each phase states its behavior, authority boundary, persistence contract and remaining acceptance gap. A planned phase reserves behavior only and has no implementation consumers or tests. Authored records identify actual existing files without claiming execution. Tested records require a dated, environment-specific passing receipt, output file, source revision, build hash and bindings covering every current consumer and focused test. Native-deferred records require an explicit reason and preserve incomplete acceptance. All phases retain `accepted: false`; roadmap acceptance requires independent feature/runtime evidence.
 

@@ -28,7 +28,7 @@ Scope labels below apply to each task. **A+D-native+R** means A, applicable brow
 
 Prerequisites: None. Historical PH00 scope was planning and the initial public documentation site; current implementation continues under PH01 and later phases.
 
-- [x] **PH00-T01** [D-initial+R] Reconcile the recorded owner decisions, 105-identity inventory, architecture, surfaces and conditional design review into this ordered plan.
+- [x] **PH00-T01** [D-initial+R] Reconcile the recorded owner decisions, 107-identity inventory, architecture, surfaces and conditional design review into this ordered plan.
 - [x] **PH00-T02** [D-initial+R] Create the documentation website source and render the authoritative planning documents, decision log and source wiki with stable internal routes.
 - [x] **PH00-T03** [D-initial+R] Implement usable roadmap navigation and checklist rendering from these stable phase/task IDs; use genuine registered Material Design 3 controls throughout and keep source Markdown authoritative.
 - [x] **PH00-T04** [D-initial+R] Verify the built website with real browser interaction, phone-friendly touch/keyboard layouts from approximately 320px, pure Material Design 3 control provenance, working document routes and genuine source-bound captures; retain actual check output.
@@ -43,12 +43,13 @@ Current continuation: implementation resumed on 2026-10-15 across all roadmap ph
 
 Prerequisites: PH00-T01 and review of the current PH00 handoff/status records, including PH00-T06 when available. Pages deployment is not a prerequisite for independent contract preparation. Implementation is now authorized; begin with contract admission before dependent application work.
 
-- [ ] **PH01-T01** [R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 105 identities; preserve conditional and canonical-only dispositions with reasons.
+- [ ] **PH01-T01** [R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 107 identities; preserve conditional and canonical-only dispositions with reasons.
 - [ ] **PH01-T02** [R (A/D/C admission only)] Expand every applicable identity into independent A/D/C/R evidence records with stable child work IDs, implementation consumers, articles, copy, persistence, focused tests and exact runtime/capture requirements.
   - [x] **PH01-T01-C01** Reconcile the 105 catalogue identities and their recorded surface/disposition boundaries into a machine-readable admission ledger. [Evidence](docs/evidence/tasks/PH01-contracts.md).
-  - [ ] **PH01-T01-C02** Finish full canonical-section reconciliation and independent review for every identity. The ledger now has 386 planned catalogue-derived subrequirements, not completed full-contract reconciliation.
-  - [x] **PH01-T02-C01** Create independent stable A/D/C/R records, explicit pending implementation and separate proof slots for all 105 identities. [Evidence](docs/evidence/tasks/PH01-contracts.md).
-  - [ ] **PH01-T02-C02** Admit concrete implementation consumers, localized articles/copy, persistence, detailed runtime/capture tuples and tests before each feature is implemented. All 420 records now have explicit planned identities and tuple axes, but reserved paths are not admitted consumers or runtime evidence.
+  - [x] **PH01-T01-C03** Reconcile the two additional onboarding and per-control guidance identities, preserving earlier IDs and explicit surface exclusions: 107 identities, 428 surface records and 398 planned requirements. This is catalogue reconciliation, not full canonical or implementation acceptance. [Evidence](docs/evidence/tasks/PH01-catalogue-delta.md).
+  - [ ] **PH01-T01-C02** Finish full canonical-section reconciliation and independent review for every identity. The ledger now has 398 planned catalogue-derived subrequirements, not completed full-contract reconciliation.
+  - [x] **PH01-T02-C01** Create independent stable A/D/C/R records, explicit pending implementation and separate proof slots for all 107 identities. [Evidence](docs/evidence/tasks/PH01-contracts.md).
+  - [ ] **PH01-T02-C02** Admit concrete implementation consumers, localized articles/copy, persistence, detailed runtime/capture tuples and tests before each feature is implemented. All 428 records now have explicit planned identities and tuple axes, but reserved paths are not admitted consumers or runtime evidence.
   - [x] **PH01-T02-C03** Implement and locally verify the representative serialized-request parser, strict schema and typed request union. Nine focused tests and independent review pass; this child grants no authority and does not complete production IPC or any effectful action. [Evidence](docs/security/operation-requests.md).
 - [ ] **PH01-T03** [R (A/D/C admission only)] Admit genuine registered Material Design 3 components and every native/browser/tool adapter: pin provenance, compatibility, licenses, redistributability, offline payloads and full installer size.
 - [ ] **PH01-T04** [R (A/D/C admission only)] Create deterministic screen/state references, a direct reference renderer and hand-written parity/control maps; include reduced-motion, accessible structured canvas alternatives and negative textbox-substitution checks. Thirty reference states and local build tooling are authored. Two source-bound builds and focused runtime repairs are verified; full reference interaction, accessibility, typography and tuple acceptance remain pending.
@@ -200,19 +201,20 @@ Prerequisites: PH01–PH09 scoped exit proofs and a complete explicit ledger of 
 - [ ] **PH10-T05** [A+D+C+R (final applicable acceptance)] Implement CI bootstrap inventories, compatible accessible runner selection/cloud fallback and defensive evidence collection; use encrypted public builder transport only if private source is introduced.
 - [ ] **PH10-T06** [A+D+C+R (final applicable acceptance)] Publish uniquely tagged normal releases with verified installer assets, workflow timing and line counts, factual catalogue-linked naming and resolved permitted release-photo policy; read back draft=false/prerelease=false.
 - [ ] **PH10-T07** [A+D+C+R (final applicable acceptance)] Verify live downloads against expected source/version/checksums and complete homepage/wiki/articles/screenshots/gallery links; synchronize repository records, supported discussions/project item and sanitized guidance.
-- [ ] **PH10-T08** [A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 105 dispositions before declaring complete.
+- [ ] **PH10-T08** [A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 107 dispositions before declaring complete.
 
 Exit proof: Every required task, child and applicable A/D/C/R record passes with current linked evidence. All product, installer, update, guest, complete website/companion and release acceptance is verified. Any missing applicable proof prevents full completion; explicit canonical-only or genuinely inapplicable dispositions retain their documented reasons.
 
-## Primary-phase map for all 105 catalogue identities
+## Primary-phase map for all 107 catalogue identities
 
-Each identity has exactly one primary acceptance phase below. Cross-phase dependencies still apply. The primary phase owns detailed child expansion and initial A/browser-native D acceptance; PH01 admits the complete records first. Full identity closure additionally requires every applicable surface record: remaining D and C in PH09, and packaging/release-dependent records in PH10. Earlier phase acceptance never asserts those future records passed. This table is routing, not evidence or a feature checkbox. Full requirements and surfaces remain in the [105-identity inventory](docs/planning/feature-coverage.md).
+Each identity has exactly one primary acceptance phase below. Cross-phase dependencies still apply. The primary phase owns detailed child expansion and initial A/browser-native D acceptance; PH01 admits the complete records first. Full identity closure additionally requires every applicable surface record: remaining D and C in PH09, and packaging/release-dependent records in PH10. Earlier phase acceptance never asserts those future records passed. This table is routing, not evidence or a feature checkbox. Full requirements and surfaces remain in the [107-identity inventory](docs/planning/feature-coverage.md).
 
 | Category | Count | Primary phase | Explicit catalogue IDs |
 | --- | ---: | --- | --- |
 | Language, voice and personalization | 10 | PH03 | `language`, `funny-emoji`, `personal-vocabulary`, `school-mode`, `narration`, `scheduled-settings`, `display-name`, `adhd-modes`, `dim-sum`, `dim-sum-photo-source` |
 | Material, appearance and layout | 10 | PH03 | `material-design`, `workflow-navigation`, `motion`, `appearance-editor`, `color-picker`, `logo-customization`, `overlay-panels`, `collapse-filters`, `accessibility-sizing`, `functional-ui` |
 | Navigation, search and commands | 9 | PH03 | `tabs`, `regex-search`, `command-palette`, `context-menus`, `menu-shortcuts`, `rich-controls`, `guided-forms`, `settings-explanations`, `blank-editors` |
+| Practical setup and control guidance | 2 | PH03 | `onboarding-wizard`, `info-icon-guidance` |
 | Safety, locks and authentication | 7 | PH04 | `super-confirmation`, `element-locks`, `support-tickets`, `unlock-ladder`, `authenticator`, `qr-pairing`, `honest-monetization` |
 | Records, history and messages | 7 | PH04 | `local-history`, `exports`, `bulk-actions`, `changelog`, `offline-docs`, `rendered-provider-text`, `notifications` |
 | Built-in tools and handoff | 7 | PH08 | `file-converter`, `minecraft-server-manager`, `ollama-suite`, `external-editor`, `download-handoff`, `forge-publishing`, `progress-recovery` |
@@ -225,7 +227,7 @@ Each identity has exactly one primary acceptance phase below. Cross-phase depend
 | Repository records | 14 | PH10 | `tabbed-readme`, `human-time-estimate`, `sanitized-instruction-copy`, `agents-md-vocabulary-block`, `vocabulary-hash-lock`, `roadmap-checklist`, `feature-docs`, `postman-collections`, `wiki-site-sync`, `handoff-record`, `closeout-prompt`, `discussion-records`, `project-board`, `operational-skill` |
 | Catalogue entries with narrower subjects | 5 | PH01 | `readme-prompt-banner`, `single-file-instruction-editions`, `project-profile`, `roblox-model-catalogue`, `roblox-visual-realism` |
 
-**Total: 105 unique catalogue identities.** Canonical-only, owner-memory and currently inapplicable Roblox identities retain explicit disposition records in PH01; they do not authorize private instruction publication or unrelated product implementation. Conditional encrypted-builder scope remains conditional. Repository records begin with PH01 admission and setup; PH10 owns their final closure and they remain current throughout delivery.
+**Total: 107 unique catalogue identities.** Canonical-only, owner-memory and currently inapplicable Roblox identities retain explicit disposition records in PH01; they do not authorize private instruction publication or unrelated product implementation. Conditional encrypted-builder scope remains conditional. Repository records begin with PH01 admission and setup; PH10 owns their final closure and they remain current throughout delivery.
 
 ## Current checkpoint
 

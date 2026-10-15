@@ -4,13 +4,13 @@
 
 Continue the full application roadmap on `main` only, preserving all work. The latest owner instruction defers Windows runtime testing and prioritizes application implementation. Each roadmap phase has its own implementation owner; desktop GUI uses the designated GUI model, other implementation uses the designated coding model, and website work uses the designated website model. Keep source comments and published records professional and free of private conversation vocabulary.
 
-Read the newest HANDOFF.md entry before historical material below. The production renderer is now a working project workspace with durable onboarding and plans plus host operation consumers. The public website also has an independent local visitor workbench. Read docs/desktop/modern-workspace.md and the actual source; do not restore the historical two-screen-only description. PH00-T05 has fresh live byte/readback evidence. Broad phase acceptance and complete authenticated companion parity remain open. Continue the concrete remaining contracts and integration gaps, without relabelling deferred proof as success.
+Read the newest HANDOFF.md entry before historical material below. Source `fb6196f` includes the compact icon-based editor and offline documentation workspace. Package discovery/preserving imports, measured model fit, the interactive documentation site and replacement current screenshots are the active continuation. Keep historical captures in `docs/evidence/ARCHIVE.md`, with only a concise archive link in the README. The production renderer is now a working project workspace with durable onboarding and plans plus host operation consumers. The public website also has an independent local visitor workbench. Read docs/desktop/modern-workspace.md and the actual source; do not restore the historical two-screen-only description. PH00-T05 has fresh live byte/readback evidence. Broad phase acceptance and complete authenticated companion parity remain open. Continue the concrete remaining contracts and integration gaps, without relabelling deferred proof as success.
 
 ## Current implementation steering
 
 The owner now authorizes implementation. P40-P42 are answered, managed GitHub Actions execution and product delivery are included, and encrypted transport applies only after a user chooses publication to a verified private repository. The generic engine extraction is approved without private history or credentials. Read HANDOFF.md before the historical planning context below.
 
-The first ledger unit has 105 identities, 420 surface records and 10 passing local tests. PH01-T01/T02/T05 parents remain partial. Continue PH01-T01-C02 and PH01-T02-C02, component/dependency admission and deterministic reference authoring. Hosting is active and About homepage is verified for the initial committed website. New documentation updates still require regeneration.
+The current ledger has 107 identities, 428 surface records and 398 planned requirements. PH01-T01/T02/T05 parents remain partial. Continue PH01-T01-C02 and PH01-T02-C02, component/dependency admission and deterministic reference authoring. Hosting is active and About homepage is verified for the initial committed website. New documentation updates still require regeneration.
 
 ## Authoritative starting point
 
@@ -41,7 +41,7 @@ Support minimal/desktop/server/appliance guests; bootable ISO/VMDK/VDI/OVA; VMwa
 
 **P40–P42 are resolved in DECISIONS.md.** Preserve the recorded destinations and target types; actual provider credentials, enrollment and runtime acceptance remain separate requirements.
 
-Deliver every applicable shared obligation across the 105-identity inventory. PH01 expands separate records; the roadmap's explicit primary-phase map assigns closure ownership. The initial website is a documentation checkpoint. Full D visitor tools and authenticated C Edge/Chrome/LAN companion each need independent state, persistence, interactions, documentation and evidence. Pair through real authentication and scoped capabilities; experience locks never grant host authority. Do not solve browser transport restrictions with permissive CORS, trust-all TLS or unauthenticated local services.
+Deliver every applicable shared obligation across the 107-identity inventory. PH01 expands separate records; the roadmap's explicit primary-phase map assigns closure ownership. The initial website is a documentation checkpoint. Full D visitor tools and authenticated C Edge/Chrome/LAN companion each need independent state, persistence, interactions, documentation and evidence. Pair through real authentication and scoped capabilities; experience locks never grant host authority. Do not solve browser transport restrictions with permissive CORS, trust-all TLS or unauthenticated local services.
 
 ## Native acceptance and publication
 

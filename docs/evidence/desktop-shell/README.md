@@ -1,6 +1,6 @@
-# Desktop shell capture evidence
+# Archived v0.1.0 desktop shell captures
 
-These are genuine captures of the packaged desktop executable built from commit `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd`. They show the current bounded shell and saved language behavior, not a complete Buildroot management product. Later documentation-only commits do not change this captured source identity.
+This is a historical archive for the v0.1.0 packaged desktop executable built from commit `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd`. These images show the original empty shell and settings screen; they do not depict the current workspace. See the [current workspace evidence](../modern-workspace/README.md) and [current workspace guide](../../desktop/modern-workspace.md) for later implementation and its verification limits. The original release evidence below remains bound to its captured source identity.
 
 ## Captured surfaces
 

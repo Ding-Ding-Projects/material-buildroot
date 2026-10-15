@@ -22,6 +22,19 @@
     "theme selection": [
       "md-switch"
     ],
+    "visitor workbench goal and notes, backup import and visitor language controls": [
+      "md-outlined-text-field"
+    ],
+    "visitor workbench checklists and backup actions": [
+      "md-checkbox",
+      "md-filled-button",
+      "md-outlined-button"
+    ],
+    "visitor companion endpoint, challenge, pairing, refresh and read-only actions": [
+      "md-outlined-text-field",
+      "md-filled-button",
+      "md-outlined-button"
+    ],
     "phase filtering": [
       "md-chip-set",
       "md-filter-chip"
@@ -35,6 +48,18 @@
     ],
     "verified task count progress": [
       "md-linear-progress"
+    ],
+    "interactive learning guide, bounded recipe preview, troubleshooting and bookmarks": [
+      "md-filled-button",
+      "md-outlined-button",
+      "md-text-button",
+      "md-outlined-text-field",
+      "md-list",
+      "md-list-item",
+      "md-linear-progress"
+    ],
+    "article reference bookmarks": [
+      "md-outlined-button"
     ],
     "phase category summaries and per-phase navigation": [
       "md-list",

@@ -40,6 +40,7 @@ Before implementation, the next session must reread the current owner-managed ca
 
 | ID | Requirement | Surface |
 | --- | --- | --- |
+| onboarding-wizard | Practical in-app first-run setup with real actions/results, progress, Back/Next, save/resume, optional skipping and accessible localized completion into the workspace | A |
 | tabs | Four edges, left default, group/reorder/pin/overflow/four discovery searches and bulk close | A+D+C |
 | regex-search | Independent anchored full regex workbench at every search/menu/picker | A+D+C |
 | command-palette | Ctrl+Shift+F, live rich controls, navigation/focus and shared action consumers | A+D+C |
@@ -47,6 +48,7 @@ Before implementation, the next session must reread the current owner-managed ca
 | menu-shortcuts | Real working shortcut labels in menus | A+D+C |
 | rich-controls | Typed interactive controls, visual editors and applicable canvases with actual consumers | A+D+C |
 | guided-forms | Contextual stepwise help, shared validation/actions and isolated resettable playgrounds | A+D+C |
+| info-icon-guidance | Independent per-control bundled info button above each capable target, contextual guidance, worked example and isolated playground with accessible focus return | A+D+C |
 | settings-explanations | Current/default provenance, plain explanations and meaningful disabled reasons | A+D+C |
 | blank-editors | Useful real presets and guided starting points in empty editors | A+D+C |
 
@@ -180,4 +182,4 @@ Before implementation, the next session must reread the current owner-managed ca
 
 Every applicable A/D/C row expands into distinct A, D and C records naming implementation paths, detailed/localized articles, copy resources, persistence, focused tests, red-then-green negative checks, exact built interaction receipts and genuine captures. Record unsupported capabilities with their actual limits; never mark a family complete from registry presence.
 
-Application builds, installers, authenticated companion implementation and product release wiring remain reserved for the next development session. The owner subsequently authorized the initial public documentation website now. Its PH00 checklist is separate from full production D/C feature acceptance; source preservation and an initial site do not claim delivered product releases. See the [phased roadmap](../../ROADMAP.md) for stable task IDs and explicit primary-phase ownership of all 105 identities.
+Application implementation is authorized and underway. The initial PH00 documentation checkpoint is separate from full production A/D/C acceptance; source preservation and an initial site do not establish delivered product releases. See the [phased roadmap](../../ROADMAP.md) for stable task IDs and explicit primary-phase ownership of all 107 identities.

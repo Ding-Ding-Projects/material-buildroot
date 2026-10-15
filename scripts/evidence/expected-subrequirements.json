@@ -213,7 +213,7 @@
       "subrequirements": [
         {
           "id": "material-design-REQ-01",
-          "text": "Every user-facing application, GitHub Pages, and extension page conforms fully to Material Design 3 Expressive, its tokens, typography, shape, elevation, motion, and component anatomy, with zero legacy or original design elements remaining."
+          "text": "Every user-facing application, GitHub Pages, and extension page conforms fully to Material Design 3 Expressive, its tokens, typography, shape, elevation, motion, and component anatomy, with zero legacy or original design elements remaining. Use genuine locally bundled Material icons throughout the application and editors; registered icon-button containers filled with unrelated text glyphs do not establish icon conformance. A modern compact desktop layout must preserve accessible target sizes, keyboard operation and readable content at supported scales."
         },
         {
           "id": "material-design-REQ-02",
@@ -284,7 +284,7 @@
       "subrequirements": [
         {
           "id": "appearance-editor-REQ-01",
-          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance… from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close."
+          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance\u2026 from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close."
         },
         {
           "id": "appearance-editor-REQ-02",
@@ -439,7 +439,7 @@
         },
         {
           "id": "tabs-REQ-03",
-          "text": "Every application ships the four tab-discovery searches, a Move… into group… picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders."
+          "text": "Every application ships the four tab-discovery searches, a Move\u2026 into group\u2026 picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders."
         },
         {
           "id": "tabs-REQ-04",
@@ -494,7 +494,7 @@
       "subrequirements": [
         {
           "id": "context-menus-REQ-01",
-          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance… and Lock this element…."
+          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance\u2026 and Lock this element\u2026."
         },
         {
           "id": "context-menus-REQ-02",
@@ -532,7 +532,7 @@
       "subrequirements": [
         {
           "id": "rich-controls-REQ-01",
-          "text": "Wherever a value is shown, in list rows, table cells, menu items, search results, detail panels, cards, and previews, the real control is preferred over a printout, wired to the same validation, persistence, localization, funny-level styling, history, and accessible naming as its originating surface."
+          "text": "Wherever a value is shown, in list rows, table cells, menu items, search results, detail panels, cards, and previews, the real control is preferred over a printout, wired to the same validation, persistence, localization, funny-level styling, history, and accessible naming as its originating surface. Package and guest canvases must connect editable selections and inspectors to actual validated semantic consumers with reviewed diffs, revision checks and truthful results. Dragging nodes changes layout only unless an explicitly reviewed semantic action is applied. Preserve structured keyboard alternatives, selection, pan/zoom, appropriate snapping and undo/redo; layout persistence never establishes successful package generation, guest configuration or guest boot."
         },
         {
           "id": "rich-controls-REQ-02",
@@ -641,7 +641,7 @@
       "subrequirements": [
         {
           "id": "element-locks-REQ-01",
-          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element… command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP."
+          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element\u2026 command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP."
         },
         {
           "id": "element-locks-REQ-02",
@@ -1154,7 +1154,7 @@
       "subrequirements": [
         {
           "id": "design-folder-REQ-01",
-          "text": "Every design surface, including a Astra design implementation subagent’s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface."
+          "text": "Every design surface, including a Astra design implementation subagent\u2019s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface."
         },
         {
           "id": "design-folder-REQ-02",
@@ -1276,7 +1276,7 @@
       "subrequirements": [
         {
           "id": "feature-articles-REQ-01",
-          "text": "The documentation lives on the GitHub Pages, not only in the repository: every feature has its own detailed article covering behaviour, configuration, error modes, security, and verification, ending with suggested articles so no reader hits a dead end."
+          "text": "The documentation lives on the GitHub Pages, not only in the repository: every feature has its own detailed article covering behaviour, configuration, error modes, security, and verification, ending with suggested articles so no reader hits a dead end. Documentation must lead with real user tasks, guided walkthroughs, contextual explanations, interactive diagrams and useful examples while retaining complete articles and source links. A Markdown file browser or repository directory viewer alone is insufficient. Controls change explanation, examples or visitor-owned progress with keyboard access, localization, narrow layouts and reduced motion; demonstrations never imply real installed-application execution. Verify interaction and persistence on both built and deployed website routes."
         },
         {
           "id": "feature-articles-REQ-02",
@@ -1765,7 +1765,7 @@
       "subrequirements": [
         {
           "id": "tabbed-readme-REQ-01",
-          "text": "A README opens with a compact index, what the project is, the install line, the GitHub Pages link, and short contents, and folds every long reference section into `<details><summary>` blocks with findable summaries. `CONTRIBUTING.md`, `LICENSE`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` stay real and current so GitHub shows them as tabs above the README."
+          "text": "A README opens with a compact index, what the project is, the install line, the GitHub Pages link, and short contents, and folds every long reference section into `<details><summary>` blocks with findable summaries. `CONTRIBUTING.md`, `LICENSE`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` stay real and current so GitHub shows them as tabs above the README. After an interface remake, replace every current README screenshot with inspected captures bound to the actual source, build hash, state, language, theme, viewport, scale, capture method, privacy verdict and capture date/timezone. Preserve earlier originals and provenance in a separate Markdown archive, linked concisely from the current README; never relabel historical proof as current. Audit all current image references across documentation, website, wiki, gallery and downloads, and reject stale-current substitutions."
         },
         {
           "id": "tabbed-readme-REQ-02",
@@ -2068,6 +2068,64 @@
         {
           "id": "roblox-visual-realism-REQ-01",
           "text": "Conditional on Roblox visual/game work; not evidence for Buildroot or guest UI"
+        }
+      ]
+    },
+    {
+      "id": "onboarding-wizard",
+      "subrequirements": [
+        {
+          "id": "onboarding-wizard-REQ-01",
+          "text": "Provide a practical first-run/setup wizard inside the installed application that performs actual setup actions and reports their real results; a public website or feature catalogue is no substitute."
+        },
+        {
+          "id": "onboarding-wizard-REQ-02",
+          "text": "Provide visible progress, Back and Next navigation, validation and truthful pending, failed, cancelled and completed states; unfinished required setup must never count as successful."
+        },
+        {
+          "id": "onboarding-wizard-REQ-03",
+          "text": "Save and resume appropriate progress and permit skipping optional steps without silently skipping required work."
+        },
+        {
+          "id": "onboarding-wizard-REQ-04",
+          "text": "Provide localized accessible labels, keyboard navigation and focus handling; completion opens the productive workspace and setup remains reachable for later changes."
+        },
+        {
+          "id": "onboarding-wizard-REQ-05",
+          "text": "Independently prove real setup action results, navigation, resume and optional skipping, all language modes and keyboard behavior with actual built interactions and genuine captures; preserve the separate public website requirement."
+        }
+      ]
+    },
+    {
+      "id": "info-icon-guidance",
+      "subrequirements": [
+        {
+          "id": "info-icon-guidance-REQ-01",
+          "text": "Track this identity independently of guided forms, with a hand-written inventory binding every rendered capable control to its exact info button, target, contextual content and interaction evidence; unsupported controls require explicit capability reasons."
+        },
+        {
+          "id": "info-icon-guidance-REQ-02",
+          "text": "Render a compact locally bundled Material Design info icon button directly above each capable target; global Help, tooltips alone, text-only guidance links and source declarations do not substitute for a working rendered button."
+        },
+        {
+          "id": "info-icon-guidance-REQ-03",
+          "text": "Provide at least 44 by 44 logical units on native Windows surfaces and 44 by 44 CSS pixels on browser surfaces, localized target-specific accessible names, tooltips, keyboard activation, visible focus, truthful expanded state and focus return."
+        },
+        {
+          "id": "info-icon-guidance-REQ-04",
+          "text": "Opening the optional non-modal panel presents complete target-specific purpose, choices, defaults, consequences, validation, recovery and guided steps; narrow layouts expand content in flow while preserving target association."
+        },
+        {
+          "id": "info-icon-guidance-REQ-05",
+          "text": "Provide a reviewed control-specific worked example and a functioning isolated playground using the actual component and applicable pure logic, synthetic input, a visible result and Reset; closing discards sample drafts and reopening restores the example."
+        },
+        {
+          "id": "info-icon-guidance-REQ-06",
+          "text": "Never seed a playground from live private values or files, alter production settings or history, invoke real external or destructive actions, bypass validation or permissions, or claim a sample result completed a real operation."
+        },
+        {
+          "id": "info-icon-guidance-REQ-07",
+          "text": "Independently remove the required icon, target binding, keyboard action or contextual panel and replace specific help with repeated generic text to obtain failing regressions; restore real behavior to pass and retain per-control localized documentation, persistence or explicit non-persistence, real built interactions and genuine captures."
         }
       ]
     }

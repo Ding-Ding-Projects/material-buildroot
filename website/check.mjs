@@ -51,11 +51,13 @@ for(const [file,html] of htmlByFile){
 }
 const featureContent=await fs.readFile(admittedSource(root,'docs/planning/feature-coverage.md',sourceIndex),'utf8');
 const identities=[...featureContent.matchAll(/^\| ([a-z][a-z0-9-]+) \|/gm)].map(m=>m[1]);
-if(identities.length!==105||new Set(identities).size!==105)failures.push('Feature inventory no longer has 105 unique identities; reconcile the phase map.');
 const sourceRoadmap=await fs.readFile(admittedSource(root,'ROADMAP.md',sourceIndex),'utf8');
-const phaseMap=sourceRoadmap.split('## Primary-phase map for all 105 catalogue identities')[1]?.split('## Current checkpoint')[0]||'';
+const catalogueCount=Number(sourceRoadmap.match(/^## Primary-phase map for all (\d+) catalogue identities$/m)?.[1]);
+if(!Number.isSafeInteger(catalogueCount)||catalogueCount<1)failures.push('Roadmap is missing its primary catalogue identity count.');
+if(identities.length!==catalogueCount||new Set(identities).size!==catalogueCount)failures.push(`Feature inventory must contain ${catalogueCount} unique identities.`);
+const phaseMap=sourceRoadmap.split(`## Primary-phase map for all ${catalogueCount} catalogue identities`)[1]?.split('## Current checkpoint')[0]||'';
 const mapped=[...phaseMap.matchAll(/`([a-z][a-z0-9-]+)`/g)].map(m=>m[1]).filter(id=>identities.includes(id));
-if(mapped.length!==105||new Set(mapped).size!==105)failures.push('Roadmap must map each of the 105 feature identities exactly once.');
+if(mapped.length!==catalogueCount||new Set(mapped).size!==catalogueCount)failures.push(`Roadmap must map each of the ${catalogueCount} feature identities exactly once.`);
 if(process.argv.includes('--with-browser')){
   const receipt=JSON.parse(await fs.readFile(admittedSource(root,'website/evidence/browser-check.json',sourceIndex),'utf8'));
   if(receipt.verdict!=='passed'||receipt.input_snapshot_sha256!==meta.input_snapshot_sha256)failures.push('Browser receipt is missing, failed or bound to another source snapshot.');

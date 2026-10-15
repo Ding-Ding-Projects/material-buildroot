@@ -16,10 +16,10 @@ function validate(ledger, { root = path.resolve(__dirname, '../..') } = {}) {
   const catalogue = fs.readFileSync(path.join(root, 'docs/planning/feature-coverage.md'));
   const rows = catalogueRows(catalogue.toString());
   if (ledger.schemaVersion !== 1) fail('Unsupported schemaVersion');
-  if (rows.length !== 105 || new Set(rows.map(r => r.id)).size !== 105) fail('Catalogue must contain exactly 105 unique identities');
+  if (rows.length !== 107 || new Set(rows.map(r => r.id)).size !== 107) fail('Catalogue must contain exactly 107 unique identities');
   if (ledger.catalogueSha256 !== hash(catalogue)) fail('Stale catalogue hash');
   const records = Array.isArray(ledger.identities) ? ledger.identities : [];
-  if (records.length !== 105) fail('Ledger must contain exactly 105 identities');
+  if (records.length !== 107) fail('Ledger must contain exactly 107 identities');
   const seen = new Set();
   const realRoot = fs.realpathSync(root);
   const within = (base, target) => {
@@ -136,6 +136,6 @@ if (require.main === module) {
   const ledger = JSON.parse(fs.readFileSync(path.join(root, 'docs/planning/feature-evidence.json'), 'utf8'));
   const errors = validate(ledger, { root });
   if (errors.length) { process.stderr.write(errors.join('\n') + '\n'); process.exitCode = 1; }
-  else console.log('PASS: 105 identities, 420 surface records; admission integrity only, product completion unverified.');
+  else console.log('PASS: 107 identities, 428 surface records; admission integrity only, product completion unverified.');
 }
 module.exports = { validate, catalogueRows, hash };

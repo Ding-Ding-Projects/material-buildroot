@@ -1,6 +1,6 @@
 # Productive desktop workspace
 
-The application opens into an editable workspace. First-run setup records an intended Linux runtime, creates a real saved project plan, and reviews appearance. Back, skip and resume preserve progress; completion is separate from dismissal. Setup does not claim to install or verify a runtime.
+The application opens into a desktop workspace with an activity rail, project explorer, editor tabs and resizable jobs/output dock. Bundled, licensed Material icons identify navigation and editor actions; icon-only utilities retain accessible names and tooltips. First-run setup records an intended Linux runtime, creates a real saved project plan, and reviews appearance. Back, skip and resume preserve progress; completion is separate from dismissal. Setup does not claim to install or verify a runtime.
 
 ## Plans and recovery
 
@@ -43,3 +43,11 @@ Linux Chromium fixtures exercise real renderer controls and, for workspace persi
 The browser visitor workspace uses its own storage and does not acquire host authority from local planning data. Authenticated companion enrollment requires separately reviewed HTTPS, origin and session controls; browser transport acceptance is independent of desktop checks.
 
 [香港粵語](modern-workspace.zh-HK.md)
+
+## Canvas editors and offline help
+
+Package dependencies and guest hardware/network/storage use interactive canvases with typed inspectors. Drag nodes, pan, zoom, fit and use keyboard movement; undo and redo affect geometry only. Load and save diagram layout separately from semantic Preview and Apply. Layout writes use project identity and revision checks, and a conflict preserves the current draft until the saved state is reviewed. Package generation and guest configuration remain explicit reviewed host operations.
+
+The Help & documentation workspace reads the articles packaged with this application, including admitted local images. Topic navigation, formatted tables/code, heading links and back/forward history work offline. Search matches titles, topics and summaries; its adjacent regex builder runs in a bounded worker with timeout recovery. Search and reader history are currently session-only. The reader does not claim full-text search or translated articles when only the English source is available.
+
+External HTTPS links open through the host only after an explicit link action. Missing or unsupported offline resources appear as unavailable; reading never executes an example, starts a build or changes the project. See [the offline documentation boundary](../security/offline-documentation.md).

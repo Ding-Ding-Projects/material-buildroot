@@ -9,7 +9,7 @@ const baseline = JSON.parse(fs.readFileSync(path.join(root,'docs/planning/featur
 const copy = () => structuredClone(baseline);
 test('admission ledger is valid without pretending product completion', () => {
   assert.deepEqual(validate(baseline), []);
-  assert.equal(baseline.identities.length,105);
+  assert.equal(baseline.identities.length,107);
   assert.equal(baseline.identities.flatMap(r => Object.values(r.surfaces)).filter(s => s.state==='complete').length,0);
 });
 test('missing identity fails and restoration passes', () => {
@@ -185,4 +185,15 @@ test('desktop viewport and display scales are exact admitted logical axes', () =
   const scale=copy();scale.identities[0].surfaces.A.plannedAdmission.runtime.scales=[100,150];
   assert(validate(scale).some(e=>e.includes('display-scale axes')));
   assert.deepEqual(validate(baseline),[]);
+});
+
+test('new onboarding and contextual guidance identities have independent surface boundaries', () => {
+  const onboarding=baseline.identities.find(r=>r.id==='onboarding-wizard');
+  const guidance=baseline.identities.find(r=>r.id==='info-icon-guidance');
+  assert(onboarding && guidance);
+  assert.equal(onboarding.surfaces.A.applicability,'required');
+  for(const surface of ['D','C','R']) assert.equal(onboarding.surfaces[surface].applicability,'outside-catalogue-scope');
+  for(const surface of ['A','D','C']) assert.equal(guidance.surfaces[surface].applicability,'required');
+  const ledger=copy();ledger.identities=ledger.identities.filter(r=>r.id!=='info-icon-guidance');
+  assert(validate(ledger).some(e=>e==='Missing identity: info-icon-guidance'));
 });
