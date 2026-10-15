@@ -1,3 +1,4 @@
+import {actionIcon} from "./material-icons";
 import { LitElement, html, nothing, css } from "lit";
 import { workspaceStyles } from "./workspace-styles";
 type Case = { text: string; expected: boolean };
@@ -537,16 +538,16 @@ export class RegexWorkbench extends LitElement {
         </p>
         <div class="row">
           <md-filled-button @click=${this.run}
-            >${this.l("Evaluate", "運算")}</md-filled-button
+            >${actionIcon('Evaluate')}${this.l("Evaluate", "運算")}</md-filled-button
           ><md-outlined-button
             ?disabled=${!this.busy}
             @click=${() => {
               this.stop();
               this.feedback = this.l("Evaluation cancelled.", "已取消運算。");
             }}
-            >${this.l("Cancel evaluation", "取消運算")}</md-outlined-button
+            >${actionIcon('Cancel evaluation')}${this.l("Cancel evaluation", "取消運算")}</md-outlined-button
           ><md-text-button @click=${this.copyPattern}
-            >${this.l("Copy pattern", "複製模式")}</md-text-button
+            >${actionIcon('Copy pattern')}${this.l("Copy pattern", "複製模式")}</md-text-button
           >
         </div>
         ${this.feedback
@@ -688,14 +689,14 @@ export class RegexWorkbench extends LitElement {
               <md-text-button
                 ?disabled=${this.matchIndex === 0}
                 @click=${() => this.matchIndex--}
-                >${this.l("Previous match", "上一個符合項目")}</md-text-button
+                >${actionIcon('Previous match')}${this.l("Previous match", "上一個符合項目")}</md-text-button
               ><span
                 >${this.result.matches.length ? this.matchIndex + 1 : 0} /
                 ${this.result.matches.length}</span
               ><md-text-button
                 ?disabled=${this.matchIndex + 1 >= this.result.matches.length}
                 @click=${() => this.matchIndex++}
-                >${this.l("Next match", "下一個符合項目")}</md-text-button
+                >${actionIcon('Next match')}${this.l("Next match", "下一個符合項目")}</md-text-button
               >
             </div>
             ${match
@@ -755,8 +756,7 @@ export class RegexWorkbench extends LitElement {
         ><md-outlined-button
           ?disabled=${this.cases.length >= 20}
           @click=${this.addCase}
-          >${this.l(
-            "Add test (maximum 20)",
+          >${actionIcon('Add test (maximum 20)')}${this.l("Add test (maximum 20)",
             "加入測試（最多 20 個）",
           )}</md-outlined-button
         >${this.cases.map(
@@ -778,7 +778,7 @@ export class RegexWorkbench extends LitElement {
                   this.cases = this.cases.filter((_, i) => i !== index);
                   this.result = undefined;
                 }}
-                >${this.l("Remove", "移除")}</md-text-button
+                >${actionIcon('Remove')}${this.l("Remove", "移除")}</md-text-button
               >
             </div>`,
         )}
@@ -804,11 +804,11 @@ export class RegexWorkbench extends LitElement {
           <md-outlined-button
             ?disabled=${!this.snippetName.trim() || this.snippets.length >= 50}
             @click=${this.saveSnippet}
-            >${this.l("Save snippet", "儲存片段")}</md-outlined-button
+            >${actionIcon('Save snippet')}${this.l("Save snippet", "儲存片段")}</md-outlined-button
           ><md-text-button
             ?disabled=${!this.snippets.length}
             @click=${this.exportSnippets}
-            >${this.l("Export snippets", "匯出片段")}</md-text-button
+            >${actionIcon('Export snippets')}${this.l("Export snippets", "匯出片段")}</md-text-button
           >
         </div>
         ${this.snippets.map(
@@ -819,7 +819,7 @@ export class RegexWorkbench extends LitElement {
               ><md-text-button
                 @click=${() =>
                   (this.snippets = this.snippets.filter((_, i) => i !== index))}
-                >${this.l("Remove", "移除")}</md-text-button
+                >${actionIcon('Remove')}${this.l("Remove", "移除")}</md-text-button
               >
             </div>`,
         )}<label

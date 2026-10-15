@@ -17,3 +17,13 @@ Selection, snapping, drag, background pan, zoom, fit, keyboard movement, structu
 ## Verification boundary
 
 Browser fixtures establish renderer behavior and genuine application pixels at 960 and 1440 widths in light and dark themes. Typed fake host replies are labelled fixtures. They do not establish native picker, Buildroot, TLS, hypervisor or Windows runtime acceptance. Capture provenance must bind final source and generated artifacts after the implementation checkpoint.
+
+## Material icon and workflow follow-up
+
+The desktop now uses a checked-in subset of Google's Material Icons, pinned to upstream commit `49d4db35df873165d6bd6ba09b063c7dafbac2f4`. Original SVGs, Apache-2.0 license and per-file SHA-256 provenance live in `src/renderer/assets/material-icons/`. Icons render through registered `md-icon` components and inherit the active Material color; there is no remote font or CDN dependency. Navigation has distinct workspace symbols and tooltips. Repeated refresh, movement and removal controls use named `md-icon-button` controls; primary actions retain a short label with a decorative icon. Canvas icon targets are 48 CSS pixels and keep keyboard focus and accessible names.
+
+The diagram edge SVG rule is scoped to the canvas world so it cannot shrink nested Material icons. Focused renderer captures assert visible icon geometry and that the package canvas footer ends above the default jobs dock at 960 and 1440 CSS pixels. Inspector scrolling is reset deliberately for capture framing. A larger user-resized dock can still require scrolling the editor; controls remain within its scrollable content.
+
+External-tree setup supports native folder selection, preview of the three initialization files, explicit initialization approval, inspection of persisted grants, a separately reviewed ordered activation list and explicit trust for executable external recipes. Managed Ollama installation, cancellation, start and owned stop use typed host requests; fixture tests do not establish native installation or process acceptance.
+
+Layout reload remains explicit to protect unsaved arrangements. Browser fixtures exercise real components and actual workspace preference storage with clearly typed fake native-operation replies. Final published screenshots must be regenerated and bound to the subsequent committed source; working-tree captures are review material only. Offline documentation integration and its final screen inventory follow separately.

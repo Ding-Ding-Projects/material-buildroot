@@ -1,3 +1,4 @@
+import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/button/filled-button.js";
@@ -122,7 +123,8 @@ export class SourcePanel extends LitElement {
     }
   }
   private button(en: string, zh: string, work: (current: () => boolean) => Promise<void>, disabled = false) {
-    return html`<md-outlined-button ?disabled=${this.pending || disabled} @click=${() => this.run(work)}>${this.l(en,zh)}</md-outlined-button>`;
+    if (/^(Refresh|Remove|Move|Stop|Cancel)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||disabled} @click=${()=>this.run(work)}>${materialIcon(actionSymbol(en))}</md-icon-button>`;
+    return html`<md-outlined-button ?disabled=${this.pending || disabled} @click=${() => this.run(work)}>${actionIcon(en)}${this.l(en,zh)}</md-outlined-button>`;
   }
   private field(label: string, value: string, set: (value:string)=>void, type="text") {
     return html`<md-outlined-text-field .label=${label} .value=${value} .type=${type} ?disabled=${this.pending} @input=${(event:Event)=>{set((event.target as HTMLInputElement).value);this.changed();}}></md-outlined-text-field>`;

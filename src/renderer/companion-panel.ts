@@ -1,3 +1,4 @@
+import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/textfield/outlined-text-field.js";
@@ -146,10 +147,11 @@ export class CompanionPanel extends LitElement {
     work: () => Promise<void>,
     disabled = false,
   ) {
+    if (/^(Refresh|Remove|Move|Stop|Cancel|Revoke)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||disabled} @click=${()=>this.run(work)}>${materialIcon(actionSymbol(en))}</md-icon-button>`;
     return html`<md-outlined-button
       ?disabled=${this.pending || disabled}
       @click=${() => this.run(work)}
-      >${this.l(en, zh)}</md-outlined-button
+      >${actionIcon(en)}${this.l(en, zh)}</md-outlined-button
     >`;
   }
   private async refresh() {
@@ -343,8 +345,7 @@ export class CompanionPanel extends LitElement {
                         this.reveal = false;
                         this.revision++;
                       }}
-                      >${this.l(
-                        "Dismiss code",
+                      >${actionIcon('Dismiss code')}${this.l("Dismiss code",
                         "關閉配對碼",
                       )}</md-outlined-button
                     >

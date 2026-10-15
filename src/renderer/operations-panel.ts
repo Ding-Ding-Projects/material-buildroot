@@ -1,3 +1,4 @@
+import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing, css } from "lit";
 import "@material/web/tabs/tabs.js";
 import "@material/web/tabs/primary-tab.js";
@@ -528,7 +529,7 @@ export class OperationsPanel extends LitElement {
         )}
       </p>
       <md-filled-button @click=${() => (this.tab = "runtime")}
-        >${this.l("Choose project", "選擇專案")}</md-filled-button
+        >${actionIcon('Choose project')}${this.l("Choose project", "選擇專案")}</md-filled-button
       >
     </section>`;
   }
@@ -543,7 +544,7 @@ export class OperationsPanel extends LitElement {
           )}
         </p>
         <md-outlined-button ?disabled=${this.pending} @click=${this.discover}
-          >${this.l("Discover runtimes", "探索執行環境")}</md-outlined-button
+          >${actionIcon('Discover runtimes')}${this.l("Discover runtimes", "探索執行環境")}</md-outlined-button
         >
         <p>
           ${this.l(
@@ -554,8 +555,7 @@ export class OperationsPanel extends LitElement {
         <md-outlined-button
           ?disabled=${this.pending}
           @click=${this.choosePython}
-          >${this.l(
-            "Choose trusted Python",
+          >${actionIcon('Choose trusted Python')}${this.l("Choose trusted Python",
             "揀選可信 Python",
           )}</md-outlined-button
         >${this.runtime
@@ -587,8 +587,7 @@ export class OperationsPanel extends LitElement {
           )}
         </p>
         <md-filled-button ?disabled=${this.pending} @click=${this.choose}
-          >${this.l(
-            "Choose source and output",
+          >${actionIcon('Choose source and output')}${this.l("Choose source and output",
             "選擇來源同輸出",
           )}</md-filled-button
         >${this.selection
@@ -619,8 +618,7 @@ export class OperationsPanel extends LitElement {
               ><md-filled-tonal-button
                 ?disabled=${this.pending || !this.trust}
                 @click=${this.adopt}
-                >${this.l(
-                  "Adopt trusted project",
+                >${actionIcon('Adopt trusted project')}${this.l("Adopt trusted project",
                   "接入可信專案",
                 )}</md-filled-tonal-button
               >`
@@ -709,8 +707,7 @@ export class OperationsPanel extends LitElement {
                 ? !this.distribution
                 : !/^.+@sha256:[a-f0-9]{64}$/.test(this.image))}
               @click=${this.selectRuntime}
-              >${this.l(
-                "Use runtime for configuration",
+              >${actionIcon('Use runtime for configuration')}${this.l("Use runtime for configuration",
                 "設定使用呢個執行環境",
               )}</md-outlined-button
             ><md-filled-button
@@ -722,7 +719,7 @@ export class OperationsPanel extends LitElement {
                 ? !this.distribution
                 : !/^.+@sha256:[a-f0-9]{64}$/.test(this.image))}
               @click=${this.submit}
-              >${this.l("Start build", "開始建置")}</md-filled-button
+              >${actionIcon('Start build')}${this.l("Start build", "開始建置")}</md-filled-button
             >
           </section>`
         : this.noProject()}
@@ -730,7 +727,7 @@ export class OperationsPanel extends LitElement {
         <div class="row">
           <h2>${this.l("Build jobs", "建置工作")}</h2>
           <md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}
-            >${this.l("Refresh", "重新整理")}</md-text-button
+            >${actionIcon('Refresh')}${this.l("Refresh", "重新整理")}</md-text-button
           >
         </div>
         ${this.jobs.length
@@ -744,13 +741,12 @@ export class OperationsPanel extends LitElement {
                     <md-text-button
                       ?disabled=${this.pending}
                       @click=${() => this.readLogs(job)}
-                      >${this.l("Read logs", "檢視記錄")}</md-text-button
+                      >${actionIcon('Read logs')}${this.l("Read logs", "檢視記錄")}</md-text-button
                     >${["queued", "running"].includes(job.state)
                       ? html`<md-outlined-button
                           ?disabled=${this.pending}
                           @click=${() => this.jobAction("cancel", job)}
-                          >${this.l(
-                            "Request cancellation",
+                          >${actionIcon('Request cancellation')}${this.l("Request cancellation",
                             "要求取消",
                           )}</md-outlined-button
                         >`
@@ -762,8 +758,7 @@ export class OperationsPanel extends LitElement {
                       ? html`<md-outlined-button
                           ?disabled=${this.pending}
                           @click=${() => this.jobAction("retry", job)}
-                          >${this.l(
-                            "New attempt",
+                          >${actionIcon('New attempt')}${this.l("New attempt",
                             "新增嘗試",
                           )}</md-outlined-button
                         >`
@@ -803,8 +798,7 @@ export class OperationsPanel extends LitElement {
                       );
                       if (job) void this.readLogs(job, true);
                     }}
-                    >${this.l(
-                      "Load next records",
+                    >${actionIcon('Load next records')}${this.l("Load next records",
                       "載入下一批記錄",
                     )}</md-text-button
                   >`
@@ -821,9 +815,9 @@ export class OperationsPanel extends LitElement {
         <md-outlined-button
           ?disabled=${this.pending || !!Object.keys(this.changes).length}
           @click=${this.inspectConfig}
-          >${this.l("Inspect configuration", "檢視設定")}</md-outlined-button
+          >${actionIcon('Inspect configuration')}${this.l("Inspect configuration", "檢視設定")}</md-outlined-button
         ><md-text-button ?disabled=${this.pending} @click=${this.listDefconfigs}
-          >${this.l("List defconfigs", "列出預設設定")}</md-text-button
+          >${actionIcon('List defconfigs')}${this.l("List defconfigs", "列出預設設定")}</md-text-button
         >
       </div>
       ${this.config
@@ -931,33 +925,31 @@ export class OperationsPanel extends LitElement {
               <md-text-button
                 ?disabled=${this.configPage === 0}
                 @click=${() => this.configPage--}
-                >${this.l("Previous", "上一頁")}</md-text-button
+                >${actionIcon('Previous')}${this.l("Previous", "上一頁")}</md-text-button
               ><span
                 >${this.configPage + 1} /
                 ${Math.max(1, Math.ceil(entries.length / 30))}</span
               ><md-text-button
                 ?disabled=${(this.configPage + 1) * 30 >= entries.length}
                 @click=${() => this.configPage++}
-                >${this.l("Next", "下一頁")}</md-text-button
+                >${actionIcon('Next')}${this.l("Next", "下一頁")}</md-text-button
               >
             </div>
             <div class="row">
               <md-filled-button
                 ?disabled=${this.pending || !Object.keys(this.changes).length}
                 @click=${this.applyConfig}
-                >${this.l(
-                  "Apply and reconcile",
+                >${actionIcon('Apply and reconcile')}${this.l("Apply and reconcile",
                   "套用並協調",
                 )}</md-filled-button
               ><md-text-button
                 ?disabled=${this.pending || !Object.keys(this.changes).length}
                 @click=${() => (this.changes = {})}
-                >${this.l("Discard changes", "放棄變更")}</md-text-button
+                >${actionIcon('Discard changes')}${this.l("Discard changes", "放棄變更")}</md-text-button
               ><md-outlined-button
                 ?disabled=${this.pending || !!Object.keys(this.changes).length}
                 @click=${this.undoConfig}
-                >${this.l(
-                  "Undo last application",
+                >${actionIcon('Undo last application')}${this.l("Undo last application",
                   "復原上次套用",
                 )}</md-outlined-button
               >
@@ -986,7 +978,7 @@ export class OperationsPanel extends LitElement {
                       !this.config ||
                       !!Object.keys(this.changes).length}
                       @click=${() => this.applyDefconfig(item.path)}
-                      >${this.l("Apply", "套用")}</md-outlined-button
+                      >${actionIcon('Apply')}${this.l("Apply", "套用")}</md-outlined-button
                     >
                   </div>`,
               )}${this.defconfigs.length > 100
@@ -1005,7 +997,7 @@ export class OperationsPanel extends LitElement {
         <md-outlined-button
           ?disabled=${this.pending}
           @click=${this.listArtifacts}
-          >${this.l("List artifacts", "列出輸出檔案")}</md-outlined-button
+          >${actionIcon('List artifacts')}${this.l("List artifacts", "列出輸出檔案")}</md-outlined-button
         >
       </div>
       ${this.artifacts.map(
@@ -1017,7 +1009,7 @@ export class OperationsPanel extends LitElement {
               ? html`<md-text-button
                   ?disabled=${this.pending}
                   @click=${() => this.inspectArtifact(item.path)}
-                  >${this.l("Inspect", "檢視")}</md-text-button
+                  >${actionIcon('Inspect')}${this.l("Inspect", "檢視")}</md-text-button
                 >`
               : html`<span>${this.l("Directory", "目錄")}</span>`}
           </div>`,
@@ -1070,8 +1062,7 @@ export class OperationsPanel extends LitElement {
         )}
       </p>
       <md-outlined-button ?disabled=${this.pending} @click=${this.loadModels}
-        >${this.l(
-          "Load installed models",
+        >${actionIcon('Load installed models')}${this.l("Load installed models",
           "載入已安裝模型",
         )}</md-outlined-button
       >${this.models.length
@@ -1110,7 +1101,7 @@ export class OperationsPanel extends LitElement {
         !this.prompt.trim() ||
         this.messages.length >= 98}
         @click=${this.sendMessage}
-        >${this.l("Send message", "傳送訊息")}</md-filled-button
+        >${actionIcon('Send message')}${this.l("Send message", "傳送訊息")}</md-filled-button
       >
     </section>`;
   }
@@ -1127,17 +1118,16 @@ export class OperationsPanel extends LitElement {
         <md-filled-button
           ?disabled=${this.pending}
           @click=${() => this.updateAction("check")}
-          >${this.l("Check for updates", "檢查更新")}</md-filled-button
+          >${actionIcon('Check for updates')}${this.l("Check for updates", "檢查更新")}</md-filled-button
         ><md-outlined-button
           ?disabled=${this.pending}
           @click=${() => this.updateAction("state")}
-          >${this.l("Refresh status", "重新整理狀態")}</md-outlined-button
+          >${actionIcon('Refresh status')}${this.l("Refresh status", "重新整理狀態")}</md-outlined-button
         >${this.updateState?.status === "available"
           ? html`<md-outlined-button
               ?disabled=${this.pending}
               @click=${() => this.updateAction("download")}
-              >${this.l(
-                "Download verified installer",
+              >${actionIcon('Download verified installer')}${this.l("Download verified installer",
                 "下載已驗證安裝程式",
               )}</md-outlined-button
             >`
@@ -1172,7 +1162,7 @@ export class OperationsPanel extends LitElement {
     separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
   }
   render() {
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","updates"].map(tab=>html`<md-text-button class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}>${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","updates"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",updates:"download"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations", "專案操作")}
         .activeTabIndex=${[
@@ -1305,7 +1295,7 @@ export class OperationsPanel extends LitElement {
       >${this.feedback
         ? html`<div class="status" role="status">${this.feedback}</div>`
         : nothing}
-    </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板")}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小")} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出")}</strong><span>${this.jobs.length} ${this.l("loaded","已載入")}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${this.l("Refresh jobs","重新整理工作")}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出")}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件")}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。")}</span>`}</div></div></section>`:nothing}</div></div>`;
+    </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板")}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小")} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出")}</strong><span>${this.jobs.length} ${this.l("loaded","已載入")}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${actionIcon('Refresh jobs')}${this.l("Refresh jobs","重新整理工作")}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出")}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件")}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。")}</span>`}</div></div></section>`:nothing}</div></div>`;
   }
 }
 customElements.define("operations-panel", OperationsPanel);

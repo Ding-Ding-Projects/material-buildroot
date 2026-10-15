@@ -1,3 +1,4 @@
+import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import {LitElement,html,css,nothing,type PropertyValues} from "lit";
 import {workspaceStyles} from "./workspace-styles";
 type Tree={externalTreeId:string;name:string};
@@ -13,7 +14,7 @@ export class ExternalTreePanel extends LitElement{
  private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
  private async call<T>(action:string,fields:Record<string,unknown>={}):Promise<T>{if(!window.studio?.operations)throw Error("DESKTOP_REQUIRED");const r=await window.studio.operations({action,workspaceId:this.workspaceId,...fields});if(!r.ok)throw Error(r.code);return r.result as T;}
  private async run(work:(current:()=>boolean)=>Promise<void>){if(this.pending||!this.workspaceId)return;const workspace=this.workspaceId;this.pending=true;this.feedback="";this.revision++;try{await work(()=>this.workspaceId===workspace);}catch(e){if(this.workspaceId===workspace){this.preview=undefined;this.consent=false;this.trust=false;this.feedback=this.l("Operation not confirmed. Refresh project options and review before retrying.","操作未確認，請重新整理專案選項並審核，再重試。")+" "+(e instanceof Error&&/^[A-Z_]+$/.test(e.message)?e.message:"");}}finally{this.pending=false;this.revision++;}}
- private btn(en:string,zh:string,work:()=>void,disabled=false){return html`<md-outlined-button ?disabled=${this.pending||!this.workspaceId||disabled} @click=${work}>${this.l(en,zh)}</md-outlined-button>`;}
+ private btn(en:string,zh:string,work:()=>void,disabled=false){if (/^(Refresh|Remove|Move|Stop|Cancel)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||!this.workspaceId||disabled} @click=${work}>${materialIcon(actionSymbol(en))}</md-icon-button>`;return html`<md-outlined-button ?disabled=${this.pending||!this.workspaceId||disabled} @click=${work}>${actionIcon(en)}${this.l(en,zh)}</md-outlined-button>`;}
  private async refresh(current:()=>boolean){const result=await this.call<Options>("project.options");if(current()){this.options=result;this.trust=false;}}
  private async choose(){await this.run(async current=>{const tree=await this.call<Tree>("external.choose");if(!current())return;this.tree=tree;this.preview=undefined;this.consent=false;this.dispatchEvent(new CustomEvent("external-selected",{bubbles:true,composed:true,detail:tree}));await this.refresh(current);if(current())this.available=tree.externalTreeId;});}
  private reorder(index:number,delta:number){const next=index+delta;if(next<0||next>=this.order.length)return;[this.order[index],this.order[next]]=[this.order[next],this.order[index]];this.trust=false;this.revision++;}

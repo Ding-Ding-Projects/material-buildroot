@@ -1,3 +1,5 @@
+import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
+import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing } from "lit";
 import "@material/web/button/filled-button.js";
 import "@material/web/button/outlined-button.js";
@@ -640,7 +642,7 @@ class MaterialBuildroot extends LitElement {
               this.snapshots.length >= 20 ||
               this.dirty}
               @click=${this.createSnapshot}
-              >${this.l("Create snapshot", "建立快照")}</md-filled-tonal-button
+              >${actionIcon('Create snapshot')}${this.l("Create snapshot", "建立快照")}</md-filled-tonal-button
             >
             <p class="muted">
               ${this.l(
@@ -661,7 +663,7 @@ class MaterialBuildroot extends LitElement {
                       this.restoreId = snapshot.id;
                       this.openDialog("restore-dialog", e);
                     }}
-                    >${this.l("Restore", "還原")}</md-outlined-button
+                    >${actionIcon('Restore')}${this.l("Restore", "還原")}</md-outlined-button
                   >
                 </div>`,
             )}<label class="import-label"
@@ -1009,20 +1011,9 @@ class MaterialBuildroot extends LitElement {
     }
   }
   private icon(name: string) {
-    const paths: Record<string, string> = {
-      plans: "M3 3h7v7H3V3Zm11 0h7v7h-7V3ZM3 14h7v7H3v-7Zm11 0h7v7h-7v-7Z",
-      activity:
-        "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm-1 2v7l5 3 1-1.7-4-2.3V6h-2Z",
-      settings:
-        "M10 2h4l.7 3 2 .9 2.8-.9 2 3.5-2.1 2.1v2.8l2.1 2.1-2 3.5-2.8-.9-2 .9-.7 3h-4l-.7-3-2-.9-2.8.9-2-3.5 2.1-2.1v-2.8L2.5 8.5l2-3.5 2.8.9 2-.9.7-3ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z",
-      about:
-        "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm-1 6h2v7h-2v-7Zm0-4h2v2h-2V6Z",
-    };
-    return html`<md-icon
-      ><svg viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="currentColor" d=${paths[name] ?? paths.plans}></path></svg
-    ></md-icon>`;
+    return materialIcon(({plans:"dashboard",operations:"computer",activity:"history",settings:"settings",about:"info"} as Record<string,string>)[name]||name);
   }
+
   private routeLabel(route: string) {
     return route === "operations"
       ? this.l("Project operations", "專案操作")
@@ -1044,7 +1035,7 @@ class MaterialBuildroot extends LitElement {
     ].map(
       (route, index) =>
         html`<md-text-button
-          class=${this.route === route ? "selected" : ""}
+          title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
           aria-label=${this.route === route
             ? `${this.routeLabel(route)}, ${this.l("current workspace", "目前工作區")}`
             : this.routeLabel(route)}
@@ -1054,7 +1045,7 @@ class MaterialBuildroot extends LitElement {
           }}
           ><span class="navsymbol" aria-hidden="true"
             >${this.icon(
-              ["plans", "plans", "activity", "settings", "about"][index],
+              ["plans", "operations", "activity", "settings", "about"][index],
             )}</span
           ><span class=${dialog ? "" : "navlabel"}
             >${this.routeLabel(route)}</span
@@ -1160,14 +1151,14 @@ class MaterialBuildroot extends LitElement {
         <md-filled-button
           ?disabled=${!this.dirty || !this.canEditWorkspace}
           @click=${() => this.applyPlan()}
-          >${this.l("Apply changes", "套用變更")}</md-filled-button
+          >${actionIcon('Apply changes')}${this.l("Apply changes", "套用變更")}</md-filled-button
         ><md-text-button
           ?disabled=${!this.dirty || !this.canEditWorkspace}
           @click=${this.discardPlan}
-          >${this.l("Discard changes", "放棄變更")}</md-text-button
+          >${actionIcon('Discard changes')}${this.l("Discard changes", "放棄變更")}</md-text-button
         ><md-outlined-button
           @click=${(e: Event) => this.openDialog("details-dialog", e)}
-          >${this.l("Details", "詳細資料")}</md-outlined-button
+          >${actionIcon('Details')}${this.l("Details", "詳細資料")}</md-outlined-button
         >
       </div>
       <div class="row">
@@ -1176,10 +1167,10 @@ class MaterialBuildroot extends LitElement {
           this.dirty ||
           !this.canEditWorkspace}
           @click=${this.duplicatePlan}
-          >${this.l("Duplicate", "複製")}</md-text-button
+          >${actionIcon('Duplicate')}${this.l("Duplicate", "複製")}</md-text-button
         ><md-text-button
           @click=${(e: Event) => this.openDialog("remove-dialog", e)}
-          >${this.l("Remove plan", "移除計劃")}</md-text-button
+          >${actionIcon('Remove plan')}${this.l("Remove plan", "移除計劃")}</md-text-button
         >
       </div>
     </section>`;
@@ -1234,7 +1225,7 @@ class MaterialBuildroot extends LitElement {
                 )}
               </p>
               <md-filled-button @click=${(e: Event) => this.beginNew(e)}
-                >${this.l("New plan", "新增計劃")}</md-filled-button
+                >${actionIcon('New plan')}${this.l("New plan", "新增計劃")}</md-filled-button
               >
             </div>`}
       </section>
@@ -1306,7 +1297,7 @@ class MaterialBuildroot extends LitElement {
           ><md-text-button
             ?disabled=${!this.canDiscard}
             @click=${this.discardLanguage}
-            >${this.l("Discard choice", "放棄選擇")}</md-text-button
+            >${actionIcon('Discard choice')}${this.l("Discard choice", "放棄選擇")}</md-text-button
           >
         </div>
         <p class="muted">${this.storageMessage()}</p>
@@ -1368,7 +1359,7 @@ class MaterialBuildroot extends LitElement {
                 "Buildroot 需要 Linux。記錄你打算使用嘅環境，選填檢查會檢視已安裝執行環境，唔會安裝。",
               )}
             </p>
-            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="runtime";}}>${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="source";}}>${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
+            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
             <md-outlined-select
               label=${this.l("Intended runtime", "預定執行環境")}
               .value=${this.newRuntime}
@@ -1429,8 +1420,7 @@ class MaterialBuildroot extends LitElement {
                   this.closeDialog("setup-dialog", true);
                   void this.navigate("settings");
                 }}
-                >${this.l(
-                  "Review language settings",
+                >${actionIcon('Review language settings')}${this.l("Review language settings",
                   "檢視語言設定",
                 )}</md-text-button
               >`}`;
@@ -1491,7 +1481,7 @@ class MaterialBuildroot extends LitElement {
   }
   private closeButton(id: string) {
     return html`<md-text-button @click=${() => this.closeDialog(id)}
-      >${this.l("Close", "關閉")}</md-text-button
+      >${actionIcon('Close')}${this.l("Close", "關閉")}</md-text-button
     >`;
   }
   render() {
@@ -1501,7 +1491,7 @@ class MaterialBuildroot extends LitElement {
           class="menu"
           aria-label=${this.l("Open navigation", "開啟導覽")}
           @click=${(e: Event) => this.openDialog("navigation-dialog", e)}
-          >☰</md-text-button
+          >${materialIcon("menu")}</md-text-button
         >
         <div class="brand">
           <strong>Material Buildroot</strong
@@ -1513,8 +1503,7 @@ class MaterialBuildroot extends LitElement {
             "開啟操作，Control Shift F",
           )}
           @click=${(e: Event) => this.openDialog("actions-dialog", e)}
-          ><span aria-hidden="true">⌘</span
-          ><span class="palette-label">
+          >${materialIcon("search","icon")}<span class="palette-label">
             ${this.l("Actions", "操作")} · Ctrl+Shift+F</span
           ></md-text-button
         >
@@ -1529,7 +1518,7 @@ class MaterialBuildroot extends LitElement {
                 ][index]}
                 ?disabled=${!window.studio}
                 @click=${() => void this.controlWindow(command)}
-                >${["−", "□", "×"][index]}</md-text-button
+                >${materialIcon(["remove", "crop_square", "close"][index])}</md-text-button
               >`,
           )}
         </div>
@@ -1541,9 +1530,8 @@ class MaterialBuildroot extends LitElement {
           <md-text-button
             aria-label=${this.l("Resume setup", "繼續設定")}
             @click=${(e: Event) => this.openDialog("setup-dialog", e)}
-            ><span class="navsymbol" aria-hidden="true">◇</span
-            ><span class="navlabel"
-              >${this.l("Setup", "開始設定")}</span
+            ><span class="navsymbol" aria-hidden="true">${materialIcon("tune")}</span><span class="navlabel"
+              >${actionIcon('Setup')}${this.l("Setup", "開始設定")}</span
             ></md-text-button
           >
         </nav>
@@ -1587,17 +1575,17 @@ class MaterialBuildroot extends LitElement {
                           )}
               </p>
             </div>
-            ${!this.setupDone && this.route!=="projects"?html`<md-outlined-button @click=${(e:Event)=>this.openDialog("setup-dialog",e)}>${this.l("Start setup","開始設定")}</md-outlined-button>`:nothing}
+            ${!this.setupDone && this.route!=="projects"?html`<md-outlined-button @click=${(e:Event)=>this.openDialog("setup-dialog",e)}>${actionIcon('Start setup')}${this.l("Start setup","開始設定")}</md-outlined-button>`:nothing}
             ${this.route === "projects"
               ? html`<md-outlined-button
                     ?disabled=${!this.plans.length}
                     @click=${this.exportPlans}
-                    >${this.l("Export plans", "匯出計劃")}</md-outlined-button
+                    >${actionIcon('Export plans')}${this.l("Export plans", "匯出計劃")}</md-outlined-button
                   ><md-filled-button
                     ?disabled=${this.plans.length >= 100 ||
                     !this.canEditWorkspace}
                     @click=${(e: Event) => this.beginNew(e)}
-                    >${this.l("New plan", "新增計劃")}</md-filled-button
+                    >${actionIcon('New plan')}${this.l("New plan", "新增計劃")}</md-filled-button
                   >`
               : nothing}
           </div>
@@ -1620,7 +1608,7 @@ class MaterialBuildroot extends LitElement {
                     ? this.l("Resume setup", "繼續設定")
                     : this.l("Start setup", "開始設定")}</md-filled-tonal-button
                 ><md-text-button @click=${this.skipSetup}
-                  >${this.l("Skip for now", "暫時略過")}</md-text-button
+                  >${actionIcon('Skip for now')}${this.l("Skip for now", "暫時略過")}</md-text-button
                 >
               </section>`
             : nothing}${this.route === "settings"
@@ -1652,7 +1640,7 @@ class MaterialBuildroot extends LitElement {
                             </p>`}
                     </section>`
                   : html`<section class="panel view">
-                      <h2>Material Buildroot</h2>
+                      <h2>Material Buildroot</h2><details><summary>${this.l("Material Icons license", "Material Icons 授權")}</summary><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></details>
                       <dl>
                         <dt>${this.l("Version", "版本")}</dt>
                         <dd>
@@ -1714,7 +1702,7 @@ class MaterialBuildroot extends LitElement {
         html`${this.closeButton("new-plan-dialog")}<md-filled-button
             ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
             @click=${() => this.createPlan()}
-            >${this.l("Create plan", "建立計劃")}</md-filled-button
+            >${actionIcon('Create plan')}${this.l("Create plan", "建立計劃")}</md-filled-button
           >`,
       )}
       ${this.dialog(
@@ -1740,7 +1728,7 @@ class MaterialBuildroot extends LitElement {
           </p>`,
         html`${this.closeButton("remove-dialog")}<md-filled-button
             @click=${this.removePlan}
-            >${this.l("Remove plan", "移除計劃")}</md-filled-button
+            >${actionIcon('Remove plan')}${this.l("Remove plan", "移除計劃")}</md-filled-button
           >`,
       )}
       ${this.dialog(
@@ -1753,11 +1741,11 @@ class MaterialBuildroot extends LitElement {
           )}
         </p>`,
         html`<md-text-button @click=${() => this.closeDialog("leave-dialog")}
-            >${this.l("Stay", "留喺呢度")}</md-text-button
+            >${actionIcon('Stay')}${this.l("Stay", "留喺呢度")}</md-text-button
           ><md-outlined-button @click=${() => this.finishLeave(false)}
-            >${this.l("Discard and continue", "放棄並繼續")}</md-outlined-button
+            >${actionIcon('Discard and continue')}${this.l("Discard and continue", "放棄並繼續")}</md-outlined-button
           ><md-filled-button @click=${() => this.finishLeave(true)}
-            >${this.l("Apply and continue", "套用並繼續")}</md-filled-button
+            >${actionIcon('Apply and continue')}${this.l("Apply and continue", "套用並繼續")}</md-filled-button
           >`,
       )}
       ${this.dialog(
@@ -1765,11 +1753,11 @@ class MaterialBuildroot extends LitElement {
         this.l("Workspace setup", "工作區設定"),
         this.setupView(),
         html`<md-text-button @click=${this.skipSetup}
-            >${this.l("Skip for now", "暫時略過")}</md-text-button
+            >${actionIcon('Skip for now')}${this.l("Skip for now", "暫時略過")}</md-text-button
           >${this.setupStep > 0
             ? html`<md-text-button
                 @click=${() => this.saveSetup(this.setupStep - 1)}
-                >${this.l("Back", "上一步")}</md-text-button
+                >${actionIcon('Back')}${this.l("Back", "上一步")}</md-text-button
               >`
             : nothing}<md-filled-button
             @click=${() => {
@@ -1797,7 +1785,7 @@ class MaterialBuildroot extends LitElement {
         html`${this.closeButton("restore-dialog")}<md-filled-button
             ?disabled=${!this.canEditWorkspace || this.dirty}
             @click=${this.restoreSnapshot}
-            >${this.l("Restore snapshot", "還原快照")}</md-filled-button
+            >${actionIcon('Restore snapshot')}${this.l("Restore snapshot", "還原快照")}</md-filled-button
           >`,
       )}
       ${this.dialog(
@@ -1815,7 +1803,7 @@ class MaterialBuildroot extends LitElement {
             this.dirty ||
             !this.importText}
             @click=${this.applyImport}
-            >${this.l("Import and replace", "匯入並取代")}</md-filled-button
+            >${actionIcon('Import and replace')}${this.l("Import and replace", "匯入並取代")}</md-filled-button
           >`,
       )}
       ${this.dialog(
@@ -1843,20 +1831,20 @@ class MaterialBuildroot extends LitElement {
                 this.closeDialog("actions-dialog");
                 this.beginNew();
               }}
-              >${this.l("New plan", "新增計劃")}</md-text-button
+              >${actionIcon('New plan')}${this.l("New plan", "新增計劃")}</md-text-button
             ><md-text-button
               ?disabled=${!this.plans.length}
               @click=${() => {
                 this.closeDialog("actions-dialog");
                 this.exportPlans();
               }}
-              >${this.l("Export plans", "匯出計劃")}</md-text-button
+              >${actionIcon('Export plans')}${this.l("Export plans", "匯出計劃")}</md-text-button
             ><md-text-button
               @click=${() => {
                 this.closeDialog("actions-dialog");
                 this.openDialog("setup-dialog");
               }}
-              >${this.l("Resume setup", "繼續設定")}</md-text-button
+              >${actionIcon('Resume setup')}${this.l("Resume setup", "繼續設定")}</md-text-button
             >
           </div>`,
         this.closeButton("actions-dialog"),

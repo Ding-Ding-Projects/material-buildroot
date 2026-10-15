@@ -1,3 +1,4 @@
+import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import "./guest-topology";
 import { workspaceStyles } from "./workspace-styles";
@@ -295,7 +296,7 @@ export class GuestPanel extends LitElement {
           )}
         </p>
       </section>`;
-    return html`<div class="row"><md-outlined-button @click=${()=>this.topology=true}>${this.l("Topology editor","拓樸編輯器")}</md-outlined-button><md-outlined-button @click=${()=>this.topology=false}>${this.l("Guest records and disk conversion","客體記錄同磁碟轉換")}</md-outlined-button></div><guest-topology ?hidden=${!this.topology} .workspaceId=${this.workspaceId} .language=${this.language}></guest-topology><div class="guests" ?hidden=${this.topology}>
+    return html`<div class="row"><md-outlined-button @click=${()=>this.topology=true}>${actionIcon('Topology editor')}${this.l("Topology editor","拓樸編輯器")}</md-outlined-button><md-outlined-button @click=${()=>this.topology=false}>${actionIcon('Guest records and disk conversion')}${this.l("Guest records and disk conversion","客體記錄同磁碟轉換")}</md-outlined-button></div><guest-topology ?hidden=${!this.topology} .workspaceId=${this.workspaceId} .language=${this.language}></guest-topology><div class="guests" ?hidden=${this.topology}>
       <section class="panel stack">
         <h2>${this.l("Managed virtual machines", "受管理虛擬機")}</h2>
         <p>
@@ -306,16 +307,15 @@ export class GuestPanel extends LitElement {
         </p>
         <div class="row">
           <md-outlined-button ?disabled=${this.pending} @click=${this.discover}
-            >${this.l("Discover providers", "探索供應商")}</md-outlined-button
+            >${actionIcon('Discover providers')}${this.l("Discover providers", "探索供應商")}</md-outlined-button
           ><md-outlined-button ?disabled=${this.pending} @click=${this.refresh}
-            >${this.l(
-              "Refresh managed guests",
+            >${actionIcon('Refresh managed guests')}${this.l("Refresh managed guests",
               "重新整理受管理客體",
             )}</md-outlined-button
           ><md-outlined-button
             ?disabled=${this.pending}
             @click=${this.loadFiles}
-            >${this.l("Load output files", "載入輸出檔案")}</md-outlined-button
+            >${actionIcon('Load output files')}${this.l("Load output files", "載入輸出檔案")}</md-outlined-button
           >
         </div>
         ${this.providers
@@ -444,7 +444,7 @@ export class GuestPanel extends LitElement {
                     )}</md-filled-button
             >${this.editing
               ? html`<md-text-button @click=${() => (this.editing = "")}
-                  >${this.l("Cancel edit", "取消編輯")}</md-text-button
+                  >${actionIcon('Cancel edit')}${this.l("Cancel edit", "取消編輯")}</md-text-button
                 >`
               : nothing}
           </div>
@@ -482,7 +482,7 @@ export class GuestPanel extends LitElement {
             !this.disk ||
             !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(this.outputName)}
             @click=${this.previewConversion}
-            >${this.l("Preview conversion", "預覽轉換")}</md-outlined-button
+            >${actionIcon('Preview conversion')}${this.l("Preview conversion", "預覽轉換")}</md-outlined-button
           >${this.preview
             ? html`<dl>
                   <dt>${this.l("Source", "來源")}</dt>
@@ -495,7 +495,7 @@ export class GuestPanel extends LitElement {
                 <md-filled-button
                   ?disabled=${this.pending}
                   @click=${this.executeConversion}
-                  >${this.l("Confirm conversion", "確認轉換")}</md-filled-button
+                  >${actionIcon('Confirm conversion')}${this.l("Confirm conversion", "確認轉換")}</md-filled-button
                 >`
             : nothing}${this.conversion
             ? html`<p>${this.conversion.path}</p>
@@ -520,29 +520,25 @@ export class GuestPanel extends LitElement {
                     <md-text-button
                       ?disabled=${this.pending}
                       @click=${() => this.act("refresh", guest)}
-                      >${this.l(
-                        "Refresh state",
+                      >${actionIcon('Refresh state')}${this.l("Refresh state",
                         "重新整理狀態",
                       )}</md-text-button
                     ><md-outlined-button
                       ?disabled=${this.pending || guest.state !== "stopped"}
                       @click=${() => this.edit(guest)}
-                      >${this.l(
-                        "Edit hardware",
+                      >${actionIcon('Edit hardware')}${this.l("Edit hardware",
                         "編輯硬件",
                       )}</md-outlined-button
                     ><md-filled-tonal-button
                       ?disabled=${this.pending || guest.state !== "stopped"}
                       @click=${() => this.act("launch", guest)}
-                      >${this.l(
-                        "Launch guest",
+                      >${actionIcon('Launch guest')}${this.l("Launch guest",
                         "啟動客體",
                       )}</md-filled-tonal-button
                     ><md-outlined-button
                       ?disabled=${this.pending || guest.state !== "running"}
                       @click=${() => this.act("stop", guest)}
-                      >${this.l(
-                        "Request shutdown",
+                      >${actionIcon('Request shutdown')}${this.l("Request shutdown",
                         "要求關閉",
                       )}</md-outlined-button
                     >

@@ -1,3 +1,4 @@
+import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/textfield/outlined-text-field.js";
@@ -80,7 +81,7 @@ export class PackagePanel extends LitElement {
     pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:400px;margin:0;padding:16px;border-radius:12px;background:var(--md-sys-color-surface-container-high)}
     .consent span{flex:1;min-width:160px}.validation{color:var(--md-sys-color-error)}
     md-chip-set{max-width:100%}
-    .package-context{padding:6px!important;gap:6px!important}.package-context>h2{display:none}.package-context>p{font-size:11px;line-height:1.3;margin:0}.package-context details{font-size:12px}.package-workbench{display:grid;grid-template-columns:minmax(300px,1fr) minmax(330px,440px);height:480px;max-height:calc(100vh - 485px);min-height:320px;border:1px solid var(--md-sys-color-outline-variant)}
+    .package-context{padding:6px!important;gap:6px!important}.package-context>h2{display:none}.package-context>p{font-size:11px;line-height:1.3;margin:0}.package-context details{font-size:12px}.package-workbench{display:grid;grid-template-columns:minmax(300px,1fr) minmax(330px,440px);height:480px;max-height:calc(100vh - 595px);min-height:320px;border:1px solid var(--md-sys-color-outline-variant)}
     .canvas-pane{min-width:0;min-height:0}.package-inspector{overflow:auto;min-width:0;border-left:1px solid var(--md-sys-color-outline-variant)}
     .package-inspector>.columns{display:contents}.package-inspector .panel{padding:12px;border-radius:0;background:transparent}
     .package-inspector .panel[hidden]{display:none}.package-inspector>.row{padding:6px}
@@ -100,7 +101,7 @@ export class PackagePanel extends LitElement {
   private select(label:string,value:string,options:string[],set:(value:string)=>void){
     return html`<md-outlined-select .label=${label} .value=${value} .displayText=${value} ?disabled=${this.pending} @change=${(e:Event)=>{set((e.target as HTMLSelectElement).value);this.edit();}}>${options.map(option=>html`<md-select-option .value=${option}><div slot="headline">${option}</div></md-select-option>`)}</md-outlined-select>`;
   }
-  private button(en:string,zh:string,work:()=>void,disabled=false){return html`<md-outlined-button ?disabled=${this.pending||disabled} @click=${work}>${this.l(en,zh)}</md-outlined-button>`;}
+  private button(en:string,zh:string,work:()=>void,disabled=false){if (/^(Refresh|Remove|Move|Stop|Cancel)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||disabled} @click=${work}>${materialIcon(actionSymbol(en))}</md-icon-button>`;return html`<md-outlined-button ?disabled=${this.pending||disabled} @click=${work}>${actionIcon(en)}${this.l(en,zh)}</md-outlined-button>`;}
   private async request<T>(action:string,fields:Record<string,unknown>):Promise<T>{
     if(!window.studio?.operations)throw new Error("DESKTOP_REQUIRED");
     const result=await window.studio.operations({action,...fields});
@@ -184,7 +185,7 @@ export class PackagePanel extends LitElement {
       ${this.pending?html`<md-linear-progress indeterminate aria-label=${this.l("Package operation in progress","套件操作進行中")}></md-linear-progress>`:nothing}
       <div role="status" aria-live="polite">${this.feedback}</div>
       <section class="panel stack package-context"><h2>${this.l("Author a Buildroot package","編寫 Buildroot 套件")}</h2>
-        <p>${this.l("Create a recipe in an existing prepared BR2_EXTERNAL tree. It must already contain external.desc with one name, Config.in and external.mk. Select it with the native picker; no tree is created automatically.","喺現有已準備好嘅 BR2_EXTERNAL 樹建立配方。該樹必須已有包含單一名稱嘅 external.desc、Config.in 同 external.mk。請用原生選擇器選取，唔會自動建立外部樹。")}</p>
+        <p>${this.l("Choose a prepared BR2_EXTERNAL tree, or initialize an empty folder below. Package file review and build activation are separate approvals.","選擇已準備好嘅 BR2_EXTERNAL 樹，或喺下面初始化空白資料夾。套件檔案審核同建置啟用需要獨立批准。")}</p>
         ${!this.workspaceId?html`<p>${this.l("Adopt a project in Projects & runtime first. Your draft stays here while you select one.","請先喺專案同執行環境接入專案，選擇期間會保留草稿。")}</p>`:nothing}
         <div class="row">${this.button("Choose prepared external tree","選擇已準備好外部樹",()=>this.choose(),!this.workspaceId)}<span>${this.external?.name||this.l("No external tree selected","未選擇外部樹")}</span></div>
         <details><summary>${this.l("Start from example metadata","由範例中繼資料開始")}</summary><p class="note">${this.l("Replaces this draft with GNU Hello metadata. Hashes are deliberately empty; obtain and verify real source and license-file digests before previewing.","用 GNU Hello 中繼資料取代此草稿。摘要會保持空白，預覽前請取得並驗證真實來源同授權條款檔摘要。")}</p>${this.button("Use GNU Hello example","使用 GNU Hello 範例",()=>this.example())}</details>

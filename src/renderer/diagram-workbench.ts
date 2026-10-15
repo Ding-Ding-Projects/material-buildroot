@@ -1,3 +1,4 @@
+import {materialIcon} from "./material-icons";
 import { LitElement, html, svg, css, nothing, type PropertyValues } from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/iconbutton/icon-button.js";
@@ -18,11 +19,12 @@ export class DiagramWorkbench extends LitElement {
   static styles=css`
     :host{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;color:var(--md-sys-color-on-surface);font:13px Roboto,Arial,sans-serif}
     .tools{flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container)}
+    .tools:first-child{gap:0;padding:0 2px}.tools:first-child strong{flex-basis:100%;padding:4px 6px}.tools:last-of-type span{flex:1;min-width:100px}
     .tools strong{margin-right:auto;font-size:12px}.tools span{font-variant-numeric:tabular-nums;font-size:11px}
-    md-icon-button{--md-icon-button-state-layer-height:32px;--md-icon-button-state-layer-width:32px;width:32px;height:32px}
-    .viewport{position:relative;flex:1;min-height:80px;overflow:hidden;touch-action:none;background-color:var(--md-sys-color-surface);background-image:radial-gradient(var(--md-sys-color-outline-variant) 1px,transparent 1px);background-size:20px 20px;cursor:grab}
+    md-icon-button{--md-icon-button-state-layer-height:40px;--md-icon-button-state-layer-width:40px;width:48px;height:48px}
+    .viewport{position:relative;flex:1;min-height:60px;overflow:hidden;touch-action:none;background-color:var(--md-sys-color-surface);background-image:radial-gradient(var(--md-sys-color-outline-variant) 1px,transparent 1px);background-size:20px 20px;cursor:grab}
     .world{position:absolute;inset:0;transform-origin:0 0;overflow:visible}
-    svg{position:absolute;overflow:visible;width:1px;height:1px;pointer-events:none}line{stroke:var(--md-sys-color-outline);stroke-width:2}
+    .world>svg{position:absolute;overflow:visible;width:1px;height:1px;pointer-events:none}.world>svg line{stroke:var(--md-sys-color-outline);stroke-width:2}
     .node{position:absolute;width:180px;min-height:66px;--md-outlined-button-container-shape:8px;--md-outlined-button-outline-color:var(--md-sys-color-outline);background:var(--md-sys-color-surface-container);border-radius:8px;cursor:move;text-align:left}
     .node[selected]{background:var(--md-sys-color-primary-container);--md-outlined-button-outline-color:var(--md-sys-color-primary);box-shadow:0 0 0 2px var(--md-sys-color-primary)}
     .node span{display:block;overflow-wrap:anywhere;white-space:normal}.node small{display:block;font-size:11px;color:var(--md-sys-color-on-surface-variant)}
@@ -79,13 +81,13 @@ export class DiagramWorkbench extends LitElement {
       this.saveMessage=write?this.l("Layout saved","佈局已儲存"):this.l("Saved layout loaded; no semantic changes","已載入儲存佈局，無語意變更");
     }catch(error){if(key===this.layoutKey){this.savedRevision=undefined;this.saveMessage=this.l("Layout not confirmed. Reload before saving again.","未能確認佈局，請重新載入再儲存。")+" "+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:"");}}finally{this.saving=false;this.revision++;}
   }
-  private icon(label:string,glyph:string,action:()=>void,disabled=false){return html`<md-icon-button aria-label=${label} title=${label} ?disabled=${disabled} @click=${action}>${glyph}</md-icon-button>`;}
+  private icon(label:string,icon:string,action:()=>void,disabled=false){return html`<md-icon-button aria-label=${label} title=${label} ?disabled=${disabled} @click=${action}>${materialIcon(icon)}</md-icon-button>`;}
   render(){const selected=this.nodes.find(n=>n.id===this.selected);return html`
     <div class="tools" role="toolbar" aria-label=${this.l("Canvas tools","畫布工具")}><strong>${this.title}</strong>
-      ${this.icon(this.l("Undo layout","復原佈局"),"↶",()=>this.history(),!this.undoStack.length)}${this.icon(this.l("Redo layout","重做佈局"),"↷",()=>this.history(true),!this.redoStack.length)}
-      ${this.icon(this.l("Zoom out","縮小"),"−",()=>this.zoom(-.1),this.layout.scale<=.25)}<span>${Math.round(this.layout.scale*100)}%</span>${this.icon(this.l("Zoom in","放大"),"+",()=>this.zoom(.1),this.layout.scale>=2)}
-      ${this.icon(this.l("Fit diagram","符合畫布"),"⊡",()=>this.fit(),!this.nodes.length)}
-      ${this.icon(this.l("Pan left","向左平移"),"←",()=>this.adjust(()=>this.layout.x-=40))}${this.icon(this.l("Pan right","向右平移"),"→",()=>this.adjust(()=>this.layout.x+=40))}
+      ${this.icon(this.l("Undo layout","復原佈局"),"undo",()=>this.history(),!this.undoStack.length)}${this.icon(this.l("Redo layout","重做佈局"),"redo",()=>this.history(true),!this.redoStack.length)}
+      ${this.icon(this.l("Zoom out","縮小"),"zoom_out",()=>this.zoom(-.1),this.layout.scale<=.25)}<span>${Math.round(this.layout.scale*100)}%</span>${this.icon(this.l("Zoom in","放大"),"zoom_in",()=>this.zoom(.1),this.layout.scale>=2)}
+      ${this.icon(this.l("Fit diagram","符合畫布"),"crop_square",()=>this.fit(),!this.nodes.length)}
+      ${this.icon(this.l("Pan left","向左平移"),"arrow_back",()=>this.adjust(()=>this.layout.x-=40))}${this.icon(this.l("Pan right","向右平移"),"arrow_forward",()=>this.adjust(()=>this.layout.x+=40))}
     </div>
     <div class="viewport" role="region" aria-label=${this.title} @pointerdown=${(e:PointerEvent)=>this.start(e)} @pointermove=${this.move} @pointerup=${this.end} @pointercancel=${this.end}>
       ${!this.nodes.length?html`<p class="empty">${this.l("Add records in the inspector to populate this canvas.","喺檢視器加入記錄以填入畫布。")}</p>`:nothing}
@@ -94,8 +96,8 @@ export class DiagramWorkbench extends LitElement {
         ${this.nodes.map(node=>html`<md-outlined-button class="node" style=${`left:${this.point(node.id).x}px;top:${this.point(node.id).y}px`} ?selected=${this.selected===node.id} aria-pressed=${this.selected===node.id} aria-label=${`${node.label}, ${node.detail||node.kind}`} @click=${()=>this.select(node.id)} @pointerdown=${(e:PointerEvent)=>this.start(e,node.id)} @pointermove=${this.move} @pointerup=${this.end} @pointercancel=${this.end} @keydown=${(e:KeyboardEvent)=>this.keys(e,node.id)}><span>${node.label}<small>${node.detail||node.kind}</small></span></md-outlined-button>`)}
       </div>
     </div>
-    <div class="footer"><md-outlined-select .label=${this.l("Selected node","已選節點")} .value=${this.selected} .displayText=${selected?.label||this.l("Select a node","選擇節點")} @change=${(e:Event)=>this.select((e.target as HTMLSelectElement).value)}>${this.nodes.map(node=>html`<md-select-option .value=${node.id}><div slot="headline">${node.label}</div></md-select-option>`)}</md-outlined-select>${this.icon(this.l("Remove selected dependency","移除所選相依項目"),"×",()=>this.removeSelected(),!selected?.removable)}</div>
-    <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局"),"↓",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局"),"↑",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${this.saveMessage||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。")}</span></div>
+    <div class="footer"><md-outlined-select .label=${this.l("Selected node","已選節點")} .value=${this.selected} .displayText=${selected?.label||this.l("Select a node","選擇節點")} @change=${(e:Event)=>this.select((e.target as HTMLSelectElement).value)}>${this.nodes.map(node=>html`<md-select-option .value=${node.id}><div slot="headline">${node.label}</div></md-select-option>`)}</md-outlined-select>${this.icon(this.l("Remove selected dependency","移除所選相依項目"),"delete",()=>this.removeSelected(),!selected?.removable)}</div>
+    <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局"),"download",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局"),"save",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${this.saveMessage||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。")}</span></div>
     <p class="hint">${this.l("Drag to arrange, background to pan. Arrow keys move a focused node by 10 units. Undo/redo changes layout only.","拖曳排列，拖曳背景平移。方向鍵每次移動已聚焦節點 10 單位，復原／重做只會改變佈局。")}</p>
   `;}
 }
