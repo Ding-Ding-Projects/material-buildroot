@@ -1,0 +1,9 @@
+# PH01 canonical reconciliation batch 01
+
+Added an exact-section reference index for all 107 public identities without changing their IDs, the 428 surface records or the 398 planned requirements. All catalogue contract links resolved to existing source headings during indexing. Canonical source revision and opaque exact locator hashes bind the review input without exporting private headings, vocabulary or host details. Non-restricted feature documents additionally carry document/section hashes; restricted private instruction content digests are omitted.
+
+Read and mapped the complete directly linked sections for seven identities: onboarding, per-control info guidance, offline documentation, provider-authored text, external editor handoff, browser-extension download handoff and front-screen provenance. Every existing requirement ID in these rows has an explicit canonical obligation and missing-detail/evidence field. Full guidance and universal delivery sections retain related cross-contract duties instead of narrowing them to the selected identity.
+
+Status: seven direct-section detail mappings; 100 reference-indexed rows awaiting detail mapping; zero newly completed full canonical reconciliations, independently reviewed feature acceptances or native proofs. Browser scope/adaptation review and transitive localization, accessibility, privacy, persistence, search and evidence requirements remain open even for the seven mapped rows. No feature-ledger completion, conditional activation or surface waiver was introduced.
+
+The files are planning records, not executable evidence admission. Index generation checked current link resolution and exact identity inventory only. No new application test, runtime receipt, screenshot or native Windows execution was performed. Root review and deliberate integration remain required before publishing these unstaged planning additions.

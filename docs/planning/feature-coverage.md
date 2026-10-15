@@ -4,7 +4,7 @@ Status: every production feature below is planned and unverified. This hand-writ
 
 Surfaces: **A** Windows application; **D** public documentation visitor surface; **C** authenticated browser companion; **R** repository/build/release/operating process. A+D+C means separate delivery records and proof for all three surfaces. Shared implementation libraries are permitted; a sibling surface, redirect or shared state claim never substitutes for coverage. See [surface boundaries](surfaces.md). Platform capability limitations need exact documented reasons and tested alternative behavior; they never become silent omissions.
 
-Before implementation, the next session must reread the current owner-managed canonical contracts and reconcile this planning inventory. The canonical contracts control detailed behavior. Public documentation uses neutral identifiers and never includes private vocabulary values or operational machine details.
+Before implementation, the next session must reread the current owner-managed canonical contracts and reconcile this planning inventory. The [direct contract reconciliation and dependency map](canonical-reconciliation.md) records all 107 identities, their concrete detail gaps and bounded independent review. The canonical contracts control detailed behavior. Public documentation uses neutral identifiers and never includes private vocabulary values or operational machine details.
 
 ## Language, voice and personalization
 
