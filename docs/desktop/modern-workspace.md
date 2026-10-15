@@ -22,6 +22,14 @@ Artifact controls inspect file metadata, hashes and bounded text. Guest controls
 
 The local assistant sends explicitly composed messages to loopback Ollama. It does not attach project files or execute proposals automatically. Update controls discover normal releases and verify installer bytes; download alone does not install an update. See [tools](built-in-tools.md) and [updates](updates.md).
 
+## Tools and companion
+
+The Tools panel selects input and new output files through native dialogs. Text, structured-data and binary conversions use the durable queue; PDF operations and model pulls share queue controls. External parsers require both admitted executable provenance and a verified isolation route. Selecting an executable does not supply the missing isolation proof. Existing output files are preserved. File permissions last for the desktop session and must be selected again after restart.
+
+The server form discovers Java releases, verifies downloads, writes reviewed properties and requires explicit EULA acceptance. Starting software requires native approval for the chosen directory and an admitted Java executable. Local container startup additionally requires a pinned runtime image. Bedrock, remote targets and full plugin/runtime acceptance remain separate roadmap requirements.
+
+The Companion panel selects a certificate and matching key using native dialogs, explicitly starts a listener on an available loopback or private interface, and creates a short-lived challenge for an exact HTTPS browser origin. Pairing still requires native approval. Sessions can read summaries of plans, projects and jobs, and can be revoked individually. Local paths, notes, raw logs, credentials and job payloads are excluded. See [companion security](../security/companion.md).
+
 ## Interface and accessibility
 
 Controls are registered Material Web components with bundled licensed Roboto, explicit Material typeface tokens, dark/light/system appearance and English/Hong Kong Cantonese/bilingual copy. Navigation focuses its destination heading. Dialogs retain explicit identities and return focus. The action launcher supports keyboard traversal. Every motion family respects reduced-motion preference.

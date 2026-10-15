@@ -27,10 +27,12 @@ async function newPlan(page,name='Appliance image'){
  await expect(page.locator('.editor').getByRole('textbox',{name:'Plan name'})).toBeEditable();
 }
 async function nav(page,name){await page.locator('nav').getByRole('button',{name:new RegExp('^'+name+'(?:,|$)')}).click();}
-test('first-run wizard creates a real saved plan and resumes after reload',async({page})=>{
+test('first-run wizard creates a real saved plan and resumes after reload',async({page},testInfo)=>{
  const f=await open(page);try{
   await page.getByRole('button',{name:'Start setup',exact:true}).click();const dialog=page.locator('#setup-dialog');
   await dialog.getByRole('button',{name:'Next',exact:true}).click();await dialog.getByRole('textbox',{name:'Plan name'}).fill('Guided image');
+  await expect(dialog.getByRole('textbox',{name:'Plan name'})).toBeVisible();await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:testInfo.outputPath('onboarding.png'),fullPage:true});
   await dialog.getByRole('button',{name:'Create plan',exact:true}).click();await expect(dialog).toContainText('Step 3 / 3');
   expect(f.service.get().state.plans[0].name).toBe('Guided image');
   await page.reload();await page.locator('nav').getByRole('button',{name:'Resume setup',exact:true}).click();

@@ -6,6 +6,8 @@ import "@material/web/switch/switch.js";
 import "@material/web/progress/linear-progress.js";
 import "./regex-workbench";
 import "./guest-panel";
+import "./tools-panel";
+import "./companion-panel";
 import { workspaceStyles } from "./workspace-styles";
 type Reply = { ok: true; result: any } | { ok: false; code: string };
 type Job = {
@@ -112,6 +114,10 @@ export class OperationsPanel extends LitElement {
       md-tabs {
         --md-primary-tab-container-color: var(--md-sys-color-surface);
         flex-shrink: 0;
+      }
+      md-primary-tab {
+        flex: 0 0 auto;
+        min-width: max-content;
       }
       .content {
         display: flex;
@@ -475,6 +481,8 @@ export class OperationsPanel extends LitElement {
       assistant: ["Local assistant", "本機助理"],
       updates: ["Updates", "更新"],
       regex: ["Regex workbench", "正規表達式"],
+      tools: ["Tools", "工具"],
+      companion: ["Browser companion", "瀏覽器配對"],
       guests: ["Virtual machines", "虛擬機"],
     };
     return this.l(...labels[tab]);
@@ -1136,6 +1144,8 @@ export class OperationsPanel extends LitElement {
           "assistant",
           "updates",
           "regex",
+          "tools",
+          "companion",
         ].indexOf(this.tab)}
         @change=${(e: Event) => {
           const index = (e.target as any).activeTabIndex;
@@ -1149,6 +1159,8 @@ export class OperationsPanel extends LitElement {
               "assistant",
               "updates",
               "regex",
+              "tools",
+              "companion",
             ][index] ?? "runtime";
         }}
         >${[
@@ -1160,6 +1172,8 @@ export class OperationsPanel extends LitElement {
           "assistant",
           "updates",
           "regex",
+          "tools",
+          "companion",
         ].map(
           (tab) =>
             html`<md-primary-tab
@@ -1194,7 +1208,7 @@ export class OperationsPanel extends LitElement {
                   ? nothing
                   : this.tab === "assistant"
                     ? this.assistantView()
-                    : this.tab === "regex"
+                    : ["regex", "tools", "companion"].includes(this.tab)
                       ? nothing
                       : this.updatesView()}
       </div>
@@ -1209,6 +1223,14 @@ export class OperationsPanel extends LitElement {
         ?hidden=${this.tab !== "regex"}
         .language=${this.language}
       ></regex-workbench
+      ><tools-panel
+        ?hidden=${this.tab !== "tools"}
+        .language=${this.language}
+      ></tools-panel
+      ><companion-panel
+        ?hidden=${this.tab !== "companion"}
+        .language=${this.language}
+      ></companion-panel
       >${this.feedback
         ? html`<div class="status" role="status">${this.feedback}</div>`
         : nothing}

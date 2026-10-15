@@ -14,13 +14,30 @@ function createToolsService(options = {}) {
   const ollama = createOllama(options),
     converter = createConverter(options),
     minecraft = createMinecraft(options);
+  let disposed = false;
+  const active = new Set();
+  const inFlight = new Set();
   const previews = new Map();
   const queue = require("./queue.cjs").createToolQueue(
     options.queueDirectory,
     (request, context) => execute(request, context),
   );
   async function execute(request, context = {}) {
+    let settled;
+    const completion = new Promise((resolve) => {
+      settled = resolve;
+    });
+    inFlight.add(completion);
+    const controller = new AbortController();
+    if (context.signal?.aborted) controller.abort();
+    const abort = () => controller.abort();
+    context.signal?.addEventListener("abort", abort, { once: true });
+    const originalSignal = context.signal;
+    context = { ...context, signal: controller.signal };
+    active.add(controller);
     try {
+      if (disposed) fail("SERVICE_DISPOSED");
+      request = require("./request-contract.cjs").admit(request);
       if (!request || typeof request !== "object" || Array.isArray(request))
         fail("INVALID_REQUEST");
       text(request.action, 80);
@@ -99,8 +116,46 @@ function createToolsService(options = {}) {
               ? error.code
               : "TOOL_FAILED",
       };
+    } finally {
+      active.delete(controller);
+      originalSignal?.removeEventListener("abort", abort);
+      inFlight.delete(completion);
+      settled();
     }
   }
-  return { execute };
+  let disposal;
+  function dispose() {
+    if (disposal) return disposal;
+    disposed = true;
+    for (const controller of active) controller.abort();
+    previews.clear();
+    disposal = (async () => {
+      let timer;
+      try {
+        await Promise.race([
+          Promise.all([
+            queue.dispose(),
+            minecraft.dispose(),
+            Promise.all([...inFlight]),
+          ]),
+          new Promise((_, reject) => {
+            timer = setTimeout(
+              () =>
+                reject(
+                  Object.assign(new Error("SERVICE_SHUTDOWN_UNVERIFIED"), {
+                    code: "SERVICE_SHUTDOWN_UNVERIFIED",
+                  }),
+                ),
+              15000,
+            );
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+    })();
+    return disposal;
+  }
+  return { execute, dispose };
 }
 module.exports = { createToolsService };

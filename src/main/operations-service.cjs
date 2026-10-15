@@ -7,11 +7,17 @@ const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { createToolsService } = require("./tools/index.cjs");
+const { createPayloadManager } = require("./tools/payload-manager.cjs");
+const { createToolFiles } = require("./security/tool-files.cjs");
+const {
+  createCompanionController,
+} = require("./security/companion-controller.cjs");
 const { createUpdateService } = require("./updates/service.cjs");
 const { createFileGrants } = require("./security/file-grants.cjs");
 const { createProjectStore } = require("./storage/project-store.cjs");
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
+const { createSourceOperations } = require("./source-operations.cjs");
 const contract = require("./security/workspace-contract.cjs");
 
 const owner = "desktop-owner";
@@ -36,6 +42,11 @@ const fields = {
   "artifacts.inspect": ["workspaceId", "path"],
   "artifacts.manifest": ["workspaceId", "paths"],
   tools: ["request"],
+  "payload.list": [],
+  "payload.choose": ["toolId"],
+  "file.choose": ["access", "kind"],
+  companion: ["request"],
+  source: ["request"],
   "guest.discover": ["workspaceId"],
   "guest.list": ["workspaceId"],
   "guest.create": ["workspaceId", "request"],
@@ -97,6 +108,7 @@ function createOperationsService({
   version,
   source,
   execution = new ExecutionService(),
+  workspaceRead,
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const selections = new Map(),
@@ -110,6 +122,8 @@ function createOperationsService({
   let choosing = false,
     disposed = false,
     configurationBusy = false;
+  let disposal;
+  const sourceLocks = new Set();
   const activeBuild = () =>
     jobs
       .list()
@@ -129,6 +143,71 @@ function createOperationsService({
     }
     return item;
   }
+  function registerProject(selected) {
+    const granted = execution.grantProject({
+      ...selected,
+      trustedSource: true,
+    });
+    const workspaceId = projectStore.adopt({
+      name: selected.name,
+      root: selected.root,
+      source: selected.source,
+      output: selected.output,
+    });
+    const identities = Object.fromEntries(
+      ["root", "source", "output"].map((key) => {
+        const stat = fs.statSync(selected[key]);
+        return [key, `${stat.dev}:${stat.ino}`];
+      }),
+    );
+    projects.set(workspaceId, {
+      ...selected,
+      identities,
+      grantId: granted.grantId,
+    });
+    return { workspaceId, name: selected.name };
+  }
+  const sources = createSourceOperations({
+    chooseDirectory: async () => {
+      if (choosing) reject("PICKER_BUSY");
+      choosing = true;
+      try {
+        return await pick(
+          "Select a workspace folder for a new source checkout",
+        );
+      } finally {
+        choosing = false;
+      }
+    },
+    resolveWorkspace: (id) => project(id),
+    acquireSourceLock: (sourceRoot) => {
+      if (
+        disposed ||
+        configurationBusy ||
+        activeBuild() ||
+        sourceLocks.has(sourceRoot)
+      )
+        reject("SOURCE_BUSY");
+      sourceLocks.add(sourceRoot);
+      return () => sourceLocks.delete(sourceRoot);
+    },
+    onSourceAdopted: ({ root, source }) => {
+      if (disposed) reject("SOURCE_SERVICE_CLOSED");
+      const output = path.join(root, path.basename(source) + "-output");
+      try {
+        fs.mkdirSync(output, { mode: 0o700 });
+      } catch (error) {
+        if (error.code === "EEXIST") reject("ADOPTION_REQUIRED");
+        throw error;
+      }
+      return registerProject({
+        root,
+        source,
+        output,
+        name: path.basename(source),
+      });
+    },
+  });
   async function executeProject(input, log, signal) {
     const item = project(input.workspaceId);
     const job = await execution.start(
@@ -200,9 +279,80 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const payloadManager = createPayloadManager({
+    directory: path.join(directory, "payloads"),
+    dialog,
+    parentWindow,
+  });
+  const toolFiles = createToolFiles({ dialog, parentWindow });
   const tools = createToolsService({
     queueDirectory: path.join(directory, "tool-queue"),
+    payloadManager,
+    resolveGrant: (id, mode) => toolFiles.resolve(id, mode),
+    authorizeServerExecution: (id) => toolFiles.serverAuthorized(id),
   });
+  // Companion reads deliberately omit local paths, logs, notes, payloads and credentials.
+  const companion =
+    typeof dialog.showMessageBox === "function"
+      ? createCompanionController({
+          dialog,
+          parentWindow,
+          onAction: async (request, context) => {
+            if (disposed || !context.isAuthorized()) reject("UNAUTHORIZED");
+            const summarizeJob = (job) => ({
+              id: job.id,
+              kind: job.kind,
+              state: job.state,
+              sequence: job.sequence,
+              createdAt: job.createdAt,
+              updatedAt: job.updatedAt,
+              logCount: job.logCount,
+              itemCount: job.itemCount,
+            });
+            switch (request.action) {
+              case "workspace.read": {
+                const result = workspaceRead?.();
+                if (!result?.ok) reject("WORKSPACE_UNAVAILABLE");
+                return {
+                  revision: result.state.revision,
+                  onboardingCompleted: result.state.onboardingCompleted,
+                  plans: result.state.plans.map(
+                    ({ id, name, runtime, target, status, updatedAt }) => ({
+                      id,
+                      name,
+                      runtime,
+                      target,
+                      status,
+                      updatedAt,
+                    }),
+                  ),
+                };
+              }
+              case "projects.list":
+                return {
+                  projects: projectStore
+                    .list()
+                    .map(({ id, name }) => ({
+                      id,
+                      name,
+                      authorized: projects.has(id),
+                    })),
+                };
+              case "jobs.list":
+                return {
+                  jobs: jobs
+                    .list()
+                    .filter((job) => job.ownerId === owner)
+                    .map(summarizeJob),
+                };
+              case "jobs.get":
+                return { job: summarizeJob(ownJob(request.args.jobId)) };
+              default:
+                reject("ACTION_NOT_ADMITTED");
+            }
+          },
+        })
+      : null;
   const updates = createUpdateService({
     userData: directory,
     currentVersion: version,
@@ -283,7 +433,8 @@ function createOperationsService({
     return visible;
   }
   async function changeConfig(work) {
-    if (configurationBusy || activeBuild()) reject("PROJECT_BUSY");
+    if (configurationBusy || activeBuild() || sourceLocks.size)
+      reject("PROJECT_BUSY");
     configurationBusy = true;
     try {
       return await work();
@@ -348,31 +499,11 @@ function createOperationsService({
           reject("SOURCE_CONSENT_REQUIRED");
         for (const id of selected.capabilities)
           fileGrants.resolve({ id, owner });
-        const granted = execution.grantProject({
-          ...selected,
-          trustedSource: true,
-        });
-        const workspaceId = projectStore.adopt({
-          name: selected.name,
-          root: selected.root,
-          source: selected.source,
-          output: selected.output,
-        });
-        const identities = Object.fromEntries(
-          ["root", "source", "output"].map((key) => {
-            const stat = fs.statSync(selected[key]);
-            return [key, `${stat.dev}:${stat.ino}`];
-          }),
-        );
-        projects.set(workspaceId, {
-          ...selected,
-          identities,
-          grantId: granted.grantId,
-        });
+        const registered = registerProject(selected);
         selections.delete(request.selectionId);
         for (const id of selected.capabilities)
           fileGrants.revoke({ id, owner });
-        return { workspaceId, name: selected.name };
+        return registered;
       }
       case "project.runtime":
         project(request.workspaceId).runtime = runtime(request.runtime);
@@ -387,7 +518,8 @@ function createOperationsService({
         )
           reject("INVALID_TARGET");
         item.runtime = runtime(request.runtime);
-        if (configurationBusy || activeBuild()) reject("BUILD_BUSY");
+        if (configurationBusy || activeBuild() || sourceLocks.size)
+          reject("BUILD_BUSY");
         return start(
           jobs.enqueue({
             kind: "build",
@@ -415,7 +547,8 @@ function createOperationsService({
       case "jobs.retry": {
         const previous = ownJob(request.id);
         project(previous.payload.workspaceId);
-        if (configurationBusy || activeBuild()) reject("BUILD_BUSY");
+        if (configurationBusy || activeBuild() || sourceLocks.size)
+          reject("BUILD_BUSY");
         return start(jobs.retry(request.id, owner, request.sequence));
       }
       case "config.inspect":
@@ -470,6 +603,24 @@ function createOperationsService({
             "ollama.chat",
             "converter.catalog",
             "minecraft.versions",
+            "minecraft.flavours",
+            "minecraft.plugins",
+            "minecraft.bedrock.discovery",
+            "minecraft.plugin.install",
+            "minecraft.install",
+            "minecraft.configure",
+            "minecraft.start",
+            "minecraft.stop",
+            "minecraft.status",
+            "ollama.pull",
+            "converter.convert",
+            "pdf.execute",
+            "queue.add",
+            "queue.page",
+            "queue.run",
+            "queue.cancel",
+            "queue.resume",
+            "queue.recover",
           ].includes(request.request?.action)
         )
           reject("ACTION_NOT_ADMITTED");
@@ -477,6 +628,21 @@ function createOperationsService({
         if (result?.ok === false) reject(result.code || "TOOL_UNAVAILABLE");
         return result;
       }
+      case "payload.list":
+        return payloadManager.list();
+      case "source": {
+        const result = await sources.handle(request.request);
+        if (!result.ok) reject(result.code);
+        return result;
+      }
+      case "payload.choose":
+        return payloadManager.choose(request.toolId);
+      case "file.choose":
+        return toolFiles.choose(request);
+      case "companion":
+        exact(request.request, ["action", "args"]);
+        if (!companion) reject("COMPANION_UNAVAILABLE");
+        return companion.request(request.request.action, request.request.args);
       case "updates.check":
         return safeUpdateState(await updates.check());
       case "updates.state":
@@ -505,10 +671,18 @@ function createOperationsService({
       }
     },
     dispose() {
+      if (disposal) return disposal;
       disposed = true;
       fileGrants.clear();
       updates.cancel();
-      for (const job of running) void job.cancel().catch(() => {});
+      toolFiles.dispose();
+      sources.dispose();
+      disposal = Promise.allSettled([
+        tools.dispose?.(),
+        companion?.request("companion.stop", {}),
+        ...[...running].map((job) => job.cancel()),
+      ]);
+      return disposal;
     },
   };
 }

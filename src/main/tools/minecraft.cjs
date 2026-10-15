@@ -43,7 +43,8 @@ function properties(input) {
   return (
     Object.entries(input)
       .map(([key, value]) => {
-        if (!rules[key]?.(value)) fail("INVALID_SERVER_PROPERTY");
+        if (!Object.hasOwn(rules, key) || !rules[key](value))
+          fail("INVALID_SERVER_PROPERTY");
         return key + "=" + value;
       })
       .join("\n") + "\n"
@@ -51,11 +52,14 @@ function properties(input) {
 }
 function createMinecraft(options) {
   const running = new Map();
+  const starting = new Set();
+  let disposed = false;
   const fetchImpl = options.fetchImpl || fetch;
   async function versions(signal) {
     return fetchBounded(MANIFEST, { signal, fetchImpl });
   }
-  return async (request, context = {}) => {
+  const execute = async (request, context = {}) => {
+    if (disposed) fail("SERVICE_DISPOSED");
     switch (request.action) {
       case "minecraft.flavours":
         return require("./minecraft-catalog.cjs").catalog(
@@ -156,92 +160,116 @@ function createMinecraft(options) {
       }
       case "minecraft.start": {
         const id = text(request.serverId, 80);
-        if (running.has(id)) fail("SERVER_ALREADY_RUNNING");
-        if (!["local-process", "local-container"].includes(request.target))
-          fail("TARGET_REQUIRES_ADMITTED_TYPED_TRANSPORT");
-        const directory = await grant(options, request.directoryId, "read");
-        if (
-          (
-            await fs.readFile(path.join(directory, "eula.txt"), "utf8")
-          ).trim() !== "eula=true"
-        )
-          fail("EULA_ACCEPTANCE_REQUIRED");
-        const memory = request.memoryMiB;
-        if (!Number.isInteger(memory) || memory < 512 || memory > 32768)
-          fail("INVALID_REQUEST");
-        await fs.access(path.join(directory, "server.jar"));
-        let command, args;
-        if (request.target === "local-container") {
+        if (running.has(id) || starting.has(id)) fail("SERVER_ALREADY_RUNNING");
+        starting.add(id);
+        try {
+          if (!["local-process", "local-container"].includes(request.target))
+            fail("TARGET_REQUIRES_ADMITTED_TYPED_TRANSPORT");
+          const directory = await grant(options, request.directoryId, "write");
           if (
-            !/^[a-z0-9./_-]+@sha256:[a-f0-9]{64}$/.test(
-              options.minecraftJavaImage || "",
-            )
+            typeof options.authorizeServerExecution !== "function" ||
+            (await options.authorizeServerExecution(request.directoryId)) !==
+              true
           )
-            fail("PINNED_CONTAINER_IMAGE_REQUIRED");
-          if (directory.includes(",")) fail("INVALID_MOUNT_PATH");
-          command = await executable(options, "docker");
-          const network = request.network || "none";
-          if (!["none", "bridge"].includes(network))
-            fail("INVALID_NETWORK_MODE");
-          const ports = [];
-          if (network === "bridge") {
+            fail("SERVER_EXECUTION_CONSENT_REQUIRED");
+          if (
+            (
+              await fs.readFile(path.join(directory, "eula.txt"), "utf8")
+            ).trim() !== "eula=true"
+          )
+            fail("EULA_ACCEPTANCE_REQUIRED");
+          const memory = request.memoryMiB;
+          if (!Number.isInteger(memory) || memory < 512 || memory > 32768)
+            fail("INVALID_REQUEST");
+          await fs.access(path.join(directory, "server.jar"));
+          let command, args, containerName;
+          if (request.target === "local-container") {
             if (
-              !Number.isInteger(request.port) ||
-              request.port < 1024 ||
-              request.port > 65535
+              !/^[a-z0-9./_-]+@sha256:[a-f0-9]{64}$/.test(
+                options.minecraftJavaImage || "",
+              )
             )
-              fail("INVALID_SERVER_PORT");
-            ports.push("--publish", "127.0.0.1:" + request.port + ":25565/tcp");
+              fail("PINNED_CONTAINER_IMAGE_REQUIRED");
+            if (directory.includes(",")) fail("INVALID_MOUNT_PATH");
+            command = await executable(options, "docker");
+            const network = request.network || "none";
+            if (!["none", "bridge"].includes(network))
+              fail("INVALID_NETWORK_MODE");
+            const ports = [];
+            if (network === "bridge") {
+              if (
+                !Number.isInteger(request.port) ||
+                request.port < 1024 ||
+                request.port > 65535
+              )
+                fail("INVALID_SERVER_PORT");
+              ports.push(
+                "--publish",
+                "127.0.0.1:" + request.port + ":25565/tcp",
+              );
+            }
+            containerName = "material-buildroot-" + randomUUID();
+            args = [
+              "run",
+              "--name",
+              containerName,
+              "--rm",
+              "--network",
+              network,
+              ...ports,
+              "--cap-drop",
+              "ALL",
+              "--security-opt",
+              "no-new-privileges",
+              "--memory",
+              memory + "m",
+              "--cpus",
+              "2",
+              "--mount",
+              "type=bind,source=" + directory + ",target=/server",
+              "--workdir",
+              "/server",
+              options.minecraftJavaImage,
+              "java",
+              "-Xms512M",
+              "-Xmx" + memory + "M",
+              "-jar",
+              "server.jar",
+              "nogui",
+            ];
+          } else {
+            command = await executable(options, "java");
+            args = [
+              "-Xms512M",
+              "-Xmx" + memory + "M",
+              "-jar",
+              "server.jar",
+              "nogui",
+            ];
           }
-          args = [
-            "run",
-            "--rm",
-            "--network",
-            network,
-            ...ports,
-            "--cap-drop",
-            "ALL",
-            "--security-opt",
-            "no-new-privileges",
-            "--memory",
-            memory + "m",
-            "--cpus",
-            "2",
-            "--mount",
-            "type=bind,source=" + directory + ",target=/server",
-            "--workdir",
-            "/server",
-            options.minecraftJavaImage,
-            "java",
-            "-Xms512M",
-            "-Xmx" + memory + "M",
-            "-jar",
-            "server.jar",
-            "nogui",
-          ];
-        } else {
-          command = await executable(options, "java");
-          args = [
-            "-Xms512M",
-            "-Xmx" + memory + "M",
-            "-jar",
-            "server.jar",
-            "nogui",
-          ];
+          if (disposed) fail("SERVICE_DISPOSED");
+          const result = await processRun(command, args, {
+            ...context,
+            cwd: directory,
+            wait: false,
+          });
+          running.set(id, { child: result.child, command, containerName });
+          result.child.once("exit", () => running.delete(id));
+          return { started: true, serverId: id };
+        } finally {
+          starting.delete(id);
         }
-        const result = await processRun(command, args, {
-          ...context,
-          cwd: directory,
-          wait: false,
-        });
-        running.set(id, result.child);
-        result.child.once("exit", () => running.delete(id));
-        return { started: true, serverId: id };
       }
       case "minecraft.stop": {
-        const child = running.get(request.serverId);
-        if (!child) fail("SERVER_NOT_RUNNING");
-        child.kill("SIGTERM");
+        const record = running.get(request.serverId);
+        if (!record) fail("SERVER_NOT_RUNNING");
+        if (record.containerName)
+          await processRun(
+            await executable(options, "docker"),
+            ["stop", "--time", "5", record.containerName],
+            { timeout: 10000 },
+          );
+        else record.child.kill("SIGTERM");
         return { stopping: true };
       }
       case "minecraft.status":
@@ -250,5 +278,52 @@ function createMinecraft(options) {
         fail("INVALID_REQUEST");
     }
   };
+  execute.dispose = async () => {
+    disposed = true;
+    const results = await Promise.allSettled(
+      [...running.values()].map(async (record) => {
+        let containerError;
+        if (record.containerName) {
+          try {
+            await processRun(
+              await executable(options, "docker"),
+              ["stop", "--time", "5", record.containerName],
+              { timeout: 10000 },
+            );
+          } catch (error) {
+            containerError = error;
+          }
+        }
+        const child = record.child;
+        const alive = () =>
+          child.exitCode === null && child.signalCode === null;
+        const wait = () =>
+          new Promise((resolve) => {
+            if (!alive()) {
+              resolve();
+              return;
+            }
+            const timer = setTimeout(resolve, 1000);
+            child.once("exit", () => {
+              clearTimeout(timer);
+              resolve();
+            });
+          });
+        if (alive()) {
+          child.kill("SIGTERM");
+          await wait();
+        }
+        if (alive()) {
+          child.kill("SIGKILL");
+          await wait();
+        }
+        if (alive() || containerError) fail("PROCESS_STOP_UNVERIFIED");
+      }),
+    );
+    if (results.some((result) => result.status === "rejected"))
+      fail("PROCESS_STOP_UNVERIFIED");
+    running.clear();
+  };
+  return execute;
 }
 module.exports = { createMinecraft, properties, official };

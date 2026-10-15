@@ -41,3 +41,24 @@ Explicit dispatch returns a correlation operation ID, not an invented run ID. `o
 Artifact download checks that the selected artifact belongs to the observed run, verifies its exact compressed size and caller-supplied SHA-256 (including the API digest when present), writes an exclusive partial file, then links the verified file without overwriting an existing destination. ZIP extraction is intentionally separate. The destination must already be resolved from a host save grant; raw renderer paths are not authority. Failed/truncated transfers remove only their owned partial file. The production fetch transport enforces time/output limits, follows only signed Azure artifact-storage redirects and strips API credentials on redirected requests. Other storage providers fail explicitly pending admission. Credential-bearing transport errors are replaced with bounded public errors.
 
 `node --test tests/actions.test.cjs` passes nine mock-protocol tests covering workflow effects, runner billing restrictions, read-only discovery, remote byte review, dispatch ownership, cancellation, reconnect receipts, artifact verification, truncation cleanup, redirect credential stripping and hostile redirects. No authenticated GitHub request, hosted build, billed runner, repository mutation or live artifact download was performed. These tests prove protocol handling rather than a completed managed-build runtime record.
+
+## Host source operation integration
+
+`createSourceOperations` in `src/main/source-operations.cjs` wraps the source backend in exact-field requests and bounded public error codes. Construct it with host callbacks `chooseDirectory()`, `resolveWorkspace(workspaceId)`, `onSourceAdopted({root, source, revision, branch})` and `acquireSourceLock(canonicalSource)`. The picker returns an existing native-selected parent directory or cancellation. The workspace resolver must return only an authorized, previously trusted workspace `{source}`. The registration callback receives the canonical selected parent as `root`, preserves pre-existing output trees, and may reject with `code: "ADOPTION_REQUIRED"` while retaining the clone. It returns `{workspaceId}` after retaining the selected source in the host project store. The lock callback must atomically exclude builds and configuration/source mutations and return its release function; reject with `code: "SOURCE_BUSY"` when unavailable. Constructor `sourceOptions` are host-only dependency settings, never renderer data.
+
+Call `handle` with these action-specific fields (besides `action`):
+
+| Action | Fields |
+| --- | --- |
+| `source.choose` | none |
+| `source.clone` | `selectionId`, single child `directory`, HTTPS `url`, `ref`, `trust: true` |
+| `source.status` | `workspaceId` |
+| `source.ref` | `workspaceId`, `ref` |
+| `source.upgrade.preview` | `workspaceId`, immutable `revision` |
+| `source.upgrade.apply` | `workspaceId`, `previewId`, `expectedRevision`, `consent: true` |
+| `source.rollback.preview` | `workspaceId`, `rollbackId` from a successful Apply |
+| `source.rollback.apply` | `workspaceId`, rollback `previewId`, `expectedRevision`, `consent: true` |
+
+Replies are `{ok: true, ...result}` or `{ok: false, code}`; raw errors, subprocess stderr and filesystem paths are not returned by clone/selection. Preview handles are bound to their workspace, expected source revision and upgrade/rollback kind. Rollback requires its own fresh diff preview and explicit Apply. Unknown fields, including renderer paths or commands, are rejected. Clone destinations are never cleaned up automatically, including after failed host registration. HTTPS Git clone is the source download route; archive download is not offered here. Grants, previews and rollback receipts are session-scoped; restart requires host re-adoption and a new preview.
+
+`node --test tests/source-operations.test.cjs` passes four real local Git fixture checks covering registration-conflict preservation, host-selected clone/fetch/upgrade/rollback and negative request authority, trust, foreign preview, stale revision, missing consent, dirty preservation and build-lock denial. These checks do not exercise Windows or live network access. Main-process operation dispatch and renderer wiring are separate integration work.

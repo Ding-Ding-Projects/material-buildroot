@@ -23,6 +23,7 @@ if (verification.length) {
   app.setPath("userData", path.resolve(value));
 }
 let store, window, desktop, operations;
+let quitting = false;
 const capabilities = createCapabilityRegistry();
 if (require("electron-squirrel-startup")) app.quit();
 else if (!app.requestSingleInstanceLock()) app.quit();
@@ -102,11 +103,12 @@ else {
         metadata,
         storageReady: !!store,
       });
+      const workspaceService = createWorkspaceService({
+        filePath: path.join(app.getPath("userData"), "workspace.json"),
+      });
       const workspace = createWorkspaceIPC({
         desktop,
-        service: createWorkspaceService({
-          filePath: path.join(app.getPath("userData"), "workspace.json"),
-        }),
+        service: workspaceService,
       });
       ipcMain.handle("studio:workspace:get", (event) => workspace.get(event));
       ipcMain.handle("studio:workspace:export", (event) =>
@@ -122,6 +124,7 @@ else {
           parentWindow: window,
           version: metadata.version,
           source: metadata.source,
+          workspaceRead: () => workspaceService.get(),
         });
       } catch {
         operations = null;
@@ -161,8 +164,13 @@ else {
     })
     .catch(() => app.quit());
   app.on("window-all-closed", () => app.quit());
-  app.on("before-quit", () => {
-    operations?.dispose();
+  app.on("before-quit", (event) => {
+    if (operations && !quitting) {
+      event.preventDefault();
+      quitting = true;
+      void operations.dispose().finally(() => app.quit());
+      return;
+    }
     desktop?.revoke();
     capabilities.clear();
     store?.close();

@@ -4,7 +4,9 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { fail, text } = require("./runtime.cjs");
 function createToolQueue(directory, execute) {
-  let consuming = false;
+  let consuming = false,
+    disposed = false;
+  const idle = [];
   const active = new Map();
   async function prepare() {
     if (!directory || !path.isAbsolute(directory))
@@ -29,7 +31,28 @@ function createToolQueue(directory, execute) {
     }
   }
   async function read(id) {
-    return JSON.parse(await fs.readFile(file(id), "utf8"));
+    const target = file(id),
+      stat = await fs.lstat(target);
+    if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 131072)
+      fail("INVALID_QUEUE_RECORD");
+    const record = JSON.parse(await fs.readFile(target, "utf8"));
+    if (
+      record.id !== id ||
+      ![
+        "queued",
+        "running",
+        "interrupted",
+        "completed",
+        "failed",
+        "cancelled",
+      ].includes(record.state) ||
+      !["converter.convert", "ollama.pull", "pdf.execute"].includes(
+        record.request?.action,
+      )
+    )
+      fail("INVALID_QUEUE_RECORD");
+    record.request = require("./request-contract.cjs").admit(record.request);
+    return record;
   }
   async function page(after = "", limit = 50) {
     await prepare();
@@ -39,9 +62,7 @@ function createToolQueue(directory, execute) {
     const stream = await fs.opendir(directory);
     for await (const entry of stream) {
       if (!entry.name.endsWith(".json")) continue;
-      const record = JSON.parse(
-        await fs.readFile(path.join(directory, entry.name), "utf8"),
-      );
+      const record = await read(entry.name.slice(0, -5));
       if (record.id > after) {
         records.push(record);
         records.sort((a, b) => a.id.localeCompare(b.id));
@@ -54,23 +75,34 @@ function createToolQueue(directory, execute) {
     };
   }
   return {
+    async dispose() {
+      disposed = true;
+      for (const controller of active.values()) controller.abort();
+      if (consuming) await new Promise((resolve) => idle.push(resolve));
+    },
     async dispatch(request, context) {
+      if (disposed) fail("SERVICE_DISPOSED");
       await prepare();
       switch (request.action) {
         case "queue.add":
           if (
             !request.job ||
-            !["converter.convert", "ollama.pull"].includes(request.job.action)
+            !["converter.convert", "ollama.pull", "pdf.execute"].includes(
+              request.job.action,
+            )
           )
             fail("INVALID_REQUEST");
           {
+            const admitted = require("./request-contract.cjs").admit(
+              request,
+            ).job;
             const record = {
               id: randomUUID(),
               state: "queued",
-              request: request.job,
+              request: admitted,
               createdAt: new Date().toISOString(),
             };
-            if (Buffer.byteLength(JSON.stringify(record)) > 16384)
+            if (Buffer.byteLength(JSON.stringify(record)) > 65536)
               fail("REQUEST_LIMIT");
             await write(record);
             return { job: record };
@@ -92,9 +124,7 @@ function createToolQueue(directory, execute) {
           let recovered = 0;
           for await (const entry of stream) {
             if (!entry.name.endsWith(".json")) continue;
-            const record = JSON.parse(
-              await fs.readFile(path.join(directory, entry.name), "utf8"),
-            );
+            const record = await read(entry.name.slice(0, -5));
             if (record.state === "running" && !active.has(record.id)) {
               record.state = "interrupted";
               await write(record);
@@ -120,11 +150,10 @@ function createToolQueue(directory, execute) {
           try {
             const stream = await fs.opendir(directory);
             for await (const entry of stream) {
-              if (context.signal?.aborted) break;
+              if (disposed || context.signal?.aborted) break;
               if (!entry.name.endsWith(".json")) continue;
-              const record = JSON.parse(
-                await fs.readFile(path.join(directory, entry.name), "utf8"),
-              );
+              const record = await read(entry.name.slice(0, -5));
+              if (disposed || context.signal?.aborted) break;
               if (record.state !== "queued") continue;
               const controller = new AbortController();
               const abort = () => controller.abort();
@@ -132,6 +161,7 @@ function createToolQueue(directory, execute) {
               active.set(record.id, controller);
               record.state = "running";
               await write(record);
+              if (disposed || context.signal?.aborted) controller.abort();
               try {
                 const result = await execute(record.request, {
                   signal: controller.signal,
@@ -159,6 +189,7 @@ function createToolQueue(directory, execute) {
             };
           } finally {
             consuming = false;
+            for (const resolve of idle.splice(0)) resolve();
           }
         }
         default:
