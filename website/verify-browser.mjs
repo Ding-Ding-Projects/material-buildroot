@@ -11,15 +11,18 @@ const target=process.env.DOCS_TEST_URL || 'http://127.0.0.1:8765/material-buildr
 const endpoint=new URL(target);
 if(!['127.0.0.1','localhost','ding-ding-projects.github.io'].includes(endpoint.hostname))throw new Error('Unexpected documentation test target');
 const publicBase='/material-buildroot/';
-const out=path.join(here,'evidence');
+// Keep exploratory captures outside tracked source inputs to avoid invalidating the build.
+const out=path.resolve(process.env.DOCS_EVIDENCE_DIR || path.join(root,'.cache','browser-evidence'));
+const outputRoot=path.resolve(process.env.DOCS_OUTPUT_ROOT || path.join(root,'docs'));
 await fs.mkdir(out,{recursive:true});
-const meta=JSON.parse(await fs.readFile(path.join(root,'docs/site/build-info.json'),'utf8'));
-const inventory=JSON.parse(await fs.readFile(path.join(root,'docs/site/document-inventory.json'),'utf8'));
+const meta=JSON.parse(await fs.readFile(path.join(outputRoot,'site/build-info.json'),'utf8'));
+const inventory=JSON.parse(await fs.readFile(path.join(outputRoot,'site/document-inventory.json'),'utf8'));
+const roadmap=JSON.parse(await fs.readFile(path.join(outputRoot,'site/roadmap.json'),'utf8'));
 const errors=[];
 const browser=await chromium.launch({headless:true,executablePath:process.env.DOCS_CHROMIUM_PATH || undefined});
 const receipt={schema:1,scope:'Initial documentation site only; no desktop, full shared feature parity, native host or companion proof.',route:endpoint.hostname==='ding-ding-projects.github.io'?'public-github-pages':'local-headless-chromium',browser:browser.version(),built_at:meta.built_at,input_snapshot_sha256:meta.input_snapshot_sha256,base_commit:meta.base_commit,inputs_differ_from_base:meta.inputs_differ_from_base,checks:[],captures:[]};
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-receipt.artifacts={html_sha256:sha(await fs.readFile(path.join(root,'docs/index.html'))),javascript_sha256:sha(await fs.readFile(path.join(root,'docs/site/assets/app.js'))),css_sha256:sha(await fs.readFile(path.join(root,'docs/site/assets/app.css')))};
+receipt.artifacts={html_sha256:sha(await fs.readFile(path.join(outputRoot,'index.html'))),javascript_sha256:sha(await fs.readFile(path.join(outputRoot,'site/assets/app.js'))),css_sha256:sha(await fs.readFile(path.join(outputRoot,'site/assets/app.css')))};
 const context=await browser.newContext({viewport:{width:1440,height:1100},deviceScaleFactor:1,colorScheme:'light'});
 const page=await context.newPage();
 page.on('pageerror',error=>errors.push(error.message));
@@ -36,34 +39,71 @@ async function chooseLanguage(value){
  ]);
 }
 async function ready(){await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('*')].filter(e=>e.localName.startsWith('md-')).map(e=>customElements.whenDefined(e.localName)));await Promise.all([...document.querySelectorAll('*')].filter(e=>e.updateComplete).map(e=>e.updateComplete));await document.fonts.ready;});}
-async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:'website/evidence/'+name+'.png',sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
+async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:path.relative(root,file).split(path.sep).join('/'),sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
 try{
- assert.equal((await page.goto(target)).status(),200);await ready();
+ const homeResponse=await page.goto(target);assert.equal(homeResponse.status(),200);await ready();
+ assert.equal(sha(await homeResponse.body()),receipt.artifacts.html_sha256,'Served HTML must match the selected output');
+ for(const [key,relative] of Object.entries({javascript_sha256:'site/assets/app.js',css_sha256:'site/assets/app.css'})){
+  const response=await context.request.get(new URL(relative,target).href);
+  assert.equal(response.status(),200);
+  assert.equal(sha(await response.body()),receipt.artifacts[key],`Served ${relative} must match the selected output`);
+ }
+ receipt.checks.push('Served HTML, JavaScript and CSS match the exact selected build output.');
  assert.equal(await page.locator('.phase, .task-mark').count(),0,'Home must not contain the full checklist');
- await page.locator('.actions md-filled-button').click();await ready();
+ assert.equal(await page.locator('.landing-home').count(),1);
+ const installer=page.locator('.hero-copy .actions md-filled-button');
+ assert.equal(await installer.getAttribute('href'),'https://github.com/Ding-Ding-Projects/material-buildroot/releases/download/v0.1.0/Setup.exe');
+ assert.equal(await page.locator('.landing-status .capability-card').count(),2);
+ const preview=page.locator('.product-preview img');
+ assert.equal(await preview.getAttribute('src'),publicBase+'site/source-assets/docs/evidence/desktop-shell/projects-dark.png');
+ assert.ok((await preview.getAttribute('alt'))?.trim(),'Product preview needs descriptive alternative text');
+ assert.ok(await preview.evaluate(image=>image.complete&&image.naturalWidth>0),'Product preview must load');
+ receipt.checks.push('Landing installer CTA names the published Windows asset without initiating a download; preview loads with alternative text and capability status is present.');
+ await page.locator('.actions md-outlined-button[href="'+publicBase+'site/roadmap.html"]').click();await ready();
  assert.match(page.url(),/site\/roadmap\.html$/);
- assert.equal(await page.locator('.category-card').count(),4);
+ assert.ok(await page.locator('.category-card').count()>0);
  await page.locator('.category-card md-list-item').first().click();await ready();
- assert.equal(await page.locator('.phase').count(),5);
- await page.locator('[data-phase-filter="planned"]').click();
- assert.equal(await page.locator('.phase:not([hidden])').count(),4);
- await page.locator('[data-phase-filter="started"]').click();
- assert.equal(await page.locator('.phase:not([hidden])').count(),1);
- await page.locator('.phase:not([hidden]) .phase-link').click();await ready();
- assert.match(page.url(),/site\/phases\/ph00\.html$/);
- assert.equal(await page.locator('.task-mark').count(),6);
- assert.match(await page.locator('article').innerText(),/PH00-T01/);
- await page.locator('.phase-pagination md-filled-button').click();await ready();
- assert.match(page.url(),/site\/phases\/ph01\.html$/);
- await page.locator('.phase-pagination md-outlined-button').click();await ready();
- assert.match(page.url(),/site\/phases\/ph00\.html$/);
+ const phaseIds=await page.locator('.phase-link').evaluateAll(links=>links.map(link=>link.getAttribute('href').split('/').pop().replace('.html','').toUpperCase()));
+ const categoryPhases=phaseIds.map(id=>{const phase=roadmap.phases.find(p=>p.id===id);assert.ok(phase,`Unknown phase ${id}`);return phase;});
+ assert.ok(categoryPhases.length>0);
+ for(const status of ['planned','started','complete','all']){
+  await page.locator('[data-phase-filter="'+status+'"]').click();
+  const expected=status==='all'?categoryPhases:categoryPhases.filter(p=>p.status===status);
+  assert.equal(await page.locator('.phase:not([hidden])').count(),expected.length,`Phase filter ${status}`);
+ }
+ await page.locator('.phase-link').first().click();await ready();
+ const firstPhase=categoryPhases[0];
+ assert.equal(new URL(page.url()).pathname,publicBase+'site/phases/'+firstPhase.id.toLowerCase()+'.html');
+ assert.equal(await page.locator('.task-mark').count(),firstPhase.tasks.length);
+ for(const task of firstPhase.tasks)assert.ok((await page.locator('article').innerText()).includes(task.id));
+ const nextPhase=roadmap.phases[roadmap.phases.findIndex(p=>p.id===firstPhase.id)+1];
+ if(nextPhase){
+  await page.locator('.phase-pagination md-filled-button').click();await ready();
+  assert.equal(new URL(page.url()).pathname,publicBase+'site/phases/'+nextPhase.id.toLowerCase()+'.html');
+  await page.locator('.phase-pagination md-outlined-button').click();await ready();
+  assert.equal(new URL(page.url()).pathname,publicBase+'site/phases/'+firstPhase.id.toLowerCase()+'.html');
+ }
  receipt.checks.push('Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.');
+ await page.locator('#doc-search').locator('input').fill('build');
+ const searchTotal=await page.evaluate(()=>JSON.parse(document.querySelector('#document-index').textContent).filter(d=>(d.title+' '+d.text).toLowerCase().includes('build')).length);
+ assert.equal(await page.locator('#search-results md-list-item').count(),Math.min(12,searchTotal));
+ assert.ok((await page.locator('.search-count').innerText()).startsWith(searchTotal+' matching '));
+ if(searchTotal>12)assert.match(await page.locator('.search-count').innerText(),/showing the first 12/);
+ await page.locator('#doc-search').locator('input').press('ArrowDown');
+ assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('#search-results md-list-item')),true);
+ await page.keyboard.press('Escape');
+ assert.equal(await page.locator('#search-results').isHidden(),true);
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'doc-search');
  await page.locator('#doc-search').locator('input').fill('Kconfig');
+ await page.mouse.click(1430,1090);
+ assert.equal(await page.locator('#search-results').isHidden(),true);
+ await page.locator('#doc-search').locator('input').focus();
+ assert.equal(await page.locator('#search-results').isHidden(),false);
  assert.ok(await page.locator('#search-results md-list-item').count()>0);
  await page.locator('#search-results md-list-item').first().click();
  assert.equal(await page.locator('article').count(),1);
  assert.ok((await page.locator('article').innerText()).length>100);
- receipt.checks.push('Document search finds content and opens a fully rendered article.');
+ receipt.checks.push('Document search reports the full match count, caps results truthfully, supports keyboard focus and Escape/outside dismissal, and opens a complete article.');
  await page.goto(target);await ready();
  await page.locator('#theme').click();
  assert.equal(await page.getAttribute('html','data-theme'),'dark');
@@ -93,6 +133,7 @@ try{
  await page.locator('#menu').click();
  assert.equal(await page.locator('#menu').locator('button').getAttribute('aria-expanded'),'true');
  assert.equal(await page.locator('.sidebar').evaluate(e=>e.inert),false);
+ assert.equal(await page.locator('.skip').evaluate(e=>e.inert),true);
  await page.setViewportSize({width:320,height:568});
  await page.locator('.sidebar md-list-item').last().scrollIntoViewIfNeeded();
  assert.ok(await page.locator('.sidebar').evaluate(e=>e.scrollHeight>e.clientHeight));
@@ -100,6 +141,12 @@ try{
  assert.equal(await page.locator('#menu').locator('button').getAttribute('aria-expanded'),'false');
  assert.equal(await page.locator('.sidebar').evaluate(e=>e.inert),true);
  assert.equal(await page.evaluate(()=>document.activeElement.id),'menu');
+ assert.equal(await page.locator('.skip').evaluate(e=>e.inert),false);
+ await page.setViewportSize({width:1440,height:1000});
+ await page.locator('.sidebar md-list-item').first().focus();
+ await page.setViewportSize({width:390,height:844});
+ await page.waitForFunction(()=>document.activeElement.id==='menu');
+ assert.equal(await page.locator('.sidebar').evaluate(e=>e.inert),true);
  await page.setViewportSize({width:390,height:844});
  await capture('home-mobile');
  receipt.checks.push('Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation opens and Escape closes it.');
@@ -116,7 +163,7 @@ try{
  }
  receipt.document_routes=routes;
  receipt.checks.push(`All ${routes.length} current document routes render their complete article at mobile width without page overflow.`);
- const pageInventory=JSON.parse(await fs.readFile(path.join(root,'docs/site/page-inventory.json'),'utf8'));
+ const pageInventory=JSON.parse(await fs.readFile(path.join(outputRoot,'site/page-inventory.json'),'utf8'));
  const extraRoutes=pageInventory.filter(route=>!route.startsWith('site/articles/'));
  for(const route of extraRoutes){
   const relative=route==='index.html'?'':route;
