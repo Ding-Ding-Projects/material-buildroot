@@ -1,5 +1,14 @@
 # Handoff
 
+## Request admission and built-reference findings, 2026-10-15
+
+The serialized-operation parser and exact action union are implemented, with nine focused tests passing on pinned Node.js 24.22.0. Independent review reproduced numeric precision loss in the first candidate; the repaired original-lexeme check now rejects fractions, exponent notation, underflow and negative zero. The independent rerun reached no remaining parser finding. This admits request data only; caller authentication, capabilities, revisions, durable idempotency, IPC and effects remain unwired.
+
+The original built matrix is complete: 222 page captures (30 declared states plus 48 browser tuples for each of four representative workspaces), zero body-overflow observations, zero relevant console/network observations, and 55 observations of the two unnamed controls. Device scale factor is not native Windows scaling. Owned browsers, servers and hidden desktops ended. Three isolated profiles remain because automatic approval review rejected their scoped deletion. Raw evidence is retained privately and has not been promoted as public screenshots.
+
+The actual reference build from e16fa45fc73d24480b80c4db2eab695bcbe57b2d succeeded with receipt SHA-256 99a6b5a5d9b5da35b0cc23b5986f6302d7d296e01d1f3c0ac7e59f23433cec0f. Built checks confirmed component registration and five repaired flows, but disproved the earlier claim that all six repairs reached source: creation identity still omitted jobs. The corrected source now includes the full draft, with readback. The built accessibility tree also exposed unnamed follow/review controls; explicit localized names are now authored. Those three source corrections need a new build and focused runtime rerun. The ongoing original matrix remains bound to e16fa45 and is not proof for this newer source.
+
+
 ## Build and reference source checkpoint, 2026-10-15
 
 Root build, installer and dependency entrypoints now share a pinned manifest, complete portable-tree verification, exclusive producer ownership, source/index binding and output receipts/recovery. Cold acquisition obtained Node.js 24.22.0 and MinGit 2.56.0.2 and installed 311 locked npm packages. Six build-tool tests pass, including real PowerShell 5.1 activation/recovery and real junction rejection. The existing 17 ledger tests remain a separate admission result.

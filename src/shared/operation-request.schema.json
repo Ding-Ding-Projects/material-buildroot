@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:material-buildroot:operation-request:v1",
+  "title": "Operation request, version 1",
+  "description": "Validated input only. Authorization, revision checks and execution remain separate broker obligations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "operationId",
+    "projectId",
+    "expectedRevision",
+    "capability",
+    "action",
+    "arguments"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "expectedRevision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "capability": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{32,128}$"
+    },
+    "action": {
+      "enum": [
+        "settings.setLanguage",
+        "projects.create",
+        "builds.preview",
+        "builds.submit",
+        "jobs.cancel"
+      ]
+    },
+    "arguments": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "settings.setLanguage"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "language"
+            ],
+            "properties": {
+              "language": {
+                "enum": [
+                  "en",
+                  "zh-HK",
+                  "bilingual"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "projects.create"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "runtime",
+              "destinationCapability",
+              "name"
+            ],
+            "properties": {
+              "runtime": {
+                "enum": [
+                  "wsl",
+                  "docker",
+                  "ssh-linux-process",
+                  "ssh-linux-container",
+                  "ssh-windows-wsl",
+                  "ssh-windows-docker",
+                  "actions-linux"
+                ]
+              },
+              "destinationCapability": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{32,128}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^(?=.*\\S)[^\\u0000-\\u001f\\u007f]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "builds.preview"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "configurationRevision",
+              "target"
+            ],
+            "properties": {
+              "configurationRevision": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "target": {
+                "enum": [
+                  "image",
+                  "sdk",
+                  "toolchain"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "builds.submit"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "previewId",
+              "previewSha256"
+            ],
+            "properties": {
+              "previewId": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 128
+              },
+              "previewSha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "jobs.cancel"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "jobId",
+              "expectedSequence"
+            ],
+            "properties": {
+              "jobId": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 128
+              },
+              "expectedSequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

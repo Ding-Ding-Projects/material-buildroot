@@ -1,11 +1,29 @@
-export type Backend = 'wsl' | 'docker';
-export type Language = 'en' | 'yue' | 'both';
-export interface Project { id: string; name: string; root: string; output: string; backend: Backend; distro: string; image: string; jobs: number; external: string; }
-export interface SymbolNode { id: string; name: string; prompt: string; type: string; value: string; help: string; visible: boolean; assignable: string[]; children: SymbolNode[]; choices?: string[]; }
-export interface TaskEvent { taskId: string; kind: 'log'|'state'|'progress'; text: string; stream?: string; state?: string; timestamp: string; }
-export interface Result { ok: boolean; error?: string; [key: string]: unknown; }
-export interface StudioAPI {
-  invoke(action: string, payload?: Record<string, unknown>): Promise<any>;
-  onEvent(listener: (event: TaskEvent) => void): () => void;
+export type Language = 'en' | 'zh-HK' | 'bilingual';
+export type Runtime = 'wsl' | 'docker' | 'ssh-linux-process' | 'ssh-linux-container' | 'ssh-windows-wsl' | 'ssh-windows-docker' | 'actions-linux';
+interface RequestIdentity {version: 1; operationId: string; projectId: string; expectedRevision: string; capability: string;}
+export interface ActionArguments {
+  'settings.setLanguage': {language: Language};
+  'projects.create': {runtime: Runtime; destinationCapability: string; name: string};
+  'builds.preview': {configurationRevision: string; target: 'image' | 'sdk' | 'toolchain'};
+  'builds.submit': {previewId: string; previewSha256: string};
+  'jobs.cancel': {jobId: string; expectedSequence: number};
 }
-declare global { interface Window { studio: StudioAPI; } }
+export type OperationRequest = {[Action in keyof ActionArguments]: RequestIdentity & {action: Action; arguments: ActionArguments[Action]}}[keyof ActionArguments];
+export type OperationFailureCode =
+  | 'REQUEST_TYPE' | 'REQUEST_TOO_LARGE' | 'REQUEST_ENCODING' | 'REQUEST_SYNTAX'
+  | 'REQUEST_DEPTH' | 'REQUEST_COMPLEXITY' | 'REQUEST_UNSAFE_KEY'
+  | 'REQUEST_DUPLICATE_KEY' | 'REQUEST_NUMBER' | 'REQUEST_SCHEMA'
+  | 'UNAUTHORIZED' | 'STALE_REVISION' | 'IDEMPOTENCY_CONFLICT' | 'UNAVAILABLE' | 'NOT_IMPLEMENTED';
+export type OperationReply<Result = unknown> =
+  | {ok: true; operationId: string; revision: string; result: Result}
+  | {ok: false; code: OperationFailureCode; message: string};
+export interface OperationEvent {
+  version: 1; operationId: string; sequence: number; timestamp: string;
+  state: 'accepted' | 'running' | 'cancelling' | 'cancelled' | 'succeeded' | 'failed' | 'interrupted' | 'partial';
+}
+/** The production preload must implement this narrow contract; no bridge is installed yet. */
+export interface StudioAPI {
+  request(request: OperationRequest): Promise<OperationReply>;
+  onEvent(listener: (event: OperationEvent) => void): () => void;
+}
+declare global {interface Window {studio: StudioAPI;}}

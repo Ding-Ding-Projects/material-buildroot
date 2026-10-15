@@ -1,6 +1,6 @@
 # Architecture and implementation handoff
 
-Status: proposed design, no handlers or runtimes implemented. This document resolves planning review findings; it does not approve dependency versions or claim runtime conformance.
+Status: proposed execution architecture with a locally verified serialized-request parser. No IPC handlers or runtimes are implemented. The [parser article](../security/operation-requests.md) names its exact admitted dependencies and evidence; this document does not claim runtime conformance.
 
 ## Shared operation envelope
 
