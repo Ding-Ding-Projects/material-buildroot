@@ -61,6 +61,7 @@ export class ExecutionService {
     docker: ExecutionResult & { available: boolean };
     wsl: Partial<ExecutionResult> & { distributions: string[] };
   }>;
+  probeResources(request: { grantId: string; runtime: ExecutionRuntime }): Promise<{ cpuSlots: number | null; memoryAvailableBytes: number | null; storageAvailableBytes: number | null; observedAt: string; constraintModel: "unknown" | "cgroup-v2-and-affinity" }>;
   probeEnvironment(request: {
     grantId: string;
     runtime: ExecutionRuntime;

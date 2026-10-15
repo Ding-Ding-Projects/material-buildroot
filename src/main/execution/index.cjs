@@ -163,6 +163,30 @@ const LINUX_SCRIPT =
   'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "$4"';
 const ENVIRONMENT_SCRIPT =
   'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; gcc -dumpmachine; gcc -dumpfullversion -dumpversion';
+const RESOURCE_SCRIPT = `set -eu
+ test "$(id -u)" -ne 0 || exit 77
+ cpu=unknown; memory=unknown
+ group=$(awk -F: '$1 == "0" {print $3}' /proc/self/cgroup)
+ case "$group" in /*) ;; *) group=unknown ;; esac
+ case "$group" in *..*) group=unknown ;; esac
+ if test "$group" != unknown && test -d "/sys/fs/cgroup$group"; then
+   cpu=$(awk '/^Cpus_allowed_list:/ {n=split($2,a,","); c=0; for(i=1;i<=n;i++){m=split(a[i],b,"-");c+=m==2?b[2]-b[1]+1:1} print c}' /proc/self/status)
+   memory=$(awk '/^MemAvailable:/ {printf "%.0f", $2*1024}' /proc/meminfo)
+   node="/sys/fs/cgroup$group"
+   test "$group" = / && node=/sys/fs/cgroup
+   while :; do
+     if ! test -r "$node/cpu.max" || ! test -r "$node/memory.max" || ! test -r "$node/memory.current"; then cpu=unknown; memory=unknown; break; fi
+     read quota period < "$node/cpu.max"
+     if test "$quota" != max; then capacity=$((quota / period)); if test "$capacity" -lt "$cpu"; then cpu=$capacity; fi; fi
+     maximum=$(cat "$node/memory.max")
+     if test "$maximum" != max; then current=$(cat "$node/memory.current"); remaining=$((maximum - current)); if test "$remaining" -lt 0; then remaining=0; fi; if test "$remaining" -lt "$memory"; then memory=$remaining; fi; fi
+     test "$node" = /sys/fs/cgroup && break
+     node=$(dirname "$node")
+   done
+ fi
+ storage=$(df -Pk "$1" | awk 'NR==2 {printf "%.0f", $4*1024}')
+ printf '%s\n%s\n%s\n' "$cpu" "$memory" "$storage"
+`;
 class ExecutionService {
   constructor({
     platform = process.platform,
@@ -314,6 +338,38 @@ class ExecutionService {
             : [],
       },
     };
+  }
+  async probeResources(request) {
+    if (!request || typeof request !== "object" || Array.isArray(request) || Object.keys(request).length !== 2 || !Object.hasOwn(request, "grantId") || !Object.hasOwn(request, "runtime")) throw new Error("invalid-resource-probe");
+    const grant = this.grants.get(request.grantId); if (!grant) throw new Error("grant-unavailable");
+    const validate = () => {
+      if (this.grants.get(request.grantId) !== grant) throw new Error("grant-unavailable");
+      for (const key of ["root", "source", "output"]) {
+        const stat = fs.statSync(grant[key]);
+        if (canonicalDirectory(grant[key]) !== grant[key] || `${stat.dev}:${stat.ino}` !== grant.identities[key]) throw new Error("grant-path-changed");
+      }
+      this.validateExternal(grant);
+    };
+    validate(); const runtime = request.runtime; let file, args, onTerminate;
+    if (runtime?.kind === "docker") {
+      if (!/^[a-z0-9][a-z0-9./_-]*@sha256:[a-f0-9]{64}$/.test(runtime.image || "") || !Number.isSafeInteger(runtime.uid) || runtime.uid < 1 || runtime.uid > 4294967294 || !Number.isSafeInteger(runtime.gid) || runtime.gid < 1 || runtime.gid > 4294967294) throw new Error("invalid-container-runtime");
+      const name = `material-buildroot-resources-${crypto.randomUUID()}`; file = this.executables.docker;
+      args = ["run", "--rm", "--pull=never", "--name", name, "--user", `${runtime.uid}:${runtime.gid}`, "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=64", "--memory=4g", "--cpus=2", "--cgroupns=host", "--network=none", "--mount", `type=bind,src=${grant.output},dst=/output,readonly`, "--entrypoint", "/bin/sh", runtime.image, "-c", RESOURCE_SCRIPT, "resources", "/output"];
+      onTerminate = async () => { const stopped = await boundedProcess(file, ["stop", "--time", "2", name], { timeoutMs: 5000 }).completion; if (stopped.state !== "succeeded") throw new Error("container-stop-failed"); };
+    } else if (runtime?.kind === "wsl") {
+      if (this.platform !== "win32" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(runtime.distribution || "")) throw new Error("invalid-wsl-runtime");
+      file = this.executables.wsl;
+      const translated = await boundedProcess(file, ["--distribution", runtime.distribution, "--exec", "wslpath", "-a", "-u", grant.output]).completion;
+      const output = translated.stdout.trim(); if (translated.state !== "succeeded" || !/^\/[A-Za-z0-9_/.+-]+$/.test(output)) throw new Error("wsl-path-translation-failed");
+      validate(); args = ["--distribution", runtime.distribution, "--exec", "timeout", "--signal=TERM", "--kill-after=1s", "8s", "/bin/sh", "-c", RESOURCE_SCRIPT, "resources", output];
+    } else if (runtime?.kind === "linux-fixture" && this.linuxFixture && this.platform !== "win32") {
+      if (process.getuid() === 0) throw new Error("non-root-required"); file = "/bin/sh"; args = ["-c", RESOURCE_SCRIPT, "resources", grant.output];
+    } else throw new Error("runtime-unavailable");
+    const result = await boundedProcess(file, args, { timeoutMs: 10000, maxBytes: 4096, onTerminate }).completion; validate();
+    if (result.state !== "succeeded") { if (result.code === 77) throw new Error("non-root-required"); throw new Error(`resource-probe-${result.state}`); }
+    const lines = result.stdout.trim().split(/\r?\n/); if (lines.length !== 3) throw new Error("invalid-resource-output");
+    const values = lines.map(value => { if (value === "unknown") return null; if (!/^[0-9]+$/.test(value) || !Number.isSafeInteger(Number(value))) throw new Error("invalid-resource-output"); return Number(value); });
+    return { cpuSlots: values[0], memoryAvailableBytes: values[1], storageAvailableBytes: values[2], observedAt: new Date().toISOString(), constraintModel: values[0] === null || values[1] === null ? "unknown" : "cgroup-v2-and-affinity" };
   }
   async probeEnvironment(request) {
     if (

@@ -526,3 +526,18 @@ test("compiler target architecture follows Buildroot normalization independently
     assert.equal(result.hostGccVersion, "13.3.0");
   }
 });
+test('resource probe uses read-only output mount and preserves explicitly unknown measurements', async t => {
+  const dirs = fixture(t), executable = path.join(dirs.root, 'docker-resources-fixture'), record = path.join(dirs.root, 'resource-argv.json');
+  fs.writeFileSync(executable, '#!/usr/bin/env node\nrequire("fs").writeFileSync(' + JSON.stringify(record) + ',JSON.stringify(process.argv.slice(2)));process.stdout.write("2\\n2048\\n4096\\n");\n'); fs.chmodSync(executable, 0o755);
+  const service = new ExecutionService({ executables: { docker: executable } }), grant = service.grantProject(dirs), runtime = { kind: 'docker', image: 'build@sha256:' + 'a'.repeat(64), uid: 1000, gid: 1000 };
+  const result = await service.probeResources({ grantId: grant.grantId, runtime }); assert.equal(result.cpuSlots, 2); assert.equal(result.memoryAvailableBytes, 2048); assert.equal(result.storageAvailableBytes, 4096); assert.equal(result.constraintModel, 'cgroup-v2-and-affinity');
+  const argv = JSON.parse(fs.readFileSync(record, 'utf8')); assert.ok(argv.includes(`type=bind,src=${dirs.output},dst=/output,readonly`)); assert.ok(argv.includes('--read-only')); assert.ok(argv.includes('--network=none')); assert.ok(argv.some(value => value.includes('memory.current')));
+  fs.writeFileSync(executable, '#!/usr/bin/env node\nprocess.stdout.write("unknown\\nunknown\\n4096\\n");\n'); const unknown = await service.probeResources({ grantId: grant.grantId, runtime }); assert.equal(unknown.cpuSlots, null); assert.equal(unknown.memoryAvailableBytes, null); assert.equal(unknown.constraintModel, 'unknown');
+  await assert.rejects(service.probeResources({ grantId: grant.grantId, runtime, script: 'id' }), /invalid-resource-probe/);
+});
+test('real non-root Linux resources probe reports available filesystem bytes without modifying output', { skip: process.platform === 'win32' }, async t => {
+  const dirs = fixture(t); fs.chmodSync(dirs.root, 0o755);
+  const script = `const {ExecutionService}=require(${JSON.stringify(require.resolve('../src/main/execution/index.cjs'))});(async()=>{const s=new ExecutionService({linuxFixture:true});const g=s.grantProject(${JSON.stringify(dirs)});process.stdout.write(JSON.stringify(await s.probeResources({grantId:g.grantId,runtime:{kind:'linux-fixture'}})));})().catch(e=>{console.error(e);process.exitCode=1});`;
+  const result = process.getuid() === 0 ? await boundedProcess('/usr/sbin/runuser', ['-u', 'nobody', '--', process.execPath, '-e', script]).completion : await boundedProcess(process.execPath, ['-e', script]).completion;
+  assert.equal(result.state, 'succeeded', result.stderr); const resources = JSON.parse(result.stdout); assert.ok(Number.isSafeInteger(resources.storageAvailableBytes)); assert.ok(resources.storageAvailableBytes >= 0); assert.ok(resources.cpuSlots === null || Number.isSafeInteger(resources.cpuSlots)); assert.deepEqual(fs.readdirSync(dirs.output), []);
+});
