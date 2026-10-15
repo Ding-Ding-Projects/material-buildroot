@@ -1,0 +1,65 @@
+# Scheduled settings evaluator and transaction seam
+
+`src/shared/scheduled-settings.mjs` is a portable offline scheduling candidate. It validates rules, evaluates civil-time windows, resolves temporary per-setting overrides, guards external-source results, and defines a persistence/history transaction seam. It performs no network access, native storage operation, setting mutation, timer polling, token lookup, or renderer action. Existing application build-job scheduling has a different purpose. The sibling browser preference schema is not adopted or claimed compatible.
+
+## Explicit admitted setting registry
+
+Every operation requires a host-admitted registry mapping exact setting keys to synchronous validators. Keys are flat identities, never object paths to execute. Only registered settings with values accepted by their validator can appear in base values, rule values, or external results. The generic core does not ship a frozen hand-picked appearance list; consumers must admit their actual language, theme, density, color, typography, motion, display-name and other exposed appearance/customization consumers independently. Each validator must enforce its real consumer's complete value schema. Never admit credentials, authorization, file authority, private vocabulary, or broker effects as schedule settings. An asynchronous validator does not count as a successful validation.
+
+The evaluator returns an isolated flat values object and provenance. It never assigns arbitrary nested properties, evaluates code, changes permanent base settings, or claims that a GUI actually applied the returned values. Actual application/reset, unavailable-value explanations, School mode precedence, localization, visible scheduling controls, search/palette routes and accessibility remain consumer integration work.
+
+## Version 1 rule document
+
+The exact root fields are `schemaVersion: 1`, nonnegative integer `revision`, explicit `timeZone`, and ordered `rules`. Unknown versions have no silent migration. Revision is bounded below the largest JavaScript safe integer; the store rejects revision exhaustion instead of wrapping. Timezone must be understood by the installed `Intl.DateTimeFormat` implementation. Use an explicit IANA timezone or UTC; ICU aliases accepted by the runtime remain accepted rather than inventing a separate timezone table.
+
+Each rule has exactly `id`, `label`, `enabled`, `priority`, `startDate`, `endDate`, `startTime`, `endTime`, `days`, `values`, and `source`. IDs are stable one-to-80-character ASCII identifiers, unique within the document. Labels contain one to 160 Unicode code points without C0/DEL controls. Enabled is Boolean; priority is an integer from -1000 to 1000. Dates are null or real Gregorian `YYYY-MM-DD` dates, years 0001–9999, with inclusive start/end bounds. Times are required `HH:mm` values from 00:00 through 23:59; a partial window is rejected. Days is exactly `{type: 'everyday'}` or `{type: 'weekdays', weekdays: [...]}` with one to seven unique numbers, Sunday 0 through Saturday 6. Every day is one rule, not seven copies. Values is a nonempty map of admitted setting values. Empty schedules are valid.
+
+Limits are 262,144 original UTF-8 document bytes, 256 rules, eight nested container levels, 256 keys per object, 256 array items, 160 Unicode code points per object key, 4,096 per generic string, and 16,384 serialized UTF-8 bytes per setting-values map. Narrower field/source limits also apply. Scalars must be JSON-compatible and finite. Unsafe object keys, extra root/rule/source fields, duplicate decoded JSON keys, invalid UTF-8, malformed JSON, invalid calendar dates and unsupported settings are rejected as a whole. `parseScheduleBytes(bytes, options)` enforces original wire bytes and duplicate keys before returning a validated document; `validateScheduleDocument(input, options)` validates already parsed data and returns an isolated copy. Typed callers must not silently feed a duplicate-key JSON payload through ordinary JSON.parse first.
+
+## Civil-time and daylight-saving semantics
+
+`evaluateSchedule({document, base, at, registry, ...sourceOptions})` takes an explicit epoch-millisecond instant. It uses `Intl.DateTimeFormat` with the document timezone, Gregorian calendar, Latin digits and a 24-hour clock to find the actual local civil date and minute. No local UTC offset is invented. Start is inclusive, end exclusive.
+
+A start earlier than end is an ordinary same-day window. A start later than end crosses midnight: the early-morning segment belongs to the previous civil start date for both date bounds and weekday selection. A Friday window ending Saturday at 02:00 still applies Saturday at 01:59 even if Friday was the final allowed start date. Saturday at 02:00 is outside it. Before the first allowed start date, an early-morning segment cannot borrow a future start date.
+
+Equal start/end means the entire selected civil calendar day, midnight through the following midnight, regardless of the displayed equal time. It is not a 24-hour elapsed duration anchored at that time. Thus a daylight-saving spring day may have 23 actual hours and an autumn day 25. Nonexistent spring-forward minutes never match because no actual instant has that wall time. Repeated fall-back minutes match during both occurrences. Calendar-day subtraction for overnight anchoring uses a Gregorian date representation only, not timezone-offset arithmetic.
+
+Among matching rules, greater priority wins; equal priority uses the later document-array position. Resolution occurs separately for each setting, so a high-priority rule that changes only theme cannot erase a lower-priority language override. When an override ends, each setting returns to another matching rule or its unchanged base value. No derived remote value is persisted into permanent base settings.
+
+## Sources and actual privileged boundaries
+
+Source is one of these exact descriptors:
+
+- Local: `{type: 'local'}`. Apply the rule's admitted local values.
+- HTTPS: `{type: 'https', url, refreshMs, timeoutMs, maxResponseBytes}`. A validated response can supply any subset of the exact setting keys admitted by that rule's values map, never other settings.
+- Home Assistant: `{type: 'home-assistant', baseUrl, entityId, refreshMs, timeoutMs, maxResponseBytes}`. The base URL must be an origin root. Entity is a `binary_sensor` or `input_boolean` with a bounded lowercase identifier. Boolean on enables the rule's local values; off applies no values.
+
+The host supplies an exact allowed-origin list. URLs must already have canonical spelling, an ASCII path, no duplicate slash segments, and no query, fragment or embedded credentials. Dot traversal and encoded path components are rejected rather than normalized into a different destination. HTTPS is required. HTTP is accepted only when the host separately enables loopback development transport and admits the exact `localhost`, `127.0.0.1`, or `[::1]` origin and port. Refresh intervals are 30 seconds to 24 hours, timeout 100 milliseconds to 30 seconds, response limit one to 65,536 bytes. Tokens and vault references are not allowed descriptor fields.
+
+These syntax checks do not resolve DNS or establish SSRF safety. A future admitted privileged network provider must independently enforce resolved destination/pinning policy, deny redirects and private/link-local/metadata destinations except explicitly enrolled Home Assistant or development destinations, bound original response bytes and execution time, own cancellation, and classify offline/authentication/rate-limit failures truthfully. Home Assistant tokens must come from that provider's protected vault binding under a stable account key and never enter rules, responses, logs or ordinary history. No fake fetch or ignored credentials exist in this candidate because it implements no provider.
+
+## External result generation and cancellation
+
+`createExternalScheduleCoordinator(options)` coordinates actual future provider calls without making them:
+
+1. `reset(document)` validates the exact new configuration, increments generation, aborts existing requests, and revokes all old result receipts. Call on every document change, including same-revision external edits.
+2. `reconcile(document, at)` aborts requests and removes results for windows that have become inactive. Call when observing a new clock state before deciding whether to fetch. Re-entry can then request fresh activation data.
+3. `begin(document, ruleId, at)` admits an active external rule, checks exact document identity, enforces its minimum refresh interval, and returns a single request token with `AbortSignal`. Starting a permitted replacement request aborts the old one. The privileged provider uses only the admitted rule descriptor, never renderer-supplied network instructions.
+4. `settleBytes(token, bytes, at)` parses bounded original UTF-8 bytes, rejects duplicate keys and validates the response. `settle(token, payload, at)` is the already-strictly-parsed provider seam. Obsolete or consumed tokens, elapsed timeout, cancelled generations and invalid values cannot replace a newer result. An obsolete malformed response cannot abort a current request.
+5. `snapshot()` supplies immutable, ephemeral receipts for `evaluateSchedule`; `cancel()` aborts and revokes everything. A captured old snapshot is revoked by cancellation or result replacement. Receipts bind exact configuration identity and cannot be reconstructed by serialization or replayed against same-revision rule edits.
+
+The exact response is `{schemaVersion: 1, status, values}`. Status is `ready`, `off`, or `failed`. HTTPS ready values must be a nonempty valid subset of rule keys; off/failed values must be empty. Home Assistant responses always have empty values: ready means verified on and uses the rule's local values. Off means verified off. The provider must map actual validated Home Assistant Boolean state into that result; missing token/unavailable/unknown states must never become ready.
+
+Valid results expire after one admitted refresh interval from observation. Absent, expired, failed, invalid and off results fall through to another matching local rule or base per setting. Generic issue codes and rule IDs identify recovery context without preserving response bodies or tokens. The coordinator supplies generation guards, not an automatic background loop. The host still owns bounded activation/background refresh, clock-change observation and localized nonblocking recovery notifications.
+
+## Persistence and history seam
+
+`createScheduleStore({adapter, ...options})` serializes `load()` and `replace(document, {expectedRevision})`. It snapshots candidate data, reloads and validates committed bytes, checks revision, then asks the adapter to atomically compare the exact observed bytes and commit new bytes plus a history receipt. Missing storage uses expectedRevision null; the first committed revision is zero. Later replacements increment exactly once. The final document is revalidated after incrementing, so revision growth cannot publish an oversized record. Queue failure does not poison future operations.
+
+The required adapter is `read(): Promise<Uint8Array|null>` and `commit({expectedBytes, bytes, receipt}): Promise<boolean>`. Commit must return true only when exact observed-byte comparison, document persistence and append-only history receipt are one committed operation. False means conflict; exceptions mean unavailable. Receipt includes only version, create/update action and from/to revision. The actual owner can bind it to its complete approved history model in that transaction. This seam does not itself provide a filesystem lock, atomic compare-and-exchange, browser transaction, durable history backend or independent-process ownership. An adapter that updates document and history separately does not satisfy it. No workspace store or host storage was changed in this unit.
+
+## Actual verification and remaining acceptance
+
+`node --test tests/scheduled-settings.test.mjs` passes twelve focused tests on Linux. They exercise per-setting precedence/base restoration, everyday and selected weekdays, date boundaries, overnight end-date spillover, equal whole-day semantics, actual IANA timezone conversion, both repeated DST hours, skipped spring minutes and a 23-hour calendar day; strict limits/schema/source admission; stale/timeout/invalid/off results; Home Assistant Boolean behavior; duplicate raw responses; cancellation/revocation; exact configuration binding; and serialized transaction/history conflict/failure/reload behavior and exact revision-growth byte boundaries with an in-memory adapter.
+
+The module performs no network or native mutation. Real host/browser persistence, actual HTTPS/Home Assistant providers and token vaults, full registered setting consumers, schedule editor and history UI, localization/accessibility, supported-host clock changes, runtime screenshots, native Windows and independent A/D/C acceptance remain open. Passing offline core tests does not complete the scheduled-settings feature.
