@@ -1,45 +1,131 @@
-# Material workspace screenshot gallery
+# Current Material workspace gallery
 
-These genuine, inspected Linux Chromium source previews document application source `7c14df34ffe785e2a7e108b17f839e15668d1183`. They are browser captures of the real renderer, not packaged Windows captures. No image has been composited or retouched.
+Twenty-four genuine, unretouched Linux Chromium captures show twelve workflows at application source `e8f9bebf2b96397b00000be485870a61c16cb3e2`. The capture began at `2026-10-15T21:31:33.702Z` and completed at `2026-10-15T21:31:45.687Z`. All 24 originals were decoded and visually reviewed; each copied PNG was verified byte-for-byte against its recorded SHA-256.
 
-The workspace and onboarding fixtures use the actual local workspace service. Tools and companion captures use typed fixture replies and show the panels before native configuration. They do not prove file-picker, executable, TLS, LAN, build, guest or installer behavior. Native Windows runtime verification is deferred.
+These are renderer source-preview captures, not packaged Windows acceptance. The actual local workspace service supplies saved plans and setup state. The actual offline documentation service reads its verified 66-article bundle, whose incomplete-resource status is retained. Native runtime, file grants, source/configuration observations, tools, model and companion responses use explicit typed fixtures. No build, installed model, managed guest, native picker, TLS connection or host operation is implied by a screenshot.
 
-The renderer suite passed 52 cases. A separate passing onboarding recapture waited for the Material field transition to finish before taking the image. [Capture hashes, dimensions, source bindings and timestamps](captures.json) retain the exact scope. [Earlier packaged Windows captures](../desktop-shell/README.md) remain historical.
+The [capture manifest](current/captures.json) records all image hashes, per-image capture clocks, exact source-file hashes, documentation index/snapshot hashes, workflow boundaries, and language/theme/viewport/scale. Its SHA-256 is `8df213e5a7d39fce3bdcbe2ac8ad78c8241c3c9193721deedef8cb66a6d0d9c4`. The source cleanliness claim is scoped to the capture-bound files; unrelated backend work was ongoing. All captures use display scale 1 and reduced motion.
 
-## Workspace and practical setup
+Each workflow has English/light at 1440 × 960 and bilingual/dark at 960 × 960. Long bilingual navigation labels may truncate while retaining complete accessible names. Lower form sections remain available through normal editor scrolling. These frames do not establish every language/theme/DPI combination or animation behavior.
 
-### Workspace, English, dark, 1440 × 960
+[Historical screenshots and original provenance](../ARCHIVE.md) remain separate. Earlier files and their original manifest are unchanged.
 
-![Workspace, English, dark, 1440 × 960](workspace-en-dark.png)
+## Runtime and project setup
 
-### Workspace, English, light, 1440 × 960
+### English, light, 1440 × 960
 
-![Workspace, English, light, 1440 × 960](workspace-en-light.png)
+![Runtime and project setup: English, light, 1440 × 960](current/runtime-en-light-1440.png)
 
-### Workspace, Hong Kong Cantonese, light, 1440 × 960
+### Bilingual, dark, 960 × 960
 
-![Workspace, Hong Kong Cantonese, light, 1440 × 960](workspace-zh-hk-light.png)
+![Runtime and project setup: Bilingual, dark, 960 × 960](current/runtime-bilingual-dark-960.png)
 
-### Workspace, bilingual, dark, 1440 × 960
+## Source management
 
-![Workspace, bilingual, dark, 1440 × 960](workspace-bilingual-dark.png)
+### English, light, 1440 × 960
 
-### Workspace, bilingual, dark, 960 × 640, scrollable editor
+![Source management: English, light, 1440 × 960](current/source-en-light-1440.png)
 
-![Workspace, bilingual, dark, 960 × 640, scrollable editor](workspace-bilingual-compact.png)
+### Bilingual, dark, 960 × 960
 
-### Tools component fixture, bilingual, light, full-page capture
+![Source management: Bilingual, dark, 960 × 960](current/source-bilingual-dark-960.png)
 
-![Tools component fixture, bilingual, light, full-page capture](tools-bilingual-light.png)
+## Package dependency canvas
 
-### Companion component fixture, bilingual, light, unconfigured
+### English, light, 1440 × 960
 
-![Companion component fixture, bilingual, light, unconfigured](companion-bilingual-light.png)
+![Package dependency canvas: English, light, 1440 × 960](current/package-canvas-en-light-1440.png)
 
-### Companion component fixture, bilingual, dark, unconfigured
+### Bilingual, dark, 960 × 960
 
-![Companion component fixture, bilingual, dark, unconfigured](companion-bilingual-dark.png)
+![Package dependency canvas: Bilingual, dark, 960 × 960](current/package-canvas-bilingual-dark-960.png)
 
-### Practical onboarding, English, step 2, real saved-plan workflow
+## Guest topology canvas
 
-![Practical onboarding, English, step 2, real saved-plan workflow](onboarding.png)
+### English, light, 1440 × 960
+
+![Guest topology canvas: English, light, 1440 × 960](current/guest-canvas-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Guest topology canvas: Bilingual, dark, 960 × 960](current/guest-canvas-bilingual-dark-960.png)
+
+## Configuration
+
+### English, light, 1440 × 960
+
+![Configuration: English, light, 1440 × 960](current/configuration-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Configuration: Bilingual, dark, 960 × 960](current/configuration-bilingual-dark-960.png)
+
+## Builds and output
+
+### English, light, 1440 × 960
+
+![Builds and output: English, light, 1440 × 960](current/jobs-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Builds and output: Bilingual, dark, 960 × 960](current/jobs-bilingual-dark-960.png)
+
+## Built-in tools
+
+### English, light, 1440 × 960
+
+![Built-in tools: English, light, 1440 × 960](current/tools-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Built-in tools: Bilingual, dark, 960 × 960](current/tools-bilingual-dark-960.png)
+
+## Read-only companion
+
+### English, light, 1440 × 960
+
+![Read-only companion: English, light, 1440 × 960](current/companion-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Read-only companion: Bilingual, dark, 960 × 960](current/companion-bilingual-dark-960.png)
+
+## Local assistant
+
+### English, light, 1440 × 960
+
+![Local assistant: English, light, 1440 × 960](current/assistant-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Local assistant: Bilingual, dark, 960 × 960](current/assistant-bilingual-dark-960.png)
+
+## Offline documentation
+
+### English, light, 1440 × 960
+
+![Offline documentation: English, light, 1440 × 960](current/offline-help-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Offline documentation: Bilingual, dark, 960 × 960](current/offline-help-bilingual-dark-960.png)
+
+## Settings and recovery
+
+### English, light, 1440 × 960
+
+![Settings and recovery: English, light, 1440 × 960](current/settings-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Settings and recovery: Bilingual, dark, 960 × 960](current/settings-bilingual-dark-960.png)
+
+## Resumable onboarding
+
+### English, light, 1440 × 960
+
+![Resumable onboarding: English, light, 1440 × 960](current/onboarding-en-light-1440.png)
+
+### Bilingual, dark, 960 × 960
+
+![Resumable onboarding: Bilingual, dark, 960 × 960](current/onboarding-bilingual-dark-960.png)

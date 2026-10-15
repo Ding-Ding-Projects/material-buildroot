@@ -1,0 +1,489 @@
+{
+  "format": "material-buildroot-current-renderer-captures",
+  "version": 1,
+  "invocationTime": "2026-10-15T21:31:33.702Z",
+  "sourceRevision": "e8f9bebf2b96397b00000be485870a61c16cb3e2",
+  "sourceDirty": false,
+  "preliminary": false,
+  "sourceFiles": {
+    "src/renderer/assets/Roboto-LICENSE.txt": "84044c09058803d87a241bd28abb4ce30a433d7db9c27a04da3efad6a0ca539c",
+    "src/renderer/assets/material-icons/LICENSE.txt": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+    "src/renderer/assets/material-icons/add.svg": "475c29758b4a689598f80099714362c0340ad3a4bc111e2d88807bbf4b0f817e",
+    "src/renderer/assets/material-icons/arrow_back.svg": "e1590e051f577d02ec994e7cc6005a2bc96407a3d1ba2d7ce6825fb80402684c",
+    "src/renderer/assets/material-icons/arrow_downward.svg": "61643262c55c5fe4022407585d2609a7e3e73420ff93267931148a5eb9782790",
+    "src/renderer/assets/material-icons/arrow_forward.svg": "2f48309fb6ccc7b38a6412757801cd7d07e40b492f64e7146e8899d5a0e7c39a",
+    "src/renderer/assets/material-icons/arrow_upward.svg": "473799e3e3c53c8f7417f80fe797cf6c2a55886cc415f8a7972b8e55abd82ec1",
+    "src/renderer/assets/material-icons/build.svg": "df34fba3d09778db69503a23b688761051dbf65b5bccb0d7b729c69ff61c3804",
+    "src/renderer/assets/material-icons/check.svg": "3f622661988927d85b134f07b0aa7842aeb404c71735d3c32f31de6c695b8d31",
+    "src/renderer/assets/material-icons/close.svg": "b54342456d5a7f2da53795147f8af36ec76fbf5b57d792fe75f07538e6c6783e",
+    "src/renderer/assets/material-icons/code.svg": "5c4415c78335a94353a4ba07423365bb167aa49d8f9963cfb1b7aa7bc10acf9f",
+    "src/renderer/assets/material-icons/computer.svg": "2e8b0e0ed413b797ab1c7243f588989a3b9c6636290f1b89f208c649ad9637e7",
+    "src/renderer/assets/material-icons/crop_square.svg": "c04dc8bf21a54f45b6220da186f9fb17fb0de5f03336eb1e9784d525210d554e",
+    "src/renderer/assets/material-icons/dashboard.svg": "70e13e1dd263d8c0c45eaf0e80264ed1b463b3bf20b31557dbce6e13b4ec3ed2",
+    "src/renderer/assets/material-icons/delete.svg": "5f0d4f6a9d1b779ad4063d8ccb799ae4352ba0785a978230113d473115961140",
+    "src/renderer/assets/material-icons/description.svg": "ffe4041194ad06a93b1dd035c807578c85aa64262ba9e9892001d518a4f6521b",
+    "src/renderer/assets/material-icons/download.svg": "2895c5994613c1f4a8cbc802290873a24b4e1dee3cbc068dd7cb08622e6d31b5",
+    "src/renderer/assets/material-icons/edit.svg": "2301568113724db8d9e6c1cdf649d16af34da24e223a1f6a295d867a2b2037c9",
+    "src/renderer/assets/material-icons/folder_open.svg": "bff58362b101120a1661e8165500458697e896b2104c5e40ec881d1426a4232b",
+    "src/renderer/assets/material-icons/help_outline.svg": "7da2dfc6cdefefd7135fff26e760afa90804d32ac593c623e98a467c2a228766",
+    "src/renderer/assets/material-icons/history.svg": "3d63bf10617ed68dde0d0c99d5d38892317a6439d6582f30b08bc3727cb26f14",
+    "src/renderer/assets/material-icons/info.svg": "5e3fe070eee9ca124d7591296c8052943d43d412aa25193284e7fde535180aa7",
+    "src/renderer/assets/material-icons/inventory_2.svg": "00e623cea897ac5b34affd9a56cb676df65e236e7b3b44b5c5c0db3bc65aae7d",
+    "src/renderer/assets/material-icons/link.svg": "1182c09f6e05c64ac491bdcc575cff537bc1157dbb79fdc34d67a15b0c7a8a47",
+    "src/renderer/assets/material-icons/memory.svg": "204fa6341a4a9d4c2fdcab6e778a39aa06ea412ce043e780482c145438610dcd",
+    "src/renderer/assets/material-icons/menu.svg": "5222c9f8a54b1023571595636174fa96d136a3c245d80168702888151193762f",
+    "src/renderer/assets/material-icons/more_vert.svg": "4f59e208f5babcf58c07505356ca1f109a9e1972e839b991dff19f709a28eeba",
+    "src/renderer/assets/material-icons/open_in_new.svg": "fe2c764701d194a633c6d1c904adc07ae445323c77ae16fa49ad96d1b17127e2",
+    "src/renderer/assets/material-icons/play_arrow.svg": "39d601c1d4199c5cadddf5f96a1f57157147d1eedc7a147cdadc29805c6d5fea",
+    "src/renderer/assets/material-icons/preview.svg": "e847732086c3f2332d5ecd7d26020035b85480a4c2082cd6da0796728708b88c",
+    "src/renderer/assets/material-icons/provenance.json": "e2e84b38f1be8ad57298041996d20ddc9fb1586177ea84fb7f3cffbf4b1177c7",
+    "src/renderer/assets/material-icons/redo.svg": "2f052f6aefb5366bf4a213299c89cbd7fac8c6ba91e9500ff21bd7cafe49cf89",
+    "src/renderer/assets/material-icons/refresh.svg": "48954ebff577688aa2c6d5816133726035103938ab766f6f8763a5da6d0e5fb9",
+    "src/renderer/assets/material-icons/remove.svg": "ddb31b1d29bec31f6c96badaadee121ee8a5a096379d35d049848d8cc5deaeb9",
+    "src/renderer/assets/material-icons/save.svg": "6e4f136963e84ee9b485e50ec2d241c01b732f8852dfcdb11a7ee946c3d0b5bf",
+    "src/renderer/assets/material-icons/search.svg": "c25d4cdca9972ef7ed9f8e9f32553d0444afd6a7cf8cc6ca9eebf5b4073ef308",
+    "src/renderer/assets/material-icons/security.svg": "6556bb21f1c209cb6f2672f13cc4b04b15da6873408e4ac5cdd259ef61326cf7",
+    "src/renderer/assets/material-icons/settings.svg": "86a35d4b8dd844c6a89f6b195b1600367cb52b8465847a0e7bbc8b3365c3983d",
+    "src/renderer/assets/material-icons/stop.svg": "f8fa3ab06887774e976b3090df0f377bf2bb8bdfccf6f174f63085076e159f45",
+    "src/renderer/assets/material-icons/sync.svg": "9b26d0443dddfad8b09207247c7f655d7395be79b7279e8ac37ae50483347d4e",
+    "src/renderer/assets/material-icons/tune.svg": "9505432ac66c71102ee0d0786caf563aecb2d25851e6c39ea03c8e79e554c6c8",
+    "src/renderer/assets/material-icons/undo.svg": "27e60a2dca53920a90e20ea71eade5c1ba85765b5c52704cfbf1fa2e0c529b0f",
+    "src/renderer/assets/material-icons/upload.svg": "2529deb1ba60557629195824f7b4987603b6625571ad5b863afc3a59bcc7b6a8",
+    "src/renderer/assets/material-icons/zoom_in.svg": "d87d302a06c9054973ee93ae34ab994201c8a3a9dae3bc94011e50e4e6a6e9e9",
+    "src/renderer/assets/material-icons/zoom_out.svg": "b2b7747b3f5a1080b0db65b6673b5b7d7d7ba1ef3e4c46e93579a72cf7c6ca5b",
+    "src/renderer/assets/roboto-latin.woff2": "20b535fa80c8189e3b87d1803038389960203a886d502bc2ef1857affc2f38d2",
+    "src/renderer/assets.d.ts": "21eb7039a32e91cea285b02e27ca3faa6ae1c5c373aafcd15537c4063bb2a302",
+    "src/renderer/companion-panel.ts": "88a96a1e16dbd200df80e62b5ca57c0a5b1d129fcf192c2bc2613cfa9729cc49",
+    "src/renderer/diagram-workbench.ts": "0c638326716564ab4df2d90bd47140ce4eebae4a709c310b561d90542c68ac31",
+    "src/renderer/documentation-panel.ts": "ef9ec73d7503b898be4b3b24565d38d51348f67c88a282909b5800e64a7f9d1e",
+    "src/renderer/documentation-search-worker.ts": "f9cb75be07ccd81a269c5d822eba6f5330af046ff3c7086615266bf99cf8b440",
+    "src/renderer/external-tree-panel.ts": "ea26fb112972c14b7e2e6688e26d391c9a10cb9edd828ccc6239281eebfc506b",
+    "src/renderer/fonts.css": "132c570287393d83de7393dd20445bb915b5c326b87503b4266e1a505172373f",
+    "src/renderer/guest-panel.ts": "566cb683e40a638789250d8d0d1ddcfe9247fbc99494c9a22d598d31c4d8ce88",
+    "src/renderer/guest-topology.ts": "5322f2bc4c183608edbda73d3763aa24036134ddafa449763b3d29074e09c185",
+    "src/renderer/main.ts": "72fa9476bddd7428d00d48775b96267feeb1d1dd90d242b8676180a36e1a0800",
+    "src/renderer/managed-ollama-panel.ts": "0e3f7390cc7f538f30ec71845d7eab49e4b292b01059f2eceade06b9d1837ef2",
+    "src/renderer/material-icons.ts": "970e86a67adebdd02278688f2891259aef070c176bb24f3bdc29ba7c9dacbcac",
+    "src/renderer/ollama-evidence-panel.ts": "976e349a0e12c0300781bfdb88c21ebc07c04871217862394180e0b8a3012d82",
+    "src/renderer/operations-panel.ts": "277d7a88f3c2c2cf43653be060ac9db97b1cd4196a325c27e68ef93ebf2c0502",
+    "src/renderer/package-discovery-panel.ts": "1789e47548f6f69f5f10095f9b2ae41972fbf8e67872808186481039289e1658",
+    "src/renderer/package-panel.ts": "80ce972c24920303c593ba1174da796ced3f4ad1e19b8078fd33f0876a6ddfa1",
+    "src/renderer/regex-workbench.ts": "5a3482f52d3382d68889d9391d2f5ce18b5ea5c7ce45daaf72bcfa4e37837037",
+    "src/renderer/regex-worker.ts": "a6e359b3285ccaf416c9a33636009cb42aca4a7965a7a926be21e2aa1edfe4e6",
+    "src/renderer/source-panel.ts": "f542c57dc2b8b3211cb7945e292e40a31b4a3bafd625ac724ed3949e247ebe6f",
+    "src/renderer/tools-panel.ts": "9c76132f8804b8072f2f5554c36633fca773c9905da7fc92ce58a0eb78a86bbf",
+    "src/renderer/workspace-styles.ts": "96388b5b00c99616a7b5c5b28fcaab507570efa38bb63027fa05e9a1cac265d0",
+    "src/main/documentation/service.cjs": "7f52f59fa182b48d2610e450fdc901a2df12c7865f3ceeef37e0d9af41b4508d",
+    "tests/renderer/desktop-fixture.mjs": "e539b3f4a92e95838f620ea4b46487ec15c6ef33c32b06e06493df462710acd4",
+    "tests/renderer/playwright.config.mjs": "23902c61dfede69f5a0612c6d5d45c5ec9e1372ca1d461da0cde72e8db3fec1a",
+    "tests/renderer/renderer-canvas.spec.mjs": "b31171e30c545d6553b99dc8964e10591187869de8df9c385575d068e76912de",
+    "tests/renderer/renderer-current-gallery.spec.mjs": "182ab64249bb33dcc787feeca3278bb9fe9e64c86ed1baebcee439aeaf8b9d5d",
+    "tests/renderer/renderer-discovery-fit.spec.mjs": "f826fdebf415283129146a85fab8ecad6339663717a6aa4097aad299b995ad10",
+    "tests/renderer/renderer-documentation.spec.mjs": "62da83b42d00085776539481ee0b90c2d64349091998deb309c0d1c39c476d40",
+    "tests/renderer/renderer-external-runtime.spec.mjs": "7ff91eb2f396d8f9011dd9c48ebbdd1e1f01c93f4da88a1e38ff2b30a21579c2",
+    "tests/renderer/renderer-settings.spec.mjs": "fd4b7a314422a25cbce372a579250c69e5a7b702b3af17da8024d2cccc8788b0",
+    "tests/renderer/renderer-source.spec.mjs": "4a44a93c41426d3a3519695560e83755650470c0e381cce1c14f99f3dde6f8c9",
+    "tests/renderer/renderer-tools.spec.mjs": "055d0ad8cb2342612bafc3fcd92d64a487e81271aee6b865a451e2edf5f78e8f",
+    "tests/renderer/renderer-vite.config.mjs": "411b81a69204935eebf479cafbbcff887fb399f61eeec1b4ec6a942971fd54f0",
+    "tests/renderer/renderer-workspace.spec.mjs": "c19afe9650825f03da8cb574d3fcdfb512049da8832e540a31ae3be8721adc39",
+    "package.json": "762c7185820520533276147e3fe46fe7b036c638390980fa6aa2a1e54a7453c2",
+    "package-lock.json": "4d929feb9a192e2d189674a6bb9622274cda970a2b40d07db911845e89400b5b",
+    "index.html": "c23465cd549c942885e7a3016c392f05302a01a9006832ace08c599b1db50776",
+    "src/main/workspace-service.cjs": "67b4a5470cd01e778298e01ad9d49d4cd41f8206dc0670d54e3f796d9f4adce5",
+    "src/main/storage/workspace-store.cjs": "dd07e56e308877218ecbbf95b745068b47cd2752a82a37791d3fe99acef7be90",
+    "src/main/security/workspace-contract.cjs": "5191f3731840c025ad6d997b8dd888804d058402206733045622abb5f0785c61"
+  },
+  "documentation": {
+    "indexSha256": "7037c8f8734952205022aa37f6b0a58dd8fbba7823af6276427df69c00908f15",
+    "sourceSnapshot": "c73e1186219123967125a385b4b0afdabad688bdde438c876680381cd94fc1b3",
+    "articleCount": 66,
+    "complete": false
+  },
+  "captures": [
+    {
+      "file": "runtime-en-light-1440.png",
+      "state": "runtime",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:35.182Z",
+      "captureCompletedAt": "2026-10-15T21:31:35.234Z",
+      "sha256": "83512679e16507517f18f936b6e150310c59d48bdfe306443abe5025d7169b83",
+      "boundary": "Real renderer; native runtime discovery not invoked; fixture adopted project."
+    },
+    {
+      "file": "source-en-light-1440.png",
+      "state": "source",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:35.498Z",
+      "captureCompletedAt": "2026-10-15T21:31:35.556Z",
+      "sha256": "62821b66b1ab2dc88af89fe35ca30efbd1b06e63822b80cde1f8ed49875a5ec0",
+      "boundary": "Real renderer with typed source status fixture; no native checkout proof."
+    },
+    {
+      "file": "package-canvas-en-light-1440.png",
+      "state": "package-canvas",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:36.181Z",
+      "captureCompletedAt": "2026-10-15T21:31:36.240Z",
+      "sha256": "e2dcc3e375d548c572da91964ade2cf42598cffc0481fd6fc2d8aa7930b12aa2",
+      "boundary": "Actual editable package draft and dependency canvas; typed folder grant fixture, no host file writes."
+    },
+    {
+      "file": "guest-canvas-en-light-1440.png",
+      "state": "guest-canvas",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:36.514Z",
+      "captureCompletedAt": "2026-10-15T21:31:36.570Z",
+      "sha256": "a27a10a17c6d282354eb8aba559a43391cf4ca7fd9de9367a494765bed127fa2",
+      "boundary": "Actual new guest draft and topology editor; no fabricated managed guest or native boot."
+    },
+    {
+      "file": "configuration-en-light-1440.png",
+      "state": "configuration",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:36.848Z",
+      "captureCompletedAt": "2026-10-15T21:31:36.901Z",
+      "sha256": "0288454c9e8dc575f10f50b794b4445a669103ee81f21b7620ba050333984776",
+      "boundary": "Real configuration controls using explicitly fixture source declarations; no native Kconfig execution in this capture."
+    },
+    {
+      "file": "jobs-en-light-1440.png",
+      "state": "jobs",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:37.182Z",
+      "captureCompletedAt": "2026-10-15T21:31:37.231Z",
+      "sha256": "331198bdafe6b93c4fa37aaf0c5583a4903512d21381f157b7c8d4fcab231748",
+      "boundary": "Actual build controls and empty job/output dock; no invented job data or logs, no build executed."
+    },
+    {
+      "file": "tools-en-light-1440.png",
+      "state": "tools",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:37.517Z",
+      "captureCompletedAt": "2026-10-15T21:31:37.568Z",
+      "sha256": "5bf519c600c41024cc2d1c812460bd3f970c253b28f32fb39b99daa0b830829a",
+      "boundary": "Real tool forms with typed format-catalogue fixture; no conversion execution."
+    },
+    {
+      "file": "companion-en-light-1440.png",
+      "state": "companion",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:37.833Z",
+      "captureCompletedAt": "2026-10-15T21:31:37.885Z",
+      "sha256": "08fdf8e98d178d52693199b503bb81643228f6895bbde661d023e11680c05fa5",
+      "boundary": "Real companion controls with disabled typed listener fixture; no TLS listener or pairing performed."
+    },
+    {
+      "file": "assistant-en-light-1440.png",
+      "state": "assistant",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:38.164Z",
+      "captureCompletedAt": "2026-10-15T21:31:38.219Z",
+      "sha256": "6cef9b0e8dd8452437e7b2bdf1d490c49016fa4df409f9318e3b5818498f772d",
+      "boundary": "Real local assistant controls; explicitly unavailable native runtime fixture; no model installed or running."
+    },
+    {
+      "file": "offline-help-en-light-1440.png",
+      "state": "offline-help",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:38.540Z",
+      "captureCompletedAt": "2026-10-15T21:31:38.617Z",
+      "sha256": "267d1394f12011a3793c3c9e88f08f47c8f4577da0de9739eaff5074d042c160",
+      "boundary": "Real createDocumentationService, verified bundled article inventory and host-rendered article; native Electron bridge replaced by direct Node bridge."
+    },
+    {
+      "file": "settings-en-light-1440.png",
+      "state": "settings",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:38.755Z",
+      "captureCompletedAt": "2026-10-15T21:31:38.811Z",
+      "sha256": "fa062fa9af8b1181b58e37b7850d8465c5fcc915e75ac174402d64998c50df04",
+      "boundary": "Actual workspace preferences and local workspace-service storage; language host-save backend remains fixture."
+    },
+    {
+      "file": "onboarding-en-light-1440.png",
+      "state": "onboarding",
+      "language": "en",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:39.365Z",
+      "captureCompletedAt": "2026-10-15T21:31:39.418Z",
+      "sha256": "8a63a05ef8a8c84def84e0d8ea7fb1ebb28eb3fb3f90e297942fda3dff3958f1",
+      "boundary": "Actual resumable setup dialog backed by local workspace-service storage; native setup actions not invoked."
+    },
+    {
+      "file": "runtime-bilingual-dark-960.png",
+      "state": "runtime",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:40.565Z",
+      "captureCompletedAt": "2026-10-15T21:31:40.621Z",
+      "sha256": "f1055fe1b50181d847788addbd79aa195c54e6b6163a424899cdbd08f6e9bc52",
+      "boundary": "Real renderer; native runtime discovery not invoked; fixture adopted project."
+    },
+    {
+      "file": "source-bilingual-dark-960.png",
+      "state": "source",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:40.914Z",
+      "captureCompletedAt": "2026-10-15T21:31:40.966Z",
+      "sha256": "89c8ff4846cd760a714741f4a0182fb22891f06b6b59f163453141ae2fe2985b",
+      "boundary": "Real renderer with typed source status fixture; no native checkout proof."
+    },
+    {
+      "file": "package-canvas-bilingual-dark-960.png",
+      "state": "package-canvas",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:41.615Z",
+      "captureCompletedAt": "2026-10-15T21:31:41.678Z",
+      "sha256": "283ed189d72401f2c5301f73291eb7881dd6c3ede6509d7faa156f2f101ea4dc",
+      "boundary": "Actual editable package draft and dependency canvas; typed folder grant fixture, no host file writes."
+    },
+    {
+      "file": "guest-canvas-bilingual-dark-960.png",
+      "state": "guest-canvas",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:41.981Z",
+      "captureCompletedAt": "2026-10-15T21:31:42.045Z",
+      "sha256": "d1b113570b92d3cf79e652dc43f6ff08cafede138301531990704ee8e05b516c",
+      "boundary": "Actual new guest draft and topology editor; no fabricated managed guest or native boot."
+    },
+    {
+      "file": "configuration-bilingual-dark-960.png",
+      "state": "configuration",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:42.333Z",
+      "captureCompletedAt": "2026-10-15T21:31:42.388Z",
+      "sha256": "0d464b36ede6bd43ae80dd238e5acc7264ba3db002c52eabb8145676d2ab72cf",
+      "boundary": "Real configuration controls using explicitly fixture source declarations; no native Kconfig execution in this capture."
+    },
+    {
+      "file": "jobs-bilingual-dark-960.png",
+      "state": "jobs",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:42.681Z",
+      "captureCompletedAt": "2026-10-15T21:31:42.735Z",
+      "sha256": "10f09c7cfb2a6d175d6351d743c620de9f159e4e816d993a48506f0bf0bd6a09",
+      "boundary": "Actual build controls and empty job/output dock; no invented job data or logs, no build executed."
+    },
+    {
+      "file": "tools-bilingual-dark-960.png",
+      "state": "tools",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:43.014Z",
+      "captureCompletedAt": "2026-10-15T21:31:43.070Z",
+      "sha256": "b6258a050bad1f9673b260fc93f6e7aa981cbfe780c65f45027c2f7a2f7eaf59",
+      "boundary": "Real tool forms with typed format-catalogue fixture; no conversion execution."
+    },
+    {
+      "file": "companion-bilingual-dark-960.png",
+      "state": "companion",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:43.348Z",
+      "captureCompletedAt": "2026-10-15T21:31:43.406Z",
+      "sha256": "871031e4777a7927cf736b896622981d467a52d66ca688c63e8c0732a177bd45",
+      "boundary": "Real companion controls with disabled typed listener fixture; no TLS listener or pairing performed."
+    },
+    {
+      "file": "assistant-bilingual-dark-960.png",
+      "state": "assistant",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:43.698Z",
+      "captureCompletedAt": "2026-10-15T21:31:43.755Z",
+      "sha256": "6e49d63a43617eed40d8cbc3c7f26d2f0c2a4efcb3c8c3bd7c5ecefe23732b0c",
+      "boundary": "Real local assistant controls; explicitly unavailable native runtime fixture; no model installed or running."
+    },
+    {
+      "file": "offline-help-bilingual-dark-960.png",
+      "state": "offline-help",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:44.126Z",
+      "captureCompletedAt": "2026-10-15T21:31:44.194Z",
+      "sha256": "cbfd9917c70315558f87926f4196ba596bd0923a88d5ee7ea069b2bb2d6a35f1",
+      "boundary": "Real createDocumentationService, verified bundled article inventory and host-rendered article; native Electron bridge replaced by direct Node bridge."
+    },
+    {
+      "file": "settings-bilingual-dark-960.png",
+      "state": "settings",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:44.340Z",
+      "captureCompletedAt": "2026-10-15T21:31:44.401Z",
+      "sha256": "db3220352ffd07daa9b33c29de74ccc0bd57b1081ceffa66f5424de5059757e5",
+      "boundary": "Actual workspace preferences and local workspace-service storage; language host-save backend remains fixture."
+    },
+    {
+      "file": "onboarding-bilingual-dark-960.png",
+      "state": "onboarding",
+      "language": "bilingual",
+      "theme": "dark",
+      "viewport": {
+        "width": 960,
+        "height": 960
+      },
+      "displayScale": 1,
+      "reducedMotion": true,
+      "captureStartedAt": "2026-10-15T21:31:45.615Z",
+      "captureCompletedAt": "2026-10-15T21:31:45.687Z",
+      "sha256": "2610bc9fbffd591da885a5df2f6a4fa991811a47a23648c0399c02934900a94a",
+      "boundary": "Actual resumable setup dialog backed by local workspace-service storage; native setup actions not invoked."
+    }
+  ],
+  "completedAt": "2026-10-15T21:31:45.687Z"
+}

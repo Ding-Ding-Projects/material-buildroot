@@ -15,3 +15,9 @@ No release, publication, commit, push or Windows execution was performed for thi
 An updater metadata replay using those downloaded files and live GitHub commit resolution returned `available` for the earlier installed source and `current` for the matching source. The focused updater suite passed 11 tests again. No updater schema bug was found. This proves metadata compatibility, not a native update transition.
 
 GitHub reports `draft=false`, `prerelease=false` and `immutable=false`. The uniquely named tag resolves to the expected commit at readback; server-enforced release immutability is not established. This evidence covers the recorded source only, and does not close acceptance for later revisions. Physical Windows testing remains explicitly deferred.
+
+## Build 24.1 release readback
+
+[The source-bound release receipt](../desktop-shell/release-v0.1.0-build.24.1.json) records normal release `v0.1.0-build.24.1`, whose tag resolves to `1f565df8897d06bfdaf50605c41b768435482ca1`. Windows release run 38808716461 and Pages run 38808716023 both completed successfully for that source. All five published assets were downloaded and independently matched against GitHub sizes and SHA-256 digests. All four checksum-covered files matched the downloaded checksum manifest; all three package assets matched provenance. The Squirrel `RELEASES` record matched the downloaded full package's SHA-1 and size, and its package manifest reported version `0.1.0`. Provenance manifest/lock hashes matched the exact source with the recorded Windows checkout CRLF conversion.
+
+GitHub reported `draft=false`, `prerelease=false` and `immutable=false`. This is exact tag/source readback, not a claim of enforced immutability. No Windows executable was run, installed or tested. Native acceptance remains deferred. The receipt covers only the recorded source; subsequent revisions require a new audit.
