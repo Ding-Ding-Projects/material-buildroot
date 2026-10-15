@@ -134,6 +134,24 @@ try{
  assert.equal(await page.locator('#menu').locator('button').getAttribute('aria-expanded'),'true');
  assert.equal(await page.locator('.sidebar').evaluate(e=>e.inert),false);
  assert.equal(await page.locator('.skip').evaluate(e=>e.inert),true);
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'close-menu');
+ for(let index=0;index<4;index++)await page.keyboard.press('Tab');
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'close-menu','Tab must wrap inside the navigation drawer');
+ await page.keyboard.press('Shift+Tab');
+ assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('nav[aria-label="Contributor navigation"] md-list-item')),true,'Reverse Tab reaches the current contributor item');
+ await page.keyboard.press('ArrowDown');
+ assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('nav[aria-label="Contributor navigation"] md-list-item:last-child')),true,'Contributor list supports arrow navigation');
+ await page.keyboard.press('Tab');
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'close-menu','Tab wraps after the newly selected contributor item');
+ await page.keyboard.press('Shift+Tab');
+ assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('nav[aria-label="Contributor navigation"] md-list-item:last-child')),true,'Reverse Tab preserves the current contributor item');
+ await page.keyboard.press('Tab');
+ await page.keyboard.press('Tab');
+ assert.equal(await page.evaluate(()=>document.activeElement.classList.contains('brand')),true);
+ await page.keyboard.press('Tab');
+ assert.equal(await page.evaluate(()=>document.activeElement===document.querySelector('nav[aria-label="Main navigation"] md-list-item')),true);
+ await page.keyboard.press('ArrowDown');
+ assert.equal(await page.evaluate(()=>document.activeElement===document.querySelectorAll('nav[aria-label="Main navigation"] md-list-item')[1]),true,'Main navigation supports arrow navigation');
  await page.setViewportSize({width:320,height:568});
  await page.locator('.sidebar md-list-item').last().scrollIntoViewIfNeeded();
  assert.ok(await page.locator('.sidebar').evaluate(e=>e.scrollHeight>e.clientHeight));
@@ -149,7 +167,7 @@ try{
  assert.equal(await page.locator('.sidebar').evaluate(e=>e.inert),true);
  await page.setViewportSize({width:390,height:844});
  await capture('home-mobile');
- receipt.checks.push('Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation opens and Escape closes it.');
+ receipt.checks.push('Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation traps forward/reverse Tab, retains Material arrow navigation, and Escape closes it.');
  await page.setViewportSize({width:320,height:844});
  const routes=[];
  for(const doc of inventory){

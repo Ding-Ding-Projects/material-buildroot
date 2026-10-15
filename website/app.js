@@ -69,7 +69,11 @@ document.addEventListener('keydown', (event) => {
   if (!document.body.classList.contains('nav-open')) return;
   if (event.key === 'Escape') { setDrawer(false, true); return; }
   if (event.key === 'Tab') {
-    const focusable = [...sidebar.querySelectorAll('md-icon-button, md-list-item, a')];
+    // Material lists keep only the current item in each list in the Tab order.
+    // The close button delegates focus to its internal button instead of its host.
+    const focusable = [...sidebar.querySelectorAll('md-icon-button, md-list-item, a')]
+      .filter(element => (element === closeMenu || element.tabIndex >= 0)
+        && !element.disabled && !element.inert && element.getClientRects().length > 0);
     const first = focusable[0]; const last = focusable.at(-1);
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }

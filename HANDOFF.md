@@ -1,5 +1,13 @@
 # Handoff
 
+## Website landing refresh, 2026-10-15
+
+The website now leads with the immutable v0.1.0 Windows x64 download, a genuine desktop capture explicitly bound to historical source `3f5d2cd`, and separate available/planned capabilities. Bilingual copy and responsive cards lead to the complete documentation, verification records and contributor guidance. Search reports the full match count, supports keyboard entry and dismissal, and the mobile drawer follows the actual Material list Tab order. These changes do not implement desktop project creation, Buildroot execution or the authenticated companion.
+
+The first website source checkpoint was integrated with concurrent desktop changes and verified on remote main at `703d960a7e32232f5cb80ac80df929f517373bf3`. Five documentation-source tests passed. The initial generated candidate passed 70 pages, 1,612 internal links/assets/fragments, ten browser interaction checks, all 70 routes and twelve width/language combinations; its exact source snapshot was `e724eb3d4c70ac0614557d3ac722bd171d241e8739b0c7a51f746fd9d920dafb`. Later spacing, drawer and merged documentation changes require their own rebuilt evidence. [The current landing browser receipt and captures](https://github.com/Ding-Ding-Projects/material-buildroot/tree/main/website/evidence/landing-refresh) record their own source and artifact hashes; do not transfer earlier proof to a later snapshot.
+
+This session uses the Linux Node.js documentation generator with isolated output and Chromium. It does not claim a successful Windows root `build.bat` run, native application verification or installer acceptance. The browser verifier compares served artifact bytes against `DOCS_OUTPUT_ROOT` and writes exploratory evidence outside tracked source. Publication promotes only the generated website, preserving Markdown source. Hosting remains main → /docs; verify live delivery separately from source publication. No redundant task-owned branches, linked worktrees or stashes were created.
+
 ## Resumed renderer verification, 2026-10-15
 
 The owner authorized resumption and repeated frequent publication on main. The screenshot matrix now waits for each language select's exact displayed label and for fonts before capture. All 12 language/theme/viewport cases passed against unchanged renderer bytes from `299dca4d0d9413ef98ee249c172704a4d1732cc8`; refreshed image inspection and packaged-renderer verification are in progress. Normal release `v0.1.0-build.4.1` resolves to that source. Asset hash readback remains a separate ongoing check. This supersedes the earlier paused steering, without changing any native acceptance claim.
