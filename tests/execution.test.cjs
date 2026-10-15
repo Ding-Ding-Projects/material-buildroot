@@ -541,3 +541,29 @@ test('real non-root Linux resources probe reports available filesystem bytes wit
   const result = process.getuid() === 0 ? await boundedProcess('/usr/sbin/runuser', ['-u', 'nobody', '--', process.execPath, '-e', script]).completion : await boundedProcess(process.execPath, ['-e', script]).completion;
   assert.equal(result.state, 'succeeded', result.stderr); const resources = JSON.parse(result.stdout); assert.ok(Number.isSafeInteger(resources.storageAvailableBytes)); assert.ok(resources.storageAvailableBytes >= 0); assert.ok(resources.cpuSlots === null || Number.isSafeInteger(resources.cpuSlots)); assert.deepEqual(fs.readdirSync(dirs.output), []);
 });
+test('Docker aggregate probe excludes only its verified owned leaf and preserves parent constraints', async t => {
+  const dirs = fixture(t); fs.chmodSync(dirs.root, 0o755);
+  const cgroupRoot = path.join(dirs.root, 'cgroups'), parent = path.join(cgroupRoot, 'parent'), leaf = path.join(parent, 'leaf'); fs.mkdirSync(leaf, { recursive: true });
+  function metrics(directory, cpu, maximum, current) { fs.writeFileSync(path.join(directory, 'cpu.max'), cpu + '\n'); fs.writeFileSync(path.join(directory, 'memory.max'), maximum + '\n'); fs.writeFileSync(path.join(directory, 'memory.current'), current + '\n'); }
+  metrics(cgroupRoot, 'max 100000', 'max', '0'); metrics(parent, '400000 100000', '8589934592', '1073741824'); metrics(leaf, '200000 100000', '4294967296', '104857600');
+  const groupFile = path.join(dirs.root, 'self-cgroup'), statusFile = path.join(dirs.root, 'self-status'), memoryFile = path.join(dirs.root, 'meminfo');
+  fs.writeFileSync(groupFile, '0::/parent/leaf\n'); fs.writeFileSync(statusFile, 'Cpus_allowed_list:\t0-7\n'); fs.writeFileSync(memoryFile, 'MemAvailable: 16777216 kB\n');
+  const source = fs.readFileSync(require.resolve('../src/main/execution/index.cjs'), 'utf8');
+  const script = source.match(/const RESOURCE_SCRIPT = `([\s\S]*?)`;/)[1].replaceAll('/proc/self/cgroup', groupFile).replaceAll('/proc/self/status', statusFile).replaceAll('/proc/meminfo', memoryFile).replaceAll('/sys/fs/cgroup', cgroupRoot);
+  const probe = async mode => {
+    const args = ['-c', script, 'resources', dirs.output, mode];
+    const result = process.getuid() === 0 ? await boundedProcess('/usr/sbin/runuser', ['-u', 'nobody', '--', '/bin/sh', ...args]).completion : await boundedProcess('/bin/sh', args).completion;
+    assert.equal(result.state, 'succeeded', result.stderr); return result.stdout.trim().split('\n').slice(0, 2);
+  };
+  assert.deepEqual(await probe('docker-owned-probe'), ['4', '7516192768']);
+  assert.deepEqual(await probe('runtime'), ['2', '4190109696']);
+  for (const file of ['cpu.max', 'memory.max', 'memory.current']) fs.unlinkSync(path.join(cgroupRoot, file));
+  fs.writeFileSync(path.join(cgroupRoot, 'cgroup.controllers'), 'cpu memory\n');
+  assert.deepEqual(await probe('docker-owned-probe'), ['4', '7516192768']);
+  metrics(parent, '100000 100000', '3221225472', '1073741824');
+  assert.deepEqual(await probe('docker-owned-probe'), ['1', '2147483648']);
+  metrics(leaf, '100000 100000', '4294967296', '104857600');
+  assert.deepEqual(await probe('docker-owned-probe'), ['unknown', 'unknown']);
+  fs.writeFileSync(groupFile, '0::/\n');
+  assert.deepEqual(await probe('docker-owned-probe'), ['unknown', 'unknown']);
+});

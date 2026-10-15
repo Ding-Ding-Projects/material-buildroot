@@ -174,7 +174,24 @@ const RESOURCE_SCRIPT = `set -eu
    memory=$(awk '/^MemAvailable:/ {printf "%.0f", $2*1024}' /proc/meminfo)
    node="/sys/fs/cgroup$group"
    test "$group" = / && node=/sys/fs/cgroup
-   while :; do
+   if test "$2" = docker-owned-probe; then
+     # Exclude only the probe container's verified artificial leaf limits.
+     # Every real parent remains included below; an unresolved leaf fails closed.
+     if test "$node" = /sys/fs/cgroup || ! test -r "$node/cpu.max" || ! test -r "$node/memory.max"; then
+       cpu=unknown; memory=unknown
+     else
+       read own_quota own_period < "$node/cpu.max"
+       own_memory=$(cat "$node/memory.max")
+       if test "$own_quota" = max || test "$own_quota" -ne "$((own_period * 2))" || test "$own_memory" != 4294967296; then
+         cpu=unknown; memory=unknown
+       else
+         node=$(dirname "$node")
+       fi
+     fi
+   fi
+   while test "$cpu" != unknown && test "$memory" != unknown; do
+     # The actual cgroup-v2 hierarchy root is exempt from controller limits.
+     if test "$node" = /sys/fs/cgroup && test -r "$node/cgroup.controllers" && ! test -e "$node/cpu.max" && ! test -e "$node/memory.max"; then break; fi
      if ! test -r "$node/cpu.max" || ! test -r "$node/memory.max" || ! test -r "$node/memory.current"; then cpu=unknown; memory=unknown; break; fi
      read quota period < "$node/cpu.max"
      if test "$quota" != max; then capacity=$((quota / period)); if test "$capacity" -lt "$cpu"; then cpu=$capacity; fi; fi
@@ -354,16 +371,16 @@ class ExecutionService {
     if (runtime?.kind === "docker") {
       if (!/^[a-z0-9][a-z0-9./_-]*@sha256:[a-f0-9]{64}$/.test(runtime.image || "") || !Number.isSafeInteger(runtime.uid) || runtime.uid < 1 || runtime.uid > 4294967294 || !Number.isSafeInteger(runtime.gid) || runtime.gid < 1 || runtime.gid > 4294967294) throw new Error("invalid-container-runtime");
       const name = `material-buildroot-resources-${crypto.randomUUID()}`; file = this.executables.docker;
-      args = ["run", "--rm", "--pull=never", "--name", name, "--user", `${runtime.uid}:${runtime.gid}`, "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=64", "--memory=4g", "--cpus=2", "--cgroupns=host", "--network=none", "--mount", `type=bind,src=${grant.output},dst=/output,readonly`, "--entrypoint", "/bin/sh", runtime.image, "-c", RESOURCE_SCRIPT, "resources", "/output"];
+      args = ["run", "--rm", "--pull=never", "--name", name, "--user", `${runtime.uid}:${runtime.gid}`, "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=64", "--memory=4g", "--cpus=2", "--cgroupns=host", "--network=none", "--mount", `type=bind,src=${grant.output},dst=/output,readonly`, "--entrypoint", "/bin/sh", runtime.image, "-c", RESOURCE_SCRIPT, "resources", "/output", "docker-owned-probe"];
       onTerminate = async () => { const stopped = await boundedProcess(file, ["stop", "--time", "2", name], { timeoutMs: 5000 }).completion; if (stopped.state !== "succeeded") throw new Error("container-stop-failed"); };
     } else if (runtime?.kind === "wsl") {
       if (this.platform !== "win32" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(runtime.distribution || "")) throw new Error("invalid-wsl-runtime");
       file = this.executables.wsl;
       const translated = await boundedProcess(file, ["--distribution", runtime.distribution, "--exec", "wslpath", "-a", "-u", grant.output]).completion;
       const output = translated.stdout.trim(); if (translated.state !== "succeeded" || !/^\/[A-Za-z0-9_/.+-]+$/.test(output)) throw new Error("wsl-path-translation-failed");
-      validate(); args = ["--distribution", runtime.distribution, "--exec", "timeout", "--signal=TERM", "--kill-after=1s", "8s", "/bin/sh", "-c", RESOURCE_SCRIPT, "resources", output];
+      validate(); args = ["--distribution", runtime.distribution, "--exec", "timeout", "--signal=TERM", "--kill-after=1s", "8s", "/bin/sh", "-c", RESOURCE_SCRIPT, "resources", output, "runtime"];
     } else if (runtime?.kind === "linux-fixture" && this.linuxFixture && this.platform !== "win32") {
-      if (process.getuid() === 0) throw new Error("non-root-required"); file = "/bin/sh"; args = ["-c", RESOURCE_SCRIPT, "resources", grant.output];
+      if (process.getuid() === 0) throw new Error("non-root-required"); file = "/bin/sh"; args = ["-c", RESOURCE_SCRIPT, "resources", grant.output, "runtime"];
     } else throw new Error("runtime-unavailable");
     const result = await boundedProcess(file, args, { timeoutMs: 10000, maxBytes: 4096, onTerminate }).completion; validate();
     if (result.state !== "succeeded") { if (result.code === 77) throw new Error("non-root-required"); throw new Error(`resource-probe-${result.state}`); }
