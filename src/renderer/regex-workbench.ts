@@ -822,16 +822,12 @@ export class RegexWorkbench extends LitElement {
                 >${actionIcon('Remove')}${this.l("Remove", "移除")}</md-text-button
               >
             </div>`,
-        )}<label
-          >${this.l(
-            "Import snippet JSON, maximum 1 MiB",
-            "匯入片段 JSON，最大 1 MiB",
-          )}<input
-            class="file"
-            type="file"
-            accept=".json,application/json"
-            @change=${this.importSnippets}
-        /></label>
+        )}<md-outlined-button
+          @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#snippet-import-file")?.click()}
+        >${actionIcon("Import snippets")}${this.l("Import snippet JSON, maximum 1 MiB", "匯入片段 JSON，最大 1 MiB")}</md-outlined-button>
+        <input id="snippet-import-file" hidden style="display:none" tabindex="-1"
+          type="file" accept=".json,application/json" @change=${this.importSnippets}
+        />
       </section>
     </div>`;
   }

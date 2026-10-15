@@ -666,16 +666,15 @@ class MaterialBuildroot extends LitElement {
                     >${actionIcon('Restore')}${this.l("Restore", "還原")}</md-outlined-button
                   >
                 </div>`,
-            )}<label class="import-label"
-              >${this.l(
-                "Import workspace JSON (maximum 1 MiB)",
-                "匯入工作區 JSON（最大 1 MiB）",
-              )}<input
-                type="file"
-                accept="application/json,.json"
-                ?disabled=${!this.canEditWorkspace || this.dirty}
-                @change=${this.readImport}
-            /></label>`
+            )}<md-outlined-button
+              ?disabled=${!this.canEditWorkspace || this.dirty}
+              @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#workspace-import-file")?.click()}
+            >${materialIcon("upload", "icon")}${this.l("Import workspace JSON (maximum 1 MiB)", "匯入工作區 JSON（最大 1 MiB）")}</md-outlined-button>
+            <input id="workspace-import-file" hidden style="display:none" type="file"
+              accept="application/json,.json" tabindex="-1"
+              ?disabled=${!this.canEditWorkspace || this.dirty}
+              @change=${this.readImport}
+            />`
         : html`<p>
             ${this.l(
               "Durable workspace storage is required for snapshots and importing.",

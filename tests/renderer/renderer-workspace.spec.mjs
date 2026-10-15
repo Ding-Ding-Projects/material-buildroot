@@ -78,3 +78,26 @@ for(const language of ['en','zh-HK','bilingual'])for(const colorScheme of ['ligh
   await page.screenshot({path:testInfo.outputPath('workspace.png'),fullPage:true});expect(f.errors).toEqual([]);
  }finally{f.close();}
 });
+test('Material import buttons open hidden native pickers and preserve validation',async({page})=>{
+ const f=await open(page,{completed:true});try{
+  await nav(page,'Settings');
+  const workspace=page.locator('#workspace-import-file');await expect(workspace).toBeHidden();
+  const choose=async(button,file)=>{const pending=page.waitForEvent('filechooser');await button.click();await (await pending).setFiles(file);};
+  const file=text=>({name:'import.json',mimeType:'application/json',buffer:Buffer.from(text)});
+  const button=page.getByRole('button',{name:'Import workspace JSON (maximum 1 MiB)',exact:true});
+  await expect(page.locator('md-outlined-button').filter({hasText:'Import workspace JSON'}).locator('md-icon')).toBeVisible();
+  await choose(button,file('{}'));await expect(page.locator('main > .notice')).toContainText('Invalid workspace export');
+  await choose(button,{name:'large.json',mimeType:'application/json',buffer:Buffer.alloc(1024*1024+1)});await expect(page.locator('main > .notice')).toContainText('no larger than 1 MiB');
+  await choose(button,file(JSON.stringify({format:'material-buildroot-workspace-export',version:1,plans:[]})));await expect(page.locator('#import-dialog')).toHaveJSProperty('open',true);
+  await page.locator('#import-dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await choose(button,[]);await expect(page.locator('#import-dialog')).toHaveJSProperty('open',false);
+  await page.evaluate(()=>{const workbench=document.createElement('regex-workbench');workbench.language='en';workbench.style.cssText='position:fixed;inset:0;z-index:1000;overflow:auto;background:white';document.body.append(workbench);});
+  const regex=page.locator('body > regex-workbench');await expect(regex.locator('input[type=file]')).toBeHidden();
+  const importButton=regex.getByRole('button',{name:'Import snippet JSON, maximum 1 MiB',exact:true});
+  await expect(regex.locator('md-outlined-button').filter({hasText:'Import snippet JSON'}).locator('md-icon')).toBeVisible();
+  await choose(importButton,file(JSON.stringify({version:1,snippets:[{name:'Imported sample',pattern:'foo',flags:'i',sample:'FOO',replacement:'bar'}]})));await expect(regex).toContainText('Session snippets replaced');await expect(regex.getByRole('button',{name:'Imported sample',exact:true})).toBeVisible();
+  await choose(importButton,file('{}'));await expect(regex).toContainText('Invalid or oversized snippet file');await expect(regex.getByRole('button',{name:'Imported sample',exact:true})).toBeVisible();
+  await choose(importButton,[]);await expect(regex.getByRole('button',{name:'Imported sample',exact:true})).toBeVisible();
+  for(const input of await page.locator('input[type=file]').all())await expect(input).toBeHidden();expect(f.errors).toEqual([]);
+ }finally{f.close();}
+});
