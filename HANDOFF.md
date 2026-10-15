@@ -2,7 +2,7 @@
 
 ## Current local source check
 
-The updated `npm test` entrypoint discovered and passed all 61 tests, with zero failures, cancellations or skips: broker contract 3, broker/storage 17, build tools 6, preload 1, desktop session 5, documentation source boundaries 3, evidence ledger 17 and operation parser 9. This run includes the documentation-source changes and is separate from the packaged GUI receipts below. Documentation output and live delivery still require their own build and verification.
+The updated `npm test` entrypoint discovered and passed all 61 tests, with zero failures, cancellations or skips: broker contract 3, broker/storage 17, build tools 6, preload 1, desktop session 5, documentation source boundaries 3, evidence ledger 17 and operation parser 9. The first documentation build then exposed CRLF roadmap parsing. The production parser now normalizes newlines in memory while raw-byte provenance remains unchanged. Its additional real-roadmap regression was observed failing before repair; all four focused documentation checks passed afterward on pinned Node.js 24.22.0. These source checks are separate from the packaged GUI receipts below. Generated output and live delivery still require their own verification.
 
 ## Verified desktop shell and documentation preparation, 2026-10-14 America/Toronto
 

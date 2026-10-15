@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import MarkdownIt from 'markdown-it';
 import { build } from 'esbuild';
 import { documentSources, categoryFor } from './inventory.mjs';
+import { parseRoadmap } from './roadmap.mjs';
 import { resolveDocumentLink, containedPath, sourceSnapshot } from './source-boundary.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -82,7 +83,7 @@ md.renderer.rules.image = (tokens,i,options,env,self) => {
 const render = (text, source='README.md', headings=[]) => md.render(text,{source,headings}).replace(/<table>/g,'<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>').replace(/<\/table>/g,'</table></div>').replace(/<li>(\s*(?:<p>)?<md-checkbox class="task-mark)/g,'<li class="task-item">$1');
 // Render once to discover every linked asset before computing source provenance.
 for (const doc of documents) render(doc.content,doc.source);
-const inputs = [...sources, ...localAssets, 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/app.js','website/style.css','website/components.json'].sort();
+const inputs = [...sources, ...localAssets, 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json'].sort();
 const snapshot = sourceSnapshot(root,inputs);
 const sourceCommit = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const dirty = Boolean(execFileSync('git',['status','--porcelain','--',...inputs],{cwd:root,encoding:'utf8'}).trim());
@@ -98,11 +99,7 @@ function page(title,body,{active='Overview',description='Explore the Material Bu
 }
 
 const roadmap = bySource.get('ROADMAP.md').content;
-const phases = [...roadmap.matchAll(/^## (PH\d+) (.+)\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm)].map(match=>{
-  const tasks = [...match[3].matchAll(/^- \[([ x])\] \*\*(PH\d+-T\d+(?:-\d+)?)\*\* (.+)$/gm)].map(m=>({id:m[2],done:m[1]==='x',text:m[3]}));
-  const done=tasks.filter(t=>t.done).length;
-  return {id:match[1],title:match[2],body:match[3],tasks,done,status:done===tasks.length?'complete':done?'started':'planned'};
-});
+const phases = parseRoadmap(roadmap);
 const indexJson = JSON.stringify([...phases.map(p=>({title:p.id+' '+p.title,url:base+'site/phases/'+p.id.toLowerCase()+'.html',category:'Roadmap phase',text:p.body})),...documents.map(d=>({title:d.title,url:d.url,category:d.category,text:d.content.replace(/[#*`|>]/g,' ')}))]).replace(/</g,'\\u003c');
 const taskCount = phases.reduce((n,p)=>n+p.tasks.length,0); const completed=phases.reduce((n,p)=>n+p.done,0);
 if (!phases.length || !taskCount) throw new Error('Roadmap has no recognized stable phases/tasks');

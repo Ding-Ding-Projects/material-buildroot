@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseRoadmap } from '../website/roadmap.mjs';
 import { resolveDocumentLink, containedPath, sourceSnapshot } from '../website/source-boundary.mjs';
 const parent=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../.cache/documentation-tests');
 fs.mkdirSync(parent,{recursive:true});
@@ -30,4 +31,20 @@ test('asset-only binary byte changes invalidate the documentation snapshot',()=>
   const inputs=['article.md','capture.png'];const before=sourceSnapshot(source,inputs);
   fs.writeFileSync(image,Buffer.from([0,255,253,1]));
   assert.notEqual(sourceSnapshot(source,inputs),before);
+});
+
+
+test('real roadmap LF and CRLF variants preserve phases and tasks while byte snapshots differ',()=>{
+  const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+  const actual=fs.readFileSync(path.join(root,'ROADMAP.md'),'utf8');
+  const lf=actual.replace(/\r\n?/g,'\n'), crlf=lf.replace(/\n/g,'\r\n');
+  const expected=parseRoadmap(lf);
+  assert.equal(expected.length,11);
+  assert.ok(expected.find(phase=>phase.id==='PH02').tasks.some(task=>task.id==='PH02-T02'));
+  assert.deepEqual(parseRoadmap(crlf),expected);
+  assert.deepEqual(parseRoadmap(actual),expected);
+  const source=path.join(fixture,'roadmap');fs.mkdirSync(source);
+  const file=path.join(source,'ROADMAP.md');fs.writeFileSync(file,lf);
+  const before=sourceSnapshot(source,['ROADMAP.md']);fs.writeFileSync(file,crlf);
+  assert.notEqual(sourceSnapshot(source,['ROADMAP.md']),before);
 });
