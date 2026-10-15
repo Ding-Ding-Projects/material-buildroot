@@ -21,8 +21,16 @@ export interface OperationEvent {
   version: 1; operationId: string; sequence: number; timestamp: string;
   state: 'accepted' | 'running' | 'cancelling' | 'cancelled' | 'succeeded' | 'failed' | 'interrupted' | 'partial';
 }
-/** The production preload must implement this narrow contract; no bridge is installed yet. */
+export type WindowCommand = 'minimize' | 'maximize-restore' | 'close';
+export interface StudioBootstrap {
+  language: Language; revision: string; projectId: string; capability: string;
+  storage: 'ready' | 'unavailable'; origin: 'default' | 'saved' | 'unavailable';
+  version: string; source: string | null; updatedAt: string | null;
+}
+/** Only host-admitted documents receive this bridge. */
 export interface StudioAPI {
+  bootstrap(): Promise<StudioBootstrap>;
+  windowControl(command: WindowCommand): Promise<boolean>;
   request(request: OperationRequest): Promise<OperationReply>;
   onEvent(listener: (event: OperationEvent) => void): () => void;
 }

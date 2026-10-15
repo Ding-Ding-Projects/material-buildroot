@@ -174,6 +174,7 @@ async function main() {
   const template = installer ? target.installerCommand : target.command;
   if (!Array.isArray(template) || !template.length) throw new Error('Canonical package command is missing.');
   if (target.rendererCommand) execute(node,target.rendererCommand);
+  if (target.kind === 'desktop') fs.writeFileSync(path.join(root,'dist/build-info.json'),JSON.stringify({source:before.commit,updatedAt:new Date().toISOString()})+'\n');
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
   if (target.kind === 'desktop') {

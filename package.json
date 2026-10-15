@@ -41,12 +41,6 @@
       "src/shared/**/*",
       "package.json"
     ],
-    "extraResources": [
-      {
-        "from": "runtime",
-        "to": "runtime"
-      }
-    ],
     "win": {
       "target": [
         {

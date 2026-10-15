@@ -1,5 +1,13 @@
 # Handoff
 
+## Desktop shell candidate, 2026-10-14 America/Toronto
+
+The owner resumed implementation and prioritized the production desktop GUI. The main process, sandboxed preload, typed desktop session and real renderer now exist. The bounded workflow saves English, Cantonese or bilingual language through the existing capability-scoped durable broker. Window controls are wired, the initial workspace contains no synthetic project data, and appearance choices are explicitly session-only.
+
+Twenty-six focused host/preload/broker checks passed, renderer/shared type checking passed and the source diff check passed. Independent source review found no remaining actionable security candidate in the main/preload/session seam. Recovery text was corrected to require restart after an uncertain save. This candidate still requires exact-root packaging and actual hidden-desktop runtime verification, including packaged SQLite support and persistence across executable restarts. No installer or release is claimed.
+
+Keep one source writer on main. All GUI implementation, review and capture lanes explicitly use gpt-6-astra. Preserve the historical reference evidence separately from production evidence. The encrypted-publication work described below remains deferred by the current GUI priority.
+
 ## Requested preservation closeout, 2026-10-15
 
 The owner requested preservation and cleanup before further implementation. The encrypted-publication admission lane stopped before creating any files; that entire slice remains unimplemented. Completed settings work is pushed and verified at a4926c2c70afd1d118f2a46b572ee42cafd0f760. No source work remains uncommitted.

@@ -1,0 +1,9 @@
+# Production desktop shell reference reuse
+
+The production shell reuses the existing `design/reference/control-map.md` toolbar and navigation dimensions, purple Material color roles, growing bilingual toolbar and S11 language/theme control anatomy. Independent review approved this bounded reuse before visual implementation. No replacement design is introduced.
+
+The desktop minimum is 960 by 640 CSS pixels. Navigation becomes a 72-pixel compact rail below 1200, and a toolbar-opened Material dialog below 700 for zoom/reflow. The full rail is 224 pixels. Native title-bar operations use genuine Material text buttons inside the registered production composite, with drag confined to toolbar anatomy. Routing focuses the destination heading. The dialog provides explicit Close and Material-owned Escape/focus containment.
+
+Production deliberately omits synthetic project rows, fixture selectors, simulated logs, configuration trees and inspectors. Projects honestly reports that project and build operations are unavailable. Settings offers durable language selection and session-only system/light/dark themes. Theme persistence and the full appearance contract remain outstanding. No search field is introduced without the required regex workbench.
+
+Registered controls: `md-filled-button`, `md-outlined-button`, `md-text-button`, `md-outlined-select`, `md-select-option`, `md-dialog`, imported from pinned `@material/web`. `material-buildroot` is the registered Lit production composite owning semantic layout, headings, status and navigation internals. Runtime registration, keyboard behavior, layout and contrast require actual packaged evidence; source imports alone do not prove them.
