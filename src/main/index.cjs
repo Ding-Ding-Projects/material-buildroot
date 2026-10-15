@@ -1,5 +1,12 @@
 "use strict";
-const { app, BrowserWindow, ipcMain, session, dialog } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  session,
+  dialog,
+  shell,
+} = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
 const { pathToFileURL } = require("node:url");
@@ -124,6 +131,11 @@ else {
           parentWindow: window,
           version: metadata.version,
           source: metadata.source,
+          documentationDirectory: path.join(
+            app.getAppPath(),
+            "dist/documentation",
+          ),
+          openDocumentationExternal: (url) => shell.openExternal(url),
           workspaceRead: () => workspaceService.get(),
         });
       } catch {

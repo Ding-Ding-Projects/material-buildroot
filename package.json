@@ -19,7 +19,8 @@
     "ajv": "8.20.0",
     "electron-squirrel-startup": "1.0.1",
     "jsonc-parser": "3.3.1",
-    "lit": "3.3.3"
+    "lit": "3.3.3",
+    "markdown-it": "15.0.2"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
@@ -33,7 +34,9 @@
     "appId": "com.dingdingprojects.materialbuildroot",
     "productName": "Material Buildroot",
     "asar": true,
-    "asarUnpack": ["scripts/configuration/**/*"],
+    "asarUnpack": [
+      "scripts/configuration/**/*"
+    ],
     "directories": {
       "output": "release"
     },

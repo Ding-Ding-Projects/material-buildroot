@@ -13,6 +13,7 @@ const {
   createCompanionController,
 } = require("./security/companion-controller.cjs");
 const { createUpdateService } = require("./updates/service.cjs");
+const { createDocumentationService } = require("./documentation/service.cjs");
 const { createFileGrants } = require("./security/file-grants.cjs");
 const { createProjectStore } = require("./storage/project-store.cjs");
 const {
@@ -31,6 +32,9 @@ const contract = require("./security/workspace-contract.cjs");
 
 const owner = "desktop-owner";
 const fields = {
+  "documentation.list": [],
+  "documentation.read": ["id"],
+  "documentation.open": ["id", "linkId"],
   "runtime.discover": [],
   "runtime.python.choose": [],
   "project.list": [],
@@ -145,10 +149,18 @@ function createOperationsService({
   parentWindow,
   version,
   source,
+  documentationDirectory,
+  openDocumentationExternal,
   execution = new ExecutionService(),
   workspaceRead,
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const documentation = documentationDirectory
+    ? createDocumentationService({
+        directory: documentationDirectory,
+        openExternal: openDocumentationExternal,
+      })
+    : null;
   const selections = new Map(),
     projects = new Map(),
     fileGrants = createFileGrants(),
@@ -571,6 +583,15 @@ function createOperationsService({
     exact(request, ["action", ...fields[action]]);
     if (disposed) reject("UNAVAILABLE");
     switch (action) {
+      case "documentation.list":
+        if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
+        return documentation.list();
+      case "documentation.read":
+        if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
+        return documentation.read({ id: request.id });
+      case "documentation.open":
+        if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
+        return documentation.open({ id: request.id, linkId: request.linkId });
       case "runtime.discover":
         return execution.discover();
       case "runtime.python.choose": {
