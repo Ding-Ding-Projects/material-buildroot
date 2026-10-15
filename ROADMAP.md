@@ -229,6 +229,8 @@ Each identity has exactly one primary acceptance phase below. Cross-phase depend
 
 ## Current checkpoint
 
+The public landing page now emphasizes the published early desktop shell, immutable download, historical genuine capture and explicit feature boundaries. Documentation search and mobile keyboard navigation were improved. This bounded website refresh does not close PH09 or the full shared-feature inventory; see the current [handoff](HANDOFF.md#website-landing-refresh-2026-10-15) for verification boundaries.
+
 The requested first downloadable desktop milestone is published as version 0.1.0. This bounded publication does not close complete installer, update or full-product acceptance. The additional focused packaged pass on `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd` passed six keyboard/accessibility combinations, reload/replay and stale-revision recovery, and two preserved invalid/foreign storage cases; native display-scale and elapsed-time expiry evidence remain separate and open.
 
 The bounded PH02-T02-C02 desktop-shell child is verified against the source and capture record linked above; its broad parent remains unchecked. The earlier data-only broker child retains its separate evidence. All wider phase and per-surface acceptance requirements remain open unless their own checkbox and evidence explicitly say otherwise.
