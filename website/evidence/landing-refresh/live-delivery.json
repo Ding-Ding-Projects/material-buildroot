@@ -1,0 +1,664 @@
+{
+  "checked_at": "2026-10-15T06:36:31.873977+00:00",
+  "url": "https://ding-ding-projects.github.io/material-buildroot/",
+  "files": 108,
+  "matched": 108,
+  "results": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "5defc1bfef30a1be1dfeebaef7af0f4b795a791597629106df5337b7be3e762a",
+      "match": true
+    },
+    {
+      "path": "site/roadmap.json",
+      "status": 200,
+      "sha256": "8a50079fd8a31faf49d2ee4f7b1090db8a28dab10f92b29f1358807f99e0b3fa",
+      "match": true
+    },
+    {
+      "path": "site/library.html",
+      "status": 200,
+      "sha256": "fed8457057743bf441c8dc42b453d2504b20f97e3621f1f0cb7dce6ef146875c",
+      "match": true
+    },
+    {
+      "path": "site/build-info.json",
+      "status": 200,
+      "sha256": "cfcdb542f8ea7f0ae5442c902730e30b7d6a43b56fb8cfb21565b86183bd8a06",
+      "match": true
+    },
+    {
+      "path": "site/document-inventory.json",
+      "status": 200,
+      "sha256": "5b7c78dabaae2e5ba80215162e4428b32867d3976a1da04cf3575e62659f464b",
+      "match": true
+    },
+    {
+      "path": "site/roadmap.html",
+      "status": 200,
+      "sha256": "de31a5085374c805f77fb4660925e44bf1c1a23843631dae2a7403c33f6f333a",
+      "match": true
+    },
+    {
+      "path": "site/asset-inventory.json",
+      "status": 200,
+      "sha256": "24a10091e492addafb243b4b92122a7f7df2f95112acc662b25816478b3531aa",
+      "match": true
+    },
+    {
+      "path": "site/page-inventory.json",
+      "status": 200,
+      "sha256": "f5edb831ac4f2d19d77a6de405cc9765c38b6067a4f3ff06021987af51b310fe",
+      "match": true
+    },
+    {
+      "path": "site/status.html",
+      "status": 200,
+      "sha256": "e2acffc0c1806f2f1c7aa2c2e8fff2ca65a9393f8dacd583bd143968e468e336",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-vietnamese-wght-normal-VW3D74US.woff2",
+      "status": 200,
+      "sha256": "21f8c903939d8a814cda235a0adbcaca204e6b418b25e4ac2aa083adf013e201",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-greek-wght-normal-VLWBABMT.woff2",
+      "status": 200,
+      "sha256": "72a9c88670fbb856cb9b2d78135325434922ee0bdf2032b84fd1a2104ee45f62",
+      "match": true
+    },
+    {
+      "path": "site/assets/_fontsource-variable_roboto-LICENSE.txt",
+      "status": 200,
+      "sha256": "84044c09058803d87a241bd28abb4ce30a433d7db9c27a04da3efad6a0ca539c",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-latin-wght-normal-RPED2M7J.woff2",
+      "status": 200,
+      "sha256": "20b535fa80c8189e3b87d1803038389960203a886d502bc2ef1857affc2f38d2",
+      "match": true
+    },
+    {
+      "path": "site/assets/lit-LICENSE.txt",
+      "status": 200,
+      "sha256": "45d31799d0db956cc3eb5469346abbd9b7025babc5ff29fab10d7095da992ef1",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-greek-ext-wght-normal-YXAP6ZHC.woff2",
+      "status": 200,
+      "sha256": "d94ccab74005ea632c5680d33d34586634ded595035990fa2cfef2f1e1cccb55",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-symbols-wght-normal-6QR33THK.woff2",
+      "status": 200,
+      "sha256": "e921785496ed2d98c2257c88a6f838afa6acbee05cb8467048501bfe2a301461",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-latin-ext-wght-normal-TTDZXF47.woff2",
+      "status": 200,
+      "sha256": "884933fb5789b478d2da68a4cb0bd5cc138d995f1fea9a957ba29cb3c00f1bf7",
+      "match": true
+    },
+    {
+      "path": "site/assets/icon.ico",
+      "status": 200,
+      "sha256": "0196a424dbb2c33e8b8f36ee2db2b345afb707b8a642c2361f350f189f07d047",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-math-wght-normal-TTI6CXAB.woff2",
+      "status": 200,
+      "sha256": "0ac2bd2955bce37b4b57866fb20d9b2a9d40efe46eafc7276a9995b36dc4b34a",
+      "match": true
+    },
+    {
+      "path": "site/assets/icon.svg",
+      "status": 200,
+      "sha256": "1f335395c19333747ad07de1c1e5cde62514cee9549bc80d9b970289ce74a182",
+      "match": true
+    },
+    {
+      "path": "site/assets/app.js",
+      "status": 200,
+      "sha256": "45f438710d128aed0c05871f179a86709413a3d2a6068c13bc020715f9165e6d",
+      "match": true
+    },
+    {
+      "path": "site/assets/icon.png",
+      "status": 200,
+      "sha256": "28e0e278dc147cc221725b610acec0b57f78a97f0153c263578ebbc247a456cc",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-cyrillic-wght-normal-CFJJGOIL.woff2",
+      "status": 200,
+      "sha256": "c06ca3fcbc5f7c37ebb7c86a69502009911ecd8183811bae02f9b1fbb0541ddb",
+      "match": true
+    },
+    {
+      "path": "site/assets/_material_web-LICENSE.txt",
+      "status": 200,
+      "sha256": "295cdb4364b782931c914f5ca8c47fac87c732fa7e448b788a47aa5b25728212",
+      "match": true
+    },
+    {
+      "path": "site/assets/roboto-cyrillic-ext-wght-normal-NPTASRJH.woff2",
+      "status": 200,
+      "sha256": "381140ad3fe6f48603cc4898803d2cafb3e53c03b789741c8571b190436ce846",
+      "match": true
+    },
+    {
+      "path": "site/assets/app.css",
+      "status": 200,
+      "sha256": "0110d6ec13d870c07a48b321d09fcbf2498707e6c85e233db3f96eeec58213a0",
+      "match": true
+    },
+    {
+      "path": "site/categories/security.html",
+      "status": 200,
+      "sha256": "c739bbbad40167fc3a5f306bc2061fd3b8657d8e602297a53e19a0d5dce5159d",
+      "match": true
+    },
+    {
+      "path": "site/categories/evidence.html",
+      "status": 200,
+      "sha256": "0ab38f93fe828bd29ae43bc287f9664edb8ff0fc170605a92e59b4523d1822af",
+      "match": true
+    },
+    {
+      "path": "site/categories/wiki.html",
+      "status": 200,
+      "sha256": "c66e60b7cd0370ab78d176ea60320ea6a52950d42c8174bf05463411a1fc2968",
+      "match": true
+    },
+    {
+      "path": "site/categories/build.html",
+      "status": 200,
+      "sha256": "46f53052de636e6a3b6a3b32250b8d57814d1d14227d1657d0159a42c6637f84",
+      "match": true
+    },
+    {
+      "path": "site/categories/desktop.html",
+      "status": 200,
+      "sha256": "67d37f07f88ef01e2abe8ccb52748eb7730e93e2277d6b462ed2bc180ad19b2c",
+      "match": true
+    },
+    {
+      "path": "site/categories/planning.html",
+      "status": 200,
+      "sha256": "4259350db470fe0290a242f24f9755e9aef6abdc6cf9bd8839e3019dd45b87c2",
+      "match": true
+    },
+    {
+      "path": "site/categories/design.html",
+      "status": 200,
+      "sha256": "81c0cb8f392c60e8b5c5a636191404d94914572ba1a2f707ef089b777e7a6dff",
+      "match": true
+    },
+    {
+      "path": "site/roadmap/buildroot.html",
+      "status": 200,
+      "sha256": "0f4085593d37f97ec37f93455ec1141f769fafab22ede634494ad8c8caea34c3",
+      "match": true
+    },
+    {
+      "path": "site/roadmap/tools.html",
+      "status": 200,
+      "sha256": "c4a9a3a9f573210d005ff4ed93c59feb7f855160ff4e25bf9d4906ea51017c8b",
+      "match": true
+    },
+    {
+      "path": "site/roadmap/delivery.html",
+      "status": 200,
+      "sha256": "bc9b44432b12c3da3ebfbbacd6e9087b1978fde059d563e01144f51273dc9ed9",
+      "match": true
+    },
+    {
+      "path": "site/roadmap/foundations.html",
+      "status": 200,
+      "sha256": "a8b107a360249a53ff57d2a0268e1d2d7e0303855fe639681d8262969236d983",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph03.html",
+      "status": 200,
+      "sha256": "c7cbc34ce4a6d041b7d092777d810d31149cdaaa7f4e85a0e3a451b4bc9e76d7",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph06.html",
+      "status": 200,
+      "sha256": "c024170890c3926a71a4b6ac1ca44f89dcba9dd80d765cd8c0ae48af91af5b5d",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph02.html",
+      "status": 200,
+      "sha256": "084c4146d990af7f291438fa0db3be3164f760ecaf30ffa7e0b52d0ff9bec4c3",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph09.html",
+      "status": 200,
+      "sha256": "a1471eda297664ae6014f33ae8b202552a61138f7d6ce9b4b0a6362bda641e84",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph10.html",
+      "status": 200,
+      "sha256": "9b18117a8c9f6e42c6df664451d42a23372e40794ff07d3e2cf270c45a2c2966",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph01.html",
+      "status": 200,
+      "sha256": "f1134f2b1a2248ea0ae8306018e6067fa839c01e918aea33b33bebc8a483fe16",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph05.html",
+      "status": 200,
+      "sha256": "7295a35c74da1a4f1536ae9394bbc4b1e57be81160f07c738950a3a90fb11a31",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph00.html",
+      "status": 200,
+      "sha256": "9a22c8d76afa153feb03b75b4cc56e736e024a1b34eb770cf8ff8fe6b3bde39d",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph07.html",
+      "status": 200,
+      "sha256": "845a0df223103427d5f6325e7ce1da92b9eb8122df7ba1f27195cac96e83a760",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph04.html",
+      "status": 200,
+      "sha256": "39d06f531bc895b04284566f551c3559464a3ce75d2f50e18e4532b9fa301a5d",
+      "match": true
+    },
+    {
+      "path": "site/phases/ph08.html",
+      "status": 200,
+      "sha256": "b236f65a1a0c41759a32622d76390696295528ebcc345bba58071c45be8e7ada",
+      "match": true
+    },
+    {
+      "path": "site/articles/CLOSEOUT_PROMPT.html",
+      "status": 200,
+      "sha256": "5d1d4fe060d66f825b9c6abb806f6fcce04cac6a0d19cd61dd7292179009064a",
+      "match": true
+    },
+    {
+      "path": "site/articles/DECISIONS.html",
+      "status": 200,
+      "sha256": "1cf38acd6d7dabfeb4abe5b7b411db30c2831e6f9d9d5db6643307fb68ceeece",
+      "match": true
+    },
+    {
+      "path": "site/articles/AGENTS.html",
+      "status": 200,
+      "sha256": "944395c9a400f5ba3419b4a93414012abe1963f70ffe66f1c9194b67478a87db",
+      "match": true
+    },
+    {
+      "path": "site/articles/PLAN.html",
+      "status": 200,
+      "sha256": "3809a9396a9da40443651c0d0940c7c6336f0d80be4f5a69f3cf4b1528465105",
+      "match": true
+    },
+    {
+      "path": "site/articles/HANDOFF.html",
+      "status": 200,
+      "sha256": "206348175813b69f12cf3e6df52d4e23a7ca5ed64f938168e52819049dfc7715",
+      "match": true
+    },
+    {
+      "path": "site/articles/NEXT_SESSION.html",
+      "status": 200,
+      "sha256": "3993cb5420bddbef728bc745f1e880afa9129818e49981b4673c202e69c7a4c4",
+      "match": true
+    },
+    {
+      "path": "site/articles/ROADMAP.html",
+      "status": 200,
+      "sha256": "d56bc7368b064a6f3bc35ce09cbd0f686fd23f4920c2ace46eeccb6af4a69c85",
+      "match": true
+    },
+    {
+      "path": "site/articles/README.html",
+      "status": 200,
+      "sha256": "ff65053063ef9435c4d72c32452a5445a57d411afdee44e5e5c731a4bc203b50",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/components.json",
+      "status": 200,
+      "sha256": "dbcb16bf2e103a51aa998316c7d000f3fee30abc58f87bd9b1e3564b61550f6c",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/planning/operation-request.schema.json",
+      "status": 200,
+      "sha256": "d9b9ec04e740e2e3c79dc6331a3c0caa959e16bc95dc374d414930aa2566c224",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/planning/feature-evidence.json",
+      "status": 200,
+      "sha256": "1d23a4594b396b978201b65b25a8a460f43154029c8a3b75e621a4a95ee9532c",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/evidence/desktop-shell/settings-dark.png",
+      "status": 200,
+      "sha256": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/evidence/desktop-shell/inventory.json",
+      "status": 200,
+      "sha256": "2a3f1db7b574980b79adb66d7fa872b3bbf560052d305269d1eb7b6dab72f0c1",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/evidence/desktop-shell/release-v0.1.0-build.4.1.json",
+      "status": 200,
+      "sha256": "73f52b12ee9bae3d0facd7eaab5d212b9362afd993d5d47ac4b2964f402fb349",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/evidence/desktop-shell/projects-dark.png",
+      "status": 200,
+      "sha256": "66c2d311d1dcc49bd8a4ca9c80b5ac0d6defb2b36044153276aa5581cd8c8cd9",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/docs/evidence/hosting/initial-live.json",
+      "status": 200,
+      "sha256": "13d91a3a66afef04201f57eec49eb3fe3622f6c51be543dce6058bdc4fb37e04",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/evidence/roadmap-categories.png",
+      "status": 200,
+      "sha256": "d7be379ece9a4bc1c2ac26c05befe3d8e96b367f75220babe027f7dad06e82d8",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/evidence/home-desktop-dark.png",
+      "status": 200,
+      "sha256": "0b58791d61dce44bbdfc9ccd3e561c24c4f286739a6c8487464611e47a97673a",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/evidence/home-mobile.png",
+      "status": 200,
+      "sha256": "be82ed311392f756a30038f988f95ff3850342711bd05ee6e4d3d0b154c27ece",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/evidence/roadmap-article.png",
+      "status": 200,
+      "sha256": "eaf19c9c499fc23d99f251f16ff504964d8b03368713e47b1f69250bc9156a35",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/evidence/home-desktop.png",
+      "status": 200,
+      "sha256": "54fc417b7c64527ae580df85e39465c596622e5a7f4289e563fd603cf9bdb03f",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/website/evidence/browser-check.json",
+      "status": 200,
+      "sha256": "5577908069ac891f5538ed932e70e33ba720bacd8edd2f5e4cb86ee92183364c",
+      "match": true
+    },
+    {
+      "path": "site/source-assets/design/reference/states.json",
+      "status": 200,
+      "sha256": "73788cfbd2e3a80a8756da7ea8296380000f19a1709c64692c25d436fdce205c",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/README.html",
+      "status": 200,
+      "sha256": "7eb865b6f9606b2401fcd8965a68b2ef9db7a957b338bfd750896c3e4ab6edd6",
+      "match": true
+    },
+    {
+      "path": "site/articles/website/README.html",
+      "status": 200,
+      "sha256": "a08c2a64d65abc3ee2182ba71abf1fc9afea4289fa94282ad4ed7ee4eed71761",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/screens.html",
+      "status": 200,
+      "sha256": "8443601969058177b43441f9e79ad8f738ae8f742572c57030072e0360ae1c1f",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/components.html",
+      "status": 200,
+      "sha256": "0e2979ad0afa76b8a72e59a2b780c76fd422c228593238910a0434bfe0a87b7e",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/REVIEW.html",
+      "status": 200,
+      "sha256": "b640a07bd9a7c78ebd72bf960cb5cc7515e27ef59d2b5590dc709398b18c8ad3",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/desktop-shell.html",
+      "status": 200,
+      "sha256": "0abf4efca9a8a544aadf58e0edf0a6b7fdcbdafee7c019824d910a2b1ea81662",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/acceptance.html",
+      "status": 200,
+      "sha256": "e8fb8e15a062d1c76c2855b5fe8dab92e531ac3bf66866615e021cf46750a114",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/README.html",
+      "status": 200,
+      "sha256": "7216358ba6d5594b2150256059b0150068233d6fb2a7c92a80964b468df5e161",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/desktop/README.html",
+      "status": 200,
+      "sha256": "816ab88a8c39cd82a1614f0ca984c37a3f88744372ddf99eb20d8c6150abf7f1",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/desktop/host-and-preferences.html",
+      "status": 200,
+      "sha256": "4ef13d3a6a095f4da73a66b142b18e598ccd61d0d1067ad03be4b207744a5f50",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/build/releases.html",
+      "status": 200,
+      "sha256": "f5acce892ef50469e8097e72ba3dc322a04e97d31f45b6502fa668b9be4a01ac",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/build/windows-entrypoints.html",
+      "status": 200,
+      "sha256": "09e0f26dfd164bbaaa608f25be42a7b57c940de703f73043b15aaa040cb9df95",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/build/README.html",
+      "status": 200,
+      "sha256": "82b688b4054cd12b08f91af07f5f55c15c54fc082cfa297c12a6d0b7dca8e09f",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/security/operation-requests.html",
+      "status": 200,
+      "sha256": "76e8840809749b8bd73946c3802ecca23f66b3e9f96d99702c627a91c2fc0c98",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/security/broker-admission.html",
+      "status": 200,
+      "sha256": "f7e50faa0684dd3c6c84c52a6bd8eb6782873bec2192745e5903fef9d0d37a18",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/security/README.html",
+      "status": 200,
+      "sha256": "a8ddc5e109a498a4e5c4f9c4404c8b21aeccabf4ce9a4096b5fae5c3a3fc6079",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/surfaces.html",
+      "status": 200,
+      "sha256": "76b699af6f4a50c72f439e7739a673bb55a02e7ab649e8b36f4d19d6cc288bb2",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/feature-coverage.html",
+      "status": 200,
+      "sha256": "ada1e6619f317d26ef68bd002a760999aaeb9972e9ed769bb8dcb77cf1bcf233",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/architecture.html",
+      "status": 200,
+      "sha256": "4a2a9d2d803292b1ff9232370629b030b5df56d2c8791786b4dfac03e2215ce3",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/buildroot-constraints.html",
+      "status": 200,
+      "sha256": "b660339838dbe6c0da90530657b74ca8673a800ded455ffe85cdf03f9e24d97b",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/README.html",
+      "status": 200,
+      "sha256": "5603b508ba3f83c49ee14333f2ab654279caabb22ced4ec2ff40bc4d19aad7af",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/evidence-ledger.html",
+      "status": 200,
+      "sha256": "637e0cba56fafd912f795b72c4b352491b481923e27a0173a37c296cb78aebbb",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/planning/managed-execution.html",
+      "status": 200,
+      "sha256": "77881940aaac4a27c8db7f0e151a65bf61ce2803cb1e8e7158fd6a8451db3e78",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/wiki/Getting-started.html",
+      "status": 200,
+      "sha256": "8d17909848bcfea09f959eaf17abb312cb858fe645a9c33d54a107b318224436",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/wiki/Home.html",
+      "status": 200,
+      "sha256": "40e1a039483a0ac29b2e982801962b6d670b71006a2a4d8e3580e9bd15fe7fbd",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/wiki/FAQ.html",
+      "status": 200,
+      "sha256": "6932dde9381b31c4f397750ae73b7478b8e7864836ca53fe9bd2769bbf40240a",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/evidence/planning-site.html",
+      "status": 200,
+      "sha256": "c8c985be879cd24ca77a3bfe386a875d7120510757a17b7f0f53493ad6dc9fc9",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/evidence/desktop-shell/README.html",
+      "status": 200,
+      "sha256": "3299dbd6e1a1630c19745ef27372df14b7cc3412c55e5ad911fd24e80fa2eebf",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/evidence/tasks/PH02-T02-C03.html",
+      "status": 200,
+      "sha256": "ff333e638fd50c02df8e48de17b00d4dcdd68ec0f282440634645a1bbebe0642",
+      "match": true
+    },
+    {
+      "path": "site/articles/docs/evidence/tasks/PH01-contracts.html",
+      "status": 200,
+      "sha256": "2bcacbb5dce55555ed9f552e5402be6b8cb9c7941e5cbc22689c6036ae36301c",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/archive/README.html",
+      "status": 200,
+      "sha256": "91b6b9acaf7ae6d1bcd26b85e445959f92cee713343eb32cfceb520b99c7568c",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/reference/control-map.html",
+      "status": 200,
+      "sha256": "160c3c03d8c28d6982e7fa86706e400d0f6a1c9ca58c304f2a0a231f90a309cc",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/reference/README.html",
+      "status": 200,
+      "sha256": "ae3a658cd42ea121969cb66477c89052db1ef44eae9ce7e6ab639cf498495266",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/archive/initial-draft/screens.html",
+      "status": 200,
+      "sha256": "45460c85a07518fc669278e17e20095f2c9228c82055761761d91fa4ab4ce686",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/archive/initial-draft/questions.html",
+      "status": 200,
+      "sha256": "53338750754e5cc585c619f485e1fa7c89e6aba8f98dc201f0e0b1e338eed100",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/archive/initial-draft/components.html",
+      "status": 200,
+      "sha256": "9d8c7b5f534c5ab892e7100156fd9afe09cc9d7e45e1702ac74086cfd06d1e53",
+      "match": true
+    },
+    {
+      "path": "site/articles/design/archive/initial-draft/README.html",
+      "status": 200,
+      "sha256": "883346b136bf61379818795f64a95e8812dadab3d036eb7f0933c6558a58a7d5",
+      "match": true
+    }
+  ],
+  "schema": 1,
+  "published_source_commit": "5819290b661789737618c37049ca00708ad8334f",
+  "build_base_commit": "a8c71418c7ab75673bd4cb8c960d4b4c6cfc23e9",
+  "input_snapshot_sha256": "258c3153b0d68fae9345e630bbf3d3dea5828a57c701fa785e17fa17e62ff031",
+  "deployment_url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38692479628",
+  "deployment_conclusion": "success",
+  "homepage": "https://ding-ding-projects.github.io/material-buildroot/",
+  "scope": "Public HTTP byte verification of the reviewed static website. Native Windows and installer acceptance are separate."
+}
