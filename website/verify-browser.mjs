@@ -19,7 +19,8 @@ const meta=JSON.parse(await fs.readFile(path.join(outputRoot,'site/build-info.js
 const inventory=JSON.parse(await fs.readFile(path.join(outputRoot,'site/document-inventory.json'),'utf8'));
 const roadmap=JSON.parse(await fs.readFile(path.join(outputRoot,'site/roadmap.json'),'utf8'));
 const errors=[];
-const browser=await chromium.launch({headless:true,executablePath:process.env.DOCS_CHROMIUM_PATH || undefined});
+const proxyServer=process.env.DOCS_BROWSER_PROXY || process.env.HTTPS_PROXY || process.env.https_proxy;
+const browser=await chromium.launch({headless:true,executablePath:process.env.DOCS_CHROMIUM_PATH || undefined,...(proxyServer?{proxy:{server:proxyServer,bypass:'127.0.0.1,localhost'}}:{})});
 const receipt={schema:1,scope:'Initial documentation site only; no desktop, full shared feature parity, native host or companion proof.',route:endpoint.hostname==='ding-ding-projects.github.io'?'public-github-pages':'local-headless-chromium',browser:browser.version(),built_at:meta.built_at,input_snapshot_sha256:meta.input_snapshot_sha256,base_commit:meta.base_commit,inputs_differ_from_base:meta.inputs_differ_from_base,checks:[],captures:[]};
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 receipt.artifacts={html_sha256:sha(await fs.readFile(path.join(outputRoot,'index.html'))),javascript_sha256:sha(await fs.readFile(path.join(outputRoot,'site/assets/app.js'))),css_sha256:sha(await fs.readFile(path.join(outputRoot,'site/assets/app.css')))};

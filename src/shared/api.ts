@@ -82,6 +82,16 @@ export interface StudioBootstrap {
 }
 /** Only host-admitted documents receive this bridge. */
 export interface StudioAPI {
+  sharedMode?(
+    request: import("./shared-mode").SharedModeRequest,
+  ): Promise<import("./shared-mode").SharedModeReply>;
+  sharedModeRecovery?(): Promise<
+    | { ok: true; result: import("./shared-mode").SharedModeRecovery }
+    | { ok: false; code: string }
+  >;
+  onSharedMode?(
+    listener: (snapshot: import("./shared-mode").SharedModeSnapshot) => void,
+  ): () => void;
   operations?(request: {
     action: string;
     [key: string]: unknown;

@@ -1,6 +1,76 @@
 "use strict";
 const { contextBridge, ipcRenderer } = require("electron");
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+function validModeSnapshot(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Object.keys(value).sort().join(",") !==
+      "active,available,configured,credentialKind,displayName,revision,watching"
+  )
+    return false;
+  if (
+    typeof value.available !== "boolean" ||
+    typeof value.watching !== "boolean" ||
+    ![true, false, null].includes(value.active) ||
+    ![true, false, null].includes(value.configured)
+  )
+    return false;
+  if (
+    value.displayName !== null &&
+    (typeof value.displayName !== "string" ||
+      [...value.displayName].length > 96 ||
+      !value.displayName.trim() ||
+      /[\u0000-\u001f\u007f]/u.test(value.displayName))
+  )
+    return false;
+  if (
+    value.revision !== null &&
+    (typeof value.revision !== "string" || !uuid.test(value.revision))
+  )
+    return false;
+  if (![null, "pin", "password", "passkey"].includes(value.credentialKind))
+    return false;
+  if (!value.available)
+    return (
+      value.active === null &&
+      value.configured === null &&
+      value.revision === null &&
+      value.credentialKind === null
+    );
+  if (
+    !value.watching ||
+    typeof value.active !== "boolean" ||
+    typeof value.configured !== "boolean"
+  )
+    return false;
+  if (!value.configured)
+    return (
+      value.active === false &&
+      value.displayName === null &&
+      value.revision === null &&
+      value.credentialKind === null
+    );
+  return (
+    value.displayName !== null &&
+    typeof value.revision === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      value.revision,
+    ) &&
+    (!value.active || value.credentialKind !== null)
+  );
+}
+function modeRequest(request) {
+  let serialized;
+  try {
+    serialized = JSON.stringify(request);
+  } catch {
+    return Promise.resolve({ ok: false, code: "INVALID_REQUEST" });
+  }
+  if (typeof serialized !== "string" || serialized.length > 16384)
+    return Promise.resolve({ ok: false, code: "INVALID_REQUEST" });
+  return ipcRenderer.invoke("studio:shared-mode", serialized);
+}
 function validEvent(value) {
   return (
     value !== null &&
@@ -22,6 +92,22 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    sharedMode: modeRequest,
+    sharedModeRecovery: () => modeRequest({ action: "recovery" }),
+    onSharedMode: (listener) => {
+      if (typeof listener !== "function")
+        throw new TypeError("Listener must be a function.");
+      let active = true;
+      const wrapped = (_event, value) => {
+        if (active && validModeSnapshot(value))
+          listener(Object.freeze({ ...value }));
+      };
+      ipcRenderer.on("studio:shared-mode:event", wrapped);
+      return () => {
+        active = false;
+        ipcRenderer.removeListener("studio:shared-mode:event", wrapped);
+      };
+    },
     operations: (request) => {
       let serialized;
       try {

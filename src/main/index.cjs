@@ -6,6 +6,7 @@ const {
   session,
   dialog,
   shell,
+  safeStorage,
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -16,6 +17,11 @@ const { createDesktopSession } = require("./security/desktop-session.cjs");
 const { createWorkspaceService } = require("./workspace-service.cjs");
 const { createWorkspaceIPC } = require("./security/workspace-ipc.cjs");
 const { createOperationsService } = require("./operations-service.cjs");
+const { createVault } = require("./security/vault.cjs");
+const {
+  createSharedModeService,
+} = require("./privacy/shared-mode-service.cjs");
+const { createSharedModeIPC } = require("./privacy/shared-mode-ipc.cjs");
 const verification = process.argv.filter((arg) =>
   arg.startsWith("--verification-user-data="),
 );
@@ -29,7 +35,7 @@ if (verification.length) {
     throw new Error("Verification profile must be one absolute directory.");
   app.setPath("userData", path.resolve(value));
 }
-let store, window, desktop, operations;
+let store, window, desktop, operations, sharedModeIPC, unsubscribeSharedMode;
 let quitting = false;
 const capabilities = createCapabilityRegistry();
 if (require("electron-squirrel-startup")) app.quit();
@@ -43,7 +49,7 @@ else {
   });
   app
     .whenReady()
-    .then(() => {
+    .then(async () => {
       session.defaultSession.setPermissionRequestHandler(
         (_wc, _permission, callback) => callback(false),
       );
@@ -110,6 +116,54 @@ else {
         metadata,
         storageReady: !!store,
       });
+      let sharedModeService;
+      try {
+        // Common protocol location, separate from this application's workspace/profile.
+        // Other applications must explicitly adopt the same protocol and vault provider.
+        const localData =
+          process.platform === "win32"
+            ? process.env.LOCALAPPDATA
+            : process.env.XDG_DATA_HOME ||
+              path.join(app.getPath("home"), ".local", "share");
+        if (
+          typeof localData !== "string" ||
+          !path.isAbsolute(localData) ||
+          /[\x00-\x1f]/.test(localData)
+        )
+          throw Error("Local storage unavailable");
+        const sharedDirectory = verification.length
+          ? path.join(app.getPath("userData"), "verification-shared-experience-v1")
+          : path.join(localData, "Ding-Ding Projects", "shared-experience-v1");
+        sharedModeService = createSharedModeService({
+          sharedDirectory,
+          vault: createVault({
+            safeStorage,
+            directory: path.join(sharedDirectory, "credentials"),
+          }),
+        });
+        await sharedModeService.start();
+      } catch {
+        sharedModeService?.close();
+        sharedModeService = undefined;
+      }
+      sharedModeIPC = createSharedModeIPC({
+        desktop,
+        service: sharedModeService,
+      });
+      ipcMain.handle("studio:shared-mode", (event, value) =>
+        sharedModeIPC.request(event, value),
+      );
+      unsubscribeSharedMode = sharedModeService?.subscribe((snapshot) => {
+        if (
+          !window.isDestroyed() &&
+          !window.webContents.isDestroyed() &&
+          window.webContents.mainFrame.url === url
+        ) {
+          try {
+            window.webContents.send("studio:shared-mode:event", snapshot);
+          } catch {}
+        }
+      });
       const workspaceService = createWorkspaceService({
         filePath: path.join(app.getPath("userData"), "workspace.json"),
       });
@@ -172,11 +226,13 @@ else {
       window.webContents.on("render-process-gone", () => desktop.revoke());
       window.webContents.on("destroyed", () => desktop.revoke());
       window.once("ready-to-show", () => window.show());
-      window.loadURL(url);
+      await window.loadURL(url);
     })
     .catch(() => app.quit());
   app.on("window-all-closed", () => app.quit());
   app.on("before-quit", (event) => {
+    unsubscribeSharedMode?.();
+    sharedModeIPC?.close();
     if (operations && !quitting) {
       event.preventDefault();
       quitting = true;

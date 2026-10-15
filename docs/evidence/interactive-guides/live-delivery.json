@@ -1,0 +1,1526 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-15T21:47:30Z",
+  "siteUrl": "https://ding-ding-projects.github.io/material-buildroot/",
+  "publication": {
+    "commit": "3de982211517bbeeb221cb540893bb3b3e4c06ff",
+    "defaultBranch": "main",
+    "configuredPath": "/docs",
+    "pagesStatus": "built",
+    "buildType": "legacy",
+    "latestBuildStatus": "built",
+    "latestBuildCreatedAt": "2026-10-15T21:41:37Z",
+    "latestBuildUpdatedAt": "2026-10-15T21:42:02Z",
+    "repositoryAbout": {
+      "homepage": "https://ding-ding-projects.github.io/material-buildroot/",
+      "defaultBranch": "main",
+      "repository": "https://github.com/Ding-Ding-Projects/material-buildroot"
+    }
+  },
+  "generatedOutput": {
+    "baseCommit": "c527753500fd97e66b6e74646bd93a42b6555aea",
+    "inputsDifferFromBase": true,
+    "inputSnapshotSha256": "d9f0cd2d3f1ea5750fe2f36f05cefe0478287483451a8dec672617eab4cf1d8f",
+    "builtAt": "2026-10-15T21:38:28.314Z",
+    "sourceInputCount": 132,
+    "documentCount": 67,
+    "roadmapTaskCount": 79,
+    "featureIdentityCount": 107,
+    "materialComponents": "@material/web 2.4.1",
+    "baseCommitMeaning": "Build base commit only; inputsDifferFromBase is true, so the exact website input snapshot SHA-256 is the complete source binding for this output."
+  },
+  "runtime": {
+    "platform": "linux",
+    "architecture": "x64",
+    "node": "v24.19.0",
+    "browser": "Chromium 154.0.8037.57",
+    "transport": "curl through configured HTTPS proxy; Playwright Chromium launched with configured proxy; no proxy address or credentials recorded",
+    "boundedFileChecks": {
+      "parallelism": 8,
+      "retries": 3,
+      "cacheBust": "unique expected-SHA-256 prefix per generated file",
+      "curl": "curl with compressed-response decoding"
+    }
+  },
+  "liveFileComparison": {
+    "generatedFileCount": 171,
+    "matchedFileCount": 171,
+    "mismatchedFileCount": 0,
+    "totalLocalBytes": 61687130,
+    "allResponsesWereHttp200": true,
+    "allSha256Matched": true,
+    "files": [
+      {
+        "path": ".nojekyll",
+        "status": 200,
+        "bytes": 0,
+        "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "observedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "matched": true
+      },
+      {
+        "path": "index.html",
+        "status": 200,
+        "bytes": 572472,
+        "expectedSha256": "97d516308444e7f9271658b78199fb7dd6645c2cee9cd29ebd7e3dd3ab965986",
+        "observedSha256": "97d516308444e7f9271658b78199fb7dd6645c2cee9cd29ebd7e3dd3ab965986",
+        "matched": true
+      },
+      {
+        "path": "service-worker.js",
+        "status": 200,
+        "bytes": 13204,
+        "expectedSha256": "d6c497da381fdd6d1c6e15d09a8fc24dafb0006ef698a801f9adda62119e83bf",
+        "observedSha256": "d6c497da381fdd6d1c6e15d09a8fc24dafb0006ef698a801f9adda62119e83bf",
+        "matched": true
+      },
+      {
+        "path": "site/articles/AGENTS.html",
+        "status": 200,
+        "bytes": 562950,
+        "expectedSha256": "584da80a987eaaf5c511cc984dbf3ef132443a29802cbd61435e41458325808c",
+        "observedSha256": "584da80a987eaaf5c511cc984dbf3ef132443a29802cbd61435e41458325808c",
+        "matched": true
+      },
+      {
+        "path": "site/articles/CLOSEOUT_PROMPT.html",
+        "status": 200,
+        "bytes": 567278,
+        "expectedSha256": "63dfb36130d55d006006c0f7a9796669c2473809f58a22cff608c41bf753a1b1",
+        "observedSha256": "63dfb36130d55d006006c0f7a9796669c2473809f58a22cff608c41bf753a1b1",
+        "matched": true
+      },
+      {
+        "path": "site/articles/DECISIONS.html",
+        "status": 200,
+        "bytes": 572582,
+        "expectedSha256": "9a7bce16e07701372ad3881bae11328b02eae557863d27359721b208bc42c537",
+        "observedSha256": "9a7bce16e07701372ad3881bae11328b02eae557863d27359721b208bc42c537",
+        "matched": true
+      },
+      {
+        "path": "site/articles/HANDOFF.html",
+        "status": 200,
+        "bytes": 605185,
+        "expectedSha256": "3037c45f0f033f40207195ca8ef6bdf3089e6792230a7d812fbd623075b128ea",
+        "observedSha256": "3037c45f0f033f40207195ca8ef6bdf3089e6792230a7d812fbd623075b128ea",
+        "matched": true
+      },
+      {
+        "path": "site/articles/NEXT_SESSION.html",
+        "status": 200,
+        "bytes": 572246,
+        "expectedSha256": "4d3aef6e4a1faa7a2fc5d9cab3b0a63bbe0a69e7642427e6dd88e38364a02fd7",
+        "observedSha256": "4d3aef6e4a1faa7a2fc5d9cab3b0a63bbe0a69e7642427e6dd88e38364a02fd7",
+        "matched": true
+      },
+      {
+        "path": "site/articles/PLAN.html",
+        "status": 200,
+        "bytes": 581070,
+        "expectedSha256": "15ff59b5d3909b977e4e28948e1940790472fb83dc7c0511a61a0c19e1c5a506",
+        "observedSha256": "15ff59b5d3909b977e4e28948e1940790472fb83dc7c0511a61a0c19e1c5a506",
+        "matched": true
+      },
+      {
+        "path": "site/articles/README.html",
+        "status": 200,
+        "bytes": 568243,
+        "expectedSha256": "3f0770e139d4a9b27b6fbe873a84c73c76e1b08effc0751cdd9d7fd16ab656ac",
+        "observedSha256": "3f0770e139d4a9b27b6fbe873a84c73c76e1b08effc0751cdd9d7fd16ab656ac",
+        "matched": true
+      },
+      {
+        "path": "site/articles/ROADMAP.html",
+        "status": 200,
+        "bytes": 618108,
+        "expectedSha256": "b32c5a50e9f318f37eda6fb1772dec91ea498379c9edb1a93d30ae7819514208",
+        "observedSha256": "b32c5a50e9f318f37eda6fb1772dec91ea498379c9edb1a93d30ae7819514208",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/README.html",
+        "status": 200,
+        "bytes": 566181,
+        "expectedSha256": "5c6181188ef015b0fb9d94f3b56c3eab403cda6d696df8b9099e9b39712a4cb5",
+        "observedSha256": "5c6181188ef015b0fb9d94f3b56c3eab403cda6d696df8b9099e9b39712a4cb5",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/REVIEW.html",
+        "status": 200,
+        "bytes": 562816,
+        "expectedSha256": "f899231e85abf96bc1cc90605a07fa4f55e99e0a8b61cbc0b4296b481c8e9d3c",
+        "observedSha256": "f899231e85abf96bc1cc90605a07fa4f55e99e0a8b61cbc0b4296b481c8e9d3c",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/acceptance.html",
+        "status": 200,
+        "bytes": 564167,
+        "expectedSha256": "62f763dca032afbc1476622754ecf5c509cd1b1f98a13ab4050559eb9e380946",
+        "observedSha256": "62f763dca032afbc1476622754ecf5c509cd1b1f98a13ab4050559eb9e380946",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/archive/README.html",
+        "status": 200,
+        "bytes": 561896,
+        "expectedSha256": "acc95cd5518d4fc4e12096adfde96146ca7aa9982f47c694b961b7c764d27d89",
+        "observedSha256": "acc95cd5518d4fc4e12096adfde96146ca7aa9982f47c694b961b7c764d27d89",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/archive/initial-draft/README.html",
+        "status": 200,
+        "bytes": 570508,
+        "expectedSha256": "0cd0f5a28093eb5cf04b189cfb7931ca1dfbe6031e1604638d4fca4c489568f8",
+        "observedSha256": "0cd0f5a28093eb5cf04b189cfb7931ca1dfbe6031e1604638d4fca4c489568f8",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/archive/initial-draft/components.html",
+        "status": 200,
+        "bytes": 566148,
+        "expectedSha256": "6ac0f897b8f53654eb9e9cc6abfa0943e8cf66d56f17bff49b15961956056578",
+        "observedSha256": "6ac0f897b8f53654eb9e9cc6abfa0943e8cf66d56f17bff49b15961956056578",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/archive/initial-draft/questions.html",
+        "status": 200,
+        "bytes": 566438,
+        "expectedSha256": "4ad4245e4fa40e9d8976afca1ca13d263ddd9e163016aabdb895ce28c30e1497",
+        "observedSha256": "4ad4245e4fa40e9d8976afca1ca13d263ddd9e163016aabdb895ce28c30e1497",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/archive/initial-draft/screens.html",
+        "status": 200,
+        "bytes": 568599,
+        "expectedSha256": "7be13a28ed7d9c8699262e0a513bd4bbd7a17ac3ac9f7b2a1de60fc7d2b09754",
+        "observedSha256": "7be13a28ed7d9c8699262e0a513bd4bbd7a17ac3ac9f7b2a1de60fc7d2b09754",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/components.html",
+        "status": 200,
+        "bytes": 566108,
+        "expectedSha256": "c9c55e093e51c0b9e0a410d66a7d804bb1611c91051f31bdbc4770e4008fe078",
+        "observedSha256": "c9c55e093e51c0b9e0a410d66a7d804bb1611c91051f31bdbc4770e4008fe078",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/desktop-shell.html",
+        "status": 200,
+        "bytes": 563787,
+        "expectedSha256": "8ed7c6704aad749e0f6f8c5f96f91a6658aecc7ce97648f9b95de9b340fae4c3",
+        "observedSha256": "8ed7c6704aad749e0f6f8c5f96f91a6658aecc7ce97648f9b95de9b340fae4c3",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/desktop-workspace-remake.html",
+        "status": 200,
+        "bytes": 570077,
+        "expectedSha256": "cbaaec999f63682de5f228cded752aa678e21eb74d74bb3f38c87f767c198265",
+        "observedSha256": "cbaaec999f63682de5f228cded752aa678e21eb74d74bb3f38c87f767c198265",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/modern-workspace.html",
+        "status": 200,
+        "bytes": 574896,
+        "expectedSha256": "84f43425f2f813b3179fdd5303c3e6a5154e2423ae3082388fb8dce423d76034",
+        "observedSha256": "84f43425f2f813b3179fdd5303c3e6a5154e2423ae3082388fb8dce423d76034",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/reference/README.html",
+        "status": 200,
+        "bytes": 566781,
+        "expectedSha256": "d0b4eb77f9c69a6ddcdd0f7315c439041a3a0eb0c8c7be36005e8a1c57749564",
+        "observedSha256": "d0b4eb77f9c69a6ddcdd0f7315c439041a3a0eb0c8c7be36005e8a1c57749564",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/reference/control-map.html",
+        "status": 200,
+        "bytes": 573235,
+        "expectedSha256": "2b5abe7ed502d0d4f618de64c620d54cb44f3484fc2d608e6e8f5e81ca316b06",
+        "observedSha256": "2b5abe7ed502d0d4f618de64c620d54cb44f3484fc2d608e6e8f5e81ca316b06",
+        "matched": true
+      },
+      {
+        "path": "site/articles/design/screens.html",
+        "status": 200,
+        "bytes": 570128,
+        "expectedSha256": "67867b6464e019835e721e90196db8fabda7909638528fb708a4abe1612655d5",
+        "observedSha256": "67867b6464e019835e721e90196db8fabda7909638528fb708a4abe1612655d5",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/README.html",
+        "status": 200,
+        "bytes": 562973,
+        "expectedSha256": "11b66a6fa121506e303f5796a23359df75ddc93fee52bcb70b5b14bd19befe8a",
+        "observedSha256": "11b66a6fa121506e303f5796a23359df75ddc93fee52bcb70b5b14bd19befe8a",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/build/README.html",
+        "status": 200,
+        "bytes": 561349,
+        "expectedSha256": "86a29be6de8affd4ea096f9456890356d046a3c82d86d2a39dcdc3860b48b983",
+        "observedSha256": "86a29be6de8affd4ea096f9456890356d046a3c82d86d2a39dcdc3860b48b983",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/build/releases.html",
+        "status": 200,
+        "bytes": 567087,
+        "expectedSha256": "720ce6e6ecd5942bdbdb1cdb59fe0b47579c24fec4daf1184b9261510685a969",
+        "observedSha256": "720ce6e6ecd5942bdbdb1cdb59fe0b47579c24fec4daf1184b9261510685a969",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/build/windows-entrypoints.html",
+        "status": 200,
+        "bytes": 570443,
+        "expectedSha256": "c68d71d52453f9a517e416f27594b36c3d790c36f8c345b53a156d5b0dcde8ae",
+        "observedSha256": "c68d71d52453f9a517e416f27594b36c3d790c36f8c345b53a156d5b0dcde8ae",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/README.html",
+        "status": 200,
+        "bytes": 561412,
+        "expectedSha256": "abf23cb7905445e83a4b5607d3038147790180b2d3591658a8c0daa0a41fbd7b",
+        "observedSha256": "abf23cb7905445e83a4b5607d3038147790180b2d3591658a8c0daa0a41fbd7b",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/built-in-tools.html",
+        "status": 200,
+        "bytes": 591470,
+        "expectedSha256": "4178db990c54153def27e5ced7002b8a9159265e6294da827ca6f8c7c3e403ac",
+        "observedSha256": "4178db990c54153def27e5ced7002b8a9159265e6294da827ca6f8c7c3e403ac",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/configuration.html",
+        "status": 200,
+        "bytes": 581602,
+        "expectedSha256": "3809cbce15a201070b888fce02cd9ffd414c4fc70a43ec1351b72a1f59140c1c",
+        "observedSha256": "3809cbce15a201070b888fce02cd9ffd414c4fc70a43ec1351b72a1f59140c1c",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/deployment.html",
+        "status": 200,
+        "bytes": 569916,
+        "expectedSha256": "4a5565d3cd8ab246d6c82bc6bf608a0658919eff5f2ab98b59c66a98e113bd82",
+        "observedSha256": "4a5565d3cd8ab246d6c82bc6bf608a0658919eff5f2ab98b59c66a98e113bd82",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/execution.html",
+        "status": 200,
+        "bytes": 589388,
+        "expectedSha256": "d882192e2e99db5a0d52545dc1a5e00993bd550abcdefbcf9c55daef7f81bd6e",
+        "observedSha256": "d882192e2e99db5a0d52545dc1a5e00993bd550abcdefbcf9c55daef7f81bd6e",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/host-and-preferences.html",
+        "status": 200,
+        "bytes": 567177,
+        "expectedSha256": "d166ec78df4dfb46459b88dda09ce37b149db34977ef288ad018ec1c5cc9f8da",
+        "observedSha256": "d166ec78df4dfb46459b88dda09ce37b149db34977ef288ad018ec1c5cc9f8da",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/modern-workspace.html",
+        "status": 200,
+        "bytes": 569545,
+        "expectedSha256": "f67fc95cfa4002f9e37ee32eba536d2f88237b69b7212ddb6ae15718de83ca2c",
+        "observedSha256": "f67fc95cfa4002f9e37ee32eba536d2f88237b69b7212ddb6ae15718de83ca2c",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/modern-workspace.zh-HK.html",
+        "status": 200,
+        "bytes": 565391,
+        "expectedSha256": "996c4cb63e205253def3bddad57a67a2cd6729275f7f7d6f314f9dd688b546ba",
+        "observedSha256": "996c4cb63e205253def3bddad57a67a2cd6729275f7f7d6f314f9dd688b546ba",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/desktop/updates.html",
+        "status": 200,
+        "bytes": 564048,
+        "expectedSha256": "e6e550cdc335cc657d88a1db534c66aa6360b92f02d85d267ce315da7a0b6451",
+        "observedSha256": "e6e550cdc335cc657d88a1db534c66aa6360b92f02d85d267ce315da7a0b6451",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/ARCHIVE.html",
+        "status": 200,
+        "bytes": 565426,
+        "expectedSha256": "ba979b3917262cf89ee6a44e7763f8dfba2ffbaff7b2bab682734cf944fcf0cc",
+        "observedSha256": "ba979b3917262cf89ee6a44e7763f8dfba2ffbaff7b2bab682734cf944fcf0cc",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/desktop-shell/README.html",
+        "status": 200,
+        "bytes": 565126,
+        "expectedSha256": "68bfaefd82003220ef6489f919a5e3f2f40c0523b3967f04c519dffd9224b234",
+        "observedSha256": "68bfaefd82003220ef6489f919a5e3f2f40c0523b3967f04c519dffd9224b234",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/modern-workspace/README.html",
+        "status": 200,
+        "bytes": 570316,
+        "expectedSha256": "8656ce27440177c856eb2fed9a01ae7e9ebac966266084e994ed149d9fecbea4",
+        "observedSha256": "8656ce27440177c856eb2fed9a01ae7e9ebac966266084e994ed149d9fecbea4",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/planning-site.html",
+        "status": 200,
+        "bytes": 568617,
+        "expectedSha256": "3c1af8bd71019d33452986ed94f077734c740b5792705dfaf1cbf5d331d43c0b",
+        "observedSha256": "3c1af8bd71019d33452986ed94f077734c740b5792705dfaf1cbf5d331d43c0b",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH00-current-hosting.html",
+        "status": 200,
+        "bytes": 563094,
+        "expectedSha256": "f287542d19800e0fe960bd9212133e5c5be108b2ab2c3499b51330894dd74745",
+        "observedSha256": "f287542d19800e0fe960bd9212133e5c5be108b2ab2c3499b51330894dd74745",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH01-catalogue-delta.html",
+        "status": 200,
+        "bytes": 564336,
+        "expectedSha256": "77997a5bb305dfb59bd74deae4a38acc35740748b818b63a5053cbbd2ea516ed",
+        "observedSha256": "77997a5bb305dfb59bd74deae4a38acc35740748b818b63a5053cbbd2ea516ed",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH01-contracts.html",
+        "status": 200,
+        "bytes": 570876,
+        "expectedSha256": "f0aef159612bc42d7ec0fd7c510c864a545ff784131935543112e951bc7a1a11",
+        "observedSha256": "f0aef159612bc42d7ec0fd7c510c864a545ff784131935543112e951bc7a1a11",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH01-current-interface-contracts.html",
+        "status": 200,
+        "bytes": 570610,
+        "expectedSha256": "9d3a03014d441b8848d58c34030de9838b3b5468413697e9fcf83a38c7ca2b1c",
+        "observedSha256": "9d3a03014d441b8848d58c34030de9838b3b5468413697e9fcf83a38c7ca2b1c",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH01-implementation-admission.html",
+        "status": 200,
+        "bytes": 562271,
+        "expectedSha256": "8b627a7d0333305b211551044e821fb41cd99022d37e8c60e536c7faa7a55139",
+        "observedSha256": "8b627a7d0333305b211551044e821fb41cd99022d37e8c60e536c7faa7a55139",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH01-vocabulary-mode-admission.html",
+        "status": 200,
+        "bytes": 571396,
+        "expectedSha256": "a3ae83f86a1fcb97f439d40a90485ebae4981100dcd145a21770a17e45c6659f",
+        "observedSha256": "a3ae83f86a1fcb97f439d40a90485ebae4981100dcd145a21770a17e45c6659f",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH02-T02-C03.html",
+        "status": 200,
+        "bytes": 569550,
+        "expectedSha256": "c55b70cb4433f186ae1ded285ed515b8532d48e8c5586b52a7b93228db66557e",
+        "observedSha256": "c55b70cb4433f186ae1ded285ed515b8532d48e8c5586b52a7b93228db66557e",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/evidence/tasks/PH10-implementation.html",
+        "status": 200,
+        "bytes": 565655,
+        "expectedSha256": "360867e44b608a0522d6857ab6010c8bd8b746402b18befc9e2bde013e95e337",
+        "observedSha256": "360867e44b608a0522d6857ab6010c8bd8b746402b18befc9e2bde013e95e337",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/README.html",
+        "status": 200,
+        "bytes": 562447,
+        "expectedSha256": "cf9c630e4cb0607eae81d8a3b77ef9d279c8d5a4c2585dc01d7d4d7784762b4f",
+        "observedSha256": "cf9c630e4cb0607eae81d8a3b77ef9d279c8d5a4c2585dc01d7d4d7784762b4f",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/architecture.html",
+        "status": 200,
+        "bytes": 579039,
+        "expectedSha256": "fb581383629da243188bbc5b8f5dc6849eb1cbbcf7db7e9de8db8b207029bba6",
+        "observedSha256": "fb581383629da243188bbc5b8f5dc6849eb1cbbcf7db7e9de8db8b207029bba6",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/buildroot-constraints.html",
+        "status": 200,
+        "bytes": 567196,
+        "expectedSha256": "5dce34a89d4a6d2758cdcc7c39dca7e69be237623911e6aedbefcad5a8514924",
+        "observedSha256": "5dce34a89d4a6d2758cdcc7c39dca7e69be237623911e6aedbefcad5a8514924",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/evidence-ledger.html",
+        "status": 200,
+        "bytes": 569747,
+        "expectedSha256": "3179577db00e40592edd51e85478c38eab32ba8ffd1ec7b41fe92bc2ac6808db",
+        "observedSha256": "3179577db00e40592edd51e85478c38eab32ba8ffd1ec7b41fe92bc2ac6808db",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/feature-coverage.html",
+        "status": 200,
+        "bytes": 582584,
+        "expectedSha256": "39496ff5c7f7b0d0de1c73d7cf1208be27f507d78e830efd4572edfe3d604b59",
+        "observedSha256": "39496ff5c7f7b0d0de1c73d7cf1208be27f507d78e830efd4572edfe3d604b59",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/implementation-admission.html",
+        "status": 200,
+        "bytes": 563384,
+        "expectedSha256": "53d6dc93436f0f483668a0482adbf4aaa60022fcdcf4973ce45be6dbff4c6a90",
+        "observedSha256": "53d6dc93436f0f483668a0482adbf4aaa60022fcdcf4973ce45be6dbff4c6a90",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/managed-execution.html",
+        "status": 200,
+        "bytes": 565266,
+        "expectedSha256": "cdc4c5fd80928a10e66fc60e4c91608a382da03d83bd696f3d36663e01a90360",
+        "observedSha256": "cdc4c5fd80928a10e66fc60e4c91608a382da03d83bd696f3d36663e01a90360",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/planning/surfaces.html",
+        "status": 200,
+        "bytes": 564278,
+        "expectedSha256": "363c9d6576fc4d83acc72f584a0f88439254581d2d4425467a562def061c0091",
+        "observedSha256": "363c9d6576fc4d83acc72f584a0f88439254581d2d4425467a562def061c0091",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/README.html",
+        "status": 200,
+        "bytes": 561361,
+        "expectedSha256": "37a0bccc65aebed4d980079b48f92bcd29fa2c0deca015b9090a277aa2e37b77",
+        "observedSha256": "37a0bccc65aebed4d980079b48f92bcd29fa2c0deca015b9090a277aa2e37b77",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/broker-admission.html",
+        "status": 200,
+        "bytes": 571100,
+        "expectedSha256": "ec7d714789eafd243898150a9ec82f76bbaa22e2560d88364c0e62bcc5c6bb4e",
+        "observedSha256": "ec7d714789eafd243898150a9ec82f76bbaa22e2560d88364c0e62bcc5c6bb4e",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/companion.html",
+        "status": 200,
+        "bytes": 572344,
+        "expectedSha256": "55e88b87d5a01c87a0470f2465ca780dfcc1114df2fc20dc57f0dc44044c6ce0",
+        "observedSha256": "55e88b87d5a01c87a0470f2465ca780dfcc1114df2fc20dc57f0dc44044c6ce0",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/jobs-and-recovery.html",
+        "status": 200,
+        "bytes": 571515,
+        "expectedSha256": "8621cddabc0185daafdcb0b594b563c6962b293cd6bdfa73353d4d22f57c18a3",
+        "observedSha256": "8621cddabc0185daafdcb0b594b563c6962b293cd6bdfa73353d4d22f57c18a3",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/offline-documentation.html",
+        "status": 200,
+        "bytes": 568503,
+        "expectedSha256": "c8c232dcd78515336b625a7c5fea0e7c03bbe5dfd61609ca340991a6b6bb85f1",
+        "observedSha256": "c8c232dcd78515336b625a7c5fea0e7c03bbe5dfd61609ca340991a6b6bb85f1",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/operation-requests.html",
+        "status": 200,
+        "bytes": 565496,
+        "expectedSha256": "a4340f24383e0a1b2b73465901ae58c9a4eb561997b6a1efff88030ad7433f00",
+        "observedSha256": "a4340f24383e0a1b2b73465901ae58c9a4eb561997b6a1efff88030ad7433f00",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/security/workspace-state.html",
+        "status": 200,
+        "bytes": 581857,
+        "expectedSha256": "06c81b025fed978af89019167ccb448ca5555d45eae8e856bc88a5ab565abac0",
+        "observedSha256": "06c81b025fed978af89019167ccb448ca5555d45eae8e856bc88a5ab565abac0",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/wiki/FAQ.html",
+        "status": 200,
+        "bytes": 563731,
+        "expectedSha256": "ae55b300785e11fdcece7daf3814ddeb430840a759b17b7216934f17d9b09de3",
+        "observedSha256": "ae55b300785e11fdcece7daf3814ddeb430840a759b17b7216934f17d9b09de3",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/wiki/Getting-started.html",
+        "status": 200,
+        "bytes": 562752,
+        "expectedSha256": "f95fa3113d73453d105154b06a0348c2c27aac2fc064050f396af44d059886e5",
+        "observedSha256": "f95fa3113d73453d105154b06a0348c2c27aac2fc064050f396af44d059886e5",
+        "matched": true
+      },
+      {
+        "path": "site/articles/docs/wiki/Home.html",
+        "status": 200,
+        "bytes": 562194,
+        "expectedSha256": "39c804b65c28d520cde8185151f56913090375e311db5512b1bda5a161821606",
+        "observedSha256": "39c804b65c28d520cde8185151f56913090375e311db5512b1bda5a161821606",
+        "matched": true
+      },
+      {
+        "path": "site/articles/website/README.html",
+        "status": 200,
+        "bytes": 567930,
+        "expectedSha256": "3a015c348ba0930fa62d77babc0b1d8a8d53ea35a84c670a4305836e74cb0564",
+        "observedSha256": "3a015c348ba0930fa62d77babc0b1d8a8d53ea35a84c670a4305836e74cb0564",
+        "matched": true
+      },
+      {
+        "path": "site/asset-inventory.json",
+        "status": 200,
+        "bytes": 3294,
+        "expectedSha256": "4d09977896fdad3c926f2de8bbe02237c5905e6a96c38c7f7ad75c56b8b2b15a",
+        "observedSha256": "4d09977896fdad3c926f2de8bbe02237c5905e6a96c38c7f7ad75c56b8b2b15a",
+        "matched": true
+      },
+      {
+        "path": "site/assets/_fontsource-variable_roboto-LICENSE.txt",
+        "status": 200,
+        "bytes": 4512,
+        "expectedSha256": "84044c09058803d87a241bd28abb4ce30a433d7db9c27a04da3efad6a0ca539c",
+        "observedSha256": "84044c09058803d87a241bd28abb4ce30a433d7db9c27a04da3efad6a0ca539c",
+        "matched": true
+      },
+      {
+        "path": "site/assets/_material_web-LICENSE.txt",
+        "status": 200,
+        "bytes": 11348,
+        "expectedSha256": "295cdb4364b782931c914f5ca8c47fac87c732fa7e448b788a47aa5b25728212",
+        "observedSha256": "295cdb4364b782931c914f5ca8c47fac87c732fa7e448b788a47aa5b25728212",
+        "matched": true
+      },
+      {
+        "path": "site/assets/app.css",
+        "status": 200,
+        "bytes": 45691,
+        "expectedSha256": "425c542717da2a40ce7aaec91bec8e7c3f6a4f47c0fbea37b67ed6327c827cad",
+        "observedSha256": "425c542717da2a40ce7aaec91bec8e7c3f6a4f47c0fbea37b67ed6327c827cad",
+        "matched": true
+      },
+      {
+        "path": "site/assets/app.js",
+        "status": 200,
+        "bytes": 308595,
+        "expectedSha256": "c0c2050001f29ec56c725e5921d1cc4d6027d71020942afbaaee615783ea74ef",
+        "observedSha256": "c0c2050001f29ec56c725e5921d1cc4d6027d71020942afbaaee615783ea74ef",
+        "matched": true
+      },
+      {
+        "path": "site/assets/icon.ico",
+        "status": 200,
+        "bytes": 5304,
+        "expectedSha256": "0196a424dbb2c33e8b8f36ee2db2b345afb707b8a642c2361f350f189f07d047",
+        "observedSha256": "0196a424dbb2c33e8b8f36ee2db2b345afb707b8a642c2361f350f189f07d047",
+        "matched": true
+      },
+      {
+        "path": "site/assets/icon.png",
+        "status": 200,
+        "bytes": 2102,
+        "expectedSha256": "28e0e278dc147cc221725b610acec0b57f78a97f0153c263578ebbc247a456cc",
+        "observedSha256": "28e0e278dc147cc221725b610acec0b57f78a97f0153c263578ebbc247a456cc",
+        "matched": true
+      },
+      {
+        "path": "site/assets/icon.svg",
+        "status": 200,
+        "bytes": 222,
+        "expectedSha256": "1f335395c19333747ad07de1c1e5cde62514cee9549bc80d9b970289ce74a182",
+        "observedSha256": "1f335395c19333747ad07de1c1e5cde62514cee9549bc80d9b970289ce74a182",
+        "matched": true
+      },
+      {
+        "path": "site/assets/lit-LICENSE.txt",
+        "status": 200,
+        "bytes": 1517,
+        "expectedSha256": "45d31799d0db956cc3eb5469346abbd9b7025babc5ff29fab10d7095da992ef1",
+        "observedSha256": "45d31799d0db956cc3eb5469346abbd9b7025babc5ff29fab10d7095da992ef1",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-cyrillic-ext-wght-normal-NPTASRJH.woff2",
+        "status": 200,
+        "bytes": 35532,
+        "expectedSha256": "381140ad3fe6f48603cc4898803d2cafb3e53c03b789741c8571b190436ce846",
+        "observedSha256": "381140ad3fe6f48603cc4898803d2cafb3e53c03b789741c8571b190436ce846",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-cyrillic-wght-normal-CFJJGOIL.woff2",
+        "status": 200,
+        "bytes": 22796,
+        "expectedSha256": "c06ca3fcbc5f7c37ebb7c86a69502009911ecd8183811bae02f9b1fbb0541ddb",
+        "observedSha256": "c06ca3fcbc5f7c37ebb7c86a69502009911ecd8183811bae02f9b1fbb0541ddb",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-greek-ext-wght-normal-YXAP6ZHC.woff2",
+        "status": 200,
+        "bytes": 4340,
+        "expectedSha256": "d94ccab74005ea632c5680d33d34586634ded595035990fa2cfef2f1e1cccb55",
+        "observedSha256": "d94ccab74005ea632c5680d33d34586634ded595035990fa2cfef2f1e1cccb55",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-greek-wght-normal-VLWBABMT.woff2",
+        "status": 200,
+        "bytes": 17628,
+        "expectedSha256": "72a9c88670fbb856cb9b2d78135325434922ee0bdf2032b84fd1a2104ee45f62",
+        "observedSha256": "72a9c88670fbb856cb9b2d78135325434922ee0bdf2032b84fd1a2104ee45f62",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-latin-ext-wght-normal-TTDZXF47.woff2",
+        "status": 200,
+        "bytes": 26428,
+        "expectedSha256": "884933fb5789b478d2da68a4cb0bd5cc138d995f1fea9a957ba29cb3c00f1bf7",
+        "observedSha256": "884933fb5789b478d2da68a4cb0bd5cc138d995f1fea9a957ba29cb3c00f1bf7",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-latin-wght-normal-RPED2M7J.woff2",
+        "status": 200,
+        "bytes": 40128,
+        "expectedSha256": "20b535fa80c8189e3b87d1803038389960203a886d502bc2ef1857affc2f38d2",
+        "observedSha256": "20b535fa80c8189e3b87d1803038389960203a886d502bc2ef1857affc2f38d2",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-math-wght-normal-TTI6CXAB.woff2",
+        "status": 200,
+        "bytes": 40688,
+        "expectedSha256": "0ac2bd2955bce37b4b57866fb20d9b2a9d40efe46eafc7276a9995b36dc4b34a",
+        "observedSha256": "0ac2bd2955bce37b4b57866fb20d9b2a9d40efe46eafc7276a9995b36dc4b34a",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-symbols-wght-normal-6QR33THK.woff2",
+        "status": 200,
+        "bytes": 20408,
+        "expectedSha256": "e921785496ed2d98c2257c88a6f838afa6acbee05cb8467048501bfe2a301461",
+        "observedSha256": "e921785496ed2d98c2257c88a6f838afa6acbee05cb8467048501bfe2a301461",
+        "matched": true
+      },
+      {
+        "path": "site/assets/roboto-vietnamese-wght-normal-VW3D74US.woff2",
+        "status": 200,
+        "bytes": 13040,
+        "expectedSha256": "21f8c903939d8a814cda235a0adbcaca204e6b418b25e4ac2aa083adf013e201",
+        "observedSha256": "21f8c903939d8a814cda235a0adbcaca204e6b418b25e4ac2aa083adf013e201",
+        "matched": true
+      },
+      {
+        "path": "site/build-info.json",
+        "status": 200,
+        "bytes": 8961,
+        "expectedSha256": "0c7976f24b4f8399ced54e22a196031968cb92b69e1b2420c3181424e4cf81e1",
+        "observedSha256": "0c7976f24b4f8399ced54e22a196031968cb92b69e1b2420c3181424e4cf81e1",
+        "matched": true
+      },
+      {
+        "path": "site/categories/build.html",
+        "status": 200,
+        "bytes": 560942,
+        "expectedSha256": "21c403e37f71a75fbca4d521aa538bfc2065bde0ab19948a0824fc78691ee056",
+        "observedSha256": "21c403e37f71a75fbca4d521aa538bfc2065bde0ab19948a0824fc78691ee056",
+        "matched": true
+      },
+      {
+        "path": "site/categories/design.html",
+        "status": 200,
+        "bytes": 564366,
+        "expectedSha256": "d28003a91952a2ab93c54229ee254000ad723f708bbeff5618edd790056e96ae",
+        "observedSha256": "d28003a91952a2ab93c54229ee254000ad723f708bbeff5618edd790056e96ae",
+        "matched": true
+      },
+      {
+        "path": "site/categories/desktop.html",
+        "status": 200,
+        "bytes": 562560,
+        "expectedSha256": "709607b605d4ae84affed6bdfce6380de1199b067a7c1af0a98933620b2b8885",
+        "observedSha256": "709607b605d4ae84affed6bdfce6380de1199b067a7c1af0a98933620b2b8885",
+        "matched": true
+      },
+      {
+        "path": "site/categories/evidence.html",
+        "status": 200,
+        "bytes": 563919,
+        "expectedSha256": "26f59356e59cb00277e58fb8614f52324128535fbdeae2b7c4a4e7c16e18ea16",
+        "observedSha256": "26f59356e59cb00277e58fb8614f52324128535fbdeae2b7c4a4e7c16e18ea16",
+        "matched": true
+      },
+      {
+        "path": "site/categories/planning.html",
+        "status": 200,
+        "bytes": 564845,
+        "expectedSha256": "ff712103d71fc7999777c830d228128f659d8cde8bc082a932cdd64b5709ce59",
+        "observedSha256": "ff712103d71fc7999777c830d228128f659d8cde8bc082a932cdd64b5709ce59",
+        "matched": true
+      },
+      {
+        "path": "site/categories/security.html",
+        "status": 200,
+        "bytes": 562113,
+        "expectedSha256": "e2a5b81e67d155a3e55ff18fd869a9997a5e437f0bd5b7d92d6ce2086764709f",
+        "observedSha256": "e2a5b81e67d155a3e55ff18fd869a9997a5e437f0bd5b7d92d6ce2086764709f",
+        "matched": true
+      },
+      {
+        "path": "site/categories/wiki.html",
+        "status": 200,
+        "bytes": 560906,
+        "expectedSha256": "b7251834b3dde069530504a54bccc5249730fa2224696ea1caa5a745cfe2df18",
+        "observedSha256": "b7251834b3dde069530504a54bccc5249730fa2224696ea1caa5a745cfe2df18",
+        "matched": true
+      },
+      {
+        "path": "site/document-inventory.json",
+        "status": 200,
+        "bytes": 13928,
+        "expectedSha256": "4645a3452de1a2f0bfdd1d2e84a13e4c4f1bc82f4c301de87f02ad881a0e2043",
+        "observedSha256": "4645a3452de1a2f0bfdd1d2e84a13e4c4f1bc82f4c301de87f02ad881a0e2043",
+        "matched": true
+      },
+      {
+        "path": "site/library.html",
+        "status": 200,
+        "bytes": 564097,
+        "expectedSha256": "c0c1e4e6a3058f2172a9ba6133356e627f71776e1f8d4b911087ae5adcc749ae",
+        "observedSha256": "c0c1e4e6a3058f2172a9ba6133356e627f71776e1f8d4b911087ae5adcc749ae",
+        "matched": true
+      },
+      {
+        "path": "site/page-inventory.json",
+        "status": 200,
+        "bytes": 4143,
+        "expectedSha256": "833fd53069aaedf6036389da881c45d0e3abd58fb21c0fb98ddbfb266a450d7a",
+        "observedSha256": "833fd53069aaedf6036389da881c45d0e3abd58fb21c0fb98ddbfb266a450d7a",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph00.html",
+        "status": 200,
+        "bytes": 563534,
+        "expectedSha256": "bd773af9bc0eb82a794f63730ae81cfc47c651db2efc8bdeba5b9b51705a1c73",
+        "observedSha256": "bd773af9bc0eb82a794f63730ae81cfc47c651db2efc8bdeba5b9b51705a1c73",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph01.html",
+        "status": 200,
+        "bytes": 569757,
+        "expectedSha256": "3df85172a48787d28cf269b6e9d161eb63e6084719addaff2503f4c3eecc4cb9",
+        "observedSha256": "3df85172a48787d28cf269b6e9d161eb63e6084719addaff2503f4c3eecc4cb9",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph02.html",
+        "status": 200,
+        "bytes": 564988,
+        "expectedSha256": "bfded1ff9ad9624ccc1c8e2ffd8c9a48dab56f06b9520e17189e5381218cc3a7",
+        "observedSha256": "bfded1ff9ad9624ccc1c8e2ffd8c9a48dab56f06b9520e17189e5381218cc3a7",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph03.html",
+        "status": 200,
+        "bytes": 563755,
+        "expectedSha256": "bb2ca34cdc39e44571856576d5a513f722306d31201170bc4b2f71da37c74309",
+        "observedSha256": "bb2ca34cdc39e44571856576d5a513f722306d31201170bc4b2f71da37c74309",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph04.html",
+        "status": 200,
+        "bytes": 563413,
+        "expectedSha256": "ccb51da5555f67f321010dbbb9a159004a9a22db30ebb9347a15109c44a89428",
+        "observedSha256": "ccb51da5555f67f321010dbbb9a159004a9a22db30ebb9347a15109c44a89428",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph05.html",
+        "status": 200,
+        "bytes": 563121,
+        "expectedSha256": "d8631bc976c869cbc21f7dff5b2609a9bac786be6408857c6298e28c0f55938c",
+        "observedSha256": "d8631bc976c869cbc21f7dff5b2609a9bac786be6408857c6298e28c0f55938c",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph06.html",
+        "status": 200,
+        "bytes": 563412,
+        "expectedSha256": "47f08ddc7e5d2bf6d71320405ace2c441aae37cc9d754ec44807230ba418d01d",
+        "observedSha256": "47f08ddc7e5d2bf6d71320405ace2c441aae37cc9d754ec44807230ba418d01d",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph07.html",
+        "status": 200,
+        "bytes": 564126,
+        "expectedSha256": "073f65ecff3f171c5223cffab6a31344ae3193821bed49aaa5c959cbc9702bc3",
+        "observedSha256": "073f65ecff3f171c5223cffab6a31344ae3193821bed49aaa5c959cbc9702bc3",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph08.html",
+        "status": 200,
+        "bytes": 563689,
+        "expectedSha256": "9a74c530b28f99e29d5e6cfa37224a885982640c4a7f0e797f38e044efa67b45",
+        "observedSha256": "9a74c530b28f99e29d5e6cfa37224a885982640c4a7f0e797f38e044efa67b45",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph09.html",
+        "status": 200,
+        "bytes": 564451,
+        "expectedSha256": "7605d8375c3872d95d3c1e22fd206b0dc11d7d4c3b7b56474cc0f8ece2a6958a",
+        "observedSha256": "7605d8375c3872d95d3c1e22fd206b0dc11d7d4c3b7b56474cc0f8ece2a6958a",
+        "matched": true
+      },
+      {
+        "path": "site/phases/ph10.html",
+        "status": 200,
+        "bytes": 564898,
+        "expectedSha256": "f29f7730266ab8fee2524d87e781380786e553621e8cec955b734f9938d86335",
+        "observedSha256": "f29f7730266ab8fee2524d87e781380786e553621e8cec955b734f9938d86335",
+        "matched": true
+      },
+      {
+        "path": "site/roadmap.html",
+        "status": 200,
+        "bytes": 562862,
+        "expectedSha256": "aeec7774f3dfd54929e1bba1d0b7e5f75d38eafe3ded4169e61e48c564efad22",
+        "observedSha256": "aeec7774f3dfd54929e1bba1d0b7e5f75d38eafe3ded4169e61e48c564efad22",
+        "matched": true
+      },
+      {
+        "path": "site/roadmap.json",
+        "status": 200,
+        "bytes": 24630,
+        "expectedSha256": "4d6ff38482af339eefe8ffe3f03af3c3f25b463a2ec7ae19b347578023e5c3e6",
+        "observedSha256": "4d6ff38482af339eefe8ffe3f03af3c3f25b463a2ec7ae19b347578023e5c3e6",
+        "matched": true
+      },
+      {
+        "path": "site/roadmap/buildroot.html",
+        "status": 200,
+        "bytes": 562375,
+        "expectedSha256": "f756aa208ea7d01ed65a1f7443e5dfc94f488caa9082f74e127f57a75e1037b9",
+        "observedSha256": "f756aa208ea7d01ed65a1f7443e5dfc94f488caa9082f74e127f57a75e1037b9",
+        "matched": true
+      },
+      {
+        "path": "site/roadmap/delivery.html",
+        "status": 200,
+        "bytes": 561880,
+        "expectedSha256": "d03fab9c2483d8291084242c04e0c7e9ab316da1987dfa952a4cde4064d7f7d9",
+        "observedSha256": "d03fab9c2483d8291084242c04e0c7e9ab316da1987dfa952a4cde4064d7f7d9",
+        "matched": true
+      },
+      {
+        "path": "site/roadmap/foundations.html",
+        "status": 200,
+        "bytes": 563412,
+        "expectedSha256": "c4c74f5dc17f8de744dd20f106c3cf5846cc108a4e1380a1329fbe8f304091bf",
+        "observedSha256": "c4c74f5dc17f8de744dd20f106c3cf5846cc108a4e1380a1329fbe8f304091bf",
+        "matched": true
+      },
+      {
+        "path": "site/roadmap/tools.html",
+        "status": 200,
+        "bytes": 561283,
+        "expectedSha256": "3bc0fcf17a4332f04a469f69f2cb0f3a40a1ad82a3d7ba2e225504ae06593088",
+        "observedSha256": "3bc0fcf17a4332f04a469f69f2cb0f3a40a1ad82a3d7ba2e225504ae06593088",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/design/reference/states.json",
+        "status": 200,
+        "bytes": 1584,
+        "expectedSha256": "73788cfbd2e3a80a8756da7ea8296380000f19a1709c64692c25d436fdce205c",
+        "observedSha256": "73788cfbd2e3a80a8756da7ea8296380000f19a1709c64692c25d436fdce205c",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/desktop-shell/inventory.json",
+        "status": 200,
+        "bytes": 2575,
+        "expectedSha256": "2a3f1db7b574980b79adb66d7fa872b3bbf560052d305269d1eb7b6dab72f0c1",
+        "observedSha256": "2a3f1db7b574980b79adb66d7fa872b3bbf560052d305269d1eb7b6dab72f0c1",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/desktop-shell/projects-dark.png",
+        "status": 200,
+        "bytes": 71671,
+        "expectedSha256": "66c2d311d1dcc49bd8a4ca9c80b5ac0d6defb2b36044153276aa5581cd8c8cd9",
+        "observedSha256": "66c2d311d1dcc49bd8a4ca9c80b5ac0d6defb2b36044153276aa5581cd8c8cd9",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/desktop-shell/release-v0.1.0-build.14.1.json",
+        "status": 200,
+        "bytes": 4870,
+        "expectedSha256": "77691ef94073686cc0f7bf5cf734498d8569f3ae20f7b1b5ca894c30e3dfe20e",
+        "observedSha256": "77691ef94073686cc0f7bf5cf734498d8569f3ae20f7b1b5ca894c30e3dfe20e",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/desktop-shell/release-v0.1.0-build.24.1.json",
+        "status": 200,
+        "bytes": 4808,
+        "expectedSha256": "42c43d2df541800f5d06830e9000a9f3e31a33a9d07ad9f19ca17cdf6276bd85",
+        "observedSha256": "42c43d2df541800f5d06830e9000a9f3e31a33a9d07ad9f19ca17cdf6276bd85",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/desktop-shell/release-v0.1.0-build.4.1.json",
+        "status": 200,
+        "bytes": 3847,
+        "expectedSha256": "73f52b12ee9bae3d0facd7eaab5d212b9362afd993d5d47ac4b2964f402fb349",
+        "observedSha256": "73f52b12ee9bae3d0facd7eaab5d212b9362afd993d5d47ac4b2964f402fb349",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/desktop-shell/settings-dark.png",
+        "status": 200,
+        "bytes": 73034,
+        "expectedSha256": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968",
+        "observedSha256": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/hosting/initial-live.json",
+        "status": 200,
+        "bytes": 19668,
+        "expectedSha256": "13d91a3a66afef04201f57eec49eb3fe3622f6c51be543dce6058bdc4fb37e04",
+        "observedSha256": "13d91a3a66afef04201f57eec49eb3fe3622f6c51be543dce6058bdc4fb37e04",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/captures.json",
+        "status": 200,
+        "bytes": 8107,
+        "expectedSha256": "b08b329e2247711cc6e3ec1ae354d2a965c9f2c3ac34231b2bdc52848031b54b",
+        "observedSha256": "b08b329e2247711cc6e3ec1ae354d2a965c9f2c3ac34231b2bdc52848031b54b",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/companion-bilingual-dark.png",
+        "status": 200,
+        "bytes": 131155,
+        "expectedSha256": "9ad8333e951ef6a1db40101dd356ad5f0a7ebe530f1823ef7a4c1ed0f65d40e5",
+        "observedSha256": "9ad8333e951ef6a1db40101dd356ad5f0a7ebe530f1823ef7a4c1ed0f65d40e5",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/companion-bilingual-light.png",
+        "status": 200,
+        "bytes": 135884,
+        "expectedSha256": "9c84e74eca83fc08b34ebf7a1043f57c09a4486452d860721efc2c5887ad2aba",
+        "observedSha256": "9c84e74eca83fc08b34ebf7a1043f57c09a4486452d860721efc2c5887ad2aba",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/assistant-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 178707,
+        "expectedSha256": "6e49d63a43617eed40d8cbc3c7f26d2f0c2a4efcb3c8c3bd7c5ecefe23732b0c",
+        "observedSha256": "6e49d63a43617eed40d8cbc3c7f26d2f0c2a4efcb3c8c3bd7c5ecefe23732b0c",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/assistant-en-light-1440.png",
+        "status": 200,
+        "bytes": 110871,
+        "expectedSha256": "6cef9b0e8dd8452437e7b2bdf1d490c49016fa4df409f9318e3b5818498f772d",
+        "observedSha256": "6cef9b0e8dd8452437e7b2bdf1d490c49016fa4df409f9318e3b5818498f772d",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/captures.json",
+        "status": 200,
+        "bytes": 24525,
+        "expectedSha256": "8df213e5a7d39fce3bdcbe2ac8ad78c8241c3c9193721deedef8cb66a6d0d9c4",
+        "observedSha256": "8df213e5a7d39fce3bdcbe2ac8ad78c8241c3c9193721deedef8cb66a6d0d9c4",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/companion-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 153606,
+        "expectedSha256": "871031e4777a7927cf736b896622981d467a52d66ca688c63e8c0732a177bd45",
+        "observedSha256": "871031e4777a7927cf736b896622981d467a52d66ca688c63e8c0732a177bd45",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/companion-en-light-1440.png",
+        "status": 200,
+        "bytes": 107382,
+        "expectedSha256": "08fdf8e98d178d52693199b503bb81643228f6895bbde661d023e11680c05fa5",
+        "observedSha256": "08fdf8e98d178d52693199b503bb81643228f6895bbde661d023e11680c05fa5",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/configuration-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 142312,
+        "expectedSha256": "0d464b36ede6bd43ae80dd238e5acc7264ba3db002c52eabb8145676d2ab72cf",
+        "observedSha256": "0d464b36ede6bd43ae80dd238e5acc7264ba3db002c52eabb8145676d2ab72cf",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/configuration-en-light-1440.png",
+        "status": 200,
+        "bytes": 112492,
+        "expectedSha256": "0288454c9e8dc575f10f50b794b4445a669103ee81f21b7620ba050333984776",
+        "observedSha256": "0288454c9e8dc575f10f50b794b4445a669103ee81f21b7620ba050333984776",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/guest-canvas-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 160558,
+        "expectedSha256": "d1b113570b92d3cf79e652dc43f6ff08cafede138301531990704ee8e05b516c",
+        "observedSha256": "d1b113570b92d3cf79e652dc43f6ff08cafede138301531990704ee8e05b516c",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/guest-canvas-en-light-1440.png",
+        "status": 200,
+        "bytes": 111971,
+        "expectedSha256": "a27a10a17c6d282354eb8aba559a43391cf4ca7fd9de9367a494765bed127fa2",
+        "observedSha256": "a27a10a17c6d282354eb8aba559a43391cf4ca7fd9de9367a494765bed127fa2",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/jobs-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 134409,
+        "expectedSha256": "10f09c7cfb2a6d175d6351d743c620de9f159e4e816d993a48506f0bf0bd6a09",
+        "observedSha256": "10f09c7cfb2a6d175d6351d743c620de9f159e4e816d993a48506f0bf0bd6a09",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/jobs-en-light-1440.png",
+        "status": 200,
+        "bytes": 93319,
+        "expectedSha256": "331198bdafe6b93c4fa37aaf0c5583a4903512d21381f157b7c8d4fcab231748",
+        "observedSha256": "331198bdafe6b93c4fa37aaf0c5583a4903512d21381f157b7c8d4fcab231748",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/offline-help-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 182120,
+        "expectedSha256": "cbfd9917c70315558f87926f4196ba596bd0923a88d5ee7ea069b2bb2d6a35f1",
+        "observedSha256": "cbfd9917c70315558f87926f4196ba596bd0923a88d5ee7ea069b2bb2d6a35f1",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/offline-help-en-light-1440.png",
+        "status": 200,
+        "bytes": 167854,
+        "expectedSha256": "267d1394f12011a3793c3c9e88f08f47c8f4577da0de9739eaff5074d042c160",
+        "observedSha256": "267d1394f12011a3793c3c9e88f08f47c8f4577da0de9739eaff5074d042c160",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/onboarding-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 135324,
+        "expectedSha256": "2610bc9fbffd591da885a5df2f6a4fa991811a47a23648c0399c02934900a94a",
+        "observedSha256": "2610bc9fbffd591da885a5df2f6a4fa991811a47a23648c0399c02934900a94a",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/onboarding-en-light-1440.png",
+        "status": 200,
+        "bytes": 95704,
+        "expectedSha256": "8a63a05ef8a8c84def84e0d8ea7fb1ebb28eb3fb3f90e297942fda3dff3958f1",
+        "observedSha256": "8a63a05ef8a8c84def84e0d8ea7fb1ebb28eb3fb3f90e297942fda3dff3958f1",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/package-canvas-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 186199,
+        "expectedSha256": "283ed189d72401f2c5301f73291eb7881dd6c3ede6509d7faa156f2f101ea4dc",
+        "observedSha256": "283ed189d72401f2c5301f73291eb7881dd6c3ede6509d7faa156f2f101ea4dc",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/package-canvas-en-light-1440.png",
+        "status": 200,
+        "bytes": 129348,
+        "expectedSha256": "e2dcc3e375d548c572da91964ade2cf42598cffc0481fd6fc2d8aa7930b12aa2",
+        "observedSha256": "e2dcc3e375d548c572da91964ade2cf42598cffc0481fd6fc2d8aa7930b12aa2",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/runtime-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 153661,
+        "expectedSha256": "f1055fe1b50181d847788addbd79aa195c54e6b6163a424899cdbd08f6e9bc52",
+        "observedSha256": "f1055fe1b50181d847788addbd79aa195c54e6b6163a424899cdbd08f6e9bc52",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/runtime-en-light-1440.png",
+        "status": 200,
+        "bytes": 99264,
+        "expectedSha256": "83512679e16507517f18f936b6e150310c59d48bdfe306443abe5025d7169b83",
+        "observedSha256": "83512679e16507517f18f936b6e150310c59d48bdfe306443abe5025d7169b83",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/settings-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 135081,
+        "expectedSha256": "db3220352ffd07daa9b33c29de74ccc0bd57b1081ceffa66f5424de5059757e5",
+        "observedSha256": "db3220352ffd07daa9b33c29de74ccc0bd57b1081ceffa66f5424de5059757e5",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/settings-en-light-1440.png",
+        "status": 200,
+        "bytes": 75770,
+        "expectedSha256": "fa062fa9af8b1181b58e37b7850d8465c5fcc915e75ac174402d64998c50df04",
+        "observedSha256": "fa062fa9af8b1181b58e37b7850d8465c5fcc915e75ac174402d64998c50df04",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/source-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 157034,
+        "expectedSha256": "89c8ff4846cd760a714741f4a0182fb22891f06b6b59f163453141ae2fe2985b",
+        "observedSha256": "89c8ff4846cd760a714741f4a0182fb22891f06b6b59f163453141ae2fe2985b",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/source-en-light-1440.png",
+        "status": 200,
+        "bytes": 134177,
+        "expectedSha256": "62821b66b1ab2dc88af89fe35ca30efbd1b06e63822b80cde1f8ed49875a5ec0",
+        "observedSha256": "62821b66b1ab2dc88af89fe35ca30efbd1b06e63822b80cde1f8ed49875a5ec0",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/tools-bilingual-dark-960.png",
+        "status": 200,
+        "bytes": 127790,
+        "expectedSha256": "b6258a050bad1f9673b260fc93f6e7aa981cbfe780c65f45027c2f7a2f7eaf59",
+        "observedSha256": "b6258a050bad1f9673b260fc93f6e7aa981cbfe780c65f45027c2f7a2f7eaf59",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/current/tools-en-light-1440.png",
+        "status": 200,
+        "bytes": 103468,
+        "expectedSha256": "5bf519c600c41024cc2d1c812460bd3f970c253b28f32fb39b99daa0b830829a",
+        "observedSha256": "5bf519c600c41024cc2d1c812460bd3f970c253b28f32fb39b99daa0b830829a",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/onboarding.png",
+        "status": 200,
+        "bytes": 81183,
+        "expectedSha256": "82b2947d2b5f0cb90b10c6237dccc6c606781bcb557673f46ca4d36413fe3b9d",
+        "observedSha256": "82b2947d2b5f0cb90b10c6237dccc6c606781bcb557673f46ca4d36413fe3b9d",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/tools-bilingual-light.png",
+        "status": 200,
+        "bytes": 307701,
+        "expectedSha256": "9879e3a5d02070d85a3f52311d7815ff00c1b2298e3ea0cea1cb4a30da4151c9",
+        "observedSha256": "9879e3a5d02070d85a3f52311d7815ff00c1b2298e3ea0cea1cb4a30da4151c9",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/workspace-bilingual-compact.png",
+        "status": 200,
+        "bytes": 84407,
+        "expectedSha256": "9d93723c9ec32581900c3cffcb8491d5be9fe5d361e62c7699a41d5b91617d77",
+        "observedSha256": "9d93723c9ec32581900c3cffcb8491d5be9fe5d361e62c7699a41d5b91617d77",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/workspace-bilingual-dark.png",
+        "status": 200,
+        "bytes": 138193,
+        "expectedSha256": "dba718f8018aee390b6bd611cd05da7e6493e6a51bb50c0b4356630adf8bd769",
+        "observedSha256": "dba718f8018aee390b6bd611cd05da7e6493e6a51bb50c0b4356630adf8bd769",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/workspace-en-dark.png",
+        "status": 200,
+        "bytes": 82984,
+        "expectedSha256": "3b1660b89bbbffe957ad447de4b3059f6ade2c84d87259d8d5f72e93f133a12e",
+        "observedSha256": "3b1660b89bbbffe957ad447de4b3059f6ade2c84d87259d8d5f72e93f133a12e",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/workspace-en-light.png",
+        "status": 200,
+        "bytes": 82532,
+        "expectedSha256": "260307ce6018382bed26d3c83709ea1f1c795983c7980a584d81062d40dc3cf5",
+        "observedSha256": "260307ce6018382bed26d3c83709ea1f1c795983c7980a584d81062d40dc3cf5",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/evidence/modern-workspace/workspace-zh-hk-light.png",
+        "status": 200,
+        "bytes": 82990,
+        "expectedSha256": "640c5f9cadcbc64cd66c25e12db86a58f11b1b5c12e8a05911ceb5355792bc1e",
+        "observedSha256": "640c5f9cadcbc64cd66c25e12db86a58f11b1b5c12e8a05911ceb5355792bc1e",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/planning/feature-evidence.json",
+        "status": 200,
+        "bytes": 2027877,
+        "expectedSha256": "c0a05bc70eb3b44360baab0ca600a4eb5bda2d87497fb44dff2e178f69e96a07",
+        "observedSha256": "c0a05bc70eb3b44360baab0ca600a4eb5bda2d87497fb44dff2e178f69e96a07",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/planning/implementation-admission.json",
+        "status": 200,
+        "bytes": 10882,
+        "expectedSha256": "4c0e578b94cb459432915df6ea3cd5dfbb5adf44c940436169ad8bc938fc8cfc",
+        "observedSha256": "4c0e578b94cb459432915df6ea3cd5dfbb5adf44c940436169ad8bc938fc8cfc",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/docs/planning/operation-request.schema.json",
+        "status": 200,
+        "bytes": 5443,
+        "expectedSha256": "d9b9ec04e740e2e3c79dc6331a3c0caa959e16bc95dc374d414930aa2566c224",
+        "observedSha256": "d9b9ec04e740e2e3c79dc6331a3c0caa959e16bc95dc374d414930aa2566c224",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/components.json",
+        "status": 200,
+        "bytes": 2179,
+        "expectedSha256": "d27a1d9c72502c7b8223c33188afcd8a512658daa0e686f7a42d072f3613c94c",
+        "observedSha256": "d27a1d9c72502c7b8223c33188afcd8a512658daa0e686f7a42d072f3613c94c",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/evidence/browser-check.json",
+        "status": 200,
+        "bytes": 6748,
+        "expectedSha256": "5577908069ac891f5538ed932e70e33ba720bacd8edd2f5e4cb86ee92183364c",
+        "observedSha256": "5577908069ac891f5538ed932e70e33ba720bacd8edd2f5e4cb86ee92183364c",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/evidence/home-desktop-dark.png",
+        "status": 200,
+        "bytes": 241112,
+        "expectedSha256": "0b58791d61dce44bbdfc9ccd3e561c24c4f286739a6c8487464611e47a97673a",
+        "observedSha256": "0b58791d61dce44bbdfc9ccd3e561c24c4f286739a6c8487464611e47a97673a",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/evidence/home-desktop.png",
+        "status": 200,
+        "bytes": 241287,
+        "expectedSha256": "54fc417b7c64527ae580df85e39465c596622e5a7f4289e563fd603cf9bdb03f",
+        "observedSha256": "54fc417b7c64527ae580df85e39465c596622e5a7f4289e563fd603cf9bdb03f",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/evidence/home-mobile.png",
+        "status": 200,
+        "bytes": 172552,
+        "expectedSha256": "be82ed311392f756a30038f988f95ff3850342711bd05ee6e4d3d0b154c27ece",
+        "observedSha256": "be82ed311392f756a30038f988f95ff3850342711bd05ee6e4d3d0b154c27ece",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/evidence/roadmap-article.png",
+        "status": 200,
+        "bytes": 203021,
+        "expectedSha256": "eaf19c9c499fc23d99f251f16ff504964d8b03368713e47b1f69250bc9156a35",
+        "observedSha256": "eaf19c9c499fc23d99f251f16ff504964d8b03368713e47b1f69250bc9156a35",
+        "matched": true
+      },
+      {
+        "path": "site/source-assets/website/evidence/roadmap-categories.png",
+        "status": 200,
+        "bytes": 151910,
+        "expectedSha256": "d7be379ece9a4bc1c2ac26c05befe3d8e96b367f75220babe027f7dad06e82d8",
+        "observedSha256": "d7be379ece9a4bc1c2ac26c05befe3d8e96b367f75220babe027f7dad06e82d8",
+        "matched": true
+      },
+      {
+        "path": "site/status.html",
+        "status": 200,
+        "bytes": 564633,
+        "expectedSha256": "7d9a11724d5a204546166e8c35000178c848dc2439179ee0f9b261594a01f72a",
+        "observedSha256": "7d9a11724d5a204546166e8c35000178c848dc2439179ee0f9b261594a01f72a",
+        "matched": true
+      },
+      {
+        "path": "site/visitor.html",
+        "status": 200,
+        "bytes": 572507,
+        "expectedSha256": "7bcf4f225bcfa890584f194640f6efb330191859eed60a68797997d291be9d37",
+        "observedSha256": "7bcf4f225bcfa890584f194640f6efb330191859eed60a68797997d291be9d37",
+        "matched": true
+      }
+    ]
+  },
+  "liveBrowserVerification": {
+    "route": "public-github-pages",
+    "checks": 14,
+    "documentRoutes": 67,
+    "responsiveTuples": 12,
+    "captures": [
+      {
+        "file": ".cache/browser-evidence/ph09-live-interactive-3de9822/home-desktop-dark.png",
+        "sha256": "56f44f11c8b90e925d8e513d1f69597a86a71eabee6fb84378f6bbbaff1fc5c2",
+        "route": "/material-buildroot/",
+        "viewport": {
+          "width": 1440,
+          "height": 1100
+        },
+        "theme": "dark",
+        "language": "en"
+      },
+      {
+        "file": ".cache/browser-evidence/ph09-live-interactive-3de9822/home-desktop.png",
+        "sha256": "44e84f730b7316f873ff3120276ce362f3b1b258398a45bdef0406def5d8d54d",
+        "route": "/material-buildroot/",
+        "viewport": {
+          "width": 1440,
+          "height": 1100
+        },
+        "theme": "light",
+        "language": "both"
+      },
+      {
+        "file": ".cache/browser-evidence/ph09-live-interactive-3de9822/home-mobile.png",
+        "sha256": "3abfe66345e65bdd59ff4f6491057b202de921392bb2aa21d87b5de23a471639",
+        "route": "/material-buildroot/",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "theme": "light",
+        "language": "both"
+      },
+      {
+        "file": ".cache/browser-evidence/ph09-live-interactive-3de9822/roadmap-categories.png",
+        "sha256": "c63fcb6428ae96bf5c9dab9206fe8a04ead837c08c22acee2c489a1fe383654d",
+        "route": "/material-buildroot/site/roadmap.html",
+        "viewport": {
+          "width": 1440,
+          "height": 1100
+        },
+        "theme": "light",
+        "language": "both"
+      },
+      {
+        "file": ".cache/browser-evidence/ph09-live-interactive-3de9822/roadmap-article.png",
+        "sha256": "0819a19c65aad0304c11dc0fd634b2794e9ae7df2e1a6a49e67294f10f79ffa4",
+        "route": "/material-buildroot/site/phases/ph00.html",
+        "viewport": {
+          "width": 1440,
+          "height": 1100
+        },
+        "theme": "light",
+        "language": "both"
+      }
+    ],
+    "allCurrentGalleryImagesLoaded": true,
+    "manifestCurrentGalleryCaptureCount": 24,
+    "artifacts": {
+      "html_sha256": "97d516308444e7f9271658b78199fb7dd6645c2cee9cd29ebd7e3dd3ab965986",
+      "javascript_sha256": "c0c2050001f29ec56c725e5921d1cc4d6027d71020942afbaaee615783ea74ef",
+      "css_sha256": "425c542717da2a40ce7aaec91bec8e7c3f6a4f47c0fbea37b67ed6327c827cad"
+    },
+    "checkSummaries": [
+      "Served HTML, JavaScript and CSS match the exact selected build output.",
+      "Interactive field guide validates persistent walkthrough progress, safe recipe preview and input rejection, troubleshooting decisions, local article bookmarks and latest-release/native-limit status.",
+      "Companion protocol fixture verifies private-IP validation, manual challenge pairing, bounded read-only request shapes, memory-only CSRF state, safe workspace/project/job summaries, session refresh and server-confirmed disconnect. This fixture does not establish real TLS/LAN acceptance.",
+      "Visitor workbench persists a private plan, checklist and notes; malformed imports preserve existing data, valid backups restore state, export downloads JSON, and opt-in offline caching serves an article after network disconnect. A separate protocol fixture covers the opted-in read-only companion contract but does not establish real TLS/LAN acceptance.",
+      "Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.",
+      "Document search reports the full match count, caps results truthfully, supports keyboard focus and Escape/outside dismissal, and opens a complete article.",
+      "Heading language and explicit theme preferences survive reload; fresh system theme is light in this test context.",
+      "Bilingual walkthrough rail buttons fit inside their rail without overlapping the explanation panel at desktop and 320px; full names remain accessible and filled-button Cantonese labels use on-primary white.",
+      "Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation traps forward/reverse Tab, retains Material arrow navigation, and Escape closes it.",
+      "All 67 current document routes render their complete article at mobile width without page overflow.",
+      "All 24 manifest-listed current-workspace captures load in the evidence article and have alternative text. Captures remain source-preview evidence, not Windows runtime proof.",
+      "All 27 overview/category/phase/status routes fit 320px and use real dedicated pages.",
+      "All authored interactive controls use registered Material Web components; standard document hyperlinks remain semantic links.",
+      "No browser JavaScript errors or HTTP asset/route failures observed."
+    ],
+    "supplementalMobileCapture": {
+      "file": ".cache/browser-evidence/ph09-live-interactive-3de9822/home-bilingual-320.png",
+      "sha256": "3d817fd79e64d97386b53a03d8b2ce4416a752585a111b6368ac54382e48572c",
+      "bytes": 609509,
+      "route": "https://ding-ding-projects.github.io/material-buildroot/",
+      "httpStatus": 200,
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "fullPage": true,
+      "language": "both",
+      "theme": "light",
+      "noHorizontalOverflow": true,
+      "railAndDetailNonOverlap": true
+    }
+  },
+  "scope": "Observed static-site publication, generated-file byte comparison, GitHub Pages configuration, and public-origin Chromium checks only. Does not establish Windows/native application acceptance or backend behavior beyond the documented browser surfaces."
+}
