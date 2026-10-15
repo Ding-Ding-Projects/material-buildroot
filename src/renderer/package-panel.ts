@@ -1,3 +1,4 @@
+import "./package-discovery-panel";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
@@ -188,6 +189,7 @@ export class PackagePanel extends LitElement {
         <p>${this.l("Choose a prepared BR2_EXTERNAL tree, or initialize an empty folder below. Package file review and build activation are separate approvals.","選擇已準備好嘅 BR2_EXTERNAL 樹，或喺下面初始化空白資料夾。套件檔案審核同建置啟用需要獨立批准。")}</p>
         ${!this.workspaceId?html`<p>${this.l("Adopt a project in Projects & runtime first. Your draft stays here while you select one.","請先喺專案同執行環境接入專案，選擇期間會保留草稿。")}</p>`:nothing}
         <div class="row">${this.button("Choose prepared external tree","選擇已準備好外部樹",()=>this.choose(),!this.workspaceId)}<span>${this.external?.name||this.l("No external tree selected","未選擇外部樹")}</span></div>
+        <details><summary>${this.l("Discover and import source packages","探索同匯入來源套件")}</summary><package-discovery-panel .workspaceId=${this.workspaceId} .language=${this.language} .locked=${this.pending} @package-draft-imported=${(e:CustomEvent)=>{if(this.pending||e.detail.workspaceId!==this.workspaceId)return;this.model=structuredClone(e.detail.draft);if(e.detail.treeId!=="source")this.external={externalTreeId:e.detail.treeId,name:e.detail.name};this.editorTab="identity";this.edit();}}></package-discovery-panel></details>
         <details><summary>${this.l("Start from example metadata","由範例中繼資料開始")}</summary><p class="note">${this.l("Replaces this draft with GNU Hello metadata. Hashes are deliberately empty; obtain and verify real source and license-file digests before previewing.","用 GNU Hello 中繼資料取代此草稿。摘要會保持空白，預覽前請取得並驗證真實來源同授權條款檔摘要。")}</p>${this.button("Use GNU Hello example","使用 GNU Hello 範例",()=>this.example())}</details>
         <details><summary>${this.l("Initialize folders and activate external trees","初始化資料夾同啟用外部樹")}</summary><external-tree-panel .workspaceId=${this.workspaceId} .language=${this.language} @external-selected=${(e:CustomEvent)=>{this.external=e.detail;this.edit();}}></external-tree-panel></details>
       </section>

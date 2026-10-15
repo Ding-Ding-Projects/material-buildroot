@@ -382,6 +382,37 @@ test("native external-tree selection binds package preview and actual apply to t
     fs.readFileSync(path.join(root, "package/demo/demo.mk"), "utf8"),
     /DEMO_DEPENDENCIES = zlib/,
   );
+  const discovery = await f.request({
+    action: "package.discover",
+    workspaceId: input.workspaceId,
+    query: "demo",
+    offset: 0,
+    limit: 20,
+  });
+  assert.equal(discovery.ok, true);
+  assert.equal(discovery.result.total, 1);
+  assert.equal(discovery.result.packages[0].treeId, input.externalTreeId);
+  const imported = await f.request({
+    action: "package.import",
+    workspaceId: input.workspaceId,
+    packageId: discovery.result.packages[0].id,
+    revision: discovery.result.revision,
+  });
+  assert.equal(imported.ok, true);
+  assert.equal(imported.result.roundTripAllowed, true);
+  assert.deepEqual(imported.result.draft, model);
+  assert.equal(
+    (
+      await f.request({
+        action: "package.discover",
+        workspaceId: "forged",
+        query: "",
+        offset: 0,
+        limit: 20,
+      })
+    ).code,
+    "PROJECT_NOT_ADOPTED",
+  );
   assert.equal(
     (
       await f.request({

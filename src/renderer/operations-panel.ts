@@ -1,3 +1,4 @@
+import "./ollama-evidence-panel";
 import "./documentation-panel";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing, css } from "lit";
@@ -1079,7 +1080,7 @@ export class OperationsPanel extends LitElement {
               this.models.map((model) => [model.name, model.name]),
             )}</md-outlined-select
           >`
-        : nothing}${this.messages.map(
+        : nothing}<ollama-evidence-panel .model=${this.model} .language=${this.language}></ollama-evidence-panel>${this.messages.map(
         (message) =>
           html`<div class="message">
             <strong

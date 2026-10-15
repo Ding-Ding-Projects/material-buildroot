@@ -40,6 +40,7 @@ function admit(request, nested = false) {
   const action = request.action;
   const simple = [
     "ollama.status",
+    "ollama.hardware",
     "ollama.tags",
     "ollama.running",
     "ollama.managed.status",
@@ -60,6 +61,16 @@ function admit(request, nested = false) {
           if (request[key] !== undefined && typeof request[key] !== "boolean")
             fail("INVALID_REQUEST");
         break;
+      case "ollama.fit":
+        keys(request, ["action", "model"], ["contextTokens"]);
+        token(request.model);
+        if (
+          request.contextTokens !== undefined &&
+          !integer(request.contextTokens, 128, 1048576)
+        )
+          fail("INVALID_REQUEST");
+        break;
+      case "ollama.capabilities":
       case "ollama.show":
       case "ollama.pull":
         keys(request, ["action", "model"]);

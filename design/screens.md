@@ -55,3 +55,7 @@ Name every concrete project/source/ref/profile/defconfig/symbol/help/dependency/
 ### Implemented documentation search
 
 `documentation-panel` owns one concrete search surface: article titles, topic names and summaries in the bundled offline index. It has independent literal query, expression, `i/m/s/u` flags, mode, validation message and result IDs. The adjacent code icon opens an anchored builder with escaped-literal construction and start/end/exact anchors. Evaluation uses a dedicated terminable worker with input bounds and a 600 ms deadline. Escape returns focus to the builder trigger. It never changes the standalone regex workbench or another surface's query. Search is session-only; persistent search history/snippets and full-text body indexing remain unimplemented and must not be inferred from this bounded reader.
+
+### Implemented package discovery search
+
+`package-discovery-panel` owns the source catalogue substring query and an independent adjacent regex builder. The host query searches admitted package names, paths and retained declarations. The local expression filters only the loaded page, explicitly labelled as such, with its own pattern, flags, literal constructor, result IDs and timeout. It does not alter documentation search or the standalone workbench. Host declaration truncation is visible. Search history/snippets are not persisted.

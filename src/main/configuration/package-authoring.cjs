@@ -208,17 +208,30 @@ async function safePath(root, relative) {
   return current;
 }
 async function readFile(root, relative) {
-  const file = await safePath(root, relative);
-  const stat = await fs.stat(file).catch((error) => {
+  await safePath(root, relative);
+  const { readSafe } = require("./package-discovery.cjs");
+  const bytes = await readSafe(root, relative).catch((error) => {
     if (error.code === "ENOENT") return null;
     throw error;
   });
-  if (stat?.size > 1024 * 1024) fail("PACKAGE_FILE_LIMIT");
-  const bytes = stat ? await fs.readFile(file) : null;
   const before = bytes ? bytes.toString("utf8") : null;
   if (bytes && !Buffer.from(before, "utf8").equals(bytes))
     fail("PACKAGE_FILE_NOT_UTF8");
-  return { path: relative, before, mode: stat ? stat.mode & 0o777 : 0o644 };
+  return {
+    path: relative,
+    before,
+    mode: bytes ? bytes.receipt.mode : 0o644,
+    identity: bytes ? bytes.receipt.identity : null,
+  };
+}
+async function assertBefore(root, expected) {
+  const current = await readFile(root, expected.path);
+  if (
+    current.before !== expected.before ||
+    current.mode !== expected.mode ||
+    current.identity !== expected.identity
+  )
+    fail("REVISION_CONFLICT");
 }
 const append = (before, line) =>
   (before || "").split("\n").includes(line)
@@ -228,6 +241,13 @@ const append = (before, line) =>
       line +
       "\n";
 function createPackageAuthoringService({ resolveExternalTree, withLock }) {
+  const admittedRoots = new Map();
+  const samePath = (a, b) =>
+    process.platform === "win32"
+      ? path.normalize(a).toLowerCase() === path.normalize(b).toLowerCase()
+      : a === b;
+  const rootIdentity = (stat) =>
+    [stat.dev, stat.ino, stat.birthtimeNs].map(String).join(":");
   if (
     typeof resolveExternalTree !== "function" ||
     typeof withLock !== "function"
@@ -239,9 +259,40 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
       input.externalTreeId,
     );
     if (grant?.granted !== true) fail("ROOT_NOT_GRANTED");
+    if (typeof grant.root !== "string" || !path.isAbsolute(grant.root))
+      fail("ROOT_NOT_GRANTED");
     const root = await fs.realpath(grant.root);
-    if (!(await fs.stat(root)).isDirectory()) fail("ROOT_NOT_GRANTED");
-    return withLock(root, () => work(root));
+    if (!samePath(root, grant.root)) fail("ROOT_NOT_GRANTED");
+    const stat = await fs.lstat(root, { bigint: true });
+    if (
+      !stat.isDirectory() ||
+      stat.isSymbolicLink() ||
+      (grant.identity &&
+        (String(grant.identity.dev) !== String(stat.dev) ||
+          String(grant.identity.ino) !== String(stat.ino)))
+    )
+      fail("ROOT_NOT_GRANTED");
+    const fingerprint = rootIdentity(stat),
+      key = JSON.stringify([input.workspaceId, input.externalTreeId, root]);
+    if (admittedRoots.has(key) && admittedRoots.get(key) !== fingerprint)
+      fail("ROOT_NOT_GRANTED");
+    admittedRoots.set(key, fingerprint);
+    const verify = async () => {
+      const current = await fs.lstat(root, { bigint: true });
+      if (
+        !current.isDirectory() ||
+        current.isSymbolicLink() ||
+        rootIdentity(current) !== fingerprint ||
+        !samePath(await fs.realpath(root), root)
+      )
+        fail("ROOT_NOT_GRANTED");
+    };
+    return withLock(root, async () => {
+      await verify();
+      const result = await work(root);
+      await verify();
+      return result;
+    });
   }
   async function previewAt(root, model) {
     const desc = await readFile(root, "external.desc");
@@ -270,10 +321,50 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
             : append(before.before, line),
       });
     }
+    const packageDirectory = path.join(root, "package", model.name);
+    const packageStat = await fs.lstat(packageDirectory).catch((error) => {
+      if (error.code === "ENOENT") return null;
+      throw error;
+    });
+    if (packageStat) {
+      if (!packageStat.isDirectory() || packageStat.isSymbolicLink())
+        fail("UNSAFE_PACKAGE_PATH");
+      const {
+        snapshotPackage,
+        interpretRecipe,
+      } = require("./package-discovery.cjs");
+      const existing = await snapshotPackage(root, `package/${model.name}`);
+      for (const file of files.filter((file) =>
+        file.path.startsWith(`package/${model.name}/`),
+      )) {
+        const saved = existing.find(
+          (item) => item.path === file.path.split("/").at(-1),
+        );
+        if (
+          (file.before === null) !== !saved ||
+          (saved &&
+            (saved.sha256 !== digest(Buffer.from(file.before, "utf8")) ||
+              saved.identity !== file.identity ||
+              saved.mode !== file.mode))
+        )
+          fail("REVISION_CONFLICT");
+      }
+      if (
+        existing.length &&
+        !interpretRecipe(model.name, existing).roundTripAllowed
+      )
+        fail("PACKAGE_MANUAL_EDIT_REQUIRED");
+    }
+    for (const file of [desc, ...files]) await assertBefore(root, file);
     const revision = digest(
       JSON.stringify([
         desc,
-        ...files.map(({ path, before, mode }) => ({ path, before, mode })),
+        ...files.map(({ path, before, mode, identity }) => ({
+          path,
+          before,
+          mode,
+          identity,
+        })),
       ]),
     );
     return {
@@ -352,14 +443,26 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
       ],
     };
   }
-  async function atomic(root, relative, text, mode, noReplace = false) {
+  async function atomic(
+    root,
+    relative,
+    text,
+    mode,
+    noReplace = false,
+    onPublished,
+    beforePublish,
+  ) {
     const file = await safePath(root, relative),
       temp = file + "." + randomUUID() + ".tmp";
     try {
       await fs.writeFile(temp, text, { flag: "wx", mode });
       await fs.chmod(temp, mode);
-      if (noReplace) await fs.link(temp, file);
-      else await fs.rename(temp, file);
+      if (beforePublish) await beforePublish();
+      if (noReplace) {
+        await fs.link(temp, file);
+        await fs.rm(temp);
+      } else await fs.rename(temp, file);
+      if (onPublished) await onPublished();
     } finally {
       await fs.rm(temp, { force: true });
     }
@@ -385,7 +488,9 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
             try {
               const current = await readFile(root, file.path);
               if (current.before !== file.after) fail("REVISION_CONFLICT");
-              await fs.rm(await safePath(root, file.path));
+              const destination = await safePath(root, file.path);
+              await assertBefore(root, current);
+              await fs.rm(destination);
             } catch {
               rollbackFailed = true;
             }
@@ -420,16 +525,48 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
             await safePath(root, relative + "/Config.in");
           }
           for (const file of preview.files) {
-            await atomic(root, file.path, file.after, file.mode);
-            written.push(file);
+            await assertBefore(root, file);
+            await atomic(
+              root,
+              file.path,
+              file.after,
+              file.mode,
+              file.before === null,
+              async () => {
+                written.push(file);
+                const current = await readFile(root, file.path);
+                if (current.before !== file.after)
+                  fail("PACKAGE_SOURCE_CHANGED");
+                file.publishedIdentity = current.identity;
+              },
+              () => assertBefore(root, file),
+            );
           }
         } catch (error) {
           let rollbackFailed = false;
           for (const file of written.reverse())
             try {
-              if (file.before === null)
-                await fs.rm(await safePath(root, file.path));
-              else await atomic(root, file.path, file.before, file.mode);
+              const current = await readFile(root, file.path);
+              if (
+                current.before !== file.after ||
+                (file.publishedIdentity &&
+                  current.identity !== file.publishedIdentity)
+              )
+                fail("REVISION_CONFLICT");
+              if (file.before === null) {
+                const destination = await safePath(root, file.path);
+                await assertBefore(root, current);
+                await fs.rm(destination);
+              } else
+                await atomic(
+                  root,
+                  file.path,
+                  file.before,
+                  file.mode,
+                  false,
+                  undefined,
+                  () => assertBefore(root, current),
+                );
             } catch {
               rollbackFailed = true;
             }

@@ -13,6 +13,14 @@ function createOllama(options = {}) {
   const execute = async function execute(request, context = {}) {
     const common = { signal: context.signal, fetchImpl: options.fetchImpl };
     switch (request.action) {
+      case "ollama.hardware":
+      case "ollama.fit":
+      case "ollama.capabilities":
+        return require("./ollama-fit.cjs").executeFit(
+          options,
+          request,
+          context,
+        );
       case "ollama.status":
         return fetchBounded(base + "/api/version", common);
       case "ollama.tags":

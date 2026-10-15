@@ -126,7 +126,7 @@ test("partial transaction restores previous files and removes new package direct
   const rename = fs.rename;
   let count = 0;
   fs.rename = async (...args) => {
-    if (++count === 4)
+    if (++count === 1)
       throw Object.assign(new Error("fixture write failure"), { code: "EIO" });
     return rename(...args);
   };
@@ -264,10 +264,14 @@ test("initialization rejects changed descriptors, directory identity, and confli
       revision: preview.revision,
       previewHash: preview.previewHash,
     }),
-    { code: "REVISION_CONFLICT" },
+    { code: "ROOT_NOT_GRANTED" },
   );
   await fs.writeFile(path.join(root, "external.desc"), "name: KEEP\n");
-  await assert.rejects(service.previewInitialize(request), {
+  const regranted = createPackageAuthoringService({
+    resolveExternalTree: async () => ({ granted: true, root }),
+    withLock: async (_, work) => work(),
+  });
+  await assert.rejects(regranted.previewInitialize(request), {
     code: "EXTERNAL_DIRECTORY_NOT_EMPTY",
   });
   assert.equal(
@@ -316,4 +320,202 @@ test("failed partial initialization removes only created files and preserves con
     await fs.readFile(path.join(root, "unrelated.txt"), "utf8"),
     "preserve me",
   );
+});
+
+test("an independent valid recipe update after before-image read invalidates apply", async (t) => {
+  const { root, service } = await fixture(t);
+  const initial = { model: model() };
+  const first = await service.preview(initial);
+  await service.apply({
+    ...initial,
+    revision: first.revision,
+    previewHash: first.previewHash,
+  });
+  const requested = { model: { ...model(), version: "2.0" } };
+  const preview = await service.preview(requested);
+  const {
+    renderPackage,
+  } = require("../src/main/configuration/package-authoring.cjs");
+  const independent = renderPackage({ ...model(), version: "1.1" }, "FIXTURE")
+    .files["package/demo-tool/demo-tool.mk"];
+  const target = path.join(root, "package/demo-tool/demo-tool.mk"),
+    open = fs.open;
+  let changed = false;
+  fs.open = async (...args) => {
+    const handle = await open(...args);
+    if (args[0] === target && !changed) {
+      const close = handle.close.bind(handle);
+      handle.close = async () => {
+        await close();
+        if (!changed) {
+          changed = true;
+          await fs.writeFile(target, independent);
+        }
+      };
+    }
+    return handle;
+  };
+  try {
+    await assert.rejects(
+      service.apply({
+        ...requested,
+        revision: preview.revision,
+        previewHash: preview.previewHash,
+      }),
+      { code: "REVISION_CONFLICT" },
+    );
+  } finally {
+    fs.open = open;
+  }
+  assert.equal(changed, true);
+  assert.equal(await fs.readFile(target, "utf8"), independent);
+});
+test("rollback preserves independently edited published files and reports the conflict", async (t) => {
+  const { root, service } = await fixture(t);
+  const request = { model: model() },
+    preview = await service.preview(request);
+  const rename = fs.rename;
+  let count = 0;
+  const edited = path.join(root, "package/demo-tool/Config.in");
+  fs.rename = async (...args) => {
+    if (++count === 1) {
+      await fs.writeFile(edited, "# Independent edit after publication\n");
+      throw Object.assign(new Error("injected later failure"), { code: "EIO" });
+    }
+    return rename(...args);
+  };
+  try {
+    await assert.rejects(
+      service.apply({
+        ...request,
+        revision: preview.revision,
+        previewHash: preview.previewHash,
+      }),
+      { code: "PACKAGE_ROLLBACK_FAILED" },
+    );
+  } finally {
+    fs.rename = rename;
+  }
+  assert.equal(
+    await fs.readFile(edited, "utf8"),
+    "# Independent edit after publication\n",
+  );
+  assert.equal(
+    await fs.readFile(path.join(root, "Config.in"), "utf8"),
+    "# Preserve configuration\n",
+  );
+});
+
+test("target edit during temporary-file preparation is preserved before publish", async (t) => {
+  const { root, service } = await fixture(t);
+  const first = await service.preview({ model: model() });
+  await service.apply({
+    model: model(),
+    revision: first.revision,
+    previewHash: first.previewHash,
+  });
+  const requested = { model: { ...model(), version: "2.0" } },
+    preview = await service.preview(requested);
+  const {
+    renderPackage,
+  } = require("../src/main/configuration/package-authoring.cjs");
+  const target = path.join(root, "package/demo-tool/demo-tool.mk");
+  const independent = renderPackage({ ...model(), version: "1.1" }, "FIXTURE")
+    .files["package/demo-tool/demo-tool.mk"];
+  const writeFile = fs.writeFile;
+  let changed = false;
+  fs.writeFile = async (...args) => {
+    const result = await writeFile(...args);
+    if (
+      !changed &&
+      typeof args[0] === "string" &&
+      args[0].startsWith(target + ".") &&
+      args[0].endsWith(".tmp")
+    ) {
+      changed = true;
+      await writeFile(target, independent);
+    }
+    return result;
+  };
+  try {
+    await assert.rejects(
+      service.apply({
+        ...requested,
+        revision: preview.revision,
+        previewHash: preview.previewHash,
+      }),
+      { code: "REVISION_CONFLICT" },
+    );
+  } finally {
+    fs.writeFile = writeFile;
+  }
+  assert.equal(changed, true);
+  assert.equal(await fs.readFile(target, "utf8"), independent);
+});
+test("rollback rechecks after-image ownership after preparing restoration bytes", async (t) => {
+  const { root, service } = await fixture(t);
+  const first = await service.preview({ model: model() });
+  await service.apply({
+    model: model(),
+    revision: first.revision,
+    previewHash: first.previewHash,
+  });
+  const requested = { model: { ...model(), version: "2.0" } },
+    preview = await service.preview(requested);
+  const target = path.join(root, "package/demo-tool/demo-tool.mk");
+  const rename = fs.rename,
+    writeFile = fs.writeFile;
+  let failure = false,
+    changed = false;
+  fs.rename = async (...args) => {
+    if (!failure && args[1] === path.join(root, "Config.in")) {
+      failure = true;
+      throw Object.assign(new Error("later publication failure"), {
+        code: "EIO",
+      });
+    }
+    return rename(...args);
+  };
+  fs.writeFile = async (...args) => {
+    const result = await writeFile(...args);
+    if (
+      failure &&
+      !changed &&
+      typeof args[0] === "string" &&
+      args[0].startsWith(target + ".") &&
+      args[0].endsWith(".tmp")
+    ) {
+      changed = true;
+      await writeFile(target, "# Independent edit during restoration\n");
+    }
+    return result;
+  };
+  try {
+    await assert.rejects(
+      service.apply({
+        ...requested,
+        revision: preview.revision,
+        previewHash: preview.previewHash,
+      }),
+      { code: "PACKAGE_ROLLBACK_FAILED" },
+    );
+  } finally {
+    fs.rename = rename;
+    fs.writeFile = writeFile;
+  }
+  assert.equal(changed, true);
+  assert.equal(
+    await fs.readFile(target, "utf8"),
+    "# Independent edit during restoration\n",
+  );
+});
+test("authoring refuses a selected root redirected to a different canonical directory", async (t) => {
+  const { root, service } = await fixture(t);
+  await service.preview({ model: model() });
+  await fs.rename(root, root + "-selected");
+  t.after(() => fs.rm(root + "-selected", { recursive: true, force: true }));
+  await fs.symlink(root + "-selected", root);
+  await assert.rejects(service.preview({ model: model() }), {
+    code: "ROOT_NOT_GRANTED",
+  });
 });

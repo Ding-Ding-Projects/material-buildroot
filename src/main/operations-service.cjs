@@ -28,6 +28,9 @@ const { createSourceOperations } = require("./source-operations.cjs");
 const {
   createPackageAuthoringService,
 } = require("./configuration/package-authoring.cjs");
+const {
+  createPackageDiscoveryService,
+} = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 
 const owner = "desktop-owner";
@@ -79,6 +82,8 @@ const fields = {
     "previewHash",
   ],
   "package.preview": ["workspaceId", "externalTreeId", "model"],
+  "package.discover": ["workspaceId", "query", "offset", "limit"],
+  "package.import": ["workspaceId", "packageId", "revision"],
   "package.apply": [
     "workspaceId",
     "externalTreeId",
@@ -378,14 +383,42 @@ function createOperationsService({
     purpose: "external-tree",
   });
   const externalWorkspaces = new Map();
+  const packageDiscovery = createPackageDiscoveryService({
+    resolveRoots: (workspaceId) => {
+      const item = project(workspaceId);
+      const [dev, ino] = item.identities.source.split(":");
+      return {
+        granted: true,
+        sourceRoot: item.source,
+        sourceIdentity: { dev, ino },
+        externalTrees: [...externalWorkspaces.entries()]
+          .filter(([, id]) => id === workspaceId)
+          .map(([id]) => {
+            const root = externalFiles.resolve(id, "write");
+            const stat = fs.lstatSync(root, { bigint: true });
+            externalFiles.resolve(id, "write");
+            return {
+              id,
+              root,
+              identity: { dev: String(stat.dev), ino: String(stat.ino) },
+            };
+          }),
+      };
+    },
+    withLock: (_roots, work) => changeConfig(work),
+  });
   const packageAuthoring = createPackageAuthoringService({
     resolveExternalTree: (workspaceId, externalTreeId) => {
       project(workspaceId);
       if (externalWorkspaces.get(externalTreeId) !== workspaceId)
         reject("EXTERNAL_TREE_NOT_GRANTED");
+      const root = externalFiles.resolve(externalTreeId, "write");
+      const stat = fs.lstatSync(root, { bigint: true });
+      externalFiles.resolve(externalTreeId, "write");
       return {
         granted: true,
-        root: externalFiles.resolve(externalTreeId, "write"),
+        root,
+        identity: { dev: String(stat.dev), ino: String(stat.ino) },
       };
     },
     withLock: async (root, work) =>
@@ -794,6 +827,9 @@ function createOperationsService({
         if (
           ![
             "ollama.status",
+            "ollama.hardware",
+            "ollama.fit",
+            "ollama.capabilities",
             "ollama.managed.status",
             "ollama.install",
             "ollama.managed.start",
@@ -902,6 +938,19 @@ function createOperationsService({
         });
       case "package.preview":
         return packageAuthoring.preview(request);
+      case "package.discover":
+        return packageDiscovery.discover({
+          workspaceId: request.workspaceId,
+          query: request.query,
+          offset: request.offset,
+          limit: request.limit,
+        });
+      case "package.import":
+        return packageDiscovery.importPackage({
+          workspaceId: request.workspaceId,
+          packageId: request.packageId,
+          revision: request.revision,
+        });
       case "external.previewInitialize":
         return packageAuthoring.previewInitialize(request);
       case "external.initialize":
