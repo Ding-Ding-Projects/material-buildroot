@@ -2,7 +2,7 @@
 
 ## Resumed renderer verification, 2026-10-15
 
-The owner authorized resumption and repeated frequent publication on main. The screenshot matrix now waits for each language select's exact displayed label and for fonts before capture. All 12 language/theme/viewport cases passed against unchanged renderer bytes from `299dca4d0d9413ef98ee249c172704a4d1732cc8`; refreshed image inspection and packaged-renderer verification are in progress. Normal release `v0.1.0-build.4.1` resolves to that source. Asset hash readback remains a separate ongoing check. This supersedes the earlier paused steering, without changing any native acceptance claim.
+The owner authorized resumption and repeated frequent publication on main. Capture readiness now includes exact property and rendered label text, nested Material content opacity of 1, and font readiness. All 12 presentation cases passed and independent inspection confirmed all selected labels visible. No renderer mutation was needed for the finite fade-in transition. Normal release `v0.1.0-build.4.1` and successful workflow `38690926331` bind exact source `299dca4d0d9413ef98ee249c172704a4d1732cc8`; all five downloaded asset sizes/digests and package manifests were verified. All 25 renderer tests also passed against its unchanged packaged assets with a synthetic bridge. Native Windows input, installation and IPC remain separate and unverified for this source. See [the current evidence record](docs/evidence/tasks/PH02-T02-C03.md).
 
 ## Frontend continuation, 2026-10-15
 

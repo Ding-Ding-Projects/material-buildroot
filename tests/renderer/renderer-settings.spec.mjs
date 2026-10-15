@@ -66,7 +66,10 @@ test('navigation focuses destination heading, marks current route and retains dr
 });
 for(const languageMode of ['en','zh-HK','bilingual'])for(const theme of ['light','dark'])for(const viewport of [{width:960,height:640},{width:1440,height:960}])test(`source-preview layout ${languageMode} ${theme} ${viewport.width}x${viewport.height}`,async({page},testInfo)=>{
  await page.setViewportSize(viewport);await page.emulateMedia({colorScheme:theme});const errors=await open(page,{bootstrap:{...initial,language:languageMode}});await page.locator('nav md-outlined-button').nth(1).click();await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-outlined-button').nth(1)).toHaveClass(/selected/);await expect(language(page)).toHaveJSProperty('disabled',false);
- await expect(language(page)).toHaveJSProperty('displayText',languageMode==='en'?'English':languageMode==='zh-HK'?'香港粵語':'English + 香港粵語');
+ const displayedLanguage=languageMode==='en'?'English':languageMode==='zh-HK'?'香港粵語':'English + 香港粵語';
+ await expect(language(page)).toHaveJSProperty('displayText',displayedLanguage);
+ await expect(language(page).locator('#label')).toHaveText(displayedLanguage);
+ await expect.poll(()=>language(page).locator('md-outlined-field .content').evaluate(el=>getComputedStyle(el).opacity)).toBe('1');
  await page.evaluate(()=>document.fonts.ready);
  expect(await page.evaluate(()=>['md-filled-button','md-outlined-button','md-text-button','md-outlined-select','md-select-option','md-dialog'].every(name=>!!customElements.get(name)))).toBe(true);
  const overflow=await page.evaluate(()=>{const root=document.querySelector('material-buildroot').shadowRoot;return [...root.querySelectorAll('.shell,header,main,.panel')].map(el=>({element:el.className||el.tagName,width:el.clientWidth,scroll:el.scrollWidth,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(r=>r.scroll>r.width+1||r.left< -1||r.right>innerWidth+1);});expect(overflow).toEqual([]);
