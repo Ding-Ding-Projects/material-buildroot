@@ -1,5 +1,13 @@
 # Handoff
 
+## Public gallery preservation, 2026-10-15
+
+The source preservation checkpoint is `d236a1fddc8c57609ab9697db0e64979dbe7923a`; its Windows release and Pages workflows passed. The unfinished schedule editor remains an inactive, byte-verified recovery patch. New implementation remains stopped, and the full roadmap is incomplete.
+
+A reviewed 51-image gallery is being prepared at the existing public Pages route `/gallery/`, with the exact source README backlink. It retains 24 workspace, nine historical workspace, six interactive website, five earlier landing, five early preview and two historical desktop-shell originals. Capture clocks are used only when recorded; image dimensions, viewport dimensions, build bases and source snapshots remain distinct. Later shared-mode, queue/catalogue and schedule changes are not represented by current accepted captures. Unmanifested cache captures remain withheld.
+
+Creating the separately requested gallery repository was blocked by GitHub integration permissions (`Resource not accessible by integration (createRepository)`). The existing project Pages route preserves the publishable work; it does not satisfy that separate repository requirement. Verify the gallery publication receipt before claiming live delivery. No extra branches, linked worktrees or stashes exist in either the source or private reference checkout, so there is no redundant cleanup candidate and no deletion or archive is claimed.
+
 ## Requested preservation and scoped cleanup, 2026-10-15
 
 New implementation stopped at the owner's explicit preservation request. Reviewed schedule enrollment is published at `8c0c15edd7ed45cd3ffa02cd1032f52922e1396c`. The unfinished schedule GUI is retained as a byte-verified, inactive [recovery patch](design/archive/schedule-editor-in-progress/README.md); it passed TypeScript but has no browser acceptance. Source-enrollment forms were not started. The active renderer preserves the existing working controls. Independent queue/catalogue motion and capture-alignment fixes passed two focused viewport checks.

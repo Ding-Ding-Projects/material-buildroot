@@ -2,7 +2,7 @@
 
 A Material Design 3 desktop workspace for configuring and building embedded Linux systems through WSL 2 or Docker.
 
-[Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Full screenshot gallery](docs/evidence/modern-workspace/README.md) · [Roadmap](ROADMAP.md)
+[Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Capture provenance](docs/evidence/modern-workspace/README.md) · [Roadmap](ROADMAP.md)
 
 ## A productive desktop workspace
 
@@ -12,9 +12,9 @@ Practical onboarding creates a saved plan and preserves setup progress. Native f
 
 The local assistant exposes managed Ollama controls, actual installed-model metadata and measured capacity evidence. Offline help packages the public articles with formatted reading, topic navigation and isolated local search. The documentation website adds guided tasks, recipe previews, troubleshooting and saved browser progress.
 
-## Current interface
+## Interface captures
 
-These are genuine, unretouched Linux Chromium captures of the application renderer. Workspace storage and the offline documentation service are real; native-operation boundaries use explicit fixtures. The [capture manifest and full gallery](docs/evidence/modern-workspace/README.md) record exact source and image hashes, capture clocks, language/theme/viewport and each workflow's verification limit. They do not establish packaged Windows acceptance.
+These are genuine, unretouched Linux Chromium captures of renderer source `e8f9beb`. Workspace storage and the offline documentation service are real; native-operation boundaries use explicit fixtures. Later shared-preference and queue/catalogue controls are not shown in this retained set. The [capture manifest](docs/evidence/modern-workspace/README.md) records exact source and image hashes, capture clocks, language/theme/viewport and each workflow's verification limit. The [public gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) also preserves reviewed historical application and website originals. These captures do not establish current packaged Windows acceptance.
 
 ### Package dependency canvas
 

@@ -1,6 +1,6 @@
 # Development continuation
 
-The latest owner request stopped new implementation for preservation and scoped cleanup. Read `CLOSEOUT_PROMPT.md` and the newest `HANDOFF.md` entry first. The schedule GUI draft is inactive and preserved under `design/archive/schedule-editor-in-progress/`; source-enrollment forms have not been started. The host enrollment checkpoint is `8c0c15e`. Only the required public screenshot gallery publication continues in the closeout lane. Do not interpret earlier active-work statements below as a direction to restart implementation during that pass.
+The latest owner request stopped new implementation for preservation and scoped cleanup. Read `CLOSEOUT_PROMPT.md` and the newest `HANDOFF.md` entry first. The schedule GUI draft is inactive and preserved under `design/archive/schedule-editor-in-progress/`; source-enrollment forms have not been started. Source preservation checkpoint `d236a1f` has successful Windows release and Pages workflows. Only the required 51-image public gallery publication continues in the closeout lane, using the existing project Pages route because GitHub integration permissions blocked creation of a dedicated repository. Do not interpret earlier active-work statements below as a direction to restart implementation during that pass.
 
 ## Active delivery instructions
 

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-source-browser-validation",
+  "sourceState": "uncommitted local preview",
+  "browser": {
+    "engine": "Chromium",
+    "version": "154.0.8037.57",
+    "headless": true,
+    "viewportChecks": [
+      {
+        "width": 320,
+        "height": 900,
+        "documentWidth": 320,
+        "bodyWidth": 320
+      },
+      {
+        "width": 390,
+        "height": 900,
+        "documentWidth": 390,
+        "bodyWidth": 390
+      },
+      {
+        "width": 768,
+        "height": 900,
+        "documentWidth": 768,
+        "bodyWidth": 768
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "documentWidth": 1440,
+        "bodyWidth": 1440
+      }
+    ],
+    "reducedMotionPreference": "reduce"
+  },
+  "materialWeb": {
+    "version": "2.4.1",
+    "resolution": "esbuild --alias points to website/node_modules/@material/web",
+    "bundledInputCount": 83,
+    "allBundledInputsPinned": true
+  },
+  "checks": {
+    "reviewedCaptureCount": 51,
+    "allRegisteredControls": true,
+    "bilingualChipLabels": [
+      "All captures / 全部截圖",
+      "Workspace / 工作區",
+      "Historical workspace / 歷史工作區",
+      "Legacy shell / 舊版介面",
+      "Interactive website / 互動網站",
+      "Earlier website / 早期網站",
+      "Early preview / 早期預覽"
+    ],
+    "legacyCollectionVisible": 2,
+    "searchNoMatchState": true,
+    "clearFilterCount": 51,
+    "provenanceDisclosure": {
+      "expanded": true,
+      "accessibleExpandedState": "true"
+    },
+    "keyboardSpaceActivatesCollection": true,
+    "languageChange": {
+      "lang": "zh-HK",
+      "dataset": "zh",
+      "chip": "全部截圖"
+    },
+    "themeChanged": "dark",
+    "languageAndThemePersisted": {
+      "lang": "zh-HK",
+      "theme": "dark"
+    },
+    "allImageElementsDecoded": 51,
+    "reducedMotionComputedScrollBehavior": "auto",
+    "consoleOrPageErrors": []
+  },
+  "sourceAssetSha256": {
+    "gallery/index.html": "0ac5becf0b152a6faee4e28aa59fe683b59381d15e94c317a2e32452872f755a",
+    "gallery/styles.css": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
+    "gallery/gallery.js": "498dd1609f666567b70349d250fa6e995eb9948734b66b862f215a16ca7c84dc",
+    "gallery/captures.json": "ad958bd307f0bfba22654523a2d0ae4bc182ba13931919db494e1d080e131d87",
+    "gallery/components.js": "769e967e57f425905e7209a0558ab9b11c61a020de520b7f3712c25364edc941",
+    "gallery/assets/material-components.js": "db0399aa3ce6453c305144f4808f18c6349354e3fb1eb0871c38f1a90f47b9c5",
+    "gallery/THIRD_PARTY_NOTICES.txt": "44286cae3767340d7a992501f6d149361450dd96099edf21549917b6ea9159fb"
+  },
+  "imageSha256VerifiedByLocalCheck": {
+    "verifiedImages": 51,
+    "sourceAndDeploymentCopies": true,
+    "failures": 0
+  },
+  "captureClock": "not recorded"
+}
