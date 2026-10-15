@@ -82,6 +82,14 @@ export interface StudioBootstrap {
 }
 /** Only host-admitted documents receive this bridge. */
 export interface StudioAPI {
+  scheduledPreferences?(
+    request: import("./scheduled-preferences").ScheduledPreferencesRequest,
+  ): Promise<import("./scheduled-preferences").ScheduledPreferencesReply>;
+  onScheduledPreferences?(
+    listener: (
+      snapshot: import("./scheduled-preferences").ScheduledPreferencesSnapshot,
+    ) => void,
+  ): () => void;
   sharedMode?(
     request: import("./shared-mode").SharedModeRequest,
   ): Promise<import("./shared-mode").SharedModeReply>;

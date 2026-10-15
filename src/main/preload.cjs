@@ -1,6 +1,69 @@
 "use strict";
 const { contextBridge, ipcRenderer } = require("electron");
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+function exactKeys(value, keys) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.keys(value).sort().join(",") === keys
+  );
+}
+function validScheduleSnapshot(value) {
+  if (
+    !exactKeys(
+      value,
+      "available,effective,evaluatedAt,externalAvailable,revision,running,watching",
+    ) ||
+    ["available", "watching", "running", "externalAvailable"].some(
+      (key) => typeof value[key] !== "boolean",
+    ) ||
+    (value.revision !== null &&
+      (!Number.isSafeInteger(value.revision) || value.revision < 0)) ||
+    (value.evaluatedAt !== null &&
+      (!Number.isSafeInteger(value.evaluatedAt) || value.evaluatedAt < 0))
+  )
+    return false;
+  if (value.effective === null) return true;
+  const effective = value.effective;
+  const id = (value) =>
+    typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(value);
+  return (
+    exactKeys(effective, "appliedRuleIds,issues,provenance,values") &&
+    exactKeys(effective.values, "appearance.theme,language") &&
+    ["en", "zh-HK", "bilingual"].includes(effective.values.language) &&
+    ["system", "light", "dark"].includes(
+      effective.values["appearance.theme"],
+    ) &&
+    exactKeys(effective.provenance, "appearance.theme,language") &&
+    Object.values(effective.provenance).every(
+      (value) => value === null || id(value),
+    ) &&
+    Array.isArray(effective.appliedRuleIds) &&
+    effective.appliedRuleIds.length <= 256 &&
+    effective.appliedRuleIds.every(id) &&
+    Array.isArray(effective.issues) &&
+    effective.issues.length <= 256 &&
+    effective.issues.every(
+      (issue) =>
+        exactKeys(issue, "code,ruleId") &&
+        id(issue.ruleId) &&
+        typeof issue.code === "string" &&
+        /^[A-Z][A-Z_]{0,95}$/.test(issue.code),
+    )
+  );
+}
+function scheduleRequest(request) {
+  let serialized;
+  try {
+    serialized = JSON.stringify(request);
+  } catch {
+    return Promise.resolve({ ok: false, code: "INVALID_REQUEST" });
+  }
+  if (typeof serialized !== "string" || serialized.length > 264192)
+    return Promise.resolve({ ok: false, code: "INVALID_REQUEST" });
+  return ipcRenderer.invoke("studio:scheduled-preferences", serialized);
+}
 function validModeSnapshot(value) {
   if (
     !value ||
@@ -92,6 +155,36 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    scheduledPreferences: scheduleRequest,
+    onScheduledPreferences: (listener) => {
+      if (typeof listener !== "function")
+        throw new TypeError("Listener must be a function.");
+      let active = true;
+      const wrapped = (_event, value) => {
+        if (!active || !validScheduleSnapshot(value)) return;
+        const effective =
+          value.effective &&
+          Object.freeze({
+            values: Object.freeze({ ...value.effective.values }),
+            provenance: Object.freeze({ ...value.effective.provenance }),
+            appliedRuleIds: Object.freeze([...value.effective.appliedRuleIds]),
+            issues: Object.freeze(
+              value.effective.issues.map((issue) =>
+                Object.freeze({ ...issue }),
+              ),
+            ),
+          });
+        listener(Object.freeze({ ...value, effective }));
+      };
+      ipcRenderer.on("studio:scheduled-preferences:event", wrapped);
+      return () => {
+        active = false;
+        ipcRenderer.removeListener(
+          "studio:scheduled-preferences:event",
+          wrapped,
+        );
+      };
+    },
     sharedMode: modeRequest,
     sharedModeRecovery: () => modeRequest({ action: "recovery" }),
     onSharedMode: (listener) => {

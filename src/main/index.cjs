@@ -22,6 +22,7 @@ const {
   createSharedModeService,
 } = require("./privacy/shared-mode-service.cjs");
 const { createSharedModeIPC } = require("./privacy/shared-mode-ipc.cjs");
+const { createScheduleIPC } = require("./preferences/schedule-ipc.cjs");
 const verification = process.argv.filter((arg) =>
   arg.startsWith("--verification-user-data="),
 );
@@ -36,6 +37,7 @@ if (verification.length) {
   app.setPath("userData", path.resolve(value));
 }
 let store, window, desktop, operations, sharedModeIPC, unsubscribeSharedMode;
+let scheduleIPC, unsubscribeSchedule;
 let quitting = false;
 const capabilities = createCapabilityRegistry();
 if (require("electron-squirrel-startup")) app.quit();
@@ -132,7 +134,10 @@ else {
         )
           throw Error("Local storage unavailable");
         const sharedDirectory = verification.length
-          ? path.join(app.getPath("userData"), "verification-shared-experience-v1")
+          ? path.join(
+              app.getPath("userData"),
+              "verification-shared-experience-v1",
+            )
           : path.join(localData, "Ding-Ding Projects", "shared-experience-v1");
         sharedModeService = createSharedModeService({
           sharedDirectory,
@@ -170,6 +175,63 @@ else {
       const workspace = createWorkspaceIPC({
         desktop,
         service: workspaceService,
+      });
+      let scheduleService;
+      try {
+        const { createSchedulePreferencesService } = await import(
+          "./preferences/service.mjs"
+        );
+        scheduleService = await createSchedulePreferencesService({
+          directory: path.join(
+            app.getPath("userData"),
+            "scheduled-preferences",
+          ),
+          profileId: "desktop",
+          sourceEnrollments: [],
+          baseReader: () => {
+            const language = store?.read(
+              "desktop-owner",
+              "desktop-settings",
+            )?.language;
+            const workspace = workspaceService.get();
+            if (!language || !workspace.ok)
+              throw Error("Base preferences unavailable");
+            return {
+              language,
+              "appearance.theme": workspace.state.preferences.theme,
+            };
+          },
+          vault: createVault({
+            safeStorage,
+            directory: path.join(
+              app.getPath("userData"),
+              "scheduled-preferences",
+              "credentials",
+            ),
+          }),
+        });
+        await scheduleService.start();
+      } catch {
+        await scheduleService?.close();
+        scheduleService = undefined;
+      }
+      scheduleIPC = createScheduleIPC({ desktop, service: scheduleService });
+      ipcMain.handle("studio:scheduled-preferences", (event, value) =>
+        scheduleIPC.request(event, value),
+      );
+      unsubscribeSchedule = scheduleService?.subscribe((snapshot) => {
+        if (
+          !window.isDestroyed() &&
+          !window.webContents.isDestroyed() &&
+          window.webContents.mainFrame.url === url
+        ) {
+          try {
+            window.webContents.send(
+              "studio:scheduled-preferences:event",
+              snapshot,
+            );
+          } catch {}
+        }
       });
       ipcMain.handle("studio:workspace:get", (event) => workspace.get(event));
       ipcMain.handle("studio:workspace:export", (event) =>
@@ -233,10 +295,14 @@ else {
   app.on("before-quit", (event) => {
     unsubscribeSharedMode?.();
     sharedModeIPC?.close();
-    if (operations && !quitting) {
+    unsubscribeSchedule?.();
+    if ((operations || scheduleIPC) && !quitting) {
       event.preventDefault();
       quitting = true;
-      void operations.dispose().finally(() => app.quit());
+      void Promise.allSettled([
+        operations?.dispose(),
+        scheduleIPC?.close(),
+      ]).then(() => app.quit());
       return;
     }
     desktop?.revoke();

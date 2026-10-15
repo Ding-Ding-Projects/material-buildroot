@@ -1,0 +1,76 @@
+import type {
+  ScheduleDocument,
+  SettingRegistry,
+  ScheduleHistoryReceipt,
+} from "../../shared/scheduled-settings.mjs";
+import type { SqliteScheduleAdapter } from "./schedule-store.mjs";
+import type {
+  ScheduleProviderOptions,
+  ScheduleSourceEnrollment,
+} from "./schedule-provider.mjs";
+export interface ScheduleEffective {
+  values: {
+    language: "en" | "zh-HK" | "bilingual";
+    "appearance.theme": "system" | "light" | "dark";
+  };
+  provenance: Record<"language" | "appearance.theme", string | null>;
+  appliedRuleIds: string[];
+  issues: Array<{ ruleId: string; code: string }>;
+}
+export interface SchedulePreferencesSnapshot {
+  available: boolean;
+  watching: boolean;
+  running: boolean;
+  revision: number | null;
+  externalAvailable: boolean;
+  effective: ScheduleEffective | null;
+  evaluatedAt: number | null;
+}
+export const CURRENT_SCHEDULE_REGISTRY: SettingRegistry;
+export class SchedulePreferencesError extends Error {
+  readonly code: string;
+  constructor(code: string);
+}
+export function createSchedulePreferencesService(options: {
+  directory: string;
+  profileId: string;
+  baseReader: () =>
+    | ScheduleEffective["values"]
+    | Promise<ScheduleEffective["values"]>;
+  sourceEnrollments?: ScheduleSourceEnrollment[];
+  vault?: ScheduleProviderOptions["vault"];
+  clock?: () => number;
+  tickMs?: number;
+  watchFactory?: (
+    directory: string,
+    options: { persistent: boolean },
+    listener: () => void,
+  ) => { on(event: string, listener: () => void): unknown; close(): void };
+  lookup?: ScheduleProviderOptions["lookup"];
+  trustedCa?: ScheduleProviderOptions["trustedCa"];
+  storageAdapter?: SqliteScheduleAdapter;
+}): Readonly<{
+  start(): Promise<SchedulePreferencesSnapshot>;
+  read(): Promise<ScheduleDocument | null>;
+  replace(options: {
+    document: ScheduleDocument;
+    expectedRevision: number | null;
+    authorize?: () => boolean;
+  }): Promise<ScheduleDocument>;
+  history(page?: {
+    after?: number;
+    limit?: number;
+  }): Promise<{
+    records: Array<{ sequence: number; receipt: ScheduleHistoryReceipt }>;
+    next: number;
+    hasMore: boolean;
+  }>;
+  evaluate(options?: { at?: number }): Promise<ScheduleEffective>;
+  refresh(): Promise<SchedulePreferencesSnapshot>;
+  cancel(): Promise<SchedulePreferencesSnapshot>;
+  status(): SchedulePreferencesSnapshot;
+  subscribe(
+    listener: (snapshot: SchedulePreferencesSnapshot) => void,
+  ): () => void;
+  close(): void;
+}>;

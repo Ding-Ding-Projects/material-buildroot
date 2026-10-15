@@ -1,5 +1,19 @@
 # Handoff
 
+## Shared preference controls and scheduled host integration, 2026-10-15
+
+Shared-mode desktop controls are published at `4f023e4`. The settings workspace supports exact-name initialization and rename, PIN/password enrollment and replacement, entry, verified exit, refresh and recovery guidance. Active or unknown mode uses English for application-owned controls and retained operational outcomes without changing saved language or exact records. Language and vocabulary routes are omitted; restricted offline help exposes a vetted English guide while full article classification remains open. Thirty-five focused browser checks and strict TypeScript checking passed. Native vault, cross-application and passkey acceptance remain unverified.
+
+The scheduled-preferences host now connects SQLite document/history transactions, bounded profile watching, civil-time evaluation and a privileged HTTPS/Home Assistant provider to a narrow desktop bridge. Forty focused checks cover the shared core, real SQLite crash recovery, actual local TLS fixtures, bounded concurrency, credential and frame revocation, event filtering and IPC. Independent review repaired cleanup when a foreign journal or incident record appears: retained files are preserved, SQLite locks are released and recovery remains unavailable until explicit owner action. These checks do not establish every physical failure or hostile filesystem race.
+
+The application currently admits local schedules for language and theme. External source enrollment is empty by default; network provider support does not claim configured user services. Graphical scheduling controls and effective preference consumption remain separate active work. The original base preferences stay unchanged. Windows runtime testing remains deferred.
+
+Canonical reconciliation is published at `ba7ea4b`: 107 feature identities, 398 requirement rows and 1,767 cross-contract edges. The independent review checked structure and selected semantic clauses, not every interpretation or runtime consumer. A later explanatory catalogue link changed its bytes; the two current digest bindings were refreshed without changing validators, historical evidence, requirement content or acceptance states.
+
+Queue/recovery and official catalogue controls, scheduling consumers and interactive documentation updates continue with their existing owners. The earlier gallery and live website receipts below retain their original source bindings and need new captures/publication for these features. No broad roadmap phase is newly accepted.
+
+After correcting the two current catalogue bindings, the full Node suite passed 425 tests with four skips: three opt-in official-source checks and the Windows PowerShell runtime check. This is one combined run of 429 discovered tests. The official-source paths retain their separate earlier focused receipts; skipped cases are not counted as passing this run.
+
 ## Reviewed scheduling, recovery and catalogue checkpoint, 2026-10-15
 
 Personal-vocabulary controls and scoped owned-copy consumers are published at `1578869b7d59ba18ac8720085071516ccd10b4df`. Unknown shared-preference status suppresses substitutions. A failed cache deletion keeps substitutions inactive and mutations disabled until a full reload revalidates retained bytes; the GUI does not claim deletion succeeded. Settings search and palette routes focus the actual controls. Complete interface-copy and independent visitor/companion coverage remain open.
