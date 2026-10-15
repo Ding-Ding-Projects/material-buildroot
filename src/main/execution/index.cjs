@@ -160,7 +160,9 @@ function canonicalDirectory(value) {
   return real;
 }
 const LINUX_SCRIPT =
-  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; exec make -C "$1" "O=$2" "-j$3" "$4"';
+  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "$4"';
+const ENVIRONMENT_SCRIPT =
+  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; gcc -dumpmachine; gcc -dumpfullversion -dumpversion';
 class ExecutionService {
   constructor({
     platform = process.platform,
@@ -178,7 +180,14 @@ class ExecutionService {
     this.grants = new Map();
     this.locks = new Set();
   }
-  grantProject({ root, source, output, trustedSource = false }) {
+  grantProject({
+    root,
+    source,
+    output,
+    trustedSource = false,
+    externalTrees = [],
+    trustedExternalTrees = false,
+  }) {
     if (trustedSource !== true)
       throw new Error("source-execution-consent-required");
     root = canonicalDirectory(root);
@@ -199,11 +208,49 @@ class ExecutionService {
       throw new Error("project-path-boundary");
     if (!fs.statSync(path.join(source, "Makefile")).isFile())
       throw new Error("makefile-required");
+    if (!Array.isArray(externalTrees) || externalTrees.length > 32)
+      throw new Error("invalid-external-trees");
+    if (externalTrees.length && trustedExternalTrees !== true)
+      throw new Error("external-execution-consent-required");
+    const external = externalTrees.map((entry) => {
+      const canonical = canonicalDirectory(entry);
+      if (
+        path.resolve(entry) !== canonical ||
+        canonical.replace(/^[A-Za-z]:[\\/]/, "").includes(":") ||
+        !/^[A-Za-z0-9_:/\\.+-]+$/.test(canonical)
+      )
+        throw new Error("unsupported-external-path");
+      if (
+        canonical === source ||
+        inside(output, canonical) ||
+        inside(canonical, output)
+      )
+        throw new Error("external-path-boundary");
+      const paths = [
+        canonical,
+        ...["external.desc", "Config.in", "external.mk"].map((name) =>
+          path.join(canonical, name),
+        ),
+      ];
+      const identities = paths.map((entry, index) => {
+        const stat = fs.lstatSync(entry);
+        if (
+          stat.isSymbolicLink() ||
+          (index === 0 ? !stat.isDirectory() : !stat.isFile())
+        )
+          throw new Error("external-descriptor-required");
+        return `${stat.dev}:${stat.ino}`;
+      });
+      return { path: canonical, paths, identities };
+    });
+    if (new Set(external.map((entry) => entry.path)).size !== external.length)
+      throw new Error("duplicate-external-tree");
     const grantId = crypto.randomUUID();
     this.grants.set(grantId, {
       root,
       source,
       output,
+      external,
       identities: Object.fromEntries(
         Object.entries({ root, source, output }).map(([key, value]) => {
           const stat = fs.statSync(value);
@@ -211,7 +258,32 @@ class ExecutionService {
         }),
       ),
     });
-    return { grantId, root, source, output };
+    return {
+      grantId,
+      root,
+      source,
+      output,
+      externalTrees: external.map((entry) => entry.path),
+    };
+  }
+  validateExternal(grant) {
+    try {
+      for (const external of grant.external) {
+        if (canonicalDirectory(external.path) !== external.path)
+          throw new Error("external-path-changed");
+        external.paths.forEach((entry, index) => {
+          const stat = fs.lstatSync(entry);
+          if (
+            stat.isSymbolicLink() ||
+            (index === 0 ? !stat.isDirectory() : !stat.isFile()) ||
+            `${stat.dev}:${stat.ino}` !== external.identities[index]
+          )
+            throw new Error("external-path-changed");
+        });
+      }
+    } catch {
+      throw new Error("external-path-changed");
+    }
   }
   revoke(grantId) {
     this.grants.delete(grantId);
@@ -243,6 +315,136 @@ class ExecutionService {
       },
     };
   }
+  async probeEnvironment(request) {
+    if (
+      !request ||
+      typeof request !== "object" ||
+      Array.isArray(request) ||
+      Object.keys(request).length !== 2 ||
+      !Object.hasOwn(request, "grantId") ||
+      !Object.hasOwn(request, "runtime")
+    )
+      throw new Error("invalid-environment-probe");
+    const grant = this.grants.get(request.grantId);
+    if (!grant) throw new Error("grant-unavailable");
+    const validate = () => {
+      if (this.grants.get(request.grantId) !== grant)
+        throw new Error("grant-unavailable");
+      for (const key of ["root", "source", "output"]) {
+        const stat = fs.statSync(grant[key]);
+        if (
+          canonicalDirectory(grant[key]) !== grant[key] ||
+          `${stat.dev}:${stat.ino}` !== grant.identities[key]
+        )
+          throw new Error("grant-path-changed");
+      }
+      this.validateExternal(grant);
+    };
+    validate();
+    const runtime = request.runtime;
+    let file, args, onTerminate;
+    if (runtime?.kind === "docker") {
+      if (
+        !/^[a-z0-9][a-z0-9./_-]*@sha256:[a-f0-9]{64}$/.test(
+          runtime.image || "",
+        ) ||
+        !Number.isSafeInteger(runtime.uid) ||
+        runtime.uid < 1 ||
+        runtime.uid > 4294967294 ||
+        !Number.isSafeInteger(runtime.gid) ||
+        runtime.gid < 1 ||
+        runtime.gid > 4294967294
+      )
+        throw new Error("invalid-container-runtime");
+      const name = `material-buildroot-probe-${crypto.randomUUID()}`;
+      file = this.executables.docker;
+      args = [
+        "run",
+        "--rm",
+        "--pull=never",
+        "--name",
+        name,
+        "--user",
+        `${runtime.uid}:${runtime.gid}`,
+        "--read-only",
+        "--cap-drop=ALL",
+        "--security-opt=no-new-privileges",
+        "--pids-limit=64",
+        "--memory=256m",
+        "--cpus=1",
+        "--network=none",
+        "--entrypoint",
+        "/bin/sh",
+        runtime.image,
+        "-c",
+        ENVIRONMENT_SCRIPT,
+      ];
+      onTerminate = async () => {
+        const stopped = await boundedProcess(
+          file,
+          ["stop", "--time", "2", name],
+          { timeoutMs: 5000 },
+        ).completion;
+        if (stopped.state !== "succeeded")
+          throw new Error("container-stop-failed");
+      };
+    } else if (runtime?.kind === "wsl") {
+      if (
+        this.platform !== "win32" ||
+        !/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(runtime.distribution || "")
+      )
+        throw new Error("invalid-wsl-runtime");
+      file = this.executables.wsl;
+      args = [
+        "--distribution",
+        runtime.distribution,
+        "--exec",
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=1s",
+        "8s",
+        "/bin/sh",
+        "-c",
+        ENVIRONMENT_SCRIPT,
+      ];
+    } else if (
+      runtime?.kind === "linux-fixture" &&
+      this.linuxFixture &&
+      this.platform !== "win32"
+    ) {
+      if (process.getuid() === 0) throw new Error("non-root-required");
+      file = "/bin/sh";
+      args = ["-c", ENVIRONMENT_SCRIPT];
+    } else throw new Error("runtime-unavailable");
+    const result = await boundedProcess(file, args, {
+      timeoutMs: 10000,
+      maxBytes: 4096,
+      onTerminate,
+    }).completion;
+    validate();
+    if (result.state !== "succeeded") {
+      if (result.code === 77) throw new Error("non-root-required");
+      throw new Error(`environment-probe-${result.state}`);
+    }
+    const lines = result.stdout.trim().split(/\r?\n/);
+    if (
+      lines.length !== 2 ||
+      !/^[A-Za-z0-9_][A-Za-z0-9_.+-]{0,199}$/.test(lines[0]) ||
+      !/^[0-9]+(?:\.[0-9]+){0,3}(?:[-+~][A-Za-z0-9.~-]+)?$/.test(lines[1])
+    )
+      throw new Error("invalid-environment-output");
+    const targetArchitecture = lines[0].split("-")[0].toLowerCase();
+    let hostArchitecture = targetArchitecture;
+    if (/^i.86$/.test(targetArchitecture)) hostArchitecture = "x86";
+    else if (targetArchitecture === "sun4u") hostArchitecture = "sparc64";
+    else if (/^arm/.test(targetArchitecture) || targetArchitecture === "sa110")
+      hostArchitecture = "arm";
+    else if (targetArchitecture === "ppc64") hostArchitecture = "powerpc64";
+    else if (targetArchitecture === "ppc" || targetArchitecture === "macppc")
+      hostArchitecture = "powerpc";
+    else if (/^sh/.test(targetArchitecture)) hostArchitecture = "sh";
+    return { hostArchitecture, hostGccVersion: lines[1] };
+  }
   async start(request, onLog) {
     const { grantId, target, runtime, jobs = 1 } = request || {};
     if (
@@ -268,6 +470,7 @@ class ExecutionService {
       )
         throw new Error("grant-path-changed");
     }
+    this.validateExternal(grant);
     if (this.locks.has(grant.output) || this.locks.has(grant.source))
       throw new Error("project-busy");
     let file,
@@ -326,6 +529,10 @@ class ExecutionService {
         `type=bind,src=${grant.source},dst=/source,readonly`,
         "--mount",
         `type=bind,src=${grant.output},dst=/output`,
+        ...grant.external.flatMap((entry, index) => [
+          "--mount",
+          `type=bind,src=${entry.path},dst=/external/${index},readonly`,
+        ]),
         "--workdir",
         "/source",
         "--entrypoint",
@@ -338,6 +545,7 @@ class ExecutionService {
         "/output",
         String(jobs),
         target,
+        grant.external.map((_, index) => `/external/${index}`).join(":"),
       ];
       cancelExtra = async () => {
         const result = await boundedProcess(
@@ -375,6 +583,15 @@ class ExecutionService {
       };
       const source = await translate(grant.source),
         output = await translate(grant.output);
+      const externalPaths = [];
+      for (const external of grant.external)
+        externalPaths.push(await translate(external.path));
+      if (
+        [source, output, ...externalPaths].some(
+          (entry) => !/^[A-Za-z0-9_/.+-]+$/.test(entry),
+        )
+      )
+        throw new Error("unsupported-build-path");
       file = this.executables.wsl;
       args = [
         "--distribution",
@@ -389,6 +606,7 @@ class ExecutionService {
         output,
         String(jobs),
         target,
+        externalPaths.join(":"),
       ];
       cancelExtra = async () => {
         for (let attempt = 0; !linuxPid && attempt < 20; attempt++)
@@ -432,7 +650,14 @@ class ExecutionService {
     ) {
       if (process.getuid() === 0) throw new Error("non-root-required");
       file = this.executables.make;
-      args = ["-C", grant.source, `O=${grant.output}`, `-j${jobs}`, target];
+      args = [
+        "-C",
+        grant.source,
+        `O=${grant.output}`,
+        `-j${jobs}`,
+        `BR2_EXTERNAL=${grant.external.map((entry) => entry.path).join(":")}`,
+        target,
+      ];
     } else throw new Error("runtime-unavailable");
     if (this.grants.get(grantId) !== grant)
       throw new Error("grant-unavailable");
@@ -444,6 +669,7 @@ class ExecutionService {
       )
         throw new Error("grant-path-changed");
     }
+    this.validateExternal(grant);
     if (this.locks.has(grant.output) || this.locks.has(grant.source))
       throw new Error("project-busy");
     this.locks.add(grant.output);

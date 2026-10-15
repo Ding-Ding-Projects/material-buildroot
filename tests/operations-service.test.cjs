@@ -57,6 +57,8 @@ function fixture(t, { cancelled = false, hold = false } = {}) {
   return {
     request: (r) => service.request(JSON.stringify(r)),
     calls,
+    execution,
+    directory,
     service,
     root,
     source,
@@ -295,15 +297,44 @@ test("native external-tree selection binds package preview and actual apply to t
     });
   const root = path.join(f.root, "external");
   fs.mkdirSync(root);
-  fs.writeFileSync(path.join(root, "external.desc"), "name: FIXTURE\n");
-  fs.writeFileSync(path.join(root, "Config.in"), "# preserved\n");
-  fs.writeFileSync(path.join(root, "external.mk"), "# preserved\n");
   f.picks.push(root);
   const chosen = await f.request({
     action: "external.choose",
     workspaceId: adopted.result.workspaceId,
   });
   assert.equal(chosen.ok, true);
+  const initialization = {
+    workspaceId: adopted.result.workspaceId,
+    externalTreeId: chosen.result.externalTreeId,
+    descriptor: { name: "FIXTURE", description: "Example packages" },
+  };
+  const initialPreview = await f.request({
+    action: "external.previewInitialize",
+    ...initialization,
+  });
+  assert.equal(initialPreview.ok, true);
+  assert.deepEqual(fs.readdirSync(root), []);
+  const initialized = await f.request({
+    action: "external.initialize",
+    ...initialization,
+    revision: initialPreview.result.revision,
+    previewHash: initialPreview.result.previewHash,
+  });
+  assert.equal(initialized.ok, true);
+  assert.equal(initialized.result.initialized, true);
+  assert.match(
+    fs.readFileSync(path.join(root, "external.desc"), "utf8"),
+    /name: FIXTURE/,
+  );
+  assert.equal(
+    (
+      await f.request({
+        action: "external.previewInitialize",
+        ...initialization,
+      })
+    ).code,
+    "EXTERNAL_DIRECTORY_NOT_EMPTY",
+  );
   const model = {
     name: "demo",
     version: "1.0",
@@ -362,4 +393,140 @@ test("native external-tree selection binds package preview and actual apply to t
     ).code,
     "REVISION_CONFLICT",
   );
+});
+
+test("ordered external activation persists options but requires renewed folder authority after restart", async (t) => {
+  const f = fixture(t);
+  const selected = await f.request({ action: "project.choose" });
+  const adopted = await f.request({
+    action: "project.adopt",
+    selectionId: selected.result.selectionId,
+    trust: true,
+  });
+  const workspaceId = adopted.result.workspaceId;
+  const chosenRuntime = { kind: "wsl", distribution: "Ubuntu" };
+  assert.equal(
+    (
+      await f.request({
+        action: "project.runtime",
+        workspaceId,
+        runtime: chosenRuntime,
+      })
+    ).result.revision,
+    1,
+  );
+  const external = path.join(f.root, "external");
+  fs.mkdirSync(external);
+  for (const [name, contents] of Object.entries({
+    "external.desc": "name: FIXTURE\n",
+    "Config.in": "# packages\n",
+    "external.mk": "# recipes\n",
+  }))
+    fs.writeFileSync(path.join(external, name), contents);
+  f.picks.push(external);
+  const choice = await f.request({ action: "external.choose", workspaceId });
+  const activation = {
+    workspaceId,
+    externalTreeIds: [choice.result.externalTreeId],
+    expectedRevision: 1,
+    trust: true,
+  };
+  assert.equal(
+    (
+      await f.request({
+        action: "external.activate",
+        ...activation,
+        trust: false,
+      })
+    ).code,
+    "SOURCE_CONSENT_REQUIRED",
+  );
+  assert.equal(
+    (
+      await f.request({
+        action: "external.activate",
+        ...activation,
+        expectedRevision: 0,
+      })
+    ).code,
+    "REVISION_CONFLICT",
+  );
+  const active = await f.request({
+    action: "external.activate",
+    ...activation,
+  });
+  assert.equal(active.ok, true);
+  assert.equal(active.result.revision, 2);
+  assert.deepEqual(active.result.externalTrees, [
+    { path: external, name: "FIXTURE" },
+  ]);
+  assert.deepEqual(f.calls.at(-1).externalTrees, [external]);
+  assert.equal(f.calls.at(-1).trustedExternalTrees, true);
+  const options = await f.request({ action: "project.options", workspaceId });
+  assert.equal(options.result.externalTreesAuthorized, true);
+  assert.deepEqual(options.result.runtime, chosenRuntime);
+  await f.service.dispose();
+  const picks = [f.root, f.source, f.output, external];
+  const service = createOperationsService({
+    directory: path.join(f.directory, "state"),
+    dialog: {
+      showOpenDialog: async () => ({
+        canceled: false,
+        filePaths: [picks.shift()],
+      }),
+    },
+    version: "0.1.0",
+    source: null,
+    execution: f.execution,
+  });
+  const request = (r) => service.request(JSON.stringify(r));
+  try {
+    const list = await request({ action: "project.list" });
+    assert.equal(list.result[0].authorized, false);
+    const choice2 = await request({ action: "project.choose" });
+    const restored = await request({
+      action: "project.adopt",
+      selectionId: choice2.result.selectionId,
+      trust: true,
+    });
+    assert.equal(restored.result.workspaceId, workspaceId);
+    const restoredOptions = await request({
+      action: "project.options",
+      workspaceId,
+    });
+    assert.equal(restoredOptions.result.externalTreesAuthorized, false);
+    assert.deepEqual(restoredOptions.result.runtime, chosenRuntime);
+    assert.equal(
+      (
+        await request({
+          action: "build.submit",
+          workspaceId,
+          runtime: chosenRuntime,
+          target: "all",
+          jobs: 1,
+        })
+      ).code,
+      "EXTERNAL_TREES_NOT_AUTHORIZED",
+    );
+    const renewed = await request({ action: "external.choose", workspaceId });
+    assert.equal(
+      (
+        await request({
+          action: "external.activate",
+          workspaceId,
+          externalTreeIds: [renewed.result.externalTreeId],
+          expectedRevision: 2,
+          trust: true,
+        })
+      ).ok,
+      true,
+    );
+    assert.equal(
+      (await request({ action: "project.options", workspaceId })).result
+        .externalTreesAuthorized,
+      true,
+    );
+  } finally {
+    await service.dispose();
+  }
 });

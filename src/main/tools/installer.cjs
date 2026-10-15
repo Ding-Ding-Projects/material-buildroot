@@ -61,7 +61,7 @@ async function installOllama(options, context = {}) {
     payload.length < 1 ||
     payload.length > 2 * 1024 ** 3 ||
     !/^[a-f0-9]{64}$/.test(payload.sha256) ||
-    !["executable", "tar"].includes(payload.kind) ||
+    !["executable", "tar", "zip"].includes(payload.kind) ||
     !Array.isArray(payload.members) ||
     !payload.members.length ||
     payload.members.length > 10000
@@ -83,6 +83,9 @@ async function installOllama(options, context = {}) {
     payload.version + "-" + payload.platform + "-" + payload.arch,
   );
   async function verify(directory) {
+    const directoryStat = await fs.lstat(directory);
+    if (!directoryStat.isDirectory() || directoryStat.isSymbolicLink())
+      fail("INVALID_INSTALLATION");
     async function walk(current, relative = "") {
       for (const entry of await fs.readdir(current, { withFileTypes: true })) {
         const key = relative ? relative + "/" + entry.name : entry.name;
@@ -99,18 +102,49 @@ async function installOllama(options, context = {}) {
       if (
         !stat.isFile() ||
         stat.isSymbolicLink() ||
+        stat.nlink !== 1 ||
         (await digest(file)) !== member.sha256
       )
         fail("PAYLOAD_HASH_MISMATCH");
     }
   }
   try {
-    await verify(destination);
-    return { installed: true, existing: true, version: payload.version };
+    const existingRoot = await fs.lstat(root);
+    if (!existingRoot.isDirectory() || existingRoot.isSymbolicLink())
+      fail("INVALID_INSTALLATION_ROOT");
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
+  let needsRepair = false;
+  try {
+    await verify(destination);
+    return { installed: true, existing: true, version: payload.version };
+  } catch (error) {
+    let exists = false;
+    try {
+      await fs.lstat(destination);
+      exists = true;
+    } catch (inspectError) {
+      if (inspectError.code !== "ENOENT") throw inspectError;
+    }
+    if (exists) {
+      if (options.repairOllama !== true) throw error;
+      needsRepair = true;
+    } else if (error.code !== "ENOENT") throw error;
+  }
   await fs.mkdir(root, { recursive: true, mode: 0o700 });
+  const rootStat = await fs.lstat(root);
+  if (!rootStat.isDirectory() || rootStat.isSymbolicLink())
+    fail("INVALID_INSTALLATION_ROOT");
+  const storage = await fs.statfs(root);
+  const required =
+    payload.length +
+    payload.members.reduce(
+      (sum, member) => sum + (member.length || payload.length),
+      0,
+    ) +
+    32 * 1024 * 1024;
+  if (storage.bavail * storage.bsize < required) fail("INSUFFICIENT_STORAGE");
   const stage = path.join(root, ".install-" + randomUUID()),
     archive = path.join(root, ".download-" + randomUUID());
   await fs.mkdir(stage, { mode: 0o700 });
@@ -171,7 +205,26 @@ async function installOllama(options, context = {}) {
       if (completed !== payload.length || hash.digest("hex") !== payload.sha256)
         fail("PAYLOAD_HASH_MISMATCH");
     }
+    if (options.ollamaCacheDirectory) {
+      await fs.mkdir(options.ollamaCacheDirectory, {
+        recursive: true,
+        mode: 0o700,
+      });
+      const cacheStat = await fs.lstat(options.ollamaCacheDirectory);
+      if (!cacheStat.isDirectory() || cacheStat.isSymbolicLink())
+        fail("INVALID_CACHE_DIRECTORY");
+      const saved = path.join(
+        options.ollamaCacheDirectory,
+        payload.sha256 + "." + payload.kind,
+      );
+      try {
+        await fs.link(archive, saved);
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+      }
+    }
     if (context.signal?.aborted) fail("CANCELLED");
+    context.onProgress?.({ type: "ollama-install", phase: "extract" });
     if (payload.kind === "executable") {
       if (
         payload.members.length !== 1 ||
@@ -181,6 +234,13 @@ async function installOllama(options, context = {}) {
       const file = path.join(stage, payload.executablePath);
       await fs.mkdir(path.dirname(file), { recursive: true });
       await fs.copyFile(archive, file);
+    } else if (payload.kind === "zip") {
+      await require("./zip-payload.cjs").extractZip(
+        archive,
+        stage,
+        payload.members,
+        context,
+      );
     } else {
       const tar = await executable(options, "tar");
       const names = await processRun(
@@ -223,10 +283,23 @@ async function installOllama(options, context = {}) {
         context,
       );
     }
+    context.onProgress?.({ type: "ollama-install", phase: "verify" });
     await verify(stage);
     await fs.chmod(path.join(stage, payload.executablePath), 0o700);
     if (context.signal?.aborted) fail("CANCELLED");
-    await fs.rename(stage, destination);
+    context.onProgress?.({ type: "ollama-install", phase: "promote" });
+    let retained;
+    if (needsRepair) {
+      retained = path.join(root, ".retained-" + randomUUID());
+      await fs.rename(destination, retained);
+    }
+    try {
+      await fs.rename(stage, destination);
+    } catch (error) {
+      if (retained) await fs.rename(retained, destination);
+      throw error;
+    }
+    context.onProgress?.({ type: "ollama-install", phase: "installed" });
     return { installed: true, version: payload.version, existing: false };
   } finally {
     await fs.rm(archive, { force: true });

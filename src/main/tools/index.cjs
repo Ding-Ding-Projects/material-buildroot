@@ -136,6 +136,7 @@ function createToolsService(options = {}) {
           Promise.all([
             queue.dispose(),
             minecraft.dispose(),
+            ollama.dispose?.(),
             Promise.all([...inFlight]),
           ]),
           new Promise((_, reject) => {

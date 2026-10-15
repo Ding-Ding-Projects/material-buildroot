@@ -193,3 +193,127 @@ test("typed build systems generate documented Buildroot infrastructure macros", 
       assert.match(recipe, /DEMO_TOOL_SETUP_TYPE = setuptools-rust/);
   }
 });
+
+async function emptyTree(t) {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "external-init-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const service = createPackageAuthoringService({
+    resolveExternalTree: async () => ({ granted: true, root }),
+    withLock: async (_, work) => work(),
+  });
+  return {
+    root,
+    service,
+    request: {
+      workspaceId: "workspace",
+      externalTreeId: "selected",
+      descriptor: { name: "BOARD_1", description: "Board packages" },
+    },
+  };
+}
+test("initialization previews and creates a real usable external tree without overwrites", async (t) => {
+  const { root, service, request } = await emptyTree(t);
+  const preview = await service.previewInitialize(request);
+  assert.deepEqual(await fs.readdir(root), []);
+  assert.deepEqual(
+    preview.files.map((file) => file.path),
+    ["external.desc", "Config.in", "external.mk"],
+  );
+  const result = await service.applyInitialize({
+    ...request,
+    revision: preview.revision,
+    previewHash: preview.previewHash,
+  });
+  assert.equal(result.initialized, true);
+  assert.equal(
+    await fs.readFile(path.join(root, "external.desc"), "utf8"),
+    "name: BOARD_1\ndesc: Board packages\n",
+  );
+  const packagePreview = await service.preview({ ...request, model: model() });
+  assert.match(
+    packagePreview.files.find((file) => file.path === "Config.in").after,
+    /BR2_EXTERNAL_BOARD_1_PATH/,
+  );
+  await assert.rejects(
+    service.applyInitialize({
+      ...request,
+      revision: preview.revision,
+      previewHash: preview.previewHash,
+    }),
+    { code: "EXTERNAL_DIRECTORY_NOT_EMPTY" },
+  );
+});
+test("initialization rejects changed descriptors, directory identity, and conflicting or partial trees", async (t) => {
+  const { root, service, request } = await emptyTree(t);
+  const preview = await service.previewInitialize(request);
+  await assert.rejects(
+    service.applyInitialize({
+      ...request,
+      descriptor: { ...request.descriptor, name: "OTHER" },
+      revision: preview.revision,
+      previewHash: preview.previewHash,
+    }),
+    { code: "PACKAGE_PREVIEW_CONFLICT" },
+  );
+  await fs.rename(root, root + "-previous");
+  await fs.mkdir(root);
+  t.after(() => fs.rm(root + "-previous", { recursive: true, force: true }));
+  await assert.rejects(
+    service.applyInitialize({
+      ...request,
+      revision: preview.revision,
+      previewHash: preview.previewHash,
+    }),
+    { code: "REVISION_CONFLICT" },
+  );
+  await fs.writeFile(path.join(root, "external.desc"), "name: KEEP\n");
+  await assert.rejects(service.previewInitialize(request), {
+    code: "EXTERNAL_DIRECTORY_NOT_EMPTY",
+  });
+  assert.equal(
+    await fs.readFile(path.join(root, "external.desc"), "utf8"),
+    "name: KEEP\n",
+  );
+});
+test("initialization rejects descriptor injection and unknown fields", async (t) => {
+  const { service, request } = await emptyTree(t);
+  for (const descriptor of [
+    { name: "../../bad", description: "Safe" },
+    { name: "GOOD", description: "Bad\nname: EVIL" },
+    { name: "GOOD", description: "$(shell bad)" },
+    { name: "GOOD", description: "Safe", root: "/tmp" },
+  ])
+    await assert.rejects(service.previewInitialize({ ...request, descriptor }));
+});
+test("failed partial initialization removes only created files and preserves concurrent content", async (t) => {
+  const { root, service, request } = await emptyTree(t);
+  const preview = await service.previewInitialize(request);
+  const link = fs.link;
+  let count = 0;
+  fs.link = async (...args) => {
+    if (++count === 2) {
+      await fs.writeFile(path.join(root, "unrelated.txt"), "preserve me");
+      throw Object.assign(new Error("injected publication failure"), {
+        code: "EIO",
+      });
+    }
+    return link(...args);
+  };
+  try {
+    await assert.rejects(
+      service.applyInitialize({
+        ...request,
+        revision: preview.revision,
+        previewHash: preview.previewHash,
+      }),
+      { code: "EIO" },
+    );
+  } finally {
+    fs.link = link;
+  }
+  assert.deepEqual(await fs.readdir(root), ["unrelated.txt"]);
+  assert.equal(
+    await fs.readFile(path.join(root, "unrelated.txt"), "utf8"),
+    "preserve me",
+  );
+});

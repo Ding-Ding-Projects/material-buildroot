@@ -40,6 +40,6 @@ export async function open(page,{language='en',theme='light'}={}) {
  await page.goto('/');await expect(page.locator('.toolbar')).toContainText(/Project operations|專案操作/);
  await page.locator('nav').getByRole('button',{name:/^Project operations|^專案操作/}).click();
  await page.locator('operations-panel').evaluate(panel=>panel.workspace={workspaceId:'project-1',name:'Appliance source'});
- await page.getByRole('tab',{name:language==='en'?'Source':'Source · 來源',exact:true}).click();
+ await page.getByRole('tab',{name:language==='en'?'Source':language==='zh-HK'?'來源':'Source · 來源',exact:true}).click();
  return {errors,close:()=>fs.rmSync(directory,{recursive:true,force:true})};
 }

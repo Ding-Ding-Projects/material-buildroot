@@ -42,7 +42,10 @@ function admit(request, nested = false) {
     "ollama.status",
     "ollama.tags",
     "ollama.running",
-    "ollama.install",
+    "ollama.managed.status",
+    "ollama.managed.cancel",
+    "ollama.managed.start",
+    "ollama.managed.stop",
     "converter.catalog",
     "minecraft.bedrock.discovery",
     "queue.run",
@@ -51,6 +54,12 @@ function admit(request, nested = false) {
   if (simple.includes(action)) keys(request, ["action"]);
   else
     switch (action) {
+      case "ollama.install":
+        keys(request, ["action"], ["acquire", "repair"]);
+        for (const key of ["acquire", "repair"])
+          if (request[key] !== undefined && typeof request[key] !== "boolean")
+            fail("INVALID_REQUEST");
+        break;
       case "ollama.show":
       case "ollama.pull":
         keys(request, ["action", "model"]);

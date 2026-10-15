@@ -1,5 +1,5 @@
 """Read-only Kconfig bridge. Input is supplied by the admitted host adapter."""
-import sys, os, json
+import sys, os, json, io
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'vendor'))
 import kconfiglib as k
 request = json.load(sys.stdin)
@@ -8,7 +8,13 @@ output = os.path.realpath(request['outputRoot'])
 allowed = [source, output] + request.get('externalRoots', [])
 def inside(filename):
     real = os.path.realpath(filename)
-    return any(os.path.commonpath([real, root]) == root for root in allowed)
+    for root in allowed:
+        try:
+            if os.path.normcase(os.path.commonpath([real, root])) == os.path.normcase(root):
+                return True
+        except ValueError:
+            pass
+    return False
 # Restrict file reads, including Kconfig source statements, to admitted trees and
 # the vendored module. Python audit hooks run before the underlying open.
 def audit(event, args):
@@ -25,10 +31,43 @@ sys.addaudithook(audit)
 os.chdir(source)
 os.environ.clear()
 os.environ.update(request.get('environment', {}))
-os.environ['srctree'] = source
-os.environ['objtree'] = output
+os.environ['srctree'] = request.get('sourceReference', source)
+os.environ['objtree'] = request.get('outputReference', output)
 os.environ['CONFIG_'] = request.get('prefix', '')
-conf = k.Kconfig(request.get('entrypoint', 'Config.in'), warn_to_stderr=False, suppress_traceback=True)
+virtual = {}
+if request.get('buildroot'):
+    for category in ('paths', 'menus', 'toolchains', 'jpeg', 'openssl', 'skeleton', 'init', 'linux'):
+        virtual[os.path.join(output, '.br2-external.in.' + category)] = ''
+    trees = request.get('externalTrees', [])
+    paths = ['config BR2_EXTERNAL_NAMES', '\tstring', '\tdefault "' + ' '.join(tree['name'] for tree in trees) + '"', ''] if trees else []
+    menus = ['menu "External options"', ''] if trees else []
+    for tree in trees:
+        name, root, description = tree['name'], tree['root'], tree['description']
+        reference = tree['kconfigRoot']
+        paths += ['config BR2_EXTERNAL_' + name + '_PATH', '\tstring', '\tdefault "' + reference + '"', '']
+        menus += ['menu "' + description + '"', 'source "' + reference + '/Config.in"', 'endmenu', '']
+        for category in ('toolchains', 'jpeg', 'openssl', 'skeleton', 'init', 'linux'):
+            relative = 'linux/Config.ext.in' if category == 'linux' else 'provides/' + category + '.in'
+            filename = os.path.join(root, relative)
+            if os.path.isfile(filename):
+                virtual[os.path.join(output, '.br2-external.in.' + category)] += 'source "' + reference + '/' + relative + '"\n'
+    if trees:
+        menus.append('endmenu')
+    virtual[os.path.join(output, '.br2-external.in.paths')] = '\n'.join(paths)
+    virtual[os.path.join(output, '.br2-external.in.menus')] = '\n'.join(menus)
+virtual = {os.path.normcase(os.path.abspath(filename)): content for filename, content in virtual.items()}
+original_glob = k.iglob
+def virtual_glob(pattern):
+    canonical = os.path.normcase(os.path.abspath(pattern))
+    return iter([canonical]) if canonical in virtual else original_glob(pattern)
+k.iglob = virtual_glob
+class ReadOnlyKconfig(k.Kconfig):
+    def _open(self, filename, mode):
+        canonical = os.path.normcase(os.path.abspath(filename))
+        if mode == 'r' and canonical in virtual:
+            return io.StringIO(virtual[canonical])
+        return super()._open(filename, mode)
+conf = ReadOnlyKconfig(request.get('entrypoint', 'Config.in'), warn_to_stderr=False, suppress_traceback=True)
 config = os.path.join(output, '.config')
 if os.path.isfile(config):
     conf.load_config(config)
@@ -56,7 +95,7 @@ def node_json(node, depth=0):
         children.append(node_json(child, depth + 1)); child = child.next
     result['children'] = children
     return result
-result = {'available': True, 'adapter': 'kconfiglib', 'version': '14.1.0', 'tree': node_json(conf.top_node), 'warnings': conf.warnings[:1000]}
+result = {'available': True, 'adapter': 'kconfiglib', 'version': '14.1.0', 'externalTrees': [{'name': tree['name'], 'description': tree['description']} for tree in request.get('externalTrees', [])], 'tree': node_json(conf.top_node), 'warnings': conf.warnings[:1000]}
 encoded = json.dumps(result)
 if len(encoded) > 16 * 1024 * 1024:
     raise ValueError('Kconfig JSON limit exceeded')

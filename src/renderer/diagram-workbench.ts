@@ -16,17 +16,17 @@ export class DiagramWorkbench extends LitElement {
   private undoStack:Layout[]=[];private redoStack:Layout[]=[];
   private drag?:{id:string;start:Point;origin:Point;before:Layout};
   static styles=css`
-    :host{display:flex;flex-direction:column;min-width:0;height:100%;min-height:360px;color:var(--md-sys-color-on-surface);font:13px Roboto,Arial,sans-serif}
-    .tools{display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container)}
+    :host{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;color:var(--md-sys-color-on-surface);font:13px Roboto,Arial,sans-serif}
+    .tools{flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container)}
     .tools strong{margin-right:auto;font-size:12px}.tools span{font-variant-numeric:tabular-nums;font-size:11px}
     md-icon-button{--md-icon-button-state-layer-height:32px;--md-icon-button-state-layer-width:32px;width:32px;height:32px}
-    .viewport{position:relative;flex:1;min-height:280px;overflow:hidden;touch-action:none;background-color:var(--md-sys-color-surface);background-image:radial-gradient(var(--md-sys-color-outline-variant) 1px,transparent 1px);background-size:20px 20px;cursor:grab}
+    .viewport{position:relative;flex:1;min-height:80px;overflow:hidden;touch-action:none;background-color:var(--md-sys-color-surface);background-image:radial-gradient(var(--md-sys-color-outline-variant) 1px,transparent 1px);background-size:20px 20px;cursor:grab}
     .world{position:absolute;inset:0;transform-origin:0 0;overflow:visible}
     svg{position:absolute;overflow:visible;width:1px;height:1px;pointer-events:none}line{stroke:var(--md-sys-color-outline);stroke-width:2}
     .node{position:absolute;width:180px;min-height:66px;--md-outlined-button-container-shape:8px;--md-outlined-button-outline-color:var(--md-sys-color-outline);background:var(--md-sys-color-surface-container);border-radius:8px;cursor:move;text-align:left}
     .node[selected]{background:var(--md-sys-color-primary-container);--md-outlined-button-outline-color:var(--md-sys-color-primary);box-shadow:0 0 0 2px var(--md-sys-color-primary)}
     .node span{display:block;overflow-wrap:anywhere;white-space:normal}.node small{display:block;font-size:11px;color:var(--md-sys-color-on-surface-variant)}
-    .footer{display:flex;gap:8px;align-items:center;border-top:1px solid var(--md-sys-color-outline-variant);padding:6px 8px;background:var(--md-sys-color-surface-container)}
+    .footer{flex-shrink:0;display:flex;gap:8px;align-items:center;border-top:1px solid var(--md-sys-color-outline-variant);padding:6px 8px;background:var(--md-sys-color-surface-container)}
     md-outlined-select{flex:1;min-width:0;--md-outlined-field-top-space:7px;--md-outlined-field-bottom-space:7px;font-size:12px}
     .hint{font-size:11px;color:var(--md-sys-color-on-surface-variant);margin:0;padding:4px 8px;background:var(--md-sys-color-surface-container)}
     .empty{padding:24px;color:var(--md-sys-color-on-surface-variant)}

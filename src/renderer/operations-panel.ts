@@ -10,6 +10,7 @@ import "./tools-panel";
 import "./companion-panel";
 import "./source-panel";
 import "./package-panel";
+import "./managed-ollama-panel";
 import { workspaceStyles } from "./workspace-styles";
 type Reply = { ok: true; result: any } | { ok: false; code: string };
 type Job = {
@@ -1061,6 +1062,7 @@ export class OperationsPanel extends LitElement {
   private assistantView() {
     return html`<section class="panel stack">
       <h2>${this.l("Local Ollama assistant", "本機 Ollama 助理")}</h2>
+      <managed-ollama-panel .language=${this.language}></managed-ollama-panel>
       <p>
         ${this.l(
           "Messages are sent only to Ollama on this computer. No project files or logs are attached automatically. Model installation is not performed here.",

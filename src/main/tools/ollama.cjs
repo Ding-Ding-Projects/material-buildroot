@@ -2,7 +2,15 @@
 const { fail, text, token, fetchBounded } = require("./runtime.cjs");
 function createOllama(options = {}) {
   const base = "http://127.0.0.1:11434";
-  return async function execute(request, context = {}) {
+  const managed =
+    options.managedOllamaController ||
+    (options.ollamaManagedDirectory
+      ? require("./ollama-managed.cjs").createManagedOllamaController({
+          ...options,
+          directory: options.ollamaManagedDirectory,
+        })
+      : null);
+  const execute = async function execute(request, context = {}) {
     const common = { signal: context.signal, fetchImpl: options.fetchImpl };
     switch (request.action) {
       case "ollama.status":
@@ -80,11 +88,20 @@ function createOllama(options = {}) {
           },
         };
       }
+      case "ollama.managed.cancel":
+      case "ollama.managed.status":
+      case "ollama.managed.start":
+      case "ollama.managed.stop":
+        if (!managed) fail("MANAGED_OLLAMA_UNAVAILABLE");
+        return managed.execute(request, context);
       case "ollama.install":
+        if (managed) return managed.execute(request, context);
         return require("./installer.cjs").installOllama(options, context);
       default:
         fail("INVALID_REQUEST");
     }
   };
+  execute.dispose = () => managed?.dispose();
+  return execute;
 }
 module.exports = { createOllama };

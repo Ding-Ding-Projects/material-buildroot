@@ -16,6 +16,9 @@ const { createUpdateService } = require("./updates/service.cjs");
 const { createFileGrants } = require("./security/file-grants.cjs");
 const { createProjectStore } = require("./storage/project-store.cjs");
 const {
+  createProjectOptionsStore,
+} = require("./storage/project-options-store.cjs");
+const {
   createCanvasLayoutStore,
 } = require("./storage/canvas-layout-store.cjs");
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
@@ -34,6 +37,7 @@ const fields = {
   "project.choose": [],
   "project.adopt": ["selectionId", "trust"],
   "project.runtime": ["workspaceId", "runtime"],
+  "project.options": ["workspaceId"],
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
@@ -56,6 +60,20 @@ const fields = {
   companion: ["request"],
   source: ["request"],
   "external.choose": ["workspaceId"],
+  "external.activate": [
+    "workspaceId",
+    "externalTreeIds",
+    "expectedRevision",
+    "trust",
+  ],
+  "external.previewInitialize": ["workspaceId", "externalTreeId", "descriptor"],
+  "external.initialize": [
+    "workspaceId",
+    "externalTreeId",
+    "descriptor",
+    "revision",
+    "previewHash",
+  ],
   "package.preview": ["workspaceId", "externalTreeId", "model"],
   "package.apply": [
     "workspaceId",
@@ -141,6 +159,9 @@ function createOperationsService({
   const canvasLayouts = createCanvasLayoutStore({
     directory: path.join(directory, "canvas-layouts"),
   });
+  const projectOptions = createProjectOptionsStore({
+    directory: path.join(directory, "project-options"),
+  });
   let kconfigAdapter;
   let choosing = false,
     disposed = false,
@@ -183,10 +204,14 @@ function createOperationsService({
         return [key, `${stat.dev}:${stat.ino}`];
       }),
     );
+    const options = projectOptions.get({ workspaceId });
     projects.set(workspaceId, {
       ...selected,
       identities,
       grantId: granted.grantId,
+      runtime: options.runtime,
+      externalTrees: [],
+      externalStateVerified: options.externalTrees.length === 0,
     });
     return { workspaceId, name: selected.name };
   }
@@ -233,6 +258,7 @@ function createOperationsService({
   });
   async function executeProject(input, log, signal) {
     const item = project(input.workspaceId);
+    if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
     const job = await execution.start(
       {
         grantId: item.grantId,
@@ -282,12 +308,38 @@ function createOperationsService({
       if (!kconfigAdapter) reject("PYTHON_NOT_ADMITTED");
       return kconfigAdapter(roots);
     },
-    resolveWorkspace: (id) => {
+    resolveWorkspace: async (id) => {
       const item = project(id);
+      if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+      if (!item.runtime) reject("SELECT_RUNTIME");
+      const environment = await execution.probeEnvironment({
+        grantId: item.grantId,
+        runtime: item.runtime,
+      });
+      const makefile = path.join(item.source, "Makefile");
+      const info = fs.lstatSync(makefile);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > 1024 * 1024)
+        reject("INVALID_BUILDROOT_SOURCE");
+      const version = fs
+        .readFileSync(makefile, "utf8")
+        .match(
+          /^(?:export[ \t]+)?BR2_VERSION[ \t]*:?=[ \t]*([0-9][A-Za-z0-9.+_-]*)[ \t]*$/m,
+        )?.[1];
+      if (!version) reject("BUILDROOT_VERSION_UNAVAILABLE");
+      project(id);
       return {
         granted: true,
         sourceRoot: item.source,
         outputRoot: item.output,
+        kconfig: {
+          buildroot: true,
+          externalRoots: item.externalTrees,
+          environment: {
+            HOSTARCH: environment.hostArchitecture,
+            HOST_GCC_VERSION: environment.hostGccVersion.split(".")[0],
+            BR2_VERSION_FULL: version,
+          },
+        },
       };
     },
     executor: async (input) => {
@@ -324,10 +376,41 @@ function createOperationsService({
         root: externalFiles.resolve(externalTreeId, "write"),
       };
     },
-    withLock: async (_root, work) => changeConfig(work),
+    withLock: async (root, work) =>
+      changeConfig(async () => {
+        const result = await work();
+        if (result.applied) {
+          for (const item of projects.values()) {
+            if (
+              !item.externalStateVerified ||
+              !item.externalTrees.includes(root)
+            )
+              continue;
+            try {
+              const replacement = execution.grantProject({
+                root: item.root,
+                source: item.source,
+                output: item.output,
+                trustedSource: true,
+                externalTrees: item.externalTrees,
+                trustedExternalTrees: true,
+              });
+              execution.revoke?.(item.grantId);
+              item.grantId = replacement.grantId;
+            } catch {
+              item.externalStateVerified = false;
+              result.activationRequired = true;
+            }
+          }
+        }
+        return result;
+      }),
   });
   const tools = createToolsService({
     queueDirectory: path.join(directory, "tool-queue"),
+    ollamaManagedDirectory: path.join(directory, "ollama"),
+    dialog,
+    parentWindow,
     payloadManager,
     resolveGrant: (id, mode) => toolFiles.resolve(id, mode),
     authorizeServerExecution: (id) => toolFiles.serverAuthorized(id),
@@ -545,8 +628,36 @@ function createOperationsService({
         return registered;
       }
       case "project.runtime":
-        project(request.workspaceId).runtime = runtime(request.runtime);
-        return { configured: true };
+        return changeConfig(() => {
+          const item = project(request.workspaceId);
+          const selectedRuntime = runtime(request.runtime);
+          const previous = projectOptions.get({
+            workspaceId: request.workspaceId,
+          });
+          const saved = projectOptions.save({
+            workspaceId: request.workspaceId,
+            expectedRevision: previous.revision,
+            runtime: selectedRuntime,
+            externalTrees: previous.externalTrees,
+          });
+          item.runtime = selectedRuntime;
+          return { configured: true, revision: saved.revision };
+        });
+      case "project.options": {
+        const item = project(request.workspaceId);
+        return {
+          ...projectOptions.get({ workspaceId: request.workspaceId }),
+          externalTreesAuthorized: item.externalStateVerified,
+          availableTrees: [...externalWorkspaces.entries()]
+            .filter(([, id]) => id === request.workspaceId)
+            .map(([externalTreeId]) => ({
+              externalTreeId,
+              name: path.basename(
+                externalFiles.resolve(externalTreeId, "write"),
+              ),
+            })),
+        };
+      }
       case "canvas.read":
         project(request.workspaceId);
         return canvasLayouts.get({
@@ -563,6 +674,8 @@ function createOperationsService({
         });
       case "build.submit": {
         const item = project(request.workspaceId);
+        if (!item.externalStateVerified)
+          reject("EXTERNAL_TREES_NOT_AUTHORIZED");
         if (
           !TARGETS.includes(request.target) ||
           !Number.isSafeInteger(request.jobs) ||
@@ -660,6 +773,11 @@ function createOperationsService({
         if (
           ![
             "ollama.status",
+            "ollama.managed.status",
+            "ollama.install",
+            "ollama.managed.start",
+            "ollama.managed.stop",
+            "ollama.managed.cancel",
             "ollama.tags",
             "ollama.running",
             "ollama.show",
@@ -704,8 +822,69 @@ function createOperationsService({
         externalWorkspaces.set(choice.id, request.workspaceId);
         return { externalTreeId: choice.id, name: choice.name };
       }
+      case "external.activate":
+        return changeConfig(() => {
+          const item = project(request.workspaceId);
+          if (request.trust !== true) reject("SOURCE_CONSENT_REQUIRED");
+          if (
+            !Array.isArray(request.externalTreeIds) ||
+            request.externalTreeIds.length > 32 ||
+            new Set(request.externalTreeIds).size !==
+              request.externalTreeIds.length
+          )
+            reject("INVALID_REQUEST");
+          const externalTrees = request.externalTreeIds.map((id) => {
+            if (externalWorkspaces.get(id) !== request.workspaceId)
+              reject("EXTERNAL_TREE_NOT_GRANTED");
+            const root = externalFiles.resolve(id, "write");
+            const file = path.join(root, "external.desc");
+            const info = fs.lstatSync(file);
+            if (!info.isFile() || info.isSymbolicLink() || info.size > 65536)
+              reject("INVALID_EXTERNAL_DESCRIPTOR");
+            const names = [
+              ...fs
+                .readFileSync(file, "utf8")
+                .matchAll(
+                  /^name:[ \t]*([A-Za-z][A-Za-z0-9_]{0,63})[ \t]*\r?$/gm,
+                ),
+            ];
+            if (names.length !== 1) reject("INVALID_EXTERNAL_DESCRIPTOR");
+            return { path: root, name: names[0][1] };
+          });
+          const replacement = execution.grantProject({
+            root: item.root,
+            source: item.source,
+            output: item.output,
+            trustedSource: true,
+            externalTrees: externalTrees.map((tree) => tree.path),
+            trustedExternalTrees: true,
+          });
+          try {
+            const previous = projectOptions.get({
+              workspaceId: request.workspaceId,
+            });
+            const saved = projectOptions.save({
+              workspaceId: request.workspaceId,
+              expectedRevision: request.expectedRevision,
+              runtime: previous.runtime,
+              externalTrees,
+            });
+            execution.revoke?.(item.grantId);
+            item.grantId = replacement.grantId;
+            item.externalTrees = externalTrees.map((tree) => tree.path);
+            item.externalStateVerified = true;
+            return { ...saved, externalTreesAuthorized: true };
+          } catch (error) {
+            execution.revoke?.(replacement.grantId);
+            throw error;
+          }
+        });
       case "package.preview":
         return packageAuthoring.preview(request);
+      case "external.previewInitialize":
+        return packageAuthoring.previewInitialize(request);
+      case "external.initialize":
+        return packageAuthoring.applyInitialize(request);
       case "package.apply":
         return packageAuthoring.apply(request);
       case "source": {

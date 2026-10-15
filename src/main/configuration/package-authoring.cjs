@@ -290,18 +290,115 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
       ],
     };
   }
-  async function atomic(root, relative, text, mode) {
+  async function previewInitializeAt(root, descriptor) {
+    if (
+      !descriptor ||
+      typeof descriptor !== "object" ||
+      Array.isArray(descriptor) ||
+      Object.keys(descriptor).some(
+        (key) => !["name", "description"].includes(key),
+      )
+    )
+      fail("INVALID_EXTERNAL_DESCRIPTOR");
+    token(
+      descriptor.name,
+      "INVALID_EXTERNAL_NAME",
+      /^[A-Za-z][A-Za-z0-9_]{0,63}$/,
+    );
+    token(
+      descriptor.description,
+      "INVALID_EXTERNAL_DESCRIPTION",
+      /^[A-Za-z0-9][A-Za-z0-9 .,_()+-]{0,79}$/,
+    );
+    const stat = await fs.stat(root, { bigint: true });
+    const entries = await fs.readdir(root);
+    if (entries.length) fail("EXTERNAL_DIRECTORY_NOT_EMPTY");
+    const files = [
+      {
+        path: "external.desc",
+        before: null,
+        after: `name: ${descriptor.name}\ndesc: ${descriptor.description}\n`,
+        mode: 0o644,
+      },
+      {
+        path: "Config.in",
+        before: null,
+        after: "# External package configuration\n",
+        mode: 0o644,
+      },
+      {
+        path: "external.mk",
+        before: null,
+        after: `include $(sort $(wildcard $(BR2_EXTERNAL_${descriptor.name}_PATH)/package/*/*.mk))\n`,
+        mode: 0o644,
+      },
+    ];
+    const revision = digest(
+      JSON.stringify({
+        root,
+        device: String(stat.dev),
+        inode: String(stat.ino),
+        birthtime: String(stat.birthtimeNs),
+        entries,
+      }),
+    );
+    return {
+      revision,
+      previewHash: digest(JSON.stringify({ revision, files })),
+      externalName: descriptor.name,
+      files,
+      warnings: [
+        "Creates an external tree skeleton; Buildroot runtime compatibility remains unverified.",
+      ],
+    };
+  }
+  async function atomic(root, relative, text, mode, noReplace = false) {
     const file = await safePath(root, relative),
       temp = file + "." + randomUUID() + ".tmp";
     try {
       await fs.writeFile(temp, text, { flag: "wx", mode });
       await fs.chmod(temp, mode);
-      await fs.rename(temp, file);
+      if (noReplace) await fs.link(temp, file);
+      else await fs.rename(temp, file);
     } finally {
       await fs.rm(temp, { force: true });
     }
   }
   return {
+    previewInitialize: (input) =>
+      context(input, (root) => previewInitializeAt(root, input.descriptor)),
+    applyInitialize: (input) =>
+      context(input, async (root) => {
+        const preview = await previewInitializeAt(root, input.descriptor);
+        if (preview.revision !== input.revision) fail("REVISION_CONFLICT");
+        if (preview.previewHash !== input.previewHash)
+          fail("PACKAGE_PREVIEW_CONFLICT");
+        const written = [];
+        try {
+          for (const file of preview.files) {
+            await atomic(root, file.path, file.after, file.mode, true);
+            written.push(file);
+          }
+        } catch (error) {
+          let rollbackFailed = false;
+          for (const file of written.reverse()) {
+            try {
+              const current = await readFile(root, file.path);
+              if (current.before !== file.after) fail("REVISION_CONFLICT");
+              await fs.rm(await safePath(root, file.path));
+            } catch {
+              rollbackFailed = true;
+            }
+          }
+          if (rollbackFailed) fail("PACKAGE_ROLLBACK_FAILED");
+          throw error;
+        }
+        return {
+          initialized: true,
+          externalName: preview.externalName,
+          files: preview.files,
+        };
+      }),
     preview: (input) => context(input, (root) => previewAt(root, input.model)),
     apply: (input) =>
       context(input, async (root) => {
