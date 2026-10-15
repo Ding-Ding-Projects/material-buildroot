@@ -1,5 +1,11 @@
 # Continuation handoff
 
+## Latest desktop contribution
+
+The language panel now displays the last confirmed value and its actual default/saved origin. Discard choice resets the draft locally and returns keyboard focus, with no host call. Invalid recovery states remain locked. Strict TypeScript and all 29 source-preview browser checks pass, including twelve presentation tuples. Renderer SHA-256: `122575c891c1c9c4e2a9d4a852d6b61a196b459faf598197ff52be0361623114`. This newer renderer still needs separately bound package/native verification; do not reuse the earlier release result for it.
+
+Next: verify the automatic exact-source Windows release and its assets, then current packaged behavior where the host is available. Preserve the parallel website work and all earlier source boundaries below. Continue directly on main and publish coherent checkpoints frequently.
+
 The owner requested continued Material Buildroot frontend work, main only, frequent commits and pushes, then requested preservation and scoped cleanup. The owner has since authorized resumption and repeated frequent pushes to main.
 
 The repository is `Ding-Ding-Projects/material-buildroot`, branch `main`, with one primary checkout and no task branches, linked worktrees or stashes. The global memory repository was consulted read-only; no project-specific profile existed. Preserve its private content outside public source.

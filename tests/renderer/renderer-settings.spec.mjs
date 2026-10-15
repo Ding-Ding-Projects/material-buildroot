@@ -33,7 +33,7 @@ test('missing desktop bridge disables window controls without unhandled errors',
  const errors=await open(page,{missing:true});await expect(page.getByRole('status')).toContainText(/unavailable/i);for(const button of await page.locator('.window md-text-button').all())await expect(button).toHaveJSProperty('disabled',true);expect(errors).toEqual([]);
 });
 test('successful save uses actual Material controls and updates language after reply',async({page})=>{
- const errors=await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await expect(language(page)).toHaveJSProperty('disabled',true);await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('status')).toContainText(/Saving language/);await expect(page.getByRole('group',{name:'Language actions'})).toHaveAccessibleDescription('Saving language…');expect(await page.evaluate(()=>window.fixture.requests[0].arguments.language)).toBe('zh-HK');await expect(page.locator('html')).toHaveAttribute('lang','en');await reply(page,success());await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');await expect(page.getByRole('status')).toContainText(/已儲存/);expect(errors).toEqual([]);
+ const errors=await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await expect(language(page)).toHaveJSProperty('disabled',true);await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('status')).toContainText(/Saving language/);await expect(page.getByRole('group',{name:'Language actions'})).toHaveAccessibleDescription('Saving language…');expect(await page.evaluate(()=>window.fixture.requests[0].arguments.language)).toBe('zh-HK');await expect(page.locator('html')).toHaveAttribute('lang','en');await reply(page,success());await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');await expect(page.getByRole('status')).toContainText(/已儲存/);await expect(page.locator('#confirmed-language')).toContainText('香港粵語');await expect(page.locator('#confirmed-language')).toContainText('已儲存喺呢部電腦');expect(errors).toEqual([]);
 });
 test('expired authority retries exactly once with the same operation identity',async({page})=>{
  await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await reply(page,failure('UNAUTHORIZED'));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await bootReply(page,{...initial,capability:'fresh-fixture'});await expect.poll(()=>page.evaluate(()=>window.fixture.requests.length)).toBe(2);
@@ -46,20 +46,20 @@ test('expired authority with changed revision never silently retries',async({pag
  await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure('UNAUTHORIZED'));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await bootReply(page,{...initial,language:'zh-HK',revision:'2'.repeat(40)});await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');await expect(language(page)).toHaveJSProperty('value','bilingual');await expect(page.getByRole('status')).toContainText(/檢視|review/i);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);
 });
 test('unknown transaction outcome blocks further saves for this session',async({page})=>{
- const errors=await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await page.evaluate(()=>window.fixture.pendingRequests.shift().reject(new Error('Fixture transport lost')));await expect(page.getByRole('status')).toContainText(/restart/i);await expect(save(page)).toHaveJSProperty('disabled',true);await page.locator('nav md-outlined-button').filter({hasText:'Projects'}).click();await settings(page);await expect(save(page)).toHaveJSProperty('disabled',true);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
+ const errors=await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await page.evaluate(()=>window.fixture.pendingRequests.shift().reject(new Error('Fixture transport lost')));await expect(page.getByRole('status')).toContainText(/restart/i);await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('button',{name:'Discard choice'})).toBeDisabled();await expect(page.locator('#confirmed-language')).toContainText('Last confirmed language: English');await page.locator('nav md-outlined-button').filter({hasText:'Projects'}).click();await settings(page);await expect(save(page)).toHaveJSProperty('disabled',true);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
 });
 test('window-command rejection and false result are announced without unhandled errors',async({page})=>{
  const errors=await open(page);await page.evaluate(()=>window.fixture.windowResult='reject');await page.locator('.window md-text-button').first().click();await expect(page.getByRole('status')).toContainText(/window|desktop/i);await page.evaluate(()=>window.fixture.windowResult=false);await page.locator('.window md-text-button').nth(1).click();await expect(page.getByRole('status')).toContainText(/window|desktop/i);expect(errors).toEqual([]);
 });
 test('unavailable storage disables saving and preserves the selected draft',async({page})=>{
- await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure('UNAUTHORIZED'));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await bootReply(page,{...initial,storage:'unavailable',origin:'unavailable',capability:''});await expect(save(page)).toHaveJSProperty('disabled',true);await expect(language(page)).toHaveJSProperty('value','bilingual');await expect(page.getByRole('status')).toContainText(/storage|unavailable/i);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);
+ await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure('UNAUTHORIZED'));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await bootReply(page,{...initial,storage:'unavailable',origin:'unavailable',capability:''});await expect(save(page)).toHaveJSProperty('disabled',true);await expect(language(page)).toHaveJSProperty('value','bilingual');await expect(page.getByRole('status')).toContainText(/storage|unavailable/i);await expect(page.locator('#confirmed-language')).toHaveCount(0);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);
 });
 test('system theme follows media changes, explicit mode overrides them',async({page})=>{
  await page.emulateMedia({colorScheme:'light'});await open(page);await settings(page);await expect(page.locator('.shell')).not.toHaveClass(/dark/);await page.emulateMedia({colorScheme:'dark'});await expect(page.locator('.shell')).toHaveClass(/dark/);await page.locator('md-outlined-select').nth(1).click();await page.locator('md-select-option[value="light"]').click();await expect(page.locator('.shell')).not.toHaveClass(/dark/);await page.emulateMedia({colorScheme:'light'});await page.emulateMedia({colorScheme:'dark'});await expect(page.locator('.shell')).not.toHaveClass(/dark/);
 });
 
 for(const rejection of ['STALE_REVISION','UNAUTHORIZED'])test(`failed refresh after ${rejection} blocks retry with accurate recovery guidance`,async({page})=>{
- const errors=await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure(rejection));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await page.evaluate(()=>window.fixture.pendingBoot.shift().reject(new Error('Fixture refresh unavailable')));await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('status')).toContainText(/restart/i);await expect(page.getByRole('status')).not.toContainText(/Save outcome unavailable/i);await expect(language(page)).toHaveJSProperty('value','bilingual');expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
+ const errors=await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure(rejection));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await page.evaluate(()=>window.fixture.pendingBoot.shift().reject(new Error('Fixture refresh unavailable')));await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('status')).toContainText(/restart/i);await expect(page.getByRole('status')).not.toContainText(/Save outcome unavailable/i);await expect(page.getByRole('button',{name:'Discard choice'})).toBeDisabled();await expect(language(page)).toHaveJSProperty('value','bilingual');expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
 });
 test('navigation focuses destination heading, marks current route and retains draft',async({page})=>{
  await open(page);await settings(page);await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-outlined-button').nth(1)).toHaveClass(/selected/);expect(await page.locator('nav md-outlined-button').evaluateAll(els=>getComputedStyle(els[0]).backgroundColor!==getComputedStyle(els[1]).backgroundColor)).toBe(true);await choose(page,'bilingual');await page.locator('nav md-outlined-button').first().click();await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-outlined-button').first()).toHaveClass(/selected/);await settings(page);await expect(language(page)).toHaveJSProperty('value','bilingual');
@@ -75,4 +75,37 @@ for(const languageMode of ['en','zh-HK','bilingual'])for(const theme of ['light'
  const overflow=await page.evaluate(()=>{const root=document.querySelector('material-buildroot').shadowRoot;return [...root.querySelectorAll('.shell,header,main,.panel')].map(el=>({element:el.className||el.tagName,width:el.clientWidth,scroll:el.scrollWidth,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(r=>r.scroll>r.width+1||r.left< -1||r.right>innerWidth+1);});expect(overflow).toEqual([]);
  const cdp=await page.context().newCDPSession(page);const {nodes}=await cdp.send('Accessibility.getFullAXTree');const controls=nodes.filter(n=>!n.ignored&&['button','combobox','listbox'].includes(n.role?.value));expect(controls.length).toBeGreaterThanOrEqual(8);expect(controls.some(n=>/current workspace|目前工作區/.test(n.name?.value||''))).toBe(true);const actionGroup=nodes.find(n=>!n.ignored&&n.role?.value==='group'&&/Language actions|語言操作/.test(n.name?.value||''));expect(actionGroup?.description?.value).toBe(await page.locator('#save-feedback').innerText());expect(controls.filter(n=>!n.name?.value?.trim()).map(n=>({role:n.role?.value,name:n.name?.value}))).toEqual([]);await cdp.detach();expect(errors).toEqual([]);
  await page.screenshot({path:testInfo.outputPath('source-preview.png'),fullPage:true});
+});
+
+for(const origin of ['default','saved'])test(`confirmed bilingual preference distinguishes ${origin} provenance`,async({page})=>{
+ await open(page,{bootstrap:{...initial,language:'bilingual',origin}});
+ await page.locator('nav md-outlined-button').nth(1).click();
+ await expect(page.locator('#confirmed-language')).toContainText('English + 香港粵語');
+ await expect(page.locator('#confirmed-language')).toContainText(origin==='default'?'Application default':'Saved on this device');
+ await expect(page.getByRole('button',{name:/Discard choice/})).toBeDisabled();
+});
+test('discard restores the confirmed draft locally and returns keyboard focus',async({page})=>{
+ await open(page);await settings(page);await choose(page,'zh-HK');
+ await expect(page.locator('#confirmed-language')).toContainText('Last confirmed language: English');
+ const discard=page.getByRole('button',{name:'Discard choice'});
+ await discard.focus();await page.keyboard.press('Enter');
+ await expect(language(page)).toHaveJSProperty('value','en');
+ await expect(language(page).locator('md-outlined-field')).toBeFocused();
+ await expect(discard).toBeDisabled();
+ await expect(page.getByRole('status')).toContainText('Pending choice reset');
+ await expect(page.locator('html')).toHaveAttribute('lang','en');
+ expect(await page.evaluate(()=>({requests:window.fixture.requests.length,bootstraps:window.fixture.bootstrapCalls}))).toEqual({requests:0,bootstraps:1});
+});
+test('discard after a conflict uses the refreshed value without another mutation',async({page})=>{
+ await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();
+ await reply(page,failure('STALE_REVISION'));
+ await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);
+ await bootReply(page,{...initial,language:'zh-HK',origin:'saved',revision:'2'.repeat(40)});
+ await expect(language(page)).toHaveJSProperty('value','bilingual');
+ await expect(page.locator('#confirmed-language')).toContainText('香港粵語');
+ await page.getByRole('button',{name:'放棄選擇',exact:true}).click();
+ await expect(language(page)).toHaveJSProperty('value','zh-HK');
+ await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
+ await expect(page.getByRole('button',{name:'放棄選擇',exact:true})).toBeDisabled();
+ expect(await page.evaluate(()=>({requests:window.fixture.requests.length,bootstraps:window.fixture.bootstrapCalls}))).toEqual({requests:1,bootstraps:2});
 });

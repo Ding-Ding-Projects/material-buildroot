@@ -1,5 +1,11 @@
 # Handoff
 
+## Confirmed language review and draft reset, 2026-10-15
+
+The settings panel now identifies the last confirmed language and whether it came from the application default or device storage. A localized Discard choice action restores the pending selection without a host request, preserves confirmed state and returns keyboard focus to the select. Unknown outcomes, failed refresh, unavailable storage and pending saves keep the action disabled. Strict TypeScript and all 29 source-preview browser cases pass, including twelve language/theme/viewport tuples. Renderer SHA-256 is `122575c891c1c9c4e2a9d4a852d6b61a196b459faf598197ff52be0361623114`. Independent source review found no blocking issue.
+
+This is a later renderer than the separately verified `v0.1.0-build.4.1` package. Its new packaged/native verification is pending; the earlier 25-case package result and five-asset audit below retain their original source binding. The owner continues to require frequent publication directly on main. Concurrent website changes were integrated without changing renderer source or discarding their records. See [the task evidence](docs/evidence/tasks/PH02-T02-C03.md).
+
 ## Website landing refresh, 2026-10-15
 
 The website now leads with the immutable v0.1.0 Windows x64 download, a genuine desktop capture explicitly bound to historical source `3f5d2cd`, and separate available/planned capabilities. Bilingual copy and responsive cards lead to the complete documentation, verification records and contributor guidance. Search reports the full match count, supports keyboard entry and dismissal, and the mobile drawer follows the actual Material list Tab order. These changes do not implement desktop project creation, Buildroot execution or the authenticated companion.
