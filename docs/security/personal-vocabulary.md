@@ -1,6 +1,6 @@
 # Local personal vocabulary boundary
 
-The reusable loader contains no built-in mappings. Original shipped wording remains unchanged until the user explicitly imports a valid local file or a valid private cache is reloaded. This document describes the shared non-GUI service. Application, website, and companion upload controls and presentation wiring are separate acceptance work and are not completed by this module.
+The reusable loader contains no built-in mappings. Original shipped wording remains unchanged until the user explicitly imports a valid local file or a valid private cache is reloaded. The portable service contract and current desktop integration are described separately below. Website and companion upload consumers remain separate acceptance work.
 
 ## Portable input contract
 
@@ -43,4 +43,14 @@ Only validated cache bytes belong in these stores. Never serialize a cache, sour
 
 `node --test tests/personal-vocabulary.test.mjs tests/personal-vocabulary-browser.test.mjs` passes eleven tests on Linux. Tests use generated neutral strings only. They cover dynamic inventory, Unicode and original byte bounds, UTF-8 errors, decoded duplicate keys, schema rejection, private opaque handles, prior-selection preservation, overlapping import/clear, caller mutation including Node Buffer aliasing, retry after synchronous IndexedDB open failure, queue recovery, corruption, literal matching, presentation-kind refusal, School suppression/restoration, cache reload and clear, link rejection, generic failures, and real Chromium IndexedDB commit/abort/reopen/corruption/clear without network fallback.
 
-The browser test uses a task-owned headless Chromium context and local source-module server. It proves the IndexedDB adapter, not a built application UI or native Windows runtime. The visible localized upload/replace/clear controls, semantic picker, search and command-palette routes, all eligible text/accessible-name consumers, whole-application export exclusions, phone/high-scale accessibility, built-artifact screenshots, independent A/D/C evidence, and native host verification remain separate integration work. No feature-ledger completion is claimed.
+The browser test uses a task-owned headless Chromium context and local source-module server. It proves the IndexedDB adapter, not a built application UI or native Windows runtime. Whole-interface copy coverage, whole-application export exclusions, phone/high-scale accessibility, built-artifact screenshots, independent A/D/C evidence, and native host verification remain open. No feature-ledger completion is claimed.
+
+## Current desktop controls
+
+The desktop Settings workspace now provides localized import/replace and Clear controls through genuine Material buttons and a native file picker. Settings search and the command palette focus the actual control. A dedicated private IndexedDB database stores the bounded vocabulary separately from workspace snapshots and exports. The interface displays only generic status; it does not expose file names, counts, hashes or mappings.
+
+The desktop consumer immediately suppresses substitutions when Clear is requested. If durable deletion fails, substitutions remain suppressed and further imports or clears are disabled for that renderer session. The recovery message requires a full application reload; it does not claim deletion succeeded. Reload validates retained bytes again, so a valid cache whose deletion failed may become active again when shared preference permits. This presentation rule is additional to the portable controller's prior-selection retention described above.
+
+Active or unavailable shared preference omits vocabulary and language settings, search results and palette routes. It forces application-owned controls to English while retaining saved base preferences and cache bytes. A later confirmed inactive state restores eligibility and reloads the private cache. Shared preference status events supersede older pending status responses.
+
+The explicit owned-copy consumer currently covers static shell route labels and accessible names, settings headings and vocabulary palette actions. Interpolated records, provider strings, paths, commands, identifiers and documentation bodies remain exact. This is a bounded consumer inventory, not complete interface-wide customization. Browser checks cover actual IndexedDB operations, failed deletion suppression, reload revalidation and shared-mode transitions with neutral generated inputs. Native protected storage and cross-application mode interoperability remain unverified.

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-15T22:42:30.359770+00:00",
+  "repository": "Ding-Ding-Projects/material-buildroot",
+  "source": "a1db4edacd949c679420dd29259391053860e9c3",
+  "tag": "v0.1.0-build.35.1",
+  "tagObject": {
+    "type": "commit",
+    "sha": "a1db4edacd949c679420dd29259391053860e9c3"
+  },
+  "release": {
+    "url": "https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.35.1",
+    "id": 414338598,
+    "draft": false,
+    "prerelease": false,
+    "immutable": false,
+    "publishedAt": "2026-10-15T22:34:51Z"
+  },
+  "method": "Downloaded all five published assets. Independently compared SHA-256 and sizes with GitHub, four files with SHA256SUMS.txt, three package files with provenance, and the package SHA-1/size with the UTF-8 BOM Squirrel RELEASES manifest. False coverage flags mean a file is outside that manifest, not a checksum mismatch.",
+  "workflows": [
+    {
+      "id": 38817711358,
+      "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38817711358",
+      "headSha": "a1db4edacd949c679420dd29259391053860e9c3",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38817710785,
+      "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38817710785",
+      "headSha": "a1db4edacd949c679420dd29259391053860e9c3",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "provenance": {
+    "schemaVersion": 1,
+    "version": "0.1.0",
+    "source": "a1db4edacd949c679420dd29259391053860e9c3",
+    "tree": "3c81a7dbdb3b5a07aefb79089757b647da6c11e2",
+    "platform": "windows-x64",
+    "installer": "Squirrel.Windows",
+    "signed": false,
+    "runtimeVerified": false
+  },
+  "sourceFiles": [
+    {
+      "name": "build-manifest.json",
+      "gitBlobSha256": "371bd12ecd7e20a25f7ea47522724abc7aad2237566a2c869d498761a113b6ae",
+      "windowsCheckoutSha256": "a8bb10b2daff9233ec635ea9dcec25160f6b46318c185d32ed7dae3deb9dcfcd",
+      "provenanceMatched": true,
+      "normalization": "LF to CRLF, matching the Windows checkout bytes hashed by the build driver"
+    },
+    {
+      "name": "package-lock.json",
+      "gitBlobSha256": "4d929feb9a192e2d189674a6bb9622274cda970a2b40d07db911845e89400b5b",
+      "windowsCheckoutSha256": "9181b9eaeff3947360768f6b2ad900fc7252453e4443e0c166bc12263048d751",
+      "provenanceMatched": true,
+      "normalization": "LF to CRLF, matching the Windows checkout bytes hashed by the build driver"
+    }
+  ],
+  "assets": [
+    {
+      "name": "MaterialBuildroot-0.1.0-full.nupkg",
+      "bytes": 162041775,
+      "sha256": "725dbd9c17c99757afa750d130373eaf1ceec5100c35fca323c4253d666009c0",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": true
+    },
+    {
+      "name": "provenance.json",
+      "bytes": 1100,
+      "sha256": "bede7b0ace87207758478a31baf6ce696416668fbab9ec20cf3b409f063dc740",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": false
+    },
+    {
+      "name": "RELEASES",
+      "bytes": 88,
+      "sha256": "eaf2fcf1c31f6868dc7911f55a028415f0deb880f754f0f06753e4d64d0d4ee7",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": true
+    },
+    {
+      "name": "Setup.exe",
+      "bytes": 162740224,
+      "sha256": "188f59f161018b192b1edd77aab9126970c07824e08bb159b50532ffe704fc56",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 334,
+      "sha256": "7c01830f2ebc0f2cd35378afe66d36eeb7b06756f03c216f6e93caa757341f5d",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": false,
+      "provenanceMatched": false
+    }
+  ],
+  "squirrelRecords": [
+    {
+      "name": "MaterialBuildroot-0.1.0-full.nupkg",
+      "bytes": 162041775,
+      "sha1": "f62bbda24ddb0dd3ae74431a4434a53a0a16d28b",
+      "manifestMatched": true
+    }
+  ],
+  "limitations": [
+    "Packaging and downloaded-asset integrity only; no Windows installation, launch, update or guest runtime was executed.",
+    "GitHub reports the release is not platform-enforced immutable."
+  ]
+}

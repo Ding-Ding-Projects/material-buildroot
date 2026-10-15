@@ -39,6 +39,11 @@ async function chooseLanguage(value){
   page.locator('md-select-option[value="'+value+'"]').click()
  ]);
 }
+async function chooseM3(locator,value){
+ if(await locator.evaluate(element=>element.value)===value)return;
+ await Promise.all([locator.evaluate(element=>new Promise(resolve=>element.addEventListener('opened',()=>resolve(true),{once:true}))),locator.click()]);
+ await Promise.all([locator.evaluate(element=>new Promise(resolve=>element.addEventListener('closed',()=>resolve(true),{once:true}))),page.locator('md-select-option[value="'+value+'"]').click()]);
+}
 async function ready(){await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('*')].filter(e=>e.localName.startsWith('md-')).map(e=>customElements.whenDefined(e.localName)));await Promise.all([...document.querySelectorAll('*')].filter(e=>e.updateComplete).map(e=>e.updateComplete));await document.fonts.ready;});}
 async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:path.relative(root,file).split(path.sep).join('/'),sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
 try{
@@ -56,12 +61,12 @@ try{
  assert.match(await page.locator('main').innerText(),/never inspect your computer|不會檢查你嘅電腦/);
  assert.match(await page.locator('#walkthrough-step-title').innerText(),/Choose a source and review the consent boundary.*選擇來源並了解確認界線/);
  await page.locator('#walkthrough-complete').click();
- assert.match(await page.locator('#learning-progress-label').innerText(),/1 of 5 steps completed/);
+ assert.match(await page.locator('#learning-progress-label').innerText(),/1 of 22 guide steps completed/);
  await page.locator('#walkthrough-next').click();
  assert.match(await page.locator('#walkthrough-step-title').innerText(),/Keep source, build output/);
  await page.reload();await ready();
  assert.match(await page.locator('#walkthrough-step-title').innerText(),/Keep source, build output/,'Walkthrough position persists in this browser');
- assert.match(await page.locator('#learning-progress-label').innerText(),/1 of 5 steps completed/);
+ assert.match(await page.locator('#learning-progress-label').innerText(),/1 of 22 guide steps completed/);
  assert.equal(await page.locator('#recipe-output').isVisible(),true);
  assert.match(await page.locator('#recipe-code').innerText(),/SAMPLELIB_SITE_METHOD = https/);
  await page.locator('#recipe-name').locator('input').fill('<img src=x onerror=alert(1)>');
@@ -72,6 +77,60 @@ try{
  await page.locator('#recipe-generate').click();
  assert.match(await page.locator('#recipe-code').innerText(),/SAFE_PKG_VERSION = 1.2.3/);
  assert.doesNotMatch(await page.locator('main').innerText(),/<img src=x/);
+ assert.equal(await page.locator('#workflow-guides').count(),1);
+ assert.deepEqual(await page.locator('.learning-jump a').evaluateAll(links=>links.map(link=>link.getAttribute('href'))),['#source-walkthrough','#recipe-lab','#troubleshooter','#workflow-guides','#saved-references'],'Jump guide order follows the rendered activity order');
+ await chooseM3(page.locator('#workflow-family'),'vocabulary');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/does not accept or inspect vocabulary files/);
+ await chooseM3(page.locator('#workflow-stage'),'replace');
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/mappings, counts and hashes are excluded/);
+ await chooseM3(page.locator('#workflow-stage'),'clear');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/suppress.*as soon as you choose Clear/);
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/disables further vocabulary changes until a full app reload/);
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/previous selection may become active again/);
+ await chooseM3(page.locator('#workflow-stage'),'shared-unknown');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/Unavailable is not the same as inactive/);
+ await chooseM3(page.locator('#workflow-family'),'shared');
+ await chooseM3(page.locator('#workflow-stage'),'enter');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/does not prove a future exit credential check/);
+ await chooseM3(page.locator('#workflow-stage'),'verified-exit');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/supports shared PIN or password verification\. Passkey verification is not available/);
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/confirmed state/);
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/use the documented manual recovery route/);
+ await chooseM3(page.locator('#workflow-stage'),'recovery');
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/not proof of a successful exit/);
+ await chooseM3(page.locator('#workflow-family'),'queue');
+ await chooseM3(page.locator('#workflow-stage'),'blocked-intent');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/not evidence of a successful build/);
+ await chooseM3(page.locator('#workflow-stage'),'reauthorize');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/Persisted descriptors are not fresh filesystem grants/);
+ await chooseM3(page.locator('#workflow-stage'),'quarantine');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/durable quarantine/);
+ await page.locator('#workflow-complete').click();
+ assert.match(await page.locator('#learning-progress-label').innerText(),/2 of 22 guide steps completed/);
+ await page.reload();await ready();
+ assert.equal(await page.locator('#workflow-family').evaluate(element=>element.value),'queue');
+ assert.equal(await page.locator('#workflow-stage').evaluate(element=>element.value),'quarantine');
+ assert.match(await page.locator('#workflow-status').innerText(),/Progress is stored in this browser only/);
+ await chooseM3(page.locator('#workflow-family'),'catalogue');
+ await chooseM3(page.locator('#workflow-stage'),'observed');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/not an authoritative complete or simultaneous inventory/);
+ await chooseM3(page.locator('#workflow-stage'),'refresh');
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/exhaustive=false and metadataComplete=false/);
+ await chooseM3(page.locator('#workflow-stage'),'cancel');
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/CATALOGUE_COMMIT_IN_PROGRESS/);
+ await chooseM3(page.locator('#workflow-stage'),'unknown-metadata');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/Missing exact size.*remains unknown/);
+ await chooseLanguage('zh');
+ await chooseM3(page.locator('#workflow-family'),'vocabulary');
+ await chooseM3(page.locator('#workflow-stage'),'clear');
+ assert.match(await page.locator('#workflow-stage-title').innerText(),/清除本機詞彙/);
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/即時停止套用/);
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/之前嘅選取可能會再次啟用/);
+ await chooseM3(page.locator('#workflow-family'),'shared');
+ await chooseM3(page.locator('#workflow-stage'),'verified-exit');
+ assert.match(await page.locator('#workflow-stage-body').innerText(),/尚未提供通行密鑰驗證/);
+ assert.match(await page.locator('#workflow-stage-next').innerText(),/手動復原途徑/);
+ await chooseLanguage('both');
  await page.locator('#troubleshooter-reset').click();
  await page.locator('#troubleshooter-choices md-outlined-button').last().click();
  assert.match(await page.locator('#troubleshooter-question').innerText(),/separate writable build-output directory/);
@@ -89,7 +148,7 @@ try{
  assert.match(await page.locator('main').innerText(),/Native Windows\/Electron acceptance.*unverified/);
  assert.match(await page.locator('main').innerText(),/Archived v0.1.0 desktop-shell evidence/);
  await page.goto(target);await ready();
- receipt.checks.push('Interactive field guide validates persistent walkthrough progress, safe recipe preview and input rejection, troubleshooting decisions, local article bookmarks and latest-release/native-limit status.');
+ receipt.checks.push('Interactive guides persist browser-owned progress and cover vocabulary import/replace/clear plus unavailable shared state, verified shared-preference exit/recovery, queued intent/reauthorization/runtime quarantine, and observed non-exhaustive catalogue refresh/cancel/unknown metadata in English and Cantonese. All examples are local visitor explanations with no secrets, private vocabulary payloads or desktop execution.');
  let companionSequence=1;const companionRequests=[];
  await context.route('https://192.168.1.20:8443/**',async route=>{
   const request=route.request(),url=new URL(request.url()),origin=new URL(target).origin;
@@ -242,8 +301,14 @@ try{
   await page.setViewportSize({width,height:1000});
   for(const language of ['both','en','zh']){
    await chooseLanguage(language);
-   const sizes=await page.evaluate(()=>({width:innerWidth,document:document.documentElement.scrollWidth}));
+   const sizes=await page.evaluate(()=>{
+    const box=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+    return {width:innerWidth,document:document.documentElement.scrollWidth,family:box('#workflow-family'),situation:box('#workflow-stage'),detail:box('#workflow-guidance')};
+   });
    assert.ok(sizes.document<=sizes.width,`Horizontal overflow at ${width}/${language}: ${sizes.document}`);
+   assert.ok(sizes.family.left>=0&&sizes.family.right<=width+1&&sizes.situation.left>=0&&sizes.situation.right<=width+1&&sizes.detail.left>=0&&sizes.detail.right<=width+1,`Workflow controls and explanation stay within ${width}px/${language}`);
+   if(width<=700){assert.ok(sizes.family.bottom+4<=sizes.situation.top+1,`Workflow selectors stack without overlap at ${width}px/${language}`);assert.ok(sizes.situation.bottom+8<=sizes.detail.top+1,`Workflow selectors do not overlap the explanation at ${width}px/${language}`);}
+   else assert.ok(sizes.family.right+8<=sizes.situation.left+1,`Workflow selectors stay side-by-side without overlap at ${width}px/${language}`);
    geometry.push({width,language,document_width:sizes.document});
   }
  }
@@ -267,6 +332,22 @@ try{
   }
  }
  receipt.checks.push('Bilingual walkthrough rail buttons fit inside their rail without overlapping the explanation panel at desktop and 320px; full names remain accessible and filled-button Cantonese labels use on-primary white.');
+ await page.setViewportSize({width:320,height:1000});await chooseLanguage('both');await ready();
+ const workflowImage=path.join(out,'workflow-guide-bilingual-320.png');
+ await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+ await page.screenshot({path:workflowImage,fullPage:true});
+ receipt.captures.push({file:path.relative(root,workflowImage).split(path.sep).join('/'),sha256:sha(await fs.readFile(workflowImage)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language'),scope:'complete page at 320px viewport'});
+ await page.locator('#workflow-family').evaluate(element=>element.shadowRoot.querySelector('md-outlined-field').focus());
+ await page.keyboard.press('Enter');
+ assert.equal(await page.locator('#workflow-family').evaluate(element=>element.shadowRoot.querySelector('md-outlined-field').getAttribute('aria-expanded')),'true','Workflow selector opens from the keyboard');
+ await page.keyboard.press('Escape');
+ assert.equal(await page.locator('#workflow-family').evaluate(element=>element.shadowRoot.querySelector('md-outlined-field').getAttribute('aria-expanded')),'false','Escape closes the workflow selector');
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const reduced=await page.evaluate(()=>({scroll:getComputedStyle(document.documentElement).scrollBehavior,transition:getComputedStyle(document.querySelector('#workflow-guidance')).transitionDuration}));
+ assert.equal(reduced.scroll,'auto');assert.match(reduced.transition,/^(0s|0ms)(,\s*(0s|0ms))*$/);
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ receipt.checks.push('Workflow selectors open and dismiss by keyboard, and reduced-motion preferences disable smooth scrolling and transitions.');
+ receipt.checks.push('The new workflow selector and explanation stay inside the viewport and never overlap at desktop and narrow bilingual widths; a 320px bilingual interaction capture is retained.');
  await page.setViewportSize({width:390,height:844});
  await chooseLanguage('both');
  await page.locator('#menu').click();

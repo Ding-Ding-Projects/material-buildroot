@@ -1,5 +1,13 @@
 # Handoff
 
+## Queue controls and interactive workflow guide source, 2026-10-15
+
+The queue/catalogue GUI is published at `009354b177a74e9ca9a12306771287243a3cc556`; both Windows packaging and Pages workflows passed. The Builds workspace exposes typed reservations, scheduler status, admission rechecks, native-access renewal and verified cleanup. The Local assistant workspace provides observed official catalogue status, paging, family drill-down, scoped regex filtering and refresh/cancel. Fourteen affected browser checks and two viewport checks passed. The captures remain preliminary source previews, with native effects supplied by fixtures.
+
+Four interactive website guides now cover personal vocabulary, shared preference, build recovery and observed model discovery. They store only visitor learning progress and accept no private mappings, credentials or desktop execution. A fresh isolated preview passed 2,481 route/link/asset/fragment checks, 16 browser interaction checks, 73 article routes and 12 responsive tuples. This source checkpoint does not regenerate or replace the tracked deployed site. Final current captures, generated documentation and live delivery are still pending.
+
+All five downloaded assets of `v0.1.0-build.35.1` were independently verified against GitHub sizes/digests, published checksums, provenance and Squirrel package records. The [receipt](docs/evidence/desktop-shell/release-v0.1.0-build.35.1.json) binds source `a1db4edacd949c679420dd29259391053860e9c3`. GitHub reports the release is not platform-enforced immutable. No native runtime check was performed. The release-note template is corrected to describe the implemented workspace and remaining runtime gaps instead of the historical empty-shell milestone.
+
 ## Shared preference controls and scheduled host integration, 2026-10-15
 
 Shared-mode desktop controls are published at `4f023e4`. The settings workspace supports exact-name initialization and rename, PIN/password enrollment and replacement, entry, verified exit, refresh and recovery guidance. Active or unknown mode uses English for application-owned controls and retained operational outcomes without changing saved language or exact records. Language and vocabulary routes are omitted; restricted offline help exposes a vetted English guide while full article classification remains open. Thirty-five focused browser checks and strict TypeScript checking passed. Native vault, cross-application and passkey acceptance remain unverified.
