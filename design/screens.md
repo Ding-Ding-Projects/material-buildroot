@@ -44,6 +44,9 @@ All screens are proposed and unimplemented. Every collection/search/menu/picker 
 | S38 | Accessibility tools | Persistent/proxied entry, immediate preferences, explicit hide/Cancel focus, locked-state restore and secret-safe read-aloud |
 | S39 | Authenticated status integration | Session registration, current status, scoped replies/questions and truthful disconnected/unsupported states |
 | S40 | Cloud/remote/flash/install | Typed target selection, destination preview, credentials by reference, progress/cancel/partial/readback and destructive confirmation |
+| S41 | Managed execution and delivery | Purpose/platform distinction, source/dedicated repository, hosted/self-hosted setup, reviewed YAML, saved/published/dispatched separation, observed jobs and verified output retrieval |
+
+The bounded executable desktop reference covers selected states of S01-S04, S06-S07, S09, S11 and S41. See [the exact state inventory](reference/states.json) and [control map](reference/control-map.md). It is a synthetic design fixture, not production or runtime acceptance. All other screen and shared-feature requirements remain open.
 
 ## Search inventory
 

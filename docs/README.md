@@ -2,6 +2,7 @@
 
 These are current planning documents, rendered directly by the initial documentation website. Product implementation articles, complete localized twins and genuine application screenshots remain required in later phases.
 
+- [Windows build tooling](build/README.md)
 - [Implementation plan](../PLAN.md)
 - [Owner decisions](../DECISIONS.md)
 - [Phased checklist](../ROADMAP.md)

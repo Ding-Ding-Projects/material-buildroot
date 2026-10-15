@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-design/
+dist-design.previous-*/
 release/
 .cache/
 .agent/

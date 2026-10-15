@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+root=$(git rev-parse --show-toplevel)
+node_path="$root/.cache/toolchains/node-24.22.0/active/node.exe"
+if [ -x "$node_path" ]; then
+  exec "$node_path" "$root/scripts/check-vocabulary.cjs"
+fi
+exec node "$root/scripts/check-vocabulary.cjs"

@@ -1,6 +1,6 @@
 # Application design handoff
 
-Status: proposed planning reference. No renderer implementation, prototype or genuine application capture exists. Owner decisions in [DECISIONS.md](../DECISIONS.md) override earlier design suggestions. Independent review findings must be resolved before implementation.
+Status: an executable desktop design fixture is authored under [reference/](reference/README.md). Its build and runtime remain unverified. No production renderer or genuine application capture is established by that fixture. Owner decisions in [DECISIONS.md](../DECISIONS.md) override earlier design suggestions. Independent review findings must be resolved before implementation.
 
 ## Productive workspace composition
 
@@ -28,6 +28,9 @@ Keep dependency inspection read-only where the underlying relationship is derive
 
 ## Handoff documents
 
+- [Executable desktop reference and exact remaining gaps](reference/README.md)
+- [Control, layout, focus and managed execution state contract](reference/control-map.md)
+- [Hand-maintained deterministic state inventory](reference/states.json)
 - [Screen/state inventory](screens.md)
 - [Component provenance](components.md)
 - [Acceptance and evidence matrix](acceptance.md)
