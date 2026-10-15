@@ -108,6 +108,18 @@
     "category": "Design"
   },
   {
+    "source": "design/desktop-workspace-remake.md",
+    "title": "Desktop editor workspace",
+    "url": "/material-buildroot/site/articles/design/desktop-workspace-remake.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/modern-workspace.md",
+    "title": "Desktop workspace implementation and design record",
+    "url": "/material-buildroot/site/articles/design/modern-workspace.html",
+    "category": "Design"
+  },
+  {
     "source": "design/reference/README.md",
     "title": "Executable desktop reference",
     "url": "/material-buildroot/site/articles/design/reference/README.html",
@@ -151,8 +163,32 @@
   },
   {
     "source": "docs/desktop/README.md",
-    "title": "Desktop shell",
+    "title": "Desktop workspace",
     "url": "/material-buildroot/site/articles/docs/desktop/README.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/built-in-tools.md",
+    "title": "Built-in tool services",
+    "url": "/material-buildroot/site/articles/docs/desktop/built-in-tools.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/configuration.md",
+    "title": "Configuration service",
+    "url": "/material-buildroot/site/articles/docs/desktop/configuration.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/deployment.md",
+    "title": "Artifacts and deployment",
+    "url": "/material-buildroot/site/articles/docs/desktop/deployment.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/execution.md",
+    "title": "Project execution adapter",
+    "url": "/material-buildroot/site/articles/docs/desktop/execution.html",
     "category": "Desktop"
   },
   {
@@ -162,9 +198,39 @@
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/modern-workspace.md",
+    "title": "Productive desktop workspace",
+    "url": "/material-buildroot/site/articles/docs/desktop/modern-workspace.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/modern-workspace.zh-HK.md",
+    "title": "桌面工作區",
+    "url": "/material-buildroot/site/articles/docs/desktop/modern-workspace.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/updates.md",
+    "title": "Desktop updates",
+    "url": "/material-buildroot/site/articles/docs/desktop/updates.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/evidence/ARCHIVE.md",
+    "title": "Historical screenshot archive",
+    "url": "/material-buildroot/site/articles/docs/evidence/ARCHIVE.html",
+    "category": "Evidence"
+  },
+  {
     "source": "docs/evidence/desktop-shell/README.md",
-    "title": "Desktop shell capture evidence",
+    "title": "Archived v0.1.0 desktop shell captures",
     "url": "/material-buildroot/site/articles/docs/evidence/desktop-shell/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/modern-workspace/README.md",
+    "title": "Current Material workspace gallery",
+    "url": "/material-buildroot/site/articles/docs/evidence/modern-workspace/README.html",
     "category": "Evidence"
   },
   {
@@ -174,15 +240,51 @@
     "category": "Evidence"
   },
   {
+    "source": "docs/evidence/tasks/PH00-current-hosting.md",
+    "title": "PH00-T05 current hosting evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH00-current-hosting.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-catalogue-delta.md",
+    "title": "PH01 catalogue delta: onboarding and per-control guidance",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-catalogue-delta.html",
+    "category": "Evidence"
+  },
+  {
     "source": "docs/evidence/tasks/PH01-contracts.md",
     "title": "PH01 contract and evidence admission unit",
     "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-contracts.html",
     "category": "Evidence"
   },
   {
+    "source": "docs/evidence/tasks/PH01-current-interface-contracts.md",
+    "title": "PH01 current documentation and interface obligations",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-current-interface-contracts.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-implementation-admission.md",
+    "title": "PH01 concrete implementation admission",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-implementation-admission.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-vocabulary-mode-admission.md",
+    "title": "PH01 personal vocabulary and shared mode admission",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-vocabulary-mode-admission.html",
+    "category": "Evidence"
+  },
+  {
     "source": "docs/evidence/tasks/PH02-T02-C03.md",
     "title": "Settings renderer lifecycle verification",
     "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH02-T02-C03.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH10-implementation.md",
+    "title": "PH10 implementation evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH10-implementation.html",
     "category": "Evidence"
   },
   {
@@ -216,6 +318,12 @@
     "category": "Planning"
   },
   {
+    "source": "docs/planning/implementation-admission.md",
+    "title": "Concrete implementation admission",
+    "url": "/material-buildroot/site/articles/docs/planning/implementation-admission.html",
+    "category": "Planning"
+  },
+  {
     "source": "docs/planning/managed-execution.md",
     "title": "Managed execution and delivery admission",
     "url": "/material-buildroot/site/articles/docs/planning/managed-execution.html",
@@ -240,9 +348,33 @@
     "category": "Security"
   },
   {
+    "source": "docs/security/companion.md",
+    "title": "Opt-in HTTPS companion boundary",
+    "url": "/material-buildroot/site/articles/docs/security/companion.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/jobs-and-recovery.md",
+    "title": "Durable jobs and local safety services",
+    "url": "/material-buildroot/site/articles/docs/security/jobs-and-recovery.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/offline-documentation.md",
+    "title": "Bundled offline documentation",
+    "url": "/material-buildroot/site/articles/docs/security/offline-documentation.html",
+    "category": "Security"
+  },
+  {
     "source": "docs/security/operation-requests.md",
     "title": "Serialized operation requests",
     "url": "/material-buildroot/site/articles/docs/security/operation-requests.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/workspace-state.md",
+    "title": "Persistent workspace state",
+    "url": "/material-buildroot/site/articles/docs/security/workspace-state.html",
     "category": "Security"
   },
   {

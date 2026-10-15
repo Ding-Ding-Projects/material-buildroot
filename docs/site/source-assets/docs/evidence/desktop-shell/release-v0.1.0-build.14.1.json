@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-15T19:53:07.076Z",
+  "repository": "Ding-Ding-Projects/material-buildroot",
+  "source": "d236e56824e5d428820a06c2210fedb9d7e9c110",
+  "tag": "v0.1.0-build.14.1",
+  "tagObject": {
+    "type": "commit",
+    "sha": "d236e56824e5d428820a06c2210fedb9d7e9c110"
+  },
+  "release": {
+    "url": "https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.14.1",
+    "id": 414209055,
+    "draft": false,
+    "prerelease": false,
+    "immutable": false,
+    "publishedAt": "2026-10-15T19:48:00Z"
+  },
+  "workflows": [
+    {
+      "id": 38796364595,
+      "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38796364595",
+      "headSha": "d236e56824e5d428820a06c2210fedb9d7e9c110",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38796364007,
+      "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38796364007",
+      "headSha": "d236e56824e5d428820a06c2210fedb9d7e9c110",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "method": "Downloaded all five published assets and independently computed SHA-256 and size. Compared four checksum-covered files to downloaded SHA256SUMS.txt, all five files to GitHub asset digests/sizes, and three package files to provenance.",
+  "provenance": {
+    "schemaVersion": 1,
+    "version": "0.1.0",
+    "source": "d236e56824e5d428820a06c2210fedb9d7e9c110",
+    "platform": "windows-x64",
+    "installer": "Squirrel.Windows",
+    "signed": false,
+    "runtimeVerified": false
+  },
+  "sourceFiles": [
+    {
+      "name": "build-manifest.json",
+      "gitBlobSha256": "371bd12ecd7e20a25f7ea47522724abc7aad2237566a2c869d498761a113b6ae",
+      "windowsCheckoutSha256": "a8bb10b2daff9233ec635ea9dcec25160f6b46318c185d32ed7dae3deb9dcfcd",
+      "provenanceMatched": true,
+      "normalization": "LF to CRLF, matching the Windows checkout bytes hashed by the build driver"
+    },
+    {
+      "name": "package-lock.json",
+      "gitBlobSha256": "a1cbe18328e8acd28114a68c00ffbbc353c0a1c74df55e332660618d6419d392",
+      "windowsCheckoutSha256": "71cc042ac587ee9bf7025c5b76582667cd79cac163b0722c6bc4caa4660aceb2",
+      "provenanceMatched": true,
+      "normalization": "LF to CRLF, matching the Windows checkout bytes hashed by the build driver"
+    }
+  ],
+  "assets": [
+    {
+      "name": "MaterialBuildroot-0.1.0-full.nupkg",
+      "bytes": 156683096,
+      "sha256": "31b2754c1df17aa2ff8dba34698e9cb38d5558678c58f1db73793bde29a39589",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": true
+    },
+    {
+      "name": "provenance.json",
+      "bytes": 1100,
+      "sha256": "091b9ce665764e7513ed48c41db85a57ba973b7e4c842c67c8541716b4d70532",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": null
+    },
+    {
+      "name": "RELEASES",
+      "bytes": 88,
+      "sha256": "d0826aea5dd7b060347d411420ccca0038abb79b13e4fbf6456aab108f7a95ec",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": true
+    },
+    {
+      "name": "Setup.exe",
+      "bytes": 157380096,
+      "sha256": "f99bf25ff7b107787f89d3602799ad456f10239c29f68f2c78b834beefd30596",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": true,
+      "provenanceMatched": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 334,
+      "sha256": "b26cf4a1b106b5cc72c3e6b32597595f47e032bd640affb151a319d0da3ae3e0",
+      "githubSizeMatched": true,
+      "githubDigestMatched": true,
+      "checksumManifestMatched": null,
+      "provenanceMatched": null
+    }
+  ],
+  "limitations": [
+    "The unique tag resolves to the recorded exact commit at verification time; GitHub immutable=false, so server-enforced release immutability is not established.",
+    "SHA256SUMS.txt has no self-checksum; its downloaded bytes match the GitHub asset digest.",
+    "No Windows installation, launch, update, rollback or runtime acceptance was performed.",
+    "This receipt does not cover later local changes or later revisions."
+  ],
+  "updaterHandshake": {
+    "method": "Ran the current updater check against the actual downloaded release metadata and live GitHub commit resolution through an injected readback transport; no installer execution or native runtime involved.",
+    "olderInstalledSource": "0881a3a3f58c85bf73f57035b3a09da3acbbe1a8",
+    "olderInstalledSourceResult": "available",
+    "matchingInstalledSourceResult": "current",
+    "selectedTag": "v0.1.0-build.14.1",
+    "focusedTests": {
+      "command": "node --test tests/updates.test.cjs",
+      "passed": 11,
+      "failed": 0
+    }
+  }
+}

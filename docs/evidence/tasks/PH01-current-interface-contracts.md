@@ -29,3 +29,7 @@ Source inspection identifies implemented candidates and concrete missing consume
 ## Targeted follow-up boundary
 
 This follow-up updates candidate ownership after the icon checkpoint and new offline documentation consumers. The task-oriented website documentation requirement, refreshed current screenshots and separate Markdown archive remain recorded in the existing feature-article/README contracts. The inventory remains 107 identities, 428 surface records and 398 planned requirements. Earlier test counts above belong to the recorded contract-edit verification; this follow-up adds no new runtime, screenshot or native evidence and does not assert that pending reader/model-fit/recipe work is complete.
+
+## Personal vocabulary and universal mode dependencies
+
+The [bounded consumer admission](PH01-vocabulary-mode-admission.md) records actual reusable parser/controller and private file/IndexedDB cache candidates, independent A/D/C ownership and R's supporting-only role. Core/cache corrections are active. Visible controls, controlled UI-copy/accessible-name boundaries, isolated export/history exclusions, own settings/palette/regex discovery and all-language suppression/restoration remain integration work. The caller's suppression predicate is not the required universal shared record, live watcher, rename or shared credential verifier. PH04 core/mode work and the upcoming desktop/visitor consumers are plans; the 107/428/398 inventory and all full acceptance boundaries remain unchanged. No private payload was read and no runtime/native proof is claimed.

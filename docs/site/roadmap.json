@@ -7,7 +7,7 @@
         {
           "id": "PH00-T01",
           "done": true,
-          "text": "[D-initial+R] Reconcile the recorded owner decisions, 105-identity inventory, architecture, surfaces and conditional design review into this ordered plan."
+          "text": "[D-initial+R] Reconcile the recorded owner decisions, 107-identity inventory, architecture, surfaces and conditional design review into this ordered plan."
         },
         {
           "id": "PH00-T02",
@@ -26,7 +26,7 @@
         },
         {
           "id": "PH00-T05",
-          "done": false,
+          "done": true,
           "text": "[D-initial+R] Deploy the initial GitHub Pages website, verify the live URL and routes, and read back the repository About homepage; record hosted evidence separately from local proof."
         },
         {
@@ -35,8 +35,8 @@
           "text": "[D-initial+R] Update current handoff, public status and next-session prompt with verified planning/site evidence and explicit unimplemented application and D/C parity boundaries."
         }
       ],
-      "done": 5,
-      "status": "started"
+      "done": 6,
+      "status": "complete"
     },
     {
       "id": "PH01",
@@ -45,7 +45,7 @@
         {
           "id": "PH01-T01",
           "done": false,
-          "text": "[R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 105 identities; preserve conditional and canonical-only dispositions with reasons."
+          "text": "[R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 107 identities; preserve conditional and canonical-only dispositions with reasons."
         },
         {
           "id": "PH01-T02",
@@ -477,7 +477,7 @@
         {
           "id": "PH10-T08",
           "done": false,
-          "text": "[A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 105 dispositions before declaring complete."
+          "text": "[A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 107 dispositions before declaring complete."
         }
       ],
       "done": 0,
@@ -485,6 +485,6 @@
     }
   ],
   "task_count": 79,
-  "verified_count": 6,
-  "input_snapshot_sha256": "258c3153b0d68fae9345e630bbf3d3dea5828a57c701fa785e17fa17e62ff031"
+  "verified_count": 7,
+  "input_snapshot_sha256": "d9f0cd2d3f1ea5750fe2f36f05cefe0478287483451a8dec672617eab4cf1d8f"
 }

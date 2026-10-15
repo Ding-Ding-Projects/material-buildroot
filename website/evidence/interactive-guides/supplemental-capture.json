@@ -1,0 +1,11 @@
+{
+  "format": "material-buildroot-inspected-website-capture",
+  "sourceSnapshot": "d9f0cd2d3f1ea5750fe2f36f05cefe0478287483451a8dec672617eab4cf1d8f",
+  "file": "home-bilingual-320.png",
+  "sha256": "3d817fd79e64d97386b53a03d8b2ce4416a752585a111b6368ac54382e48572c",
+  "language": "both",
+  "theme": "light",
+  "route": "local-headless-chromium",
+  "inspection": "Root and website owner reviewed the exact original image. This supplemental image has no independent capture clock and is not native runtime proof.",
+  "viewportWidth": 320
+}

@@ -323,10 +323,11 @@ try{
  await page.setViewportSize({width:1440,height:1000});
  assert.equal((await page.goto(galleryUrl)).status(),200);await ready();
  const gallery=page.locator('article img');
- assert.equal(await gallery.count(),9,'Current workspace evidence gallery must show all nine reviewed captures');
+ const galleryManifest=JSON.parse(await fs.readFile(path.join(outputRoot,'site/source-assets/docs/evidence/modern-workspace/current/captures.json'),'utf8'));
+ assert.equal(await gallery.count(),galleryManifest.captures.length,'Current workspace evidence gallery must show every manifest capture');
  await page.waitForFunction(()=>[...document.querySelectorAll('article img')].every(image=>image.complete&&image.naturalWidth>0),null,{timeout:30000});
  assert.ok((await gallery.evaluateAll(images=>images.every(image=>image.alt.trim().length>0))),'Each current workspace capture must have useful alternative text');
- receipt.checks.push('All nine reviewed current-workspace captures load in the evidence article and have alternative text. Captures remain source-preview evidence, not Windows runtime proof.');
+ receipt.checks.push(`All ${galleryManifest.captures.length} manifest-listed current-workspace captures load in the evidence article and have alternative text. Captures remain source-preview evidence, not Windows runtime proof.`);
  await page.setViewportSize({width:320,height:844});
  const pageInventory=JSON.parse(await fs.readFile(path.join(outputRoot,'site/page-inventory.json'),'utf8'));
  const extraRoutes=pageInventory.filter(route=>!route.startsWith('site/articles/'));

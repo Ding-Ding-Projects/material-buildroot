@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "catalogue": "docs/planning/feature-coverage.md",
-  "catalogueSha256": "746bc353d219b6e56fbe423194299e2a9159c7b3a5f50c70a65a9e47c1a2d443",
+  "catalogueSha256": "559ae1e35394e549139b2df5aa1e96ed883513cc7193eff3f3a7a96a1441268d",
   "baselineRevision": "9c8fe848ff7abb1c11fd3d5014fc0ebfa8c60f1a",
   "status": "admission-only-pending-detailed-reconciliation",
   "identities": [
@@ -657,7 +657,7 @@
     },
     {
       "id": "funny-emoji",
-      "requirement": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
+      "requirement": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
       "catalogueSurface": "A+D+C",
       "disposition": "applicable",
       "reason": "Independent surface delivery required by the catalogue and canonical surface contract.",
@@ -692,7 +692,7 @@
               "path": "src/renderer/features/funny-emoji",
               "operation": "A.funny-emoji.apply",
               "authority": "validated typed IPC and bounded capabilities",
-              "behavior": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
+              "behavior": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -879,7 +879,7 @@
               "path": "website/features/funny-emoji",
               "operation": "D.funny-emoji.apply",
               "authority": "browser-local; native capability needs explicit authenticated broker grant",
-              "behavior": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
+              "behavior": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -1066,7 +1066,7 @@
               "path": "src/companion/features/funny-emoji",
               "operation": "C.funny-emoji.apply",
               "authority": "paired scoped broker capability; revocation applies",
-              "behavior": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
+              "behavior": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -7253,7 +7253,7 @@
       "subrequirements": [
         {
           "id": "material-design-REQ-01",
-          "text": "Every user-facing application, GitHub Pages, and extension page conforms fully to Material Design 3 Expressive, its tokens, typography, shape, elevation, motion, and component anatomy, with zero legacy or original design elements remaining.",
+          "text": "Every user-facing application, GitHub Pages, and extension page conforms fully to Material Design 3 Expressive, its tokens, typography, shape, elevation, motion, and component anatomy, with zero legacy or original design elements remaining. Use genuine locally bundled Material icons throughout the application and editors; registered icon-button containers filled with unrelated text glyphs do not establish icon conformance. A modern compact desktop layout must preserve accessible target sizes, keyboard operation and readable content at supported scales.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -9227,7 +9227,7 @@
       "subrequirements": [
         {
           "id": "appearance-editor-REQ-01",
-          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance… from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close.",
+          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance\u2026 from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -13785,7 +13785,7 @@
         },
         {
           "id": "tabs-REQ-03",
-          "text": "Every application ships the four tab-discovery searches, a Move… into group… picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders.",
+          "text": "Every application ships the four tab-discovery searches, a Move\u2026 into group\u2026 picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -15723,7 +15723,7 @@
       "subrequirements": [
         {
           "id": "context-menus-REQ-01",
-          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance… and Lock this element….",
+          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance\u2026 and Lock this element\u2026.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -17013,7 +17013,7 @@
       "subrequirements": [
         {
           "id": "rich-controls-REQ-01",
-          "text": "Wherever a value is shown, in list rows, table cells, menu items, search results, detail panels, cards, and previews, the real control is preferred over a printout, wired to the same validation, persistence, localization, funny-level styling, history, and accessible naming as its originating surface.",
+          "text": "Wherever a value is shown, in list rows, table cells, menu items, search results, detail panels, cards, and previews, the real control is preferred over a printout, wired to the same validation, persistence, localization, funny-level styling, history, and accessible naming as its originating surface. Package and guest canvases must connect editable selections and inspectors to actual validated semantic consumers with reviewed diffs, revision checks and truthful results. Dragging nodes changes layout only unless an explicitly reviewed semantic action is applied. Preserve structured keyboard alternatives, selection, pan/zoom, appropriate snapping and undo/redo; layout persistence never establishes successful package generation, guest configuration or guest boot.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -20273,7 +20273,7 @@
       "subrequirements": [
         {
           "id": "element-locks-REQ-01",
-          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element… command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP.",
+          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element\u2026 command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -36906,7 +36906,7 @@
       "subrequirements": [
         {
           "id": "design-folder-REQ-01",
-          "text": "Every design surface, including a Astra design implementation subagent’s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface.",
+          "text": "Every design surface, including a Astra design implementation subagent\u2019s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -36935,7 +36935,7 @@
     },
     {
       "id": "layout-matrix",
-      "requirement": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
+      "requirement": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
       "catalogueSurface": "A+D+C+R",
       "disposition": "applicable",
       "reason": "Independent surface delivery required by the catalogue and canonical surface contract.",
@@ -36970,7 +36970,7 @@
               "path": "src/renderer/features/layout-matrix",
               "operation": "A.layout-matrix.apply",
               "authority": "validated typed IPC and bounded capabilities",
-              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
+              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -37157,7 +37157,7 @@
               "path": "website/features/layout-matrix",
               "operation": "D.layout-matrix.apply",
               "authority": "browser-local; native capability needs explicit authenticated broker grant",
-              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
+              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -37344,7 +37344,7 @@
               "path": "src/companion/features/layout-matrix",
               "operation": "C.layout-matrix.apply",
               "authority": "paired scoped broker capability; revocation applies",
-              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
+              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -37531,7 +37531,7 @@
               "path": "scripts/features/layout-matrix",
               "operation": "R.layout-matrix.apply",
               "authority": "repository-owned execution; no renderer authority",
-              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
+              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -39789,7 +39789,7 @@
       "subrequirements": [
         {
           "id": "feature-articles-REQ-01",
-          "text": "The documentation lives on the GitHub Pages, not only in the repository: every feature has its own detailed article covering behaviour, configuration, error modes, security, and verification, ending with suggested articles so no reader hits a dead end.",
+          "text": "The documentation lives on the GitHub Pages, not only in the repository: every feature has its own detailed article covering behaviour, configuration, error modes, security, and verification, ending with suggested articles so no reader hits a dead end. Documentation must lead with real user tasks, guided walkthroughs, contextual explanations, interactive diagrams and useful examples while retaining complete articles and source links. A Markdown file browser or repository directory viewer alone is insufficient. Controls change explanation, examples or visitor-owned progress with keyboard access, localization, narrow layouts and reduced motion; demonstrations never imply real installed-application execution. Verify interaction and persistence on both built and deployed website routes.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -51468,7 +51468,7 @@
       "subrequirements": [
         {
           "id": "tabbed-readme-REQ-01",
-          "text": "A README opens with a compact index, what the project is, the install line, the GitHub Pages link, and short contents, and folds every long reference section into `<details><summary>` blocks with findable summaries. `CONTRIBUTING.md`, `LICENSE`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` stay real and current so GitHub shows them as tabs above the README.",
+          "text": "A README opens with a compact index, what the project is, the install line, the GitHub Pages link, and short contents, and folds every long reference section into `<details><summary>` blocks with findable summaries. `CONTRIBUTING.md`, `LICENSE`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` stay real and current so GitHub shows them as tabs above the README. After an interface remake, replace every current README screenshot with inspected captures bound to the actual source, build hash, state, language, theme, viewport, scale, capture method, privacy verdict and capture date/timezone. Preserve earlier originals and provenance in a separate Markdown archive, linked concisely from the current README; never relabel historical proof as current. Audit all current image references across documentation, website, wiki, gallery and downloads, and reject stale-current substitutions.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -57368,6 +57368,1060 @@
         {
           "id": "roblox-visual-realism-REQ-01",
           "text": "Conditional on Roblox visual/game work; not evidence for Buildroot or guest UI",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        }
+      ],
+      "canonicalReview": {
+        "state": "pending-full-section-review",
+        "catalogueEntryMatched": true,
+        "subrequirementSource": "sanitized-catalogue-expansion",
+        "remaining": [
+          "Reconcile complete linked canonical sections and referenced contracts.",
+          "Independently review detailed applicability and action/state/capability inventories."
+        ]
+      }
+    },
+    {
+      "id": "onboarding-wizard",
+      "requirement": "Practical in-app first-run setup with real actions/results, progress, Back/Next, save/resume, optional skipping and accessible localized completion into the workspace",
+      "catalogueSurface": "A",
+      "disposition": "applicable",
+      "reason": "Independent surface delivery required by the catalogue and canonical surface contract.",
+      "reconciliation": "pending-detailed-review",
+      "surfaces": {
+        "A": {
+          "workId": "PH01-T02-onboarding-wizard-A",
+          "applicability": "required",
+          "reason": "Catalogue surface; detailed canonical applicability review pending.",
+          "state": "unimplemented",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "planned-unimplemented",
+            "consumer": {
+              "id": "A.onboarding-wizard.controller",
+              "path": "src/renderer/features/onboarding-wizard",
+              "operation": "A.onboarding-wizard.apply",
+              "authority": "validated typed IPC and bounded capabilities",
+              "behavior": "Practical in-app first-run setup with real actions/results, progress, Back/Next, save/resume, optional skipping and accessible localized completion into the workspace",
+              "requestContract": "docs/planning/operation-request.schema.json"
+            },
+            "articles": [
+              {
+                "id": "article.A.onboarding-wizard.en",
+                "path": "docs/features/onboarding-wizard/A.en.md",
+                "state": "planned"
+              },
+              {
+                "id": "article.A.onboarding-wizard.zh-HK",
+                "path": "docs/features/onboarding-wizard/A.zh-HK.md",
+                "state": "planned"
+              }
+            ],
+            "copy": [
+              {
+                "id": "copy.A.onboarding-wizard.en",
+                "path": "src/renderer/features/onboarding-wizard/locales/en.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.A.onboarding-wizard.zh-HK",
+                "path": "src/renderer/features/onboarding-wizard/locales/zh-HK.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.A.onboarding-wizard.bilingual",
+                "path": "src/renderer/features/onboarding-wizard/locales/bilingual.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              }
+            ],
+            "persistence": {
+              "id": "state.A.onboarding-wizard",
+              "store": "application-data/features/onboarding-wizard.json",
+              "version": 1,
+              "states": [
+                "initial",
+                "changed",
+                "reload",
+                "reset",
+                "corrupt",
+                "migration"
+              ],
+              "sensitiveData": "vault references only; exclude secrets and personal mappings from exports/history",
+              "state": "planned-review-per-property"
+            },
+            "tests": [
+              {
+                "id": "test.A.onboarding-wizard.interaction",
+                "path": "tests/features/onboarding-wizard/A.interaction.test.cjs"
+              },
+              {
+                "id": "test.A.onboarding-wizard.negative",
+                "path": "tests/features/onboarding-wizard/A.negative.test.cjs"
+              }
+            ],
+            "runtime": {
+              "id": "runtime.A.onboarding-wizard",
+              "tupleIdTemplate": "A.onboarding-wizard.{state}.{language}.{theme}.{scale}.{viewport}",
+              "states": [
+                "initial",
+                "success",
+                "invalid",
+                "unavailable",
+                "cancelled",
+                "recovery",
+                "reload",
+                "reset",
+                "stale",
+                "disconnected",
+                "interrupted",
+                "partial"
+              ],
+              "languages": [
+                "en",
+                "zh-HK",
+                "bilingual"
+              ],
+              "themes": [
+                "light",
+                "dark"
+              ],
+              "scales": [
+                100,
+                125,
+                150,
+                200
+              ],
+              "viewports": [
+                "minimum-960x640",
+                "normal-1440x960"
+              ],
+              "sourceRevision": null,
+              "builtHash": null,
+              "capture": {
+                "id": "capture.A.onboarding-wizard",
+                "path": "docs/evidence/features/onboarding-wizard/A/{tupleId}.png",
+                "state": "pending-genuine-capture"
+              },
+              "state": "pending"
+            },
+            "requirementIds": [
+              "onboarding-wizard-REQ-01",
+              "onboarding-wizard-REQ-02",
+              "onboarding-wizard-REQ-03",
+              "onboarding-wizard-REQ-04",
+              "onboarding-wizard-REQ-05"
+            ]
+          }
+        },
+        "D": {
+          "workId": "PH01-T02-onboarding-wizard-D",
+          "applicability": "outside-catalogue-scope",
+          "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required."
+            },
+            "requirementIds": [
+              "onboarding-wizard-REQ-01",
+              "onboarding-wizard-REQ-02",
+              "onboarding-wizard-REQ-03",
+              "onboarding-wizard-REQ-04",
+              "onboarding-wizard-REQ-05"
+            ]
+          }
+        },
+        "C": {
+          "workId": "PH01-T02-onboarding-wizard-C",
+          "applicability": "outside-catalogue-scope",
+          "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required."
+            },
+            "requirementIds": [
+              "onboarding-wizard-REQ-01",
+              "onboarding-wizard-REQ-02",
+              "onboarding-wizard-REQ-03",
+              "onboarding-wizard-REQ-04",
+              "onboarding-wizard-REQ-05"
+            ]
+          }
+        },
+        "R": {
+          "workId": "PH01-T02-onboarding-wizard-R",
+          "applicability": "outside-catalogue-scope",
+          "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "The specific practical in-app onboarding contract applies to the installed application. This excludes only this identity; independent website delivery and contextual browser guidance remain required."
+            },
+            "requirementIds": [
+              "onboarding-wizard-REQ-01",
+              "onboarding-wizard-REQ-02",
+              "onboarding-wizard-REQ-03",
+              "onboarding-wizard-REQ-04",
+              "onboarding-wizard-REQ-05"
+            ]
+          }
+        }
+      },
+      "subrequirements": [
+        {
+          "id": "onboarding-wizard-REQ-01",
+          "text": "Provide a practical first-run/setup wizard inside the installed application that performs actual setup actions and reports their real results; a public website or feature catalogue is no substitute.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "onboarding-wizard-REQ-02",
+          "text": "Provide visible progress, Back and Next navigation, validation and truthful pending, failed, cancelled and completed states; unfinished required setup must never count as successful.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "onboarding-wizard-REQ-03",
+          "text": "Save and resume appropriate progress and permit skipping optional steps without silently skipping required work.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "onboarding-wizard-REQ-04",
+          "text": "Provide localized accessible labels, keyboard navigation and focus handling; completion opens the productive workspace and setup remains reachable for later changes.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "onboarding-wizard-REQ-05",
+          "text": "Independently prove real setup action results, navigation, resume and optional skipping, all language modes and keyboard behavior with actual built interactions and genuine captures; preserve the separate public website requirement.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        }
+      ],
+      "canonicalReview": {
+        "state": "pending-full-section-review",
+        "catalogueEntryMatched": true,
+        "subrequirementSource": "sanitized-catalogue-expansion",
+        "remaining": [
+          "Reconcile complete linked canonical sections and referenced contracts.",
+          "Independently review detailed applicability and action/state/capability inventories."
+        ]
+      }
+    },
+    {
+      "id": "info-icon-guidance",
+      "requirement": "Independent per-control bundled info button above each capable target, contextual guidance, worked example and isolated playground with accessible focus return",
+      "catalogueSurface": "A+D+C",
+      "disposition": "applicable",
+      "reason": "Independent surface delivery required by the catalogue and canonical surface contract.",
+      "reconciliation": "pending-detailed-review",
+      "surfaces": {
+        "A": {
+          "workId": "PH01-T02-info-icon-guidance-A",
+          "applicability": "required",
+          "reason": "Catalogue surface; detailed canonical applicability review pending.",
+          "state": "unimplemented",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "planned-unimplemented",
+            "consumer": {
+              "id": "A.info-icon-guidance.controller",
+              "path": "src/renderer/features/info-icon-guidance",
+              "operation": "A.info-icon-guidance.apply",
+              "authority": "validated typed IPC and bounded capabilities",
+              "behavior": "Independent per-control bundled info button above each capable target, contextual guidance, worked example and isolated playground with accessible focus return",
+              "requestContract": "docs/planning/operation-request.schema.json"
+            },
+            "articles": [
+              {
+                "id": "article.A.info-icon-guidance.en",
+                "path": "docs/features/info-icon-guidance/A.en.md",
+                "state": "planned"
+              },
+              {
+                "id": "article.A.info-icon-guidance.zh-HK",
+                "path": "docs/features/info-icon-guidance/A.zh-HK.md",
+                "state": "planned"
+              }
+            ],
+            "copy": [
+              {
+                "id": "copy.A.info-icon-guidance.en",
+                "path": "src/renderer/features/info-icon-guidance/locales/en.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.A.info-icon-guidance.zh-HK",
+                "path": "src/renderer/features/info-icon-guidance/locales/zh-HK.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.A.info-icon-guidance.bilingual",
+                "path": "src/renderer/features/info-icon-guidance/locales/bilingual.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              }
+            ],
+            "persistence": {
+              "id": "state.A.info-icon-guidance",
+              "store": "application-data/features/info-icon-guidance.json",
+              "version": 1,
+              "states": [
+                "initial",
+                "changed",
+                "reload",
+                "reset",
+                "corrupt",
+                "migration"
+              ],
+              "sensitiveData": "vault references only; exclude secrets and personal mappings from exports/history",
+              "state": "planned-review-per-property"
+            },
+            "tests": [
+              {
+                "id": "test.A.info-icon-guidance.interaction",
+                "path": "tests/features/info-icon-guidance/A.interaction.test.cjs"
+              },
+              {
+                "id": "test.A.info-icon-guidance.negative",
+                "path": "tests/features/info-icon-guidance/A.negative.test.cjs"
+              }
+            ],
+            "runtime": {
+              "id": "runtime.A.info-icon-guidance",
+              "tupleIdTemplate": "A.info-icon-guidance.{state}.{language}.{theme}.{scale}.{viewport}",
+              "states": [
+                "initial",
+                "success",
+                "invalid",
+                "unavailable",
+                "cancelled",
+                "recovery",
+                "reload",
+                "reset",
+                "stale",
+                "disconnected",
+                "interrupted",
+                "partial"
+              ],
+              "languages": [
+                "en",
+                "zh-HK",
+                "bilingual"
+              ],
+              "themes": [
+                "light",
+                "dark"
+              ],
+              "scales": [
+                100,
+                125,
+                150,
+                200
+              ],
+              "viewports": [
+                "minimum-960x640",
+                "normal-1440x960"
+              ],
+              "sourceRevision": null,
+              "builtHash": null,
+              "capture": {
+                "id": "capture.A.info-icon-guidance",
+                "path": "docs/evidence/features/info-icon-guidance/A/{tupleId}.png",
+                "state": "pending-genuine-capture"
+              },
+              "state": "pending"
+            },
+            "requirementIds": [
+              "info-icon-guidance-REQ-01",
+              "info-icon-guidance-REQ-02",
+              "info-icon-guidance-REQ-03",
+              "info-icon-guidance-REQ-04",
+              "info-icon-guidance-REQ-05",
+              "info-icon-guidance-REQ-06",
+              "info-icon-guidance-REQ-07"
+            ]
+          }
+        },
+        "D": {
+          "workId": "PH01-T02-info-icon-guidance-D",
+          "applicability": "required",
+          "reason": "Catalogue surface; detailed canonical applicability review pending.",
+          "state": "unimplemented",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "planned-unimplemented",
+            "consumer": {
+              "id": "D.info-icon-guidance.controller",
+              "path": "website/features/info-icon-guidance",
+              "operation": "D.info-icon-guidance.apply",
+              "authority": "browser-local; native capability needs explicit authenticated broker grant",
+              "behavior": "Independent per-control bundled info button above each capable target, contextual guidance, worked example and isolated playground with accessible focus return",
+              "requestContract": "docs/planning/operation-request.schema.json"
+            },
+            "articles": [
+              {
+                "id": "article.D.info-icon-guidance.en",
+                "path": "docs/features/info-icon-guidance/D.en.md",
+                "state": "planned"
+              },
+              {
+                "id": "article.D.info-icon-guidance.zh-HK",
+                "path": "docs/features/info-icon-guidance/D.zh-HK.md",
+                "state": "planned"
+              }
+            ],
+            "copy": [
+              {
+                "id": "copy.D.info-icon-guidance.en",
+                "path": "website/features/info-icon-guidance/locales/en.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.D.info-icon-guidance.zh-HK",
+                "path": "website/features/info-icon-guidance/locales/zh-HK.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.D.info-icon-guidance.bilingual",
+                "path": "website/features/info-icon-guidance/locales/bilingual.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              }
+            ],
+            "persistence": {
+              "id": "state.D.info-icon-guidance",
+              "store": "browser-local:D:feature:info-icon-guidance",
+              "version": 1,
+              "states": [
+                "initial",
+                "changed",
+                "reload",
+                "reset",
+                "corrupt",
+                "migration"
+              ],
+              "sensitiveData": "vault references only; exclude secrets and personal mappings from exports/history",
+              "state": "planned-review-per-property"
+            },
+            "tests": [
+              {
+                "id": "test.D.info-icon-guidance.interaction",
+                "path": "tests/features/info-icon-guidance/D.interaction.test.cjs"
+              },
+              {
+                "id": "test.D.info-icon-guidance.negative",
+                "path": "tests/features/info-icon-guidance/D.negative.test.cjs"
+              }
+            ],
+            "runtime": {
+              "id": "runtime.D.info-icon-guidance",
+              "tupleIdTemplate": "D.info-icon-guidance.{state}.{language}.{theme}.{scale}.{viewport}",
+              "states": [
+                "initial",
+                "success",
+                "invalid",
+                "unavailable",
+                "cancelled",
+                "recovery",
+                "reload",
+                "reset",
+                "stale",
+                "disconnected",
+                "interrupted",
+                "partial"
+              ],
+              "languages": [
+                "en",
+                "zh-HK",
+                "bilingual"
+              ],
+              "themes": [
+                "light",
+                "dark"
+              ],
+              "scales": [
+                100,
+                125,
+                150,
+                200
+              ],
+              "viewports": [
+                "minimum-320px",
+                "normal-1280px"
+              ],
+              "sourceRevision": null,
+              "builtHash": null,
+              "capture": {
+                "id": "capture.D.info-icon-guidance",
+                "path": "docs/evidence/features/info-icon-guidance/D/{tupleId}.png",
+                "state": "pending-genuine-capture"
+              },
+              "state": "pending"
+            },
+            "requirementIds": [
+              "info-icon-guidance-REQ-01",
+              "info-icon-guidance-REQ-02",
+              "info-icon-guidance-REQ-03",
+              "info-icon-guidance-REQ-04",
+              "info-icon-guidance-REQ-05",
+              "info-icon-guidance-REQ-06",
+              "info-icon-guidance-REQ-07"
+            ]
+          }
+        },
+        "C": {
+          "workId": "PH01-T02-info-icon-guidance-C",
+          "applicability": "required",
+          "reason": "Catalogue surface; detailed canonical applicability review pending.",
+          "state": "unimplemented",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "planned-unimplemented",
+            "consumer": {
+              "id": "C.info-icon-guidance.controller",
+              "path": "src/companion/features/info-icon-guidance",
+              "operation": "C.info-icon-guidance.apply",
+              "authority": "paired scoped broker capability; revocation applies",
+              "behavior": "Independent per-control bundled info button above each capable target, contextual guidance, worked example and isolated playground with accessible focus return",
+              "requestContract": "docs/planning/operation-request.schema.json"
+            },
+            "articles": [
+              {
+                "id": "article.C.info-icon-guidance.en",
+                "path": "docs/features/info-icon-guidance/C.en.md",
+                "state": "planned"
+              },
+              {
+                "id": "article.C.info-icon-guidance.zh-HK",
+                "path": "docs/features/info-icon-guidance/C.zh-HK.md",
+                "state": "planned"
+              }
+            ],
+            "copy": [
+              {
+                "id": "copy.C.info-icon-guidance.en",
+                "path": "src/companion/features/info-icon-guidance/locales/en.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.C.info-icon-guidance.zh-HK",
+                "path": "src/companion/features/info-icon-guidance/locales/zh-HK.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.C.info-icon-guidance.bilingual",
+                "path": "src/companion/features/info-icon-guidance/locales/bilingual.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              }
+            ],
+            "persistence": {
+              "id": "state.C.info-icon-guidance",
+              "store": "browser-local:C:feature:info-icon-guidance",
+              "version": 1,
+              "states": [
+                "initial",
+                "changed",
+                "reload",
+                "reset",
+                "corrupt",
+                "migration"
+              ],
+              "sensitiveData": "vault references only; exclude secrets and personal mappings from exports/history",
+              "state": "planned-review-per-property"
+            },
+            "tests": [
+              {
+                "id": "test.C.info-icon-guidance.interaction",
+                "path": "tests/features/info-icon-guidance/C.interaction.test.cjs"
+              },
+              {
+                "id": "test.C.info-icon-guidance.negative",
+                "path": "tests/features/info-icon-guidance/C.negative.test.cjs"
+              }
+            ],
+            "runtime": {
+              "id": "runtime.C.info-icon-guidance",
+              "tupleIdTemplate": "C.info-icon-guidance.{state}.{language}.{theme}.{scale}.{viewport}",
+              "states": [
+                "initial",
+                "success",
+                "invalid",
+                "unavailable",
+                "cancelled",
+                "recovery",
+                "reload",
+                "reset",
+                "stale",
+                "disconnected",
+                "interrupted",
+                "partial"
+              ],
+              "languages": [
+                "en",
+                "zh-HK",
+                "bilingual"
+              ],
+              "themes": [
+                "light",
+                "dark"
+              ],
+              "scales": [
+                100,
+                125,
+                150,
+                200
+              ],
+              "viewports": [
+                "minimum-320px",
+                "normal-1280px"
+              ],
+              "sourceRevision": null,
+              "builtHash": null,
+              "capture": {
+                "id": "capture.C.info-icon-guidance",
+                "path": "docs/evidence/features/info-icon-guidance/C/{tupleId}.png",
+                "state": "pending-genuine-capture"
+              },
+              "state": "pending"
+            },
+            "requirementIds": [
+              "info-icon-guidance-REQ-01",
+              "info-icon-guidance-REQ-02",
+              "info-icon-guidance-REQ-03",
+              "info-icon-guidance-REQ-04",
+              "info-icon-guidance-REQ-05",
+              "info-icon-guidance-REQ-06",
+              "info-icon-guidance-REQ-07"
+            ]
+          }
+        },
+        "R": {
+          "workId": "PH01-T02-info-icon-guidance-R",
+          "applicability": "outside-catalogue-scope",
+          "reason": "Catalogue assigns A+D+C; detailed canonical review must resolve any additional universal surface obligation.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "Catalogue assigns A+D+C; detailed canonical review must resolve any additional universal surface obligation."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "Catalogue assigns A+D+C; detailed canonical review must resolve any additional universal surface obligation."
+            },
+            "requirementIds": [
+              "info-icon-guidance-REQ-01",
+              "info-icon-guidance-REQ-02",
+              "info-icon-guidance-REQ-03",
+              "info-icon-guidance-REQ-04",
+              "info-icon-guidance-REQ-05",
+              "info-icon-guidance-REQ-06",
+              "info-icon-guidance-REQ-07"
+            ]
+          }
+        }
+      },
+      "subrequirements": [
+        {
+          "id": "info-icon-guidance-REQ-01",
+          "text": "Track this identity independently of guided forms, with a hand-written inventory binding every rendered capable control to its exact info button, target, contextual content and interaction evidence; unsupported controls require explicit capability reasons.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "info-icon-guidance-REQ-02",
+          "text": "Render a compact locally bundled Material Design info icon button directly above each capable target; global Help, tooltips alone, text-only guidance links and source declarations do not substitute for a working rendered button.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "info-icon-guidance-REQ-03",
+          "text": "Provide at least 44 by 44 logical units on native Windows surfaces and 44 by 44 CSS pixels on browser surfaces, localized target-specific accessible names, tooltips, keyboard activation, visible focus, truthful expanded state and focus return.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "info-icon-guidance-REQ-04",
+          "text": "Opening the optional non-modal panel presents complete target-specific purpose, choices, defaults, consequences, validation, recovery and guided steps; narrow layouts expand content in flow while preserving target association.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "info-icon-guidance-REQ-05",
+          "text": "Provide a reviewed control-specific worked example and a functioning isolated playground using the actual component and applicable pure logic, synthetic input, a visible result and Reset; closing discards sample drafts and reopening restores the example.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "info-icon-guidance-REQ-06",
+          "text": "Never seed a playground from live private values or files, alter production settings or history, invoke real external or destructive actions, bypass validation or permissions, or claim a sample result completed a real operation.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "info-icon-guidance-REQ-07",
+          "text": "Independently remove the required icon, target binding, keyboard action or contextual panel and replace specific help with repeated generic text to obtain failing regressions; restore real behavior to pass and retain per-control localized documentation, persistence or explicit non-persistence, real built interactions and genuine captures.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         }

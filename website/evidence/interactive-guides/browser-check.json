@@ -1,0 +1,451 @@
+{
+  "schema": 1,
+  "scope": "Initial documentation site only; no desktop, full shared feature parity, native host or companion proof.",
+  "route": "local-headless-chromium",
+  "browser": "154.0.8037.57",
+  "built_at": "2026-10-15T21:38:28.314Z",
+  "input_snapshot_sha256": "d9f0cd2d3f1ea5750fe2f36f05cefe0478287483451a8dec672617eab4cf1d8f",
+  "base_commit": "c527753500fd97e66b6e74646bd93a42b6555aea",
+  "inputs_differ_from_base": true,
+  "checks": [
+    "Served HTML, JavaScript and CSS match the exact selected build output.",
+    "Interactive field guide validates persistent walkthrough progress, safe recipe preview and input rejection, troubleshooting decisions, local article bookmarks and latest-release/native-limit status.",
+    "Companion protocol fixture verifies private-IP validation, manual challenge pairing, bounded read-only request shapes, memory-only CSRF state, safe workspace/project/job summaries, session refresh and server-confirmed disconnect. This fixture does not establish real TLS/LAN acceptance.",
+    "Visitor workbench persists a private plan, checklist and notes; malformed imports preserve existing data, valid backups restore state, export downloads JSON, and opt-in offline caching serves an article after network disconnect. A separate protocol fixture covers the opted-in read-only companion contract but does not establish real TLS/LAN acceptance.",
+    "Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.",
+    "Document search reports the full match count, caps results truthfully, supports keyboard focus and Escape/outside dismissal, and opens a complete article.",
+    "Heading language and explicit theme preferences survive reload; fresh system theme is light in this test context.",
+    "Bilingual walkthrough rail buttons fit inside their rail without overlapping the explanation panel at desktop and 320px; full names remain accessible and filled-button Cantonese labels use on-primary white.",
+    "Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation traps forward/reverse Tab, retains Material arrow navigation, and Escape closes it.",
+    "All 67 current document routes render their complete article at mobile width without page overflow.",
+    "All 24 manifest-listed current-workspace captures load in the evidence article and have alternative text. Captures remain source-preview evidence, not Windows runtime proof.",
+    "All 27 overview/category/phase/status routes fit 320px and use real dedicated pages.",
+    "All authored interactive controls use registered Material Web components; standard document hyperlinks remain semantic links.",
+    "No browser JavaScript errors or HTTP asset/route failures observed."
+  ],
+  "captures": [
+    {
+      "file": ".cache/browser-evidence/ph09-final-current-gallery-3/home-desktop-dark.png",
+      "sha256": "d9de805baaa334f0ccc9b316c6de32de824fbf2ae1dc942de700aa07475a2d82",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "dark",
+      "language": "en"
+    },
+    {
+      "file": ".cache/browser-evidence/ph09-final-current-gallery-3/home-desktop.png",
+      "sha256": "f0c583d2eb5cfcb3343f749204eccf046fe3edee005c484c4d9f3fbbcaa1bbe9",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": ".cache/browser-evidence/ph09-final-current-gallery-3/home-mobile.png",
+      "sha256": "3abfe66345e65bdd59ff4f6491057b202de921392bb2aa21d87b5de23a471639",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": ".cache/browser-evidence/ph09-final-current-gallery-3/roadmap-categories.png",
+      "sha256": "8f987dc688b5de7f2f04c0e01a4baddb29ee6fff56e1156b38583607467e8edd",
+      "route": "/material-buildroot/site/roadmap.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": ".cache/browser-evidence/ph09-final-current-gallery-3/roadmap-article.png",
+      "sha256": "0819a19c65aad0304c11dc0fd634b2794e9ae7df2e1a6a49e67294f10f79ffa4",
+      "route": "/material-buildroot/site/phases/ph00.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    }
+  ],
+  "artifacts": {
+    "html_sha256": "97d516308444e7f9271658b78199fb7dd6645c2cee9cd29ebd7e3dd3ab965986",
+    "javascript_sha256": "c0c2050001f29ec56c725e5921d1cc4d6027d71020942afbaaee615783ea74ef",
+    "css_sha256": "425c542717da2a40ce7aaec91bec8e7c3f6a4f47c0fbea37b67ed6327c827cad"
+  },
+  "geometry": [
+    {
+      "width": 320,
+      "language": "both",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "en",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "zh",
+      "document_width": 320
+    },
+    {
+      "width": 390,
+      "language": "both",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "zh",
+      "document_width": 390
+    },
+    {
+      "width": 768,
+      "language": "both",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "en",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "zh",
+      "document_width": 768
+    },
+    {
+      "width": 1440,
+      "language": "both",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "en",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "zh",
+      "document_width": 1440
+    }
+  ],
+  "document_routes": [
+    {
+      "source": "AGENTS.md",
+      "status": 200
+    },
+    {
+      "source": "CLOSEOUT_PROMPT.md",
+      "status": 200
+    },
+    {
+      "source": "DECISIONS.md",
+      "status": 200
+    },
+    {
+      "source": "HANDOFF.md",
+      "status": 200
+    },
+    {
+      "source": "NEXT_SESSION.md",
+      "status": 200
+    },
+    {
+      "source": "PLAN.md",
+      "status": 200
+    },
+    {
+      "source": "README.md",
+      "status": 200
+    },
+    {
+      "source": "ROADMAP.md",
+      "status": 200
+    },
+    {
+      "source": "design/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/REVIEW.md",
+      "status": 200
+    },
+    {
+      "source": "design/acceptance.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/components.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/questions.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/screens.md",
+      "status": 200
+    },
+    {
+      "source": "design/components.md",
+      "status": 200
+    },
+    {
+      "source": "design/desktop-shell.md",
+      "status": 200
+    },
+    {
+      "source": "design/desktop-workspace-remake.md",
+      "status": 200
+    },
+    {
+      "source": "design/modern-workspace.md",
+      "status": 200
+    },
+    {
+      "source": "design/reference/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/reference/control-map.md",
+      "status": 200
+    },
+    {
+      "source": "design/screens.md",
+      "status": 200
+    },
+    {
+      "source": "docs/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/build/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/build/releases.md",
+      "status": 200
+    },
+    {
+      "source": "docs/build/windows-entrypoints.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/built-in-tools.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/configuration.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/deployment.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/execution.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/host-and-preferences.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/modern-workspace.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/modern-workspace.zh-HK.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/updates.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/ARCHIVE.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/desktop-shell/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/modern-workspace/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/planning-site.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH00-current-hosting.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH01-catalogue-delta.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH01-contracts.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH01-current-interface-contracts.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH01-implementation-admission.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH01-vocabulary-mode-admission.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH02-T02-C03.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH10-implementation.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/architecture.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/buildroot-constraints.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/evidence-ledger.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/feature-coverage.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/implementation-admission.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/managed-execution.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/surfaces.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/broker-admission.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/companion.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/jobs-and-recovery.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/offline-documentation.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/operation-requests.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/workspace-state.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/FAQ.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Getting-started.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Home.md",
+      "status": 200
+    },
+    {
+      "source": "website/README.md",
+      "status": 200
+    }
+  ],
+  "navigation_routes": [
+    "index.html",
+    "site/library.html",
+    "site/roadmap.html",
+    "site/status.html",
+    "site/visitor.html",
+    "site/categories/planning.html",
+    "site/categories/design.html",
+    "site/categories/wiki.html",
+    "site/categories/evidence.html",
+    "site/categories/build.html",
+    "site/categories/desktop.html",
+    "site/categories/security.html",
+    "site/roadmap/foundations.html",
+    "site/roadmap/buildroot.html",
+    "site/roadmap/tools.html",
+    "site/roadmap/delivery.html",
+    "site/phases/ph00.html",
+    "site/phases/ph01.html",
+    "site/phases/ph02.html",
+    "site/phases/ph03.html",
+    "site/phases/ph04.html",
+    "site/phases/ph05.html",
+    "site/phases/ph06.html",
+    "site/phases/ph07.html",
+    "site/phases/ph08.html",
+    "site/phases/ph09.html",
+    "site/phases/ph10.html"
+  ],
+  "verdict": "passed",
+  "checked_at": "2026-10-15T21:39:31.241Z"
+}

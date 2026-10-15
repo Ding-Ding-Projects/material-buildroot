@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "7c14df34ffe785e2a7e108b17f839e15668d1183",
+  "route": "Linux headless Chromium through Vite source fixture",
+  "sourceBound": true,
+  "packagedArtifact": null,
+  "nativeWindowsVerified": false,
+  "timezone": "UTC",
+  "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
+  "checks": {
+    "rendererCases": 52,
+    "passed": 52,
+    "onboardingRecaptureCases": 1,
+    "onboardingRecapturePassed": 1,
+    "unitPassed": 217,
+    "unitSkipped": 1
+  },
+  "sourceBindings": [
+    {
+      "path": "package-lock.json",
+      "sha256": "a1cbe18328e8acd28114a68c00ffbbc353c0a1c74df55e332660618d6419d392"
+    },
+    {
+      "path": "src/main/security/workspace-contract.cjs",
+      "sha256": "5191f3731840c025ad6d997b8dd888804d058402206733045622abb5f0785c61"
+    },
+    {
+      "path": "src/main/storage/workspace-store.cjs",
+      "sha256": "dd07e56e308877218ecbbf95b745068b47cd2752a82a37791d3fe99acef7be90"
+    },
+    {
+      "path": "src/main/workspace-service.cjs",
+      "sha256": "67b4a5470cd01e778298e01ad9d49d4cd41f8206dc0670d54e3f796d9f4adce5"
+    },
+    {
+      "path": "src/renderer/assets.d.ts",
+      "sha256": "35d26ea66c86da9701e4f4b467913481ffeae910761cea34c775c5dacb7f8eaa"
+    },
+    {
+      "path": "src/renderer/assets/Roboto-LICENSE.txt",
+      "sha256": "84044c09058803d87a241bd28abb4ce30a433d7db9c27a04da3efad6a0ca539c"
+    },
+    {
+      "path": "src/renderer/assets/roboto-latin.woff2",
+      "sha256": "20b535fa80c8189e3b87d1803038389960203a886d502bc2ef1857affc2f38d2"
+    },
+    {
+      "path": "src/renderer/companion-panel.ts",
+      "sha256": "2ee5e084e6961938959fba84f997bc9bb80e088283d6eab0a9176f57972775cf"
+    },
+    {
+      "path": "src/renderer/fonts.css",
+      "sha256": "132c570287393d83de7393dd20445bb915b5c326b87503b4266e1a505172373f"
+    },
+    {
+      "path": "src/renderer/guest-panel.ts",
+      "sha256": "b435665baa8741b2cb4681d70ee4a03fbd03446a26b96c4394b106ee4fe7a7f5"
+    },
+    {
+      "path": "src/renderer/main.ts",
+      "sha256": "298685dca39dfb7d635b20d85b6739984e2bf162a5ae803c5d2ab3cb06acb893"
+    },
+    {
+      "path": "src/renderer/operations-panel.ts",
+      "sha256": "a389e0e1f55245a4186c2634377d08f45c0d86c0dd9dd202eab05ff0eb2cc595"
+    },
+    {
+      "path": "src/renderer/regex-workbench.ts",
+      "sha256": "251f157c5622dffa7a7b738d723cf774178fc2f687d23a98f33786b86eae6fdd"
+    },
+    {
+      "path": "src/renderer/regex-worker.ts",
+      "sha256": "a6e359b3285ccaf416c9a33636009cb42aca4a7965a7a926be21e2aa1edfe4e6"
+    },
+    {
+      "path": "src/renderer/tools-panel.ts",
+      "sha256": "c8578a9e73e9bc830aa56e88172753075ae16ece571c1b384c7646d4d0bb25e8"
+    },
+    {
+      "path": "src/renderer/workspace-styles.ts",
+      "sha256": "19c8fc1d5469321c93abf68b03b8b197b2893dd0e9b110d3c187443a748a7a4c"
+    },
+    {
+      "path": "src/shared/api.ts",
+      "sha256": "b7b8348f58878db28e34d4cfead039464fa58f82cff41fc17542d95f32ae9219"
+    },
+    {
+      "path": "src/shared/broker-core.ts",
+      "sha256": "a47059869b199c89018c544e62d5a9f6d715acfa2a6afc4f153f50b48ecbebd3"
+    },
+    {
+      "path": "src/shared/operation-request.schema.json",
+      "sha256": "1670d3e579d922fdea1330b80a04d9b614e521f4deb193073b4ccc7ed0f97709"
+    },
+    {
+      "path": "src/shared/workspace.ts",
+      "sha256": "1a0d667b05acbc8c7e68dca47bc7e77d1d129905df198bb17006472346c42e4c"
+    }
+  ],
+  "captureRecipeBindings": [
+    {
+      "path": "tests/renderer/renderer-settings.spec.mjs",
+      "sha256": "fd4b7a314422a25cbce372a579250c69e5a7b702b3af17da8024d2cccc8788b0"
+    },
+    {
+      "path": "tests/renderer/renderer-workspace.spec.mjs",
+      "sha256": "f98ee96da23db4f10fed780ebf4475003d8d9f0c68851f755c06cb8ba52f0155"
+    },
+    {
+      "path": "tests/renderer/renderer-tools.spec.mjs",
+      "sha256": "ff3f41f0c4c7f9bd465192e38e2312c1db65ce2f133129f737c31744b4437232"
+    },
+    {
+      "path": "tests/renderer/renderer-vite.config.mjs",
+      "sha256": "411b81a69204935eebf479cafbbcff887fb399f61eeec1b4ec6a942971fd54f0"
+    }
+  ],
+  "images": [
+    {
+      "file": "workspace-en-dark.png",
+      "caption": "Workspace, English, dark, 1440 × 960",
+      "fixture": "workspace-service",
+      "width": 1440,
+      "height": 960,
+      "bytes": 82984,
+      "sha256": "3b1660b89bbbffe957ad447de4b3059f6ade2c84d87259d8d5f72e93f133a12e",
+      "capturedAt": "2026-10-15T19:55:52.233831+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "workspace-en-light.png",
+      "caption": "Workspace, English, light, 1440 × 960",
+      "fixture": "workspace-service",
+      "width": 1440,
+      "height": 960,
+      "bytes": 82532,
+      "sha256": "260307ce6018382bed26d3c83709ea1f1c795983c7980a584d81062d40dc3cf5",
+      "capturedAt": "2026-10-15T19:55:50.509794+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "workspace-zh-hk-light.png",
+      "caption": "Workspace, Hong Kong Cantonese, light, 1440 × 960",
+      "fixture": "workspace-service",
+      "width": 1440,
+      "height": 960,
+      "bytes": 82990,
+      "sha256": "640c5f9cadcbc64cd66c25e12db86a58f11b1b5c12e8a05911ceb5355792bc1e",
+      "capturedAt": "2026-10-15T19:55:54.065870+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "workspace-bilingual-dark.png",
+      "caption": "Workspace, bilingual, dark, 1440 × 960",
+      "fixture": "workspace-service",
+      "width": 1440,
+      "height": 960,
+      "bytes": 138193,
+      "sha256": "dba718f8018aee390b6bd611cd05da7e6493e6a51bb50c0b4356630adf8bd769",
+      "capturedAt": "2026-10-15T19:55:59.285983+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "workspace-bilingual-compact.png",
+      "caption": "Workspace, bilingual, dark, 960 × 640, scrollable editor",
+      "fixture": "workspace-service",
+      "width": 960,
+      "height": 640,
+      "bytes": 84407,
+      "sha256": "9d93723c9ec32581900c3cffcb8491d5be9fe5d361e62c7699a41d5b91617d77",
+      "capturedAt": "2026-10-15T19:55:58.421964+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "tools-bilingual-light.png",
+      "caption": "Tools component fixture, bilingual, light, full-page capture",
+      "fixture": "typed-operation-fixture",
+      "width": 1440,
+      "height": 1945,
+      "bytes": 307701,
+      "sha256": "9879e3a5d02070d85a3f52311d7815ff00c1b2298e3ea0cea1cb4a30da4151c9",
+      "capturedAt": "2026-10-15T19:55:36.053482+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "companion-bilingual-light.png",
+      "caption": "Companion component fixture, bilingual, light, unconfigured",
+      "fixture": "typed-operation-fixture",
+      "width": 1440,
+      "height": 960,
+      "bytes": 135884,
+      "sha256": "9c84e74eca83fc08b34ebf7a1043f57c09a4486452d860721efc2c5887ad2aba",
+      "capturedAt": "2026-10-15T19:55:36.229486+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "companion-bilingual-dark.png",
+      "caption": "Companion component fixture, bilingual, dark, unconfigured",
+      "fixture": "typed-operation-fixture",
+      "width": 960,
+      "height": 960,
+      "bytes": 131155,
+      "sha256": "9ad8333e951ef6a1db40101dd356ad5f0a7ebe530f1823ef7a4c1ed0f65d40e5",
+      "capturedAt": "2026-10-15T19:55:35.273465+00:00",
+      "reviewed": true
+    },
+    {
+      "file": "onboarding.png",
+      "caption": "Practical onboarding, English, step 2, real saved-plan workflow",
+      "fixture": "workspace-service",
+      "width": 1440,
+      "height": 960,
+      "bytes": 81183,
+      "sha256": "82b2947d2b5f0cb90b10c6237dccc6c606781bcb557673f46ca4d36413fe3b9d",
+      "capturedAt": "2026-10-15T19:56:47.287015+00:00",
+      "reviewed": true
+    }
+  ],
+  "limitations": [
+    "No packaged Windows, native IPC, installer, WSL, Docker, guest, native file picker or LAN acceptance.",
+    "Tools and companion replies in component captures are typed fixtures; they do not show completed host operations.",
+    "Workspace captures use the actual local workspace service through an explicit browser harness.",
+    "One onboarding recapture waits for Material text-field transition completion; its updated recipe is recorded separately."
+  ]
+}
