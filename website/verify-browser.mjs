@@ -174,7 +174,7 @@ try{
  receipt.navigation_routes=extraRoutes;
  receipt.checks.push('All '+extraRoutes.length+' overview/category/phase/status routes fit 320px and use real dedicated pages.');
  await page.goto(new URL('site/library.html',target).href);await ready();
- assert.equal(await page.locator('.category-card').count(),4);
+ assert.equal(await page.locator('.category-card').count(),new Set(inventory.map(doc=>doc.category)).size);
  await page.locator('.category-card md-list-item').first().click();await ready();
  assert.match(page.url(),/site\/categories\/planning\.html$/);
  assert.ok(await page.locator('.library-item').count()>0);
