@@ -1,5 +1,15 @@
 # Continuation handoff
 
+## Latest verified delivery and remaining closeout
+
+Latest observation: automatic workflow 38682722692 completed successfully and created normal `v0.1.0-build.1.1`. The earlier running observation below is historical. No further waiting on that run is required; preserve the independently verified `v0.1.0` direct download and finish documentation publication.
+
+The owner's request to fix the empty Releases page now has a verified first download: [v0.1.0](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0), normal and non-draft/non-prerelease, exact source `0881a3a3f58c85bf73f57035b3a09da3acbbe1a8`. All five uploaded assets matched local size and SHA-256. [Download Setup.exe](https://github.com/Ding-Ding-Projects/material-buildroot/releases/download/v0.1.0/Setup.exe). The code name is Classic Har Gow · 蝦餃, linked to its public catalog photo without copying it.
+
+The installed executable and archive matched the full package; bounded installed launch reported the exact version/source and ready storage with native capture. Setup exit code, signer-process auditing and update-pair acceptance remain unavailable. Automatic updates and full Buildroot functionality remain unfinished. Workflow 38682722692 was still running when this record was written.
+
+Complete only the current release closeout: rebuild and publish the corrected documentation/download link, verify live delivery, preserve these records and observe the already-running workflow. Do not start adjacent features. Keep every retained browser profile and fixture unchanged; skipped deletion tasks remain skipped. Earlier preparation text below records history, not the latest release state. This record's own commit and publication require separate proof.
+
 ## Latest release request and acceptance result
 
 The owner additionally requested fixing the empty Releases page. The source now prepares the first version 0.1.0 unsigned Squirrel.Windows release and a build/publication workflow, with an original product icon and exact-source asset verification. No build or publication is implied by source preparation. Run the exact installer entrypoint from a fixed commit and verify actual output and remote assets before claiming a download exists. Automatic updates and the wider product remain unfinished.

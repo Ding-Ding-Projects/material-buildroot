@@ -138,6 +138,12 @@
     "category": "Build"
   },
   {
+    "source": "docs/build/releases.md",
+    "title": "Unsigned Windows releases",
+    "url": "/material-buildroot/site/articles/docs/build/releases.html",
+    "category": "Build"
+  },
+  {
     "source": "docs/build/windows-entrypoints.md",
     "title": "Windows entrypoints and source-bound outputs",
     "url": "/material-buildroot/site/articles/docs/build/windows-entrypoints.html",

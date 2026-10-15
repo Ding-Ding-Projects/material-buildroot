@@ -188,6 +188,8 @@ Exit proof: Every required task and expanded child is checked with current linke
 
 ## PH10 Packaging, release and complete native acceptance
 
+- [x] Publish the bounded version 0.1.0 desktop milestone as a normal release with all five assets verified by size and SHA-256, exact source `0881a3a3f58c85bf73f57035b3a09da3acbbe1a8`. [Release and installer](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0). Bounded installed launch and full-package identity were verified. Full PH10 installer, updater, automatic-workflow and product acceptance remain open.
+
 Prerequisites: PH01–PH09 scoped exit proofs and a complete explicit ledger of remaining PH10 packaging/release-dependent records. No earlier phase may require those future records to pass.
 
 - [ ] **PH10-T01** [A+D+C+R (final applicable acceptance)] Assemble one complete Windows x64 installer with all required capability payloads, original installed icons, valid license disclosures and actual offline bundled-first discovery.
@@ -226,7 +228,7 @@ Each identity has exactly one primary acceptance phase below. Cross-phase depend
 
 ## Current checkpoint
 
-The requested first downloadable desktop milestone is being packaged as version 0.1.0. Source-only release wiring does not close installer, update, release or full-product acceptance. The additional focused packaged pass on `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd` passed six keyboard/accessibility combinations, reload/replay and stale-revision recovery, and two preserved invalid/foreign storage cases; native display-scale and elapsed-time expiry evidence remain separate and open.
+The requested first downloadable desktop milestone is published as version 0.1.0. This bounded publication does not close complete installer, update or full-product acceptance. The additional focused packaged pass on `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd` passed six keyboard/accessibility combinations, reload/replay and stale-revision recovery, and two preserved invalid/foreign storage cases; native display-scale and elapsed-time expiry evidence remain separate and open.
 
 The bounded PH02-T02-C02 desktop-shell child is verified against the source and capture record linked above; its broad parent remains unchecked. The earlier data-only broker child retains its separate evidence. All wider phase and per-surface acceptance requirements remain open unless their own checkbox and evidence explicitly say otherwise.
 

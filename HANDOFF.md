@@ -1,5 +1,13 @@
 # Handoff
 
+## Verified first downloadable release
+
+Latest observation: workflow [38682722692](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38682722692) completed successfully and created normal release `v0.1.0-build.1.1`, superseding its earlier running state below. The first manually verified `v0.1.0` download remains stable.
+
+[Version 0.1.0: Classic Har Gow · 蝦餃](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0) is published as a normal, non-draft, non-prerelease release. Its exact tag source is `0881a3a3f58c85bf73f57035b3a09da3acbbe1a8`; all five uploaded assets matched local SHA-256 digests and sizes. [Setup.exe](https://github.com/Ding-Ding-Projects/material-buildroot/releases/download/v0.1.0/Setup.exe) is the genuine unsigned Squirrel.Windows installer. Unknown-publisher or SmartScreen warnings may appear.
+
+The installed executable SHA-256 `b73e70f3338f965d7a1f6820beae31ccfcf8e0be4e16b5dcd922d5d89ea466bf` and archive SHA-256 `b37f6a251a71f60ab117ca27b58214b350499e8990104bf6dcb54aeac99be69b` matched the full package. A bounded installed launch reported version 0.1.0, the exact release source and ready storage, with native capture. Setup process exit code was unavailable. Signer-process auditing, update-pair proof and automatic updates remain unverified or unimplemented. Workflow [38682722692](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38682722692) was still running, so no successful automatic workflow verdict is claimed. Earlier preparation notes below are historical and superseded by this publication record.
+
 ## First downloadable release preparation and focused desktop acceptance
 
 The owner additionally requested a real release because the Releases page was empty. The first unsigned Squirrel.Windows package and automatic publication route are prepared in source; actual build, installation and published-asset proof must be recorded separately. Version 0.1.0 remains an early desktop milestone, not a complete Buildroot manager. Read [the release procedure](docs/build/releases.md).

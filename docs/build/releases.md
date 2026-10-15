@@ -1,5 +1,11 @@
 # Unsigned Windows releases
 
+## Published version 0.1.0
+
+Automatic workflow [38682722692](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38682722692) subsequently completed successfully and created normal release `v0.1.0-build.1.1`, superseding the running observation below. The first `v0.1.0` direct download remains stable.
+
+[Download Setup.exe](https://github.com/Ding-Ding-Projects/material-buildroot/releases/download/v0.1.0/Setup.exe) or inspect the [normal v0.1.0 release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0). The immutable tag resolves to `0881a3a3f58c85bf73f57035b3a09da3acbbe1a8`. All five uploaded asset sizes and SHA-256 digests matched local files. Bounded installed-launch evidence reported version 0.1.0, that source and ready storage, and the installed executable/archive matched the full package. Setup exit code was unavailable; signer-process audit, an update pair and automatic updating are not proven. The automatic release run 38682722692 was still in progress at this record boundary. This first desktop milestone does not close complete installer, updater or product acceptance.
+
 The first downloadable milestone is version 0.1.0. It contains the bounded desktop shell and durable language settings. Project creation, Buildroot execution and automatic updates are not implemented. The initial code name is **Classic Har Gow · 蝦餃**, resolved from the public catalog revision recorded in `assets/branding/release-codename.json`; the [public dish photo](https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0001-classic-har-gow.png) remains in its owning catalog release and is not copied into this repository or attached again.
 
 ## Local production and publication
