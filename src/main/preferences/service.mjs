@@ -1,3 +1,9 @@
+import { createSourceEnrollmentStore } from "./source-enrollments.mjs";
+import {
+  syntaxOptions,
+  parseStoredSchedule,
+  validateStoredSchedule,
+} from "./schedule-validation.mjs";
 import fs from "node:fs";
 import {
   createScheduleStore,
@@ -43,19 +49,49 @@ export function createSchedulePreferencesService({
     tickMs > 60000
   )
     fail("INVALID_SCHEDULE_SERVICE");
-  const provider = createScheduleSourceProvider({
-      enrollments: sourceEnrollments,
+  const enrollmentStore = createSourceEnrollmentStore({
+    directory,
+    profileId,
+    vault,
+  });
+  let enrolledCount = sourceEnrollments.length,
+    enrollmentHealthy = true,
+    enrollmentIdentity = null,
+    enrolledKinds = new Map(
+      sourceEnrollments.map((entry) => [entry.origin, entry.kind]),
+    );
+  const options = {
+    registry: CURRENT_SCHEDULE_REGISTRY,
+    allowedOrigins: [],
+    allowLoopbackHttp: sourceEnrollments.some(
+      (entry) => entry.developmentLoopback,
+    ),
+  };
+  const buildProvider = (entries) =>
+    createScheduleSourceProvider({
+      enrollments: entries,
       registry: CURRENT_SCHEDULE_REGISTRY,
       vault,
       lookup,
       trustedCa,
-    }),
-    options = provider.options(),
-    adapter =
-      storageAdapter ??
-      createSqliteScheduleAdapter({ directory, profileId, ...options }),
-    store = createScheduleStore({ adapter, ...options }),
+    });
+  let provider = buildProvider(sourceEnrollments),
     coordinator = createExternalScheduleCoordinator(options);
+  const adapter =
+    storageAdapter ??
+    createSqliteScheduleAdapter({
+      directory,
+      profileId,
+      ...options,
+      allowUnenrolledSources: true,
+    });
+  const store = {
+    async load() {
+      const bytes = await adapter.read();
+      return bytes === null ? null : parseStoredSchedule(bytes, options);
+    },
+  };
+
   let current = null,
     identity = null,
     generation = 0,
@@ -80,7 +116,7 @@ export function createSchedulePreferencesService({
     watching: watching && !closed,
     running: started && !closed,
     revision: current?.revision ?? null,
-    externalAvailable: sourceEnrollments.length > 0 && !closed,
+    externalAvailable: enrollmentHealthy && enrolledCount > 0 && !closed,
     effective: available && watching && !closed ? copy(effective) : null,
     evaluatedAt: available && watching && !closed ? evaluatedAt : null,
   });
@@ -106,8 +142,13 @@ export function createSchedulePreferencesService({
       current = document;
       identity = next;
       providerIssues.clear();
-      if (document) coordinator.reset(document);
-      else coordinator.cancel();
+      if (document) {
+        coordinator.cancel();
+        coordinator = createExternalScheduleCoordinator(
+          syntaxOptions(document, options),
+        );
+        coordinator.reset(document);
+      } else coordinator.cancel();
     }
   }
   async function load() {
@@ -144,7 +185,7 @@ export function createSchedulePreferencesService({
           base,
           at,
           external: coordinator.snapshot(),
-          ...options,
+          ...syntaxOptions(document, options),
         })
       : {
           values: copy(base),
@@ -155,6 +196,27 @@ export function createSchedulePreferencesService({
     const issues = new Map(result.issues.map((issue) => [issue.ruleId, issue]));
     for (const [ruleId, code] of providerIssues)
       issues.set(ruleId, { ruleId, code });
+    if (document)
+      for (const issue of [...issues.values()]) {
+        const rule = document.rules.find((rule) => rule.id === issue.ruleId);
+        if (rule && rule.source.type !== "local") {
+          const origin = new URL(
+            rule.source.type === "https"
+              ? rule.source.url
+              : rule.source.baseUrl,
+          ).origin;
+          if (!enrollmentHealthy)
+            issues.set(rule.id, {
+              ruleId: rule.id,
+              code: "SOURCE_ENROLLMENTS_UNAVAILABLE",
+            });
+          else if (enrolledKinds.get(origin) !== rule.source.type)
+            issues.set(rule.id, {
+              ruleId: rule.id,
+              code: "SOURCE_NOT_ENROLLED",
+            });
+        }
+      }
     result.issues = [...issues.values()];
     return result;
   }
@@ -163,10 +225,55 @@ export function createSchedulePreferencesService({
     if (!Number.isFinite(value)) fail("SCHEDULE_CLOCK_UNAVAILABLE");
     return value;
   }
+  async function syncEnrollments(force = false) {
+    let bindings,
+      key,
+      healthy = true;
+    const observed = generation;
+    try {
+      bindings = await enrollmentStore.bindings();
+      if (observed !== generation) bindings = await enrollmentStore.bindings();
+      key = JSON.stringify(bindings);
+    } catch {
+      healthy = false;
+      bindings = { entries: [] };
+      key = "unavailable";
+    }
+    if (closed) return;
+    if (!force && key === enrollmentIdentity) return;
+    enrollmentIdentity = key;
+    enrollmentHealthy = healthy;
+    generation++;
+    provider.close();
+    coordinator.cancel();
+    providerIssues.clear();
+    try {
+      const entries = healthy
+        ? [...sourceEnrollments, ...bindings.entries]
+        : [];
+      provider = buildProvider(entries);
+      enrolledCount = entries.length;
+      enrolledKinds = new Map(
+        entries.map((entry) => [entry.origin, entry.kind]),
+      );
+    } catch {
+      provider = buildProvider([]);
+      enrolledCount = 0;
+      enrollmentHealthy = false;
+      enrolledKinds.clear();
+    }
+    if (current) {
+      coordinator = createExternalScheduleCoordinator(
+        syntaxOptions(current, options),
+      );
+      coordinator.reset(current);
+    }
+  }
   async function cycle() {
     if (cyclePromise) return cyclePromise;
     cyclePromise = (async () => {
       try {
+        await syncEnrollments();
         await load();
         const at = now();
         if (current) coordinator.reconcile(current, at);
@@ -302,6 +409,44 @@ export function createSchedulePreferencesService({
       return snapshot();
     },
     read: load,
+    async enrollmentList() {
+      ready();
+      try {
+        return await enrollmentStore.list();
+      } catch (error) {
+        await syncEnrollments(true);
+        await cycle();
+        throw error;
+      }
+    },
+    async enrollmentSave(input) {
+      ready();
+      try {
+        const result = await enrollmentStore.save(input);
+        await syncEnrollments();
+        await cycle();
+        if (!available) await cycle();
+        return result;
+      } catch (error) {
+        if (error.code !== "UNAUTHORIZED") await syncEnrollments(true);
+        await cycle();
+        throw error;
+      }
+    },
+    async enrollmentRemove(input) {
+      ready();
+      try {
+        const result = await enrollmentStore.remove(input);
+        await syncEnrollments();
+        await cycle();
+        if (!available) await cycle();
+        return result;
+      } catch (error) {
+        if (error.code !== "UNAUTHORIZED") await syncEnrollments(true);
+        await cycle();
+        throw error;
+      }
+    },
     async replace({ document, expectedRevision, authorize = () => true }) {
       ready();
       const permitted = () => {
@@ -314,11 +459,24 @@ export function createSchedulePreferencesService({
       };
       permitted();
       // The authorizer belongs to this invocation, never mutable shared service state.
+      const replacementOptions = syntaxOptions(document, options);
+      validateStoredSchedule(document, replacementOptions);
       const scoped = {
         async read() {
           permitted();
           const bytes = await adapter.read();
           permitted();
+          if (bytes !== null) {
+            const prior = parseStoredSchedule(bytes, options);
+            replacementOptions.allowedOrigins.splice(
+              0,
+              replacementOptions.allowedOrigins.length,
+              ...new Set([
+                ...replacementOptions.allowedOrigins,
+                ...syntaxOptions(prior, options).allowedOrigins,
+              ]),
+            );
+          }
           return bytes;
         },
         commit(transaction) {
@@ -330,7 +488,7 @@ export function createSchedulePreferencesService({
       try {
         saved = await createScheduleStore({
           adapter: scoped,
-          ...options,
+          ...replacementOptions,
         }).replace(document, { expectedRevision });
       } catch (error) {
         permitted();
@@ -385,6 +543,7 @@ export function createSchedulePreferencesService({
         watcher?.close();
       } catch {}
       adapter.close();
+      enrollmentStore.close();
       listeners.clear();
     },
   });

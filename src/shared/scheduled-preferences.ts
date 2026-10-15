@@ -28,8 +28,36 @@ export interface ScheduledHistoryPage {
   next: number;
   hasMore: boolean;
 }
+export interface ScheduledSourceEntry {
+  id: string;
+  label: string;
+  origin: string;
+  kind: "https" | "home-assistant";
+  privateAddresses: string[];
+  /** A stored protected reference, not a successful provider health check. */
+  credentialConfigured: boolean;
+}
+export interface ScheduledSourceList {
+  available: true;
+  revision: string | null;
+  entries: ScheduledSourceEntry[];
+}
 export type ScheduledPreferencesRequest =
   | { action: "status" | "read" | "refresh" | "cancel" }
+  | { action: "enrollment.list" }
+  | {
+      action: "enrollment.save";
+      expectedRevision: string | null;
+      id?: string;
+      label: string;
+      origin: string;
+      kind: "https" | "home-assistant";
+      privateAddresses?: string[];
+      privateAddressConsent?: boolean;
+      token?: string;
+      retainCredential?: boolean;
+    }
+  | { action: "enrollment.remove"; expectedRevision: string | null; id: string }
   | {
       action: "replace";
       document: ScheduleDocument;
@@ -43,6 +71,7 @@ export type ScheduledPreferencesReply =
         | ScheduledPreferencesSnapshot
         | ScheduleDocument
         | ScheduledHistoryPage
+        | ScheduledSourceList
         | null;
     }
   | { ok: false; code: string };

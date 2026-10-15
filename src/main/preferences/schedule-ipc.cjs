@@ -26,7 +26,17 @@ const CODES = new Set([
   "SCHEDULE_WATCH_UNAVAILABLE",
   "SCHEDULE_CLOCK_UNAVAILABLE",
   "SCHEDULE_EVALUATION_SUPERSEDED",
+  "INVALID_SOURCE_ENROLLMENT",
+  "SCHEDULE_ENROLLMENTS_INVALID",
+  "SCHEDULE_ENROLLMENTS_UNAVAILABLE",
+  "SCHEDULE_ENROLLMENTS_BUSY",
+  "SCHEDULE_ENROLLMENTS_CLOSED",
+  "SCHEDULE_ENROLLMENTS_LIMIT",
+  "SOURCE_ENROLLMENT_NOT_FOUND",
+  "SOURCE_CREDENTIAL_REQUIRED",
+  "SOURCE_CREDENTIAL_UNAVAILABLE",
 ]);
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 function admit(serialized) {
   if (
     typeof serialized !== "string" ||
@@ -41,16 +51,53 @@ function admit(serialized) {
     cancel: ["action"],
     replace: ["action", "document", "expectedRevision"],
     history: ["action", "after", "limit"],
+    "enrollment.list": ["action"],
+    "enrollment.save": [
+      "action",
+      "expectedRevision",
+      "label",
+      "origin",
+      "kind",
+    ],
+    "enrollment.remove": ["action", "expectedRevision", "id"],
   };
+  const optional =
+    value?.action === "enrollment.save"
+      ? [
+          "id",
+          "privateAddresses",
+          "privateAddressConsent",
+          "token",
+          "retainCredential",
+        ]
+      : [];
   if (
     !value ||
     typeof value.action !== "string" ||
     !Object.hasOwn(keys, value.action) ||
     Object.getPrototypeOf(value) !== Object.prototype ||
-    Object.keys(value).length !== keys[value.action].length ||
+    Object.keys(value).some(
+      (key) => !keys[value.action].includes(key) && !optional.includes(key),
+    ) ||
     keys[value.action].some((key) => !Object.hasOwn(value, key))
   )
     throw Error();
+  if (
+    value.action === "enrollment.save" ||
+    value.action === "enrollment.remove"
+  ) {
+    if (
+      value.expectedRevision !== null &&
+      (typeof value.expectedRevision !== "string" ||
+        !uuid.test(value.expectedRevision))
+    )
+      throw Error();
+    if (
+      Object.hasOwn(value, "id") &&
+      (typeof value.id !== "string" || !uuid.test(value.id))
+    )
+      throw Error();
+  }
   if (
     value.action === "replace" &&
     value.expectedRevision !== null &&
@@ -85,13 +132,22 @@ function createScheduleIPC({ desktop, service }) {
       }
       try {
         const { action, ...options } = input;
-        const result =
-          action === "replace"
-            ? await service.replace({
-                ...options,
-                authorize: () => authorized(event),
-              })
-            : await service[action](options);
+        const method =
+          {
+            "enrollment.list": "enrollmentList",
+            "enrollment.save": "enrollmentSave",
+            "enrollment.remove": "enrollmentRemove",
+          }[action] || action;
+        const result = [
+          "replace",
+          "enrollment.save",
+          "enrollment.remove",
+        ].includes(action)
+          ? await service[method]({
+              ...options,
+              authorize: () => authorized(event),
+            })
+          : await service[method](options);
         if (!authorized(event)) return { ok: false, code: "UNAUTHORIZED" };
         return { ok: true, result };
       } catch (error) {

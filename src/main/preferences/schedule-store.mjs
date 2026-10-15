@@ -1,3 +1,4 @@
+import { parseStoredSchedule } from "./schedule-validation.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID, createHash } from "node:crypto";
@@ -96,6 +97,7 @@ export function createSqliteScheduleAdapter({
   directory,
   profileId,
   afterWrite,
+  allowUnenrolledSources = false,
   ...options
 }) {
   if (
@@ -418,7 +420,10 @@ export function createSqliteScheduleAdapter({
           if (!row) return null;
           if (row.document === null) fail("SCHEDULE_STORAGE_INVALID");
           const bytes = new Uint8Array(row.document);
-          parseScheduleBytes(bytes, options);
+          (allowUnenrolledSources ? parseStoredSchedule : parseScheduleBytes)(
+            bytes,
+            options,
+          );
           return bytes;
         } finally {
           db.close();
@@ -434,7 +439,9 @@ export function createSqliteScheduleAdapter({
           (expectedBytes !== null && !(expectedBytes instanceof Uint8Array))
         )
           fail("INVALID_SCHEDULE_TRANSACTION");
-        const candidate = parseScheduleBytes(bytes, options);
+        const candidate = (
+          allowUnenrolledSources ? parseStoredSchedule : parseScheduleBytes
+        )(bytes, options);
         if (candidate.revision !== receipt.toRevision)
           fail("INVALID_SCHEDULE_TRANSACTION");
         const db = open();
@@ -461,7 +468,9 @@ export function createSqliteScheduleAdapter({
             return false;
           }
           if (current) {
-            const prior = parseScheduleBytes(current, options);
+            const prior = (
+              allowUnenrolledSources ? parseStoredSchedule : parseScheduleBytes
+            )(current, options);
             if (prior.revision !== receipt.fromRevision)
               fail("INVALID_SCHEDULE_TRANSACTION");
           } else if (receipt.fromRevision !== null)

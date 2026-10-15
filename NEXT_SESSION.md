@@ -12,6 +12,8 @@ The application is a productive project workspace with durable onboarding, plans
 
 The repaired full Node run discovered 429 tests: 425 passed, four skipped (three opt-in official-source cases and the Windows PowerShell runtime case). Keep that combined result separate from earlier focused official-source checks. Run the final renderer matrix after current GUI controls settle.
 
+Later checkpoints: queue/catalogue controls are published at `009354b`, interactive guide source at `a434c4e`, with generated site output still pending. Explicit schedule source enrollment now has host storage, protected-reference rotation, live revocation and typed list/save/remove IPC; 43 current focused host/enrollment/IPC/preload checks pass. Astra owns the active schedule editor and consumers. Preserve this later source boundary instead of applying the prior full-suite count to new code.
+
 ## Current implementation steering
 
 The owner now authorizes implementation. P40-P42 are answered, managed GitHub Actions execution and product delivery are included, and encrypted transport applies only after a user chooses publication to a verified private repository. The generic engine extraction is approved without private history or credentials. Read HANDOFF.md before the historical planning context below.

@@ -1,5 +1,11 @@
 # Handoff
 
+## Explicit schedule-source enrollment, 2026-10-15
+
+The schedule host now persists deliberate HTTPS/Home Assistant source enrollments with exact origins, explicit private-address choices, revision conflicts and protected credential references. Tokens are transient operation input; safe settings replies contain no token or vault reference. Setup makes no DNS or socket request. Rotation writes a fresh protected reference; prior references are preserved. The narrow bridge exposes list/save/remove with live authority checks and generic failures.
+
+Removing or losing an enrollment aborts the old provider generation and restores eligible local/base values without deleting saved rules. Unenrolled rules remain editable but inert. Independent review repaired external-rule origin changes/removal; 43 current host/enrollment/IPC/preload checks pass, including actual SQLite and local TLS fixtures. Native vault, real user services and Windows acceptance remain unverified. Astra is implementing the graphical editor, source setup and effective language/theme consumers against these APIs.
+
 ## Queue controls and interactive workflow guide source, 2026-10-15
 
 The queue/catalogue GUI is published at `009354b177a74e9ca9a12306771287243a3cc556`; both Windows packaging and Pages workflows passed. The Builds workspace exposes typed reservations, scheduler status, admission rechecks, native-access renewal and verified cleanup. The Local assistant workspace provides observed official catalogue status, paging, family drill-down, scoped regex filtering and refresh/cancel. Fourteen affected browser checks and two viewport checks passed. The captures remain preliminary source previews, with native effects supplied by fixtures.

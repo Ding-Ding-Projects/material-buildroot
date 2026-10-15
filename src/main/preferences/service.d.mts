@@ -1,4 +1,9 @@
 import type {
+  SourceEnrollmentList,
+  SourceEnrollmentSave,
+  SourceEnrollmentRemove,
+} from "./source-enrollments.mjs";
+import type {
   ScheduleDocument,
   SettingRegistry,
   ScheduleHistoryReceipt,
@@ -38,7 +43,9 @@ export function createSchedulePreferencesService(options: {
     | ScheduleEffective["values"]
     | Promise<ScheduleEffective["values"]>;
   sourceEnrollments?: ScheduleSourceEnrollment[];
-  vault?: ScheduleProviderOptions["vault"];
+  vault?: ScheduleProviderOptions["vault"] & {
+    write?(owner: string, secret: string): string | Promise<string>;
+  };
   clock?: () => number;
   tickMs?: number;
   watchFactory?: (
@@ -52,15 +59,17 @@ export function createSchedulePreferencesService(options: {
 }): Readonly<{
   start(): Promise<SchedulePreferencesSnapshot>;
   read(): Promise<ScheduleDocument | null>;
+  enrollmentList(): Promise<SourceEnrollmentList>;
+  enrollmentSave(input: SourceEnrollmentSave): Promise<SourceEnrollmentList>;
+  enrollmentRemove(
+    input: SourceEnrollmentRemove,
+  ): Promise<SourceEnrollmentList>;
   replace(options: {
     document: ScheduleDocument;
     expectedRevision: number | null;
     authorize?: () => boolean;
   }): Promise<ScheduleDocument>;
-  history(page?: {
-    after?: number;
-    limit?: number;
-  }): Promise<{
+  history(page?: { after?: number; limit?: number }): Promise<{
     records: Array<{ sequence: number; receipt: ScheduleHistoryReceipt }>;
     next: number;
     hasMore: boolean;

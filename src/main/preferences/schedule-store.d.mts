@@ -8,10 +8,7 @@ export class ScheduleStorageError extends Error {
   constructor(code?: string);
 }
 export interface SqliteScheduleAdapter extends ScheduleCommitAdapter {
-  history(page?: {
-    after?: number;
-    limit?: number;
-  }): Promise<{
+  history(page?: { after?: number; limit?: number }): Promise<{
     records: Array<{ sequence: number; receipt: ScheduleHistoryReceipt }>;
     next: number;
     hasMore: boolean;
@@ -23,5 +20,6 @@ export function createSqliteScheduleAdapter(
     directory: string;
     profileId: string;
     afterWrite?: () => void;
+    allowUnenrolledSources?: boolean;
   },
 ): Readonly<SqliteScheduleAdapter>;

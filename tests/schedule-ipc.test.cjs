@@ -69,6 +69,148 @@ test("schedule IPC withholds revoked replies and supplies a live commit authoriz
   assert.deepEqual(await reply, { ok: false, code: "UNAUTHORIZED" });
   assert.equal(commits, 0);
 });
+test("source enrollment IPC rejects private host configuration and rechecks mutation authority", async () => {
+  let admitted = true,
+    resume,
+    effects = 0;
+  const pending = new Promise((resolve) => {
+    resume = resolve;
+  });
+  const ipc = createScheduleIPC({
+    desktop: { admitted: () => admitted },
+    service: {
+      async enrollmentSave({ authorize }) {
+        await pending;
+        if (!authorize())
+          throw Object.assign(Error(), { code: "UNAUTHORIZED" });
+        effects++;
+        return {};
+      },
+    },
+  });
+  const request = {
+    action: "enrollment.save",
+    expectedRevision: null,
+    label: "Schedule source",
+    origin: "https://settings.example",
+    kind: "https",
+  };
+  for (const extra of [
+    { authorize: true },
+    { trustedCa: "untrusted" },
+    { lookup: "override" },
+    { directory: "/foreign" },
+    { developmentLoopback: true },
+    { credentialReference: "vault:00000000-0000-4000-8000-000000000000" },
+  ])
+    assert.equal(
+      (await ipc.request({}, JSON.stringify({ ...request, ...extra }))).code,
+      "INVALID_REQUEST",
+    );
+  assert.equal(
+    (await ipc.request({}, JSON.stringify({ ...request, expectedRevision: 0 })))
+      .code,
+    "INVALID_REQUEST",
+  );
+  assert.equal(
+    (
+      await ipc.request(
+        {},
+        JSON.stringify({
+          action: "enrollment.remove",
+          expectedRevision: null,
+          id: "foreign",
+        }),
+      )
+    ).code,
+    "INVALID_REQUEST",
+  );
+  const reply = ipc.request({}, JSON.stringify(request));
+  admitted = false;
+  resume();
+  assert.deepEqual(await reply, { ok: false, code: "UNAUTHORIZED" });
+  assert.equal(effects, 0);
+});
+test("source enrollment bridge stores protected references without returning secrets or making setup requests", async () => {
+  const { randomUUID } = require("node:crypto");
+  const { createSchedulePreferencesService } = await import(
+    "../src/main/preferences/service.mjs"
+  );
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "schedule-enrollment-ipc-"),
+  );
+  const protectedWrites = [],
+    token = "generated-fixture-secret";
+  let network = 0;
+  const service = createSchedulePreferencesService({
+    directory,
+    profileId: "desktop",
+    baseReader: () => ({ language: "en", "appearance.theme": "light" }),
+    vault: {
+      write(owner, secret) {
+        protectedWrites.push({ owner, secret });
+        return "vault:" + randomUUID();
+      },
+      read() {
+        throw Error("No setup read");
+      },
+    },
+    lookup() {
+      network++;
+      throw Error("No setup DNS");
+    },
+  });
+  const ipc = createScheduleIPC({ desktop: { admitted: () => true }, service });
+  const call = (request) => ipc.request({}, JSON.stringify(request));
+  try {
+    await service.start();
+    const saved = await call({
+      action: "enrollment.save",
+      expectedRevision: null,
+      label: "Home schedule",
+      origin: "https://home.example",
+      kind: "home-assistant",
+      token,
+    });
+    assert.equal(saved.ok, true);
+    assert.equal(saved.result.entries.length, 1);
+    assert.equal(saved.result.entries[0].credentialConfigured, true);
+    assert.deepEqual(
+      protectedWrites.map((write) => write.secret),
+      [token],
+    );
+    assert.doesNotMatch(
+      JSON.stringify(saved),
+      /generated-fixture-secret|vault:|credentialReference/,
+    );
+    assert.deepEqual(
+      (await call({ action: "enrollment.list" })).result,
+      saved.result,
+    );
+    assert.equal(
+      (
+        await call({
+          action: "enrollment.remove",
+          expectedRevision: null,
+          id: saved.result.entries[0].id,
+        })
+      ).code,
+      "STALE_REVISION",
+    );
+    const removed = await call({
+      action: "enrollment.remove",
+      expectedRevision: saved.result.revision,
+      id: saved.result.entries[0].id,
+    });
+    assert.equal(removed.ok, true);
+    assert.deepEqual(removed.result.entries, []);
+    assert.equal(network, 0);
+    assert.equal(protectedWrites.length, 1);
+  } finally {
+    await ipc.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
 test("schedule IPC maps private errors to a generic outcome and closes owned service", async () => {
   let closed = false;
   const ipc = createScheduleIPC({
