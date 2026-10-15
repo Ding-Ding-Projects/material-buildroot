@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {actionIcon} from "./material-icons";
 import { LitElement, html, nothing, css } from "lit";
 import { workspaceStyles } from "./workspace-styles";
@@ -176,7 +177,7 @@ export class RegexWorkbench extends LitElement {
   private run() {
     this.stop();
     this.busy = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.result = undefined;
     try {
       this.worker = new Worker(new URL("./regex-worker.ts", import.meta.url), {
@@ -184,20 +185,20 @@ export class RegexWorkbench extends LitElement {
       });
       this.timer = setTimeout(() => {
         this.stop();
-        this.feedback = this.l(
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "Evaluator startup timed out. Try again.",
           "運算程序啟動超時，請再試。",
-        );
+        ));
       }, 2000);
       this.worker.onmessage = (event: MessageEvent) => {
         if (event.data.ready) {
           if (this.timer) clearTimeout(this.timer);
           this.timer = setTimeout(() => {
             this.stop();
-            this.feedback = this.l(
+            this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
               "Evaluation stopped after 250 ms. Reduce the input or simplify the expression.",
               "運算超過 250 毫秒，已停止。請縮短輸入或簡化表達式。",
-            );
+            ));
           }, 250);
           this.worker?.postMessage({
             pattern: this.pattern,
@@ -211,23 +212,23 @@ export class RegexWorkbench extends LitElement {
         this.result = event.data;
         this.matchIndex = 0;
         this.stop();
-        this.feedback = this.result.ok
-          ? this.l("Evaluation completed locally.", "已喺本機完成運算。")
-          : this.l("Expression could not be evaluated.", "未能運算表達式。");
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>this.result.ok
+          ? l("Evaluation completed locally.", "已喺本機完成運算。")
+          : l("Expression could not be evaluated.", "未能運算表達式。"));
       };
       this.worker.onerror = () => {
         this.stop();
-        this.feedback = this.l(
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "The isolated evaluator is unavailable.",
           "未能使用獨立運算程序。",
-        );
+        ));
       };
     } catch {
       this.stop();
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "The isolated evaluator could not be started.",
         "未能啟動獨立運算程序。",
-      );
+      ));
     }
   }
   private updatePattern(value: string) {
@@ -342,7 +343,7 @@ export class RegexWorkbench extends LitElement {
     a.download = "regex-snippets.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    this.feedback = this.l("Snippet download requested.", "已要求下載片段。");
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Snippet download requested.", "已要求下載片段。"));
   }
   private async importSnippets(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -382,26 +383,26 @@ export class RegexWorkbench extends LitElement {
           throw new Error();
       }
       this.snippets = document.snippets;
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Session snippets replaced from the file.",
         "已使用檔案取代工作階段片段。",
-      );
+      ));
     } catch {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Invalid or oversized snippet file. Existing snippets are retained.",
         "片段檔案無效或太大，現有片段已保留。",
-      );
+      ));
     }
   }
   private async copyPattern() {
     try {
       await navigator.clipboard.writeText(this.pattern);
-      this.feedback = this.l("Pattern copied.", "已複製模式。");
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Pattern copied.", "已複製模式。"));
     } catch {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Clipboard unavailable. Select and copy the pattern field manually.",
         "未能使用剪貼簿，請手動選取並複製模式欄位。",
-      );
+      ));
     }
   }
   private options(items: [string, string][]) {
@@ -543,7 +544,7 @@ export class RegexWorkbench extends LitElement {
             ?disabled=${!this.busy}
             @click=${() => {
               this.stop();
-              this.feedback = this.l("Evaluation cancelled.", "已取消運算。");
+              this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Evaluation cancelled.", "已取消運算。"));
             }}
             >${actionIcon('Cancel evaluation')}${this.l("Cancel evaluation", "取消運算")}</md-outlined-button
           ><md-text-button @click=${this.copyPattern}
@@ -551,7 +552,7 @@ export class RegexWorkbench extends LitElement {
           >
         </div>
         ${this.feedback
-          ? html`<p role="status">${this.feedback}</p>`
+          ? html`<p role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</p>`
           : nothing}${this.result && !this.result.ok
           ? html`<p class="error">${this.result.message}</p>`
           : nothing}

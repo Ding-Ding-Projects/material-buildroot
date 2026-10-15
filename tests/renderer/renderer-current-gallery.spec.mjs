@@ -13,9 +13,9 @@ test('current full shell gallery with real bundled documentation and capture clo
  test.skip(process.env.CAPTURE_CURRENT!=='1','Run after the renderer checkpoint with CAPTURE_CURRENT=1.');test.setTimeout(180000);
  const context=page.context();
  const root=path.resolve('.'),sourceRevision=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
- const sourceDirty=Boolean(execFileSync('git',['status','--porcelain','--','src/renderer','tests/renderer','src/main/documentation','src/main/workspace-service.cjs','src/main/storage/workspace-store.cjs','src/main/security/workspace-contract.cjs','package.json','package-lock.json','index.html'],{encoding:'utf8'}).trim());if(process.env.CAPTURE_REVIEW!=='1')expect(sourceDirty).toBe(false);
+ const sourceDirty=Boolean(execFileSync('git',['status','--porcelain','--','src/renderer','tests/renderer','src/shared','src/main/documentation','src/main/workspace-service.cjs','src/main/storage/workspace-store.cjs','src/main/security/workspace-contract.cjs','package.json','package-lock.json','index.html'],{encoding:'utf8'}).trim());if(process.env.CAPTURE_REVIEW!=='1')expect(sourceDirty).toBe(false);
  const sourceFiles={};function hashTree(relative){for(const item of fs.readdirSync(path.join(root,relative),{withFileTypes:true})){const next=relative+'/'+item.name;if(item.isDirectory())hashTree(next);else sourceFiles[next]=digest(fs.readFileSync(path.join(root,next)));}}
- hashTree('src/renderer');hashTree('src/main/documentation');hashTree('tests/renderer');
+ hashTree('src/renderer');hashTree('src/shared');hashTree('src/main/documentation');hashTree('tests/renderer');
  const boundFiles=['package.json','package-lock.json','index.html','src/main/workspace-service.cjs','src/main/storage/workspace-store.cjs','src/main/security/workspace-contract.cjs'];for(const relative of boundFiles)sourceFiles[relative]=digest(fs.readFileSync(path.join(root,relative)));
  const directory=path.resolve(process.env.DOCUMENTATION_CAPTURE_BUNDLE||'.cache/offline-docs-build/documentation');const manifest=JSON.parse(fs.readFileSync(path.join(directory,'index.json'),'utf8'));
  const documentation=createDocumentationService({directory});const inventory=documentation.list();expect(inventory.articles.length).toBeGreaterThan(20);

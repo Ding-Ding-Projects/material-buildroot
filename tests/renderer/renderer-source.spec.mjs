@@ -19,7 +19,7 @@ async function open(page,{language='en',theme='light'}={}) {
  await page.addInitScript(({language,oldRevision,newRevision})=>{
   let revision=oldRevision;
   window.__sourceRequests=[];
-  window.studio={
+  window.studio={sharedMode:async()=>({ok:true,result:{available:true,watching:true,configured:false,active:false,displayName:null,revision:null,credentialKind:null}}),
    bootstrap:async()=>({language,revision:'0'.repeat(40),projectId:'desktop-settings',capability:'fixture',storage:'ready',origin:'default',version:'source preview',source:null,updatedAt:null}),
    request:async()=>({ok:false,code:'UNAVAILABLE'}),windowControl:async()=>true,onEvent:()=>()=>{},
    workspaceGet:()=>window.__workspaceGet(),workspaceMutate:request=>window.__workspaceMutate(request),workspaceExport:()=>window.__workspaceExport(),

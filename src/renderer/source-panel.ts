@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
@@ -48,7 +49,7 @@ export class SourcePanel extends LitElement {
     this.rollback = undefined;
     this.targetRevision = "";
     this.consent = false;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.requestUpdate("workspaceId", previous);
   }
 
@@ -103,13 +104,13 @@ export class SourcePanel extends LitElement {
     const generation = this.generation;
     const current = () => generation === this.generation;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.changed();
     try { await work(current); }
     catch (error) {
       if (current()) {
         const code = error instanceof Error && /^[A-Z_]+$/.test(error.message) ? error.message : "OUTCOME_UNAVAILABLE";
-        this.feedback = `${this.l("Source operation not completed", "來源操作未完成")}: ${code}. ${this.l("Refresh source status before retrying. A failed registration can leave a cloned tree; adopt that tree through Projects & runtime.", "重試前請重新整理來源狀態。註冊失敗可能保留已複製來源樹，請透過專案同執行環境接入。")}`;
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Source operation not completed", "來源操作未完成")}: ${code}. ${l("Refresh source status before retrying. A failed registration can leave a cloned tree; adopt that tree through Projects & runtime.", "重試前請重新整理來源狀態。註冊失敗可能保留已複製來源樹，請透過專案同執行環境接入。")}`);
         this.preview = undefined;
         this.consent = false;
       }
@@ -117,7 +118,7 @@ export class SourcePanel extends LitElement {
       const adopted = current() ? this.adopted : undefined;
       this.adopted = undefined;
       this.pending = false;
-      if (!current()) this.feedback = this.l("The active project changed. The previous operation may have completed; refresh its source status when you return to that project.", "目前專案已更改。先前操作可能已完成，返回該專案時請重新整理來源狀態。");
+      if (!current()) this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("The active project changed. The previous operation may have completed; refresh its source status when you return to that project.", "目前專案已更改。先前操作可能已完成，返回該專案時請重新整理來源狀態。"));
       this.changed();
       if (adopted) this.dispatchEvent(new CustomEvent("source-adopted",{bubbles:true,composed:true,detail:adopted}));
     }
@@ -135,7 +136,7 @@ export class SourcePanel extends LitElement {
     if (!current()) return;
     this.status = result as Snapshot;
     this.invalidatePreview();
-    this.feedback = this.l("Source status refreshed.","已重新整理來源狀態。");
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Source status refreshed.","已重新整理來源狀態。"));
   }
   private async clone(current: () => boolean) {
     if (!this.selection || !this.trust) return;
@@ -145,7 +146,7 @@ export class SourcePanel extends LitElement {
     this.selection = undefined;
     this.trust = false;
     this.adopted = {workspaceId:result.workspaceId,name:this.directory};
-    this.feedback = this.l("Source cloned and adopted. Choose a runtime in Projects & runtime before building.","來源已複製並接入。建置前請喺專案同執行環境選擇執行環境。");
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Source cloned and adopted. Choose a runtime in Projects & runtime before building.","來源已複製並接入。建置前請喺專案同執行環境選擇執行環境。"));
   }
   private async acquire(current: () => boolean) {
     this.invalidatePreview();
@@ -153,7 +154,7 @@ export class SourcePanel extends LitElement {
     if (!current()) return;
     this.status = result as Snapshot;
     this.targetRevision = result.fetchedRevision || "";
-    this.feedback = this.l("Reference acquired. Review the exact revision before applying it.","已取得參照，套用前請審核確切修訂版本。");
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Reference acquired. Review the exact revision before applying it.","已取得參照，套用前請審核確切修訂版本。"));
   }
   private async review(current: () => boolean, rollback = false) {
     this.invalidatePreview();
@@ -171,14 +172,14 @@ export class SourcePanel extends LitElement {
     this.rollback = result.rollbackId && result.rollbackRevision ? {id:result.rollbackId,revision:result.rollbackRevision} : undefined;
     this.invalidatePreview();
     this.targetRevision = "";
-    this.feedback = this.l("Source revision applied. Output files were preserved; their compatibility is unknown. Inspect configuration before the next build.","來源修訂版本已套用，輸出檔案已保留，但相容性仍未確認。下次建置前請檢視設定。");
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Source revision applied. Output files were preserved; their compatibility is unknown. Inspect configuration before the next build.","來源修訂版本已套用，輸出檔案已保留，但相容性仍未確認。下次建置前請檢視設定。"));
     this.dispatchEvent(new CustomEvent("source-applied",{bubbles:true,composed:true,detail:{workspaceId:this.workspaceId}}));
   }
 
   render() {
     return html`<div class="stack" aria-busy=${this.pending}>
       ${this.pending ? html`<md-linear-progress indeterminate aria-label=${this.l("Source operation in progress","來源操作進行中")}></md-linear-progress>` : nothing}
-      <div role="status" aria-live="polite">${this.feedback}</div>
+      <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
       <div class="columns">
         <section class="panel stack"><h2>${this.l("Clone Buildroot source","複製 Buildroot 來源")}</h2>
           <p class="note">${this.l("Choose a parent folder and a new child folder name. The source is cloned from HTTPS; a separate output folder is created beside it. Existing directories are preserved.","選擇上層資料夾同新子資料夾名稱。來源會從 HTTPS 複製，並喺旁邊建立獨立輸出資料夾，保留現有目錄。")}</p>

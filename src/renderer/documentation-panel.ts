@@ -31,10 +31,12 @@ type Location = { id: string; anchor: string };
 /** Reads only host-admitted HTML. Navigation never accepts renderer-provided URLs. */
 export class DocumentationPanel extends LitElement {
   static properties = {
+    restricted:{type:Boolean},
     language: { type: String },
     active: { type: Boolean },
     revision: { state: true },
   };
+  restricted=false;
   language = "bilingual";
   active = false;
   revision = 0;
@@ -311,7 +313,8 @@ export class DocumentationPanel extends LitElement {
         : `${en} · ${zh}`;
   }
   protected updated(changed: PropertyValues) {
-    if (changed.has("active") && this.active && !this.index && !this.loading)
+    if(changed.has("restricted")){if(this.restricted)this.stopSearch();else if(this.index)this.search();}
+    if ((changed.has("active")||changed.has("restricted")) && this.active && !this.restricted && !this.index && !this.loading)
       void this.refresh();
   }
   disconnectedCallback() {
@@ -574,6 +577,7 @@ export class DocumentationPanel extends LitElement {
     >`;
   }
   render() {
+    if(this.restricted)return html`<section class="panel"><h1>Workspace help</h1><p>The full built-in article reader is unavailable while the shared preference is active or its status is unconfirmed. This limited guide does not expose the article index, history or search.</p><h2>Project workflow</h2><ol><li>Use Projects &amp; runtime to choose trusted source and output folders.</li><li>Use Source to inspect a revision before applying changes.</li><li>Review Configuration and build settings before starting a build.</li><li>Inspect returned jobs and output. An empty job list does not establish success.</li></ol><h2>Shared preference recovery</h2><p>Open Settings or use the Shared preference action to refresh the host state, verify exit or read manual recovery instructions. Your project records remain unchanged.</p></section>`;
     const articles = (this.index?.articles || []).filter(
       (a) => !this.matchedIds || this.matchedIds.has(a.id),
     );

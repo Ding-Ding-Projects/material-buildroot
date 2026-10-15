@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import "./guest-topology";
@@ -101,7 +102,7 @@ export class GuestPanel extends LitElement {
       this.editing = "";
       this.preview = undefined;
       this.conversion = undefined;
-      this.feedback = "";
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     }
   }
   private l(en: string, zh: string) {
@@ -115,7 +116,7 @@ export class GuestPanel extends LitElement {
     const api = window.studio?.operations;
     if (!api || this.pending) return undefined;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     const targetWorkspace = this.workspaceId;
     try {
       const result = await api({
@@ -124,23 +125,23 @@ export class GuestPanel extends LitElement {
         ...(request ? { request } : {}),
       });
       if (targetWorkspace !== this.workspaceId) {
-        this.feedback = this.l(
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "The previous project operation settled. Refresh this project to inspect its records.",
           "之前專案嘅操作已結束，請重新整理呢個專案以檢視記錄。",
-        );
+        ));
         return undefined;
       }
       if (!result.ok) {
         this.feedback =
-          this.l("Operation not completed", "未完成操作") + `: ${result.code}`;
+          captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Operation not completed", "未完成操作") + `: ${result.code}`);
         return undefined;
       }
       return result.result as any;
     } catch {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Outcome unavailable. Refresh managed records before trying again.",
         "未能確認結果，請先重新整理管理記錄再試。",
-      );
+      ));
       return undefined;
     } finally {
       this.pending = false;
@@ -186,15 +187,15 @@ export class GuestPanel extends LitElement {
       if (reply.ok && Array.isArray(reply.result))
         this.files = reply.result.filter((item: any) => item.kind === "file");
       else
-        this.feedback = this.l(
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "Output files could not be loaded.",
           "未能載入輸出檔案。",
-        );
+        ));
     } catch {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Output file listing unavailable.",
         "未能列出輸出檔案。",
-      );
+      ));
     } finally {
       this.pending = false;
     }
@@ -211,10 +212,10 @@ export class GuestPanel extends LitElement {
       request,
     );
     if (result !== undefined) {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Managed guest created. Guest boot has not been verified.",
         "已建立受管理客體，尚未驗證客體開機。",
-      );
+      ));
       await this.refresh();
     }
   }
@@ -242,17 +243,17 @@ export class GuestPanel extends LitElement {
     if (result !== undefined) {
       await this.refresh();
       this.feedback =
-        action === "stop"
-          ? this.l(
+        captureOwnedStatus(this,"feedback",this.l.bind(this),l=>action === "stop"
+          ? l(
               "Shutdown requested. Refresh this guest to verify it has stopped.",
               "已要求關閉，請重新整理呢個客體以確認已停止。",
             )
           : action === "launch"
-            ? this.l(
+            ? l(
                 "Launch requested. A running process does not prove guest boot.",
                 "已要求啟動，程序運行唔代表客體成功開機。",
               )
-            : this.l("Guest state refreshed.", "已重新整理客體狀態。");
+            : l("Guest state refreshed.", "已重新整理客體狀態。"));
     }
   }
   private async previewConversion() {
@@ -272,10 +273,10 @@ export class GuestPanel extends LitElement {
     this.preview = undefined;
     if (result !== undefined) {
       this.conversion = result;
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Conversion completed and output inspected.",
         "已完成轉換並檢視輸出。",
-      );
+      ));
     }
   }
   private options(items: [string, string][]) {
@@ -553,7 +554,7 @@ export class GuestPanel extends LitElement {
             </p>`}
       </section>
       ${this.feedback
-        ? html`<p class="status" role="status">${this.feedback}</p>`
+        ? html`<p class="status" role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</p>`
         : nothing}
     </div>`;
   }

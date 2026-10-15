@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon} from "./material-icons";
 import { LitElement, html, svg, css, nothing, type PropertyValues } from "lit";
 import "@material/web/button/outlined-button.js";
@@ -36,7 +37,7 @@ export class DiagramWorkbench extends LitElement {
   `;
   private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
   protected updated(changed:PropertyValues){
-    if(changed.has("layoutKey")){this.layout={positions:{},x:30,y:30,scale:1};this.undoStack=[];this.redoStack=[];this.selected="";this.savedRevision=undefined;this.saveMessage="";}
+    if(changed.has("layoutKey")){this.layout={positions:{},x:30,y:30,scale:1};this.undoStack=[];this.redoStack=[];this.selected="";this.savedRevision=undefined;this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>"");}
     if(changed.has("nodes")||changed.has("layoutKey")){
       let altered=false;this.nodes.forEach((n,i)=>{if(!this.layout.positions[n.id]){this.layout.positions[n.id]={x:i===0?20:280+(Math.floor((i-1)/4)*230),y:i===0?130:20+((i-1)%4)*100};altered=true;}});
       if(altered)this.revision++;
@@ -71,7 +72,7 @@ export class DiagramWorkbench extends LitElement {
   private removeSelected(){this.dispatchEvent(new CustomEvent("diagram-remove",{bubbles:true,composed:true,detail:{id:this.selected}}));}
   private async persist(write=false){
     if(!this.workspaceId||!window.studio?.operations||this.saving)return;
-    const key=this.layoutKey;this.saving=true;this.saveMessage="";this.revision++;
+    const key=this.layoutKey;this.saving=true;this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>"");this.revision++;
     try{
       const layout={nodes:this.nodes.map(n=>({id:n.id,...this.point(n.id)})),viewport:{x:this.layout.x,y:this.layout.y,scale:this.layout.scale}};
       const reply=await window.studio.operations({action:write?"canvas.write":"canvas.read",workspaceId:this.workspaceId,canvasId:this.canvasId,...(write?{expectedRevision:this.savedRevision,layout}:{})});
@@ -79,8 +80,8 @@ export class DiagramWorkbench extends LitElement {
       const result=reply.result as {revision:number;layout:null|typeof layout};
       this.savedRevision=result.revision;
       if(!write&&result.layout){this.save();this.layout={positions:{...this.layout.positions,...Object.fromEntries(result.layout.nodes.map(n=>[n.id,{x:n.x,y:n.y}]))},...result.layout.viewport};}
-      this.saveMessage=write?this.l("Layout saved","佈局已儲存"):this.l("Saved layout loaded; no semantic changes","已載入儲存佈局，無語意變更");
-    }catch(error){if(key===this.layoutKey){this.savedRevision=undefined;this.saveMessage=this.l("Layout not confirmed. Reload before saving again.","未能確認佈局，請重新載入再儲存。")+" "+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:"");}}finally{this.saving=false;this.revision++;}
+      this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>write?l("Layout saved","佈局已儲存"):l("Saved layout loaded; no semantic changes","已載入儲存佈局，無語意變更"));
+    }catch(error){if(key===this.layoutKey){this.savedRevision=undefined;this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>l("Layout not confirmed. Reload before saving again.","未能確認佈局，請重新載入再儲存。")+" "+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:""));}}finally{this.saving=false;this.revision++;}
   }
   private icon(label:string,icon:string,action:()=>void,disabled=false){return html`<md-icon-button aria-label=${label} title=${label} ?disabled=${disabled} @click=${action}>${materialIcon(icon)}</md-icon-button>`;}
   render(){const selected=this.nodes.find(n=>n.id===this.selected);return html`
@@ -98,7 +99,7 @@ export class DiagramWorkbench extends LitElement {
       </div>
     </div>
     <div class="footer"><md-outlined-select .label=${this.l("Selected node","已選節點")} .value=${this.selected} .displayText=${selected?.label||this.l("Select a node","選擇節點")} @change=${(e:Event)=>this.select((e.target as HTMLSelectElement).value)}>${this.nodes.map(node=>html`<md-select-option .value=${node.id}><div slot="headline">${node.label}</div></md-select-option>`)}</md-outlined-select>${this.icon(this.l("Remove selected dependency","移除所選相依項目"),"delete",()=>this.removeSelected(),!selected?.removable)}</div>
-    <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局"),"download",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局"),"save",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${this.saveMessage||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。")}</span></div>
+    <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局"),"download",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局"),"save",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${displayOwnedStatus(this,"saveMessage",this.saveMessage,this.language)||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。")}</span></div>
     <p class="hint">${this.l("Drag to arrange, background to pan. Arrow keys move a focused node by 10 units. Undo/redo changes layout only.","拖曳排列，拖曳背景平移。方向鍵每次移動已聚焦節點 10 單位，復原／重做只會改變佈局。")}</p>
   `;}
 }

@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./package-discovery-panel";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
@@ -56,7 +57,7 @@ export class PackagePanel extends LitElement {
     if(previous===value)return;
     this.activeWorkspace=value;this.generation++;
     this.external=undefined;this.preview=undefined;this.reviewedModel=undefined;this.consent=false;
-    this.feedback="";this.validation=[];this.uncertain=false;
+    this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");this.validation=[];this.uncertain=false;
     this.requestUpdate("workspaceId",previous);
   }
   static styles = [workspaceStyles,css`
@@ -95,7 +96,7 @@ export class PackagePanel extends LitElement {
   `];
   private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
   private changed(){this.revision++;}
-  private edit(){this.generation++;this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.validation=[];this.feedback="";this.changed();}
+  private edit(){this.generation++;this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.validation=[];this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");this.changed();}
   private field(label:string,value:string,set:(value:string)=>void,hint="",textarea=false){
     return html`<md-outlined-text-field .label=${label} .value=${value} .supportingText=${hint} .type=${textarea?"textarea":"text"} rows="4" ?disabled=${this.pending} @input=${(e:Event)=>{set((e.target as HTMLInputElement).value);this.edit();}}></md-outlined-text-field>`;
   }
@@ -112,18 +113,18 @@ export class PackagePanel extends LitElement {
   private async run(work:(current:()=>boolean)=>Promise<void>,applying=false){
     if(this.pending)return;
     const generation=this.generation,current=()=>this.generation===generation;
-    this.pending=true;this.feedback="";this.changed();
+    this.pending=true;this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");this.changed();
     try{await work(current);}
     catch(error){if(current()){
       const code=error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:"OUTCOME_UNAVAILABLE";
       this.preview=undefined;this.reviewedModel=undefined;this.consent=false;
       this.uncertain=applying;
-      this.feedback=`${this.l("Package operation not completed","套件操作未完成")}: ${code}. ${applying?this.l("The write outcome is unconfirmed. Inspect the external tree and create a fresh preview before retrying.","未能確認寫入結果，請檢查外部樹，並重新建立預覽後再試。"):this.l("Check the form and selected external tree, then retry.","請檢查表單同所選外部樹，再重試。")}`;
-    }}finally{this.pending=false;if(!current())this.feedback=this.l("Project or draft changed while the operation was pending. Its result was not attached to this draft. Inspect the previous external tree before retrying a write.","操作期間專案或草稿已更改，結果未附加到此草稿。重試寫入前請檢查先前外部樹。");this.changed();}
+      this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Package operation not completed","套件操作未完成")}: ${code}. ${applying?l("The write outcome is unconfirmed. Inspect the external tree and create a fresh preview before retrying.","未能確認寫入結果，請檢查外部樹，並重新建立預覽後再試。"):l("Check the form and selected external tree, then retry.","請檢查表單同所選外部樹，再重試。")}`);
+    }}finally{this.pending=false;if(!current())this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Project or draft changed while the operation was pending. Its result was not attached to this draft. Inspect the previous external tree before retrying a write.","操作期間專案或草稿已更改，結果未附加到此草稿。重試寫入前請檢查先前外部樹。"));this.changed();}
   }
-  private errors():string[]{
+  private errors(l=this.l.bind(this)):string[]{
     const m=this.model,errors:string[]=[];
-    const add=(condition:boolean,en:string,zh:string)=>{if(condition)errors.push(this.l(en,zh));};
+    const add=(condition:boolean,en:string,zh:string)=>{if(condition)errors.push(l(en,zh));};
     add(!namePattern.test(m.name),"Package name must start with a lowercase letter and contain only lowercase letters, digits or hyphens (64 characters maximum).","套件名稱須以小寫字母開頭，只可包含小寫字母、數字或連字號，最多 64 個字元。");
     add(!filenamePattern.test(m.version),"Provide a literal version using letters, digits, dots, hyphens, plus signs or underscores.","請提供字面版本，只用字母、數字、點、連字號、加號或底線。");
     const validURL=(value:string)=>{try{const u=new URL(value);return /^https?:\/\/[A-Za-z0-9._~:/@%+=-]+$/.test(value)&&!!u.hostname&&!u.username&&!u.password&&value.length<=4096;}catch{return false;}};
@@ -153,21 +154,21 @@ export class PackagePanel extends LitElement {
     const list=config?this.model.configDependencies:this.model.dependencies;
     if(!value||list.includes(value))return;
     if(!(config?/^BR2_[A-Z0-9_]+$/:namePattern).test(value)||(!config&&value===this.model.name)){
-      this.validation=[this.l("Enter a valid dependency before adding it.","加入之前，請輸入有效相依項目。")];this.changed();return;
+      this.validation=captureOwnedStatus(this,"validation",this.l.bind(this),l=>[l("Enter a valid dependency before adding it.","加入之前，請輸入有效相依項目。")]);this.changed();return;
     }
     if(config){this.model.configDependencies=[...list,value];this.configDependency="";}else{this.model.dependencies=[...list,value];this.dependency="";}
     this.edit();
   }
   private async choose(){await this.run(async current=>{
     const result=await this.request<{externalTreeId:string;name:string}>("external.choose",{workspaceId:this.workspaceId});
-    if(current()){this.external=result;this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.feedback=this.l("External tree selected. Preview the generated files before applying.","已選擇外部樹，套用前請預覽產生嘅檔案。");}
+    if(current()){this.external=result;this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("External tree selected. Preview the generated files before applying.","已選擇外部樹，套用前請預覽產生嘅檔案。"));}
   });}
   private async createPreview(){
-    this.validation=this.errors();this.changed();if(this.validation.length||!this.external)return;
+    this.validation=captureOwnedStatus(this,"validation",this.l.bind(this),l=>this.errors(l));this.changed();if(this.validation.length||!this.external)return;
     await this.run(async current=>{
       const model=structuredClone(this.model);
       const result=await this.request<Preview>("package.preview",{workspaceId:this.workspaceId,externalTreeId:this.external!.externalTreeId,model});
-      if(current()){this.preview=result;this.reviewedModel=model;this.selectedFile=0;this.editorTab="review";this.consent=false;this.uncertain=false;this.feedback=this.l("Preview ready. Review every changed file before applying.","預覽已準備好，套用前請審核每個變更檔案。");}
+      if(current()){this.preview=result;this.reviewedModel=model;this.selectedFile=0;this.editorTab="review";this.consent=false;this.uncertain=false;this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Preview ready. Review every changed file before applying.","預覽已準備好，套用前請審核每個變更檔案。"));}
     });
   }
   private async apply(){
@@ -176,7 +177,7 @@ export class PackagePanel extends LitElement {
     await this.run(async current=>{
       const result=await this.request<{applied:boolean}>("package.apply",{workspaceId:this.workspaceId,externalTreeId:this.external!.externalTreeId,model,revision:reviewed.revision,previewHash:reviewed.previewHash});
       if(!result.applied)throw new Error("OUTCOME_UNAVAILABLE");
-      if(current()){this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.uncertain=false;this.feedback=this.l("Reviewed files applied to the selected external tree. Actual Buildroot configuration and build validation are still required.","已將審核檔案套用到所選外部樹，仍需要實際 Buildroot 設定同建置驗證。");}
+      if(current()){this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.uncertain=false;this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Reviewed files applied to the selected external tree. Actual Buildroot configuration and build validation are still required.","已將審核檔案套用到所選外部樹，仍需要實際 Buildroot 設定同建置驗證。"));}
     },true);
   }
 
@@ -184,7 +185,7 @@ export class PackagePanel extends LitElement {
     const m=this.model,file=this.preview?.files[this.selectedFile];
     return html`<div class="stack" aria-busy=${this.pending}>
       ${this.pending?html`<md-linear-progress indeterminate aria-label=${this.l("Package operation in progress","套件操作進行中")}></md-linear-progress>`:nothing}
-      <div role="status" aria-live="polite">${this.feedback}</div>
+      <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
       <section class="panel stack package-context"><h2>${this.l("Author a Buildroot package","編寫 Buildroot 套件")}</h2>
         <p>${this.l("Choose a prepared BR2_EXTERNAL tree, or initialize an empty folder below. Package file review and build activation are separate approvals.","選擇已準備好嘅 BR2_EXTERNAL 樹，或喺下面初始化空白資料夾。套件檔案審核同建置啟用需要獨立批准。")}</p>
         ${!this.workspaceId?html`<p>${this.l("Adopt a project in Projects & runtime first. Your draft stays here while you select one.","請先喺專案同執行環境接入專案，選擇期間會保留草稿。")}</p>`:nothing}
@@ -221,7 +222,7 @@ export class PackagePanel extends LitElement {
         <div class="row">${this.button("Add missing required hash rows","加入缺少嘅必要摘要列",()=>{for(const file of [m.sourceFilename,...m.licenseFiles].filter(Boolean))if(!m.hashes.some(h=>h.file===file)&&m.hashes.length<256)m.hashes.push({algorithm:"sha256",file,digest:""});this.edit();})}${this.button("Add another hash","加入另一項摘要",()=>{m.hashes.push({algorithm:"sha256",file:"",digest:""});this.edit();},m.hashes.length>=256)}</div>
         ${m.hashes.map((hash,index)=>html`<div class="hash-row stack"><div class="columns">${this.field(this.l(`Hash file ${index+1}`,`摘要檔案 ${index+1}`),hash.file,v=>hash.file=v)}${this.select(this.l(`Hash algorithm ${index+1}`,`摘要演算法 ${index+1}`),hash.algorithm,["sha256","sha512"],v=>hash.algorithm=v as Hash["algorithm"])}</div>${this.field(this.l(`Verified digest ${index+1}`,`已驗證摘要 ${index+1}`),hash.digest,v=>hash.digest=v,this.l(`${hash.algorithm==="sha256"?64:128} hexadecimal digits; verify against the actual file.`,`${hash.algorithm==="sha256"?64:128} 位十六進位數字，請對照實際檔案驗證。`))}${this.button(`Remove hash ${index+1}`,`移除摘要 ${index+1}`,()=>{m.hashes=m.hashes.filter((_,i)=>i!==index);this.edit();})}</div>`)}
       </section>
-      ${this.validation.length?html`<section class="panel validation" role="alert"><h3>${this.l("Check the package draft","檢查套件草稿")}</h3><ul>${this.validation.map(error=>html`<li>${error}</li>`)}</ul></section>`:nothing}
+      ${this.validation.length?html`<section class="panel validation" role="alert"><h3>${this.l("Check the package draft","檢查套件草稿")}</h3><ul>${displayOwnedStatus(this,"validation",this.validation,this.language).map(error=>html`<li>${error}</li>`)}</ul></section>`:nothing}
       ${this.button("Preview generated files","預覽產生檔案",()=>this.createPreview(),!this.workspaceId||!this.external)}
       ${this.preview&&file?html`<section class="panel stack" ?hidden=${this.editorTab!=="review"}><h2>${this.l("Review package files","審核套件檔案")}</h2><p>${this.l("Edits invalidate this preview. Applying checks both the current external-tree revision and the generated content hash.","編輯會令此預覽失效。套用時會同時檢查目前外部樹修訂版本同產生內容摘要。")}</p>
         <ul>${this.preview.warnings.map(warning=>html`<li>${warning}</li>`)}</ul>

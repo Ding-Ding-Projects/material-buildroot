@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
@@ -125,17 +126,17 @@ export class CompanionPanel extends LitElement {
   private async run(work: () => Promise<void>) {
     if (this.pending) return;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.revision++;
     try {
       await work();
-      this.feedback ||= this.l("Completed.", "已完成。");
+      this.feedback ||= captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Completed.", "已完成。"));
     } catch (error) {
       const code =
         error instanceof Error && /^[A-Z_]+$/.test(error.message)
           ? error.message
           : "COMPANION_UNAVAILABLE";
-      this.feedback = `${this.l("Operation not completed", "操作未完成")}: ${code}`;
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Operation not completed", "操作未完成")}: ${code}`);
     } finally {
       this.pending = false;
       this.revision++;
@@ -178,7 +179,7 @@ export class CompanionPanel extends LitElement {
             aria-label=${this.l("Operation in progress", "操作進行中")}
           ></md-linear-progress>`
         : nothing}
-      <div role="status">${this.feedback}</div>
+      <div role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
       <div class="row">
         ${this.button("Refresh companion status", "重新整理配對狀態", () =>
           this.refresh(),

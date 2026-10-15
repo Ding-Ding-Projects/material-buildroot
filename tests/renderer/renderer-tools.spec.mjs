@@ -20,7 +20,7 @@ async function open(page, language = "en") {
       sessions,
     });
     window.__requests = [];
-    window.studio = {
+    window.studio={sharedMode:async()=>({ok:true,result:{available:true,watching:true,configured:false,active:false,displayName:null,revision:null,credentialKind:null}}),
       operations: async (input) => {
         window.__requests.push(input);
         let result = {};

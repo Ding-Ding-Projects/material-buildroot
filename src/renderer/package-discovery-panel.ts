@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { materialIcon } from "./material-icons";
 type SymbolDetail = {
@@ -184,7 +185,7 @@ export class PackageDiscoveryPanel extends LitElement {
       this.selected = undefined;
       this.consent = false;
       this.pending = false;
-      this.feedback = "";
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
       this.stop();
       this.matched = undefined;
       this.revision++;
@@ -217,7 +218,7 @@ export class PackageDiscoveryPanel extends LitElement {
     if (this.pending || this.locked || !this.workspaceId) return;
     const token = ++this.serial;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.revision++;
     try {
       await work(() => token === this.serial);
@@ -226,12 +227,12 @@ export class PackageDiscoveryPanel extends LitElement {
         this.imported = undefined;
         this.consent = false;
         this.feedback =
-          this.l(
+          captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
             "Package inspection unavailable. Refresh the catalogue before retrying.",
             "未能檢視套件，重試前請重新整理目錄。",
           ) +
           " " +
-          (e instanceof Error && /^[A-Z_]+$/.test(e.message) ? e.message : "");
+          (e instanceof Error && /^[A-Z_]+$/.test(e.message) ? e.message : ""));
       }
     } finally {
       if (token === this.serial) {
@@ -271,7 +272,7 @@ export class PackageDiscoveryPanel extends LitElement {
   }
   private filter() {
     this.stop();
-    this.filterMessage = "";
+    this.filterMessage = captureOwnedStatus(this,"filterMessage",this.l.bind(this),l=>"");
     if (!this.pattern) {
       this.matched = undefined;
       this.revision++;
@@ -287,23 +288,20 @@ export class PackageDiscoveryPanel extends LitElement {
       if (this.worker !== worker) return;
       this.stop();
       this.matched = new Set(ids);
-      this.filterMessage = error;
+      this.filterMessage = captureOwnedStatus(this,"filterMessage",this.l.bind(this),l=>error==="invalid"?l("Invalid page expression.","頁面表達式無效。"):error==="unavailable"?l("Page filter unavailable.","頁面篩選未能使用。"):error==="timeout"?l("Page expression timed out; simplify it.","頁面表達式逾時，請簡化。"):"");
       this.revision++;
     };
     worker.onmessage = (e) =>
       e.data.ok
         ? done(e.data.ids)
-        : done([], this.l("Invalid page expression.", "頁面表達式無效。"));
+        : done([], "invalid");
     worker.onerror = () =>
-      done([], this.l("Page filter unavailable.", "頁面篩選未能使用。"));
+      done([], "unavailable");
     this.timer = setTimeout(
       () =>
         done(
           [],
-          this.l(
-            "Page expression timed out; simplify it.",
-            "頁面表達式逾時，請簡化。",
-          ),
+          "timeout",
         ),
       600,
     );
@@ -478,7 +476,7 @@ export class PackageDiscoveryPanel extends LitElement {
             </section>`
           : nothing}
       </div>
-      <p role="status">${this.feedback || this.filterMessage}</p>
+      <p role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language) || displayOwnedStatus(this,"filterMessage",this.filterMessage,this.language)}</p>
       ${this.pending
         ? html`<md-linear-progress
             indeterminate

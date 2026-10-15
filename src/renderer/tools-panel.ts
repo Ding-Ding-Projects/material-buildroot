@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/filled-button.js";
@@ -161,17 +162,17 @@ export class ToolsPanel extends LitElement {
   private async run(work: () => Promise<void>) {
     if (this.pending) return;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.changed();
     try {
       await work();
-      this.feedback ||= this.l("Completed.", "已完成。");
+      this.feedback ||= captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Completed.", "已完成。"));
     } catch (error) {
       const code =
         error instanceof Error && /^[A-Z_]+$/.test(error.message)
           ? error.message
           : "OPERATION_FAILED";
-      this.feedback = `${this.l("Operation not completed", "操作未完成")}: ${code}`;
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Operation not completed", "操作未完成")}: ${code}`);
     } finally {
       this.pending = false;
       this.changed();
@@ -255,18 +256,18 @@ export class ToolsPanel extends LitElement {
     pages?: number;
     pageCounts?: number[];
   }) {
-    this.feedback = [
-      this.l("Completed", "已完成"),
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>[
+      l("Completed", "已完成"),
       result.bytes !== undefined ? `${result.bytes} bytes` : "",
       result.pageCounts
-        ? `${this.l("Pages", "頁數")}: ${result.pageCounts.join(", ")}`
+        ? `${l("Pages", "頁數")}: ${result.pageCounts.join(", ")}`
         : "",
       result.pages !== undefined
-        ? `${result.pages} ${this.l("pages", "頁")}`
+        ? `${result.pages} ${l("pages", "頁")}`
         : "",
     ]
       .filter(Boolean)
-      .join(" · ");
+      .join(" · "));
   }
   private pdfReady() {
     return (
@@ -315,7 +316,7 @@ export class ToolsPanel extends LitElement {
             aria-label=${this.l("Operation in progress", "操作進行中")}
           ></md-linear-progress>`
         : nothing}
-      <div role="status" aria-live="polite">${this.feedback}</div>
+      <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
       <section class="panel stack">
         <h2>${this.l("Local tools", "本機工具")}</h2>
         <p class="note">
@@ -559,13 +560,13 @@ export class ToolsPanel extends LitElement {
               this.changed();
               try {
                 const r = await this.tool({ action: "queue.run" });
-                this.feedback = `${this.l("Queue finished", "佇列已完成")}: ${r.completed} / ${r.failed}`;
+                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Queue finished", "佇列已完成")}: ${r.completed} / ${r.failed}`);
                 await this.queuePage();
               } catch (e) {
-                this.feedback = this.l(
+                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
                   "Queue could not finish. Refresh its status.",
                   "佇列未能完成，請重新整理狀態。",
-                );
+                ));
               } finally {
                 this.runningQueue = false;
                 this.changed();
@@ -789,10 +790,10 @@ export class ToolsPanel extends LitElement {
                 serverId: this.serverId,
               });
               this.serverRunning = undefined;
-              this.feedback = this.l(
+              this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
                 "Stop requested. Check status to confirm exit.",
                 "已要求停止，請檢查狀態以確認結束。",
-              );
+              ));
             },
             this.serverRunning !== true,
           )}<span

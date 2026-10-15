@@ -1,3 +1,5 @@
+import "./shared-mode-panel";
+import type {SharedModeSnapshot} from "../shared/shared-mode";
 import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
 import "./settings-search";
@@ -100,6 +102,8 @@ class MaterialBuildroot extends LitElement {
   edit: Plan | undefined;
   events: Activity[] = [];
   notice = "";
+  private noticeEnglish="";
+  private noticeText(en:string,zh:string){this.noticeEnglish=en;return this.l(en,zh);}
   newName = "";
   newRuntime: "wsl" | "docker" = "wsl";
   nameError = false;
@@ -140,30 +144,43 @@ class MaterialBuildroot extends LitElement {
   }
   private vocabularyUnsubscribe?:()=>void;
   private modeUnsubscribe?:()=>void;
-  private settingIds=['language','appearance','backups','vocabulary'];
+  private sharedSnapshot:SharedModeSnapshot|null=null;
+  private get restricted(){return vocabulary.school()!=="inactive";}
+  private get effectiveLanguage():Language{return this.restricted?"en":this.state?.language??"bilingual";}
+  private applySharedSnapshot(snapshot:SharedModeSnapshot|null){this.sharedSnapshot=snapshot;void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');this.syncDocumentLanguage();this.requestUpdate();}
+  private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
+  private settingIds=['language','appearance','backups','vocabulary','shared'];
   private settingsEntries(){return [
-    {id:'language',text:this.l('Language Interface language','語言 介面語言')},
+    ...(!this.restricted?[{id:'language',text:this.l('Language Interface language','語言 介面語言')}]:[]),
+    {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原')},
     {id:'appearance',text:this.l('Appearance Theme','外觀 主題')},
     {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入')},
-    ...(vocabulary.school()==='active'?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除')}])];}
-  private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return ownedCopy(en,zh,this.state?.language??'bilingual',kind);}
+    ...(this.restricted?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除')}])];}
+  private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return ownedCopy(en,zh,this.effectiveLanguage,kind);}
   private async loadSharedMode(){
     const bridge=window.studio;
-    const apply=(snapshot?:{available:boolean;active:boolean|null})=>void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');
+    const apply=(snapshot?:SharedModeSnapshot)=>this.applySharedSnapshot(snapshot??null);
     if(!bridge?.sharedMode){apply();return;}
     let observed=false;this.modeUnsubscribe=bridge.onSharedMode?.(snapshot=>{observed=true;apply(snapshot);});
     try{const reply=await bridge.sharedMode({action:'status'});if(!observed)apply(reply.ok?reply.result:undefined);}catch{if(!observed)apply();}
+  }
+  private async sharedPreferenceAction(){
+    const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;
+    this.settingIds=['language','appearance','backups','vocabulary','shared'];await this.navigate('settings');await this.updateComplete;
+    const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
+    const panel=this.renderRoot.querySelector('shared-mode-panel') as import('./shared-mode-panel').SharedModePanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#shared-heading') as HTMLElement|null)?.focus();
   }
   private async vocabularyAction(action:'upload'|'status'|'clear'){
     if(vocabulary.school()!=='inactive')return;
     const dialog=this.renderRoot.querySelector('#actions-dialog');
     const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));
-    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary'];await this.navigate('settings');await this.updateComplete;
+    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared'];await this.navigate('settings');await this.updateComplete;
+    const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
     panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
   }
   private l(en: string, zh: string) {
-    const language = this.state?.language ?? "bilingual";
+    const language = this.effectiveLanguage;
     return language === "en" ? en : language === "zh-HK" ? zh : `${en} · ${zh}`;
   }
   private buildTime() {
@@ -197,7 +214,7 @@ class MaterialBuildroot extends LitElement {
   }
   private get canSave() {
     return (
-      this.connection === "ready" &&
+      !this.restricted && this.connection === "ready" &&
       this.state?.storage === "ready" &&
       !this.busy &&
       this.saveState !== "unknown" &&
@@ -240,7 +257,7 @@ class MaterialBuildroot extends LitElement {
     this.state = state;
     this.connection = "ready";
     if (resetDraft) this.draft = state.language;
-    document.documentElement.lang = state.language === "en" ? "en" : "zh-HK";
+    this.syncDocumentLanguage();
   }
   private async load() {
     try {
@@ -463,7 +480,7 @@ class MaterialBuildroot extends LitElement {
       this.edit = this.selected ? { ...this.selected } : undefined;
     } catch {
       this.workspaceMode = "unavailable";
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Workspace storage could not be loaded. Restart to retry; existing data is preserved.",
         "未能載入工作區儲存，請重新啟動再試，現有資料已保留。",
       );
@@ -487,12 +504,12 @@ class MaterialBuildroot extends LitElement {
           const current = await this.workspaceAPI.workspaceGet!();
           if (current.ok) this.hydrateWorkspace(current.state);
           else this.workspaceMode = "unavailable";
-          this.notice = this.l(
+          this.notice = this.noticeText(
             "Workspace changed elsewhere. Your pending edits are retained; review before trying again.",
             "工作區已喺其他地方變更。待套用變更已保留，請檢視後再試。",
           );
         } else
-          this.notice = this.l(
+          this.notice = this.noticeText(
             "Workspace change was rejected. Your pending edits are retained.",
             "工作區變更已被拒絕，待套用變更已保留。",
           );
@@ -502,7 +519,7 @@ class MaterialBuildroot extends LitElement {
       return true;
     } catch {
       this.workspaceMode = "unavailable";
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Workspace save outcome is unknown. Restart and review saved data before making more changes.",
         "未能確認工作區儲存結果。請重新啟動並檢視已儲存資料，再作變更。",
       );
@@ -576,7 +593,7 @@ class MaterialBuildroot extends LitElement {
       })
     ) {
       this.snapshotName = "";
-      this.notice = this.l("Workspace snapshot saved.", "工作區快照已儲存。");
+      this.notice = this.noticeText("Workspace snapshot saved.", "工作區快照已儲存。");
     }
   }
   private async restoreSnapshot() {
@@ -587,7 +604,7 @@ class MaterialBuildroot extends LitElement {
       this.selectedId = this.plans[0]?.id ?? "";
       this.edit = this.selected ? { ...this.selected } : undefined;
       this.closeDialog("restore-dialog");
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Workspace snapshot restored.",
         "工作區快照已還原。",
       );
@@ -601,7 +618,7 @@ class MaterialBuildroot extends LitElement {
     this.importText = "";
     this.importSummary = "";
     if (file.size > 1024 * 1024) {
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "The workspace document must be no larger than 1 MiB.",
         "工作區文件唔可以大過 1 MiB。",
       );
@@ -624,7 +641,7 @@ class MaterialBuildroot extends LitElement {
       );
       this.openDialog("import-dialog", e);
     } catch {
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Invalid workspace export. Existing data is unchanged.",
         "工作區匯出文件無效，現有資料未有變更。",
       );
@@ -641,7 +658,7 @@ class MaterialBuildroot extends LitElement {
       this.edit = this.selected ? { ...this.selected } : undefined;
       this.importText = "";
       this.closeDialog("import-dialog");
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Workspace document imported.",
         "工作區文件已匯入。",
       );
@@ -793,7 +810,7 @@ class MaterialBuildroot extends LitElement {
       this.edit.name.trim().length > 80 ||
       this.edit.notes.length > 4000
     ) {
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Enter a name of 1–80 characters and notes of up to 4000 characters.",
         "名稱須為 1–80 個字元，備註最多 4000 個字元。",
       );
@@ -814,7 +831,7 @@ class MaterialBuildroot extends LitElement {
       )
         return false;
       this.edit = this.selected ? { ...this.selected } : undefined;
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Plan saved on this device.",
         "計劃已儲存喺呢部電腦。",
       );
@@ -826,7 +843,7 @@ class MaterialBuildroot extends LitElement {
       `Applied changes to ${plan.name}`,
       `已套用 ${plan.name} 嘅變更`,
     );
-    this.notice = this.l(
+    this.notice = this.noticeText(
       "Plan updated for this session.",
       "已更新今次工作階段嘅計劃。",
     );
@@ -834,7 +851,7 @@ class MaterialBuildroot extends LitElement {
   }
   private discardPlan() {
     if (this.selected) this.edit = { ...this.selected };
-    this.notice = this.l(
+    this.notice = this.noticeText(
       "Pending plan changes discarded.",
       "已放棄計劃嘅待套用變更。",
     );
@@ -871,7 +888,7 @@ class MaterialBuildroot extends LitElement {
       return;
     }
     if (this.dirty) {
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Apply or discard pending plan edits before creating another plan.",
         "建立另一個計劃前，請先套用或放棄待套用變更。",
       );
@@ -917,11 +934,11 @@ class MaterialBuildroot extends LitElement {
     }
     this.notice =
       this.workspaceMode === "durable"
-        ? this.l(
+        ? this.noticeText(
             "Plan saved. No project files were created.",
             "計劃已儲存，未建立專案檔案。",
           )
-        : this.l(
+        : this.noticeText(
             "Session plan created. No project files were created.",
             "已建立工作階段計劃，未建立專案檔案。",
           );
@@ -980,11 +997,11 @@ class MaterialBuildroot extends LitElement {
     this.closeDialog("remove-dialog");
     this.notice =
       this.workspaceMode === "durable"
-        ? this.l(
+        ? this.noticeText(
             "Plan removed from the saved workspace.",
             "已從儲存嘅工作區移除計劃。",
           )
-        : this.l(
+        : this.noticeText(
             "Plan removed from this session. Its name remains in session activity.",
             "已從今次工作階段移除計劃，活動記錄仍保留其名稱。",
           );
@@ -1011,7 +1028,7 @@ class MaterialBuildroot extends LitElement {
         if (!reply.ok) throw new Error("unavailable");
         document = reply.document;
       } catch {
-        this.notice = this.l(
+        this.notice = this.noticeText(
           "Workspace export unavailable. Your plans are retained.",
           "未能匯出工作區，計劃仍然保留。",
         );
@@ -1026,12 +1043,12 @@ class MaterialBuildroot extends LitElement {
     try {
       a.click();
       this.record("Plan download requested", "已要求下載計劃");
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Download requested. Check your downloads to confirm the file was saved.",
         "已要求下載。請檢查下載項目，確認檔案已儲存。",
       );
     } catch {
-      this.notice = this.l(
+      this.notice = this.noticeText(
         "Download could not be requested. Your session plans are retained.",
         "未能要求下載，工作階段計劃仍然保留。",
       );
@@ -1279,9 +1296,9 @@ class MaterialBuildroot extends LitElement {
   }
   private settingsView() {
     return html`<div class="settings-grid view">
-      <settings-search .language=${this.state?.language??'bilingual'} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;this.requestUpdate();}}}></settings-search>
+      <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;this.requestUpdate();}}}></settings-search>
       ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。')}</p>`:nothing}
-      <section
+      ${!this.restricted?html`<section
         class="panel stack" ?hidden=${!this.settingIds.includes("language")}
         aria-busy=${this.connection === "loading" || this.busy}
       >
@@ -1333,7 +1350,7 @@ class MaterialBuildroot extends LitElement {
         </div>
         <p class="muted">${this.storageMessage()}</p>
         <p id="save-feedback">${this.statusMessage()}</p>
-      </section>
+      </section>`:nothing}
       <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
         <h2>${this.owned("Appearance", "外觀")}</h2>
         <md-outlined-select
@@ -1367,8 +1384,9 @@ class MaterialBuildroot extends LitElement {
               )}
         </p>
       </section>
+      <section class="panel stack" ?hidden=${!this.settingIds.includes('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
       <div ?hidden=${!this.settingIds.includes('backups')}>${this.historyPanel()}</div>
-      ${vocabulary.school()!=='active'?html`<section class="panel stack" ?hidden=${!this.settingIds.includes('vocabulary')}><personal-vocabulary-panel .language=${this.state?.language??'bilingual'}></personal-vocabulary-panel></section>`:nothing}
+      ${!this.restricted?html`<section class="panel stack" ?hidden=${!this.settingIds.includes('vocabulary')}><personal-vocabulary-panel .language=${this.effectiveLanguage} .restricted=${this.restricted}></personal-vocabulary-panel></section>`:nothing}
     </div>`;
   }
   private setupView() {
@@ -1424,7 +1442,7 @@ class MaterialBuildroot extends LitElement {
               </h2>
               <p>
                 ${this.l(
-                  "Your plan is ready to edit. Review language in Settings and choose a theme below.",
+                  this.restricted?"Your plan is ready to edit. Choose a theme below.":"Your plan is ready to edit. Review language in Settings and choose a theme below.",
                   "計劃已可編輯。你可以喺設定檢視語言，並喺下面選擇主題。",
                 )}
               </p>
@@ -1446,7 +1464,7 @@ class MaterialBuildroot extends LitElement {
                   ["light", this.l("Light", "淺色")],
                   ["dark", this.l("Dark", "深色")],
                 ])}</md-outlined-select
-              ><md-text-button
+              >${!this.restricted?html`<md-text-button
                 @click=${() => {
                   this.setupDone = true;
                   this.closeDialog("setup-dialog", true);
@@ -1455,7 +1473,7 @@ class MaterialBuildroot extends LitElement {
                 >${actionIcon('Review language settings')}${this.l("Review language settings",
                   "檢視語言設定",
                 )}</md-text-button
-              >`}`;
+              >`:nothing}`}`;
   }
   private nameField() {
     return html`<md-outlined-text-field
@@ -1484,7 +1502,7 @@ class MaterialBuildroot extends LitElement {
       ><div slot="headline">${title}</div>
       <div slot="content" class="dialog-content stack">
         ${content}${this.notice
-          ? html`<p class="feedback" role="status">${this.notice}</p>`
+          ? html`<p class="feedback" role="status">${this.restricted?this.noticeEnglish:this.notice}</p>`
           : nothing}
       </div>
       <div slot="actions">${actions}</div></md-dialog
@@ -1589,11 +1607,11 @@ class MaterialBuildroot extends LitElement {
                     : this.route === "settings"
                       ? this.workspaceMode === "durable"
                         ? this.l(
-                            "Language and theme are saved on this device.",
+                            this.restricted?"Appearance is saved on this device.":"Language and theme are saved on this device.",
                             "語言同主題會儲存喺呢部電腦。",
                           )
                         : this.l(
-                            "Language is saved on this device. Appearance is session-only.",
+                            this.restricted?"Appearance is session-only.":"Language is saved on this device. Appearance is session-only.",
                             "語言會儲存喺呢部電腦，外觀只限今次工作階段。",
                           )
                       : this.route === "operations"
@@ -1698,15 +1716,15 @@ class MaterialBuildroot extends LitElement {
                     </section>`}<operations-panel
             class="operations-host"
             ?hidden=${this.route !== "operations"}
-            .language=${this.state?.language ?? "bilingual"}
+            .language=${this.effectiveLanguage} .restricted=${this.restricted}
           ></operations-panel
           >${this.notice
-            ? html`<p class="notice" role="status">${this.notice}</p>`
+            ? html`<p class="notice" role="status">${this.restricted?this.noticeEnglish:this.notice}</p>`
             : nothing}
         </main>
       </div>
       <div class="status" role="status" aria-live="polite">
-        ${this.statusMessage()}
+        ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
       </div>
       ${this.dialog(
         "navigation-dialog",
@@ -1857,7 +1875,7 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
+            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");

@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./documentation-panel";
 import {materialIcon, actionIcon} from "./material-icons";
@@ -27,6 +28,7 @@ type Job = {
 /** Typed task controls. Host operations remain the authority for paths and execution. */
 export class OperationsPanel extends LitElement {
   static properties = {
+    restricted:{type:Boolean},
     language: { type: String },
     tab: { state: true },
     pending: { state: true },
@@ -57,6 +59,7 @@ export class OperationsPanel extends LitElement {
     dockHeight: { state: true },
     dockOpen: { state: true },
   };
+  restricted=false;
   language = "bilingual";
   tab = "runtime";
   pending = false;
@@ -240,35 +243,35 @@ export class OperationsPanel extends LitElement {
   }
   private async run(action: string, fields: Record<string, unknown> = {}) {
     if (!this.api) {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Desktop operations are unavailable. Restart with a connected desktop host.",
         "未能使用桌面操作，請喺已連接嘅桌面主機重新啟動。",
-      );
+      ));
       return undefined;
     }
     if (this.pending) return undefined;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     try {
       const reply = await this.api({ action, ...fields });
       if (!reply.ok) {
         this.feedback =
-          this.l("Operation was not completed", "未完成操作") +
+          captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Operation was not completed", "未完成操作") +
           `: ${reply.code}` +
           (reply.code === "PROJECT_NOT_ADOPTED"
-            ? this.l(
+            ? l(
                 ". Choose the same project folders again to renew access before retrying.",
                 "。請重新選擇相同專案資料夾，更新存取授權後再試。",
               )
-            : "");
+            : ""));
         return undefined;
       }
       return reply.result;
     } catch {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Operation outcome unavailable. Refresh the relevant records before retrying.",
         "未能確認操作結果，請先重新整理相關記錄再試。",
-      );
+      ));
       return undefined;
     } finally {
       this.pending = false;
@@ -277,12 +280,12 @@ export class OperationsPanel extends LitElement {
   private async choosePython() {
     const result = await this.run("runtime.python.choose");
     if (result !== undefined)
-      this.feedback = result.available
-        ? this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>result.available
+        ? l(
             "Python admitted for Kconfig inspection",
             "已授權 Python 用於 Kconfig 檢視",
           ) + `: ${result.version}`
-        : this.l("Python could not be admitted.", "未能授權 Python。");
+        : l("Python could not be admitted.", "未能授權 Python。"));
   }
   private configEntries() {
     if (!this.config?.semantics?.available)
@@ -326,10 +329,10 @@ export class OperationsPanel extends LitElement {
       this.workspace = result;
       this.config = undefined;
       this.artifacts = [];
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Project adopted. Choose a runtime before requesting a build.",
         "專案已接入，要求建置前請先選擇執行環境。",
-      );
+      ));
       this.tab = "builds";
     }
   }
@@ -349,10 +352,10 @@ export class OperationsPanel extends LitElement {
       runtime: this.currentRuntime(),
     });
     if (result !== undefined)
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Runtime selected for this project.",
         "已為呢個專案選擇執行環境。",
-      );
+      ));
   }
   private async submit() {
     if (!this.workspace) return;
@@ -367,10 +370,10 @@ export class OperationsPanel extends LitElement {
       jobs: this.parallelism,
     });
     if (result !== undefined) {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Build request accepted. Job records determine its outcome.",
         "建置要求已接受，結果以工作記錄為準。",
-      );
+      ));
       await this.refreshJobs();
     }
   }
@@ -415,10 +418,10 @@ export class OperationsPanel extends LitElement {
       changes: this.changes,
     });
     if (result !== undefined) {
-      this.feedback = this.l(
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Configuration reconciled. Inspect effective values before building.",
         "設定已協調完成，建置前請檢視實際值。",
-      );
+      ));
       await this.inspectConfig();
     }
   }
@@ -485,10 +488,10 @@ export class OperationsPanel extends LitElement {
       if (typeof content === "string")
         this.messages = [...this.messages, { role: "assistant", content }];
       else
-        this.feedback = this.l(
+        this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "The local model request completed without a displayable response.",
           "本機模型要求已完成，但未有可顯示嘅回覆。",
-        );
+        ));
       this.prompt = "";
     }
   }
@@ -1294,12 +1297,12 @@ export class OperationsPanel extends LitElement {
         ?hidden=${this.tab !== "tools"}
         .language=${this.language}
       ></tools-panel
-      ><documentation-panel ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
+      ><documentation-panel .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
         ?hidden=${this.tab !== "companion"}
         .language=${this.language}
       ></companion-panel
       >${this.feedback
-        ? html`<div class="status" role="status">${this.feedback}</div>`
+        ? html`<div class="status" role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>`
         : nothing}
     </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板")}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小")} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出")}</strong><span>${this.jobs.length} ${this.l("loaded","已載入")}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${actionIcon('Refresh jobs')}${this.l("Refresh jobs","重新整理工作")}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出")}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件")}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。")}</span>`}</div></div></section>`:nothing}</div></div>`;
   }

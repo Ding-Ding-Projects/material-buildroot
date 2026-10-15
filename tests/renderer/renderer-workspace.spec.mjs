@@ -15,7 +15,7 @@ async function open(page,{language='en',completed=false}={}){
  await page.exposeFunction('__workspaceGet',()=>service.get());
  await page.exposeFunction('__workspaceMutate',request=>service.mutate(request));
  await page.exposeFunction('__workspaceExport',()=>service.exportDocument());
- await page.addInitScript(state=>{window.studio={bootstrap:async()=>state,request:async()=>({ok:false,code:'UNAVAILABLE'}),windowControl:async()=>true,onEvent:()=>()=>{},workspaceGet:()=>window.__workspaceGet(),workspaceMutate:request=>window.__workspaceMutate(request),workspaceExport:()=>window.__workspaceExport()};},{...bootstrap,language});
+ await page.addInitScript(state=>{window.studio={sharedMode:async()=>({ok:true,result:{available:true,watching:true,configured:false,active:false,displayName:null,revision:null,credentialKind:null}}),bootstrap:async()=>state,request:async()=>({ok:false,code:'UNAVAILABLE'}),windowControl:async()=>true,onEvent:()=>()=>{},workspaceGet:()=>window.__workspaceGet(),workspaceMutate:request=>window.__workspaceMutate(request),workspaceExport:()=>window.__workspaceExport()};},{...bootstrap,language});
  await page.goto('/');await expect(page.locator('.toolbar')).toContainText(/Saved on this device|已儲存喺呢部電腦/);
  return {service,errors,close:()=>fs.rmSync(directory,{recursive:true,force:true})};
 }

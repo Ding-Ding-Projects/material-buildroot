@@ -1,3 +1,4 @@
+import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { materialIcon } from "./material-icons";
 type Hardware = {
@@ -138,7 +139,7 @@ export class OllamaEvidencePanel extends LitElement {
       this.pending = false;
       this.fit = undefined;
       this.capabilities = undefined;
-      this.feedback = "";
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
       this.revision++;
     }
   }
@@ -165,7 +166,7 @@ export class OllamaEvidencePanel extends LitElement {
     if (this.pending) return;
     const token = ++this.serial;
     this.pending = true;
-    this.feedback = "";
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.revision++;
     try {
       const request = {
@@ -194,12 +195,12 @@ export class OllamaEvidencePanel extends LitElement {
         if (action === "ollama.fit") this.fit = undefined;
         if (action === "ollama.capabilities") this.capabilities = undefined;
         this.feedback =
-          this.l(
+          captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
             "Evidence unavailable. Refresh before making a runtime decision.",
             "未能取得證據，決定執行環境前請重新整理。",
           ) +
           " " +
-          (e instanceof Error && /^[A-Z_]+$/.test(e.message) ? e.message : "");
+          (e instanceof Error && /^[A-Z_]+$/.test(e.message) ? e.message : ""));
       }
     } finally {
       if (token === this.serial) {
@@ -278,7 +279,7 @@ export class OllamaEvidencePanel extends LitElement {
               )}
             </p>`
           : nothing}
-        <p role="status">${this.feedback}</p>
+        <p role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</p>
         ${this.pending
           ? html`<md-linear-progress
               indeterminate
