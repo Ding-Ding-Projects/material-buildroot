@@ -1,0 +1,108 @@
+{
+  "source": "299dca4d0d9413ef98ee249c172704a4d1732cc8",
+  "tag": "v0.1.0-build.4.1",
+  "isDraft": false,
+  "isPrerelease": false,
+  "url": "https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.4.1",
+  "sourceTreeVerified": true,
+  "packageLockBinding": "Exact SHA256 matches Git blob after LF to CRLF checkout conversion; not byte-identical to LF blob.",
+  "squirrelManifestVerified": true,
+  "assets": [
+    {
+      "name": "MaterialBuildroot-0.1.0-full.nupkg",
+      "bytes": 156459213,
+      "sha256": "a4a8a2b304643e2ce63fba8d129fab4105747ebf78211a122eb8642760db2ac1",
+      "apiDigestVerified": true
+    },
+    {
+      "name": "provenance.json",
+      "bytes": 1100,
+      "sha256": "961f28a2b95c8f3b603e61ae866b9ecb4f5604248dfb969cc80a70711aca5a10",
+      "apiDigestVerified": true
+    },
+    {
+      "name": "RELEASES",
+      "bytes": 88,
+      "sha256": "27080a569cd8df443471614a02c38cf9307dfc74ac1053045e36dac918408e0a",
+      "apiDigestVerified": true
+    },
+    {
+      "name": "Setup.exe",
+      "bytes": 157157376,
+      "sha256": "027bb00059cf9b7bd8e9b05be636fae2873e84ee88db979a566e378a8151c4ed",
+      "apiDigestVerified": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 334,
+      "sha256": "14f9e9476a12a3393cab2cfc92d0067c9a0de7ad5cd8a15b19c6278f8d751a32",
+      "apiDigestVerified": true
+    }
+  ],
+  "nativeRuntimeVerified": false,
+  "workflow": {
+    "id": 38690926331,
+    "conclusion": "success",
+    "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38690926331"
+  },
+  "rendererFiles": [
+    {
+      "path": "dist/assets/index-AoydyDeS.js",
+      "bytes": 181370,
+      "sha256": "b34527299d0cefd6b50c898153425c053e5d0238f5fc83a0e595ca4a2d93a316"
+    },
+    {
+      "path": "dist/build-info.json",
+      "bytes": 93,
+      "sha256": "e5b66feec58f5fc87517c443dd2ec2a4b7e3c39cf669401543006125c3f11c99"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 636,
+      "sha256": "e719b1caf4c2f2b6e11f51aa77b70f4d475fe7c3c074f4cc36a3b3ad861bb949"
+    }
+  ],
+  "verificationScope": "Downloaded release bytes and package manifests; native installation and runtime not verified.",
+  "rendererFixtureVerification": {
+    "route": "Release v0.1.0-build.4.1 packaged renderer in Linux Chromium with synthetic window.studio StudioAPI fixture; not native Windows/Electron IPC",
+    "source": "299dca4d0d9413ef98ee249c172704a4d1732cc8",
+    "spec": "tests/renderer/renderer-settings.spec.mjs",
+    "specSha256": "e6a00ffb7738bccdbe3ff33c69cb0e3bdf1184b17308a04b602de4d430bac4a8",
+    "stats": {
+      "startTime": "2026-10-15T06:18:09.529Z",
+      "duration": 17815.38,
+      "expected": 25,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "assets": [
+      {
+        "path": "dist/assets/index-AoydyDeS.js",
+        "bytes": 181370,
+        "sha256": "b34527299d0cefd6b50c898153425c053e5d0238f5fc83a0e595ca4a2d93a316",
+        "after": "b34527299d0cefd6b50c898153425c053e5d0238f5fc83a0e595ca4a2d93a316",
+        "unchanged": true
+      },
+      {
+        "path": "dist/build-info.json",
+        "bytes": 93,
+        "sha256": "e5b66feec58f5fc87517c443dd2ec2a4b7e3c39cf669401543006125c3f11c99",
+        "after": "e5b66feec58f5fc87517c443dd2ec2a4b7e3c39cf669401543006125c3f11c99",
+        "unchanged": true
+      },
+      {
+        "path": "dist/index.html",
+        "bytes": 636,
+        "sha256": "e719b1caf4c2f2b6e11f51aa77b70f4d475fe7c3c074f4cc36a3b3ad861bb949",
+        "after": "e719b1caf4c2f2b6e11f51aa77b70f4d475fe7c3c074f4cc36a3b3ad861bb949",
+        "unchanged": true
+      }
+    ],
+    "originalCspUnchanged": true,
+    "server": {
+      "teardownVerified": true
+    },
+    "titleBoundary": "Source-preview strings in shared test titles and filenames are historical; actual target was packaged extracted bytes."
+  }
+}

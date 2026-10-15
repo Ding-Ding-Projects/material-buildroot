@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "catalogue": "docs/planning/feature-coverage.md",
-  "catalogueSha256": "ec4ecead7e121a74db228aee69951455f20cb2d15d643bdcee650d4e8fc5c4d5",
+  "catalogueSha256": "746bc353d219b6e56fbe423194299e2a9159c7b3a5f50c70a65a9e47c1a2d443",
   "baselineRevision": "9c8fe848ff7abb1c11fd3d5014fc0ebfa8c60f1a",
   "status": "admission-only-pending-detailed-reconciliation",
   "identities": [

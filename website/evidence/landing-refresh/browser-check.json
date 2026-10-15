@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "scope": "Initial documentation site only; no desktop, full shared feature parity, native host or companion proof.",
+  "route": "local-headless-chromium",
+  "browser": "154.0.8037.57",
+  "built_at": "2026-10-15T06:22:27.152Z",
+  "input_snapshot_sha256": "258c3153b0d68fae9345e630bbf3d3dea5828a57c701fa785e17fa17e62ff031",
+  "base_commit": "a8c71418c7ab75673bd4cb8c960d4b4c6cfc23e9",
+  "inputs_differ_from_base": false,
+  "checks": [
+    "Served HTML, JavaScript and CSS match the exact selected build output.",
+    "Landing installer CTA names the published Windows asset without initiating a download; preview loads with alternative text and capability status is present.",
+    "Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.",
+    "Document search reports the full match count, caps results truthfully, supports keyboard focus and Escape/outside dismissal, and opens a complete article.",
+    "Heading language and explicit theme preferences survive reload; fresh system theme is light in this test context.",
+    "Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation traps forward/reverse Tab, retains Material arrow navigation, and Escape closes it.",
+    "All 45 current document routes render their complete article at mobile width without page overflow.",
+    "All 26 overview/category/phase/status routes fit 320px and use real dedicated pages.",
+    "All authored interactive controls use registered Material Web components; standard document hyperlinks remain semantic links.",
+    "No browser JavaScript errors or HTTP asset/route failures observed."
+  ],
+  "captures": [
+    {
+      "file": "website/evidence/landing-refresh/home-desktop-dark.png",
+      "sha256": "d1fa90076901b4ad992f1f0702d5257a3e78f0381f3f1fbfa62222b88aec9d0b",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "dark",
+      "language": "en"
+    },
+    {
+      "file": "website/evidence/landing-refresh/home-desktop.png",
+      "sha256": "0e414f25b9f4c9fd3253f15304b54a9e2a44fb3a19a38eb5a83e9ac27e0f85a0",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/landing-refresh/home-mobile.png",
+      "sha256": "df62979da89baf9ea14683ad7a897f63a5c900e93e30ac2607dc5869f0caef64",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/landing-refresh/roadmap-categories.png",
+      "sha256": "44373ef9f43350a8a34520ad116c13fe15550b9d56bbe52eebb40dcc7e3834a8",
+      "route": "/material-buildroot/site/roadmap.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/landing-refresh/roadmap-article.png",
+      "sha256": "01d8064b225063acdcdf7c2bd3ff4b0be786ed45df9ac7c7bc9cc942f9354320",
+      "route": "/material-buildroot/site/phases/ph00.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    }
+  ],
+  "artifacts": {
+    "html_sha256": "5defc1bfef30a1be1dfeebaef7af0f4b795a791597629106df5337b7be3e762a",
+    "javascript_sha256": "45f438710d128aed0c05871f179a86709413a3d2a6068c13bc020715f9165e6d",
+    "css_sha256": "0110d6ec13d870c07a48b321d09fcbf2498707e6c85e233db3f96eeec58213a0"
+  },
+  "geometry": [
+    {
+      "width": 320,
+      "language": "both",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "en",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "zh",
+      "document_width": 320
+    },
+    {
+      "width": 390,
+      "language": "both",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "zh",
+      "document_width": 390
+    },
+    {
+      "width": 768,
+      "language": "both",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "en",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "zh",
+      "document_width": 768
+    },
+    {
+      "width": 1440,
+      "language": "both",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "en",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "zh",
+      "document_width": 1440
+    }
+  ],
+  "document_routes": [
+    {
+      "source": "AGENTS.md",
+      "status": 200
+    },
+    {
+      "source": "CLOSEOUT_PROMPT.md",
+      "status": 200
+    },
+    {
+      "source": "DECISIONS.md",
+      "status": 200
+    },
+    {
+      "source": "HANDOFF.md",
+      "status": 200
+    },
+    {
+      "source": "NEXT_SESSION.md",
+      "status": 200
+    },
+    {
+      "source": "PLAN.md",
+      "status": 200
+    },
+    {
+      "source": "README.md",
+      "status": 200
+    },
+    {
+      "source": "ROADMAP.md",
+      "status": 200
+    },
+    {
+      "source": "design/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/REVIEW.md",
+      "status": 200
+    },
+    {
+      "source": "design/acceptance.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/components.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/questions.md",
+      "status": 200
+    },
+    {
+      "source": "design/archive/initial-draft/screens.md",
+      "status": 200
+    },
+    {
+      "source": "design/components.md",
+      "status": 200
+    },
+    {
+      "source": "design/desktop-shell.md",
+      "status": 200
+    },
+    {
+      "source": "design/reference/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/reference/control-map.md",
+      "status": 200
+    },
+    {
+      "source": "design/screens.md",
+      "status": 200
+    },
+    {
+      "source": "docs/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/build/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/build/releases.md",
+      "status": 200
+    },
+    {
+      "source": "docs/build/windows-entrypoints.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/desktop/host-and-preferences.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/desktop-shell/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/planning-site.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH01-contracts.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/tasks/PH02-T02-C03.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/architecture.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/buildroot-constraints.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/evidence-ledger.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/feature-coverage.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/managed-execution.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/surfaces.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/broker-admission.md",
+      "status": 200
+    },
+    {
+      "source": "docs/security/operation-requests.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/FAQ.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Getting-started.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Home.md",
+      "status": 200
+    },
+    {
+      "source": "website/README.md",
+      "status": 200
+    }
+  ],
+  "navigation_routes": [
+    "index.html",
+    "site/library.html",
+    "site/roadmap.html",
+    "site/status.html",
+    "site/categories/planning.html",
+    "site/categories/design.html",
+    "site/categories/wiki.html",
+    "site/categories/evidence.html",
+    "site/categories/build.html",
+    "site/categories/desktop.html",
+    "site/categories/security.html",
+    "site/roadmap/foundations.html",
+    "site/roadmap/buildroot.html",
+    "site/roadmap/tools.html",
+    "site/roadmap/delivery.html",
+    "site/phases/ph00.html",
+    "site/phases/ph01.html",
+    "site/phases/ph02.html",
+    "site/phases/ph03.html",
+    "site/phases/ph04.html",
+    "site/phases/ph05.html",
+    "site/phases/ph06.html",
+    "site/phases/ph07.html",
+    "site/phases/ph08.html",
+    "site/phases/ph09.html",
+    "site/phases/ph10.html"
+  ],
+  "verdict": "passed",
+  "checked_at": "2026-10-15T06:24:21.914Z"
+}
