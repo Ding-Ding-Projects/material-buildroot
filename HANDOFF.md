@@ -1,5 +1,9 @@
 # Handoff
 
+## Resumed renderer verification, 2026-10-15
+
+The owner authorized resumption and repeated frequent publication on main. The screenshot matrix now waits for each language select's exact displayed label and for fonts before capture. All 12 language/theme/viewport cases passed against unchanged renderer bytes from `299dca4d0d9413ef98ee249c172704a4d1732cc8`; refreshed image inspection and packaged-renderer verification are in progress. Normal release `v0.1.0-build.4.1` resolves to that source. Asset hash readback remains a separate ongoing check. This supersedes the earlier paused steering, without changing any native acceptance claim.
+
 ## Frontend continuation, 2026-10-15
 
 The owner requested continued frontend work directly on main with frequent published checkpoints. The current unit is PH02-T02-C03, settings lifecycle and navigation feedback in the existing production renderer. It adds explicit loading/saving/recovery states, draft retention and document-language synchronization after refresh, blocked submission after an unknown outcome or unavailable refresh, contained window-command failures and visible current-workspace navigation. Material Web does not forward arbitrary ARIA attributes to internal buttons; current navigation uses a supported accessible label and save feedback describes a native action group.
