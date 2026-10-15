@@ -1,9 +1,11 @@
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
+import "./guest-topology";
 import { workspaceStyles } from "./workspace-styles";
 /** Managed guest and disk conversion controls using explicit host previews. */
 export class GuestPanel extends LitElement {
   static properties = {
     workspaceId: { type: String },
+    topology: { state: true },
     language: { type: String },
     pending: { state: true },
     feedback: { state: true },
@@ -23,6 +25,7 @@ export class GuestPanel extends LitElement {
     conversion: { state: true },
   };
   workspaceId = "";
+  topology = true;
   language = "bilingual";
   pending = false;
   feedback = "";
@@ -63,6 +66,7 @@ export class GuestPanel extends LitElement {
         --md-sys-color-on-secondary-container: inherit;
         --md-sys-color-error: inherit;
       }
+      [hidden]{display:none!important}
       .guests {
         display: flex;
         flex-direction: column;
@@ -291,7 +295,7 @@ export class GuestPanel extends LitElement {
           )}
         </p>
       </section>`;
-    return html`<div class="guests">
+    return html`<div class="row"><md-outlined-button @click=${()=>this.topology=true}>${this.l("Topology editor","拓樸編輯器")}</md-outlined-button><md-outlined-button @click=${()=>this.topology=false}>${this.l("Guest records and disk conversion","客體記錄同磁碟轉換")}</md-outlined-button></div><guest-topology ?hidden=${!this.topology} .workspaceId=${this.workspaceId} .language=${this.language}></guest-topology><div class="guests" ?hidden=${this.topology}>
       <section class="panel stack">
         <h2>${this.l("Managed virtual machines", "受管理虛擬機")}</h2>
         <p>

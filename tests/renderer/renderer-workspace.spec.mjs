@@ -31,7 +31,9 @@ test('first-run wizard creates a real saved plan and resumes after reload',async
  const f=await open(page);try{
   await page.getByRole('button',{name:'Start setup',exact:true}).click();const dialog=page.locator('#setup-dialog');
   await dialog.getByRole('button',{name:'Next',exact:true}).click();await dialog.getByRole('textbox',{name:'Plan name'}).fill('Guided image');
-  await expect(dialog.getByRole('textbox',{name:'Plan name'})).toBeVisible();await page.evaluate(()=>document.fonts.ready);
+  await expect(dialog.getByRole('textbox',{name:'Plan name'})).toHaveValue('Guided image');
+  await expect.poll(()=>dialog.locator('md-outlined-text-field').filter({has:page.getByRole('textbox',{name:'Plan name'})}).locator('md-outlined-field .content').evaluate(el=>getComputedStyle(el).opacity)).toBe('1');
+  await page.evaluate(()=>document.fonts.ready);
   await page.screenshot({path:testInfo.outputPath('onboarding.png'),fullPage:true});
   await dialog.getByRole('button',{name:'Create plan',exact:true}).click();await expect(dialog).toContainText('Step 3 / 3');
   expect(f.service.get().state.plans[0].name).toBe('Guided image');

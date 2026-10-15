@@ -62,6 +62,8 @@ class MaterialBuildroot extends LitElement {
     nameError: { state: true },
     setupStep: { state: true },
     setupDone: { state: true },
+    setupRuntime: { state: true },
+    setupChecking: { state: true },
     inspector: { state: true },
     pendingDestination: { state: true },
     workspaceMode: { state: true },
@@ -73,7 +75,7 @@ class MaterialBuildroot extends LitElement {
     importSummary: { state: true },
   };
   declare state: StudioBootstrap | undefined;
-  route = "projects";
+  route = window.studio?.operations ? "operations" : "projects";
   connection: ConnectionState = "loading";
   saveState: SaveState = "idle";
   windowNotice = false;
@@ -98,6 +100,8 @@ class MaterialBuildroot extends LitElement {
   nameError = false;
   setupStep = 0;
   setupDone = false;
+  setupRuntime: any;
+  setupChecking = false;
   inspector = false;
   pendingDestination = "";
   private destinationDialogs = new Set<string>();
@@ -525,7 +529,7 @@ class MaterialBuildroot extends LitElement {
       return;
     this.setupDone = true;
     this.closeDialog("setup-dialog", true);
-    void this.navigate("projects");
+    void this.navigate(window.studio?.operations ? "operations" : "projects");
   }
   private async createSnapshot() {
     if (
@@ -1360,10 +1364,11 @@ class MaterialBuildroot extends LitElement {
             </h2>
             <p>
               ${this.l(
-                "Buildroot needs Linux. Record how you intend to run it; setup does not inspect or install a host.",
-                "Buildroot 需要 Linux。記錄你打算使用嘅環境，設定流程唔會檢查或安裝主機。",
+                "Buildroot needs Linux. Record how you intend to run it; the optional check inspects installed runtimes without installing them.",
+                "Buildroot 需要 Linux。記錄你打算使用嘅環境，選填檢查會檢視已安裝執行環境，唔會安裝。",
               )}
             </p>
+            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="runtime";}}>${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="source";}}>${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
             <md-outlined-select
               label=${this.l("Intended runtime", "預定執行環境")}
               .value=${this.newRuntime}
@@ -1582,6 +1587,7 @@ class MaterialBuildroot extends LitElement {
                           )}
               </p>
             </div>
+            ${!this.setupDone && this.route!=="projects"?html`<md-outlined-button @click=${(e:Event)=>this.openDialog("setup-dialog",e)}>${this.l("Start setup","開始設定")}</md-outlined-button>`:nothing}
             ${this.route === "projects"
               ? html`<md-outlined-button
                     ?disabled=${!this.plans.length}

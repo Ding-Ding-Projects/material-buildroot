@@ -8,6 +8,8 @@ import "./regex-workbench";
 import "./guest-panel";
 import "./tools-panel";
 import "./companion-panel";
+import "./source-panel";
+import "./package-panel";
 import { workspaceStyles } from "./workspace-styles";
 type Reply = { ok: true; result: any } | { ok: false; code: string };
 type Job = {
@@ -48,6 +50,8 @@ export class OperationsPanel extends LitElement {
     model: { state: true },
     prompt: { state: true },
     configPage: { state: true },
+    dockHeight: { state: true },
+    dockOpen: { state: true },
   };
   language = "bilingual";
   tab = "runtime";
@@ -76,6 +80,8 @@ export class OperationsPanel extends LitElement {
   model = "";
   prompt = "";
   configPage = 0;
+  dockHeight = 140;
+  dockOpen = true;
   private logCursor = 0;
   private logMore = false;
   static styles = [
@@ -106,10 +112,30 @@ export class OperationsPanel extends LitElement {
       .regex-host[hidden] {
         display: none;
       }
+      .ide { display:flex; height:100%; min-height:0; overflow:hidden; border:1px solid var(--md-sys-color-outline-variant); }
+      .explorer { width:180px; flex-shrink:0; overflow:auto; background:var(--md-sys-color-surface-container-low); border-right:1px solid var(--md-sys-color-outline-variant);padding:8px; }
+      .explorer h2 {font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:8px 4px;}
+      .explorer .project-name{font-size:12px;font-weight:600;padding:8px 4px;overflow-wrap:anywhere}
+      .explorer md-text-button{display:flex;width:100%;justify-content:flex-start;--md-text-button-container-height:32px;--md-text-button-container-shape:4px;font-size:12px}
+      .explorer .active{background:var(--md-sys-color-secondary-container)}
+      .editor-frame{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+      .document-toolbar{display:flex;gap:8px;align-items:center;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);font-size:12px;min-height:36px}
+      .document-toolbar strong{margin-right:auto}.document-toolbar md-text-button{--md-text-button-container-height:28px}
+      .dock{flex-shrink:0;display:flex;flex-direction:column;border-top:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);overflow:hidden}
+      .dock-resizer{height:5px;cursor:ns-resize;flex-shrink:0;background:var(--md-sys-color-outline-variant)}
+      .dock-content{display:flex;min-height:0;flex:1;overflow:hidden}.dock-jobs{width:220px;overflow:auto;border-right:1px solid var(--md-sys-color-outline-variant)}
+      .dock-jobs md-text-button{width:100%;--md-text-button-container-height:30px;font-size:11px}.dock-log{flex:1;min-width:0;overflow:auto;white-space:pre-wrap;font:12px/1.5 monospace;padding:8px}
+      .dock-empty{font:12px/1.5 inherit;padding:8px;color:var(--md-sys-color-on-surface-variant)}
+      .operations > .content{overflow:auto;flex:1;min-height:0;padding:12px;gap:8px}
+      .operations > [hidden]{display:none!important}
+      .operations > guest-panel,.operations > source-panel,.operations > package-panel,.operations > tools-panel,.operations > companion-panel,.operations > regex-workbench{flex:1;min-height:0;overflow:auto;padding:8px}
+      .operations > md-tabs{min-height:38px;--md-primary-tab-container-height:38px}
+      .panel{border-radius:0;padding:12px;background:transparent;border-bottom:1px solid var(--md-sys-color-outline-variant)}
       .operations {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 0;
+        flex:1;min-height:0;overflow:hidden;
       }
       md-tabs {
         --md-primary-tab-container-color: var(--md-sys-color-surface);
@@ -182,6 +208,8 @@ export class OperationsPanel extends LitElement {
         max-width: 100%;
         overflow: auto;
       }
+      @media (max-width:1100px){.explorer{width:140px}.explorer md-text-button{font-size:11px}.dock-jobs{width:160px}}
+      @media (max-width:750px){.explorer{display:none}}
       @media (max-width: 850px) {
         .split {
           grid-template-columns: 1fr;
@@ -481,6 +509,8 @@ export class OperationsPanel extends LitElement {
       assistant: ["Local assistant", "本機助理"],
       updates: ["Updates", "更新"],
       regex: ["Regex workbench", "正規表達式"],
+      source: ["Source", "來源"],
+      package: ["Package authoring", "套件編寫"],
       tools: ["Tools", "工具"],
       companion: ["Browser companion", "瀏覽器配對"],
       guests: ["Virtual machines", "虛擬機"],
@@ -1131,12 +1161,22 @@ export class OperationsPanel extends LitElement {
         : nothing}
     </section>`;
   }
+  private resizeDock(event: PointerEvent) {
+    const separator = event.currentTarget as HTMLElement;
+    const start = event.clientY, original = this.dockHeight;
+    separator.setPointerCapture(event.pointerId);
+    const move = (e:PointerEvent) => this.dockHeight = Math.max(80,Math.min(400,original+start-e.clientY));
+    const end = () => { separator.removeEventListener("pointermove",move); separator.removeEventListener("pointerup",end); separator.removeEventListener("pointercancel",end); };
+    separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
+  }
   render() {
-    return html`<div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","updates"].map(tab=>html`<md-text-button class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}>${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations", "專案操作")}
         .activeTabIndex=${[
           "runtime",
+          "source",
+          "package",
           "builds",
           "config",
           "artifacts",
@@ -1152,6 +1192,8 @@ export class OperationsPanel extends LitElement {
           this.tab =
             [
               "runtime",
+          "source",
+          "package",
               "builds",
               "config",
               "artifacts",
@@ -1165,6 +1207,8 @@ export class OperationsPanel extends LitElement {
         }}
         >${[
           "runtime",
+          "source",
+          "package",
           "builds",
           "config",
           "artifacts",
@@ -1192,6 +1236,7 @@ export class OperationsPanel extends LitElement {
         : nothing}
       <div
         class="content view"
+        ?hidden=${["guests","regex","tools","companion","source","package"].includes(this.tab)}
         id="operation-content"
         role="tabpanel"
         aria-labelledby=${"operation-tab-" + this.tab}
@@ -1208,7 +1253,7 @@ export class OperationsPanel extends LitElement {
                   ? nothing
                   : this.tab === "assistant"
                     ? this.assistantView()
-                    : ["regex", "tools", "companion"].includes(this.tab)
+                    : ["regex", "tools", "companion", "source", "package"].includes(this.tab)
                       ? nothing
                       : this.updatesView()}
       </div>
@@ -1223,6 +1268,30 @@ export class OperationsPanel extends LitElement {
         ?hidden=${this.tab !== "regex"}
         .language=${this.language}
       ></regex-workbench
+      ><package-panel
+        ?hidden=${this.tab !== "package"}
+        .workspaceId=${this.workspace?.workspaceId ?? ""}
+        .language=${this.language}
+      ></package-panel
+      ><source-panel
+        ?hidden=${this.tab !== "source"}
+        .workspaceId=${this.workspace?.workspaceId ?? ""}
+        .language=${this.language}
+        @source-adopted=${(event: CustomEvent) => {
+          this.workspace = event.detail;
+          this.config = undefined;
+          this.artifacts = [];
+          this.artifact = undefined;
+          this.changes = {};
+        }}
+        @source-applied=${(event: CustomEvent) => {
+          if (event.detail.workspaceId !== this.workspace?.workspaceId) return;
+          this.config = undefined;
+          this.artifacts = [];
+          this.artifact = undefined;
+          this.changes = {};
+        }}
+      ></source-panel
       ><tools-panel
         ?hidden=${this.tab !== "tools"}
         .language=${this.language}
@@ -1234,7 +1303,7 @@ export class OperationsPanel extends LitElement {
       >${this.feedback
         ? html`<div class="status" role="status">${this.feedback}</div>`
         : nothing}
-    </div>`;
+    </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板")}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小")} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出")}</strong><span>${this.jobs.length} ${this.l("loaded","已載入")}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${this.l("Refresh jobs","重新整理工作")}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出")}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件")}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。")}</span>`}</div></div></section>`:nothing}</div></div>`;
   }
 }
 customElements.define("operations-panel", OperationsPanel);

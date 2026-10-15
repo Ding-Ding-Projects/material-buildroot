@@ -123,6 +123,8 @@ export class ToolsPanel extends LitElement {
       p {
         margin: 0;
       }
+      a { color: var(--md-sys-color-primary); text-underline-offset: 3px; }
+      a:focus-visible { outline: 3px solid var(--md-sys-color-primary); outline-offset: 4px; border-radius: 2px; }
       .note {
         color: var(--md-sys-color-on-surface-variant);
       }
@@ -677,6 +679,7 @@ export class ToolsPanel extends LitElement {
         </div>
         <label class="row"
           ><md-checkbox
+            aria-label=${this.l("I have read and accept the Minecraft EULA.", "我已閱讀並接受 Minecraft EULA。")}
             ?checked=${this.eula}
             ?disabled=${this.pending}
             @change=${(e: Event) => {

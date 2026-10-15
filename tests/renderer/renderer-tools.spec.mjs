@@ -102,6 +102,7 @@ async function open(page, language = "en") {
     document.body.innerHTML = "";
     const panel = document.createElement("operations-panel");
     panel.language = language;
+    panel.style.height = "calc(100vh - 48px)";
     document.body.append(panel);
     document.documentElement.style.cssText = "height:auto;overflow:auto";
     document.body.style.cssText =

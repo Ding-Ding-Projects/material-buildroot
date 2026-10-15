@@ -284,6 +284,7 @@ export class CompanionPanel extends LitElement {
                 (scope) =>
                   html`<label class="row"
                     ><md-checkbox
+                          aria-label=${scope}
                       ?checked=${this.scopes.includes(scope)}
                       ?disabled=${this.pending}
                       @change=${(e: Event) => {
