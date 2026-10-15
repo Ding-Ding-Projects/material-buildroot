@@ -1,14 +1,205 @@
-'use strict';
-const fs=require('node:fs/promises');
-const path=require('node:path');
-const crypto=require('node:crypto');
-const {spawn}=require('node:child_process');
-function fail(code){throw Object.assign(new Error(code),{code});}
-function text(value,max=256){if(typeof value!=='string'||!value.length||value.length>max||/[\x00-\x1f]/.test(value))fail('INVALID_REQUEST');return value;}
-function token(value){text(value);if(!/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,199}$/.test(value)||value.includes('..'))fail('INVALID_REQUEST');return value;}
-async function digest(file,algorithm='sha256'){const hash=crypto.createHash(algorithm);const handle=await fs.open(file,'r');try{for await(const chunk of handle.createReadStream())hash.update(chunk);return hash.digest('hex');}finally{await handle.close();}}
-async function grant(options,id,mode){text(id);if(typeof options.resolveGrant!=='function')fail('FILE_GRANT_REQUIRED');const file=await options.resolveGrant(id,mode);if(typeof file!=='string'||!path.isAbsolute(file))fail('FILE_GRANT_REQUIRED');return file;}
-async function executable(options,id){const entry=options.executables?.[id];if(!entry||!path.isAbsolute(entry.path)||!entry.sha256||entry.bundled!==true)fail('MISSING_VERIFIED_PAYLOAD');if(await digest(entry.path)!==entry.sha256)fail('PAYLOAD_HASH_MISMATCH');return entry.path;}
-async function processRun(file,args,{signal,onProgress,cwd,timeout=120000,maxBytes=1048576,wait=true}={}){if(signal?.aborted)fail('CANCELLED');return new Promise((resolve,reject)=>{let size=0,done=false,reason,stdout='';const child=spawn(file,args,{shell:false,windowsHide:true,cwd,stdio:['ignore','pipe','pipe'],env:{PATH:path.dirname(file),SystemRoot:process.env.SystemRoot||'',HOME:process.env.HOME||'',LANG:'C.UTF-8'}});const finish=(error,value)=>{if(done)return;done=true;clearTimeout(timer);signal?.removeEventListener('abort',cancel);error?reject(error):resolve(value);};const cancel=()=>{reason='CANCELLED';child.kill('SIGTERM');setTimeout(()=>{if(child.exitCode===null)child.kill('SIGKILL');},1000).unref();};signal?.addEventListener('abort',cancel,{once:true});const timer=setTimeout(()=>{reason='PROCESS_TIMEOUT';cancel();reason='PROCESS_TIMEOUT';},timeout);timer.unref();for(const stream of [child.stdout,child.stderr])stream.on('data',chunk=>{size+=chunk.length;if(size>maxBytes){reason='OUTPUT_LIMIT';cancel();reason='OUTPUT_LIMIT';}else {if(stream===child.stdout)stdout+=chunk.toString('utf8');onProgress?.({type:'process-output',text:chunk.toString('utf8')});}});child.on('error',()=>finish(Object.assign(new Error('PROCESS_START_FAILED'),{code:'PROCESS_START_FAILED'})));child.on('exit',(code)=>finish(code===0&&!reason?null:Object.assign(new Error(reason||'PROCESS_FAILED'),{code:reason||'PROCESS_FAILED'}),{exitCode:code,stdout}));if(!wait)child.once('spawn',()=>finish(null,{child}));});}
-async function fetchBounded(url,{signal,maxBytes=4194304,body,method='GET',onLine,fetchImpl=fetch}={}){signal=signal?AbortSignal.any([signal,AbortSignal.timeout(120000)]):AbortSignal.timeout(120000);const response=await fetchImpl(url,{method,body:body===undefined?undefined:JSON.stringify(body),headers:body===undefined?{}:{'content-type':'application/json'},signal,redirect:'error'});if(!response.ok)fail('HTTP_FAILURE');let size=0,pending='',chunks=[];const decoder=new TextDecoder();for await(const chunk of response.body){size+=chunk.length;if(size>maxBytes)fail('RESPONSE_LIMIT');if(onLine){pending+=decoder.decode(chunk,{stream:true});if(pending.length>1048576)fail('RESPONSE_LINE_LIMIT');let at;while((at=pending.indexOf('\n'))>=0){const line=pending.slice(0,at);pending=pending.slice(at+1);if(line.trim())onLine(JSON.parse(line));}}else chunks.push(Buffer.from(chunk));}if(onLine){pending+=decoder.decode();if(pending.trim())onLine(JSON.parse(pending));return {completed:true};}return JSON.parse(Buffer.concat(chunks).toString('utf8'));}
-module.exports={fail,text,token,digest,grant,executable,processRun,fetchBounded};
+"use strict";
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const crypto = require("node:crypto");
+const { spawn } = require("node:child_process");
+function fail(code) {
+  throw Object.assign(new Error(code), { code });
+}
+function text(value, max = 256) {
+  if (
+    typeof value !== "string" ||
+    !value.length ||
+    value.length > max ||
+    /[\x00-\x1f]/.test(value)
+  )
+    fail("INVALID_REQUEST");
+  return value;
+}
+function token(value) {
+  text(value);
+  if (
+    !/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,199}$/.test(value) ||
+    value.includes("..")
+  )
+    fail("INVALID_REQUEST");
+  return value;
+}
+async function digest(file, algorithm = "sha256") {
+  const hash = crypto.createHash(algorithm);
+  const handle = await fs.open(file, "r");
+  try {
+    for await (const chunk of handle.createReadStream()) hash.update(chunk);
+    return hash.digest("hex");
+  } finally {
+    await handle.close();
+  }
+}
+async function grant(options, id, mode) {
+  text(id);
+  if (typeof options.resolveGrant !== "function") fail("FILE_GRANT_REQUIRED");
+  const file = await options.resolveGrant(id, mode);
+  if (typeof file !== "string" || !path.isAbsolute(file))
+    fail("FILE_GRANT_REQUIRED");
+  return file;
+}
+async function executable(options, id) {
+  const managed = options.payloadManager;
+  const entry = managed ? await managed.resolve(id) : options.executables?.[id];
+  const admitted =
+    entry?.bundled === true ||
+    (managed &&
+      entry?.origin === "user-selected" &&
+      typeof entry.receiptId === "string" &&
+      entry.bundled === false);
+  if (!entry || !path.isAbsolute(entry.path) || !entry.sha256 || !admitted)
+    fail("MISSING_VERIFIED_PAYLOAD");
+  if ((await digest(entry.path)) !== entry.sha256)
+    fail("PAYLOAD_HASH_MISMATCH");
+  return entry.path;
+}
+async function processRun(
+  file,
+  args,
+  {
+    signal,
+    onProgress,
+    cwd,
+    timeout = 120000,
+    maxBytes = 1048576,
+    wait = true,
+  } = {},
+) {
+  if (signal?.aborted) fail("CANCELLED");
+  return new Promise((resolve, reject) => {
+    let size = 0,
+      done = false,
+      reason,
+      stdout = "",
+      stderr = "";
+    const child = spawn(file, args, {
+      shell: false,
+      windowsHide: true,
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        PATH: path.dirname(file),
+        SystemRoot: process.env.SystemRoot || "",
+        HOME: process.env.HOME || "",
+        LANG: "C.UTF-8",
+      },
+    });
+    const finish = (error, value) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", cancel);
+      error ? reject(error) : resolve(value);
+    };
+    const cancel = () => {
+      reason = "CANCELLED";
+      child.kill("SIGTERM");
+      setTimeout(() => {
+        if (child.exitCode === null) child.kill("SIGKILL");
+      }, 1000).unref();
+    };
+    signal?.addEventListener("abort", cancel, { once: true });
+    const timer = setTimeout(() => {
+      reason = "PROCESS_TIMEOUT";
+      cancel();
+      reason = "PROCESS_TIMEOUT";
+    }, timeout);
+    timer.unref();
+    for (const stream of [child.stdout, child.stderr])
+      stream.on("data", (chunk) => {
+        size += chunk.length;
+        if (size > maxBytes) {
+          reason = "OUTPUT_LIMIT";
+          cancel();
+          reason = "OUTPUT_LIMIT";
+        } else {
+          if (stream === child.stdout) stdout += chunk.toString("utf8");
+          else stderr += chunk.toString("utf8");
+          onProgress?.({
+            type: "process-output",
+            text: chunk.toString("utf8"),
+          });
+        }
+      });
+    child.on("error", () =>
+      finish(
+        Object.assign(new Error("PROCESS_START_FAILED"), {
+          code: "PROCESS_START_FAILED",
+        }),
+      ),
+    );
+    child.on("close", (code) =>
+      finish(
+        code === 0 && !reason
+          ? null
+          : Object.assign(new Error(reason || "PROCESS_FAILED"), {
+              code: reason || "PROCESS_FAILED",
+            }),
+        { exitCode: code, stdout, stderr },
+      ),
+    );
+    if (!wait) child.once("spawn", () => finish(null, { child }));
+  });
+}
+async function fetchBounded(
+  url,
+  {
+    signal,
+    maxBytes = 4194304,
+    body,
+    method = "GET",
+    onLine,
+    fetchImpl = fetch,
+  } = {},
+) {
+  signal = signal
+    ? AbortSignal.any([signal, AbortSignal.timeout(120000)])
+    : AbortSignal.timeout(120000);
+  const response = await fetchImpl(url, {
+    method,
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: body === undefined ? {} : { "content-type": "application/json" },
+    signal,
+    redirect: "error",
+  });
+  if (!response.ok) fail("HTTP_FAILURE");
+  let size = 0,
+    pending = "",
+    chunks = [];
+  const decoder = new TextDecoder();
+  for await (const chunk of response.body) {
+    size += chunk.length;
+    if (size > maxBytes) fail("RESPONSE_LIMIT");
+    if (onLine) {
+      pending += decoder.decode(chunk, { stream: true });
+      if (pending.length > 1048576) fail("RESPONSE_LINE_LIMIT");
+      let at;
+      while ((at = pending.indexOf("\n")) >= 0) {
+        const line = pending.slice(0, at);
+        pending = pending.slice(at + 1);
+        if (line.trim()) onLine(JSON.parse(line));
+      }
+    } else chunks.push(Buffer.from(chunk));
+  }
+  if (onLine) {
+    pending += decoder.decode();
+    if (pending.trim()) onLine(JSON.parse(pending));
+    return { completed: true };
+  }
+  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+}
+module.exports = {
+  fail,
+  text,
+  token,
+  digest,
+  grant,
+  executable,
+  processRun,
+  fetchBounded,
+};

@@ -15,8 +15,8 @@ async function open(page,{bootstrap=initial,missing=false}={}){
  await page.goto('/');await page.locator('material-buildroot').waitFor();
  return errors;
 }
-async function settings(page){await page.locator('nav md-outlined-button').filter({hasText:'Settings'}).click();await expect(page.locator('h1')).toHaveText('Settings');}
-const language=page=>page.locator('md-outlined-select').first();
+async function settings(page){await page.locator('nav md-text-button').filter({hasText:'Settings'}).click();await expect(page.locator('h1')).toHaveText('Settings');}
+const language=page=>page.locator('#language-select');
 const save=page=>page.locator('md-filled-button').filter({hasText:/Save language|Saving/});
 async function choose(page,value){await language(page).click();await page.locator(`md-select-option[value="${value}"]`).click();}
 async function reply(page,value){await page.evaluate(value=>window.fixture.pendingRequests.shift().resolve(value),value);}
@@ -26,7 +26,7 @@ const success=(revision='1'.repeat(40))=>({ok:true,operationId:'fixture',revisio
 
 test('deferred bootstrap distinguishes loading and ready, and synchronizes document language',async({page})=>{
  const errors=await open(page,{bootstrap:null});await expect(page.getByRole('status')).toContainText(/loading|connecting/i);
- await page.locator('nav md-outlined-button').filter({hasText:'Settings'}).click();await expect(save(page)).toHaveJSProperty('disabled',true);
+ await page.locator('nav md-text-button').filter({hasText:'Settings'}).click();await expect(save(page)).toHaveJSProperty('disabled',true);
  await bootReply(page,initial);await expect(save(page)).toHaveJSProperty('disabled',false);await expect(page.locator('html')).toHaveAttribute('lang','en');expect(errors).toEqual([]);
 });
 test('missing desktop bridge disables window controls without unhandled errors',async({page})=>{
@@ -46,7 +46,7 @@ test('expired authority with changed revision never silently retries',async({pag
  await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure('UNAUTHORIZED'));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await bootReply(page,{...initial,language:'zh-HK',revision:'2'.repeat(40)});await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');await expect(language(page)).toHaveJSProperty('value','bilingual');await expect(page.getByRole('status')).toContainText(/檢視|review/i);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);
 });
 test('unknown transaction outcome blocks further saves for this session',async({page})=>{
- const errors=await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await page.evaluate(()=>window.fixture.pendingRequests.shift().reject(new Error('Fixture transport lost')));await expect(page.getByRole('status')).toContainText(/restart/i);await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('button',{name:'Discard choice'})).toBeDisabled();await expect(page.locator('#confirmed-language')).toContainText('Last confirmed language: English');await page.locator('nav md-outlined-button').filter({hasText:'Projects'}).click();await settings(page);await expect(save(page)).toHaveJSProperty('disabled',true);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
+ const errors=await open(page);await settings(page);await choose(page,'zh-HK');await save(page).click();await page.evaluate(()=>window.fixture.pendingRequests.shift().reject(new Error('Fixture transport lost')));await expect(page.getByRole('status')).toContainText(/restart/i);await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('button',{name:'Discard choice'})).toBeDisabled();await expect(page.locator('#confirmed-language')).toContainText('Last confirmed language: English');await page.locator('nav md-text-button').filter({hasText:'Project plans'}).click();await settings(page);await expect(save(page)).toHaveJSProperty('disabled',true);expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
 });
 test('window-command rejection and false result are announced without unhandled errors',async({page})=>{
  const errors=await open(page);await page.evaluate(()=>window.fixture.windowResult='reject');await page.locator('.window md-text-button').first().click();await expect(page.getByRole('status')).toContainText(/window|desktop/i);await page.evaluate(()=>window.fixture.windowResult=false);await page.locator('.window md-text-button').nth(1).click();await expect(page.getByRole('status')).toContainText(/window|desktop/i);expect(errors).toEqual([]);
@@ -62,10 +62,10 @@ for(const rejection of ['STALE_REVISION','UNAUTHORIZED'])test(`failed refresh af
  const errors=await open(page);await settings(page);await choose(page,'bilingual');await save(page).click();await reply(page,failure(rejection));await expect.poll(()=>page.evaluate(()=>window.fixture.pendingBoot.length)).toBe(1);await page.evaluate(()=>window.fixture.pendingBoot.shift().reject(new Error('Fixture refresh unavailable')));await expect(save(page)).toHaveJSProperty('disabled',true);await expect(page.getByRole('status')).toContainText(/restart/i);await expect(page.getByRole('status')).not.toContainText(/Save outcome unavailable/i);await expect(page.getByRole('button',{name:'Discard choice'})).toBeDisabled();await expect(language(page)).toHaveJSProperty('value','bilingual');expect(await page.evaluate(()=>window.fixture.requests.length)).toBe(1);expect(errors).toEqual([]);
 });
 test('navigation focuses destination heading, marks current route and retains draft',async({page})=>{
- await open(page);await settings(page);await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-outlined-button').nth(1)).toHaveClass(/selected/);expect(await page.locator('nav md-outlined-button').evaluateAll(els=>getComputedStyle(els[0]).backgroundColor!==getComputedStyle(els[1]).backgroundColor)).toBe(true);await choose(page,'bilingual');await page.locator('nav md-outlined-button').first().click();await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-outlined-button').first()).toHaveClass(/selected/);await settings(page);await expect(language(page)).toHaveJSProperty('value','bilingual');
+ await open(page);await settings(page);await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-text-button').filter({hasText:/Settings|設定/}).filter({hasNotText:/Setup|開始設定/})).toHaveClass(/selected/);expect(await page.locator('nav md-text-button').evaluateAll(els=>getComputedStyle(els.find(el=>el.classList.contains('selected'))).backgroundColor!==getComputedStyle(els.find(el=>!el.classList.contains('selected'))).backgroundColor)).toBe(true);await choose(page,'bilingual');await page.locator('nav md-text-button').first().click();await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-text-button').first()).toHaveClass(/selected/);await settings(page);await expect(language(page)).toHaveJSProperty('value','bilingual');
 });
 for(const languageMode of ['en','zh-HK','bilingual'])for(const theme of ['light','dark'])for(const viewport of [{width:960,height:640},{width:1440,height:960}])test(`source-preview layout ${languageMode} ${theme} ${viewport.width}x${viewport.height}`,async({page},testInfo)=>{
- await page.setViewportSize(viewport);await page.emulateMedia({colorScheme:theme});const errors=await open(page,{bootstrap:{...initial,language:languageMode}});await page.locator('nav md-outlined-button').nth(1).click();await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-outlined-button').nth(1)).toHaveClass(/selected/);await expect(language(page)).toHaveJSProperty('disabled',false);
+ await page.setViewportSize(viewport);await page.emulateMedia({colorScheme:theme});const errors=await open(page,{bootstrap:{...initial,language:languageMode}});await page.locator('nav md-text-button').filter({hasText:/Settings|設定/}).filter({hasNotText:/Setup|開始設定/}).click();await expect(page.locator('h1')).toBeFocused();await expect(page.locator('nav md-text-button').filter({hasText:/Settings|設定/}).filter({hasNotText:/Setup|開始設定/})).toHaveClass(/selected/);await expect(language(page)).toHaveJSProperty('disabled',false);
  const displayedLanguage=languageMode==='en'?'English':languageMode==='zh-HK'?'香港粵語':'English + 香港粵語';
  await expect(language(page)).toHaveJSProperty('displayText',displayedLanguage);
  await expect(language(page).locator('#label')).toHaveText(displayedLanguage);
@@ -79,7 +79,7 @@ for(const languageMode of ['en','zh-HK','bilingual'])for(const theme of ['light'
 
 for(const origin of ['default','saved'])test(`confirmed bilingual preference distinguishes ${origin} provenance`,async({page})=>{
  await open(page,{bootstrap:{...initial,language:'bilingual',origin}});
- await page.locator('nav md-outlined-button').nth(1).click();
+ await page.locator('nav md-text-button').filter({hasText:/Settings|設定/}).filter({hasNotText:/Setup|開始設定/}).click();
  await expect(page.locator('#confirmed-language')).toContainText('English + 香港粵語');
  await expect(page.locator('#confirmed-language')).toContainText(origin==='default'?'Application default':'Saved on this device');
  await expect(page.getByRole('button',{name:/Discard choice/})).toBeDisabled();

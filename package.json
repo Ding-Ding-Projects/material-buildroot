@@ -33,6 +33,7 @@
     "appId": "com.dingdingprojects.materialbuildroot",
     "productName": "Material Buildroot",
     "asar": true,
+    "asarUnpack": ["scripts/configuration/**/*"],
     "directories": {
       "output": "release"
     },
@@ -40,6 +41,7 @@
       "dist/**/*",
       "src/main/**/*",
       "src/shared/**/*",
+      "scripts/configuration/**/*",
       "package.json",
       "assets/branding/icon.ico"
     ],

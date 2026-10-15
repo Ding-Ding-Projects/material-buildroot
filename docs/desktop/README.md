@@ -1,3 +1,3 @@
-# Desktop shell
+# Desktop workspace
 
-See [Host admission and preferences](host-and-preferences.md) for the production desktop boundary, durable language workflow and verification limits. This slice does not implement project discovery, Buildroot execution, or the complete product roadmap.
+Start with the [current workspace guide](modern-workspace.md) or [香港粵語](modern-workspace.zh-HK.md). It covers onboarding, plans, native project adoption, jobs, configuration and operation controls. See [Host admission and preferences](host-and-preferences.md) for the original language broker boundary and historical proof. Full native and cross-surface acceptance remains tracked in the roadmap.

@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "phases": [
+    {
+      "id": "PH00",
+      "contract": "Planning and documentation retain product decisions and independent surface boundaries.",
+      "authority": "Documentation has no execution authority.",
+      "persistence": "Version-controlled planning records.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH01",
+      "contract": "Validate admission of phase consumers and immutable evidence file bindings.",
+      "authority": "Read-only validator rejects incomplete or stale evidence; grants no execution authority.",
+      "persistence": "Versioned JSON registry and independent feature ledger.",
+      "state": "authored",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [
+        {
+          "path": "scripts/evidence/admit-implementation.cjs",
+          "sha256": "1d5514a2f5a7c4a03751a290e52788e432ca637ecbc73277fb84ff0ef14c0e3a"
+        }
+      ],
+      "tests": [
+        {
+          "path": "tests/implementation-admission.test.cjs",
+          "sha256": "471235028877950185684d5240b4ba80d85e2d052497be837221efb6d0c5004b"
+        }
+      ],
+      "documents": [
+        {
+          "path": "docs/planning/implementation-admission.md",
+          "sha256": "6fb259b3f8b79d6bda868b58923a1422a0217b1c48082a9f134267608c744e54"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH02",
+      "contract": "Sandboxed desktop renderer reaches bounded broker actions through preload.",
+      "authority": "Main-process contracts validate requests; renderer receives narrow APIs.",
+      "persistence": "Main-process settings store; native credential protection remains separately unverified.",
+      "state": "authored",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Stable broker contract only; changing main/preload integration, native execution and Windows acceptance remain unverified.",
+      "consumers": [
+        {
+          "path": "src/main/security/broker-contract.cjs",
+          "sha256": "0175adf42215ba7080eb9ddc97ec4ccf1f36466d68a4305a61fda60ff0d8431d"
+        }
+      ],
+      "tests": [
+        {
+          "path": "tests/desktop-preload.test.cjs",
+          "sha256": "4836da20c24213bc3e9c44c83af5ef431a66b5b19508be902fc963852878b60e"
+        },
+        {
+          "path": "tests/broker-contract.test.cjs",
+          "sha256": "1e2777b24bfafad2dcf907d065ca6c7229defebf54218ef80505e78e95f2afdb"
+        }
+      ],
+      "documents": [
+        {
+          "path": "docs/security/broker-admission.md",
+          "sha256": "44968a3b58af3f211e23a89c9b62158601658174d4251b9e792b3295300815c6"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH03",
+      "contract": "Workspace service and versioned persistence consume plan, settings and onboarding requests. Renderer integration remains under active implementation and is excluded from this source snapshot.",
+      "authority": "Controls invoke bounded workspace methods; plans do not execute builds.",
+      "persistence": "Versioned workspace store and serialized renderer preferences.",
+      "state": "authored",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Authored workspace persistence only. Active renderer changes have no admitted hash here; localization, GUI/runtime and Windows acceptance remain unverified.",
+      "consumers": [
+        {
+          "path": "src/main/workspace-service.cjs",
+          "sha256": "67b4a5470cd01e778298e01ad9d49d4cd41f8206dc0670d54e3f796d9f4adce5"
+        },
+        {
+          "path": "src/main/storage/workspace-store.cjs",
+          "sha256": "dd07e56e308877218ecbbf95b745068b47cd2752a82a37791d3fe99acef7be90"
+        }
+      ],
+      "tests": [
+        {
+          "path": "tests/renderer/renderer-settings.spec.mjs",
+          "sha256": "fd4b7a314422a25cbce372a579250c69e5a7b702b3af17da8024d2cccc8788b0"
+        }
+      ],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH04",
+      "contract": "Durable records, recovery snapshots, locks and accessibility must preserve user state.",
+      "authority": "Mutation ownership and explicit restore authorization must be enforced.",
+      "persistence": "Atomic versioned stores, recovery records and explicit cleanup.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH05",
+      "contract": "Discover real sources and WSL/Docker runtimes and schedule owned project tasks.",
+      "authority": "Normal-user runtime adapters validate source consent, executable identity and ownership.",
+      "persistence": "Project revisions, runtime identity, durable queues and source locks.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH06",
+      "contract": "Authoritative Kconfig reconciliation, package/overlay editing and builds consume actual source trees.",
+      "authority": "Typed Linux bridge serializes output mutations and preserves effective configuration.",
+      "persistence": "Source/config snapshots, requested/effective revisions and build records.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH07",
+      "contract": "Real image conversion, VM lifecycle, reproducibility and deployment adapters preserve artifact provenance.",
+      "authority": "Reviewed typed adapters own exact resources; destination actions require bounded authority.",
+      "persistence": "Artifact hashes, guest identities, reproducibility manifests and transfer receipts.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH08",
+      "contract": "Converter, Ollama, Minecraft and publication workflows use actual packaged tool consumers.",
+      "authority": "Tool-specific validated adapters enforce reviewed operations and credential references.",
+      "persistence": "Durable tool queues, checkpoints, catalog versions and recovery state.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH09",
+      "contract": "Independent visitor features and authenticated paired companion actions use explicit capability states.",
+      "authority": "Scoped pairing, origin checks, replay protection and revocation bound broker access.",
+      "persistence": "Client state, paired identities, scoped grants and revocation records.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    },
+    {
+      "id": "PH10",
+      "contract": "Windows packaging and release acceptance bind installers and native behavior to reviewed builds.",
+      "authority": "Build and publication remain separate; native acceptance requires actual host evidence.",
+      "persistence": "Installer hashes, dependency manifests, native acceptance and release receipts.",
+      "state": "planned",
+      "sourceRevision": "e4202d9c78524c6bd692476fbbb924ae0a08ed1c",
+      "accepted": false,
+      "acceptanceGap": "Full feature, localization, runtime and native acceptance remain unverified; Windows tests deferred by owner.",
+      "consumers": [],
+      "tests": [],
+      "documents": [
+        {
+          "path": "docs/planning/architecture.md",
+          "sha256": "fd96349be8666726afb9b361a20cc7028c6245c81ad3616837f8aca8419d69f8"
+        }
+      ],
+      "receipts": []
+    }
+  ]
+}

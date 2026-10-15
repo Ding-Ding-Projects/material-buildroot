@@ -1,8 +1,254 @@
-'use strict';
-const fs=require('node:fs/promises');const path=require('node:path');const {randomUUID,createHash}=require('node:crypto');
-const {fail,text,grant,executable,processRun,fetchBounded}=require('./runtime.cjs');
-const MANIFEST='https://piston-meta.mojang.com/mc/game/version_manifest_v2.json';
-function official(url,hosts){const parsed=new URL(url);if(parsed.protocol!=='https:'||!hosts.includes(parsed.hostname)||parsed.port||parsed.username||parsed.password)fail('UNTRUSTED_DOWNLOAD');return parsed.href;}
-function properties(input){const rules={'server-port':v=>Number.isInteger(v)&&v>=1024&&v<=65535,'max-players':v=>Number.isInteger(v)&&v>=1&&v<=1000,'online-mode':v=>v===true,'white-list':v=>typeof v==='boolean',difficulty:v=>['peaceful','easy','normal','hard'].includes(v),gamemode:v=>['survival','creative','adventure','spectator'].includes(v),motd:v=>typeof v==='string'&&v.length<=128&&!/[\r\n\x00-\x1f]/.test(v),'level-name':v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(v)};if(!input||typeof input!=='object'||Array.isArray(input))fail('INVALID_REQUEST');return Object.entries(input).map(([key,value])=>{if(!rules[key]?.(value))fail('INVALID_SERVER_PROPERTY');return key+'='+value;}).join('\n')+'\n';}
-function createMinecraft(options){const running=new Map();const fetchImpl=options.fetchImpl||fetch;async function versions(signal){return fetchBounded(MANIFEST,{signal,fetchImpl});}return async(request,context={})=>{switch(request.action){case 'minecraft.flavours':return require('./minecraft-catalog.cjs').catalog(options,request,context);case 'minecraft.plugins':case 'minecraft.plugin.install':case 'minecraft.bedrock.discovery':return require('./minecraft-catalog.cjs').catalog(options,request,context);case 'minecraft.versions':if(request.edition==='bedrock')return {available:false,code:'BEDROCK_CATALOGUE_REQUIRES_REVIEW',recovery:'Provide an admitted official Bedrock release manifest with archive checksums.'};return versions(context.signal);case 'minecraft.install':{if(request.edition!=='java')fail('BEDROCK_PAYLOAD_NOT_ADMITTED');const version=text(request.version,80);const manifest=await versions(context.signal);const entry=manifest.versions?.find(item=>item.id===version);if(!entry)fail('VERSION_NOT_FOUND');const metadata=await fetchBounded(official(entry.url,['piston-meta.mojang.com','launchermeta.mojang.com']),{signal:context.signal,fetchImpl});const server=metadata.downloads?.server;if(!server||!Number.isInteger(server.size)||server.size<=0||server.size>256*1024*1024||!/^[0-9a-f]{40}$/.test(server.sha1))fail('SERVER_PAYLOAD_UNAVAILABLE');const directory=await grant(options,request.directoryId,'write');const destination=path.join(directory,'server.jar'),temporary=path.join(directory,'.server-'+randomUUID());try{const response=await fetchImpl(official(server.url,['piston-data.mojang.com','launcher.mojang.com']),{signal:context.signal,redirect:'error'});if(!response.ok)fail('HTTP_FAILURE');const handle=await fs.open(temporary,'wx',0o600);let bytes=0;const hash=createHash('sha1');try{for await(const chunk of response.body){bytes+=chunk.length;if(bytes>server.size)fail('DOWNLOAD_LIMIT');hash.update(chunk);await handle.write(chunk);context.onProgress?.({type:'server-download',completed:bytes,total:server.size});}}finally{await handle.close();}if(bytes!==server.size||hash.digest('hex')!==server.sha1)fail('PAYLOAD_HASH_MISMATCH');await fs.link(temporary,destination);return {installed:true,version,bytes,sha1:server.sha1};}finally{await fs.rm(temporary,{force:true});}}case 'minecraft.configure':{const directory=await grant(options,request.directoryId,'write');const content=properties(request.properties);if(request.acceptEula!==true)fail('EULA_ACCEPTANCE_REQUIRED');await fs.writeFile(path.join(directory,'server.properties'),content,{flag:'wx',mode:0o600});await fs.writeFile(path.join(directory,'eula.txt'),'eula=true\n',{flag:'wx',mode:0o600});return {configured:true};}case 'minecraft.start':{const id=text(request.serverId,80);if(running.has(id))fail('SERVER_ALREADY_RUNNING');if(!['local-process','local-container'].includes(request.target))fail('TARGET_REQUIRES_ADMITTED_TYPED_TRANSPORT');const directory=await grant(options,request.directoryId,'read');if((await fs.readFile(path.join(directory,'eula.txt'),'utf8')).trim()!=='eula=true')fail('EULA_ACCEPTANCE_REQUIRED');const memory=request.memoryMiB;if(!Number.isInteger(memory)||memory<512||memory>32768)fail('INVALID_REQUEST');await fs.access(path.join(directory,'server.jar'));let command,args;if(request.target==='local-container'){if(!/^[a-z0-9./_-]+@sha256:[a-f0-9]{64}$/.test(options.minecraftJavaImage||''))fail('PINNED_CONTAINER_IMAGE_REQUIRED');if(directory.includes(','))fail('INVALID_MOUNT_PATH');command=await executable(options,'docker');const network=request.network||'none';if(!['none','bridge'].includes(network))fail('INVALID_NETWORK_MODE');const ports=[];if(network==='bridge'){if(!Number.isInteger(request.port)||request.port<1024||request.port>65535)fail('INVALID_SERVER_PORT');ports.push('--publish','127.0.0.1:'+request.port+':25565/tcp');}args=['run','--rm','--network',network,...ports,'--cap-drop','ALL','--security-opt','no-new-privileges','--memory',memory+'m','--cpus','2','--mount','type=bind,source='+directory+',target=/server','--workdir','/server',options.minecraftJavaImage,'java','-Xms512M','-Xmx'+memory+'M','-jar','server.jar','nogui'];}else{command=await executable(options,'java');args=['-Xms512M','-Xmx'+memory+'M','-jar','server.jar','nogui'];}const result=await processRun(command,args,{...context,cwd:directory,wait:false});running.set(id,result.child);result.child.once('exit',()=>running.delete(id));return {started:true,serverId:id};}case 'minecraft.stop':{const child=running.get(request.serverId);if(!child)fail('SERVER_NOT_RUNNING');child.kill('SIGTERM');return {stopping:true};}case 'minecraft.status':return {running:running.has(request.serverId)};default:fail('INVALID_REQUEST');}};}
-module.exports={createMinecraft,properties,official};
+"use strict";
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const { randomUUID, createHash } = require("node:crypto");
+const {
+  fail,
+  text,
+  grant,
+  executable,
+  processRun,
+  fetchBounded,
+} = require("./runtime.cjs");
+const MANIFEST =
+  "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+function official(url, hosts) {
+  const parsed = new URL(url);
+  if (
+    parsed.protocol !== "https:" ||
+    !hosts.includes(parsed.hostname) ||
+    parsed.port ||
+    parsed.username ||
+    parsed.password
+  )
+    fail("UNTRUSTED_DOWNLOAD");
+  return parsed.href;
+}
+function properties(input) {
+  const rules = {
+    "server-port": (v) => Number.isInteger(v) && v >= 1024 && v <= 65535,
+    "max-players": (v) => Number.isInteger(v) && v >= 1 && v <= 1000,
+    "online-mode": (v) => v === true,
+    "white-list": (v) => typeof v === "boolean",
+    difficulty: (v) => ["peaceful", "easy", "normal", "hard"].includes(v),
+    gamemode: (v) =>
+      ["survival", "creative", "adventure", "spectator"].includes(v),
+    motd: (v) =>
+      typeof v === "string" && v.length <= 128 && !/[\r\n\x00-\x1f]/.test(v),
+    "level-name": (v) =>
+      typeof v === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(v),
+  };
+  if (!input || typeof input !== "object" || Array.isArray(input))
+    fail("INVALID_REQUEST");
+  return (
+    Object.entries(input)
+      .map(([key, value]) => {
+        if (!rules[key]?.(value)) fail("INVALID_SERVER_PROPERTY");
+        return key + "=" + value;
+      })
+      .join("\n") + "\n"
+  );
+}
+function createMinecraft(options) {
+  const running = new Map();
+  const fetchImpl = options.fetchImpl || fetch;
+  async function versions(signal) {
+    return fetchBounded(MANIFEST, { signal, fetchImpl });
+  }
+  return async (request, context = {}) => {
+    switch (request.action) {
+      case "minecraft.flavours":
+        return require("./minecraft-catalog.cjs").catalog(
+          options,
+          request,
+          context,
+        );
+      case "minecraft.plugins":
+      case "minecraft.plugin.install":
+      case "minecraft.bedrock.discovery":
+        return require("./minecraft-catalog.cjs").catalog(
+          options,
+          request,
+          context,
+        );
+      case "minecraft.versions":
+        if (request.edition === "bedrock")
+          return {
+            available: false,
+            code: "BEDROCK_CATALOGUE_REQUIRES_REVIEW",
+            recovery:
+              "Provide an admitted official Bedrock release manifest with archive checksums.",
+          };
+        return versions(context.signal);
+      case "minecraft.install": {
+        if (request.edition !== "java") fail("BEDROCK_PAYLOAD_NOT_ADMITTED");
+        const version = text(request.version, 80);
+        const manifest = await versions(context.signal);
+        const entry = manifest.versions?.find((item) => item.id === version);
+        if (!entry) fail("VERSION_NOT_FOUND");
+        const metadata = await fetchBounded(
+          official(entry.url, [
+            "piston-meta.mojang.com",
+            "launchermeta.mojang.com",
+          ]),
+          { signal: context.signal, fetchImpl },
+        );
+        const server = metadata.downloads?.server;
+        if (
+          !server ||
+          !Number.isInteger(server.size) ||
+          server.size <= 0 ||
+          server.size > 256 * 1024 * 1024 ||
+          !/^[0-9a-f]{40}$/.test(server.sha1)
+        )
+          fail("SERVER_PAYLOAD_UNAVAILABLE");
+        const directory = await grant(options, request.directoryId, "write");
+        const destination = path.join(directory, "server.jar"),
+          temporary = path.join(directory, ".server-" + randomUUID());
+        try {
+          const response = await fetchImpl(
+            official(server.url, [
+              "piston-data.mojang.com",
+              "launcher.mojang.com",
+            ]),
+            { signal: context.signal, redirect: "error" },
+          );
+          if (!response.ok) fail("HTTP_FAILURE");
+          const handle = await fs.open(temporary, "wx", 0o600);
+          let bytes = 0;
+          const hash = createHash("sha1");
+          try {
+            for await (const chunk of response.body) {
+              bytes += chunk.length;
+              if (bytes > server.size) fail("DOWNLOAD_LIMIT");
+              hash.update(chunk);
+              await handle.write(chunk);
+              context.onProgress?.({
+                type: "server-download",
+                completed: bytes,
+                total: server.size,
+              });
+            }
+          } finally {
+            await handle.close();
+          }
+          if (bytes !== server.size || hash.digest("hex") !== server.sha1)
+            fail("PAYLOAD_HASH_MISMATCH");
+          await fs.link(temporary, destination);
+          return { installed: true, version, bytes, sha1: server.sha1 };
+        } finally {
+          await fs.rm(temporary, { force: true });
+        }
+      }
+      case "minecraft.configure": {
+        const directory = await grant(options, request.directoryId, "write");
+        const content = properties(request.properties);
+        if (request.acceptEula !== true) fail("EULA_ACCEPTANCE_REQUIRED");
+        await fs.writeFile(path.join(directory, "server.properties"), content, {
+          flag: "wx",
+          mode: 0o600,
+        });
+        await fs.writeFile(path.join(directory, "eula.txt"), "eula=true\n", {
+          flag: "wx",
+          mode: 0o600,
+        });
+        return { configured: true };
+      }
+      case "minecraft.start": {
+        const id = text(request.serverId, 80);
+        if (running.has(id)) fail("SERVER_ALREADY_RUNNING");
+        if (!["local-process", "local-container"].includes(request.target))
+          fail("TARGET_REQUIRES_ADMITTED_TYPED_TRANSPORT");
+        const directory = await grant(options, request.directoryId, "read");
+        if (
+          (
+            await fs.readFile(path.join(directory, "eula.txt"), "utf8")
+          ).trim() !== "eula=true"
+        )
+          fail("EULA_ACCEPTANCE_REQUIRED");
+        const memory = request.memoryMiB;
+        if (!Number.isInteger(memory) || memory < 512 || memory > 32768)
+          fail("INVALID_REQUEST");
+        await fs.access(path.join(directory, "server.jar"));
+        let command, args;
+        if (request.target === "local-container") {
+          if (
+            !/^[a-z0-9./_-]+@sha256:[a-f0-9]{64}$/.test(
+              options.minecraftJavaImage || "",
+            )
+          )
+            fail("PINNED_CONTAINER_IMAGE_REQUIRED");
+          if (directory.includes(",")) fail("INVALID_MOUNT_PATH");
+          command = await executable(options, "docker");
+          const network = request.network || "none";
+          if (!["none", "bridge"].includes(network))
+            fail("INVALID_NETWORK_MODE");
+          const ports = [];
+          if (network === "bridge") {
+            if (
+              !Number.isInteger(request.port) ||
+              request.port < 1024 ||
+              request.port > 65535
+            )
+              fail("INVALID_SERVER_PORT");
+            ports.push("--publish", "127.0.0.1:" + request.port + ":25565/tcp");
+          }
+          args = [
+            "run",
+            "--rm",
+            "--network",
+            network,
+            ...ports,
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            "--memory",
+            memory + "m",
+            "--cpus",
+            "2",
+            "--mount",
+            "type=bind,source=" + directory + ",target=/server",
+            "--workdir",
+            "/server",
+            options.minecraftJavaImage,
+            "java",
+            "-Xms512M",
+            "-Xmx" + memory + "M",
+            "-jar",
+            "server.jar",
+            "nogui",
+          ];
+        } else {
+          command = await executable(options, "java");
+          args = [
+            "-Xms512M",
+            "-Xmx" + memory + "M",
+            "-jar",
+            "server.jar",
+            "nogui",
+          ];
+        }
+        const result = await processRun(command, args, {
+          ...context,
+          cwd: directory,
+          wait: false,
+        });
+        running.set(id, result.child);
+        result.child.once("exit", () => running.delete(id));
+        return { started: true, serverId: id };
+      }
+      case "minecraft.stop": {
+        const child = running.get(request.serverId);
+        if (!child) fail("SERVER_NOT_RUNNING");
+        child.kill("SIGTERM");
+        return { stopping: true };
+      }
+      case "minecraft.status":
+        return { running: running.has(request.serverId) };
+      default:
+        fail("INVALID_REQUEST");
+    }
+  };
+}
+module.exports = { createMinecraft, properties, official };

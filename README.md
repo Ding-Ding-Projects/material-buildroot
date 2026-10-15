@@ -1,6 +1,12 @@
 # Material Buildroot
 
-## Download version 0.1.0
+## Current development workspace
+
+Material Buildroot now has a practical setup wizard and a productive Material Design 3 workspace. Plans, appearance, setup progress and snapshots persist locally. Native project adoption, durable build jobs, typed configuration, artifact inspection, VM controls, local-model chat and verified update downloads use scoped host services. The browser visitor workspace has independent local state.
+
+Read [the workspace guide](docs/desktop/modern-workspace.md), [implementation limits](ROADMAP.md), and [latest releases](https://github.com/Ding-Ding-Projects/material-buildroot/releases). The expanded application is under active verification; Windows runtime testing is currently deferred. Existing native captures below document an earlier version.
+
+## Historical first release: version 0.1.0
 
 Automatic workflow [38682722692](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38682722692) subsequently completed successfully and created normal release `v0.1.0-build.1.1`. This supersedes the in-progress observation below. The verified `v0.1.0` direct download remains stable.
 
@@ -10,7 +16,7 @@ This is an early desktop shell with durable language preferences. Project creati
 
 A Windows desktop workspace in development for configuring Buildroot and running builds through WSL 2 or Docker Linux containers.
 
-The packaged desktop shell now opens a genuine empty-project workspace and saves English, Hong Kong Cantonese or bilingual language preferences through a narrowly scoped durable broker. Appearance choices are explicitly session-only. Project creation, Buildroot execution, virtual-machine workflows, encrypted publication and the authenticated companion remain unimplemented. The [phased checklist](ROADMAP.md) preserves the wider scope and its separate evidence requirements.
+The first released desktop shell opened an empty-project workspace and saved English, Hong Kong Cantonese or bilingual preferences. Its appearance choices were session-only. New source now adds durable workspace state and host-operation consumers; complete runtime and companion acceptance remains open. The [phased checklist](ROADMAP.md) preserves the wider scope and its separate evidence requirements.
 
 The current bounded runtime evidence is tied to source `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd`. Twenty-six host/preload/broker checks passed on the earlier `aa91c34f4588a0dae85faef169c4dcf542c307d0` candidate; those host/preload/session sources were unchanged by the final renderer-only repairs. Six build-tool checks passed on the current source. The settings matrix covered 48 language/theme/viewport/runtime-scale tuples; 52 layout receipts passed, including four startup receipts. Language persistence was verified across actual executable restarts. Read the [desktop article](docs/desktop/host-and-preferences.md) and [capture evidence](docs/evidence/desktop-shell/README.md) for exact limitations. These results do not establish complete product, installer or release acceptance.
 

@@ -1,6 +1,6 @@
 # Phased implementation roadmap
 
-Status: implementation underway after the initial planning/documentation checkpoint, beginning with contract and evidence admission. No application runtime or production A/D/C parity is verified. This roadmap orders the complete requested delivery; phases are checkpoints, not reduced scope.
+Status: complete-product implementation is active. The owner requested implementation across all phases, a practical in-application onboarding wizard, frequent checkpoints on main, and deferral of Windows runtime testing. New host services and Material workspace controls have local tests; authored code, browser fixtures, packaged builds, native runtime acceptance and A/D/C parity remain separate verdicts. The roadmap retains its complete scope.
 
 ## Execution and checkbox rules
 
@@ -32,12 +32,12 @@ Prerequisites: None. Historical PH00 scope was planning and the initial public d
 - [x] **PH00-T02** [D-initial+R] Create the documentation website source and render the authoritative planning documents, decision log and source wiki with stable internal routes.
 - [x] **PH00-T03** [D-initial+R] Implement usable roadmap navigation and checklist rendering from these stable phase/task IDs; use genuine registered Material Design 3 controls throughout and keep source Markdown authoritative.
 - [x] **PH00-T04** [D-initial+R] Verify the built website with real browser interaction, phone-friendly touch/keyboard layouts from approximately 320px, pure Material Design 3 control provenance, working document routes and genuine source-bound captures; retain actual check output.
-- [ ] **PH00-T05** [D-initial+R] Deploy the initial GitHub Pages website, verify the live URL and routes, and read back the repository About homepage; record hosted evidence separately from local proof.
+- [x] **PH00-T05** [D-initial+R] Deploy the initial GitHub Pages website, verify the live URL and routes, and read back the repository About homepage; record hosted evidence separately from local proof.
 - [x] **PH00-T06** [D-initial+R] Update current handoff, public status and next-session prompt with verified planning/site evidence and explicit unimplemented application and D/C parity boundaries.
 
 Exit proof: The recorded plan and initial website have reviewed source, focused checks, genuine browser captures and separate live publication/homepage readback; missing proof remains unchecked. Full production feature parity remains open.
 
-Current pause: the owner requested preservation closeout on 2026-10-15. Completed source is retained on main; the encrypted-publication admission lane stopped before any source write. Unchecked work remains open.
+Current continuation: implementation resumed on 2026-10-15 across all roadmap phases. The former preservation pause is historical. Fresh hosting verification matched all 108 files at source e4202d9; see [current hosting evidence](docs/evidence/tasks/PH00-current-hosting.md). Windows runtime tests are deferred by owner instruction, not passed.
 
 ## PH01 Detailed contracts, evidence admission and dependencies
 
@@ -237,4 +237,4 @@ The bounded PH02-T02-C02 desktop-shell child is verified against the source and 
 
 The initial documentation deployment remains historical in [its hosting evidence](docs/evidence/hosting/initial-live.json). The current desktop articles and captures were delivered at `ae1951d18a29ea3ba5aab726cee20e896ad89cc2`, built from `53a37011c04e46536c882bc79dae751ff56f9757`: all 103 live files matched expected and published-source bytes, and deployment [38679631020](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38679631020) succeeded. This bounded delivery does not close broad phase or per-surface requirements.
 
-The owner directed continuation while skipping blocker tasks. Five guest profiles remain retained, and strict browser audit acceptance remains 0 accepted / 20 rejected at `cleanup.completed`. Cleanup and that strict acceptance are skipped, not passed; no deletion retry or profile write is part of this continuation. Unsupported native per-scale DPI proof and the broader product backlog remain open. The current closeout objective is the bounded desktop GUI milestone, not implementation of that backlog.
+The owner directed continuation while skipping blocker tasks. Five guest profiles remain retained, and strict browser audit acceptance remains 0 accepted / 20 rejected at `cleanup.completed`. Cleanup and that strict acceptance are skipped, not passed; no deletion retry or profile write is part of this continuation. Unsupported native per-scale DPI proof and the broader product backlog remain open. That earlier bounded closeout objective is historical. The current owner request covers the full roadmap, with Windows runtime testing deferred.

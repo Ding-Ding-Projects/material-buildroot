@@ -1,5 +1,11 @@
 # Development continuation
 
+## Active delivery instructions
+
+Continue the full application roadmap on `main` only, preserving all work. The latest owner instruction defers Windows runtime testing and prioritizes application implementation. Each roadmap phase has its own implementation owner; desktop GUI uses the designated GUI model, other implementation uses the designated coding model, and website work uses the designated website model. Keep source comments and published records professional and free of private conversation vocabulary.
+
+Read the newest HANDOFF.md entry before historical material below. The production renderer is now a working project workspace with durable onboarding and plans plus host operation consumers. The public website also has an independent local visitor workbench. Read docs/desktop/modern-workspace.md and the actual source; do not restore the historical two-screen-only description. PH00-T05 has fresh live byte/readback evidence. Broad phase acceptance and complete authenticated companion parity remain open. Continue the concrete remaining contracts and integration gaps, without relabelling deferred proof as success.
+
 ## Current implementation steering
 
 The owner now authorizes implementation. P40-P42 are answered, managed GitHub Actions execution and product delivery are included, and encrypted transport applies only after a user chooses publication to a verified private repository. The generic engine extraction is approved without private history or credentials. Read HANDOFF.md before the historical planning context below.
@@ -14,7 +20,7 @@ Work only on `main`. Inspect local changes and current remote state; preserve us
 
 Read [ROADMAP.md](ROADMAP.md) as the authoritative execution queue, then [PLAN.md](PLAN.md), [DECISIONS.md](DECISIONS.md), [HANDOFF.md](HANDOFF.md), [feature inventory](docs/planning/feature-coverage.md), [surface boundaries](docs/planning/surfaces.md), [architecture](docs/planning/architecture.md), [design acceptance](design/REVIEW.md) and the current evidence index. Inspect actual source and receipts before trusting a checked item.
 
-Current checkpoint: PH00-T01–T04 and PH00-T06 are complete within their recorded planning/local-site scopes. PH00-T05 remains blocked by Pages settings permissions. See [the exact evidence and publication steps](docs/evidence/planning-site.md). The next application task is PH01-T01.
+Current checkpoint: PH00-T01–T04 and PH00-T06 are complete within their recorded planning/local-site scopes. PH00-T05 now has fresh verified hosting evidence. See [the exact evidence and publication steps](docs/evidence/planning-site.md). The next application task is PH01-T01.
 
 ## Resume one task at a time
 
@@ -33,7 +39,7 @@ Support WSL 2 and Docker per project, existing and dedicated managed WSL distrib
 
 Support minimal/desktop/server/appliance guests; bootable ISO/VMDK/VDI/OVA; VMware Workstation and VirtualBox create/import/edit/launch; BIOS/UEFI x86_64 initially without Secure Boot; real boot/login/network/persistence/graceful-shutdown proof. Record actually observed latest-stable Windows/hypervisor versions and actual host access. Complete reproducibility, SDK/toolchain export, image flashing, guest installers, remote execution, cloud upload and reviewed local assistant actions.
 
-**P40–P42 remain pending:** exact cloud destinations, remote target types and flashing/install routes. Obtain and record those owner answers before their dependent adapters. Do not invent defaults; continue independent eligible work.
+**P40–P42 are resolved in DECISIONS.md.** Preserve the recorded destinations and target types; actual provider credentials, enrollment and runtime acceptance remain separate requirements.
 
 Deliver every applicable shared obligation across the 105-identity inventory. PH01 expands separate records; the roadmap's explicit primary-phase map assigns closure ownership. The initial website is a documentation checkpoint. Full D visitor tools and authenticated C Edge/Chrome/LAN companion each need independent state, persistence, interactions, documentation and evidence. Pair through real authentication and scoped capabilities; experience locks never grant host authority. Do not solve browser transport restrictions with permissive CORS, trust-all TLS or unauthenticated local services.
 

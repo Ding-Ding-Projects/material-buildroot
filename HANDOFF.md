@@ -1,5 +1,11 @@
 # Handoff
 
+## Current full-product implementation, 2026-10-15
+
+The owner requested the complete roadmap, practical in-application onboarding, one phase owner per roadmap phase, main-only development and frequent pushes. Windows runtime testing is explicitly deferred. The backend checkpoint `725785f92a9082c144cdc3315c2826b77b1a38b9` passed its Windows packaging workflow and Pages deployment. New source extends the Material workspace with durable plans, onboarding progress, snapshots/import, native project adoption, jobs, configuration, artifacts, VM controls, local-model chat, updates and a regex workbench. Read [the current workspace article](docs/desktop/modern-workspace.md) and individual adapter articles for exact supported behavior and limitations. Earlier native evidence below remains historical and does not transfer to this renderer.
+
+The local unit run passed 187 checks with one platform-specific check skipped. Browser suites passed 29 settings regressions and 17 workspace cases before final capture readiness repairs; final source-bound capture receipts are recorded separately. The integration audit caught and repaired configuration mutation during a running build, short-lived picker grants being reused as session authority, and missing durable project identities. Additional tools and companion integration remain active. No broad phase is marked complete from module presence, fixture results or deferred Windows acceptance.
+
 ## Confirmed language review and draft reset, 2026-10-15
 
 The settings panel now identifies the last confirmed language and whether it came from the application default or device storage. A localized Discard choice action restores the pending selection without a host request, preserves confirmed state and returns keyboard focus to the select. Unknown outcomes, failed refresh, unavailable storage and pending saves keep the action disabled. Strict TypeScript and all 29 source-preview browser cases pass, including twelve language/theme/viewport tuples. Renderer SHA-256 is `122575c891c1c9c4e2a9d4a852d6b61a196b459faf598197ff52be0361623114`. Independent source review found no blocking issue.

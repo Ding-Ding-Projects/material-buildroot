@@ -1,16 +1,169 @@
-'use strict';
-const fs=require('node:fs');const path=require('node:path');const {randomUUID}=require('node:crypto');
-const REFERENCE=/^vault:([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/;
-const ownerValid=value=>typeof value==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(value);
-function fail(code){const error=new Error('Protected storage is unavailable.');error.code=code;throw error;}
-/** Host-only secret access. Never expose read() or raw secret inputs through renderer IPC. */
-function createVault({safeStorage,directory}){
- if(!safeStorage||typeof safeStorage.isEncryptionAvailable!=='function'||typeof safeStorage.encryptString!=='function'||typeof safeStorage.decryptString!=='function'||typeof directory!=='string'||!path.isAbsolute(directory))throw new TypeError('Host protected storage configuration is required.');
- function availability(){try{if(!safeStorage.isEncryptionAvailable())return {available:false,reason:'ENCRYPTION_UNAVAILABLE'};if(typeof safeStorage.getSelectedStorageBackend==='function'&&['basic_text','unknown'].includes(safeStorage.getSelectedStorageBackend()))return {available:false,reason:'INSECURE_BACKEND'};if(process.platform==='linux'&&typeof safeStorage.getSelectedStorageBackend!=='function')return {available:false,reason:'BACKEND_UNVERIFIED'};return {available:true};}catch{return {available:false,reason:'ENCRYPTION_UNAVAILABLE'};}}
- function ready(){if(!availability().available)fail('VAULT_UNAVAILABLE');}
- function root(create=false){if(create)fs.mkdirSync(directory,{recursive:true,mode:0o700});const info=fs.lstatSync(directory);if(!info.isDirectory()||info.isSymbolicLink()||fs.realpathSync.native(directory)!==directory)fail('UNSAFE_STORAGE');return directory;}
- function location(reference){if(typeof reference!=='string'||!REFERENCE.test(reference))fail('INVALID_REFERENCE');return path.join(root(),`${reference.slice(6)}.bin`);}
- function read(reference,owner){ready();if(!ownerValid(owner))fail('NOT_AUTHORIZED');try{const file=location(reference);const info=fs.lstatSync(file);if(!info.isFile()||info.isSymbolicLink()||info.nlink!==1||info.size>131072)fail('UNSAFE_STORAGE');const plaintext=safeStorage.decryptString(fs.readFileSync(file));if(typeof plaintext!=='string'||Buffer.byteLength(plaintext)>65536)fail('INVALID_RECORD');const record=JSON.parse(plaintext);if(!record||Object.getPrototypeOf(record)!==Object.prototype||Object.keys(record).length!==3||record.version!==1||!Object.hasOwn(record,'owner')||!Object.hasOwn(record,'secret')||typeof record.secret!=='string'||!ownerValid(record.owner))fail('INVALID_RECORD');if(record.owner!==owner)fail('NOT_AUTHORIZED');return record.secret;}catch(error){if(['NOT_AUTHORIZED','INVALID_REFERENCE','UNSAFE_STORAGE','INVALID_RECORD'].includes(error.code))throw error;fail('VAULT_UNAVAILABLE');}}
- const service={availability,write(owner,secret){ready();if(!ownerValid(owner)||typeof secret!=='string'||!secret.length||Buffer.byteLength(secret)>32768)fail('INVALID_REQUEST');root(true);const reference=`vault:${randomUUID()}`;const encrypted=safeStorage.encryptString(JSON.stringify({version:1,owner,secret}));if(!Buffer.isBuffer(encrypted)||encrypted.length>131072||!encrypted.length)fail('VAULT_UNAVAILABLE');const file=path.join(directory,`${reference.slice(6)}.bin`);const descriptor=fs.openSync(file,'wx',0o600);try{fs.writeFileSync(descriptor,encrypted);fs.fsyncSync(descriptor);}catch{try{fs.unlinkSync(file);}catch{}fail('VAULT_UNAVAILABLE');}finally{fs.closeSync(descriptor);}return reference;},read,remove(reference,owner){read(reference,owner);fs.unlinkSync(location(reference));return true;}};return Object.freeze(Object.fromEntries(Object.entries(service).map(([name,method])=>[name,(...args)=>{try{return method(...args);}catch(error){if(error.message==='Protected storage is unavailable.')throw error;fail('VAULT_UNAVAILABLE');}}])));
+"use strict";
+const fs = require("node:fs");
+const path = require("node:path");
+const { randomUUID } = require("node:crypto");
+const REFERENCE =
+  /^vault:([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/;
+const ownerValid = (value) =>
+  typeof value === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(value);
+function fail(code) {
+  const error = new Error("Protected storage is unavailable.");
+  error.code = code;
+  throw error;
 }
-module.exports={createVault};
+/** Host-only secret access. Never expose read() or raw secret inputs through renderer IPC. */
+function createVault({ safeStorage, directory }) {
+  if (
+    !safeStorage ||
+    typeof safeStorage.isEncryptionAvailable !== "function" ||
+    typeof safeStorage.encryptString !== "function" ||
+    typeof safeStorage.decryptString !== "function" ||
+    typeof directory !== "string" ||
+    !path.isAbsolute(directory)
+  )
+    throw new TypeError("Host protected storage configuration is required.");
+  function availability() {
+    try {
+      if (!safeStorage.isEncryptionAvailable())
+        return { available: false, reason: "ENCRYPTION_UNAVAILABLE" };
+      if (
+        typeof safeStorage.getSelectedStorageBackend === "function" &&
+        ["basic_text", "unknown"].includes(
+          safeStorage.getSelectedStorageBackend(),
+        )
+      )
+        return { available: false, reason: "INSECURE_BACKEND" };
+      if (
+        process.platform === "linux" &&
+        typeof safeStorage.getSelectedStorageBackend !== "function"
+      )
+        return { available: false, reason: "BACKEND_UNVERIFIED" };
+      return { available: true };
+    } catch {
+      return { available: false, reason: "ENCRYPTION_UNAVAILABLE" };
+    }
+  }
+  function ready() {
+    if (!availability().available) fail("VAULT_UNAVAILABLE");
+  }
+  function root(create = false) {
+    if (create) fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+    const info = fs.lstatSync(directory);
+    if (
+      !info.isDirectory() ||
+      info.isSymbolicLink() ||
+      fs.realpathSync.native(directory) !== directory
+    )
+      fail("UNSAFE_STORAGE");
+    return directory;
+  }
+  function location(reference) {
+    if (typeof reference !== "string" || !REFERENCE.test(reference))
+      fail("INVALID_REFERENCE");
+    return path.join(root(), `${reference.slice(6)}.bin`);
+  }
+  function read(reference, owner) {
+    ready();
+    if (!ownerValid(owner)) fail("NOT_AUTHORIZED");
+    try {
+      const file = location(reference);
+      const info = fs.lstatSync(file);
+      if (
+        !info.isFile() ||
+        info.isSymbolicLink() ||
+        info.nlink !== 1 ||
+        info.size > 131072
+      )
+        fail("UNSAFE_STORAGE");
+      const plaintext = safeStorage.decryptString(fs.readFileSync(file));
+      if (typeof plaintext !== "string" || Buffer.byteLength(plaintext) > 65536)
+        fail("INVALID_RECORD");
+      const record = JSON.parse(plaintext);
+      if (
+        !record ||
+        Object.getPrototypeOf(record) !== Object.prototype ||
+        Object.keys(record).length !== 3 ||
+        record.version !== 1 ||
+        !Object.hasOwn(record, "owner") ||
+        !Object.hasOwn(record, "secret") ||
+        typeof record.secret !== "string" ||
+        !ownerValid(record.owner)
+      )
+        fail("INVALID_RECORD");
+      if (record.owner !== owner) fail("NOT_AUTHORIZED");
+      return record.secret;
+    } catch (error) {
+      if (
+        [
+          "NOT_AUTHORIZED",
+          "INVALID_REFERENCE",
+          "UNSAFE_STORAGE",
+          "INVALID_RECORD",
+        ].includes(error.code)
+      )
+        throw error;
+      fail("VAULT_UNAVAILABLE");
+    }
+  }
+  const service = {
+    availability,
+    write(owner, secret) {
+      ready();
+      if (
+        !ownerValid(owner) ||
+        typeof secret !== "string" ||
+        !secret.length ||
+        Buffer.byteLength(secret) > 32768
+      )
+        fail("INVALID_REQUEST");
+      root(true);
+      const reference = `vault:${randomUUID()}`;
+      const encrypted = safeStorage.encryptString(
+        JSON.stringify({ version: 1, owner, secret }),
+      );
+      if (
+        !Buffer.isBuffer(encrypted) ||
+        encrypted.length > 131072 ||
+        !encrypted.length
+      )
+        fail("VAULT_UNAVAILABLE");
+      const file = path.join(directory, `${reference.slice(6)}.bin`);
+      const descriptor = fs.openSync(file, "wx", 0o600);
+      try {
+        fs.writeFileSync(descriptor, encrypted);
+        fs.fsyncSync(descriptor);
+      } catch {
+        try {
+          fs.unlinkSync(file);
+        } catch {}
+        fail("VAULT_UNAVAILABLE");
+      } finally {
+        fs.closeSync(descriptor);
+      }
+      return reference;
+    },
+    read,
+    remove(reference, owner) {
+      read(reference, owner);
+      fs.unlinkSync(location(reference));
+      return true;
+    },
+  };
+  return Object.freeze(
+    Object.fromEntries(
+      Object.entries(service).map(([name, method]) => [
+        name,
+        (...args) => {
+          try {
+            return method(...args);
+          } catch (error) {
+            if (error.message === "Protected storage is unavailable.")
+              throw error;
+            fail("VAULT_UNAVAILABLE");
+          }
+        },
+      ]),
+    ),
+  );
+}
+module.exports = { createVault };

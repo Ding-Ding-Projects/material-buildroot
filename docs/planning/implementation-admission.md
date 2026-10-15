@@ -1,0 +1,11 @@
+# Concrete implementation admission
+
+The [phase registry](implementation-admission.json) binds existing architecture consumers, focused tests and documentation to SHA-256 file contents. It complements the 105-identity, 420-surface feature ledger; it does not replace its independent acceptance requirements or complete canonical reconciliation.
+
+Each phase states its behavior, authority boundary, persistence contract and remaining acceptance gap. A planned phase reserves behavior only and has no implementation consumers or tests. Authored records identify actual existing files without claiming execution. Tested records require a dated, environment-specific passing receipt, output file, source revision, build hash and bindings covering every current consumer and focused test. Native-deferred records require an explicit reason and preserve incomplete acceptance. All phases retain `accepted: false`; roadmap acceptance requires independent feature/runtime evidence.
+
+Run `node scripts/evidence/admit-implementation.cjs` and `node --test tests/implementation-admission.test.cjs`. Missing consumers/tests/documents, stale hashes, absent files, traversal, symlink escape, duplicate phases and unsupported acceptance claims fail validation. Bindings are snapshots: refresh only after inspecting the final files and recording the actual source revision. Concurrent development can intentionally invalidate a snapshot until integration review updates it. Never automatically refresh bindings during validation.
+
+Existing renderer and workspace persistence are admitted only for the behavior they currently implement. Planning forms, empty adapters, documentation and registry entries do not establish build execution, conversion, authenticated companion delivery or Windows acceptance. Planned phases can be implemented independently; this registry imposes no pause or new permission gate.
+
+The validator establishes structural consistency and file currency. It cannot establish that a command was executed, that a build hash corresponds to an executable, or that runtime captures demonstrate the requested behavior. Test fixtures are synthetic validator checks, never application evidence. Windows tests are deferred under the owner's current instruction; Linux checks must not be presented as native Windows proof.
