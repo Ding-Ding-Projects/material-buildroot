@@ -1,5 +1,20 @@
 # Handoff
 
+## Durable settings admission and focused reference verification, 2026-10-15
+
+The data-only settings broker now binds capabilities to principal, project, action and monotonic expiry. Settings, revision, accepted-operation identity and sequenced event timestamp commit together. Exact retries recover the accepted result after authorized regrant; changed content conflicts. The strict internal/public translator is typed and runtime-validated. Twenty focused tests pass on pinned Node.js 24.22.0, and the strict TypeScript contract check passes.
+
+Independent storage review reproduced two defects in the initial candidate: adopting an unrelated version-1 database and changing a foreign WAL database before rejecting it. The repaired pre-open header and read-only exact-schema admission preserves both fixtures byte-for-byte, including persistent journal mode. Independent correctness and storage reruns reached no remaining candidate within those bounded seams. See [broker admission](docs/security/broker-admission.md). This is not production IPC, native filesystem authority, project creation, process execution, migration or abrupt-process recovery.
+
+The focused reference rerun is bound to source 9352fe63f34e06057fb865231294674afb72f136 and build receipt SHA-256 7e4417c2ff516153f7f06863666e94c9c9a7f7143efeee8590234dcb19b3c70b. It retained 15 interaction captures and 54 matrix captures, plus one whole-window capture. A changed jobs value creates a distinct project; an identical retry reuses it. Accessible follow-control names passed in six states, and review-checkbox names passed all 48 language/theme/viewport/device-scale tuples. Those 54 matrix cases recorded zero unnamed-control, body-overflow or relevant console/network observations. These remain synthetic design references, not production screenshots. Browser device scale is not native Windows display scaling or browser zoom.
+
+All owned browsers, servers and hidden desktops ended. Four isolated profiles remain because automatic approval review rejected scoped deletion with the reason blocked by policy. No alternate deletion route was attempted. Raw captures remain private and were not promoted to production evidence. Full reference interaction/accessibility/typography acceptance, installed runtime, installer and fresh-host verification remain open.
+
+Current online documentation still reflects the initial 9c8fe848ff7abb1c11fd3d5014fc0ebfa8c60f1a deployment. The newer articles need a recursive isolated-output documentation build, source-bound verification and actual delivery. The approved encrypted transport remains off and unimplemented; its next admission slice must bind explicit push consent and live private-repository verification independently from optional refresh authorization.
+
+## Earlier checkpoints (historical)
+
+
 ## Request admission and built-reference findings, 2026-10-15
 
 The serialized-operation parser and exact action union are implemented, with nine focused tests passing on pinned Node.js 24.22.0. Independent review reproduced numeric precision loss in the first candidate; the repaired original-lexeme check now rejects fractions, exponent notation, underflow and negative zero. The independent rerun reached no remaining parser finding. This admits request data only; caller authentication, capabilities, revisions, durable idempotency, IPC and effects remain unwired.
