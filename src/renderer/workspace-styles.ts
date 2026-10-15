@@ -1,5 +1,6 @@
 import { css } from "lit";
 export const workspaceStyles = css`
+  .settings-grid > [hidden]{display:none!important;}
   :host {
     display: block;
     height: 100%;

@@ -59,3 +59,7 @@ Name every concrete project/source/ref/profile/defconfig/symbol/help/dependency/
 ### Implemented package discovery search
 
 `package-discovery-panel` owns the source catalogue substring query and an independent adjacent regex builder. The host query searches admitted package names, paths and retained declarations. The local expression filters only the loaded page, explicitly labelled as such, with its own pattern, flags, literal constructor, result IDs and timeout. It does not alter documentation search or the standalone workbench. Host declaration truncation is visible. Search history/snippets are not persisted.
+
+### Implemented settings search
+
+`settings-search` indexes only immutable setting section names and descriptions. It owns its literal query, adjacent anchored regex editor, pattern, flags, mode and validation state. A separate terminable worker enforces the 600 ms evaluation deadline. Neither private vocabulary mappings nor project records are indexed. Search history and snippets remain session-only/unimplemented; no vocabulary data enters either surface.

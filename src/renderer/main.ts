@@ -1,3 +1,6 @@
+import {ownedCopy, vocabulary} from "./owned-copy";
+import "./personal-vocabulary-panel";
+import "./settings-search";
 import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing } from "lit";
@@ -124,13 +127,40 @@ class MaterialBuildroot extends LitElement {
     window.addEventListener("keydown", this.shortcut);
     this.media.addEventListener("change", this.mediaChanged);
     this.mediaChanged();
+    this.vocabularyUnsubscribe=vocabulary.subscribe(()=>this.requestUpdate());
+    void this.loadSharedMode();
     void this.load();
   }
   disconnectedCallback() {
     window.removeEventListener("keydown", this.shortcut);
     this.unsubscribe?.();
+    this.vocabularyUnsubscribe?.();this.modeUnsubscribe?.();
     this.media.removeEventListener("change", this.mediaChanged);
     super.disconnectedCallback();
+  }
+  private vocabularyUnsubscribe?:()=>void;
+  private modeUnsubscribe?:()=>void;
+  private settingIds=['language','appearance','backups','vocabulary'];
+  private settingsEntries(){return [
+    {id:'language',text:this.l('Language Interface language','語言 介面語言')},
+    {id:'appearance',text:this.l('Appearance Theme','外觀 主題')},
+    {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入')},
+    ...(vocabulary.school()==='active'?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除')}])];}
+  private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return ownedCopy(en,zh,this.state?.language??'bilingual',kind);}
+  private async loadSharedMode(){
+    const bridge=window.studio;
+    const apply=(snapshot?:{available:boolean;active:boolean|null})=>void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');
+    if(!bridge?.sharedMode){apply();return;}
+    let observed=false;this.modeUnsubscribe=bridge.onSharedMode?.(snapshot=>{observed=true;apply(snapshot);});
+    try{const reply=await bridge.sharedMode({action:'status'});if(!observed)apply(reply.ok?reply.result:undefined);}catch{if(!observed)apply();}
+  }
+  private async vocabularyAction(action:'upload'|'status'|'clear'){
+    if(vocabulary.school()!=='inactive')return;
+    const dialog=this.renderRoot.querySelector('#actions-dialog');
+    const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));
+    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary'];await this.navigate('settings');await this.updateComplete;
+    const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
+    panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
   }
   private l(en: string, zh: string) {
     const language = this.state?.language ?? "bilingual";
@@ -1013,16 +1043,16 @@ class MaterialBuildroot extends LitElement {
     return materialIcon(({plans:"dashboard",operations:"computer",activity:"history",settings:"settings",about:"info"} as Record<string,string>)[name]||name);
   }
 
-  private routeLabel(route: string) {
+  private routeLabel(route: string, kind:"ui-copy"|"accessible-name"="ui-copy") {
     return route === "operations"
-      ? this.l("Project operations", "專案操作")
+      ? this.owned("Project operations", "專案操作", kind)
       : route === "settings"
-        ? this.l("Settings", "設定")
+        ? this.owned("Settings", "設定", kind)
         : route === "activity"
-          ? this.l("Activity", "活動")
+          ? this.owned("Activity", "活動", kind)
           : route === "about"
-            ? this.l("About", "關於")
-            : this.l("Project plans", "專案計劃");
+            ? this.owned("About", "關於", kind)
+            : this.owned("Project plans", "專案計劃", kind);
   }
   private navigation(dialog = false) {
     return html`${[
@@ -1036,8 +1066,8 @@ class MaterialBuildroot extends LitElement {
         html`<md-text-button
           title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
           aria-label=${this.route === route
-            ? `${this.routeLabel(route)}, ${this.l("current workspace", "目前工作區")}`
-            : this.routeLabel(route)}
+            ? `${this.routeLabel(route,"accessible-name")}, ${this.owned("current workspace", "目前工作區","accessible-name")}`
+            : this.routeLabel(route,"accessible-name")}
           @click=${() => {
             if (dialog) this.closeDialog("navigation-dialog", true);
             void this.navigate(route);
@@ -1249,11 +1279,13 @@ class MaterialBuildroot extends LitElement {
   }
   private settingsView() {
     return html`<div class="settings-grid view">
+      <settings-search .language=${this.state?.language??'bilingual'} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;this.requestUpdate();}}}></settings-search>
+      ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。')}</p>`:nothing}
       <section
-        class="panel stack"
+        class="panel stack" ?hidden=${!this.settingIds.includes("language")}
         aria-busy=${this.connection === "loading" || this.busy}
       >
-        <h2>${this.l("Language", "語言")}</h2>
+        <h2>${this.owned("Language", "語言")}</h2>
         <p>
           ${this.l(
             "Bilingual is the default. A successful save persists across application restarts.",
@@ -1302,8 +1334,8 @@ class MaterialBuildroot extends LitElement {
         <p class="muted">${this.storageMessage()}</p>
         <p id="save-feedback">${this.statusMessage()}</p>
       </section>
-      <section class="panel stack">
-        <h2>${this.l("Appearance", "外觀")}</h2>
+      <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
+        <h2>${this.owned("Appearance", "外觀")}</h2>
         <md-outlined-select
           .label=${this.workspaceMode === "durable"
             ? this.l("Theme", "主題")
@@ -1335,7 +1367,8 @@ class MaterialBuildroot extends LitElement {
               )}
         </p>
       </section>
-      ${this.historyPanel()}
+      <div ?hidden=${!this.settingIds.includes('backups')}>${this.historyPanel()}</div>
+      ${vocabulary.school()!=='active'?html`<section class="panel stack" ?hidden=${!this.settingIds.includes('vocabulary')}><personal-vocabulary-panel .language=${this.state?.language??'bilingual'}></personal-vocabulary-panel></section>`:nothing}
     </div>`;
   }
   private setupView() {
@@ -1824,7 +1857,7 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
+            )}${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");
