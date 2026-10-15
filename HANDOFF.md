@@ -1,5 +1,13 @@
 # Handoff
 
+## Frontend continuation, 2026-10-15
+
+The owner requested continued frontend work directly on main with frequent published checkpoints. The current unit is PH02-T02-C03, settings lifecycle and navigation feedback in the existing production renderer. It adds explicit loading/saving/recovery states, draft retention and document-language synchronization after refresh, blocked submission after an unknown outcome or unavailable refresh, contained window-command failures and visible current-workspace navigation. Material Web does not forward arbitrary ARIA attributes to internal buttons; current navigation uses a supported accessible label and save feedback describes a native action group.
+
+The initial Linux full-suite run exposed a pre-existing catalogue digest bound to CRLF bytes while the committed catalogue was LF. Checkpoint `40878b5f6bc9677d666905061e883b1a89f0c10c` pins the catalogue to LF and corrects only its digest. All 17 ledger tests then passed; the full local suite passed 62 tests with one Windows-only PowerShell check skipped. Strict TypeScript checking passed on Node.js 24.19.0. Raw-byte evidence validation remains unchanged.
+
+Renderer verification uses Linux Chromium and a deliberately synthetic desktop bridge, preserving the production content-security policy. It does not prove packaged Windows IPC, native input, persistence, DPI, installer behavior or a new application capture. The portable `npm run test:renderer` suite passed 25 checks: 13 behavior cases and 12 language/theme/viewport tuples, including actual accessibility-tree names/descriptions and measured horizontal overflow. Seven of the first ten regression cases failed against the original renderer. See [the renderer evidence record](docs/evidence/tasks/PH02-T02-C03.md). One screenshot was taken before a Material select finished displaying its selected label; screenshot acceptance remains incomplete and those source previews are not published as current product captures. The owner then requested preservation and task-scoped cleanup before any further implementation. Current native evidence below retains its earlier source bindings; PH02-T02-C03 and broader parents remain open until their required proof exists.
+
 ## Verified first downloadable release
 
 Latest observation: workflow [38682722692](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38682722692) completed successfully and created normal release `v0.1.0-build.1.1`, superseding its earlier running state below. The first manually verified `v0.1.0` download remains stable.
