@@ -37,6 +37,8 @@ Prerequisites: None. Historical PH00 scope was planning and the initial public d
 
 Exit proof: The recorded plan and initial website have reviewed source, focused checks, genuine browser captures and separate live publication/homepage readback; missing proof remains unchecked. Full production feature parity remains open.
 
+Current pause: the owner requested preservation closeout on 2026-10-15. Completed source is retained on main; the encrypted-publication admission lane stopped before any source write. Unchecked work remains open.
+
 ## PH01 Detailed contracts, evidence admission and dependencies
 
 Prerequisites: PH00-T01 and review of the current PH00 handoff/status records, including PH00-T06 when available. Pages deployment is not a prerequisite for independent contract preparation. Implementation is now authorized; begin with contract admission before dependent application work.

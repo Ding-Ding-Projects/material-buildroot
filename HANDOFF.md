@@ -1,5 +1,16 @@
 # Handoff
 
+## Requested preservation closeout, 2026-10-15
+
+The owner requested preservation and cleanup before further implementation. The encrypted-publication admission lane stopped before creating any files; that entire slice remains unimplemented. Completed settings work is pushed and verified at a4926c2c70afd1d118f2a46b572ee42cafd0f760. No source work remains uncommitted.
+
+The product repository has one primary checkout, one local main branch, remote main and no stashes. No redundant task-owned branch or linked checkout exists, so no destructive cleanup is needed and no deletion/archive pass was started. Four isolated capture profiles remain after automatic approval review rejected deletion with the reason blocked by policy. Source history recovery, original reference captures and every generated private announcement variant are retained; none is silently discarded or published. Unrelated repository work remains outside this cleanup inventory.
+
+Verified units remain separate: 17 evidence-ledger tests, six build-tool tests, nine request-parser tests and 20 broker/translation tests, with strict request and broker type checks. The focused reference verification binds source 9352fe63f34e06057fb865231294674afb72f136, not the later broker commit. It is synthetic reference evidence and does not prove the installed product.
+
+Resume on main with one source writer. Next: implement and independently verify explicit private-publication consent admission, then the reviewed generic encrypted engine with authenticated source/body, fixed transport, exclusive builder, scoped secrets, private-only outputs and separately authorized refresh. Do not enable encrypted behavior merely because a private repository is selected. Both managed Linux Buildroot execution and Windows product delivery remain unimplemented. Production IPC/shell, project actions, full canonical admission, complete shared features, runtime/VM acceptance, installer/update/release and current documentation regeneration/delivery remain open.
+
+
 ## Durable settings admission and focused reference verification, 2026-10-15
 
 The data-only settings broker now binds capabilities to principal, project, action and monotonic expiry. Settings, revision, accepted-operation identity and sequenced event timestamp commit together. Exact retries recover the accepted result after authorized regrant; changed content conflicts. The strict internal/public translator is typed and runtime-validated. Twenty focused tests pass on pinned Node.js 24.22.0, and the strict TypeScript contract check passes.
