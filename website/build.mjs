@@ -6,7 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { build } from 'esbuild';
 import { documentSources, categoryFor } from './inventory.mjs';
 import { parseRoadmap } from './roadmap.mjs';
-import { resolveDocumentLink, containedPath, sourceSnapshot } from './source-boundary.mjs';
+import { resolveDocumentLink, containedPath, sourceSnapshot, indexedSources, admittedSource } from './source-boundary.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(here);
@@ -21,8 +21,9 @@ const origin = 'https://ding-ding-projects.github.io' + base;
 const repository = 'https://github.com/Ding-Ding-Projects/material-buildroot';
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const slug = value => value.toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').trim().replace(/\s/g, '-');
-const read = relative => fs.readFile(containedPath(root, relative), 'utf8');
-const sources = await documentSources(root);
+const sourceIndex = indexedSources(root);
+const read = relative => fs.readFile(admittedSource(root, relative, sourceIndex), 'utf8');
+const sources = await documentSources(root,sourceIndex);
 const documents = [];
 const bySource = new Map();
 for (const source of sources) {
@@ -62,6 +63,7 @@ function localUrl(href, source) {
     return target.url+suffix;
   }
   if (/\.(?:png|jpe?g|webp|gif|svg|json|pdf|txt)$/i.test(resolved)) {
+    admittedSource(root,resolved,sourceIndex);
     localAssets.add(resolved);
     return `${base}site/source-assets/${resolved}${suffix}`;
   }
@@ -84,7 +86,7 @@ const render = (text, source='README.md', headings=[]) => md.render(text,{source
 // Render once to discover every linked asset before computing source provenance.
 for (const doc of documents) render(doc.content,doc.source);
 const inputs = [...sources, ...localAssets, 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json'].sort();
-const snapshot = sourceSnapshot(root,inputs);
+const snapshot = sourceSnapshot(root,inputs,sourceIndex);
 const sourceCommit = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const dirty = Boolean(execFileSync('git',['status','--porcelain','--',...inputs],{cwd:root,encoding:'utf8'}).trim());
 const meta = {version:JSON.parse(await read('website/package.json')).version, built_at:new Date().toISOString(), base_commit:sourceCommit, input_snapshot_sha256:snapshot, inputs_differ_from_base:dirty, documents:sources, material_components:'@material/web 2.4.1', source_inputs:inputs};
@@ -175,10 +177,10 @@ await fs.writeFile(path.join(out,'page-inventory.json'),JSON.stringify(pages,nul
 console.log(`Built ${pages.length} pages: ${documents.length} documents, ${phases.length} phase pages, four roadmap categories and ${categories.length} documentation categories. Snapshot ${snapshot}.`);
 
 for (const source of [...localAssets].sort()) {
-  const sourcePath=containedPath(root,source);
+  const sourcePath=admittedSource(root,source,sourceIndex);
   if (!(await fs.lstat(sourcePath)).isFile()) throw new Error(`Referenced asset is not a regular file: ${source}`);
   const destination=containedPath(outputRoot,'site/source-assets/'+source);
   await fs.mkdir(path.dirname(destination),{recursive:true});
-  await fs.copyFile(containedPath(root,source),containedPath(outputRoot,'site/source-assets/'+source));
+  await fs.copyFile(admittedSource(root,source,sourceIndex),containedPath(outputRoot,'site/source-assets/'+source));
 }
 await fs.writeFile(path.join(out,'asset-inventory.json'),JSON.stringify([...localAssets].sort(),null,2)+'\n');

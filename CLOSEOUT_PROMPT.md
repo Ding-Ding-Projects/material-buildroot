@@ -12,6 +12,8 @@ All 48 settings tuples and 52 layout receipts passed. All three languages persis
 
 ## Documentation verification and future updates
 
+Final source admission now requires indexed articles and local assets before reading, hashing or copying. Five focused documentation checks passed. Generated deployment paths preserve exact bytes through Git attributes; do not remove those attributes when updating the static output.
+
 The updated `npm test` entrypoint has now passed all 61 discovered tests with zero failures or skips, including the three documentation-source boundary regressions. The subsequent CRLF parser repair passed four focused documentation checks.
 
 The exact root documentation build passed on `2f24e10df6e8294d2bb00863f4d1222161669df0`: 69 HTML pages, 43 complete articles, seven documentation categories and 1,578 checked internal links/assets/fragments. Twenty hidden-browser viewport/theme tuples passed observed rendering, accessibility-name, focus, console and resource checks; both embedded image hashes matched. All five browser process trees, the static server, six desktops and six task ports are closed.

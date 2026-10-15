@@ -1,1 +1,3 @@
 .githooks/* text eol=lf
+docs/index.html -text
+docs/site/** -text

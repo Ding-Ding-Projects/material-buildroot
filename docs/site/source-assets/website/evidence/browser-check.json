@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "scope": "Initial documentation site only; no desktop, full shared feature parity, native host or companion proof.",
+  "route": "local-headless-chromium",
+  "browser": "154.0.8037.57",
+  "built_at": "2026-10-14T23:01:52.323Z",
+  "input_snapshot_sha256": "71b3fb0fc075ba9b2aeecde3c9edfa940d2a5b5681c712cafc984a1beec831c5",
+  "base_commit": "cb3cd8a8efd639817aaf3d44bc393adf777982d6",
+  "inputs_differ_from_base": true,
+  "checks": [
+    "Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.",
+    "Document search finds content and opens a fully rendered article.",
+    "Heading language and explicit theme preferences survive reload; fresh system theme is light in this test context.",
+    "Home fits 320/390/768/1440 CSS px in each offered heading-language mode; mobile navigation opens and Escape closes it.",
+    "All 23 current document routes render their complete article at mobile width without page overflow.",
+    "All 23 overview/category/phase/status routes fit 320px and use real dedicated pages.",
+    "All authored interactive controls use registered Material Web components; standard document hyperlinks remain semantic links.",
+    "No browser JavaScript errors or HTTP asset/route failures observed."
+  ],
+  "captures": [
+    {
+      "file": "website/evidence/home-desktop-dark.png",
+      "sha256": "0b58791d61dce44bbdfc9ccd3e561c24c4f286739a6c8487464611e47a97673a",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "dark",
+      "language": "en"
+    },
+    {
+      "file": "website/evidence/home-desktop.png",
+      "sha256": "54fc417b7c64527ae580df85e39465c596622e5a7f4289e563fd603cf9bdb03f",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/home-mobile.png",
+      "sha256": "be82ed311392f756a30038f988f95ff3850342711bd05ee6e4d3d0b154c27ece",
+      "route": "/material-buildroot/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/roadmap-categories.png",
+      "sha256": "d7be379ece9a4bc1c2ac26c05befe3d8e96b367f75220babe027f7dad06e82d8",
+      "route": "/material-buildroot/site/roadmap.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    },
+    {
+      "file": "website/evidence/roadmap-article.png",
+      "sha256": "eaf19c9c499fc23d99f251f16ff504964d8b03368713e47b1f69250bc9156a35",
+      "route": "/material-buildroot/site/phases/ph00.html",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "language": "both"
+    }
+  ],
+  "artifacts": {
+    "html_sha256": "23d85fc8cdf2e83882aa1d7146bc0185ee0ee08a4e6019b074549f21a3f56745",
+    "javascript_sha256": "f04279862c52cf4b93d31584323788167c07e87528d34c058c1ce38e4e7714f1",
+    "css_sha256": "10005767def2f0a5b1f8382dc6303d0ceb2d9a2d0fcca47a59e55c63ed833bb0"
+  },
+  "geometry": [
+    {
+      "width": 320,
+      "language": "both",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "en",
+      "document_width": 320
+    },
+    {
+      "width": 320,
+      "language": "zh",
+      "document_width": 320
+    },
+    {
+      "width": 390,
+      "language": "both",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "document_width": 390
+    },
+    {
+      "width": 390,
+      "language": "zh",
+      "document_width": 390
+    },
+    {
+      "width": 768,
+      "language": "both",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "en",
+      "document_width": 768
+    },
+    {
+      "width": 768,
+      "language": "zh",
+      "document_width": 768
+    },
+    {
+      "width": 1440,
+      "language": "both",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "en",
+      "document_width": 1440
+    },
+    {
+      "width": 1440,
+      "language": "zh",
+      "document_width": 1440
+    }
+  ],
+  "document_routes": [
+    {
+      "source": "README.md",
+      "status": 200
+    },
+    {
+      "source": "PLAN.md",
+      "status": 200
+    },
+    {
+      "source": "DECISIONS.md",
+      "status": 200
+    },
+    {
+      "source": "ROADMAP.md",
+      "status": 200
+    },
+    {
+      "source": "NEXT_SESSION.md",
+      "status": 200
+    },
+    {
+      "source": "HANDOFF.md",
+      "status": 200
+    },
+    {
+      "source": "CLOSEOUT_PROMPT.md",
+      "status": 200
+    },
+    {
+      "source": "AGENTS.md",
+      "status": 200
+    },
+    {
+      "source": "docs/README.md",
+      "status": 200
+    },
+    {
+      "source": "website/README.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/architecture.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/buildroot-constraints.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/feature-coverage.md",
+      "status": 200
+    },
+    {
+      "source": "docs/planning/surfaces.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/FAQ.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Getting-started.md",
+      "status": 200
+    },
+    {
+      "source": "docs/wiki/Home.md",
+      "status": 200
+    },
+    {
+      "source": "docs/evidence/planning-site.md",
+      "status": 200
+    },
+    {
+      "source": "design/README.md",
+      "status": 200
+    },
+    {
+      "source": "design/REVIEW.md",
+      "status": 200
+    },
+    {
+      "source": "design/acceptance.md",
+      "status": 200
+    },
+    {
+      "source": "design/components.md",
+      "status": 200
+    },
+    {
+      "source": "design/screens.md",
+      "status": 200
+    }
+  ],
+  "navigation_routes": [
+    "index.html",
+    "site/library.html",
+    "site/roadmap.html",
+    "site/status.html",
+    "site/categories/planning.html",
+    "site/categories/design.html",
+    "site/categories/wiki.html",
+    "site/categories/evidence.html",
+    "site/roadmap/foundations.html",
+    "site/roadmap/buildroot.html",
+    "site/roadmap/tools.html",
+    "site/roadmap/delivery.html",
+    "site/phases/ph00.html",
+    "site/phases/ph01.html",
+    "site/phases/ph02.html",
+    "site/phases/ph03.html",
+    "site/phases/ph04.html",
+    "site/phases/ph05.html",
+    "site/phases/ph06.html",
+    "site/phases/ph07.html",
+    "site/phases/ph08.html",
+    "site/phases/ph09.html",
+    "site/phases/ph10.html"
+  ],
+  "verdict": "passed",
+  "checked_at": "2026-10-14T23:02:16.960Z"
+}

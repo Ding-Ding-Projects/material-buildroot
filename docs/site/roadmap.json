@@ -60,7 +60,7 @@
         {
           "id": "PH01-T04",
           "done": false,
-          "text": "[R (A/D/C admission only)] Create deterministic screen/state references, a direct reference renderer and hand-written parity/control maps; include reduced-motion, accessible structured canvas alternatives and negative textbox-substitution checks."
+          "text": "[R (A/D/C admission only)] Create deterministic screen/state references, a direct reference renderer and hand-written parity/control maps; include reduced-motion, accessible structured canvas alternatives and negative textbox-substitution checks. Thirty reference states and local build tooling are authored. Two source-bound builds and focused runtime repairs are verified; full reference interaction, accessibility, typography and tuple acceptance remain pending."
         },
         {
           "id": "PH01-T05",
@@ -69,12 +69,22 @@
         },
         {
           "id": "PH01-T06",
-          "done": false,
+          "done": true,
           "text": "[R (A/D/C admission only)] Resolve owner decisions P40–P42 for cloud destinations, remote targets and flashing/install routes; record exact answers without guessed defaults. This blocks only their dependent adapters."
+        },
+        {
+          "id": "PH05-T11",
+          "done": false,
+          "text": "Implement managed user Buildroot builds through GitHub Actions after secure backend admission."
+        },
+        {
+          "id": "PH10-T09",
+          "done": false,
+          "text": "Deliver the product through the separately reviewed GitHub Actions pipeline."
         }
       ],
-      "done": 0,
-      "status": "planned"
+      "done": 1,
+      "status": "started"
     },
     {
       "id": "PH02",
@@ -474,7 +484,7 @@
       "status": "planned"
     }
   ],
-  "task_count": 77,
-  "verified_count": 5,
-  "input_snapshot_sha256": "71b3fb0fc075ba9b2aeecde3c9edfa940d2a5b5681c712cafc984a1beec831c5"
+  "task_count": 79,
+  "verified_count": 6,
+  "input_snapshot_sha256": "6d88b313b7f5dd58a7be65080812f0fdecf0f6d42f3f4df6fdafa31e1404d3ff"
 }

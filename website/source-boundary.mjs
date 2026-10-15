@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 
 export function resolveDocumentLink(source, reference) {
   const decoded = decodeURIComponent(reference);
@@ -26,12 +27,21 @@ export function containedPath(root, relative) {
   return resolved;
 }
 
-export function sourceSnapshot(root, files) {
+export function indexedSources(root) {
+  const bytes=execFileSync(process.env.MATERIAL_BUILD_GIT || 'git',['ls-files','--cached','-z'],{cwd:root,windowsHide:true});
+  return new Set(bytes.toString('utf8').split('\0').filter(Boolean));
+}
+
+export function admittedSource(root, relative, index) {
+  if (!(index instanceof Set) || !index.has(relative)) throw new Error('Documentation source is not tracked in the index.');
+  const full=containedPath(root,relative);
+  if (!fs.lstatSync(full).isFile()) throw new Error('Documentation source is not a regular file.');
+  return full;
+}
+
+export function sourceSnapshot(root, files, index=indexedSources(root)) {
+  const admitted=files.map(file=>[file,admittedSource(root,file,index)]);
   const digest=createHash('sha256');
-  for (const file of files) {
-    const full=containedPath(root,file);
-    if (!fs.lstatSync(full).isFile()) throw new Error('Documentation source is not a regular file.');
-    digest.update(file+'\0').update(fs.readFileSync(full)).update('\0');
-  }
+  for (const [file,full] of admitted) digest.update(file+'\0').update(fs.readFileSync(full)).update('\0');
   return digest.digest('hex');
 }

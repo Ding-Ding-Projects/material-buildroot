@@ -1,0 +1,16 @@
+[
+  "design/reference/states.json",
+  "docs/evidence/desktop-shell/inventory.json",
+  "docs/evidence/desktop-shell/projects-dark.png",
+  "docs/evidence/desktop-shell/settings-dark.png",
+  "docs/evidence/hosting/initial-live.json",
+  "docs/planning/feature-evidence.json",
+  "docs/planning/operation-request.schema.json",
+  "website/components.json",
+  "website/evidence/browser-check.json",
+  "website/evidence/home-desktop-dark.png",
+  "website/evidence/home-desktop.png",
+  "website/evidence/home-mobile.png",
+  "website/evidence/roadmap-article.png",
+  "website/evidence/roadmap-categories.png"
+]

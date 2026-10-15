@@ -1,14 +1,14 @@
 [
   {
-    "source": "README.md",
-    "title": "Material Buildroot",
-    "url": "/material-buildroot/site/articles/README.html",
+    "source": "AGENTS.md",
+    "title": "Development instructions",
+    "url": "/material-buildroot/site/articles/AGENTS.html",
     "category": "Planning"
   },
   {
-    "source": "PLAN.md",
-    "title": "Material Buildroot implementation plan",
-    "url": "/material-buildroot/site/articles/PLAN.html",
+    "source": "CLOSEOUT_PROMPT.md",
+    "title": "Continuation handoff",
+    "url": "/material-buildroot/site/articles/CLOSEOUT_PROMPT.html",
     "category": "Planning"
   },
   {
@@ -18,94 +18,34 @@
     "category": "Planning"
   },
   {
-    "source": "ROADMAP.md",
-    "title": "Phased implementation roadmap",
-    "url": "/material-buildroot/site/articles/ROADMAP.html",
-    "category": "Planning"
-  },
-  {
-    "source": "NEXT_SESSION.md",
-    "title": "Next development session",
-    "url": "/material-buildroot/site/articles/NEXT_SESSION.html",
-    "category": "Planning"
-  },
-  {
     "source": "HANDOFF.md",
     "title": "Handoff",
     "url": "/material-buildroot/site/articles/HANDOFF.html",
     "category": "Planning"
   },
   {
-    "source": "CLOSEOUT_PROMPT.md",
-    "title": "Continuation prompt",
-    "url": "/material-buildroot/site/articles/CLOSEOUT_PROMPT.html",
+    "source": "NEXT_SESSION.md",
+    "title": "Development continuation",
+    "url": "/material-buildroot/site/articles/NEXT_SESSION.html",
     "category": "Planning"
   },
   {
-    "source": "AGENTS.md",
-    "title": "Development instructions",
-    "url": "/material-buildroot/site/articles/AGENTS.html",
+    "source": "PLAN.md",
+    "title": "Material Buildroot implementation plan",
+    "url": "/material-buildroot/site/articles/PLAN.html",
     "category": "Planning"
   },
   {
-    "source": "docs/README.md",
-    "title": "Documentation",
-    "url": "/material-buildroot/site/articles/docs/README.html",
+    "source": "README.md",
+    "title": "Material Buildroot",
+    "url": "/material-buildroot/site/articles/README.html",
     "category": "Planning"
   },
   {
-    "source": "website/README.md",
-    "title": "Documentation website",
-    "url": "/material-buildroot/site/articles/website/README.html",
+    "source": "ROADMAP.md",
+    "title": "Phased implementation roadmap",
+    "url": "/material-buildroot/site/articles/ROADMAP.html",
     "category": "Planning"
-  },
-  {
-    "source": "docs/planning/architecture.md",
-    "title": "Architecture and implementation handoff",
-    "url": "/material-buildroot/site/articles/docs/planning/architecture.html",
-    "category": "Planning"
-  },
-  {
-    "source": "docs/planning/buildroot-constraints.md",
-    "title": "Official-source Buildroot constraints",
-    "url": "/material-buildroot/site/articles/docs/planning/buildroot-constraints.html",
-    "category": "Planning"
-  },
-  {
-    "source": "docs/planning/feature-coverage.md",
-    "title": "Complete feature planning inventory",
-    "url": "/material-buildroot/site/articles/docs/planning/feature-coverage.html",
-    "category": "Planning"
-  },
-  {
-    "source": "docs/planning/surfaces.md",
-    "title": "Surface identities and capability boundaries",
-    "url": "/material-buildroot/site/articles/docs/planning/surfaces.html",
-    "category": "Planning"
-  },
-  {
-    "source": "docs/wiki/FAQ.md",
-    "title": "Common questions",
-    "url": "/material-buildroot/site/articles/docs/wiki/FAQ.html",
-    "category": "Wiki"
-  },
-  {
-    "source": "docs/wiki/Getting-started.md",
-    "title": "Getting started with the plan",
-    "url": "/material-buildroot/site/articles/docs/wiki/Getting-started.html",
-    "category": "Wiki"
-  },
-  {
-    "source": "docs/wiki/Home.md",
-    "title": "Project wiki",
-    "url": "/material-buildroot/site/articles/docs/wiki/Home.html",
-    "category": "Wiki"
-  },
-  {
-    "source": "docs/evidence/planning-site.md",
-    "title": "Initial planning website evidence",
-    "url": "/material-buildroot/site/articles/docs/evidence/planning-site.html",
-    "category": "Evidence"
   },
   {
     "source": "design/README.md",
@@ -126,9 +66,57 @@
     "category": "Design"
   },
   {
+    "source": "design/archive/README.md",
+    "title": "Historical planning drafts",
+    "url": "/material-buildroot/site/articles/design/archive/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/archive/initial-draft/README.md",
+    "title": "Material Buildroot application design plan",
+    "url": "/material-buildroot/site/articles/design/archive/initial-draft/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/archive/initial-draft/components.md",
+    "title": "Planned component provenance",
+    "url": "/material-buildroot/site/articles/design/archive/initial-draft/components.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/archive/initial-draft/questions.md",
+    "title": "Product decisions for the planning interview",
+    "url": "/material-buildroot/site/articles/design/archive/initial-draft/questions.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/archive/initial-draft/screens.md",
+    "title": "Application screen and state inventory",
+    "url": "/material-buildroot/site/articles/design/archive/initial-draft/screens.html",
+    "category": "Design"
+  },
+  {
     "source": "design/components.md",
     "title": "Planned component provenance",
     "url": "/material-buildroot/site/articles/design/components.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/desktop-shell.md",
+    "title": "Production desktop shell reference reuse",
+    "url": "/material-buildroot/site/articles/design/desktop-shell.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/reference/README.md",
+    "title": "Executable desktop reference",
+    "url": "/material-buildroot/site/articles/design/reference/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/reference/control-map.md",
+    "title": "Desktop reference control and state map",
+    "url": "/material-buildroot/site/articles/design/reference/control-map.html",
     "category": "Design"
   },
   {
@@ -136,5 +124,137 @@
     "title": "Screen and state inventory",
     "url": "/material-buildroot/site/articles/design/screens.html",
     "category": "Design"
+  },
+  {
+    "source": "docs/README.md",
+    "title": "Documentation",
+    "url": "/material-buildroot/site/articles/docs/README.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/build/README.md",
+    "title": "Build and dependency acquisition",
+    "url": "/material-buildroot/site/articles/docs/build/README.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/windows-entrypoints.md",
+    "title": "Windows entrypoints and source-bound outputs",
+    "url": "/material-buildroot/site/articles/docs/build/windows-entrypoints.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/desktop/README.md",
+    "title": "Desktop shell",
+    "url": "/material-buildroot/site/articles/docs/desktop/README.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/host-and-preferences.md",
+    "title": "Host admission and preferences",
+    "url": "/material-buildroot/site/articles/docs/desktop/host-and-preferences.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/evidence/desktop-shell/README.md",
+    "title": "Desktop shell capture evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/desktop-shell/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/planning-site.md",
+    "title": "Initial planning website evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/planning-site.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-contracts.md",
+    "title": "PH01 contract and evidence admission unit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-contracts.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/planning/README.md",
+    "title": "Planning documentation",
+    "url": "/material-buildroot/site/articles/docs/planning/README.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/architecture.md",
+    "title": "Architecture and implementation handoff",
+    "url": "/material-buildroot/site/articles/docs/planning/architecture.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/buildroot-constraints.md",
+    "title": "Official-source Buildroot constraints",
+    "url": "/material-buildroot/site/articles/docs/planning/buildroot-constraints.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/evidence-ledger.md",
+    "title": "Feature evidence ledger",
+    "url": "/material-buildroot/site/articles/docs/planning/evidence-ledger.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/feature-coverage.md",
+    "title": "Complete feature planning inventory",
+    "url": "/material-buildroot/site/articles/docs/planning/feature-coverage.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/managed-execution.md",
+    "title": "Managed execution and delivery admission",
+    "url": "/material-buildroot/site/articles/docs/planning/managed-execution.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/surfaces.md",
+    "title": "Surface identities and capability boundaries",
+    "url": "/material-buildroot/site/articles/docs/planning/surfaces.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/security/README.md",
+    "title": "Security boundaries",
+    "url": "/material-buildroot/site/articles/docs/security/README.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/broker-admission.md",
+    "title": "Durable settings broker admission",
+    "url": "/material-buildroot/site/articles/docs/security/broker-admission.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/operation-requests.md",
+    "title": "Serialized operation requests",
+    "url": "/material-buildroot/site/articles/docs/security/operation-requests.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/wiki/FAQ.md",
+    "title": "Common questions",
+    "url": "/material-buildroot/site/articles/docs/wiki/FAQ.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/wiki/Getting-started.md",
+    "title": "Getting started with the plan",
+    "url": "/material-buildroot/site/articles/docs/wiki/Getting-started.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/wiki/Home.md",
+    "title": "Project wiki",
+    "url": "/material-buildroot/site/articles/docs/wiki/Home.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "website/README.md",
+    "title": "Documentation website",
+    "url": "/material-buildroot/site/articles/website/README.html",
+    "category": "Planning"
   }
 ]
