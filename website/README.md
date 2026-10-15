@@ -1,25 +1,25 @@
 # Documentation website
 
-This is the initial planning website, independent of the unimplemented desktop application and authenticated companion. It renders the current public planning documents and source wiki directly. Production feature parity remains unchecked in the roadmap.
+This documentation website is independent of the desktop application and authenticated companion. It renders the current public planning documents and source wiki directly. Production feature parity remains unchecked in the roadmap.
 
-```sh
-npm ci --prefix website
-npm run build --prefix website
-npm run check --prefix website
+```powershell
+.\build.bat --target documentation /s
 ```
 
-Commit the generated `docs/index.html`, `docs/.nojekyll` and `docs/site/` with their source changes on `main`. GitHub Pages publishes the `main` branch's `/docs` directory. No separate publishing branch or application dependency installation is required. Generation replaces only its own `docs/site/` directory and generated entry files; it preserves the Markdown planning sources.
+The root entrypoint acquires the pinned portable tools and the exact `website/package-lock.json` dependencies with lifecycle scripts disabled. It generates and validates an isolated output, then activates `.cache/documentation-output/` with the standard source-bound `build-receipt.json`. Production never changes tracked documentation. The source, index and manifest must remain unchanged throughout the build.
 
-The generator derives the checklist from `ROADMAP.md`; website visitors cannot change the authoritative completion state. Build metadata records the actual build time, base Git commit, whether inputs differ from that commit, and the SHA-256 of the exact input snapshot. A clean commit containing generated output necessarily follows generation. Never describe the base commit as the entire built source when the snapshot differs.
+After review and browser verification, promote only generated `index.html`, `.nojekyll` and `site/` from that output into `docs/`, preserving the Markdown sources. Commit the promoted files separately. GitHub Pages continues publishing `main` → `/docs`. Promotion, public deployment and live verification are separate from a successful local build.
+
+The generator derives the checklist from `ROADMAP.md`; website visitors cannot change the authoritative completion state. Build metadata records the actual build time, base Git commit, whether inputs differ from that commit, and the SHA-256 of the exact input snapshot, including raw bytes of every locally referenced image and data asset. Decoded references reject Windows drive, backslash and control-character forms; source and output paths reject linked ancestors and root escapes. A clean commit containing generated output necessarily follows generation. Never describe the base commit as the entire built source when the snapshot differs.
 
 The website uses genuine registered `@material/web` buttons, icon buttons, chips, text fields, selects, switches, lists, checkboxes and progress indicators, bundled locally with licensed Roboto font files. [The component inventory](components.json) maps each control to its actual primitive. Native authored form controls and generic disclosure substitutes fail validation. Semantic prose links and tables remain ordinary accessible content.
 
 The initial site has local theme/heading-language preferences, document search and phase filtering. It must fit phones from 320 CSS pixels, with reachable touch controls, a scrolling focus-managed navigation drawer and readable articles. These bounded controls do not complete the broader shared feature catalogue or complete article localization.
 
-The home page is a short overview. Roadmap work is divided into Planning & foundations, Buildroot workflows, Built-in tools, and Website/companion/release. Every category and each of the 11 phases has its own route. Phase pages show their own task checklist, prerequisites, evidence criteria, breadcrumb and previous/next navigation. Documentation has separate Planning, Design, Wiki and Evidence indexes and individual article routes. Downloads/status is separate. The full source roadmap remains available as a reference record, not the primary all-tasks interface.
+The home page is a short overview. Roadmap work is divided into Planning & foundations, Buildroot workflows, Built-in tools, and Website/companion/release. Every category and each of the 11 phases has its own route. Phase pages show their own task checklist, prerequisites, evidence criteria, breadcrumb and previous/next navigation. Documentation recursively includes all Markdown below `docs/` and `design/`, excluding generated `docs/site/`, with category indexes and individual article routes. Nested evidence and historical design records remain included. Referenced images and data assets are copied locally and checked byte-for-byte. Downloads/status is separate. The full source roadmap remains available as a reference record, not the primary all-tasks interface.
 
 For actual browser verification, serve `docs/` under `/material-buildroot/`, install the pinned Playwright browser or use an available Chromium through `DOCS_CHROMIUM_PATH`, then run `node website/verify-browser.mjs`. `DOCS_TEST_URL` selects the local test URL or the intended GitHub Pages URL. The check retains genuine screenshots and a source/artifact-bound receipt in `website/evidence/`. Browser proof remains separate from native Windows and public hosting proof.
 
-`npm run check` validates generated internal routes and fragment destinations, document inventory, roadmap identity uniqueness, completion/evidence links and source metadata. Browser interaction and visual inspection are separate evidence. Rebuild after changing an included document so the website cannot retain an old checklist.
+The root documentation build validates generated internal routes and fragment destinations, document inventory, roadmap identity uniqueness, completion/evidence links and source metadata. Browser interaction and visual inspection are separate evidence. Rebuild after changing an included document so the website cannot retain an old checklist.
 
 The GitHub wiki service has no accessible initialized repository at the time of initial authoring. `docs/wiki/` contains the canonical starter wiki content and is rendered in this website. Synchronization with GitHub's separate wiki service remains pending.

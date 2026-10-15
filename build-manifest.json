@@ -33,6 +33,25 @@
       "launch": null,
       "installable": false
     },
+    "documentation": {
+      "kind": "static-documentation",
+      "input": "website/build.mjs",
+      "packageDirectory": "website",
+      "output": ".cache/documentation-output",
+      "entry": "index.html",
+      "command": [
+        "website/build.mjs",
+        "--output",
+        "{output}"
+      ],
+      "checkCommand": [
+        "website/check.mjs",
+        "--output",
+        "{output}"
+      ],
+      "launch": null,
+      "installable": false
+    },
     "desktop": {
       "kind": "desktop",
       "input": "src/main/index.cjs",

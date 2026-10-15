@@ -155,7 +155,9 @@ async function main() {
   const git = process.env.MATERIAL_BUILD_GIT;
   const npm = process.env.MATERIAL_BUILD_NPM;
   if (![node,git,npm].every(value => value && fs.existsSync(value))) throw new Error('Use the root build entrypoint to establish verified portable tools.');
-  if (!fs.existsSync(path.join(root,'package-lock.json'))) throw new Error('The reviewed package-lock.json is required.');
+  const packageRoot = target.packageDirectory ? contained(root,target.packageDirectory) : root;
+  const packageLock = path.join(packageRoot,'package-lock.json');
+  if (!fs.existsSync(packageLock)) throw new Error('The reviewed target package-lock.json is required.');
   if (!dependenciesOnly) {
     nonempty(root,target.input);
     if (target.rendererInput) nonempty(root,target.rendererInput);
@@ -163,7 +165,7 @@ async function main() {
   execute(node,[path.join(root,'scripts/check-vocabulary.cjs')]);
   const before = dependenciesOnly ? null : sourceIdentity(root,git,manifestBytes);
   console.log('Installing exact locked npm packages with lifecycle scripts disabled.');
-  execute(node,[npm,'ci','--ignore-scripts','--no-audit','--no-fund']);
+  execute(node,[npm,'ci','--ignore-scripts','--no-audit','--no-fund'],{cwd:packageRoot});
   if (dependenciesOnly) { console.log('Locked dependencies acquired. No build or runtime verification is claimed.'); return; }
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   recoverOutput(root,installer ? target.installerOutput : target.output);
@@ -182,6 +184,7 @@ async function main() {
     command.push(`--config.electronDist=${process.env.MATERIAL_BUILD_ELECTRON_DIST}`);
   }
   execute(node,command,{env:childEnv});
+  if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
   if (installer) verifyInstaller(output);
   else {
     nonempty(output,target.entry);
@@ -189,7 +192,7 @@ async function main() {
   }
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   const files = inventory(output);
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(path.join(root,'package-lock.json'))), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);

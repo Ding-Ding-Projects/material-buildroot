@@ -9,7 +9,7 @@
     "dev": "vite --host 127.0.0.1",
     "start": "electron .",
     "build": "build.bat /s",
-    "test": "node --test tests/*.test.cjs",
+    "test": "node --test tests/*.test.cjs tests/*.test.mjs",
     "package:win": "build.bat /s",
     "dist:win": "build-installer.bat /s"
   },

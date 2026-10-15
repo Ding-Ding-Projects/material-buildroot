@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "projects-dark",
+      "active": true,
+      "path": "docs/evidence/desktop-shell/projects-dark.png",
+      "sourceCommit": "3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd",
+      "artifactSha256": "95b0d00acc352dc598bc315fb14dd4403ea57ffbfde4711a6960a2d66d89d031",
+      "archiveSha256": "377445849f5c8028b20807f00a51ba3dda9d4e3595c116baac05f01b5b0cfa77",
+      "buildReceiptSha256": "21e9109880510ef4fde2b561e728195b7de0dd09bbeb0fdfa3ea01a415ea92d1",
+      "captureSha256": "66c2d311d1dcc49bd8a4ca9c80b5ac0d6defb2b36044153276aa5581cd8c8cd9",
+      "capturedAt": "2026-10-15T03:17:27.789Z",
+      "captureTimeZone": "UTC",
+      "screen": "projects",
+      "state": "empty-bilingual",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "viewportHeight": 960,
+      "scale": 1,
+      "interactionProofId": "launch-empty-workspace",
+      "interactionReceiptSha256": "0f13cb36789ff3a9890b86b6597b5af72402a08f9b04c9a6d47e86273c5bdfc2",
+      "inspectionStatus": "inspected"
+    },
+    {
+      "id": "settings-dark",
+      "active": true,
+      "path": "docs/evidence/desktop-shell/settings-dark.png",
+      "sourceCommit": "3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd",
+      "artifactSha256": "95b0d00acc352dc598bc315fb14dd4403ea57ffbfde4711a6960a2d66d89d031",
+      "archiveSha256": "377445849f5c8028b20807f00a51ba3dda9d4e3595c116baac05f01b5b0cfa77",
+      "buildReceiptSha256": "21e9109880510ef4fde2b561e728195b7de0dd09bbeb0fdfa3ea01a415ea92d1",
+      "captureSha256": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968",
+      "capturedAt": "2026-10-15T03:17:28.083Z",
+      "captureTimeZone": "UTC",
+      "screen": "settings",
+      "state": "language-saved-bilingual",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "viewportHeight": 960,
+      "scale": 1,
+      "interactionProofId": "open-settings-save-bilingual-select-dark",
+      "interactionReceiptSha256": "0f13cb36789ff3a9890b86b6597b5af72402a08f9b04c9a6d47e86273c5bdfc2",
+      "inspectionStatus": "inspected"
+    }
+  ],
+  "verification": {
+    "settingsMatrixTuples": 48,
+    "validatedLayoutReceipts": 52,
+    "horizontalDocumentOverflowCount": 0,
+    "physicalDpiObserved": 144,
+    "runtimeScaleFactors": [
+      1,
+      1.25,
+      1.5,
+      2
+    ],
+    "viewportSizes": [
+      [
+        1440,
+        960
+      ],
+      [
+        960,
+        640
+      ]
+    ],
+    "scaleBoundary": "Runtime factors with matching CDP viewport emulation, not independently varied operating-system DPI. Physical settings were unchanged."
+  }
+}

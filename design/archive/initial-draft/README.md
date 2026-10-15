@@ -50,4 +50,4 @@ This lane owns `design/**` and, only after renewed implementation authorization 
 
 An independent reviewer must assess the screen inventory, component provenance, workflow reachability, responsive matrix and unanswered decisions before frontend implementation. Record their actual model, verdict and requested changes. Design references remain proposed; a later reference viewer must render the actual checked-in references and expose deterministic screen/state/theme/viewport/scale routes. Neither references nor browser previews establish Windows product acceptance.
 
-See [screen inventory](screens.md), [component provenance](components.md), [acceptance plan](acceptance.md), and [product questions](questions.md).
+See [screen inventory](screens.md), [component provenance](components.md), [acceptance plan](../../acceptance.md), and [product questions](questions.md).

@@ -1,7 +1,9 @@
 # Documentation
 
-These are current planning documents, rendered directly by the initial documentation website. Product implementation articles, complete localized twins and genuine application screenshots remain required in later phases.
+These articles cover planning, implemented desktop/security/build behavior and retained evidence. Complete localized article twins and broader product acceptance remain open. Current source articles and captures require regeneration and live verification before the hosted website can be described as current.
 
+- [Desktop host and preferences](desktop/host-and-preferences.md)
+- [Verified desktop shell captures](evidence/desktop-shell/README.md)
 - [Windows build tooling](build/README.md)
 - [Security boundaries](security/README.md)
 - [Implementation plan](../PLAN.md)

@@ -2,16 +2,25 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { documentSources } from './inventory.mjs';
+import { containedPath, sourceSnapshot } from './source-boundary.mjs';
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const docs=path.join(root,'docs');
+const outputIndex=process.argv.indexOf('--output');
+const docs=outputIndex<0 ? path.join(root,'docs') : path.resolve(process.argv[outputIndex+1]);
 const base='/material-buildroot/';
 const failures=[];
 const meta=JSON.parse(await fs.readFile(path.join(docs,'site/build-info.json'),'utf8'));
 const inventory=JSON.parse(await fs.readFile(path.join(docs,'site/document-inventory.json'),'utf8'));
+const expectedDocuments=await documentSources(root);
+if(JSON.stringify(inventory.map(doc=>doc.source).sort())!==JSON.stringify(expectedDocuments))failures.push('Documentation inventory omits or duplicates current articles.');
+const assets=JSON.parse(await fs.readFile(path.join(docs,'site/asset-inventory.json'),'utf8'));
+for(const source of assets) {
+ const original=await fs.readFile(containedPath(root,source));
+ const copied=await fs.readFile(containedPath(docs,'site/source-assets/'+source));
+ if(!original.equals(copied)) failures.push(`${source}: local asset differs from source.`);
+}
 const roadmap=JSON.parse(await fs.readFile(path.join(docs,'site/roadmap.json'),'utf8'));
-const digest=createHash('sha256');
-for(const file of meta.source_inputs)digest.update(file+'\0').update(await fs.readFile(path.join(root,file))).update('\0');
-if(digest.digest('hex')!==meta.input_snapshot_sha256)failures.push('Website source snapshot is stale; rebuild after documentation changes.');
+if(sourceSnapshot(root,meta.source_inputs)!==meta.input_snapshot_sha256)failures.push('Website source snapshot is stale; rebuild after documentation changes.');
 if(!/^[a-f0-9]{40}$/.test(meta.base_commit)||!Number.isFinite(Date.parse(meta.built_at)))failures.push('Invalid build provenance.');
 const tasks=roadmap.phases.flatMap(p=>p.tasks);
 if(new Set(tasks.map(t=>t.id)).size!==tasks.length)failures.push('Duplicate task IDs.');
@@ -50,7 +59,7 @@ if(process.argv.includes('--with-browser')){
   const receipt=JSON.parse(await fs.readFile(path.join(root,'website/evidence/browser-check.json'),'utf8'));
   if(receipt.verdict!=='passed'||receipt.input_snapshot_sha256!==meta.input_snapshot_sha256)failures.push('Browser receipt is missing, failed or bound to another source snapshot.');
   for(const [key,file] of Object.entries({html_sha256:'docs/index.html',javascript_sha256:'docs/site/assets/app.js',css_sha256:'docs/site/assets/app.css'})){
-    const hash=createHash('sha256').update(await fs.readFile(path.join(root,file))).digest('hex');
+    const hash=createHash('sha256').update(await fs.readFile(path.join(docs,file.replace(/^docs\//,'')))).digest('hex');
     if(receipt.artifacts[key]!==hash)failures.push(`${file}: browser evidence artifact hash mismatch.`);
   }
   for(const capture of receipt.captures){

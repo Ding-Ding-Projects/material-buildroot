@@ -1,12 +1,24 @@
 # Handoff
 
-## Desktop shell candidate, 2026-10-14 America/Toronto
+## Current local source check
 
-The owner resumed implementation and prioritized the production desktop GUI. The main process, sandboxed preload, typed desktop session and real renderer now exist. The bounded workflow saves English, Cantonese or bilingual language through the existing capability-scoped durable broker. Window controls are wired, the initial workspace contains no synthetic project data, and appearance choices are explicitly session-only.
+The updated `npm test` entrypoint discovered and passed all 61 tests, with zero failures, cancellations or skips: broker contract 3, broker/storage 17, build tools 6, preload 1, desktop session 5, documentation source boundaries 3, evidence ledger 17 and operation parser 9. This run includes the documentation-source changes and is separate from the packaged GUI receipts below. Documentation output and live delivery still require their own build and verification.
 
-Twenty-six focused host/preload/broker checks passed, renderer/shared type checking passed and the source diff check passed. Independent source review found no remaining actionable security candidate in the main/preload/session seam. Recovery text was corrected to require restart after an uncertain save. This candidate still requires exact-root packaging and actual hidden-desktop runtime verification, including packaged SQLite support and persistence across executable restarts. No installer or release is claimed.
+## Verified desktop shell and documentation preparation, 2026-10-14 America/Toronto
 
-Keep one source writer on main. All GUI implementation, review and capture lanes explicitly use gpt-6-astra. Preserve the historical reference evidence separately from production evidence. The encrypted-publication work described below remains deferred by the current GUI priority.
+The current production executable is built from `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd`. Its root build-receipt SHA-256 is `21e9109880510ef4fde2b561e728195b7de0dd09bbeb0fdfa3ea01a415ea92d1`. The bounded shell has sandboxed preload/IPC, a genuine empty-project state, durable English/Cantonese/bilingual language settings and visibly session-only appearance. No project creation, Buildroot process, virtual-machine workflow, encrypted publication, installer or release is claimed.
+
+Twenty-six focused host/preload/broker checks and strict renderer/shared type checking passed on the earlier `aa91c34f4588a0dae85faef169c4dcf542c307d0` candidate. The host/preload/session files were unchanged by the final renderer-only repairs. Six build-tool checks passed on the current source. The current settings matrix covered all 48 tuples (three languages, two themes, two viewports and four runtime scale factors). All 52 layout receipts passed, including four startups, without measured horizontal document overflow. Current matrix observation intervals recorded no console errors, unhandled exceptions or page errors. All three languages survived actual executable restarts. Dark foreground roles and cached translated theme labels were repaired before the final matrix.
+
+Native minimize/restore/close behavior was exercised on the current source. Background Tab, event subscription/count/unsubscribe, malformed IPC and the earlier window-command checks belong to `aa91c34f4588a0dae85faef169c4dcf542c307d0`; they are not relabelled as a fresh current-source audit. See the [capture record](docs/evidence/desktop-shell/README.md). Native DPI 144 was observed. Runtime/CDP scale factors 1, 1.25, 1.5 and 2 do not prove native operating-system scaling at each factor; independent native 125% and 200% acceptance remains unverified. All owned product processes and hidden desktops ended.
+
+Two inspected raw PNGs and a public-safe hash inventory are retained under `docs/evidence/desktop-shell/` and embedded in README. Historical synthetic reference images keep their original provenance. Private launch/capture manifests and machine paths remain outside the repository.
+
+The documentation build now has a root `build.bat --target documentation /s` route, isolated ignored output, recursive article/wiki inventory, local referenced assets and source-bound checks. Three focused documentation-boundary tests passed in staging. Current generated delivery is pending: commit the source candidate, run the exact root entrypoint without source mutation, review the output, promote only generated files, then publish and verify live routes/assets/anchors. The existing Pages source is `main` → `/docs`; the exact homepage is https://ding-ding-projects.github.io/material-buildroot/ and the stored About URL matches. None of those existing settings proves current content delivery.
+
+Project 53 is linked to this repository. Issue 1 remains In Progress for the wider objective, and discussion 2 is the rolling progress record. External final delivery evidence belongs on issue 1. Status Hub health is reachable, but no trusted ingest credential is available. The separate GitHub wiki repository returned Repository not found; existing `docs/wiki/` articles will be rendered completely, without claiming separate wiki synchronization.
+
+Full shared feature coverage, project operations, execution adapters, VM acceptance, encrypted transport, companion, installer/update/release and fresh-host proof remain open. Keep one tracked-source writer and preserve existing output/profile data. Earlier dated records below are historical and do not supersede this milestone.
 
 ## Requested preservation closeout, 2026-10-15
 

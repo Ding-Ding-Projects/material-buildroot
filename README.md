@@ -1,21 +1,32 @@
 # Material Buildroot
 
-A Windows desktop workspace for configuring Buildroot and running builds through WSL 2 or Docker Linux containers.
+A Windows desktop workspace in development for configuring Buildroot and running builds through WSL 2 or Docker Linux containers.
 
-Implementation is underway. This repository contains the initial documentation website, a 105-identity/420-surface evidence ledger, its validator with 17 passing local tests, 30 authored reference states, six passing build-tool tests, a strict request parser with nine passing tests, a durable settings broker with 20 passing tests and strict typed translation, and an unverified desktop scaffold. Structural validation does not establish product completion. Read [PLAN.md](PLAN.md), [DECISIONS.md](DECISIONS.md), [ROADMAP.md](ROADMAP.md) and [HANDOFF.md](HANDOFF.md).
+The packaged desktop shell now opens a genuine empty-project workspace and saves English, Hong Kong Cantonese or bilingual language preferences through a narrowly scoped durable broker. Appearance choices are explicitly session-only. Project creation, Buildroot execution, virtual-machine workflows, encrypted publication and the authenticated companion remain unimplemented. The [phased checklist](ROADMAP.md) preserves the wider scope and its separate evidence requirements.
 
-The [phased checklist](ROADMAP.md) preserves 11 phases with stable task IDs and independently verified children, with evidence required before each completion check. The [website source and build guide](website/README.md) renders the current plan, checklist, articles and wiki directly. The [initial website](https://ding-ding-projects.github.io/material-buildroot/) is deployed from `main` → `/docs`; [hosting evidence](docs/evidence/hosting/initial-live.json) records 46 HTML routes and 62 exact source-matching files. New documentation updates still require regeneration. No desktop installer or authenticated companion is available yet.
+The current bounded runtime evidence is tied to source `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd`. Twenty-six host/preload/broker checks passed on the earlier `aa91c34f4588a0dae85faef169c4dcf542c307d0` candidate; those host/preload/session sources were unchanged by the final renderer-only repairs. Six build-tool checks passed on the current source. The settings matrix covered 48 language/theme/viewport/runtime-scale tuples; 52 layout receipts passed, including four startup receipts. Language persistence was verified across actual executable restarts. Read the [desktop article](docs/desktop/host-and-preferences.md) and [capture evidence](docs/evidence/desktop-shell/README.md) for exact limitations. These results do not establish complete product, installer or release acceptance.
 
-Start the next development session with [NEXT_SESSION.md](NEXT_SESSION.md). The owner requires work on `main`, frequent recoverable pushes, interactive rich/canvas editors, the complete shared feature baseline and a GitHub Pages documentation/browser companion.
+The [documentation website](https://ding-ding-projects.github.io/material-buildroot/) is hosted from `main` → `/docs`, and the stored repository homepage matches that address. Current desktop articles and captures still require the isolated documentation build, reviewed promotion, source publication and live verification. Historical [initial hosting evidence](docs/evidence/hosting/initial-live.json) remains historical. No installer or product release is available.
 
 ## Build
 
-The intended one-command Windows desktop route is:
-
 ```powershell
-.\build.bat --run
+.\build.bat /s
+.\build.bat --target documentation /s
 ```
 
-The root entrypoints now acquire pinned portable tools and locked packages without administrator rights. Production desktop source is still incomplete, so the desktop and installer commands return a nonzero result. The current buildable reference target is `.\build.bat --target design-reference /s`; it is synthetic design material, not the installed product. See [Windows build boundaries and verification](docs/build/windows-entrypoints.md). No fresh-operating-system or installer success is claimed.
+The root entrypoints acquire pinned portable tools and locked packages without administrator rights. The desktop build produced the source-bound packaged executable at `release/app/win-unpacked/Material Buildroot.exe`; its build-receipt SHA-256 is `21e9109880510ef4fde2b561e728195b7de0dd09bbeb0fdfa3ea01a415ea92d1`. An explicit `.\build.bat --run` builds and launches the desktop. The installer route is separate and has not been verified.
 
-Buildroot itself runs inside Linux. WSL projects should live on the distribution's Linux filesystem for predictable case sensitivity and performance. Docker projects use a dedicated Linux container with separate output storage.
+The documentation target builds and validates isolated `.cache/documentation-output/` files before a separate reviewed promotion into `docs/`. See [website build instructions](website/README.md) and [Windows build boundaries](docs/build/windows-entrypoints.md). The design-reference target remains synthetic material, not production evidence. No fresh-operating-system success is claimed.
+
+Buildroot itself runs inside Linux. WSL projects should live on the distribution's Linux filesystem for predictable case sensitivity and performance. Docker projects use a dedicated Linux container with separate output storage. Neither execution route has been accepted in the current product.
+
+Read [PLAN.md](PLAN.md), [DECISIONS.md](DECISIONS.md), [HANDOFF.md](HANDOFF.md) and [NEXT_SESSION.md](NEXT_SESSION.md) before continuing implementation.
+
+## Verified desktop shell captures
+
+The packaged shell was captured from source `3f5d2cd5bbdafbeda324514c3db0da9f0328bcfd`. These images show the empty workspace and saved bilingual language settings. Read the [capture evidence and limitations](docs/evidence/desktop-shell/README.md) for the 48-tuple matrix, 52 validated layout receipts, source hashes, runtime-scale boundary and remaining product work.
+
+![Projects empty workspace in bilingual dark mode at 1440 by 960](docs/evidence/desktop-shell/projects-dark.png)
+
+![Settings in bilingual dark mode at 1440 by 960](docs/evidence/desktop-shell/settings-dark.png)
