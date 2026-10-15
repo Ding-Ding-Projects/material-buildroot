@@ -1,6 +1,6 @@
 # Material Buildroot implementation plan
 
-Status: planning plus initial documentation website implementation. Application and authenticated companion implementation belong to the next development session. The owner separately authorized creating the public documentation website now.
+Status: implementation is underway after the initial planning and documentation website checkpoint. Contract admission is in progress; application, authenticated companion and production acceptance remain unverified. Historical planning decisions below retain their original session scope.
 
 ## Confirmed owner decisions
 
@@ -11,14 +11,14 @@ Status: planning plus initial documentation website implementation. Application 
 5. The public repository is `Ding-Ding-Projects/material-buildroot`.
 6. A GitHub Pages documentation companion is required, with its deployed URL in the repository About homepage.
 7. Work stays on `main`. Publish recoverable planning checkpoints frequently.
-8. This session prepares the plan, interviews the owner and creates the initial documentation website. The next development session implements the application and complete shared surface coverage.
+8. Historical planning-session decision: this session prepares the plan, interviews the owner and creates the initial documentation website. The next development session implements the application and complete shared surface coverage.
 9. Serve both beginners and experienced builders through guided and advanced access to the same validated actions.
 10. The central workflow is board selection, configuration, build and image export.
 11. Ask for WSL or Docker when creating a project and remember the selection per project.
 12. Manage existing sources, official releases, Git clones, branches and upgrades.
 13. Initial image targets are VMware Workstation and VirtualBox guests.
 14. Include full package, overlay and external-tree editors.
-15. The next development session's requested delivery is the complete specified application and every shared feature. Internal milestones do not reduce that scope.
+15. Historical delivery decision: the next development session's requested delivery is the complete specified application and every shared feature. Internal milestones do not reduce that scope.
 16. Guest presets cover minimal, desktop, server and appliance systems. First-class exports are bootable ISO, VMDK, VDI and OVA.
 17. Rich controls create, import, configure and launch VMware Workstation and VirtualBox guests.
 18. Verify x86_64 guests with both legacy BIOS and UEFI compatibility presets. Preserve broader architecture configuration access.
@@ -42,7 +42,7 @@ Status: planning plus initial documentation website implementation. Application 
 36. Support explicitly paired Edge/Chrome clients and authenticated access from other devices on the LAN. Internet control exposure is not part of this decision.
 37. Guest acceptance requires actual boot, login/console, networking, disk persistence and graceful guest shutdown. BIOS/UEFI support initially excludes Secure Boot.
 38. Keep all sources/history/artifacts/caches until the user chooses cleanup; resource-budget notifications do not authorize automatic pruning.
-39. Include SDK/toolchain export, image flashing, guest install wizards, remote Buildroot execution and cloud upload. Exact provider/target routes are being finalized in the decision log.
+39. Include SDK/toolchain export, image flashing, guest install wizards, remote Buildroot execution and cloud upload. All four P40 cloud destinations, P41 Linux SSH process/container and Windows SSH WSL/Docker targets, and P42 USB/SD/physical-drive and ISO/guest routes are approved in the decision log.
 
 ## Interactive control contract
 
@@ -137,4 +137,8 @@ Unanswered choices remain proposed or pending. They do not silently become owner
 
 ## Existing scaffold
 
-A minimal local manifest and interface scaffold was created before the owner clarified planning-only scope. No backend or GUI implementation, dependency installation, build, runtime capture, installer or release has completed. The next session must review the scaffold rather than treating its package pins, API shape or unchecked roadmap as verified design.
+A minimal local manifest and interface scaffold was created before the owner clarified planning-only scope. At that planning checkpoint no backend or GUI implementation, dependency installation, build, runtime capture, installer or release had completed. Implementation is now underway with contract/evidence admission; review the scaffold rather than treating its package pins, API shape or unchecked roadmap as verified design.
+
+## Managed build execution and product delivery
+
+GitHub Actions is a first-class user build backend and also the product delivery pipeline. Managed Buildroot builds require standard hosted Linux and self-hosted Linux execution. Product builds and packaging require compatible Windows runners invoking the exact root `build.bat` and `build-installer.bat` entrypoints respectively. Both workflows provide guided setup, generated configuration and reviewed expert YAML, using the source repository or a dedicated execution repository. Preserve a standard public hosted fallback; larger billed runners require an explicit user selection. Encrypted transport is conditional on a user-selected push to a verified private repository. A reviewed generic engine extraction is approved, excluding private history, identity, records and secrets. See [the execution contract](docs/planning/managed-execution.md) for stable children and admission boundaries.

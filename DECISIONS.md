@@ -12,10 +12,10 @@
 | Repository | Public `Ding-Ding-Projects/material-buildroot` |
 | Website | GitHub Pages documentation companion |
 | Working branch | `main` only, frequent publication checkpoints |
-| Current session | Planning and owner interview |
-| Implementation | Next development session |
+| Current session | Implementation underway; contract/evidence admission in progress |
+| Implementation | Authorized now; product runtime and delivery acceptance pending |
 
-## Pending owner interview
+## Recorded owner interview (historical decisions retained)
 
 | ID | Topic | Current recommendation | Owner answer |
 | --- | --- | --- | --- |
@@ -58,9 +58,9 @@
 | P37 | Secure Boot | Explicit support states and required-format signing only | BIOS/UEFI without Secure Boot first |
 | P38 | Cleanup policy | Configurable budgets, preserve records, confirm destructive cleanup | Keep everything until the user chooses cleanup |
 | P39 | Additional first-delivery workflows | Owner can name additional essentials | All listed: SDK/toolchain export, image flashing, guest installers, remote Buildroot execution and cloud upload |
-| P40 | Cloud destinations | S3-compatible, Azure Blob, Google Cloud Storage, GitHub Releases | Pending |
-| P41 | Remote execution targets | SSH Linux/Docker and Windows SSH with WSL/Docker | Pending |
-| P42 | Flashing/installation routes | USB/SD/disk flashing and guided ISO/guest installation | Pending |
+| P40 | Cloud destinations | S3-compatible, Azure Blob, Google Cloud Storage, GitHub Releases | All four destinations approved |
+| P41 | Remote execution targets | SSH Linux/Docker and Windows SSH with WSL/Docker | Linux SSH process and container; Windows SSH with WSL and Docker approved |
+| P42 | Flashing/installation routes | USB/SD/disk flashing and guided ISO/guest installation | USB, SD and physical drives; ISO and guest installation approved |
 | P43 | Execution plan | Ordered work units with prerequisite and acceptance evidence | Structure implementation into phases and a checklist; check off items one by one |
 | P44 | Immediate website scope | Planning website before desktop implementation | Create the public documentation website now; desktop implementation remains next session |
 | P45 | Phone and component requirements | Responsive layout and genuine Material controls | Phone-friendly website and pure Material Design 3 controls, no generic control substitutes |
@@ -73,3 +73,9 @@ The application must be interactive with rich controls and productive workflows.
 Canvas editors are required where appropriate. Proposed applicable surfaces are VM/network topology, disk/partition layouts, build pipelines, package dependencies, image/logo editing and appearance timelines. Each canvas requires keyboard-accessible alternatives, an inspector, validation, undo/redo and a preview of the changes it applies.
 
 Recommendations are not approvals. Further questions will be recorded as the interview proceeds.
+
+## Managed execution and delivery decision (implementation session)
+
+The owner approved GitHub Actions both for user-managed Buildroot builds and for delivering this product. Managed Buildroot builds support standard GitHub-hosted Linux runners and user-selected self-hosted Linux runners. Product builds and packaging use compatible Windows runners through the exact root `build.bat` and `build-installer.bat` entrypoints respectively. Both workflows support guided setup, generated workflows and reviewed expert YAML. Execution may use the source repository or a dedicated execution repository. The normal public-source hosted route remains available. Never select larger billed runners automatically.
+
+Encrypted transport is conditional: enable it only when the product user selects a push to a verified private repository. The owner approved extracting the generic encrypted-builder engine into this public product after review. Publish no private history, identity, operational records, credentials or private source. This approval does not attest that extraction, encryption, execution or publication is implemented or verified.

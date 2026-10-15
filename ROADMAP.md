@@ -1,6 +1,6 @@
 # Phased implementation roadmap
 
-Status: planning plus initial documentation website work. No application implementation or production A/D/C parity is verified. Application implementation starts next session. This roadmap orders the complete requested delivery; phases are checkpoints, not reduced scope.
+Status: implementation underway after the initial planning/documentation checkpoint, beginning with contract and evidence admission. No application runtime or production A/D/C parity is verified. This roadmap orders the complete requested delivery; phases are checkpoints, not reduced scope.
 
 ## Execution and checkbox rules
 
@@ -13,7 +13,7 @@ Status: planning plus initial documentation website work. No application impleme
 7. Check off a phase only after its exit proof is met. If later evidence fails, reopen affected tasks and dependents. Missing host access, publication permissions or owner answers stays visibly incomplete.
 8. On stop or resume, update [HANDOFF.md](HANDOFF.md) and [NEXT_SESSION.md](NEXT_SESSION.md) with current main revision, last verified task, first eligible task, evidence locations, pending owner answers and exact blockers. Never infer a passed check from an earlier session.
 
-The initial documentation website in PH00 is authorized now. Its deployment does not complete `landing-site`, production D tools, companion C, the full language/layout matrix or native application evidence. P40–P42 remain pending owner answers; no cloud provider, remote target or flashing/install route is selected by this roadmap.
+The initial documentation website in PH00 is authorized now. Its deployment does not complete `landing-site`, production D tools, companion C, the full language/layout matrix or native application evidence. P40–P42 are resolved in DECISIONS.md: all four cloud destinations, Linux SSH process/container and Windows SSH WSL/Docker, and USB/SD/physical-drive plus ISO/guest installation. Adapter implementation and runtime proof remain pending.
 
 
 ## Durable task evidence
@@ -26,7 +26,7 @@ Scope labels below apply to each task. **A+D-native+R** means A, applicable brow
 
 ## PH00 Planning and initial documentation website
 
-Prerequisites: None; current authorized scope is planning and the initial public documentation site.
+Prerequisites: None. Historical PH00 scope was planning and the initial public documentation site; current implementation continues under PH01 and later phases.
 
 - [x] **PH00-T01** [D-initial+R] Reconcile the recorded owner decisions, 105-identity inventory, architecture, surfaces and conditional design review into this ordered plan.
 - [x] **PH00-T02** [D-initial+R] Create the documentation website source and render the authoritative planning documents, decision log and source wiki with stable internal routes.
@@ -39,16 +39,34 @@ Exit proof: The recorded plan and initial website have reviewed source, focused 
 
 ## PH01 Detailed contracts, evidence admission and dependencies
 
-Prerequisites: PH00-T01 and review of the current PH00 handoff/status records, including PH00-T06 when available. Pages deployment is not a prerequisite for independent contract preparation. Application implementation starts next session.
+Prerequisites: PH00-T01 and review of the current PH00 handoff/status records, including PH00-T06 when available. Pages deployment is not a prerequisite for independent contract preparation. Implementation is now authorized; begin with contract admission before dependent application work.
 
 - [ ] **PH01-T01** [R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 105 identities; preserve conditional and canonical-only dispositions with reasons.
 - [ ] **PH01-T02** [R (A/D/C admission only)] Expand every applicable identity into independent A/D/C/R evidence records with stable child work IDs, implementation consumers, articles, copy, persistence, focused tests and exact runtime/capture requirements.
+  - [x] **PH01-T01-C01** Reconcile the 105 catalogue identities and their recorded surface/disposition boundaries into a machine-readable admission ledger. [Evidence](docs/evidence/tasks/PH01-contracts.md).
+  - [ ] **PH01-T01-C02** Finish detailed canonical subrequirement reconciliation and independent review for every identity. The initial ledger retains inventory requirements, not full canonical implementation contracts.
+  - [x] **PH01-T02-C01** Create independent stable A/D/C/R records, explicit pending implementation and separate proof slots for all 105 identities. [Evidence](docs/evidence/tasks/PH01-contracts.md).
+  - [ ] **PH01-T02-C02** Admit concrete implementation consumers, localized articles/copy, persistence, detailed runtime/capture tuples and tests before each feature is implemented. Pending slots are not admitted consumers.
 - [ ] **PH01-T03** [R (A/D/C admission only)] Admit genuine registered Material Design 3 components and every native/browser/tool adapter: pin provenance, compatibility, licenses, redistributability, offline payloads and full installer size.
 - [ ] **PH01-T04** [R (A/D/C admission only)] Create deterministic screen/state references, a direct reference renderer and hand-written parity/control maps; include reduced-motion, accessible structured canvas alternatives and negative textbox-substitution checks.
 - [ ] **PH01-T05** [R (A/D/C admission only)] Implement evidence validation that fails red then green when individual implementation, test, article, runtime, capture or parity records are absent or stale; bind proof to source and built artifact hashes.
-- [ ] **PH01-T06** [R (A/D/C admission only)] Resolve owner decisions P40–P42 for cloud destinations, remote targets and flashing/install routes; record exact answers without guessed defaults. This blocks only their dependent adapters.
+  - [x] **PH01-T05-C01** Implement and verify local ledger integrity and synthetic red/green proof-binding checks. Full semantic/runtime admission remains pending. [Evidence](docs/evidence/tasks/PH01-contracts.md).
+- [x] **PH01-T06** [R (A/D/C admission only)] Resolve owner decisions P40–P42 for cloud destinations, remote targets and flashing/install routes; record exact answers without guessed defaults. This blocks only their dependent adapters.
 
 Exit proof: Every required task and expanded child is checked with current linked evidence under the execution rules; all surface records within this phase's declared task scope, failure/recovery paths and relevant documentation pass. Future C, remaining D and PH10-dependent records stay unchecked and do not create a backward prerequisite. Blocked proof within the declared scope prevents this phase from being called complete.
+
+### Managed execution children (scope retained through PH10)
+
+- [ ] **PH05-T11** Implement managed user Buildroot builds through GitHub Actions after secure backend admission.
+  - [ ] **PH05-T11-C01** Guided setup for source or dedicated execution repositories, scoped credentials and compatible hosted/self-hosted Linux runner discovery.
+  - [ ] **PH05-T11-C02** Generate workflows and validate reviewed expert YAML through the same admitted action model.
+  - [ ] **PH05-T11-C03** Queue, observe, cancel, reconnect and download verified outputs from standard public hosted Linux builds.
+  - [ ] **PH05-T11-C04** Independently verify self-hosted Linux execution and explicit runner choice; never auto-select larger billed runners.
+  - [ ] **PH05-T11-C05** Review and extract the generic encrypted-builder engine without private records or secrets; enable transport only after user-selected push and private-repository verification.
+- [ ] **PH10-T09** Deliver the product through the separately reviewed GitHub Actions pipeline.
+  - [ ] **PH10-T09-C01** Guided/generated and reviewed expert YAML for source or dedicated execution repositories, selecting compatible hosted/self-hosted Windows runners for product builds and packaging.
+  - [ ] **PH10-T09-C02** Produce and verify Windows outputs by invoking exact root `build.bat` and `build-installer.bat` on compatible Windows runners; Linux coordination alone proves no native package.
+  - [ ] **PH10-T09-C03** Publish a normal unique release and verify source, downloadable assets and readback independently from user-build jobs.
 
 ## PH02 Secure foundation and Windows bootstrap
 
@@ -203,4 +221,4 @@ Each identity has exactly one primary acceptance phase below. Cross-phase depend
 
 ## Current checkpoint
 
-PH00-T01–T04 and PH00-T06 have retained planning, local website or record evidence in [the PH00 evidence record](docs/evidence/planning-site.md). PH00-T05 remains blocked and unchecked because the GitHub integration cannot enable Pages (HTTP 403). No native build, installer, guest, complete D/C feature implementation or release proof is implied. The next application session begins with PH01-T01 after the initial-site checkpoint is reconciled; unresolved PH00 publication blockers must remain recorded.
+PH00-T01–T04 and PH00-T06 have retained planning, local website or record evidence in [the PH00 evidence record](docs/evidence/planning-site.md). PH00-T05 remains blocked and unchecked because the GitHub integration cannot enable Pages (HTTP 403). No native build, installer, guest, complete D/C feature implementation or release proof is implied. PH01-T06 and the initial T01/T02/T05 children have contract admission evidence in [the PH01 record](docs/evidence/tasks/PH01-contracts.md); their parent tasks remain partial. Implementation continues with PH01-T01-C02 after the initial-site checkpoint is reconciled; unresolved PH00 publication blockers must remain recorded.
