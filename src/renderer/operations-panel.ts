@@ -1,5 +1,7 @@
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
+import "./build-queue-panel";
+import "./ollama-catalogue-panel";
 import "./documentation-panel";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing, css } from "lit";
@@ -24,6 +26,7 @@ type Job = {
   sequence: number;
   createdAt: string;
   logCount: number;
+  payload?: {target:string;jobs:number;resources?:{cpuSlots:number;memoryBytes:number;storageBytes:number};intent?:{projectId:string;sourceRevision:string;configRevision:string}};
 };
 /** Typed task controls. Host operations remain the authority for paths and execution. */
 export class OperationsPanel extends LitElement {
@@ -51,6 +54,10 @@ export class OperationsPanel extends LitElement {
     distribution: { state: true },
     image: { state: true },
     parallelism: { state: true },
+    customResources: { state: true },
+    cpuSlots: { state: true },
+    memoryMiB: { state: true },
+    storageGiB: { state: true },
     target: { state: true },
     trust: { state: true },
     model: { state: true },
@@ -82,6 +89,7 @@ export class OperationsPanel extends LitElement {
   distribution = "";
   image = "";
   parallelism = 2;
+  customResources=false;cpuSlots=2;memoryMiB=4096;storageGiB=8;
   target = "all";
   trust = false;
   model = "";
@@ -357,8 +365,9 @@ export class OperationsPanel extends LitElement {
         "已為呢個專案選擇執行環境。",
       ));
   }
+  private validResources(){return !this.customResources||(Number.isSafeInteger(this.cpuSlots)&&this.cpuSlots>=(this.runtimeKind==="docker"?2:this.parallelism)&&this.cpuSlots<=64&&Number.isSafeInteger(this.memoryMiB)&&this.memoryMiB>=(this.runtimeKind==="docker"?4096:256)&&this.memoryMiB<=262144&&Number.isSafeInteger(this.storageGiB)&&this.storageGiB>=0&&this.storageGiB<=1024);}
   private async submit() {
-    if (!this.workspace) return;
+    if (!this.workspace || !this.validResources()) return;
     const runtime =
       this.runtimeKind === "wsl"
         ? { kind: "wsl", distribution: this.distribution }
@@ -368,6 +377,7 @@ export class OperationsPanel extends LitElement {
       target: this.target,
       runtime,
       jobs: this.parallelism,
+      ...(this.customResources?{resources:{cpuSlots:this.cpuSlots,memoryBytes:this.memoryMiB*1024**2,storageBytes:this.storageGiB*1024**3}}:{}),
     });
     if (result !== undefined) {
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
@@ -707,6 +717,9 @@ export class OperationsPanel extends LitElement {
                 "建置會執行可信專案程式碼，並寫入所選輸出目錄。Docker 會以 UID/GID 1000 執行。",
               )}
             </p>
+            <label class="row"><md-checkbox aria-label=${this.l("Customize build reservations","自訂建置預留")} ?checked=${this.customResources} @change=${(e:Event)=>this.customResources=(e.target as HTMLInputElement).checked}></md-checkbox>${this.l("Customize build reservations","自訂建置預留")}</label>
+            ${this.customResources?html`<div class="row">${([['CPU slots','CPU 配額','cpuSlots',this.runtimeKind==='docker'?2:this.parallelism,64],['Memory reservation (MiB)','記憶體預留（MiB）','memoryMiB',this.runtimeKind==='docker'?4096:256,262144],['Free storage floor (GiB)','可用儲存空間下限（GiB）','storageGiB',0,1024]] as const).map(([en,zh,key,min,max])=>html`<md-outlined-text-field type="number" .label=${this.l(en,zh)} .value=${String(this[key])} min=${String(min)} max=${String(max)} @input=${(e:Event)=>this[key]=(e.target as HTMLInputElement).value.trim()===""?NaN:Number((e.target as HTMLInputElement).value)}></md-outlined-text-field>`)}</div>`:nothing}
+            <p>${this.l("Defaults reserve at least 2 CPU slots (or WSL parallel jobs), 4 GiB RAM and an 8 GiB free-storage floor. Docker keeps its fixed 2 CPU / 4 GiB execution envelope; reservations do not expand it. Queued source/configuration intent cannot be edited.","預設預留至少 2 個 CPU 配額（或 WSL 並行工作數）、4 GiB 記憶體及 8 GiB 可用儲存空間下限。Docker 保持固定 2 CPU／4 GiB 執行範圍，預留唔會擴大範圍。佇列中來源／設定意圖不可編輯。")}</p>
             <md-outlined-button
               ?disabled=${this.pending ||
               (this.runtimeKind === "wsl"
@@ -718,6 +731,7 @@ export class OperationsPanel extends LitElement {
               )}</md-outlined-button
             ><md-filled-button
               ?disabled=${this.pending ||
+              !this.validResources() ||
               !Number.isInteger(this.parallelism) ||
               this.parallelism < 1 ||
               this.parallelism > 32 ||
@@ -729,6 +743,7 @@ export class OperationsPanel extends LitElement {
             >
           </section>`
         : this.noProject()}
+      <section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
       <section class="panel">
         <div class="row">
           <h2>${this.l("Build jobs", "建置工作")}</h2>
@@ -743,6 +758,8 @@ export class OperationsPanel extends LitElement {
                   <strong>${job.kind}</strong>
                   <span class="badge">${job.state}</span>
                   <p class="muted">${job.id}</p>
+                  ${job.payload?html`<p>${this.l("Captured intent","已擷取意圖")}: ${job.payload.target} · ${job.payload.jobs} ${this.l("parallel jobs","並行工作")}</p><p>${this.l("Source revision","來源版本")}: ${job.payload.intent?.sourceRevision||this.l("Unknown","未知")}</p><p>${this.l("Configuration revision","設定版本")}: ${job.payload.intent?.configRevision||this.l("Unknown","未知")}</p>${job.payload.resources?html`<p>${job.payload.resources.cpuSlots} CPU · ${job.payload.resources.memoryBytes/1024**2} MiB · ${job.payload.resources.storageBytes/1024**3} GiB</p>`:nothing}`:nothing}
+                  ${job.state==='interrupted'?html`<p>${this.l("Interrupted is not proof of stopped runtime or successful cleanup. Inspect queue recovery before a new attempt.","中斷唔代表執行環境已停止或清理成功，新增嘗試前請檢視佇列復原。")}</p>`:nothing}
                   <div class="row">
                     <md-text-button
                       ?disabled=${this.pending}
@@ -1061,6 +1078,7 @@ export class OperationsPanel extends LitElement {
     return html`<section class="panel stack">
       <h2>${this.l("Local Ollama assistant", "本機 Ollama 助理")}</h2>
       <managed-ollama-panel .language=${this.language}></managed-ollama-panel>
+      <ollama-catalogue-panel .language=${this.language}></ollama-catalogue-panel>
       <p>
         ${this.l(
           "Messages are sent only to Ollama on this computer. No project files or logs are attached automatically. Model installation is not performed here.",

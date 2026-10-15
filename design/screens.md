@@ -65,3 +65,7 @@ Name every concrete project/source/ref/profile/defconfig/symbol/help/dependency/
 `settings-search` indexes only immutable setting section names and descriptions. It owns its literal query, adjacent anchored regex editor, pattern, flags, mode and validation state. A separate terminable worker enforces the 600 ms evaluation deadline. Neither private vocabulary mappings nor project records are indexed. Search history and snippets remain session-only/unimplemented; no vocabulary data enters either surface.
 
 Shared preference restrictions remove language/vocabulary entries from the settings search index and replace its helper text with neutral section-search wording. The shared preference panel introduces no search surface; name and credential fields are exact typed inputs. Its command-palette action clears the settings filter before focusing the panel.
+
+### Official model catalogue search
+
+`ollama-catalogue-panel` owns one cached model-name substring query and an adjacent anchored regex builder with isolated pattern, flags and mode. The host query covers the cached catalogue; the regex worker filters only current-page model identifiers, with a 600 ms deadline. Each result has a family drill-down action, with an explicit route back to all families; no extra searchable dropdown is introduced. Query/family edits invalidate the old page and in-flight page result. Regex state neither changes the host query nor shares state with package, documentation, settings or standalone searches. Search history and reusable snippets remain unimplemented here.
