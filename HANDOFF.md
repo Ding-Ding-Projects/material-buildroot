@@ -1,5 +1,19 @@
 # Handoff
 
+## Reviewed scheduling, recovery and catalogue checkpoint, 2026-10-15
+
+Personal-vocabulary controls and scoped owned-copy consumers are published at `1578869b7d59ba18ac8720085071516ccd10b4df`. Unknown shared-preference status suppresses substitutions. A failed cache deletion keeps substitutions inactive and mutations disabled until a full reload revalidates retained bytes; the GUI does not claim deletion succeeded. Settings search and palette routes focus the actual controls. Complete interface-copy and independent visitor/companion coverage remain open.
+
+The scheduled-preferences core is published at `d13db21cf27cc5b35d8c7729433efda6a72c482a`. Twelve focused checks cover civil-time/DST rules, per-setting precedence, revoked external receipts, transactional storage contracts and revision-growth byte bounds. Real profile storage, privileged providers and graphical consumers are separate active work. Both Windows packaging and Pages workflows passed for these two source checkpoints.
+
+This checkpoint connects durable independent-project build admission, bounded content intent and cleanup quarantine. Pending ownership is journaled before runtime effects. Unknown cleanup remains interrupted and blocks unsafe new admission across restart; explicit reconciliation requires renewed native authority, verified owned-runtime stop and fresh known capacity. Independent review repaired duplicate journal keys and a revoked-grant WSL startup race. A final synchronous pre-spawn abort check runs before acquiring locks so rejected startup cannot leave a permanent busy state. Real WSL/Docker runtime and Windows acceptance remain unverified.
+
+The tools boundary now admits official Ollama catalogue status, refresh, paging and cancellation with a host-owned private cache. The historical official-source traversal observed 253 families and 7,492 tags; it explicitly remains non-exhaustive. Independent review repaired HTML attribute/raw-text handling, bounded cache-read races and the late-cancellation publication boundary. Exact metadata remains unknown where the source provides only display labels. Catalogue GUI controls remain separate integration work.
+
+The combined host/source/execution/catalogue run passed 99 focused checks, including actual official Buildroot source capture. All 24 execution checks passed again after the final pre-spawn lock correction; do not relabel these as a complete application or native run. Full Node and renderer suites should run after the current GUI and profile-service units settle.
+
+The 107-identity canonical mapping and cross-contract graph are under independent review. No broad roadmap phase is newly accepted. Astra continues shared-mode management and live English-only suppression; remaining queue/catalogue controls and schedule consumers follow their reviewed host contracts. Current gallery and live documentation receipts retain the earlier source bindings below and need regeneration for these new features.
+
 ## Current desktop and documentation implementation, 2026-10-15
 
 The interactive documentation site is delivered at source `3de982211517bbeeb221cb540893bb3b3e4c06ff`. All 171 generated files matched the deployed bytes, and the public-origin Chromium run passed 14 interaction checks, 67 document routes, 12 responsive combinations and all 24 current gallery images. Pages is configured for `main` → `/docs`, and the repository About homepage matches the deployed URL. The [live delivery receipt](docs/evidence/interactive-guides/live-delivery.json) retains the exact input snapshot and distinguishes it from the build base commit. Later source changes require independent publication evidence.

@@ -10,6 +10,11 @@ export type ExecutionRuntime =
   | { kind: "wsl"; distribution: string }
   | { kind: "docker"; image: string; uid: number; gid: number }
   | { kind: "linux-fixture" };
+export type OwnershipReceipt =
+  | { version: 1; kind: "docker"; ownerToken: string; containerName: string; daemonId: string }
+  | { version: 1; kind: "wsl"; ownerToken: string; distribution: string; bootId: string; pidNamespace: string; pid: number | null; startTime: string | null };
+export interface CleanupVerdict { state: "verified-stopped" | "unknown"; reason: string }
+export function validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
 export interface ExecutionResult {
   state:
     | "succeeded"
@@ -20,6 +25,9 @@ export interface ExecutionResult {
     | "output-limit"
     | "runtime-cleanup-failed";
   code: number | null;
+  ownership?: OwnershipReceipt;
+  cleanup?: CleanupVerdict;
+  processState?: string;
   signal?: string | null;
   stdout: string;
   stderr: string;
@@ -33,6 +41,7 @@ export interface ExecutionLog {
   text: string;
 }
 export interface ExecutionJob {
+  ownership?: OwnershipReceipt | null;
   completion: Promise<ExecutionResult>;
   cancel(): Promise<ExecutionResult>;
 }
@@ -57,6 +66,8 @@ export class ExecutionService {
     externalTrees: string[];
   };
   revoke(grantId: string): void;
+  validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
+  reconcileCleanup(receipt: unknown): Promise<CleanupVerdict>;
   discover(): Promise<{
     docker: ExecutionResult & { available: boolean };
     wsl: Partial<ExecutionResult> & { distributions: string[] };
@@ -74,6 +85,7 @@ export class ExecutionService {
       jobs?: number;
     },
     onLog?: (event: ExecutionLog) => void,
+    options?: { onOwnership?(receipt: Readonly<OwnershipReceipt>): Promise<void> | void; signal?: AbortSignal },
   ): Promise<ExecutionJob>;
 }
 export const TARGETS: readonly BuildTarget[];

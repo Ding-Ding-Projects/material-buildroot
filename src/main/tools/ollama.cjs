@@ -10,9 +10,17 @@ function createOllama(options = {}) {
           directory: options.ollamaManagedDirectory,
         })
       : null);
+  const catalogue = options.ollamaCatalogue || (options.ollamaCatalogueDirectory
+    ? require("./ollama-catalogue.cjs").createOllamaCatalogue({directory:options.ollamaCatalogueDirectory,fetchImpl:options.fetchImpl}) : null);
   const execute = async function execute(request, context = {}) {
     const common = { signal: context.signal, fetchImpl: options.fetchImpl };
     switch (request.action) {
+      case "ollama.catalogue.status":
+      case "ollama.catalogue.page":
+      case "ollama.catalogue.refresh":
+      case "ollama.catalogue.cancel":
+        if(!catalogue)fail("CATALOGUE_STORAGE_UNAVAILABLE");
+        return catalogue.execute(request,context);
       case "ollama.hardware":
       case "ollama.fit":
       case "ollama.capabilities":
@@ -109,7 +117,7 @@ function createOllama(options = {}) {
         fail("INVALID_REQUEST");
     }
   };
-  execute.dispose = () => managed?.dispose();
+  execute.dispose = async () => {await Promise.all([managed?.dispose(),catalogue?.dispose()]);};
   return execute;
 }
 module.exports = { createOllama };

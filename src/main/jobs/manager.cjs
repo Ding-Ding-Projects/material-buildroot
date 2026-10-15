@@ -266,12 +266,18 @@ function createJobManager({
       }
       return copy(
         update(id, (j) => {
-          j.state = controller.signal.aborted
+          const cleanupUnknown = result && result.state === "runtime-cleanup-failed";
+          j.state = cleanupUnknown
+            ? "interrupted"
+            : controller.signal.aborted
             ? "cancelled"
             : failed
               ? "failed"
               : "succeeded";
-          if (failed)
+          if (cleanupUnknown) {
+            j.result = result;
+            j.error = { code: "RUNTIME_CLEANUP_UNVERIFIED", message: "Runtime cleanup is unverified. Reconcile its owned runtime before starting related work." };
+          } else if (failed)
             j.error = {
               code: "ADAPTER_FAILED",
               message:

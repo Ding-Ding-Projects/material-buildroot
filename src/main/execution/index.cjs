@@ -23,6 +23,7 @@ function boundedProcess(
     onTerminate,
     env,
     detached = process.platform !== "win32",
+    inputPipe = false,
   } = {},
 ) {
   let child,
@@ -71,7 +72,7 @@ function boundedProcess(
         shell: false,
         windowsHide: true,
         detached,
-        stdio: ["ignore", "pipe", "pipe"],
+        stdio: [inputPipe ? "pipe" : "ignore", "pipe", "pipe"],
       });
     } catch (error) {
       resolve({
@@ -103,6 +104,7 @@ function boundedProcess(
         /* Observers cannot control owned process settlement. */
       }
     };
+    child.stdin?.on("error", () => {});
     child.stdout.on("data", (chunk) => receive("stdout", chunk));
     child.stderr.on("data", (chunk) => receive("stderr", chunk));
     child.on("error", (error) => {
@@ -131,6 +133,10 @@ function boundedProcess(
   });
   return {
     completion,
+    writeInput(value) {
+      if (!inputPipe || !child?.stdin?.writable || child.stdin.destroyed || settled || reason || cleanupPromise) return false;
+      child.stdin.end(value); return true;
+    },
     cancel() {
       if (!settled) {
         reason = "cancelled";
@@ -203,6 +209,49 @@ const RESOURCE_SCRIPT = `set -eu
  fi
  storage=$(df -Pk "$1" | awk 'NR==2 {printf "%.0f", $4*1024}')
  printf '%s\n%s\n%s\n' "$cpu" "$memory" "$storage"
+`;
+const OWN_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+function validateOwnershipReceipt(receipt) {
+  const fields = receipt?.kind === "docker" ? ["version", "kind", "ownerToken", "containerName", "daemonId"] : ["version", "kind", "ownerToken", "distribution", "bootId", "pidNamespace", "pid", "startTime"];
+  if (!receipt || Object.getPrototypeOf(receipt) !== Object.prototype || Object.keys(receipt).length !== fields.length || fields.some(key => !Object.hasOwn(receipt, key)) || receipt.version !== 1 || typeof receipt.ownerToken !== "string" || !OWN_UUID.test(receipt.ownerToken)) throw new Error("invalid-ownership-receipt");
+  if (receipt.kind === "docker") {
+    if (receipt.containerName !== `material-buildroot-${receipt.ownerToken}` || typeof receipt.daemonId !== "string" || !/^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$/.test(receipt.daemonId)) throw new Error("invalid-ownership-receipt");
+  } else if (receipt.kind === "wsl") {
+    if (typeof receipt.distribution !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(receipt.distribution) || typeof receipt.bootId !== "string" || !OWN_UUID.test(receipt.bootId) || typeof receipt.pidNamespace !== "string" || !/^pid:\[[0-9]{1,24}\]$/.test(receipt.pidNamespace) || !((receipt.pid === null && receipt.startTime === null) || (Number.isSafeInteger(receipt.pid) && receipt.pid >= 2 && typeof receipt.startTime === "string" && /^[0-9]{1,24}$/.test(receipt.startTime)))) throw new Error("invalid-ownership-receipt");
+  } else throw new Error("invalid-ownership-receipt");
+  return Object.freeze({ ...receipt });
+}
+async function checkpointOwnership(callback, receipt) {
+  if (!callback) return;
+  let timer;
+  try { await Promise.race([Promise.resolve().then(() => callback(receipt)), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("ownership-checkpoint-failed")), 10000); })]); }
+  catch { throw new Error("ownership-checkpoint-failed"); }
+  finally { clearTimeout(timer); }
+}
+const WSL_IDENTITY_SCRIPT = 'set -eu; test "$(id -u)" -ne 0 || exit 77; cat /proc/sys/kernel/random/boot_id; readlink /proc/self/ns/pid';
+const WSL_SIGNAL_SCRIPT = `set -eu
+ test "$(id -u)" -ne 0 || exit 77
+ test "$(cat /proc/sys/kernel/random/boot_id)" = "$3" || exit 78
+ test "$(readlink /proc/self/ns/pid)" = "$5" || exit 78
+ test -r "/proc/$1/stat" || exit 78
+ identity=$(awk 'sub(/^.*[)] /, "") {print $20 " " $3 " " $4}' "/proc/$1/stat")
+ test "$identity" = "$2 $1 $1" || exit 78
+ case "$4" in TERM|KILL) ;; *) exit 78 ;; esac
+ exec /bin/kill "-$4" -- "-$1"
+`;
+const WSL_RECONCILE_SCRIPT = `set -eu
+ test "$(id -u)" -ne 0 || exit 77
+ cat /proc/sys/kernel/random/boot_id
+ readlink /proc/self/ns/pid
+ awk '$2 == "/proc" && $3 == "proc" {seen=1; if ($4 ~ /(^|,)hidepid=/ && $4 !~ /(^|,)hidepid=0(,|$)/) bad=1} END {exit !seen || bad}' /proc/mounts || exit 78
+ if test -e "/proc/$1"; then
+   test -r "/proc/$1/stat" || exit 78
+   awk 'sub(/^.*[)] /, "") {print $20 " " $3 " " $4}' "/proc/$1/stat"
+ else printf 'absent\n'; fi
+ for entry in /proc/[0-9]*/stat; do
+   if test -r "$entry"; then awk -v owned="$1" 'sub(/^.*[)] /, "") && ($3 == owned || $4 == owned) {print "member"}' "$entry"
+   elif test -e "$entry"; then exit 78; fi
+ done
 `;
 class ExecutionService {
   constructor({
@@ -355,6 +404,52 @@ class ExecutionService {
             : [],
       },
     };
+  }
+  validateOwnershipReceipt(receipt) { return validateOwnershipReceipt(receipt); }
+  async dockerIdentity() {
+    const result = await boundedProcess(this.executables.docker, ["info", "--format", "{{json .ID}}"], { timeoutMs: 10000, maxBytes: 1024 }).completion;
+    if (result.state !== "succeeded") throw new Error("runtime-identity-unavailable");
+    let identity; try { identity = JSON.parse(result.stdout); } catch { throw new Error("runtime-identity-unavailable"); }
+    if (typeof identity !== "string" || !/^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$/.test(identity)) throw new Error("runtime-identity-unavailable");
+    return identity;
+  }
+  async ownedDocker(receipt) {
+    if (await this.dockerIdentity() !== receipt.daemonId) return { state: "unknown", reason: "runtime-namespace-changed" };
+    const listed = await boundedProcess(this.executables.docker, ["ps", "--all", "--no-trunc", "--filter", `label=io.material-buildroot.operation=${receipt.ownerToken}`, "--format", "{{.ID}}"], { maxBytes: 4096 }).completion;
+    if (listed.state !== "succeeded") return { state: "unknown", reason: "runtime-unavailable" };
+    const ids = listed.stdout.trim().split(/\r?\n/).filter(Boolean);
+    if (!ids.length) {
+      const named = await boundedProcess(this.executables.docker, ["ps", "--all", "--no-trunc", "--filter", `name=^/${receipt.containerName}$`, "--format", "{{.ID}}"], { maxBytes: 4096 }).completion;
+      if (named.state !== "succeeded") return { state: "unknown", reason: "runtime-unavailable" };
+      return named.stdout.trim() ? { state: "unknown", reason: "runtime-identity-reused" } : { state: "verified-stopped", reason: "owned-container-absent" };
+    }
+    if (ids.length !== 1 || !/^[a-f0-9]{64}$/.test(ids[0])) return { state: "unknown", reason: "runtime-identity-ambiguous" };
+    const inspected = await boundedProcess(this.executables.docker, ["inspect", "--type", "container", ids[0]], { maxBytes: 65536 }).completion;
+    if (inspected.state !== "succeeded") return { state: "unknown", reason: "runtime-unavailable" };
+    let container; try { const parsed = JSON.parse(inspected.stdout); if (!Array.isArray(parsed) || parsed.length !== 1) throw Error(); container = parsed[0]; } catch { return { state: "unknown", reason: "runtime-identity-ambiguous" }; }
+    if (container.Id !== ids[0] || container.Name !== `/${receipt.containerName}` || container.Config?.Labels?.["io.material-buildroot.operation"] !== receipt.ownerToken) return { state: "unknown", reason: "runtime-identity-reused" };
+    return { state: "owned", containerId: ids[0], stopped: container.State?.Running === false && container.State?.Restarting === false && container.State?.Pid === 0 && ["created", "exited", "dead"].includes(container.State?.Status) };
+  }
+  async reconcileCleanup(value) {
+    let receipt; try { receipt = validateOwnershipReceipt(value); } catch { return { state: "unknown", reason: "invalid-ownership-receipt" }; }
+    try {
+      if (receipt.kind === "docker") {
+        const state = await this.ownedDocker(receipt);
+        if (await this.dockerIdentity() !== receipt.daemonId) return { state: "unknown", reason: "runtime-namespace-changed" };
+        if (state.state !== "owned") return state;
+        return state.stopped ? { state: "verified-stopped", reason: "owned-container-stopped" } : { state: "unknown", reason: "owned-runtime-active" };
+      }
+      if (this.platform !== "win32" || receipt.pid === null) return { state: "unknown", reason: "precise-ownership-unavailable" };
+      const result = await boundedProcess(this.executables.wsl, ["--distribution", receipt.distribution, "--exec", "timeout", "--signal=TERM", "--kill-after=1s", "8s", "/bin/sh", "-c", WSL_RECONCILE_SCRIPT, "reconcile", String(receipt.pid)], { timeoutMs: 10000, maxBytes: 4096 }).completion;
+      if (result.state !== "succeeded") return { state: "unknown", reason: "runtime-unavailable" };
+      const lines = result.stdout.trim().split(/\r?\n/);
+      if (lines[0] !== receipt.bootId || lines[1] !== receipt.pidNamespace) return { state: "unknown", reason: "runtime-namespace-changed" };
+      if (lines[2] === "absent" && lines.length === 3) return { state: "verified-stopped", reason: "owned-session-absent" };
+      if (!/^[0-9]+ [0-9]+ [0-9]+$/.test(lines[2] || "")) return { state: "unknown", reason: "runtime-identity-ambiguous" };
+      const [start, group, session] = lines[2].split(" ");
+      if (start !== receipt.startTime || group !== String(receipt.pid) || session !== String(receipt.pid)) return { state: "unknown", reason: "runtime-identity-reused" };
+      return { state: "unknown", reason: "owned-runtime-active" };
+    } catch { return { state: "unknown", reason: "runtime-unavailable" }; }
   }
   async probeResources(request) {
     if (!request || typeof request !== "object" || Array.isArray(request) || Object.keys(request).length !== 2 || !Object.hasOwn(request, "grantId") || !Object.hasOwn(request, "runtime")) throw new Error("invalid-resource-probe");
@@ -518,7 +613,17 @@ class ExecutionService {
     else if (/^sh/.test(targetArchitecture)) hostArchitecture = "sh";
     return { hostArchitecture, hostGccVersion: lines[1] };
   }
-  async start(request, onLog) {
+  async start(request, onLog, options = {}) {
+    const effect = { started: false };
+    try { return await this.#startOwned(request, onLog, options, effect); }
+    catch (error) {
+      if (!effect.started && error.message !== "ownership-checkpoint-failed") error.code = "RUNTIME_NOT_STARTED";
+      throw error;
+    }
+  }
+  async #startOwned(request, onLog, { onOwnership, signal } = {}, effect) {
+    if (onOwnership !== undefined && typeof onOwnership !== "function") throw new Error("invalid-ownership-checkpoint");
+    if (signal !== undefined && (!signal || typeof signal.aborted !== "boolean" || typeof signal.addEventListener !== "function" || typeof signal.removeEventListener !== "function")) throw new Error("invalid-cancellation-signal");
     const { grantId, target, runtime, jobs = 1 } = request || {};
     if (
       Object.keys(request || {}).some(
@@ -535,6 +640,16 @@ class ExecutionService {
       throw new Error("invalid-build-request");
     const grant = this.grants.get(grantId);
     if (!grant) throw new Error("grant-unavailable");
+    const revalidateAuthority = () => {
+      if (signal?.aborted) throw new Error("execution-cancelled");
+      if (this.grants.get(grantId) !== grant) throw new Error("grant-unavailable");
+      for (const key of ["root", "source", "output"]) {
+        const stat = fs.statSync(grant[key]);
+        if (canonicalDirectory(grant[key]) !== grant[key] || `${stat.dev}:${stat.ino}` !== grant.identities[key]) throw new Error("grant-path-changed");
+      }
+      this.validateExternal(grant);
+    };
+    revalidateAuthority();
     for (const key of ["root", "source", "output"]) {
       const stat = fs.statSync(grant[key]);
       if (
@@ -550,6 +665,10 @@ class ExecutionService {
       args,
       cancelExtra,
       linuxPid,
+      ownership = null,
+      checkpoint = Promise.resolve(),
+      checkpointFailed = false,
+      processJob,
       firstLine = "";
     let handshakeComplete = false;
     const receiveLog = (event) => {
@@ -560,8 +679,15 @@ class ExecutionService {
           handshakeComplete = true;
           const match = firstLine
             .slice(0, newline)
-            .match(/^MATERIAL_BUILDROOT_PID=(\d+)\r?$/);
-          if (match) linuxPid = Number(match[1]);
+            .match(/^MATERIAL_BUILDROOT_PID=(\d+) START=([0-9]+)\r?$/);
+          if (match && ownership?.kind === "wsl") {
+            linuxPid = Number(match[1]);
+            ownership = validateOwnershipReceipt({ ...ownership, pid: linuxPid, startTime: match[2] });
+            checkpoint = Promise.resolve().then(() => checkpointOwnership(onOwnership, ownership)).then(() => {
+              revalidateAuthority();
+              if (!processJob.writeInput(ownership.ownerToken + "\n")) throw new Error("execution-cancelled");
+            }).catch(error => { checkpointFailed = error.message === "ownership-checkpoint-failed"; processJob.cancel(); });
+          }
           firstLine = "";
         }
       }
@@ -582,7 +708,10 @@ class ExecutionService {
         throw new Error("invalid-container-runtime");
       if ([grant.source, grant.output].some((x) => x.includes(",")))
         throw new Error("unsupported-mount-path");
-      const name = `material-buildroot-${crypto.randomUUID()}`;
+      const ownerToken = crypto.randomUUID();
+      const name = `material-buildroot-${ownerToken}`;
+      ownership = validateOwnershipReceipt({ version: 1, kind: "docker", ownerToken, containerName: name, daemonId: await this.dockerIdentity() });
+      await checkpointOwnership(onOwnership, ownership);
       file = this.executables.docker;
       args = [
         "run",
@@ -590,6 +719,8 @@ class ExecutionService {
         "--pull=never",
         "--name",
         name,
+        "--label",
+        `io.material-buildroot.operation=${ownership.ownerToken}`,
         "--user",
         `${runtime.uid}:${runtime.gid}`,
         "--cap-drop=ALL",
@@ -621,9 +752,12 @@ class ExecutionService {
         grant.external.map((_, index) => `/external/${index}`).join(":"),
       ];
       cancelExtra = async () => {
+        const owned = await this.ownedDocker(ownership);
+        if (owned.state === "verified-stopped") return;
+        if (owned.state !== "owned") throw new Error("container-ownership-unverified");
         const result = await boundedProcess(
           file,
-          ["stop", "--time", "2", name],
+          ["stop", "--time", "2", owned.containerId],
           { timeoutMs: 5000 },
         ).completion;
         if (result.state !== "succeeded")
@@ -665,6 +799,11 @@ class ExecutionService {
         )
       )
         throw new Error("unsupported-build-path");
+      const identity = await boundedProcess(this.executables.wsl, ["--distribution", runtime.distribution, "--exec", "/bin/sh", "-c", WSL_IDENTITY_SCRIPT], { maxBytes: 1024 }).completion;
+      const identityParts = identity.stdout.trim().split(/\r?\n/);
+      if (identity.state !== "succeeded" || identityParts.length !== 2 || !OWN_UUID.test(identityParts[0]) || !/^pid:\[[0-9]{1,24}\]$/.test(identityParts[1])) throw new Error("runtime-identity-unavailable");
+      ownership = validateOwnershipReceipt({ version: 1, kind: "wsl", ownerToken: crypto.randomUUID(), distribution: runtime.distribution, bootId: identityParts[0], pidNamespace: identityParts[1], pid: null, startTime: null });
+      await checkpointOwnership(onOwnership, ownership);
       file = this.executables.wsl;
       args = [
         "--distribution",
@@ -673,45 +812,46 @@ class ExecutionService {
         "setsid",
         "/bin/sh",
         "-c",
-        "echo MATERIAL_BUILDROOT_PID=$$; " + LINUX_SCRIPT,
+        'echo MATERIAL_BUILDROOT_PID=$$ START=$(awk \'sub(/^.*[)] /, "") {print $20}\' /proc/$$/stat); read -r authorization; test "$authorization" = "$6" || exit 79; ' + LINUX_SCRIPT,
         "build",
         source,
         output,
         String(jobs),
         target,
         externalPaths.join(":"),
+        ownership.ownerToken,
       ];
       cancelExtra = async () => {
         for (let attempt = 0; !linuxPid && attempt < 20; attempt++)
           await new Promise((resolve) => setTimeout(resolve, 50));
         if (!Number.isSafeInteger(linuxPid) || linuxPid < 2)
           throw new Error("wsl-process-ownership-pending");
+        const verified = await this.reconcileCleanup(ownership);
+        if (verified.state === "verified-stopped") return;
+        if (verified.reason !== "owned-runtime-active") throw new Error("wsl-process-ownership-unverified");
         const result = await boundedProcess(
           file,
           [
             "--distribution",
             runtime.distribution,
             "--exec",
-            "/bin/kill",
-            "-TERM",
-            "--",
-            `-${linuxPid}`,
+            "/bin/sh", "-c", WSL_SIGNAL_SCRIPT, "signal", String(linuxPid), ownership.startTime, ownership.bootId, "TERM", ownership.pidNamespace,
           ],
           { timeoutMs: 5000 },
         ).completion;
         if (result.state !== "succeeded")
           throw new Error("wsl-cancellation-failed");
         await new Promise((resolve) => setTimeout(resolve, 500));
+        const stillOwned = await this.reconcileCleanup(ownership);
+        if (stillOwned.state === "verified-stopped") return;
+        if (stillOwned.reason !== "owned-runtime-active") throw new Error("wsl-process-ownership-unverified");
         await boundedProcess(
           file,
           [
             "--distribution",
             runtime.distribution,
             "--exec",
-            "/bin/kill",
-            "-KILL",
-            "--",
-            `-${linuxPid}`,
+            "/bin/sh", "-c", WSL_SIGNAL_SCRIPT, "signal", String(linuxPid), ownership.startTime, ownership.bootId, "KILL", ownership.pidNamespace,
           ],
           { timeoutMs: 5000 },
         ).completion;
@@ -745,25 +885,41 @@ class ExecutionService {
     this.validateExternal(grant);
     if (this.locks.has(grant.output) || this.locks.has(grant.source))
       throw new Error("project-busy");
+    revalidateAuthority();
     this.locks.add(grant.output);
     this.locks.add(grant.source);
-    const processJob = boundedProcess(file, args, {
+    effect.started = true;
+    processJob = boundedProcess(file, args, {
       cwd: grant.root,
       timeoutMs: 24 * 60 * 60 * 1000,
       maxBytes: 16 * 1024 * 1024,
       onLog: receiveLog,
       onTerminate: cancelExtra,
+      inputPipe: ownership?.kind === "wsl",
+    });
+    const abortProcess = () => processJob.cancel();
+    signal?.addEventListener("abort", abortProcess, { once: true });
+    if (signal?.aborted) abortProcess();
+    const handshakeTimer = ownership?.kind === "wsl" ? setTimeout(() => { if (!linuxPid) processJob.cancel(); }, 10000) : null;
+    const completion = processJob.completion.then(async result => {
+      clearTimeout(handshakeTimer);
+      signal?.removeEventListener("abort", abortProcess);
+      await checkpoint;
+      if (!ownership) return result;
+      const cleanup = checkpointFailed ? { state: "unknown", reason: "ownership-checkpoint-failed" } : await this.reconcileCleanup(ownership);
+      return { ...result, ...(cleanup.state === "unknown" ? { processState: result.state, state: "runtime-cleanup-failed" } : {}), ownership, cleanup };
     });
     return {
-      completion: processJob.completion.finally(() => {
+      ownership,
+      completion: completion.finally(() => {
         this.locks.delete(grant.output);
         this.locks.delete(grant.source);
       }),
       cancel: async () => {
         processJob.cancel();
-        return processJob.completion;
+        return completion;
       },
     };
   }
 }
-module.exports = { ExecutionService, TARGETS, boundedProcess };
+module.exports = { ExecutionService, TARGETS, boundedProcess, validateOwnershipReceipt };

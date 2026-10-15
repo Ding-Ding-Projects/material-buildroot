@@ -1,7 +1,10 @@
 "use strict";
 const fs = require("node:fs");
 const path = require("node:path");
-const { randomUUID } = require("node:crypto");
+const { randomUUID, createHash } = require("node:crypto");
+const { createBuildScheduler } = require("./jobs/scheduler.cjs");
+const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
+const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
@@ -49,6 +52,9 @@ const fields = {
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
   "jobs.list": [],
+  "scheduler.status": [],
+  "jobs.pump": [],
+  "jobs.reconcile": ["id"],
   "jobs.page": ["id", "after", "limit"],
   "jobs.cancel": ["id", "sequence"],
   "jobs.retry": ["id", "sequence"],
@@ -117,7 +123,13 @@ function exact(value, keys) {
     !value ||
     typeof value !== "object" ||
     Array.isArray(value) ||
-    Object.keys(value).length !== keys.length ||
+    Object.getPrototypeOf(value) !== Object.prototype ||
+    Reflect.ownKeys(value).some(
+      (key) =>
+        typeof key !== "string" ||
+        !Object.hasOwn(Object.getOwnPropertyDescriptor(value, key), "value"),
+    ) ||
+    Reflect.ownKeys(value).length !== keys.length ||
     keys.some((key) => !Object.hasOwn(value, key))
   )
     reject("INVALID_REQUEST");
@@ -134,6 +146,7 @@ function runtime(value) {
     exact(value, ["kind", "image", "uid", "gid"]);
     if (
       typeof value.image !== "string" ||
+      value.image.length > 512 ||
       !/^[a-z0-9][a-z0-9./:_-]*@sha256:[0-9a-f]{64}$/.test(value.image) ||
       !Number.isSafeInteger(value.uid) ||
       value.uid < 1 ||
@@ -158,6 +171,12 @@ function createOperationsService({
   openDocumentationExternal,
   execution = new ExecutionService(),
   workspaceRead,
+  schedulerLimits = {
+    maxConcurrent: 4,
+    cpuSlots: 32,
+    memoryBytes: 32 * 1024 ** 3,
+    storageBytes: 128 * 1024 ** 3,
+  },
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const documentation = documentationDirectory
@@ -181,14 +200,18 @@ function createOperationsService({
   });
   let kconfigAdapter;
   let choosing = false,
-    disposed = false,
-    configurationBusy = false;
+    disposed = false;
   let disposal;
-  const sourceLocks = new Set();
-  const activeBuild = () =>
-    jobs
-      .list()
-      .some((job) => ["queued", "running", "cancelling"].includes(job.state));
+  const quarantine = createBuildQuarantine({
+    directory: path.join(directory, "build-recovery"),
+    validateReceipt: (receipt) => {
+      if (typeof execution.validateOwnershipReceipt !== "function")
+        reject("RECOVERY_UNAVAILABLE");
+      execution.validateOwnershipReceipt(receipt);
+    },
+  });
+  const activeRecovery = new Set();
+  let recoveryUnavailable = false;
   function project(id) {
     const item = projects.get(id);
     if (!item) reject("PROJECT_NOT_ADOPTED");
@@ -228,6 +251,7 @@ function createOperationsService({
       grantId: granted.grantId,
       runtime: options.runtime,
       externalTrees: [],
+      externalTreeIds: [],
       externalStateVerified: options.externalTrees.length === 0,
     });
     return { workspaceId, name: selected.name };
@@ -246,15 +270,14 @@ function createOperationsService({
     },
     resolveWorkspace: (id) => project(id),
     acquireSourceLock: (sourceRoot) => {
-      if (
-        disposed ||
-        configurationBusy ||
-        activeBuild() ||
-        sourceLocks.has(sourceRoot)
-      )
-        reject("SOURCE_BUSY");
-      sourceLocks.add(sourceRoot);
-      return () => sourceLocks.delete(sourceRoot);
+      if (disposed) reject("SOURCE_BUSY");
+      let existing = sourceRoot;
+      for (let depth = 0; !fs.existsSync(existing); depth++) {
+        const parent = path.dirname(existing);
+        if (depth >= 64 || parent === existing) reject("SOURCE_BUSY");
+        existing = parent;
+      }
+      return acquirePathLeases([existing]);
     },
     onSourceAdopted: ({ root, source }) => {
       if (disposed) reject("SOURCE_SERVICE_CLOSED");
@@ -273,9 +296,16 @@ function createOperationsService({
       });
     },
   });
-  async function executeProject(input, log, signal) {
-    const item = project(input.workspaceId);
-    if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+  async function executeProject(input, log, signal, onOwnership) {
+    let item;
+    try {
+      if (disposed || signal?.aborted) reject("BUILD_CANCELLED");
+      item = project(input.workspaceId);
+      authorizedExternalPaths(input.workspaceId, item);
+    } catch (error) {
+      error.code = "RUNTIME_NOT_STARTED";
+      throw error;
+    }
     const job = await execution.start(
       {
         grantId: item.grantId,
@@ -284,6 +314,7 @@ function createOperationsService({
         jobs: input.jobs,
       },
       log,
+      { onOwnership, signal },
     );
     const cancel = () => {
       void job.cancel().catch(() => {});
@@ -302,17 +333,72 @@ function createOperationsService({
     directory: path.join(directory, "jobs"),
     adapters: {
       build: async (payload, context) => {
-        const result = await executeProject(
-          payload,
-          (event) => {
-            for (let offset = 0; offset < event.text.length; offset += 4000)
-              context.log({
-                stream: event.stream,
-                text: event.text.slice(offset, offset + 4000),
-              });
-          },
-          context.signal,
-        );
+        try {
+          validateBuildPayload(payload);
+          if (disposed || context.signal.aborted) reject("BUILD_CANCELLED");
+          await checkDispatchIntent(payload, context.signal);
+          if (disposed || context.signal.aborted) reject("BUILD_CANCELLED");
+        } catch (error) {
+          const code =
+            typeof error.code === "string" &&
+            /^(?:BLOCKED_[A-Z_]+|BUILD_CANCELLED)$/.test(error.code)
+              ? error.code
+              : "BLOCKED_AUTHORIZATION_REQUIRED";
+          context.log({
+            stream: "stderr",
+            text: `Build was not started: ${code}.`,
+          });
+          throw error;
+        }
+        quarantine.begin({
+          jobId: context.jobId,
+          workspaceId: payload.workspaceId,
+        });
+        activeRecovery.add(context.jobId);
+        let result;
+        try {
+          result = await executeProject(
+            payload,
+            (event) => {
+              for (let offset = 0; offset < event.text.length; offset += 4000)
+                context.log({
+                  stream: event.stream,
+                  text: event.text.slice(offset, offset + 4000),
+                });
+            },
+            context.signal,
+            async (receipt) => {
+              try {
+                quarantine.checkpoint(context.jobId, receipt);
+              } catch (error) {
+                recoveryUnavailable = true;
+                throw error;
+              }
+            },
+          );
+          if (result.state !== "runtime-cleanup-failed") {
+            try {
+              quarantine.clear(context.jobId);
+            } catch (error) {
+              recoveryUnavailable = true;
+              throw error;
+            }
+          }
+        } catch (error) {
+          result = { state: "runtime-cleanup-failed", code: null };
+          if (error.code === "RUNTIME_NOT_STARTED" && !recoveryUnavailable) {
+            try {
+              quarantine.clear(context.jobId);
+              result = { state: "failed", code: null };
+            } catch {
+              recoveryUnavailable = true;
+            }
+          }
+        } finally {
+          activeRecovery.delete(context.jobId);
+        }
+        if (result.state === "runtime-cleanup-failed")
+          return { state: result.state, code: result.code };
         context.item({ state: result.state, code: result.code });
         if (result.state !== "succeeded")
           reject("BUILD_" + result.state.toUpperCase().replaceAll("-", "_"));
@@ -320,6 +406,375 @@ function createOperationsService({
       },
     },
   });
+  if (!quarantine.initialized) {
+    for (const job of jobs.list(owner))
+      if (job.kind === "build" && job.state === "interrupted")
+        quarantine.begin({
+          jobId: job.id,
+          workspaceId: job.payload.workspaceId,
+        });
+    quarantine.initialize();
+  }
+  function unknownRecovery() {
+    return quarantine
+      .list()
+      .filter((record) => !activeRecovery.has(record.jobId));
+  }
+  const scheduler = createBuildScheduler({
+    jobs: {
+      list: (who) => jobs.list(who),
+      get: (id, who) => jobs.get(id, who),
+      run: (id, who, sequence) =>
+        disposed ? Promise.resolve() : jobs.run(id, who, sequence),
+    },
+    ownerId: owner,
+    limits: schedulerLimits,
+    resolveAdmission: async (job) => {
+      try {
+        if (recoveryUnavailable || unknownRecovery().length)
+          reject("BLOCKED_RUNTIME_RECOVERY_REQUIRED");
+        const payload = validateBuildPayload(job.payload);
+        const item = project(payload.workspaceId);
+        if (!item.externalStateVerified)
+          reject("BLOCKED_EXTERNAL_AUTHORIZATION_REQUIRED");
+        const externalTrees = authorizedExternalPaths(
+          payload.workspaceId,
+          item,
+        );
+        const current = await captureBuildIntent({
+          source: item.source,
+          output: item.output,
+          externalTrees,
+        });
+        project(payload.workspaceId);
+        if (
+          current.sourceRevision !== payload.intent.sourceRevision ||
+          current.configRevision !== payload.intent.configRevision
+        )
+          reject("BLOCKED_INTENT_CHANGED");
+        return {
+          projectId: payload.workspaceId,
+          source: item.source,
+          output: item.output,
+          externalTrees: [...item.externalTrees],
+          resourceDomain: "local-build-runtime",
+          storageDomain: `host-filesystem:${fs.statSync(item.output).dev}`,
+          ...payload.resources,
+          runtime: payload.runtime,
+          intent: {
+            sourceRevision: current.sourceRevision,
+            configRevision: current.configRevision,
+          },
+        };
+      } catch (error) {
+        if (error.code === "PROJECT_NOT_ADOPTED")
+          reject("BLOCKED_AUTHORIZATION_REQUIRED");
+        if (error.code === "PROJECT_PATH_CHANGED")
+          reject("BLOCKED_PATH_CHANGED");
+        if (
+          [
+            "INVALID_REQUEST",
+            "INVALID_RUNTIME",
+            "INVALID_RESERVATION",
+          ].includes(error.code)
+        )
+          reject("BLOCKED_INVALID_INTENT");
+        if (
+          [
+            "EXTERNAL_TREES_NOT_AUTHORIZED",
+            "EXTERNAL_TREE_NOT_GRANTED",
+            "FILE_GRANT_REQUIRED",
+            "UNSAFE_PATH",
+            "GRANT_CHANGED",
+            "GRANT_UNAVAILABLE",
+          ].includes(error.code)
+        )
+          reject("BLOCKED_EXTERNAL_AUTHORIZATION_REQUIRED");
+        if (
+          typeof error.code === "string" &&
+          /^BLOCKED_[A-Z_]+$/.test(error.code)
+        )
+          throw error;
+        reject("BLOCKED_ADMISSION_UNAVAILABLE");
+      }
+    },
+    observeResources: async (admission) => {
+      const unknown = {
+        resourceDomain: admission.resourceDomain,
+        storageDomain: admission.storageDomain,
+        cpuSlots: null,
+        memoryAvailableBytes: null,
+        storageAvailableBytes: null,
+      };
+      if (typeof execution.probeResources !== "function") return unknown;
+      try {
+        const item = project(admission.projectId);
+        const observed = await execution.probeResources({
+          grantId: item.grantId,
+          runtime: admission.runtime,
+        });
+        project(admission.projectId);
+        const time = Date.parse(observed?.observedAt);
+        if (!Number.isFinite(time) || Math.abs(Date.now() - time) > 15000)
+          return unknown;
+        return {
+          resourceDomain: admission.resourceDomain,
+          storageDomain: admission.storageDomain,
+          cpuSlots: observed.cpuSlots,
+          memoryAvailableBytes: observed.memoryAvailableBytes,
+          storageAvailableBytes: observed.storageAvailableBytes,
+        };
+      } catch {
+        return unknown;
+      }
+    },
+  });
+  function schedulerStatus() {
+    const counts = {
+      queued: 0,
+      running: 0,
+      cancelling: 0,
+      succeeded: 0,
+      failed: 0,
+      cancelled: 0,
+      interrupted: 0,
+    };
+    for (const job of jobs.list(owner)) counts[job.state]++;
+    return {
+      ...scheduler.status(),
+      counts,
+      quarantine: {
+        unavailable: recoveryUnavailable,
+        records: unknownRecovery().map((record) => ({
+          jobId: record.jobId,
+          workspaceId: record.workspaceId,
+          reason: record.receipt
+            ? "RUNTIME_CLEANUP_UNVERIFIED"
+            : "RUNTIME_IDENTITY_UNAVAILABLE",
+        })),
+      },
+      quarantinedReservations: unknownRecovery().reduce(
+        (total, record) => {
+          const resource = jobs.get(record.jobId, owner).payload.resources;
+          for (const key of Object.keys(total))
+            total[key] += Number.isSafeInteger(resource?.[key])
+              ? resource[key]
+              : 0;
+          return total;
+        },
+        { cpuSlots: 0, memoryBytes: 0, storageBytes: 0 },
+      ),
+      limits: { ...schedulerLimits },
+      defaultReservations: {
+        cpuSlots: 2,
+        memoryBytes: 4 * 1024 ** 3,
+        storageBytes: 8 * 1024 ** 3,
+      },
+    };
+  }
+  function acquirePathLeases(paths, { metadataOnly = false } = {}) {
+    if (disposed) reject("SOURCE_BUSY");
+    if (!metadataOnly) {
+      if (recoveryUnavailable) reject("RUNTIME_RECOVERY_REQUIRED");
+      for (const record of unknownRecovery()) {
+        const descriptor = projectStore
+          .list()
+          .find((item) => item.id === record.workspaceId);
+        if (!descriptor) reject("RUNTIME_RECOVERY_REQUIRED");
+        const denied = [
+          descriptor.source,
+          descriptor.output,
+          ...projectOptions
+            .get({ workspaceId: record.workspaceId })
+            .externalTrees.map((tree) => tree.path),
+        ];
+        if (
+          paths.some((selected) =>
+            denied.some(
+              (root) => isInside(root, selected) || isInside(selected, root),
+            ),
+          )
+        )
+          reject("RUNTIME_RECOVERY_REQUIRED");
+      }
+    }
+    const unique = [...new Set(paths)].sort();
+    const selected = unique.filter(
+      (candidate) =>
+        !unique.some(
+          (other) => other !== candidate && isInside(other, candidate),
+        ),
+    );
+    const releases = [];
+    try {
+      for (const selectedPath of selected)
+        releases.push(
+          scheduler.acquireMutationLease({
+            projectId: `mutation-${createHash("sha256").update(selectedPath).digest("hex")}`,
+            source: selectedPath,
+            output: selectedPath,
+          }),
+        );
+    } catch (error) {
+      for (const release of releases.reverse()) release();
+      throw error;
+    }
+    return () => {
+      for (const release of releases.reverse()) release();
+    };
+  }
+  function isInside(root, selected) {
+    const relative = path.relative(root, selected);
+    return (
+      relative === "" ||
+      (!path.isAbsolute(relative) &&
+        relative !== ".." &&
+        !relative.startsWith(`..${path.sep}`))
+    );
+  }
+  function authorizedExternalPaths(workspaceId, item = project(workspaceId)) {
+    if (
+      !item.externalStateVerified ||
+      !Array.isArray(item.externalTreeIds) ||
+      item.externalTreeIds.length !== item.externalTrees.length
+    )
+      reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+    for (let index = 0; index < item.externalTreeIds.length; index++) {
+      const id = item.externalTreeIds[index];
+      if (
+        externalWorkspaces.get(id) !== workspaceId ||
+        externalFiles.resolve(id, "write") !== item.externalTrees[index]
+      )
+        reject("EXTERNAL_TREE_NOT_GRANTED");
+    }
+    return [...item.externalTrees];
+  }
+  function projectPaths(workspaceId) {
+    const item = project(workspaceId);
+    return [item.source, item.output, ...item.externalTrees];
+  }
+  function recoverableProjectPaths(workspaceId) {
+    const item = project(workspaceId);
+    return [
+      item.source,
+      item.output,
+      ...item.externalTrees.filter((selected) => {
+        try {
+          return (
+            fs.lstatSync(selected).isDirectory() &&
+            !fs.lstatSync(selected).isSymbolicLink() &&
+            fs.realpathSync(selected) === selected
+          );
+        } catch {
+          return false;
+        }
+      }),
+    ];
+  }
+  function reservations(value, selectedRuntime, count) {
+    const minimumCpu = selectedRuntime.kind === "docker" ? 2 : count;
+    const minimumMemory =
+      selectedRuntime.kind === "docker" ? 4 * 1024 ** 3 : 256 * 1024 ** 2;
+    const chosen =
+      value === undefined
+        ? {
+            cpuSlots: Math.max(2, minimumCpu),
+            memoryBytes: 4 * 1024 ** 3,
+            storageBytes: 8 * 1024 ** 3,
+          }
+        : value;
+    exact(chosen, ["cpuSlots", "memoryBytes", "storageBytes"]);
+    if (
+      !Number.isSafeInteger(chosen.cpuSlots) ||
+      chosen.cpuSlots < minimumCpu ||
+      chosen.cpuSlots > 64 ||
+      !Number.isSafeInteger(chosen.memoryBytes) ||
+      chosen.memoryBytes < minimumMemory ||
+      chosen.memoryBytes > 256 * 1024 ** 3 ||
+      !Number.isSafeInteger(chosen.storageBytes) ||
+      chosen.storageBytes < 0 ||
+      chosen.storageBytes > 1024 ** 4
+    )
+      reject("INVALID_RESERVATION");
+    return { ...chosen };
+  }
+  function validateBuildPayload(payload) {
+    if (!payload?.intent) reject("BLOCKED_INTENT_UNAVAILABLE");
+    exact(payload, [
+      "workspaceId",
+      "target",
+      "runtime",
+      "jobs",
+      "resources",
+      "intent",
+      "snapshot",
+    ]);
+    if (
+      typeof payload.workspaceId !== "string" ||
+      !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
+      !TARGETS.includes(payload.target) ||
+      !Number.isSafeInteger(payload.jobs) ||
+      payload.jobs < 1 ||
+      payload.jobs > 32
+    )
+      reject("BLOCKED_INVALID_INTENT");
+    const selectedRuntime = runtime(payload.runtime);
+    exact(payload.intent, ["projectId", "sourceRevision", "configRevision"]);
+    if (
+      payload.intent.projectId !== payload.workspaceId ||
+      !/^[a-f0-9]{64}$/.test(payload.intent.sourceRevision) ||
+      !/^[a-f0-9]{64}$/.test(payload.intent.configRevision)
+    )
+      reject("BLOCKED_INVALID_INTENT");
+    exact(payload.snapshot, [
+      "version",
+      "entries",
+      "bytes",
+      "excludesGitObjectHistory",
+      "symlinkPolicy",
+      "symlinks",
+      "limitations",
+    ]);
+    if (
+      payload.snapshot.version !== 2 ||
+      payload.snapshot.excludesGitObjectHistory !== true ||
+      payload.snapshot.symlinkPolicy !== "link-text-only" ||
+      !Number.isSafeInteger(payload.snapshot.symlinks) ||
+      payload.snapshot.symlinks < 0 ||
+      payload.snapshot.symlinks > payload.snapshot.entries ||
+      JSON.stringify(payload.snapshot.limitations) !==
+        JSON.stringify([
+          "SYMLINK_TARGETS_OUTSIDE_CAPTURED_FILE_NAMESPACE_ARE_NOT_BOUND",
+        ]) ||
+      !Number.isSafeInteger(payload.snapshot.entries) ||
+      payload.snapshot.entries < 0 ||
+      payload.snapshot.entries > 50000 ||
+      !Number.isSafeInteger(payload.snapshot.bytes) ||
+      payload.snapshot.bytes < 0 ||
+      payload.snapshot.bytes > 512 * 1024 * 1024
+    )
+      reject("BLOCKED_INVALID_INTENT");
+    return {
+      ...payload,
+      runtime: selectedRuntime,
+      resources: reservations(payload.resources, selectedRuntime, payload.jobs),
+    };
+  }
+  async function checkDispatchIntent(payload, signal) {
+    const item = project(payload.workspaceId);
+    if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+    const current = await captureBuildIntent({
+      source: item.source,
+      output: item.output,
+      externalTrees: authorizedExternalPaths(payload.workspaceId, item),
+      signal,
+    });
+    if (
+      current.sourceRevision !== payload.intent.sourceRevision ||
+      current.configRevision !== payload.intent.configRevision
+    )
+      reject("BLOCKED_INTENT_CHANGED");
+  }
   const config = createConfigurationService({
     semanticAdapter: async (roots) => {
       if (!kconfigAdapter) reject("PYTHON_NOT_ADMITTED");
@@ -405,7 +860,7 @@ function createOperationsService({
           }),
       };
     },
-    withLock: (_roots, work) => changeConfig(work),
+    withLock: (roots, work) => changeConfig(roots, work),
   });
   const packageAuthoring = createPackageAuthoringService({
     resolveExternalTree: (workspaceId, externalTreeId) => {
@@ -422,7 +877,7 @@ function createOperationsService({
       };
     },
     withLock: async (root, work) =>
-      changeConfig(async () => {
+      changeConfig([root], async () => {
         const result = await work();
         if (result.applied) {
           for (const item of projects.values()) {
@@ -454,6 +909,7 @@ function createOperationsService({
   const tools = createToolsService({
     queueDirectory: path.join(directory, "tool-queue"),
     ollamaManagedDirectory: path.join(directory, "ollama"),
+    ollamaCatalogueDirectory: path.join(directory, "ollama-catalogue"),
     dialog,
     parentWindow,
     payloadManager,
@@ -584,12 +1040,6 @@ function createOperationsService({
       choosing = false;
     }
   }
-  function start(job) {
-    void jobs.run(job.id, owner, job.sequence).catch(() => {
-      /* Durable job state remains available for recovery. */
-    });
-    return jobs.get(job.id);
-  }
   function ownJob(id) {
     const job = jobs.get(id);
     if (job.ownerId !== owner) reject("UNAUTHORIZED");
@@ -599,21 +1049,29 @@ function createOperationsService({
     const { installerPath, installer, ...visible } = state;
     return visible;
   }
-  async function changeConfig(work) {
-    if (configurationBusy || activeBuild() || sourceLocks.size)
-      reject("PROJECT_BUSY");
-    configurationBusy = true;
+  async function changeConfig(paths, work, options) {
+    let release;
+    try {
+      release = acquirePathLeases(paths, options);
+    } catch (error) {
+      if (error.code === "SOURCE_BUSY") reject("PROJECT_BUSY");
+      throw error;
+    }
     try {
       return await work();
     } finally {
-      configurationBusy = false;
+      release();
     }
   }
   async function perform(request) {
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
-    exact(request, ["action", ...fields[action]]);
+    const optional =
+      action === "build.submit" && Object.hasOwn(request, "resources")
+        ? ["resources"]
+        : [];
+    exact(request, ["action", ...fields[action], ...optional]);
     if (disposed) reject("UNAVAILABLE");
     switch (action) {
       case "documentation.list":
@@ -675,14 +1133,19 @@ function createOperationsService({
           reject("SOURCE_CONSENT_REQUIRED");
         for (const id of selected.capabilities)
           fileGrants.resolve({ id, owner });
-        const registered = registerProject(selected);
+        const registered = await changeConfig(
+          [selected.source, selected.output],
+          () => registerProject(selected),
+          { metadataOnly: true },
+        );
         selections.delete(request.selectionId);
         for (const id of selected.capabilities)
           fileGrants.revoke({ id, owner });
+        void scheduler.pump().catch(() => {});
         return registered;
       }
       case "project.runtime":
-        return changeConfig(() => {
+        return changeConfig(projectPaths(request.workspaceId), () => {
           const item = project(request.workspaceId);
           const selectedRuntime = runtime(request.runtime);
           const previous = projectOptions.get({
@@ -737,21 +1200,86 @@ function createOperationsService({
           request.jobs > 32
         )
           reject("INVALID_TARGET");
-        item.runtime = runtime(request.runtime);
-        if (configurationBusy || activeBuild() || sourceLocks.size)
-          reject("BUILD_BUSY");
-        return start(
-          jobs.enqueue({
-            kind: "build",
-            ownerId: owner,
-            payload: {
-              workspaceId: request.workspaceId,
-              target: request.target,
-              runtime: item.runtime,
-              jobs: request.jobs,
-            },
-          }),
+        const selectedRuntime = runtime(request.runtime);
+        item.runtime = selectedRuntime;
+        const resources = reservations(
+          request.resources,
+          selectedRuntime,
+          request.jobs,
         );
+        const captured = await captureBuildIntent({
+          source: item.source,
+          output: item.output,
+          externalTrees: authorizedExternalPaths(request.workspaceId, item),
+        });
+        project(request.workspaceId);
+        if (disposed) reject("UNAVAILABLE");
+        const job = jobs.enqueue({
+          kind: "build",
+          ownerId: owner,
+          payload: {
+            workspaceId: request.workspaceId,
+            target: request.target,
+            runtime: selectedRuntime,
+            jobs: request.jobs,
+            resources,
+            intent: {
+              projectId: request.workspaceId,
+              sourceRevision: captured.sourceRevision,
+              configRevision: captured.configRevision,
+            },
+            snapshot: {
+              version: captured.snapshot.version,
+              entries: captured.snapshot.entries,
+              bytes: captured.snapshot.bytes,
+              excludesGitObjectHistory: true,
+              symlinkPolicy: captured.snapshot.symlinkPolicy,
+              symlinks: captured.snapshot.symlinks,
+              limitations: [...captured.snapshot.limitations],
+            },
+          },
+        });
+        void scheduler.pump().catch(() => {});
+        return job;
+      }
+      case "scheduler.status":
+        return schedulerStatus();
+      case "jobs.pump":
+        await scheduler.pump();
+        return schedulerStatus();
+      case "jobs.reconcile": {
+        const job = ownJob(request.id);
+        const record = unknownRecovery().find((item) => item.jobId === job.id);
+        if (!record) reject("RECOVERY_NOT_REQUIRED");
+        const item = project(record.workspaceId);
+        authorizedExternalPaths(record.workspaceId, item);
+        if (!record.receipt || typeof execution.reconcileCleanup !== "function")
+          reject("RECOVERY_IDENTITY_UNAVAILABLE");
+        const verdict = await execution.reconcileCleanup(record.receipt);
+        if (verdict?.state !== "verified-stopped")
+          reject("RECOVERY_UNVERIFIED");
+        const observed = await execution.probeResources({
+          grantId: item.grantId,
+          runtime: runtime(job.payload.runtime),
+        });
+        project(record.workspaceId);
+        authorizedExternalPaths(record.workspaceId, item);
+        if (
+          !Number.isFinite(Date.parse(observed?.observedAt)) ||
+          Math.abs(Date.now() - Date.parse(observed.observedAt)) > 15000 ||
+          ![
+            observed.cpuSlots,
+            observed.memoryAvailableBytes,
+            observed.storageAvailableBytes,
+          ].every((value) => Number.isSafeInteger(value) && value >= 0) ||
+          observed.cpuSlots < 1
+        )
+          reject("RECOVERY_CAPACITY_UNKNOWN");
+        quarantine.clear(job.id);
+        quarantine.list();
+        recoveryUnavailable = false;
+        void scheduler.pump().catch(() => {});
+        return { reconciled: true, jobId: job.id };
       }
       case "jobs.list":
         return jobs.list().filter((job) => job.ownerId === owner);
@@ -763,24 +1291,34 @@ function createOperationsService({
         });
       case "jobs.cancel":
         ownJob(request.id);
-        return jobs.cancel(request.id, owner, request.sequence);
+        {
+          const result = jobs.cancel(request.id, owner, request.sequence);
+          void scheduler.pump().catch(() => {});
+          return result;
+        }
       case "jobs.retry": {
         const previous = ownJob(request.id);
         project(previous.payload.workspaceId);
-        if (configurationBusy || activeBuild() || sourceLocks.size)
-          reject("BUILD_BUSY");
-        return start(jobs.retry(request.id, owner, request.sequence));
+        const job = jobs.retry(request.id, owner, request.sequence);
+        void scheduler.pump().catch(() => {});
+        return job;
       }
       case "config.inspect":
         return config.inspect(request);
       case "config.defconfigs":
         return config.listDefconfigs(request);
       case "config.apply":
-        return changeConfig(() => config.apply(request));
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          config.apply(request),
+        );
       case "config.undo":
-        return changeConfig(() => config.undo(request));
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          config.undo(request),
+        );
       case "config.defconfig":
-        return changeConfig(() => config.applyDefconfig(request));
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          config.applyDefconfig(request),
+        );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
       case "artifacts.inspect":
@@ -798,21 +1336,31 @@ function createOperationsService({
           request.request,
         );
       case "guest.disk.create":
-        return deployment(request.workspaceId).createDiskArtifact(
-          request.request,
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).createDiskArtifact(request.request),
         );
       case "guest.list":
         return deployment(request.workspaceId).listGuests();
       case "guest.create":
-        return deployment(request.workspaceId).createGuest(request.request);
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).createGuest(request.request),
+        );
       case "guest.import":
-        return deployment(request.workspaceId).importGuest(request.request);
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).importGuest(request.request),
+        );
       case "guest.edit":
-        return deployment(request.workspaceId).editGuest(request.request);
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).editGuest(request.request),
+        );
       case "guest.launch":
-        return deployment(request.workspaceId).launchGuest(request.request);
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).launchGuest(request.request),
+        );
       case "guest.stop":
-        return deployment(request.workspaceId).stopGuest(request.request);
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).stopGuest(request.request),
+        );
       case "guest.refresh":
         return deployment(request.workspaceId).refreshGuest(request.request);
       case "conversion.preview":
@@ -820,13 +1368,17 @@ function createOperationsService({
           request.request,
         );
       case "conversion.execute":
-        return deployment(request.workspaceId).executeConversion(
-          request.request,
+        return changeConfig(projectPaths(request.workspaceId), () =>
+          deployment(request.workspaceId).executeConversion(request.request),
         );
       case "tools": {
         if (
           ![
             "ollama.status",
+            "ollama.catalogue.status",
+            "ollama.catalogue.page",
+            "ollama.catalogue.refresh",
+            "ollama.catalogue.cancel",
             "ollama.hardware",
             "ollama.fit",
             "ollama.capabilities",
@@ -879,63 +1431,90 @@ function createOperationsService({
         externalWorkspaces.set(choice.id, request.workspaceId);
         return { externalTreeId: choice.id, name: choice.name };
       }
-      case "external.activate":
-        return changeConfig(() => {
-          const item = project(request.workspaceId);
-          if (request.trust !== true) reject("SOURCE_CONSENT_REQUIRED");
-          if (
-            !Array.isArray(request.externalTreeIds) ||
-            request.externalTreeIds.length > 32 ||
-            new Set(request.externalTreeIds).size !==
-              request.externalTreeIds.length
-          )
-            reject("INVALID_REQUEST");
-          const externalTrees = request.externalTreeIds.map((id) => {
-            if (externalWorkspaces.get(id) !== request.workspaceId)
-              reject("EXTERNAL_TREE_NOT_GRANTED");
-            const root = externalFiles.resolve(id, "write");
-            const file = path.join(root, "external.desc");
-            const info = fs.lstatSync(file);
-            if (!info.isFile() || info.isSymbolicLink() || info.size > 65536)
-              reject("INVALID_EXTERNAL_DESCRIPTOR");
-            const names = [
-              ...fs
-                .readFileSync(file, "utf8")
-                .matchAll(
-                  /^name:[ \t]*([A-Za-z][A-Za-z0-9_]{0,63})[ \t]*\r?$/gm,
-                ),
-            ];
-            if (names.length !== 1) reject("INVALID_EXTERNAL_DESCRIPTOR");
-            return { path: root, name: names[0][1] };
-          });
-          const replacement = execution.grantProject({
-            root: item.root,
-            source: item.source,
-            output: item.output,
-            trustedSource: true,
-            externalTrees: externalTrees.map((tree) => tree.path),
-            trustedExternalTrees: true,
-          });
-          try {
-            const previous = projectOptions.get({
-              workspaceId: request.workspaceId,
-            });
-            const saved = projectOptions.save({
-              workspaceId: request.workspaceId,
-              expectedRevision: request.expectedRevision,
-              runtime: previous.runtime,
-              externalTrees,
-            });
-            execution.revoke?.(item.grantId);
-            item.grantId = replacement.grantId;
-            item.externalTrees = externalTrees.map((tree) => tree.path);
-            item.externalStateVerified = true;
-            return { ...saved, externalTreesAuthorized: true };
-          } catch (error) {
-            execution.revoke?.(replacement.grantId);
-            throw error;
-          }
+      case "external.activate": {
+        if (
+          !Array.isArray(request.externalTreeIds) ||
+          request.externalTreeIds.length > 32
+        )
+          reject("INVALID_REQUEST");
+        const selectedPaths = request.externalTreeIds.map((id) => {
+          if (externalWorkspaces.get(id) !== request.workspaceId)
+            reject("EXTERNAL_TREE_NOT_GRANTED");
+          return externalFiles.resolve(id, "write");
         });
+        if (
+          unknownRecovery().some(
+            (record) => record.workspaceId === request.workspaceId,
+          )
+        ) {
+          const old = projectOptions
+            .get({ workspaceId: request.workspaceId })
+            .externalTrees.map((tree) => tree.path);
+          if (JSON.stringify(old) !== JSON.stringify(selectedPaths))
+            reject("RUNTIME_RECOVERY_REQUIRED");
+        }
+        return changeConfig(
+          [...recoverableProjectPaths(request.workspaceId), ...selectedPaths],
+          () => {
+            const item = project(request.workspaceId);
+            if (request.trust !== true) reject("SOURCE_CONSENT_REQUIRED");
+            if (
+              !Array.isArray(request.externalTreeIds) ||
+              request.externalTreeIds.length > 32 ||
+              new Set(request.externalTreeIds).size !==
+                request.externalTreeIds.length
+            )
+              reject("INVALID_REQUEST");
+            const externalTrees = request.externalTreeIds.map((id) => {
+              if (externalWorkspaces.get(id) !== request.workspaceId)
+                reject("EXTERNAL_TREE_NOT_GRANTED");
+              const root = externalFiles.resolve(id, "write");
+              const file = path.join(root, "external.desc");
+              const info = fs.lstatSync(file);
+              if (!info.isFile() || info.isSymbolicLink() || info.size > 65536)
+                reject("INVALID_EXTERNAL_DESCRIPTOR");
+              const names = [
+                ...fs
+                  .readFileSync(file, "utf8")
+                  .matchAll(
+                    /^name:[ \t]*([A-Za-z][A-Za-z0-9_]{0,63})[ \t]*\r?$/gm,
+                  ),
+              ];
+              if (names.length !== 1) reject("INVALID_EXTERNAL_DESCRIPTOR");
+              return { path: root, name: names[0][1] };
+            });
+            const replacement = execution.grantProject({
+              root: item.root,
+              source: item.source,
+              output: item.output,
+              trustedSource: true,
+              externalTrees: externalTrees.map((tree) => tree.path),
+              trustedExternalTrees: true,
+            });
+            try {
+              const previous = projectOptions.get({
+                workspaceId: request.workspaceId,
+              });
+              const saved = projectOptions.save({
+                workspaceId: request.workspaceId,
+                expectedRevision: request.expectedRevision,
+                runtime: previous.runtime,
+                externalTrees,
+              });
+              execution.revoke?.(item.grantId);
+              item.grantId = replacement.grantId;
+              item.externalTrees = externalTrees.map((tree) => tree.path);
+              item.externalTreeIds = [...request.externalTreeIds];
+              item.externalStateVerified = true;
+              return { ...saved, externalTreesAuthorized: true };
+            } catch (error) {
+              execution.revoke?.(replacement.grantId);
+              throw error;
+            }
+          },
+          { metadataOnly: true },
+        );
+      }
       case "package.preview":
         return packageAuthoring.preview(request);
       case "package.discover":
@@ -1007,6 +1586,15 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      scheduler.close();
+      for (const job of jobs.list(owner))
+        if (["running", "cancelling"].includes(job.state)) {
+          if (job.state === "running") {
+            try {
+              jobs.cancel(job.id, owner, job.sequence);
+            } catch {}
+          }
+        }
       fileGrants.clear();
       updates.cancel();
       toolFiles.dispose();
@@ -1014,6 +1602,7 @@ function createOperationsService({
       externalWorkspaces.clear();
       sources.dispose();
       disposal = Promise.allSettled([
+        scheduler.awaitIdle(),
         tools.dispose?.(),
         companion?.request("companion.stop", {}),
         ...[...running].map((job) => job.cancel()),

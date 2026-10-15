@@ -41,6 +41,9 @@ function admit(request, nested = false) {
   const simple = [
     "ollama.status",
     "ollama.hardware",
+    "ollama.catalogue.status",
+    "ollama.catalogue.refresh",
+    "ollama.catalogue.cancel",
     "ollama.tags",
     "ollama.running",
     "ollama.managed.status",
@@ -60,6 +63,13 @@ function admit(request, nested = false) {
         for (const key of ["acquire", "repair"])
           if (request[key] !== undefined && typeof request[key] !== "boolean")
             fail("INVALID_REQUEST");
+        break;
+      case "ollama.catalogue.page":
+        keys(request,["action"],["family","query","offset","limit"]);
+        if(request.family!==undefined&&(typeof request.family!=="string"||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(request.family)))fail("INVALID_REQUEST");
+        if(request.query!==undefined)string(request.query,128);
+        if(request.offset!==undefined&&!integer(request.offset,0,100000))fail("INVALID_REQUEST");
+        if(request.limit!==undefined&&!integer(request.limit,1,100))fail("INVALID_REQUEST");
         break;
       case "ollama.fit":
         keys(request, ["action", "model"], ["contextTokens"]);

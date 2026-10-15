@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const {
   ExecutionService,
   boundedProcess,
@@ -165,7 +166,7 @@ test("Docker launcher uses pinned non-root isolated argv and rejects floating im
     executable = path.join(dirs.root, "docker-fixture");
   fs.writeFileSync(
     executable,
-    "#!/usr/bin/env node\nprocess.stdout.write(JSON.stringify(process.argv.slice(2)));\n",
+    "#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};process.stdout.write(JSON.stringify(process.argv.slice(2)));\n",
   );
   fs.chmodSync(executable, 0o755);
   const service = new ExecutionService({ executables: { docker: executable } }),
@@ -321,7 +322,7 @@ test("Docker preserves external tree order using separate read-only mounts and o
   const executable = path.join(dirs.root, "docker-externals-fixture");
   fs.writeFileSync(
     executable,
-    "#!/usr/bin/env node\nprocess.stdout.write(JSON.stringify(process.argv.slice(2)));\n",
+    "#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};process.stdout.write(JSON.stringify(process.argv.slice(2)));\n",
   );
   fs.chmodSync(executable, 0o755);
   const service = new ExecutionService({ executables: { docker: executable } });
@@ -388,7 +389,7 @@ test("environment probe uses pinned isolated Docker argv and normalizes bounded 
     record = path.join(dirs.root, "argv.json");
   fs.writeFileSync(
     executable,
-    '#!/usr/bin/env node\nrequire("fs").writeFileSync(' +
+    '#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};require("fs").writeFileSync(' +
       JSON.stringify(record) +
       ',JSON.stringify(process.argv.slice(2)));process.stdout.write("x86_64-linux-gnu\\n12.2.0\\n");\n',
   );
@@ -436,7 +437,7 @@ test("environment probe uses pinned isolated Docker argv and normalizes bounded 
   );
   fs.writeFileSync(
     executable,
-    '#!/usr/bin/env node\nprocess.stdout.write("x86_64\\n12.2.0\\nextra\\n");\n',
+    '#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};process.stdout.write("x86_64\\n12.2.0\\nextra\\n");\n',
   );
   await assert.rejects(
     service.probeEnvironment({ grantId: grant.grantId, runtime }),
@@ -513,7 +514,7 @@ test("compiler target architecture follows Buildroot normalization independently
   ]) {
     fs.writeFileSync(
       executable,
-      "#!/usr/bin/env node\nprocess.stdout.write(" +
+      "#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};process.stdout.write(" +
         JSON.stringify(target + "\n13.3.0\n") +
         ");\n",
     );
@@ -528,11 +529,11 @@ test("compiler target architecture follows Buildroot normalization independently
 });
 test('resource probe uses read-only output mount and preserves explicitly unknown measurements', async t => {
   const dirs = fixture(t), executable = path.join(dirs.root, 'docker-resources-fixture'), record = path.join(dirs.root, 'resource-argv.json');
-  fs.writeFileSync(executable, '#!/usr/bin/env node\nrequire("fs").writeFileSync(' + JSON.stringify(record) + ',JSON.stringify(process.argv.slice(2)));process.stdout.write("2\\n2048\\n4096\\n");\n'); fs.chmodSync(executable, 0o755);
+  fs.writeFileSync(executable, '#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};require("fs").writeFileSync(' + JSON.stringify(record) + ',JSON.stringify(process.argv.slice(2)));process.stdout.write("2\\n2048\\n4096\\n");\n'); fs.chmodSync(executable, 0o755);
   const service = new ExecutionService({ executables: { docker: executable } }), grant = service.grantProject(dirs), runtime = { kind: 'docker', image: 'build@sha256:' + 'a'.repeat(64), uid: 1000, gid: 1000 };
   const result = await service.probeResources({ grantId: grant.grantId, runtime }); assert.equal(result.cpuSlots, 2); assert.equal(result.memoryAvailableBytes, 2048); assert.equal(result.storageAvailableBytes, 4096); assert.equal(result.constraintModel, 'cgroup-v2-and-affinity');
   const argv = JSON.parse(fs.readFileSync(record, 'utf8')); assert.ok(argv.includes(`type=bind,src=${dirs.output},dst=/output,readonly`)); assert.ok(argv.includes('--read-only')); assert.ok(argv.includes('--network=none')); assert.ok(argv.some(value => value.includes('memory.current')));
-  fs.writeFileSync(executable, '#!/usr/bin/env node\nprocess.stdout.write("unknown\\nunknown\\n4096\\n");\n'); const unknown = await service.probeResources({ grantId: grant.grantId, runtime }); assert.equal(unknown.cpuSlots, null); assert.equal(unknown.memoryAvailableBytes, null); assert.equal(unknown.constraintModel, 'unknown');
+  fs.writeFileSync(executable, '#!/usr/bin/env node\nif(/^info$/.test(process.argv[2])){process.stdout.write(JSON.stringify(/fixture-daemon/.source));process.exit(0)}if(/^ps$/.test(process.argv[2])){process.exit(0)};process.stdout.write("unknown\\nunknown\\n4096\\n");\n'); const unknown = await service.probeResources({ grantId: grant.grantId, runtime }); assert.equal(unknown.cpuSlots, null); assert.equal(unknown.memoryAvailableBytes, null); assert.equal(unknown.constraintModel, 'unknown');
   await assert.rejects(service.probeResources({ grantId: grant.grantId, runtime, script: 'id' }), /invalid-resource-probe/);
 });
 test('real non-root Linux resources probe reports available filesystem bytes without modifying output', { skip: process.platform === 'win32' }, async t => {
@@ -566,4 +567,63 @@ test('Docker aggregate probe excludes only its verified owned leaf and preserves
   assert.deepEqual(await probe('docker-owned-probe'), ['unknown', 'unknown']);
   fs.writeFileSync(groupFile, '0::/\n');
   assert.deepEqual(await probe('docker-owned-probe'), ['unknown', 'unknown']);
+});
+test('owned Docker receipts checkpoint before launch and read-only cleanup distinguishes absence reuse and namespace changes', async t => {
+ const dirs=fixture(t),stateFile=path.join(dirs.root,'docker-state.json'),callsFile=path.join(dirs.root,'docker-calls.jsonl'),executable=path.join(dirs.root,'docker-owned-fixture');
+ const initial={daemonId:'fixture-daemon',present:false,id:'b'.repeat(64),ownerToken:null,name:null,status:'running',running:true};
+ fs.writeFileSync(stateFile,JSON.stringify(initial));
+ fs.writeFileSync(executable,'#!/usr/bin/env node\nconst fs=require("fs"),args=process.argv.slice(2),file='+JSON.stringify(stateFile)+',s=JSON.parse(fs.readFileSync(file));fs.appendFileSync('+JSON.stringify(callsFile)+',JSON.stringify(args)+"\\n");if(args[0]==="info")process.stdout.write(JSON.stringify(s.daemonId));else if(args[0]==="ps")process.stdout.write(s.present?s.id:"");else if(args[0]==="inspect")process.stdout.write(JSON.stringify([{Id:s.id,Name:"/"+s.name,Config:{Labels:{"io.material-buildroot.operation":s.ownerToken}},State:{Running:s.running,Restarting:false,Pid:s.running?50:0,Status:s.status}}]));else if(args[0]==="run"){if(s.changeAfterRun){s.daemonId="changed-daemon";fs.writeFileSync(file,JSON.stringify(s));}process.stdout.write("fixture-complete");}else process.exitCode=2;\n');fs.chmodSync(executable,0o755);
+ const service=new ExecutionService({executables:{docker:executable}}),grant=service.grantProject(dirs),runtime={kind:'docker',image:'build@sha256:'+'a'.repeat(64),uid:1000,gid:1000};let receipt,release;const barrier=new Promise(resolve=>release=resolve);
+ const starting=service.start({grantId:grant.grantId,target:'all',runtime},undefined,{onOwnership:async value=>{receipt=value;await barrier;}});
+ for(let attempt=0;!receipt&&attempt<100;attempt++)await new Promise(resolve=>setTimeout(resolve,5));assert.ok(receipt);assert.equal(fs.readFileSync(callsFile,'utf8').includes('"run"'),false);release();const job=await starting;assert.equal((await job.completion).cleanup.state,'verified-stopped');
+ assert.deepEqual(await service.reconcileCleanup(receipt),{state:'verified-stopped',reason:'owned-container-absent'});
+ const update=patch=>fs.writeFileSync(stateFile,JSON.stringify({...initial,name:receipt.containerName,ownerToken:receipt.ownerToken,...patch}));
+ update({present:true});assert.equal((await service.reconcileCleanup(receipt)).reason,'owned-runtime-active');update({present:true,running:false,status:'exited'});assert.equal((await service.reconcileCleanup(receipt)).state,'verified-stopped');
+ update({present:true,ownerToken:crypto.randomUUID()});assert.equal((await service.reconcileCleanup(receipt)).reason,'runtime-identity-reused');update({daemonId:'other-daemon'});assert.equal((await service.reconcileCleanup(receipt)).reason,'runtime-namespace-changed');
+ assert.equal((await service.reconcileCleanup({...receipt,unexpected:'value'})).state,'unknown');assert.throws(()=>service.validateOwnershipReceipt({...receipt,daemonId:123}),/invalid-ownership/);
+ assert.equal(fs.readFileSync(callsFile,'utf8').includes('"stop"'),false);
+ update({changeAfterRun:true});const uncertain=await service.start({grantId:grant.grantId,target:'all',runtime});const uncertainResult=await uncertain.completion;assert.equal(uncertainResult.state,'runtime-cleanup-failed');assert.equal(uncertainResult.processState,'succeeded');assert.equal(uncertainResult.cleanup.reason,'runtime-namespace-changed');
+});
+test('pre-effect runtime failure is distinguished from failed ownership persistence',async t=>{
+ const dirs=fixture(t),missing=new ExecutionService({executables:{docker:'/nonexistent/owned-docker'}}),grant=missing.grantProject(dirs),request={grantId:grant.grantId,target:'all',runtime:{kind:'docker',image:'build@sha256:'+'a'.repeat(64),uid:1000,gid:1000}};
+ await assert.rejects(missing.start(request),error=>error.code==='RUNTIME_NOT_STARTED');
+ const executable=path.join(dirs.root,'identity-only-fixture');fs.writeFileSync(executable,'#!/usr/bin/env node\nif(process.argv[2]!=="info")process.exit(9);process.stdout.write(JSON.stringify("fixture-daemon"));\n');fs.chmodSync(executable,0o755);const service=new ExecutionService({executables:{docker:executable}}),valid=service.grantProject(dirs);
+ await assert.rejects(service.start({...request,grantId:valid.grantId},undefined,{onOwnership:async()=>{throw Error('fixture-storage-failure');}}),error=>error.message==='ownership-checkpoint-failed'&&error.code!=='RUNTIME_NOT_STARTED');
+});
+test('WSL protocol fixture persists precise ownership before authorizing execution and rejects reused boot or process identity',async t=>{
+ const dirs=fixture(t),stateFile=path.join(dirs.root,'wsl-state.json'),executable=path.join(dirs.root,'wsl-owned-fixture'),gateFile=path.join(dirs.root,'authorized');
+ const bootId=crypto.randomUUID();fs.writeFileSync(stateFile,JSON.stringify({bootId,process:'absent'}));
+ fs.writeFileSync(executable,'#!/usr/bin/env node\nconst fs=require("fs"),a=process.argv.slice(2),file='+JSON.stringify(stateFile)+',s=JSON.parse(fs.readFileSync(file));if(a.includes("wslpath")){process.stdout.write("/linux"+a.at(-1));}else if(a.includes("setsid")){process.stdout.write("MATERIAL_BUILDROOT_PID=777 START=12345\\n");process.stdin.once("data",data=>{if(data.toString().trim()!==a.at(-1))process.exit(9);fs.writeFileSync('+JSON.stringify(gateFile)+',"authorized");process.stdout.write("fixture-complete");});}else if(a.includes("timeout")){process.stdout.write(s.bootId+"\\n"+(s.pidNamespace||"pid:[123]")+"\\n"+s.process+"\\n");}else process.stdout.write(s.bootId+"\\npid:[123]\\n");\n');fs.chmodSync(executable,0o755);
+ const service=new ExecutionService({platform:'win32',executables:{wsl:executable}}),grant=service.grantProject(dirs),receipts=[];let release,precise;const barrier=new Promise(resolve=>release=resolve);
+ const job=await service.start({grantId:grant.grantId,target:'all',runtime:{kind:'wsl',distribution:'FixtureLinux'}},undefined,{onOwnership:async receipt=>{receipts.push(receipt);if(receipt.pid!==null){precise=receipt;await barrier;}}});
+ for(let attempt=0;!precise&&attempt<100;attempt++)await new Promise(resolve=>setTimeout(resolve,5));assert.ok(precise);assert.equal(receipts[0].pid,null);assert.equal(fs.existsSync(gateFile),false);release();assert.equal((await job.completion).cleanup.state,'verified-stopped');
+ fs.writeFileSync(stateFile,JSON.stringify({bootId,process:'99999 777 777'}));assert.equal((await service.reconcileCleanup(precise)).reason,'runtime-identity-reused');fs.writeFileSync(stateFile,JSON.stringify({bootId:crypto.randomUUID(),process:'absent'}));assert.equal((await service.reconcileCleanup(precise)).reason,'runtime-namespace-changed');assert.equal((await service.reconcileCleanup(receipts[0])).state,'unknown');fs.writeFileSync(stateFile,JSON.stringify({bootId,pidNamespace:'pid:[456]',process:'absent'}));assert.equal((await service.reconcileCleanup(precise)).reason,'runtime-namespace-changed');
+});
+test('WSL authorization revalidates revoked paths externals and cancellation after precise checkpoint wait',async t=>{
+ for(const action of ['revoke','source-replace','external-replace','abort','cancel']){
+  const dirs=fixture(t),tree=externalTree(dirs.root,'external'),executable=path.join(dirs.root,'wsl-authority-fixture'),marker=path.join(dirs.root,'unauthorized'),bootId=crypto.randomUUID();
+  fs.writeFileSync(executable,'#!/usr/bin/env node\nconst fs=require("fs"),a=process.argv.slice(2);if(a.includes("wslpath"))process.stdout.write("/linux"+a.at(-1));else if(a.includes("setsid")){process.stdout.write("MATERIAL_BUILDROOT_PID=777 START=12345\\n");process.stdin.once("data",()=>{fs.writeFileSync('+JSON.stringify(marker)+',"executed");});}else if(a.includes("timeout"))process.stdout.write('+JSON.stringify(bootId+'\npid:[123]\nabsent\n')+');else process.stdout.write('+JSON.stringify(bootId+'\npid:[123]\n')+');\n');fs.chmodSync(executable,0o755);
+  const service=new ExecutionService({platform:'win32',executables:{wsl:executable}}),grant=service.grantProject({...dirs,externalTrees:[tree],trustedExternalTrees:true}),controller=new AbortController();let release,precise;const barrier=new Promise(resolve=>release=resolve);
+  const job=await service.start({grantId:grant.grantId,target:'all',runtime:{kind:'wsl',distribution:'FixtureLinux'}},undefined,{signal:controller.signal,onOwnership:async receipt=>{if(receipt.pid!==null){precise=true;await barrier;}}});
+  for(let n=0;!precise&&n<100;n++)await new Promise(resolve=>setTimeout(resolve,5));assert.ok(precise,action);
+  let cancelling;
+  if(action==='revoke')service.revoke(grant.grantId);
+  else if(action==='source-replace'){fs.renameSync(dirs.source,dirs.source+'-previous');fs.mkdirSync(dirs.source);fs.writeFileSync(path.join(dirs.source,'Makefile'),'all:\n');}
+  else if(action==='external-replace'){const file=path.join(tree,'external.mk');fs.renameSync(file,file+'.previous');fs.writeFileSync(file,'# changed identity');}
+  else if(action==='abort')controller.abort();else cancelling=job.cancel();
+  release();const result=await job.completion;await cancelling;assert.equal(fs.existsSync(marker),false,action);assert.notEqual(result.state,'succeeded',action);
+ }
+});
+test('Docker pre-spawn checkpoint rechecks grant authority and host cancellation before effects',async t=>{
+ for(const action of ['revoke','abort']){
+  const dirs=fixture(t),executable=path.join(dirs.root,'docker-before-effects'),marker=path.join(dirs.root,'unauthorized');fs.writeFileSync(executable,'#!/usr/bin/env node\nif(process.argv[2]==="info")process.stdout.write(JSON.stringify("fixture-daemon"));else require("fs").writeFileSync('+JSON.stringify(marker)+',"effect");\n');fs.chmodSync(executable,0o755);
+  const service=new ExecutionService({executables:{docker:executable}}),grant=service.grantProject(dirs),controller=new AbortController();
+  await assert.rejects(service.start({grantId:grant.grantId,target:'all',runtime:{kind:'docker',image:'build@sha256:'+'a'.repeat(64),uid:1000,gid:1000}},undefined,{signal:controller.signal,onOwnership:async()=>{if(action==='revoke')service.revoke(grant.grantId);else controller.abort();}}),error=>error.code==='RUNTIME_NOT_STARTED');assert.equal(fs.existsSync(marker),false,action);
+  if(action==='abort'){
+   fs.writeFileSync(executable,'#!/usr/bin/env node\nif(process.argv[2]==="info")process.stdout.write(JSON.stringify("fixture-daemon"));else if(process.argv[2]==="run")process.stdout.write("fixture-complete");else if(process.argv[2]!=="ps")process.exitCode=2;\n');
+   const retry=await service.start({grantId:grant.grantId,target:'all',runtime:{kind:'docker',image:'build@sha256:'+'a'.repeat(64),uid:1000,gid:1000}});
+   assert.equal((await retry.completion).state,'succeeded');
+   assert.equal(service.locks.size,0);
+  }
+ }
 });
