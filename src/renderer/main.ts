@@ -1448,7 +1448,7 @@ class MaterialBuildroot extends LitElement {
     content: unknown,
     actions: unknown,
   ) {
-    return html`<md-dialog id=${id} @closed=${() => this.restoreFocus(id)}
+    return html`<md-dialog id=${id} aria-label=${title} @closed=${() => this.restoreFocus(id)}
       ><div slot="headline">${title}</div>
       <div slot="content" class="dialog-content stack">
         ${content}${this.notice
@@ -1825,7 +1825,7 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}<md-text-button
+            )}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");

@@ -51,3 +51,7 @@ The bounded executable desktop reference covers selected states of S01-S04, S06-
 ## Search inventory
 
 Name every concrete project/source/ref/profile/defconfig/symbol/help/dependency/changes/task/log/output/runtime/settings/tool/history/docs/changelog/notification/palette/tab/context-menu/picker/appearance/layer/lock/ticket/schedule/logo/export/editor/canvas/guided-example search instance. Each owns raw query, flags, validation, history and snippets. Shared invisible query state is invalid.
+
+### Implemented documentation search
+
+`documentation-panel` owns one concrete search surface: article titles, topic names and summaries in the bundled offline index. It has independent literal query, expression, `i/m/s/u` flags, mode, validation message and result IDs. The adjacent code icon opens an anchored builder with escaped-literal construction and start/end/exact anchors. Evaluation uses a dedicated terminable worker with input bounds and a 600 ms deadline. Escape returns focus to the builder trigger. It never changes the standalone regex workbench or another surface's query. Search is session-only; persistent search history/snippets and full-text body indexing remain unimplemented and must not be inferred from this bounded reader.
