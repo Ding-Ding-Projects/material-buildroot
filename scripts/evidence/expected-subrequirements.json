@@ -1,0 +1,2075 @@
+{
+  "schemaVersion": 1,
+  "source": "Reviewed sanitized catalogue expansion, fixed expected inventory; do not regenerate from the ledger during validation.",
+  "identities": [
+    {
+      "id": "language",
+      "subrequirements": [
+        {
+          "id": "language-REQ-01",
+          "text": "Every user-facing application and GitHub Pages ships a persisted language mode with exactly three baseline choices: English, playful Hong Kong-style Cantonese, and bilingual."
+        },
+        {
+          "id": "language-REQ-02",
+          "text": "Bilingual mode keeps the primary label prominent with a compact secondary label or progressive disclosure, so narrow layouts never crowd."
+        },
+        {
+          "id": "language-REQ-03",
+          "text": "Localization resources stay separate from logic with fallback behaviour, and non-UI libraries are exempt only until they expose a user-facing surface."
+        },
+        {
+          "id": "language-REQ-04",
+          "text": "universal proof; all three modes on every surface; the longest bilingual strings at narrow widths with no layout clipping defect."
+        }
+      ]
+    },
+    {
+      "id": "funny-emoji",
+      "subrequirements": [
+        {
+          "id": "funny-emoji-REQ-01",
+          "text": "Two independent persisted funny-level sliders, one for English and one for Cantonese, run from 1 (fully serious) to 5 (maximum playfulness), ship at 5, and reset independently."
+        },
+        {
+          "id": "funny-emoji-REQ-02",
+          "text": "They are wired to the copy of every message category, error, destructive, financial, security, and accessibility copy included, change voice and never facts, and are disclosed at first run and in the setting itself."
+        },
+        {
+          "id": "funny-emoji-REQ-03",
+          "text": "A persisted Show emojis in dialogs and message boxes switch adds one relevant non-semantic emoji per dialog and never puts emoji in buttons, labels, or accessible names."
+        },
+        {
+          "id": "funny-emoji-REQ-04",
+          "text": "universal proof; rendered copy demonstrably changes at every level in both languages; facts identical at levels 1 and 5; emoji switch persistence and narrow-layout gates."
+        }
+      ]
+    },
+    {
+      "id": "personal-vocabulary",
+      "subrequirements": [
+        {
+          "id": "personal-vocabulary-REQ-01",
+          "text": "Every user-facing application and GitHub Pages shows a visible local personal-vocabulary JSON upload control in its own settings, even before any file exists, with localized no-file, loaded, invalid, replace, and clear or reset states that settings search and the command palette index."
+        },
+        {
+          "id": "personal-vocabulary-REQ-02",
+          "text": "One documented, versioned, bounded schema accepts the dynamic current inventory without a hardcoded entry count and is validated in full before display or caching (256 KiB UTF-8, depth 8, keys up to 160 Unicode code points and values up to 1,000), a rejected file never applies partially, clearing purges the cache, and original shipped wording renders until a valid private file arrives."
+        },
+        {
+          "id": "personal-vocabulary-REQ-03",
+          "text": "Handling is local-only, so no private vocabulary value, mapping, payload, or file metadata ever reaches source, logs, exports, history, telemetry, prompts, or any public record."
+        },
+        {
+          "id": "personal-vocabulary-REQ-04",
+          "text": "universal proof; the empty control without a file; every schema, version, and size bound; malformed and duplicate-key input; no partial application; cache corruption; no-network behaviour; absence from logs, exports, history, and public records; the release-grade shutdown drive with the current canonical private JSON from the owner-managed private source and no private payload in any screenshot."
+        }
+      ]
+    },
+    {
+      "id": "school-mode",
+      "subrequirements": [
+        {
+          "id": "school-mode-REQ-01",
+          "text": "One shared, user-renamable School mode switch lives in the shared local application-data record, so turning it on anywhere turns it on everywhere, live and without a restart, and after a rename only the chosen name appears."
+        },
+        {
+          "id": "school-mode-REQ-02",
+          "text": "While it is on, surfaces force English and treat Cantonese, bilingual, funny levels, personal vocabulary, and every dim-sum capability as not installed, omitting their controls, routes, results, and references rather than disabling them, and the unlock ladder starts at the sums."
+        },
+        {
+          "id": "school-mode-REQ-03",
+          "text": "Turning it off needs the one shared locally verified PIN, password, or passkey choice, and the control says plainly that this is a user-experience lock that deleting the shared record resets, not a security boundary."
+        },
+        {
+          "id": "school-mode-REQ-04",
+          "text": "universal proof; live propagation across running applications; zero shipped-name occurrences after a rename; suppression and restoration of every hidden capability; an honest unreadable-record state; no credential in exports, logs, screenshots, or Git history."
+        }
+      ]
+    },
+    {
+      "id": "narration",
+      "subrequirements": [
+        {
+          "id": "narration-REQ-01",
+          "text": "Every user-facing application ships a spoken narrator for its events, off by default and enabled only by the person using it, narrating English, Cantonese, or Both strictly serialized, with a Hong Kong Cantonese voice for the Cantonese track."
+        },
+        {
+          "id": "narration-REQ-02",
+          "text": "Each narrated language has its own voice picker listing the voices the machine actually has, with Choose automatically as the shipped default, the stable voice identity persisted, late enumeration handled, the voice really in effect stated beneath it, and adjustable rate and pitch."
+        },
+        {
+          "id": "narration-REQ-03",
+          "text": "Narration is debounced, rate-limited per category, one utterance at a time, never suppresses spoken error facts, and yields to an active screen reader."
+        },
+        {
+          "id": "narration-REQ-04",
+          "text": "universal proof; no speech synthesis available; an empty first enumeration followed by a populated one; uninstalled and network-only voices; a language with no voice; rate and pitch at and beyond their bounds; persistence across restart."
+        }
+      ]
+    },
+    {
+      "id": "scheduled-settings",
+      "subrequirements": [
+        {
+          "id": "scheduled-settings-REQ-01",
+          "text": "Every user-facing application and GitHub Pages ships a persisted schedule surface for the language mode, theme, density, seed colour, fonts, motion, display-name presentation, and every other appearance or customization value, with native accessible date and time pickers and stated timezone and daylight-saving semantics."
+        },
+        {
+          "id": "scheduled-settings-REQ-02",
+          "text": "Rules live in a versioned bounded schema with stable ids and deterministic precedence, and each rule takes its value from local data, a validated versioned HTTPS API, or a Home Assistant boolean entity."
+        },
+        {
+          "id": "scheduled-settings-REQ-03",
+          "text": "External sources refresh on a bounded interval with generation checks, fail safe to the last valid base state with a localized notification, keep tokens in the operating-system credential vault, and never persist an API value as the permanent base setting."
+        },
+        {
+          "id": "scheduled-settings-REQ-04",
+          "text": "universal proof; every day versus selected weekdays; cross-midnight and date boundaries; API validation and error paths; Home Assistant `on`, `off`, and missing-token paths; offline behaviour; schedule edits recorded in local history."
+        }
+      ]
+    },
+    {
+      "id": "display-name",
+      "subrequirements": [
+        {
+          "id": "display-name-REQ-01",
+          "text": "The person using a application can change the name it shows them in the title bar, the About surface, notifications, and everywhere else it introduces itself, persisted and resettable to the shipped name in one action."
+        },
+        {
+          "id": "display-name-REQ-02",
+          "text": "Renaming changes the display name and nothing else: the data directory, installer and package ids, update feed, and markers written into other repositories stay derived from a constant, and diagnostics and crash reports still send the shipped name."
+        },
+        {
+          "id": "display-name-REQ-03",
+          "text": "Every rename, change, and reset records its own append-only commit in the application's local history."
+        },
+        {
+          "id": "display-name-REQ-04",
+          "text": "universal proof; identity paths unchanged after a rename; one-action reset to the shipped name; diagnostics carry the shipped name; one commit per rename mutation."
+        }
+      ]
+    },
+    {
+      "id": "adhd-modes",
+      "subrequirements": [
+        {
+          "id": "adhd-modes-REQ-01",
+          "text": "Every user-facing application and GitHub Pages ships independently toggleable, persisted ADHD modes, never one master switch: Focus, Low stimulation, Time awareness, One thing at a time, and Momentum, each adapted to the surface and each off by default."
+        },
+        {
+          "id": "adhd-modes-REQ-02",
+          "text": "Copy is plain, factual, and free of judgement, with no streaks, scores, or congratulation, and the modes are never presented as medical."
+        },
+        {
+          "id": "adhd-modes-REQ-03",
+          "text": "Low stimulation composes with the operating system's reduced-motion preference, and School and Kids modes interact with them explicitly and documented."
+        },
+        {
+          "id": "adhd-modes-REQ-04",
+          "text": "universal proof; each mode alone and in combination; Focus never hides work beyond one obvious action; persistence across restart; command-palette participation; local history and export."
+        }
+      ]
+    },
+    {
+      "id": "dim-sum",
+      "subrequirements": [
+        {
+          "id": "dim-sum-REQ-01",
+          "text": "Every user-facing application has a 10% chance at startup, drawn fresh per launch and at most once, to show one randomly chosen dish with its English and Cantonese names and its picture."
+        },
+        {
+          "id": "dim-sum-REQ-02",
+          "text": "The surprise is non-blocking and auto-dismissing, never holds up startup or steals focus, never appears during a first run, a failure, an update, or a task in progress, and respects reduced motion and quiet settings with alt text naming the dish."
+        },
+        {
+          "id": "dim-sum-REQ-03",
+          "text": "It cannot be opted out of, an existing off switch is removed with stored preferences migrated forward, and School mode suppresses it; pictures come only from the public catalogue under `dim-sum-photo-source`, so read both canonical sections together."
+        },
+        {
+          "id": "dim-sum-REQ-04",
+          "text": "universal proof; draw rate and single fire per launch; absence in every excluded flow; no third-party CDN or tracking; School-mode absence."
+        }
+      ]
+    },
+    {
+      "id": "dim-sum-photo-source",
+      "subrequirements": [
+        {
+          "id": "dim-sum-photo-source-REQ-01",
+          "text": "agents never generate, download, scrape, or vendor dim-sum photos in consumer repositories: the sole public source is `Ding-Ding-Projects/dim-sum-photos`, whose `catalog/index.json` names are authoritative and whose published `catalog-v1*` release assets are the only photos, reached by public asset URL or an application-data cache."
+        },
+        {
+          "id": "dim-sum-photo-source-REQ-02",
+          "text": "A missing public image is omitted and reported, never filled locally, and legacy dim-sum files inside an repository are migration material to move off. `Ding-Ding-Projects/dim-sum-catalog-archive` is recovery and audit storage only, never a consumer route."
+        },
+        {
+          "id": "dim-sum-photo-source-REQ-03",
+          "text": "no tracked dim-sum image or catalogue copy in the consumer repository; source URL and revision recorded for any offline cache; an explicit unavailable-image state with its screenshot."
+        }
+      ]
+    },
+    {
+      "id": "material-design",
+      "subrequirements": [
+        {
+          "id": "material-design-REQ-01",
+          "text": "Every user-facing application, GitHub Pages, and extension page conforms fully to Material Design 3 Expressive, its tokens, typography, shape, elevation, motion, and component anatomy, with zero legacy or original design elements remaining."
+        },
+        {
+          "id": "material-design-REQ-02",
+          "text": "Every rendered component, control, and layout surface uses a registered genuine Material Design 3 primitive, generic HTML survives only as document plumbing or inside a registered component's internals, and functional data colours stay exempt as data, not chrome."
+        },
+        {
+          "id": "material-design-REQ-03",
+          "text": "A hand-written per-surface inventory records each component's registration and provenance."
+        },
+        {
+          "id": "material-design-REQ-04",
+          "text": "universal proof; the per-surface component registration inventory; a guard that turns red when a rendered generic placeholder replaces a Material Design 3 component."
+        }
+      ]
+    },
+    {
+      "id": "workflow-navigation",
+      "subrequirements": [
+        {
+          "id": "workflow-navigation-REQ-01",
+          "text": "Content is separated into discrete destinations a person navigates to instead of one long scrolling surface, and every element presented as navigable, from window controls to overflow buttons and decorative navigation, performs its labelled action."
+        },
+        {
+          "id": "workflow-navigation-REQ-02",
+          "text": "Microsoft Windows desktop applications use a frameless window with a custom Material Design 3 title bar and working window controls, never the operating system's default title bar as product chrome."
+        },
+        {
+          "id": "workflow-navigation-REQ-03",
+          "text": "This id groups the navigation-structure duties of the linked sections, while `tabs` carries the tab strip itself."
+        },
+        {
+          "id": "workflow-navigation-REQ-04",
+          "text": "A application must never resemble its GitHub Pages: it opens into productive task workspaces with live records and contextual actions."
+        },
+        {
+          "id": "workflow-navigation-REQ-05",
+          "text": "Command catalogues, generic command forms, marketing heroes, and feature-card landing layouts cannot substitute for integrated working functions; remakes replace obsolete screenshots and update the separate GitHub Pages."
+        },
+        {
+          "id": "workflow-navigation-REQ-06",
+          "text": "universal proof; an interaction gate for every window control and navigation affordance; a screenshot of the frameless title bar from the built artifact."
+        }
+      ]
+    },
+    {
+      "id": "motion",
+      "subrequirements": [
+        {
+          "id": "motion-REQ-01",
+          "text": "Motion follows Material Design 3 motion everywhere and is one of the persisted appearance values a person can customize and schedule."
+        },
+        {
+          "id": "motion-REQ-02",
+          "text": "Every animated surface treats reduced-motion respect as a completion blocker rather than polish: the animated rainbow settles on one hue, the super-confirmation and ladder animations stay understandable without motion, and Low stimulation composes with the operating-system preference instead of overriding it."
+        },
+        {
+          "id": "motion-REQ-03",
+          "text": "Motion never becomes the only carrier of a state."
+        },
+        {
+          "id": "motion-REQ-04",
+          "text": "universal proof; a reduced-motion gate per animated surface; screenshots in both motion states."
+        }
+      ]
+    },
+    {
+      "id": "appearance-editor",
+      "subrequirements": [
+        {
+          "id": "appearance-editor-REQ-01",
+          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance… from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close."
+        },
+        {
+          "id": "appearance-editor-REQ-02",
+          "text": "The editor reaches Microsoft Word-depth typography and Adobe Photoshop-depth layered, non-destructive image editing across every interaction state, mapped by a hand-written capability matrix, alongside persisted runtime controls for theme, density, seed colour, and full UI font customization with a live preview."
+        },
+        {
+          "id": "appearance-editor-REQ-03",
+          "text": "Edits are reversible per property, layer, state, element, and globally, with undo and redo, append-only history, named presets, copy and paste style, import and export, and live application that never touches stable identity."
+        },
+        {
+          "id": "appearance-editor-REQ-04",
+          "text": "Every editor includes an Animation and Transition tab covering every renderer setting, property, track, keyframe, timeline, easing, playback, trigger, sequencing and interruption behavior, with visible capability limits, reduced-motion rendering and a hand-written matrix proven by negative regressions and actual timed rendering."
+        },
+        {
+          "id": "appearance-editor-REQ-05",
+          "text": "universal proof; every capability-matrix row mapped to implementation, persistence, undo, accessibility, built-artifact interaction, and a per-click screenshot; unsupported properties stay visible with an exact explanation."
+        }
+      ]
+    },
+    {
+      "id": "color-picker",
+      "subrequirements": [
+        {
+          "id": "color-picker-REQ-01",
+          "text": "Every colour control is an infinite picker, a continuous spectrum, wheel, or two-dimensional field plus numeric entry, never a swatch-only chooser, with a translator across named colours, HEX and HEX8, RGB, HSL, HSV, HWB, CIELAB and LCH, OKLab and OKLCH, and CMYK that preserves alpha, names the active space and gamut, warns before gamut loss, and shows contrast."
+        },
+        {
+          "id": "color-picker-REQ-02",
+          "text": "The animated rainbow is one of its choices: a sentinel outside the palette, animated in the stylesheet around the hue wheel, with one global duration, speed stored as a level, and one settled hue under reduced motion."
+        },
+        {
+          "id": "color-picker-REQ-03",
+          "text": "The pickers theme themselves and the chrome around them, carry a search with the regex builder, and never silently drop a value they cannot represent."
+        },
+        {
+          "id": "color-picker-REQ-04",
+          "text": "universal proof; bidirectional translation round trips; the rainbow sentinel never enters the palette array; a single reduced-motion hue; per-element and global reset; preset export and import."
+        }
+      ]
+    },
+    {
+      "id": "logo-customization",
+      "subrequirements": [
+        {
+          "id": "logo-customization-REQ-01",
+          "text": "Every user-facing application and GitHub Pages ships several project-appropriate logo presets plus a local custom-image upload, with truthful empty, loading, invalid, converted, replace, reset, and conversion error states that join scheduled settings, appearance export, local history, palette teleport, and per-element editing."
+        },
+        {
+          "id": "logo-customization-REQ-02",
+          "text": "Custom images are decoded locally in an isolated bounded decoder that verifies the real bytes and rejects malformed, animated, or decompression-bomb input without partial application, and they never leave the machine."
+        },
+        {
+          "id": "logo-customization-REQ-03",
+          "text": "The editor offers crop, fit, focal point, safe area, and a background through the infinite colour picker, while conversion emits only verified consumable variants, reports any loss before activation, keeps the prior logo after a failure, and never rewrites installed identity."
+        },
+        {
+          "id": "logo-customization-REQ-04",
+          "text": "universal proof; byte and signature mismatch; bounds exhaustion; rollback after a conversion failure; local-only and no-network gates; packaged rendering at every display size with the selected logo visible."
+        }
+      ]
+    },
+    {
+      "id": "overlay-panels",
+      "subrequirements": [
+        {
+          "id": "overlay-panels-REQ-01",
+          "text": "Every popover, menu, dropdown, tooltip, and anchored panel paints its own background, border, elevation, and shape, stays bounded by the viewport, and scrolls when its content does not fit instead of hiding the overflow."
+        },
+        {
+          "id": "overlay-panels-REQ-02",
+          "text": "Overlays never paint outside their card, sit under their opener, or cover the control they anchor to."
+        },
+        {
+          "id": "overlay-panels-REQ-03",
+          "text": "Every panel is resizable from its edges and corners, floating panels also drag by their header, both have keyboard paths, and size and position persist per surface with a reset."
+        },
+        {
+          "id": "overlay-panels-REQ-04",
+          "text": "universal proof; layout clipping defect checks at narrow widths, every display scale, and the longest localized strings; keyboard resize and move; persistence and reset."
+        }
+      ]
+    },
+    {
+      "id": "collapse-filters",
+      "subrequirements": [
+        {
+          "id": "collapse-filters-REQ-01",
+          "text": "Search bars, filter rows, and statistics panels are collapsible, and the ones that only describe a collection start collapsed."
+        },
+        {
+          "id": "collapse-filters-REQ-02",
+          "text": "The collapsed state persists, is keyboard-operable with a visible focus ring, announces its expanded state, and never hides an active filter without saying so."
+        },
+        {
+          "id": "collapse-filters-REQ-03",
+          "text": "universal proof; active-filter disclosure while collapsed; persistence across restart."
+        }
+      ]
+    },
+    {
+      "id": "accessibility-sizing",
+      "subrequirements": [
+        {
+          "id": "accessibility-sizing-REQ-01",
+          "text": "Accessibility failures are completion blockers wherever they are met: keyboard reachability, visible focus, correct roles, names, and states, contrast, reduced motion, and screen-reader structure."
+        },
+        {
+          "id": "accessibility-sizing-REQ-02",
+          "text": "No text or control may suffer a layout clipping defect, overlap, or sit off-screen at any supported window size, display scale, density, or language mode, and controls keep their design size, adequate touch targets, and sibling consistency at 100, 125, 150, and 200% scale."
+        },
+        {
+          "id": "accessibility-sizing-REQ-03",
+          "text": "A screenshot that shows a sizing, layout clipping defect, or accessibility failure pulls its fix into the task's scope."
+        },
+        {
+          "id": "accessibility-sizing-REQ-04",
+          "text": "universal proof; narrow widths and the longest bilingual strings; every supported scale; keyboard-only and screen-reader passes."
+        }
+      ]
+    },
+    {
+      "id": "functional-ui",
+      "subrequirements": [
+        {
+          "id": "functional-ui-REQ-01",
+          "text": "Any icon, preview, toolbar control, card, tab, badge, or affordance presented as usable performs its labelled action, exposes an accessible equivalent, persists its state where applicable, and has an interaction gate, while anything purely illustrative is labelled a static preview and never styled as a live control."
+        },
+        {
+          "id": "functional-ui-REQ-02",
+          "text": "Releases are real applications, not demo shells: no fake default placeholders, seeded sample documents, or mock-only workflows, only truthful empty states with real create and open paths."
+        },
+        {
+          "id": "functional-ui-REQ-03",
+          "text": "Discarding unsaved work is recorded as an append-only local history action before the close completes."
+        },
+        {
+          "id": "functional-ui-REQ-04",
+          "text": "universal proof; an interaction gate for every tiny affordance alongside the primary flow; empty-state screenshots; a recorded, restorable discard entry."
+        }
+      ]
+    },
+    {
+      "id": "tabs",
+      "subrequirements": [
+        {
+          "id": "tabs-REQ-01",
+          "text": "Every user-facing application and GitHub Pages presents content as browser-style tabs whose strip docks to any edge, left by default, with axis-correct accessibility, an overflow surface, reordering, first-class pinning and grouping, decoratable groups, and persistence of order, pins, groups, and collapsed state across restarts."
+        },
+        {
+          "id": "tabs-REQ-02",
+          "text": "Settings, properties, and appearance surfaces are tabbed too, with the whole tab feature set, in addition to their own search."
+        },
+        {
+          "id": "tabs-REQ-03",
+          "text": "Every application ships the four tab-discovery searches, a Move… into group… picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders."
+        },
+        {
+          "id": "tabs-REQ-04",
+          "text": "universal proof; every dock edge with a vertical `aria-orientation` where it applies; overflow at every edge; all four searches with isolated state; bulk-close previews, no run on an empty query or invalid pattern, and pinned or locked exclusion; restart persistence."
+        }
+      ]
+    },
+    {
+      "id": "regex-search",
+      "subrequirements": [
+        {
+          "id": "regex-search-REQ-01",
+          "text": "Every project includes a super-advanced regex workbench for construction, explanation, testing, profiling, and debugging against its real engine, inside its natural primary interface."
+        },
+        {
+          "id": "regex-search-REQ-02",
+          "text": "Every search bar, settings or properties surface, page, panel, list, table, tree, gallery, history, notification centre, editor section, dropdown, and context menu has its own local search with its own adjacent anchored builder, owning isolated query, pattern, flags, validation, mode, history, and snippets, with plain text as the default."
+        },
+        {
+          "id": "regex-search-REQ-03",
+          "text": "Evaluation stays local, bounded, time-limited, and safe against catastrophic backtracking, and a hand-written per-surface search inventory keeps a missing field from disappearing."
+        },
+        {
+          "id": "regex-search-REQ-04",
+          "text": "universal proof; valid, invalid, no-match, Unicode, multiline, zero-width, capture-group, and adversarial cases on the real engine; the full builder exercised from every search surface; a guard that turns red when one surface, field, builder registration, or isolated-state binding is removed."
+        }
+      ]
+    },
+    {
+      "id": "command-palette",
+      "subrequirements": [
+        {
+          "id": "command-palette-REQ-01",
+          "text": "Every user-facing application and GitHub Pages opens a command palette with `Ctrl+Shift+F`, with no competing `Ctrl+K` default, listing every command, feature page, article, destination, setting, and appearance control."
+        },
+        {
+          "id": "command-palette-REQ-02",
+          "text": "Rows are rich live controls wired to the originating code, and selecting a result teleports to the exact element: its owning surface, tab or group, scroll position, focus, and a brief highlight."
+        },
+        {
+          "id": "command-palette-REQ-03",
+          "text": "Size is a persisted choice between a bounded card, the default, and a full-window view, and the palette carries its own search with the regex builder."
+        },
+        {
+          "id": "command-palette-REQ-04",
+          "text": "universal proof; gates for every feature page, setting, appearance control, rich row interaction, teleport target, and the shortcut itself; locked items labelled and prompting instead of teleporting past the lock."
+        }
+      ]
+    },
+    {
+      "id": "context-menus",
+      "subrequirements": [
+        {
+          "id": "context-menus-REQ-01",
+          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance… and Lock this element…."
+        },
+        {
+          "id": "context-menus-REQ-02",
+          "text": "Every context menu and every dropdown opens with a keyboard-focusable filter field and its own anchored regex builder, however short the menu, filtering locally without reordering meaning, hiding a destructive item while its shortcut stays live, or changing any action."
+        },
+        {
+          "id": "context-menus-REQ-03",
+          "text": "Focus lands in the filter on open where the platform allows, arrows move, Enter activates, Escape clears and then closes, focus returns to the opener, and screen readers hear the result count."
+        },
+        {
+          "id": "context-menus-REQ-04",
+          "text": "universal proof; menus present on small, disabled, and state elements; a filter field in every menu and dropdown; an honest no-match message."
+        }
+      ]
+    },
+    {
+      "id": "menu-shortcuts",
+      "subrequirements": [
+        {
+          "id": "menu-shortcuts-REQ-01",
+          "text": "Every context-menu item that has a keyboard shortcut displays it right-aligned in the platform's own notation, derived from the same source that registers the binding so the two cannot drift."
+        },
+        {
+          "id": "menu-shortcuts-REQ-02",
+          "text": "The displayed shortcut is the one that actually works in that context, reaches assistive technology as a shortcut announced once, and an item with no shortcut shows nothing."
+        },
+        {
+          "id": "menu-shortcuts-REQ-03",
+          "text": "universal proof; a gate comparing displayed and registered bindings per context."
+        }
+      ]
+    },
+    {
+      "id": "rich-controls",
+      "subrequirements": [
+        {
+          "id": "rich-controls-REQ-01",
+          "text": "Wherever a value is shown, in list rows, table cells, menu items, search results, detail panels, cards, and previews, the real control is preferred over a printout, wired to the same validation, persistence, localization, funny-level styling, history, and accessible naming as its originating surface."
+        },
+        {
+          "id": "rich-controls-REQ-02",
+          "text": "A plain readout is allowed only for a named reason, with the full control one obvious action away."
+        },
+        {
+          "id": "rich-controls-REQ-03",
+          "text": "Long lists stay virtualized and cheap to traverse, and every embedded control has its own accessible name, role, value, state, focus, and target size."
+        },
+        {
+          "id": "rich-controls-REQ-04",
+          "text": "universal proof; the rich control and its originating surface never disagree about a value; long-list performance; keyboard traversal without per-row traps."
+        }
+      ]
+    },
+    {
+      "id": "guided-forms",
+      "subrequirements": [
+        {
+          "id": "guided-forms-REQ-01",
+          "text": "Forms assume the person does not know what to type: pickers use real data, valid suggested defaults replace blank boxes, validation is inline, browse and typed paths share validation, and expert settings retain honest novice controls with a Custom state."
+        },
+        {
+          "id": "guided-forms-REQ-02",
+          "text": "Every capable interactive element offers an optional target-bound guided wizard directly above it, with one contextual step for simple controls and full steps for complicated workflows, with the direct route usable through identical validation, permissions, super-confirmation, action and history; contextual steps provide Back, Cancel, recovery and truthful results."
+        },
+        {
+          "id": "guided-forms-REQ-03",
+          "text": "Every element that can support guidance has complete unique contextual explanation and clear documentation covering purpose, options, defaults, effects, examples, validation and recovery, with stable authoritative concept/help identifiers, localized search/palette navigation and no repeated generic paragraphs or automatically reopening guidance."
+        },
+        {
+          "id": "guided-forms-REQ-04",
+          "text": "Hand-written per-element guidance and control-complexity inventories record capability reasons for genuine nonapplicability and negative regressions catch omitted wizards, missing coverage and repetition."
+        },
+        {
+          "id": "guided-forms-REQ-05",
+          "text": "Every editable textbox has a dedicated clear control with localized keyboard access and its intended validation/persistence, while noneditable fields and secrets remain protected."
+        },
+        {
+          "id": "guided-forms-REQ-06",
+          "text": "universal proof; typed and browsed paths share validation; the novice-level mapping table; a Custom state that never overwrites advanced values; per-element guidance/complexity inventory with omission, repetition and forced-opening negatives, real wizard/direct-route parity and localized accessible help navigation."
+        }
+      ]
+    },
+    {
+      "id": "settings-explanations",
+      "subrequirements": [
+        {
+          "id": "settings-explanations-REQ-01",
+          "text": "Every settings element carries its full explanation behind progressive disclosure, stating what the setting does rather than restating its label."
+        },
+        {
+          "id": "settings-explanations-REQ-02",
+          "text": "Beside it, a truthful provenance line says whether the value came from a written file or from the compiled-in default, naming the real default value."
+        },
+        {
+          "id": "settings-explanations-REQ-03",
+          "text": "Coverage is held by a hand-written list of every settings element, so an element with no explanation turns the gate red."
+        },
+        {
+          "id": "settings-explanations-REQ-04",
+          "text": "universal proof; the hand-written settings inventory guard."
+        }
+      ]
+    },
+    {
+      "id": "blank-editors",
+      "subrequirements": [
+        {
+          "id": "blank-editors-REQ-01",
+          "text": "An editor that opens to nothing offers presets and a first-class path to start from the application's real defaults, derived strictly from those defaults and templates so a preset and reset-to-defaults can never disagree."
+        },
+        {
+          "id": "blank-editors-REQ-02",
+          "text": "Each preset states exactly what it creates and sets, and applying it is a normal recorded, undoable local history action."
+        },
+        {
+          "id": "blank-editors-REQ-03",
+          "text": "universal proof; preset and reset parity; undo through local history."
+        }
+      ]
+    },
+    {
+      "id": "super-confirmation",
+      "subrequirements": [
+        {
+          "id": "super-confirmation-REQ-01",
+          "text": "Every destructive action passes a two-key confirmation built in the application's own native UI layer, never a helper application, hosted page, or external CAPTCHA, preferably anchored beside the destructive control."
+        },
+        {
+          "id": "super-confirmation-REQ-02",
+          "text": "The confirmation names the exact action and affected data, needs two independently operated keys before a full-range slider enables, animates progress and completion, offers an always-available Emergency exit plus Escape or back, returns focus, and never acts until both keys and the slider complete."
+        },
+        {
+          "id": "super-confirmation-REQ-03",
+          "text": "Safety facts stay unambiguous at every language mode and funny level."
+        },
+        {
+          "id": "super-confirmation-REQ-04",
+          "text": "universal proof; untouched, one key, both keys, partial and full slider, cancel, Escape or back, and reduced motion; the action's real success and error paths; the affected feature recorded in its documentation."
+        }
+      ]
+    },
+    {
+      "id": "element-locks",
+      "subrequirements": [
+        {
+          "id": "element-locks-REQ-01",
+          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element… command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP."
+        },
+        {
+          "id": "element-locks-REQ-02",
+          "text": "Each lock has its own credential set in the operating-system credential vault with no master credential or implicit inheritance, and a locked element is truly disabled yet opens its own anchored unlock prompt, with no shortcut, palette teleport, or automation hook walking around it."
+        },
+        {
+          "id": "element-locks-REQ-03",
+          "text": "Every lock says it is just for fun, never security, and names deleting the local application-data folder as the recovery."
+        },
+        {
+          "id": "element-locks-REQ-04",
+          "text": "universal proof; every one-factor and multi-factor mix; keypad and manual PIN parity on one validator and one attempt budget; TOTP skew; shortcut and palette bypass resistance; history without credential leakage; a hand-written lock and input-route inventory guard."
+        }
+      ]
+    },
+    {
+      "id": "support-tickets",
+      "subrequirements": [
+        {
+          "id": "support-tickets-REQ-01",
+          "text": "A locked-out person reaches Support Tickets from the unlock prompt, the lock setting, and Help: a playful local ticket desk whose resolution opens the application-data folder in the platform file manager with the exact path shown and copyable."
+        },
+        {
+          "id": "support-tickets-REQ-02",
+          "text": "It never deletes anything itself, and any in-application deletion goes through super confirmation."
+        },
+        {
+          "id": "support-tickets-REQ-03",
+          "text": "One plain line outside the comedy, unstyled by the funny level, states that nothing is sent anywhere and nobody is reading, and no real company's support branding or human response time is ever imitated."
+        },
+        {
+          "id": "support-tickets-REQ-04",
+          "text": "universal proof; all three entry routes; the correct folder opened per platform; the disclosure line unaltered at every level and mode; no network call; a searchable, exportable, bulk-manageable ticket list."
+        }
+      ]
+    },
+    {
+      "id": "unlock-ladder",
+      "subrequirements": [
+        {
+          "id": "unlock-ladder-REQ-01",
+          "text": "Every application and GitHub Pages that can lock a person out ships the ladder in order: a dim-sum rung with one dish and four choices, ten easy sums, whack-a-mole, then the clock."
+        },
+        {
+          "id": "unlock-ladder-REQ-02",
+          "text": "It clears the waiting and never the credential, never refunds the attempt budget, is capped per rolling hour, leaves exponential escalation untouched, and grades every answer server-side against a single-use nonce."
+        },
+        {
+          "id": "unlock-ladder-REQ-03",
+          "text": "Timed rounds cannot be won early, each mole counts once, and under School mode the ladder starts at the sums with the dim-sum rung absent."
+        },
+        {
+          "id": "unlock-ladder-REQ-04",
+          "text": "universal proof; each rung cleared and lost; budget exhaustion and refill; a replayed nonce; an expired challenge; early and duplicate mole submissions; the School-mode start; a cleared ladder sets no session cookie."
+        }
+      ]
+    },
+    {
+      "id": "authenticator",
+      "subrequirements": [
+        {
+          "id": "authenticator-REQ-01",
+          "text": "Every user-facing application ships its own authenticator as an ordinary tabbed, searchable, palette-reachable destination for arbitrary TOTP secrets, registered by `otpauth://` URI, by QR from an image file or the clipboard, by camera where available, or by manual base32."
+        },
+        {
+          "id": "authenticator-REQ-02",
+          "text": "Codes are standards-exact RFC 6238 over RFC 4226 with SHA-1, SHA-256, and SHA-512, 6 to 8 digits, and arbitrary periods verified against the published vectors, shown large with copy, a readable countdown, and a next-code peek, and a skewed clock is reported in plain words."
+        },
+        {
+          "id": "authenticator-REQ-03",
+          "text": "Everything stays local in the operating-system credential vault, ordinary exports omit secrets and say so, and a secrets export sits behind super confirmation."
+        },
+        {
+          "id": "authenticator-REQ-04",
+          "text": "universal proof; RFC 6238 vectors at 6 and 8 digits for all three hashes; rollover, countdown, and peek; a skewed clock; restart persistence; search, reorder, grouping, and bulk actions; the export omission and the super-confirmation route."
+        }
+      ]
+    },
+    {
+      "id": "qr-pairing",
+      "subrequirements": [
+        {
+          "id": "qr-pairing-REQ-01",
+          "text": "Wherever a application asks someone to pair an authenticator, it generates the secret locally and draws a scannable QR of a standard `otpauth://totp/` URI in-process, never through an online service, beside the copyable grouped base32 secret, algorithm, digits, and period."
+        },
+        {
+          "id": "qr-pairing-REQ-02",
+          "text": "The QR keeps its quiet zone and true dark-on-light contrast in both themes, and the secret is revealed only by explicit action and never written to hard disk, a log, a screenshot, an export, telemetry, or history."
+        },
+        {
+          "id": "qr-pairing-REQ-03",
+          "text": "The factor arms only after the person types back one current code."
+        },
+        {
+          "id": "qr-pairing-REQ-04",
+          "text": "universal proof; encoded parameters match the display and a real authenticator accepts them; no network request; a wrong confirmation code denied and a right one accepted."
+        }
+      ]
+    },
+    {
+      "id": "honest-monetization",
+      "subrequirements": [
+        {
+          "id": "honest-monetization-REQ-01",
+          "text": "A application may be monetized only by its owner's deliberate decision, and free stays the default for every new one."
+        },
+        {
+          "id": "honest-monetization-REQ-02",
+          "text": "Accessibility, the three language modes and both funny levels, School mode and the unlock ladder, and export and import of a person's own data never sit behind a payment; nothing lapses, a purchase surface states the exact price, inventory, and every licensing limitation, and payment credentials and signing keys follow the ordinary secret rules."
+        },
+        {
+          "id": "honest-monetization-REQ-03",
+          "text": "No surface nags with unsolicited prompts for payments, donations, reviews, upgrades, or support, and donations for a application built on someone else's work point at them."
+        },
+        {
+          "id": "honest-monetization-REQ-04",
+          "text": "no paywall in any free application; the four protected categories reachable without a payment; no unsolicited promotional prompt in any flow; every purchase surface audited for exact price and limitations."
+        }
+      ]
+    },
+    {
+      "id": "local-history",
+      "subrequirements": [
+        {
+          "id": "local-history-REQ-01",
+          "text": "Every application that owns documents, projects, or other person-managed records keeps a local Git-backed history isolated beside its own data directory, never a `.git` inside the person's folder, covering documents, accounts, credentials, connected services, rules, and settings so any change can be undone."
+        },
+        {
+          "id": "local-history-REQ-02",
+          "text": "Restores are new revisions, history is append-only, snapshots keep ciphertext as ciphertext with authenticated-encryption bindings that survive restore, and revisions are labelled with what actually changed."
+        },
+        {
+          "id": "local-history-REQ-03",
+          "text": "The panel browses, diffs, restores, labels, prunes, and exports with an advanced date picker, real derived action filters with counts, and its own regex search, while secrets and display names follow the password-protected mutation-history contract with one commit per mutation and no plaintext secret."
+        },
+        {
+          "id": "local-history-REQ-04",
+          "text": "universal proof; a restore of a restore; AAD bound to a stable identifier; date, action, and text filters composing; wrong-password, missing-vault, interrupted-commit, and restart recovery paths; a history write failure never fails the person's own operation."
+        }
+      ]
+    },
+    {
+      "id": "exports",
+      "subrequirements": [
+        {
+          "id": "exports-REQ-01",
+          "text": "Every record, view, list, log, document, setting, and generated artifact a application owns is exportable in every coding format that can faithfully carry it, chosen per datum, with any loss stated before the export runs."
+        },
+        {
+          "id": "exports-REQ-02",
+          "text": "Exports are complete, re-importable where the shape allows, and state their encoding, line endings, and schema version."
+        },
+        {
+          "id": "exports-REQ-03",
+          "text": "Archives are ZIP or 7z with the full 7z option set, encrypted headers included, relative paths, and no secret the surrounding flow has not marked as sensitive."
+        },
+        {
+          "id": "exports-REQ-04",
+          "text": "universal proof; a round-trip import per format; loss disclosure before export; an encrypted-header 7z archive keeps file names hidden; omitted secrets stated."
+        }
+      ]
+    },
+    {
+      "id": "bulk-actions",
+      "subrequirements": [
+        {
+          "id": "bulk-actions-REQ-01",
+          "text": "Every list, table, grid, and collection, the notification centre and every history panel included, supports multi-select with click, shift-click, and keyboard, an honestly scoped select-all for this page or every match, inverse selection, and the whole action set in bulk."
+        },
+        {
+          "id": "bulk-actions-REQ-02",
+          "text": "Bulk runs show the exact count and a reviewable preview, report every skipped item and why, use blocking confirmation only for destructive batches, stay undoable through local history, and report progress and partial results honestly."
+        },
+        {
+          "id": "bulk-actions-REQ-03",
+          "text": "universal proof; select-all scope wording; skipped-item reporting; bulk delete behind super confirmation; bulk export honours the active filter."
+        }
+      ]
+    },
+    {
+      "id": "changelog",
+      "subrequirements": [
+        {
+          "id": "changelog-REQ-01",
+          "text": "Every user-facing application ships a changelog viewer covering every released version with its version, date, categorized changes, and the full commit SHA as a short clickable reference validated against the real forge, reachable from Help or About."
+        },
+        {
+          "id": "changelog-REQ-02",
+          "text": "It filters with an advanced calendar date picker that also accepts typed dates, searches with the regex builder, composes both, and exports or copies the filtered view with its range and SHAs."
+        },
+        {
+          "id": "changelog-REQ-03",
+          "text": "Entries are factual, never invented, and brought current in every project-changing task."
+        },
+        {
+          "id": "changelog-REQ-04",
+          "text": "universal proof; every referenced commit proven to exist before shipping; invalid and partial dates reported inline without losing input; exports match the visible filter."
+        }
+      ]
+    },
+    {
+      "id": "offline-docs",
+      "subrequirements": [
+        {
+          "id": "offline-docs-REQ-01",
+          "text": "Every GUI application bundles every feature article at build time into a full offline documentation browser rendered by its one shared Markdown renderer, distinct from and additional to the GitHub Pages articles."
+        },
+        {
+          "id": "offline-docs-REQ-02",
+          "text": "Article links resolve inside the application, the browser carries its own regex search across titles and bodies, and a completeness guard fails the build when an article file in the repository is missing from the bundle."
+        },
+        {
+          "id": "offline-docs-REQ-03",
+          "text": "universal proof; bundled article count and titles match the article files in the repository; in-application link resolution; offline operation."
+        }
+      ]
+    },
+    {
+      "id": "rendered-provider-text",
+      "subrequirements": [
+        {
+          "id": "rendered-provider-text-REQ-01",
+          "text": "Release notes, GitHub error and pull-request bodies, commit messages, and README previews display as the Markdown they are, through one shared isolated renderer that never runs with the application's own privileges."
+        },
+        {
+          "id": "rendered-provider-text-REQ-02",
+          "text": "The renderer carries an emoji map, a base reference for relative links, and an accessible region label, and an empty source shows an honest \"no notes were provided\" state."
+        },
+        {
+          "id": "rendered-provider-text-REQ-03",
+          "text": "universal proof; headings, links, lists, code, and emoji shortcodes render; provider markup stays sandboxed; the empty state."
+        }
+      ]
+    },
+    {
+      "id": "notifications",
+      "subrequirements": [
+        {
+          "id": "notifications-REQ-01",
+          "text": "Informational, success, progress, and non-decision error messages appear as non-blocking toasts anchored in a bottom corner, auto-dismissing except failures and warnings, stacking without overlap, and carrying optional actions, while modal dialogs are reserved for real decisions."
+        },
+        {
+          "id": "notifications-REQ-02",
+          "text": "A notification centre or history keeps dismissed notifications reviewable, searchable, and bulk-manageable."
+        },
+        {
+          "id": "notifications-REQ-03",
+          "text": "Every notification is localized, focusable, announced, contrast-safe, and dismissible through an adequate target."
+        },
+        {
+          "id": "notifications-REQ-04",
+          "text": "universal proof; no modal for a non-decision; failures and warnings persist until dismissed; centre search and bulk dismiss."
+        }
+      ]
+    },
+    {
+      "id": "file-converter",
+      "subrequirements": [
+        {
+          "id": "file-converter-REQ-01",
+          "text": "Every user-facing application and GitHub Pages ships a real local converter that detects type by bounded byte inspection and offers a categorized, searchable adapter catalogue covering at least Documents/PDF, Images, Audio, Video, Archives, Structured Data/Spreadsheets, Code/Text, and Binary Encodings, with unavailable formats listed as visible disabled rows naming the exact missing dependency."
+        },
+        {
+          "id": "file-converter-REQ-02",
+          "text": "An adapter is enabled only when every dependency is bundled and proven offline, runs sandboxed within bounded resources, and validates its output, and the PDF inspect, split, merge, extract, reorder, rotate, and metadata tools write atomically and reopen to verify."
+        },
+        {
+          "id": "file-converter-REQ-03",
+          "text": "Lossy changes are disclosed first, sources stay untouched, overwrites need super confirmation, and the queue has no artificial file cap yet never loads every path or byte into memory, with pause, resume, cancel, crash recovery, and a storage preflight."
+        },
+        {
+          "id": "file-converter-REQ-04",
+          "text": "universal proof; bundled-package proof without PATH discovery; every category search and builder; post-write reopen validation; a constant-memory queue; guards that turn red when an unbundled adapter shows enabled or an unlimited queue loads into memory."
+        }
+      ]
+    },
+    {
+      "id": "minecraft-server-manager",
+      "subrequirements": [
+        {
+          "id": "minecraft-server-manager-REQ-01",
+          "text": "Every application ships a full server creator, flavour/custom-plugin installer and manager through interactive rich GUI controls on local Microsoft Windows processes, local Docker, SSH processes and SSH Docker."
+        },
+        {
+          "id": "minecraft-server-manager-REQ-02",
+          "text": "Complete Java/Bedrock version discovery includes historical/current and development channels where server distributions exist, with version-bound configuration, commands, runtimes, compatibility and honest unavailable gaps."
+        },
+        {
+          "id": "minecraft-server-manager-REQ-03",
+          "text": "Reusable official references, hand-written inventories and real built-GUI acceptance prevent a version picker or generic textbox editor from masquerading as full support."
+        },
+        {
+          "id": "minecraft-server-manager-REQ-04",
+          "text": "universal proof; four target adapters; complete version discovery and compatibility matrix; typed configuration consumers; install/manage/recovery interaction; source-bound references and negative omissions."
+        }
+      ]
+    },
+    {
+      "id": "ollama-suite",
+      "subrequirements": [
+        {
+          "id": "ollama-suite-REQ-01",
+          "text": "Every application provides an actionable one-click managed Ollama installer, including missing-runtime recovery."
+        },
+        {
+          "id": "ollama-suite-REQ-02",
+          "text": "Reuse the canonical verified procedure with per-application ownership and the explicit Ollama-only managed-download exception; preserve bundled/cache preference, truthful offline states, existing installations and separate installation/runtime/GUI proof."
+        },
+        {
+          "id": "ollama-suite-REQ-03",
+          "text": "Every user-facing application and GitHub Pages independently ships a complete Ollama manager over Ollama's documented local HTTP API, fully guided inside the product with real pickers, recommended defaults, explanations, and an offline troubleshooter, and never a \"see online docs\" dead end."
+        },
+        {
+          "id": "ollama-suite-REQ-04",
+          "text": "Its Model Store enumerates the whole official catalogue and every tag at each verified refresh, hardware fit gives every variant an evidence-backed Runs well, Runs with limits, Unlikely, or Unknown verdict, and the cart means batch pull only, never a payment."
+        },
+        {
+          "id": "ollama-suite-REQ-05",
+          "text": "Chat is a full local session surface with capability-gated attachments, and launching a local harness profile is allowlisted orchestration with preflight, preview, snapshots, one-click restore, and automatic rollback, never an arbitrary shell."
+        },
+        {
+          "id": "ollama-suite-REQ-06",
+          "text": "universal proof; multi-page catalogue completeness with revision, stale, and offline states; all four fit verdicts across hardware and metadata changes; batch pull partial outcomes; rollback after a launch failure; guards that turn red when the catalogue becomes curated, fit guesses from a name, the cart gains payment semantics, or an harness profile accepts arbitrary shell."
+        }
+      ]
+    },
+    {
+      "id": "external-editor",
+      "subrequirements": [
+        {
+          "id": "external-editor-REQ-01",
+          "text": "Every application that owns files or projects detects installed editors, lets the person add or choose one, persists the choice, opens the project folder or a file, and degrades with a clear message when none is found."
+        },
+        {
+          "id": "external-editor-REQ-02",
+          "text": "Anything the application can export opens in Visual Studio Code in one action, as a workspace root for folders, with detection of `code`, per-user, machine, Insiders, and portable installs and an honest download offer when it is absent."
+        },
+        {
+          "id": "external-editor-REQ-03",
+          "text": "universal proof; the no-editor path; folders open as a workspace root; export to VS Code from the export and from its source record."
+        }
+      ]
+    },
+    {
+      "id": "download-handoff",
+      "subrequirements": [
+        {
+          "id": "download-handoff-REQ-01",
+          "text": "A browser-extension download capture opens a real Start download dialog naming the file, source, destination, and starting action before any transfer, then a distinct IDM-style Downloading surface whose controls operate the real transfer, then a non-blocking Download complete surface."
+        },
+        {
+          "id": "download-handoff-REQ-02",
+          "text": "Start and completion stay always on top until resolved, and none of them claims success before the transfer ends."
+        },
+        {
+          "id": "download-handoff-REQ-03",
+          "text": "universal proof; one built-artifact flow from the installed extension through confirm, active progress, and completion, with screenshots of all three states; DOM injection, mocked IPC, or a source preview is never proof."
+        }
+      ]
+    },
+    {
+      "id": "forge-publishing",
+      "subrequirements": [
+        {
+          "id": "forge-publishing-REQ-01",
+          "text": "A application that publishes an repository lets the person choose the account and owner, backed by real multi-account sign-in where each token sits only in the operating-system credential store under an account-scoped key and an active account keeps single-account calls working."
+        },
+        {
+          "id": "forge-publishing-REQ-02",
+          "text": "The account list is an accessible searchable list box with sign-out, set-active, and refresh actions."
+        },
+        {
+          "id": "forge-publishing-REQ-03",
+          "text": "Copy-and-push is offered as an alternative to a fork where the provider cannot make one, and the route taken is always reported."
+        },
+        {
+          "id": "forge-publishing-REQ-04",
+          "text": "universal proof; several accounts signed in at once; no token in configuration, a database, or an export; the route for a provider with no fork support."
+        }
+      ]
+    },
+    {
+      "id": "progress-recovery",
+      "subrequirements": [
+        {
+          "id": "progress-recovery-REQ-01",
+          "text": "A dialog that starts a long operation shows that operation's real progress inside the dialog, disables its submit control, denies re-entry in the handler, and offers slow optional phases as an explicit choice that names what declining leaves undone."
+        },
+        {
+          "id": "progress-recovery-REQ-02",
+          "text": "Where an operation can hit a failure the person cannot diagnose, recovery sits beside the control where it surfaced, and a hand-off to a local coding agent names the real situation and forbids work-losing remedies such as force-pushing."
+        },
+        {
+          "id": "progress-recovery-REQ-03",
+          "text": "A denied credential or missing scope offers re-authentication on the spot."
+        },
+        {
+          "id": "progress-recovery-REQ-04",
+          "text": "universal proof; a keyboard submit cannot re-enter; a declined optional phase reaches the operation; the recovery prompt forbids force-pushing, rewriting commits, and switching branches."
+        }
+      ]
+    },
+    {
+      "id": "completeness-parity",
+      "subrequirements": [
+        {
+          "id": "completeness-parity-REQ-01",
+          "text": "Every user-facing application and GitHub Pages implements every canonical feature independently, with no delegation to a sibling, a shared GitHub Pages, a future release, a hidden route, or a placeholder."
+        },
+        {
+          "id": "completeness-parity-REQ-02",
+          "text": "Each project keeps a hand-written per-surface completeness inventory naming every canonical feature with links to implementation, documentation article, localized copy, persistence, focused gate, built-artifact interaction proof, and real screenshot evidence, and a project-changing task fails closed on any absent, stale, or unproven row."
+        },
+        {
+          "id": "completeness-parity-REQ-03",
+          "text": "An executable negative-regression gate removes one asserted item at a time with exact boundaries and must turn red, then green, and release-grade shutdown adds the hand-written deep audit and the per-click screenshot ledger."
+        },
+        {
+          "id": "completeness-parity-REQ-04",
+          "text": "the inventory itself; its red-then-green guard; a discovery-only registry never counts."
+        }
+      ]
+    },
+    {
+      "id": "front-provenance",
+      "subrequirements": [
+        {
+          "id": "front-provenance-REQ-01",
+          "text": "Every user-facing application and GitHub Pages shows its running version and that version's updated-at date and local time, with seconds and a labelled timezone, on its initial screen before navigation, settings, About, or authentication."
+        },
+        {
+          "id": "front-provenance-REQ-02",
+          "text": "Both values come from provenance bound to the running artifact, never launch time, a file timestamp, a agent's clock, or a hand-entered label, and missing provenance shows an honest unavailable state."
+        },
+        {
+          "id": "front-provenance-REQ-03",
+          "text": "universal proof; a front-screen screenshot; a guard that removes each visible or provenance boundary and turns red."
+        }
+      ]
+    },
+    {
+      "id": "product-evidence",
+      "subrequirements": [
+        {
+          "id": "product-evidence-REQ-01",
+          "text": "Every README and GitHub Pages carries real screenshots of every surface that has one, the main screen, each destination, settings, editors, dialogs, empty and error states, the narrow layout, and both themes, grouped under collapsible headings with alt text naming what each shows."
+        },
+        {
+          "id": "product-evidence-REQ-02",
+          "text": "They come from the real built artifact through the project's own harness at a known commit, never from mockups, and documentation articles and interface-changing release notes follow the same rule."
+        },
+        {
+          "id": "product-evidence-REQ-03",
+          "text": "Visual tasks retain inspected, provenance-bound screenshots in the repository's evidence folder, and a surface that cannot be captured yet says so where the image would go; after a UI remake or interface-changing delivery, refresh every current presentation screenshot and reference across application, GitHub Pages, README, documentation, wiki, gallery and download surfaces from inspected genuine source/hash-bound rebuilt states/configurations, preserving historical originals and provenance without false current claims."
+        },
+        {
+          "id": "product-evidence-REQ-04",
+          "text": "Every application also carries image-generation-authored workflow diagrams in its README and GitHub Pages, with existing missing diagrams inventoried and backfilled and multiple diagrams or illustrations where needed. planning mode shows generated diagrams in chat before the completed plan, while every GitHub Pages supplies accessible animated diagrams with selectable workflow steps, access modes, or relevant configuration, pause and replay, reduced-motion support, and clearly labelled illustrative behavior; static README images link to that active equivalent and never substitute for real screenshots."
+        },
+        {
+          "id": "product-evidence-REQ-05",
+          "text": "screenshots opened from the built artifact and checked against the verified commit; a filename-only manifest never counts; source commit, viewport, scale, theme, method, and privacy recorded per retained screenshot; complete current-image/reference inventory and negative stale-current-image regression, delivered-route verification, historical originals retained."
+        }
+      ]
+    },
+    {
+      "id": "screen-recording",
+      "subrequirements": [
+        {
+          "id": "screen-recording-REQ-01",
+          "text": "Every user-facing application ships a real recording of its built artifact at a known commit, driven through the project's headless route, committed to its own repository, and shown in the README."
+        },
+        {
+          "id": "screen-recording-REQ-02",
+          "text": "It records the application's own window or renderer on an off-screen desktop, never the machine's screen, and shows a real end-to-end path rather than a highlight reel."
+        },
+        {
+          "id": "screen-recording-REQ-03",
+          "text": "It stays small, routes a genuinely large file through the repository's own large-file path and never standard Git LFS, and is refreshed whenever the interface changes."
+        },
+        {
+          "id": "screen-recording-REQ-04",
+          "text": "the recording tracked beside the screenshots; its commit and capture method stated; no monitor recording."
+        }
+      ]
+    },
+    {
+      "id": "design-reference-parity",
+      "subrequirements": [
+        {
+          "id": "design-reference-parity-REQ-01",
+          "text": "Every UI project with a checked-in design-reference folder ships a dedicated plain design-reference desktop application, or the exact framework-appropriate equivalent, that renders the real reference files deterministically by screen, state, theme, viewport, and scale, while the real built application exposes matching routes."
+        },
+        {
+          "id": "design-reference-parity-REQ-02",
+          "text": "A hand-written per-screen inventory lists every reference exactly once with both routes, the full capture tuple, a Material Design 3 primitive audit, raw screenshots from both sides, a labelled side-by-side image, visual-diff evidence, and any reviewed deviation."
+        },
+        {
+          "id": "design-reference-parity-REQ-03",
+          "text": "The parity gate fails closed on any missing or stale element and is proven red then green."
+        },
+        {
+          "id": "design-reference-parity-REQ-04",
+          "text": "an identical capture tuple on both sides through the cheap Lowlevel headless route; machine-readable diff evidence; a guard removing one reference, route, tuple field, audit, comparison, and diff record at a time."
+        }
+      ]
+    },
+    {
+      "id": "design-folder",
+      "subrequirements": [
+        {
+          "id": "design-folder-REQ-01",
+          "text": "Every design surface, including a Astra design implementation subagent’s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface."
+        },
+        {
+          "id": "design-folder-REQ-02",
+          "text": "Design files carry no private vocabulary, and a prototype or preview is never called shipped behaviour."
+        },
+        {
+          "id": "design-folder-REQ-03",
+          "text": "design files tracked under `design/` at the commit that changed them; a leak scan with no finding."
+        }
+      ]
+    },
+    {
+      "id": "layout-matrix",
+      "subrequirements": [
+        {
+          "id": "layout-matrix-REQ-01",
+          "text": "Every surface built from the Astra GUI design route receives a mandatory layout clipping defect matrix through the `diagnose-built-ui-layout` skill and the cheap Lowlevel headless route, bound to the exact source commit and built-artifact hash."
+        },
+        {
+          "id": "layout-matrix-REQ-02",
+          "text": "It covers the normal and minimum supported viewport, English, Cantonese, and bilingual modes, light and dark themes, and 100, 125, 150, and 200% scales, from roughly 320 px upward for a GitHub Pages."
+        },
+        {
+          "id": "layout-matrix-REQ-03",
+          "text": "Source inspection, a mock, or a design preview never satisfies it."
+        },
+        {
+          "id": "layout-matrix-REQ-04",
+          "text": "genuine screenshots and validated version-1 layout-probe receipts per tuple; each remaining finding recorded with its tuple, receipt, blocker, and next safe action."
+        }
+      ]
+    },
+    {
+      "id": "public-screenshot-gallery",
+      "subrequirements": [
+        {
+          "id": "public-screenshot-gallery-REQ-01",
+          "text": "At each usage limit reached pass one `gpt-6-luna` implementation subagent creates or updates a dedicated public repository and public GitHub Pages carrying every reviewed, publishable, genuine screenshot of the current project, while the source repository stays private."
+        },
+        {
+          "id": "public-screenshot-gallery-REQ-02",
+          "text": "Pixels, captions, metadata, and file names are reviewed, private vocabulary and private details are excluded, and capture dates come only from validated provenance."
+        },
+        {
+          "id": "public-screenshot-gallery-REQ-03",
+          "text": "Public visibility, the live GitHub Pages, and each image are verified separately from the source push."
+        },
+        {
+          "id": "public-screenshot-gallery-REQ-04",
+          "text": "public visibility checked without private access; every withheld screenshot reported with its reason; no fabricated or reconstructed screenshot."
+        }
+      ]
+    },
+    {
+      "id": "landing-site",
+      "subrequirements": [
+        {
+          "id": "landing-site-REQ-01",
+          "text": "Every public repository application ships a Material Design 3 GitHub Pages; private repositories are exempt from mandatory creation."
+        },
+        {
+          "id": "landing-site-REQ-02",
+          "text": "Each existing GitHub Pages is a landing, documentation, download, status, settings, and link surface, says so visibly, and is never the primary runtime, a playable game, or an embedded imitation of the product."
+        },
+        {
+          "id": "landing-site-REQ-03",
+          "text": "It strictly carries every user-facing feature in this catalogue as a GitHub Pages equivalent operating on its own content and per-visitor local storage, guarded by a hand-written enumeration that fails the docs build when one is missing, and it is as customizable and tabbed as the application."
+        },
+        {
+          "id": "landing-site-REQ-04",
+          "text": "It presents every feature the project has, bundles every asset locally with no CDN, hosted font, or analytics, states the version it documents, and never presents unreleased work as shipped."
+        },
+        {
+          "id": "landing-site-REQ-05",
+          "text": "the hand-written feature enumeration guard; the per-visitor storage reset line; no network asset in the built output; screenshots of every surface."
+        }
+      ]
+    },
+    {
+      "id": "mobile-site",
+      "subrequirements": [
+        {
+          "id": "mobile-site-REQ-01",
+          "text": "Every GitHub Pages is responsive from roughly 320 px upward with a proper viewport meta tag, no sideways body scroll, wide content scrolling inside its own container, readable reflowing text, and touch targets that meet the platform minimum with safe separation."
+        },
+        {
+          "id": "mobile-site-REQ-02",
+          "text": "Vertical tab strips collapse, and anchored popovers, the appearance editor, the colour picker, and the palette stay inside the viewport and scroll internally."
+        },
+        {
+          "id": "mobile-site-REQ-03",
+          "text": "Menu filter fields stay typable with an on-screen keyboard raised, and every hover-only affordance gets a tap equivalent."
+        },
+        {
+          "id": "mobile-site-REQ-04",
+          "text": "real phone and tablet widths in portrait and landscape, bilingual mode, larger text sizes, and a real touch screen; screenshots per width."
+        }
+      ]
+    },
+    {
+      "id": "installer-download-button",
+      "subrequirements": [
+        {
+          "id": "installer-download-button-REQ-01",
+          "text": "When a verified installer exists, the GitHub Pages's Home page carries a direct, clearly labelled download button using the immutable release asset URL from the validated release manifest, showing the version and platform and operable by keyboard and screen reader."
+        },
+        {
+          "id": "installer-download-button-REQ-02",
+          "text": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL."
+        },
+        {
+          "id": "installer-download-button-REQ-03",
+          "text": "the URL resolves to the published asset; the absent state before verification; a screenshot of Home."
+        }
+      ]
+    },
+    {
+      "id": "feature-articles",
+      "subrequirements": [
+        {
+          "id": "feature-articles-REQ-01",
+          "text": "The documentation lives on the GitHub Pages, not only in the repository: every feature has its own detailed article covering behaviour, configuration, error modes, security, and verification, ending with suggested articles so no reader hits a dead end."
+        },
+        {
+          "id": "feature-articles-REQ-02",
+          "text": "Articles and the GitHub Pages itself are updated in the same project-changing task that changes the behaviour, and long pages use navigable sections rather than one long scroll."
+        },
+        {
+          "id": "feature-articles-REQ-03",
+          "text": "an article per feature in all three language modes; the suggested-articles footer; the article updated in the same commit as the behaviour change."
+        }
+      ]
+    },
+    {
+      "id": "vendored-fonts",
+      "subrequirements": [
+        {
+          "id": "vendored-fonts-REQ-01",
+          "text": "Fonts are vendored complete by a committed script that fetches the exact URL the design asks for with a modern browser `User-Agent`, downloads every file the request returns, preserves `font-weight` and `unicode-range`, declares only axes the binary has, and records a SHA-256 per file in a committed manifest, stopping loudly on a partial set."
+        },
+        {
+          "id": "vendored-fonts-REQ-02",
+          "text": "The result is verified in the built artifact with `document.fonts.check` and the computed `fontFamily`, never by reading configuration."
+        },
+        {
+          "id": "vendored-fonts-REQ-03",
+          "text": "manifest digests match the files; the `fvar` table checked before any variable declaration; built-artifact font checks at every weight the design uses."
+        }
+      ]
+    },
+    {
+      "id": "shared-link-embed",
+      "subrequirements": [
+        {
+          "id": "shared-link-embed-REQ-01",
+          "text": "Every repository and every page it publishes renders a large embedded graphic of the actual product when its link is shared, never the auto-generated metadata card, a stock image, or a mockup. `social-preview.png` sits committed at the repository root, any served copy comes from the same script and is proven byte-identical, and every page serves `og:` title, description, URL, type, site name, an absolute `https://` image with width, height, and alt, `twitter:card` set to `summary_large_image`, and `theme-color` in the HTML the server sends."
+        },
+        {
+          "id": "shared-link-embed-REQ-02",
+          "text": "The image is fetchable anonymously with no a crawler-policy file disallow and changes URL when it changes, and the manual social-preview upload is handed to user with the exact root path and tracked until confirmed."
+        },
+        {
+          "id": "shared-link-embed-REQ-03",
+          "text": "tags read back from the deployed response body; an unauthenticated 2xx image fetch; a byte-identical served copy; a completeness inventory row."
+        }
+      ]
+    },
+    {
+      "id": "homepage-link",
+      "subrequirements": [
+        {
+          "id": "homepage-link-REQ-01",
+          "text": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home-page URL; private repositories are exempt from this mandatory field, and optional private GitHub Pages sites remain allowed."
+        },
+        {
+          "id": "homepage-link-REQ-02",
+          "text": "Set the field with `gh repo edit --homepage <url>` and link it near the top of the README."
+        },
+        {
+          "id": "homepage-link-REQ-03",
+          "text": "GitHub Pages publishing is enabled whenever the project publishes through it, and the URL and base path stay configurable and verified in the built output, so a detached fork publishing under a project path does not 404."
+        },
+        {
+          "id": "homepage-link-REQ-04",
+          "text": "the homepage field read back with `gh`; the built output carries the path prefix; the live GitHub Pages answers."
+        }
+      ]
+    },
+    {
+      "id": "vocabulary-unlock-boundary",
+      "subrequirements": [
+        {
+          "id": "vocabulary-unlock-boundary-REQ-01",
+          "text": "On every GitHub Pages or other website that uses the private vocabulary, all unauthenticated HTML, metadata, API error text, accessible names, registration and sign-in copy, and pre-authentication assets use ordinary language, and the private vocabulary unlocks only after authentication succeeds, with Slop Machine alone public."
+        },
+        {
+          "id": "vocabulary-unlock-boundary-REQ-02",
+          "text": "A current request naming one exact term and one exact private surface authorizes only that literal on that surface, never any public, unauthenticated, exported, logged, or synchronized content."
+        },
+        {
+          "id": "vocabulary-unlock-boundary-REQ-03",
+          "text": "a leak scan of every unauthenticated route and asset; an authenticated-only rendering gate; the personal-vocabulary loader stays the only route everywhere else."
+        }
+      ]
+    },
+    {
+      "id": "status-hub",
+      "subrequirements": [
+        {
+          "id": "status-hub-REQ-01",
+          "text": "The shared Status Hub is a canonical feature of every project and every application: every project registers its repository, default branch, release channel, real gate verdicts, and a stable link, and every application ships its own Material Design 3 status surface showing what the Hub sees with emoji-bearing states and the evidence behind each claim."
+        },
+        {
+          "id": "status-hub-REQ-02",
+          "text": "Hub rows are evidence, never intent, and no Hub control, such as a question card's Send answer, may appear to deliver without reaching the session inbox."
+        },
+        {
+          "id": "status-hub-REQ-03",
+          "text": "Every completeness inventory carries a Status Hub row like any other feature."
+        },
+        {
+          "id": "status-hub-REQ-04",
+          "text": "the registration visible on the Hub; inbox delivery proven by polling before an answer counts as delivered; status-surface screenshots; the completeness inventory row."
+        }
+      ]
+    },
+    {
+      "id": "discord-status-bridge",
+      "subrequirements": [
+        {
+          "id": "discord-status-bridge-REQ-01",
+          "text": "The Hub reaches Discord through a bridge that reads the same session projection and writes answers into the same session inbox, so agents poll one inbox and never hold a Discord token."
+        },
+        {
+          "id": "discord-status-bridge-REQ-02",
+          "text": "Owner-registered bridge credentials persist on the Hub host's toilet and read back as presence only, and the bridge token is read-plus-reply only and must differ from the agent enrollment token."
+        },
+        {
+          "id": "discord-status-bridge-REQ-03",
+          "text": "Every surface rule Discord cannot carry is named with its shipped equivalent."
+        },
+        {
+          "id": "discord-status-bridge-REQ-04",
+          "text": "a Discord answer arrives through the ordinary replies route; the Hub denies startup with a shared token; credential reads return presence only."
+        }
+      ]
+    },
+    {
+      "id": "panic-webhooks",
+      "subrequirements": [
+        {
+          "id": "panic-webhooks-REQ-01",
+          "text": "Verified panic conditions, `destroyed`, `intrusion_attempt`, `reset`, `unavailable`, and `vocabulary_leak`, dispatch through owner-managed Hub destinations in a fixed order: Home Assistant first, the Discord bridge next, then generic webhooks, with idempotent retries and no destination's failure suppressing the next."
+        },
+        {
+          "id": "panic-webhooks-REQ-02",
+          "text": "Registration is owner-only, with secrets held on the host and read back as presence only."
+        },
+        {
+          "id": "panic-webhooks-REQ-03",
+          "text": "Outbound delivery fails closed on unsafe targets, redirects, oversized payloads, and DNS rebinding, and carries only the fixed panic schema."
+        },
+        {
+          "id": "panic-webhooks-REQ-04",
+          "text": "suspicion never dispatches; truthful per-destination results; SSRF and DNS-rebinding gates."
+        }
+      ]
+    },
+    {
+      "id": "tidbyt-displays",
+      "subrequirements": [
+        {
+          "id": "tidbyt-displays-REQ-01",
+          "text": "Registered Tidbyt displays receive an animated scrolling-marquee frame with a factual progress bar on every Git worktree creation, push, implementation subagent spawn and completion, multi-agent orchestration mode launch, Docker deployment, large private heading, and panic activation and relief, with an animated `IDLE` frame at 100% once work goes idle."
+        },
+        {
+          "id": "tidbyt-displays-REQ-02",
+          "text": "Frames use the private vocabulary, are sent with an `installationID`, batch simultaneous events, and keep the raw WebP within the host route's 32 KiB cap."
+        },
+        {
+          "id": "tidbyt-displays-REQ-03",
+          "text": "An unreachable Hub is stated plainly, never claimed as a sent frame."
+        },
+        {
+          "id": "tidbyt-displays-REQ-04",
+          "text": "a delivery receipt per event; the idle frame never static; the size cap respected."
+        }
+      ]
+    },
+    {
+      "id": "build-entrypoints",
+      "subrequirements": [
+        {
+          "id": "build-entrypoints-REQ-01",
+          "text": "Every repository carries real working root `build.bat` and `build-installer.bat` entrypoints that take a fresh Microsoft Windows checkout to a built runnable application and to the release-equivalent installer, installing every dependency themselves in user scope, pre-elevating interactively, supporting `/s`, `--silent`, and `SILENT=1`, reporting each phase honestly, staying idempotent, and propagating the real child exit result."
+        },
+        {
+          "id": "build-entrypoints-REQ-02",
+          "text": "Every build and installer production, every manual release included, invokes these exact entrypoints, and the installer script verifies and prints its artifact path and SHA-256 and never publishes, tags, or pushes."
+        },
+        {
+          "id": "build-entrypoints-REQ-03",
+          "text": "An repository with no installable target documents exact nonapplicability with an honest non-success result."
+        },
+        {
+          "id": "build-entrypoints-REQ-04",
+          "text": "a silent run exits non-zero on the first real failure; no placeholder success; the installer digest matches the published one; a fresh-environment receipt before any fresh-install claim."
+        }
+      ]
+    },
+    {
+      "id": "fresh-build-run-command",
+      "subrequirements": [
+        {
+          "id": "fresh-build-run-command-REQ-01",
+          "text": "Every README that documents a Microsoft Windows build shows one copy-and-paste command, conventionally `.\\build.bat --run`, that works on a completely fresh Microsoft Windows installation, acquires and verifies every dependency from pinned canonical sources, builds the real runnable artifact, verifies it against the current source commit, and launches it only after success. `build.bat`, `download-dependencies.bat`, and the package path share one committed build manifest, and the launch decision binds to a receipt for the unchanged source. dependency activation is staged, locked, journaled, and recoverable after an interrupted or malformed run."
+        },
+        {
+          "id": "fresh-build-run-command-REQ-02",
+          "text": "a hand-written completeness inventory of the README command, run-flag parser, fetch call, bootstrap assertion, launch-after-success check, and manifest, with a guard removing each boundary; the package and run gate fails closed on any dirty state; concurrency, malformed-journal, and interrupted-activation gates."
+        }
+      ]
+    },
+    {
+      "id": "dependency-fetcher",
+      "subrequirements": [
+        {
+          "id": "dependency-fetcher-REQ-01",
+          "text": "Every repository carries `download-dependencies.bat`, plus `download-dependencies.sh` wherever another platform is supported, that obtains every dependency needed to build, run, and test from canonical sources into user-scoped locations, pins exact versions, verifies recorded digests, and keeps a committed manifest of both."
+        },
+        {
+          "id": "dependency-fetcher-REQ-02",
+          "text": "It is idempotent and silent-capable, reports per phase, and exits non-zero on the first real failure."
+        },
+        {
+          "id": "dependency-fetcher-REQ-03",
+          "text": "It never commits fetched dependencies or installs secrets or signing certificates, and `build.bat` calls it rather than duplicating it."
+        },
+        {
+          "id": "dependency-fetcher-REQ-04",
+          "text": "manifest digests verified on a warm and a cold run; silent mode never prompts; both build scripts call the fetcher."
+        }
+      ]
+    },
+    {
+      "id": "bundled-dependencies",
+      "subrequirements": [
+        {
+          "id": "bundled-dependencies-REQ-01",
+          "text": "Every user-facing application ships every dependency it needs inside its own installer and works with the network unplugged: \"install X and try again\" in any wording is a failure, portable distributions are preferred, and a licence that forbids redistribution means verified automatic acquisition, never a link."
+        },
+        {
+          "id": "bundled-dependencies-REQ-02",
+          "text": "Bundled-first resolution names which copy is in use, a not-found state lists every location searched, and the bundle is proven from the installed artifact rather than the configuration."
+        },
+        {
+          "id": "bundled-dependencies-REQ-03",
+          "text": "Optional integration targets such as editors stay links whose copy never reads as a missing dependency."
+        },
+        {
+          "id": "bundled-dependencies-REQ-04",
+          "text": "the installed package resolves the bundled tool and reports `bundled`; packaged-output path assertions plus a size floor with its arithmetic; the honest bundle size in the release notes."
+        }
+      ]
+    },
+    {
+      "id": "squirrel-installer",
+      "subrequirements": [
+        {
+          "id": "squirrel-installer-REQ-01",
+          "text": "Every supported Microsoft Windows installer for every installed application, whatever its framework, is genuine Squirrel.Windows shipping `Setup.exe`, `RELEASES`, the full `.nupkg`, and generated deltas where available."
+        },
+        {
+          "id": "squirrel-installer-REQ-02",
+          "text": "Every other installer route is migrated or removed, and a framework limitation is a packaging problem to solve, never an exemption."
+        },
+        {
+          "id": "squirrel-installer-REQ-03",
+          "text": "Release notes and installer status say plainly that the artifacts are unsigned and may meet an unknown-publisher or SmartScreen warning, with no authenticity claim."
+        },
+        {
+          "id": "squirrel-installer-REQ-04",
+          "text": "the complete Squirrel asset set attached; no parallel non-Squirrel installer; the unsigned disclosure in the notes; a Squirrel packaging failure blocks the release."
+        }
+      ]
+    },
+    {
+      "id": "self-signing",
+      "subrequirements": [
+        {
+          "id": "self-signing-REQ-01",
+          "text": "Outputs are signed only when their required format or runtime demands it, and then only with a project-owned self-signed credential held in protected local storage or a GitHub Actions secret store, never a public certificate authority, paid certificate, signing service, or timestamp service."
+        },
+        {
+          "id": "self-signing-REQ-02",
+          "text": "A CRX requirement is met by a genuine self-signed CRX3 with a stable project-owned key, and the signature is verified mathematically before release."
+        },
+        {
+          "id": "self-signing-REQ-03",
+          "text": "Release material states that self-signing proves only possession of the key."
+        },
+        {
+          "id": "self-signing-REQ-04",
+          "text": "no key material in the repository, logs, arguments, screenshots, or assets; the CRX3 format and signature verified; the trust limitation stated."
+        }
+      ]
+    },
+    {
+      "id": "auto-updates",
+      "subrequirements": [
+        {
+          "id": "auto-updates-REQ-01",
+          "text": "Every installed user-facing application checks for updates at startup and on a bounded background schedule, validates the unsigned Squirrel feed metadata and package hashes over HTTPS without interrupting work, stages the update, and shows a persistent non-blocking ready banner with the exact version, a release-note link, an unsigned-artifact warning, Restart to install update, and Later."
+        },
+        {
+          "id": "auto-updates-REQ-02",
+          "text": "Restart happens only on the person's choice with unsaved-work protection."
+        },
+        {
+          "id": "auto-updates-REQ-03",
+          "text": "The updater is on by default with a visible state and a manual Check for updates command, and an update failure is never hidden behind a spinner."
+        },
+        {
+          "id": "auto-updates-REQ-04",
+          "text": "gates for no update, available, downloading, ready, restart, offline, invalid metadata or hash, corrupt asset, cancellation, rollback, and unsaved work; a localized accessible banner screenshot."
+        }
+      ]
+    },
+    {
+      "id": "app-icon",
+      "subrequirements": [
+        {
+          "id": "app-icon-REQ-01",
+          "text": "Every user-facing application carries an original, project-appropriate logo and a real packaged application icon before release, generated from a committed master source into valid platform formats, a multi-resolution `.ico` on Microsoft Windows included, and wired into chrome, executable, installer, and update metadata."
+        },
+        {
+          "id": "app-icon-REQ-02",
+          "text": "A framework default, a missing mark, a mutable or unreachable icon URL, or a renamed raster blocks release-grade shutdown, and the built artifact is inspected at small and standard sizes."
+        },
+        {
+          "id": "app-icon-REQ-03",
+          "text": "the icon inspected in the built artifact at small and standard sizes; the master source committed."
+        }
+      ]
+    },
+    {
+      "id": "release-workflow",
+      "subrequirements": [
+        {
+          "id": "release-workflow-REQ-01",
+          "text": "Every GitHub project has a GitHub Actions workflow on every `push` and `workflow_dispatch` that builds, packages, and publishes exactly one new, uniquely tagged, non-draft GitHub release carrying the genuinely built installer, and by user's standing decision it runs no tests, lint, or other gating gate."
+        },
+        {
+          "id": "release-workflow-REQ-02",
+          "text": "Release notes state which checks actually ran locally and their real results, never describe an ungated release as passing, and publishing creates no automation loop."
+        },
+        {
+          "id": "release-workflow-REQ-03",
+          "text": "The active delivery scope is Microsoft Windows only, and GitHub API calls resolve the `RELEASE_TOKEN`, `ORG_TOKEN`, `GITHUB_TOKEN` chain without ever printing it."
+        },
+        {
+          "id": "release-workflow-REQ-04",
+          "text": "A private repository keeps `.github/workflows` absent and reaches the same release through `encrypted-public-builder` instead."
+        },
+        {
+          "id": "release-workflow-REQ-05",
+          "text": "a unique monotonic tag per run; the installer attached and downloadable; no test or lint job in any `needs:` chain; the run verdict recorded only after it lands."
+        }
+      ]
+    },
+    {
+      "id": "release-timing",
+      "subrequirements": [
+        {
+          "id": "release-timing-REQ-01",
+          "text": "Every successful workflow-produced release records `Workflow started`, `Workflow completed`, and `Workflow duration` with UTC ISO-8601 timestamps and a stable `HH:mm:ss` duration, measured from the first job's `startedAt` through the final publication step and never estimated."
+        },
+        {
+          "id": "release-timing-REQ-02",
+          "text": "A release without verified timing reports the missing evidence instead of pretending."
+        },
+        {
+          "id": "release-timing-REQ-03",
+          "text": "the three timing lines present and consistent with the run record."
+        }
+      ]
+    },
+    {
+      "id": "release-line-counts",
+      "subrequirements": [
+        {
+          "id": "release-line-counts-REQ-01",
+          "text": "Every GitHub release states the project's line count at that tag, produced by the release workflow running the repository's committed counter script, with the command recorded."
+        },
+        {
+          "id": "release-line-counts-REQ-02",
+          "text": "The table separates source, tests, and styles or markup with total and non-blank lines, states exclusions, separates generated files, attributes surviving lines to agents and people with `git blame` under a stated rule, gives project and grand totals, and agrees with itself. agents never count lines by hand, and the README copy is refreshed only from a published release."
+        },
+        {
+          "id": "release-line-counts-REQ-03",
+          "text": "the counter script committed and reproducible locally; attribution and line totals agree; the README figure names its release."
+        }
+      ]
+    },
+    {
+      "id": "release-dim-sum-photo",
+      "subrequirements": [
+        {
+          "id": "release-dim-sum-photo-REQ-01",
+          "text": "Every GitHub release attaches at least one real, decodable dim-sum photo as a downloadable image asset, naming the dish and exact asset file name in the notes, chosen only from verified catalogue images and never generated or fetched during publishing."
+        },
+        {
+          "id": "release-dim-sum-photo-REQ-02",
+          "text": "Read it together with `dim-sum-photo-source`; the canonical sections govern any tension between them."
+        },
+        {
+          "id": "release-dim-sum-photo-REQ-03",
+          "text": "the asset attached and decoding; the dish and file name in the notes."
+        }
+      ]
+    },
+    {
+      "id": "dim-sum-code-names",
+      "subrequirements": [
+        {
+          "id": "dim-sum-code-names-REQ-01",
+          "text": "Every build or release carries a dim sum code name beside its version, using a dish's exact `name.en` and `name.zhHant` from the public catalogue, chosen only from dishes whose public photo is published, used once per project, and recorded so the mapping is auditable."
+        },
+        {
+          "id": "dim-sum-code-names-REQ-02",
+          "text": "The code name and a public photo link appear in the release notes, the changelog viewer, the GitHub Pages release section, and the About surface, with factual names at every funny level."
+        },
+        {
+          "id": "dim-sum-code-names-REQ-03",
+          "text": "An unavailable catalogue never blocks, delays, or renames a release."
+        },
+        {
+          "id": "dim-sum-code-names-REQ-04",
+          "text": "no reused code name; the release-to-dish mapping recorded; alt text names the dish."
+        }
+      ]
+    },
+    {
+      "id": "ci-bootstrap",
+      "subrequirements": [
+        {
+          "id": "ci-bootstrap-REQ-01",
+          "text": "Every GitHub Actions job keeps an explicit dependency inventory beside its workflow, checks before installing, bootstraps anything missing from canonical sources into job-local cacheable locations, and stops at the exact step naming the missing dependency."
+        },
+        {
+          "id": "ci-bootstrap-REQ-02",
+          "text": "Each repository proves the cache-miss path from a fresh environment against a hand-written list of every job."
+        },
+        {
+          "id": "ci-bootstrap-REQ-03",
+          "text": "Every job that can produce a artifact collects and uploads its safe outputs under `if: ${{ always() }}` without masking the original failure."
+        },
+        {
+          "id": "ci-bootstrap-REQ-04",
+          "text": "the fresh-environment bootstrap gate; the hand-written job list guard; upload steps with `continue-on-error: true` and `if-no-files-found: warn`."
+        }
+      ]
+    },
+    {
+      "id": "runner-selection",
+      "subrequirements": [
+        {
+          "id": "runner-selection-REQ-01",
+          "text": "Before wiring or dispatching a job, `gh` inspects the self-hosted GitHub Actions runner inventory, access, state, platform, capacity, and labels, a compatible self-hosted GitHub Actions runner is used only when it is genuinely available, and otherwise a pinned GitHub-hosted cloud image runs the job."
+        },
+        {
+          "id": "runner-selection-REQ-02",
+          "text": "A self-hosted GitHub Actions runner on a public repository never takes a `pull_request` trigger, keeps write-access triggers, and stays resource-constrained."
+        },
+        {
+          "id": "runner-selection-REQ-03",
+          "text": "No workflow is left queued against an offline label."
+        },
+        {
+          "id": "runner-selection-REQ-04",
+          "text": "inventory evidence recorded before dispatch; no `pull_request` trigger on a self-hosted job."
+        }
+      ]
+    },
+    {
+      "id": "encrypted-public-builder",
+      "subrequirements": [
+        {
+          "id": "encrypted-public-builder-REQ-01",
+          "text": "Private repositories build and release through the `encrypted-public-builder` skill: a gibberish-named public builder holds only an encrypted, name-free payload behind opaque per-project ids, releases publish only back to the private repository, and the private source keeps `.github/workflows` absent."
+        },
+        {
+          "id": "encrypted-public-builder-REQ-02",
+          "text": "No public location ever reveals the private repository's name, products, build details, or release target."
+        },
+        {
+          "id": "encrypted-public-builder-REQ-03",
+          "text": "An unavailable builder is an exact blocker, never a fall back to an unencrypted installer."
+        },
+        {
+          "id": "encrypted-public-builder-REQ-04",
+          "text": "a manual dispatch of the project's opaque id verified on the builder; no private identifier in any public file; the release lands on the private repository."
+        }
+      ]
+    },
+    {
+      "id": "tabbed-readme",
+      "subrequirements": [
+        {
+          "id": "tabbed-readme-REQ-01",
+          "text": "A README opens with a compact index, what the project is, the install line, the GitHub Pages link, and short contents, and folds every long reference section into `<details><summary>` blocks with findable summaries. `CONTRIBUTING.md`, `LICENSE`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` stay real and current so GitHub shows them as tabs above the README."
+        },
+        {
+          "id": "tabbed-readme-REQ-02",
+          "text": "What a first-time reader needs is never collapsed."
+        },
+        {
+          "id": "tabbed-readme-REQ-03",
+          "text": "first-reader content visible without expanding anything; the tab files present and current."
+        }
+      ]
+    },
+    {
+      "id": "human-time-estimate",
+      "subrequirements": [
+        {
+          "id": "human-time-estimate-REQ-01",
+          "text": "Every application's README carries a labelled estimate, preferably a range, of how long a person would take to write the project by hand, beside the line counts."
+        },
+        {
+          "id": "human-time-estimate-REQ-02",
+          "text": "It shows its method, the hand-written line count from the committed counter, the assumed rate, any multiplier, and one line of arithmetic, and it excludes vendored, generated, and dependency trees exactly as the count does."
+        },
+        {
+          "id": "human-time-estimate-REQ-03",
+          "text": "It is refreshed from the same run as the counts and is never presented as a boast."
+        },
+        {
+          "id": "human-time-estimate-REQ-04",
+          "text": "the estimate and the counts come from the same release run; inputs and arithmetic shown."
+        }
+      ]
+    },
+    {
+      "id": "sanitized-instruction-copy",
+      "subrequirements": [
+        {
+          "id": "sanitized-instruction-copy-REQ-01",
+          "text": "Every project keeps a clearly labelled, sanitized mirror of the shared instructions in its `README.md` and `AGENTS.md`, refreshed when the instructions change, with every machine, account, host, path, address, and credential detail generalized rather than deleted."
+        },
+        {
+          "id": "sanitized-instruction-copy-REQ-02",
+          "text": "The whole private vocabulary is omitted from any mirror in a public repository, and changes are always made in the owner-managed private source first."
+        },
+        {
+          "id": "sanitized-instruction-copy-REQ-03",
+          "text": "a leak scan of the public mirror; the mirror label present; a refresh in the same task as any instruction change."
+        }
+      ]
+    },
+    {
+      "id": "agents-md-vocabulary-block",
+      "subrequirements": [
+        {
+          "id": "agents-md-vocabulary-block-REQ-01",
+          "text": "Every repository, public and private alike, carries the canonical `## Agent conversation vocabulary` block in its `AGENTS.md`, copied verbatim from the payload and naming no term, so every agent learns the discipline before its first reply."
+        },
+        {
+          "id": "agents-md-vocabulary-block-REQ-02",
+          "text": "It is added or refreshed in the same task that touches the repository, followed by the canonical leak scan before the push."
+        },
+        {
+          "id": "agents-md-vocabulary-block-REQ-03",
+          "text": "a byte-exact block; a leak scan with no finding across the repository."
+        }
+      ]
+    },
+    {
+      "id": "vocabulary-hash-lock",
+      "subrequirements": [
+        {
+          "id": "vocabulary-hash-lock-REQ-01",
+          "text": "Every repository holds its builds and its pushes behind a lock derived at run time from the dictionary, with the expected value kept beside the private source and neither the terms nor the hash ever committed."
+        },
+        {
+          "id": "vocabulary-hash-lock-REQ-02",
+          "text": "A missing private source is skipped with the reason printed, while a present but stale lock fails closed."
+        },
+        {
+          "id": "vocabulary-hash-lock-REQ-03",
+          "text": "The gate says plainly that it proves possession and currency of the dictionary, not that anyone spoke it."
+        },
+        {
+          "id": "vocabulary-hash-lock-REQ-04",
+          "text": "`scripts/check-vocabulary.mjs` wired into the build script and a `pre-push` hook through `core.hooksPath`; a stale lock turns the build red."
+        }
+      ]
+    },
+    {
+      "id": "roadmap-checklist",
+      "subrequirements": [
+        {
+          "id": "roadmap-checklist-REQ-01",
+          "text": "Every project keeps `ROADMAP.md` as a Markdown checklist with real `- [ ]` and `- [x]` boxes grouped by phase or milestone, updated in every project-changing task."
+        },
+        {
+          "id": "roadmap-checklist-REQ-02",
+          "text": "A tick is a claim made only when the item is implemented, verified, and captured where it is visible."
+        },
+        {
+          "id": "roadmap-checklist-REQ-03",
+          "text": "Dropped items are struck through or moved to a deliberately-not-doing section with the reason, never silently deleted."
+        },
+        {
+          "id": "roadmap-checklist-REQ-04",
+          "text": "every tick matches verified evidence; no silently deleted item."
+        }
+      ]
+    },
+    {
+      "id": "feature-docs",
+      "subrequirements": [
+        {
+          "id": "feature-docs-REQ-01",
+          "text": "Every feature's explanation lives in its own Markdown file below a categorized documentation folder whose `README.md` indexes it, covering behaviour, configuration, error modes, security, and verification."
+        },
+        {
+          "id": "feature-docs-REQ-02",
+          "text": "The README, the documentation, `ROADMAP.md`, and `HANDOFF.md` stay accurate for the work, and any missing file is created."
+        },
+        {
+          "id": "feature-docs-REQ-03",
+          "text": "each category index links every article; the article updated in the same task as the behaviour."
+        }
+      ]
+    },
+    {
+      "id": "postman-collections",
+      "subrequirements": [
+        {
+          "id": "postman-collections-REQ-01",
+          "text": "An HTTP or API category carries a category-level Postman collection with explanatory Markdown where useful, and the project keeps a master Postman collection JSON that links or contains every applicable API."
+        },
+        {
+          "id": "postman-collections-REQ-02",
+          "text": "A project with no HTTP API records that nonapplicability in the category index instead of inventing collections."
+        },
+        {
+          "id": "postman-collections-REQ-03",
+          "text": "the master collection covers every API category; nonapplicability recorded where it holds."
+        }
+      ]
+    },
+    {
+      "id": "wiki-site-sync",
+      "subrequirements": [
+        {
+          "id": "wiki-site-sync-REQ-01",
+          "text": "Every project-changing task updates the GitHub wiki and any existing GitHub Pages source."
+        },
+        {
+          "id": "wiki-site-sync-REQ-02",
+          "text": "Public repository applications create the mandatory GitHub Pages when the host supports it; private repositories are exempt from mandatory GitHub Pages creation and may retain an optional private surface."
+        },
+        {
+          "id": "wiki-site-sync-REQ-03",
+          "text": "Public application GitHub Pages sites contain complete articles and wiki content directly, with verified internal navigation; optional source links never substitute for content."
+        },
+        {
+          "id": "wiki-site-sync-REQ-04",
+          "text": "Publishing either one never sets off an endless loop of base repository pushes."
+        },
+        {
+          "id": "wiki-site-sync-REQ-05",
+          "text": "the wiki and GitHub Pages source changed in the same task; no publishing loop."
+        }
+      ]
+    },
+    {
+      "id": "handoff-record",
+      "subrequirements": [
+        {
+          "id": "handoff-record-REQ-01",
+          "text": "`HANDOFF.md` stays factual: what changed, verification evidence, remaining work, and external-state blockers, never an unverified success."
+        },
+        {
+          "id": "handoff-record-REQ-02",
+          "text": "Every handoff also gets a titled section on a GitHub failure with the scope, branch or commit, changed files, verification, remaining work, blockers, and the next owner, posted as the work changes state."
+        },
+        {
+          "id": "handoff-record-REQ-03",
+          "text": "handoff claims checked against the current tree; the GitHub section posted or its exact blocker recorded."
+        }
+      ]
+    },
+    {
+      "id": "closeout-prompt",
+      "subrequirements": [
+        {
+          "id": "closeout-prompt-REQ-01",
+          "text": "Every turn that worked in an repository writes a copy-ready fenced closeout prompt to `CLOSEOUT_PROMPT.md` at that repository's root, replacing the previous copy, commits it on the owning branch, pushes that branch, and proves the Git remote ref with `git ls-remote` before the turn ends."
+        },
+        {
+          "id": "closeout-prompt-REQ-02",
+          "text": "A public repository's copy goes through the canonical sanitizer and the leak scan, and an unchanged prompt makes no empty commit."
+        },
+        {
+          "id": "closeout-prompt-REQ-03",
+          "text": "At usage limit reached this push is unconditional."
+        },
+        {
+          "id": "closeout-prompt-REQ-04",
+          "text": "`git ls-remote` proof of the pushed copy; a public copy that passes the leak scan."
+        }
+      ]
+    },
+    {
+      "id": "discussion-records",
+      "subrequirements": [
+        {
+          "id": "discussion-records-REQ-01",
+          "text": "GitHub Discussions are enabled where supported, each active task keeps one rolling progress Discussion with frequent factual milestone comments, and each build or release gets exactly one changelog Announcement whose comments carry every push, GitHub Actions verdict, and artifact."
+        },
+        {
+          "id": "discussion-records-REQ-02",
+          "text": "The newest agent-created Announcement is pinned, and only a provably agent-managed older pin is unpinned."
+        },
+        {
+          "id": "discussion-records-REQ-03",
+          "text": "one Announcement per build or release; comments link exact commits and runs; user-managed pins untouched."
+        }
+      ]
+    },
+    {
+      "id": "project-board",
+      "subrequirements": [
+        {
+          "id": "project-board-REQ-01",
+          "text": "Where GitHub Projects work, each task has one item in the best-scoped Project, moved to `In Progress` at the start and to `Done` only when completion and Git remote proof hold, and every single-repository Project is formally linked to that repository."
+        },
+        {
+          "id": "project-board-REQ-02",
+          "text": "A Project limitation is recorded once and never blocks the rest of the work."
+        },
+        {
+          "id": "project-board-REQ-03",
+          "text": "the Project visible from the repository; the item state matches verified evidence."
+        }
+      ]
+    },
+    {
+      "id": "operational-skill",
+      "subrequirements": [
+        {
+          "id": "operational-skill-REQ-01",
+          "text": "Every release-grade shutdown pass generates or refreshes one repository-specific operational skill recording the real build, packaging, full-UI drive, per-click screenshot, evidence, verification, release, and recovery routes, so a later agent or implementation subagent can reproduce them without rediscovery."
+        },
+        {
+          "id": "operational-skill-REQ-02",
+          "text": "Private workflow content belongs in the canonical private skill catalogue and any project-local mirror is sanitized."
+        },
+        {
+          "id": "operational-skill-REQ-03",
+          "text": "The skill is validated through the skill-creator workflow."
+        },
+        {
+          "id": "operational-skill-REQ-04",
+          "text": "the installed, current skill recorded in the release-grade shutdown evidence."
+        }
+      ]
+    },
+    {
+      "id": "readme-prompt-banner",
+      "subrequirements": [
+        {
+          "id": "readme-prompt-banner-REQ-01",
+          "text": "Applies to the canonical instruction repository; not a banner exposing private prompts in this public product"
+        }
+      ]
+    },
+    {
+      "id": "single-file-instruction-editions",
+      "subrequirements": [
+        {
+          "id": "single-file-instruction-editions-REQ-01",
+          "text": "Applies to the canonical instruction repository; do not publish private editions here"
+        }
+      ]
+    },
+    {
+      "id": "project-profile",
+      "subrequirements": [
+        {
+          "id": "project-profile-REQ-01",
+          "text": "Maintain a sanitized product profile in owner-controlled project memory, with private operations excluded from public source"
+        }
+      ]
+    },
+    {
+      "id": "roblox-model-catalogue",
+      "subrequirements": [
+        {
+          "id": "roblox-model-catalogue-REQ-01",
+          "text": "Conditional on building a Roblox game; no Roblox game is currently requested"
+        }
+      ]
+    },
+    {
+      "id": "roblox-visual-realism",
+      "subrequirements": [
+        {
+          "id": "roblox-visual-realism-REQ-01",
+          "text": "Conditional on Roblox visual/game work; not evidence for Buildroot or guest UI"
+        }
+      ]
+    }
+  ]
+}

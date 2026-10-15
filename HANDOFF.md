@@ -1,5 +1,10 @@
 # Handoff
 
+## Admission expansion checkpoint
+
+The ledger contains 386 bounded planned subrequirements and 420 separate planned surface admissions. Seventeen local focused tests pass, including independent obligation inventory, bounded planned paths, malformed rows and exact desktop tuple axes. The representative version-1 request schema documents strict fields, bounded input, idempotency and interruption recovery, but no broker parser or transactional execution is implemented. Full linked-section reconciliation and concrete consumer admission remain open. Product runtime, installer and release acceptance remain unverified.
+
+
 ## Implementation checkpoint, 2026-10-14
 
 Implementation is authorized and underway on main. P40-P42 are resolved, with all proposed cloud destinations, SSH host families and flashing/install routes approved. Managed GitHub Actions execution, product delivery and conditional private-repository encrypted publication are added to the decision log and stable roadmap children.

@@ -105,3 +105,84 @@ test('realpath containment rejects an internal directory link to external proof'
     fs.rmSync(resolved,{recursive:true,force:true});
   }
 });
+test('planned contract rows cannot disappear or exceed the bounded schema', () => {
+  const missing=copy(); delete missing.identities[0].subrequirements;
+  assert(validate(missing).some(e=>e.includes('planned subrequirements')));
+  const oversized=copy(); oversized.identities[0].subrequirements[0].text='x'.repeat(6001);
+  assert(validate(oversized).some(e=>e.includes('invalid planned subrequirement')));
+  const binding=copy(); binding.identities[0].surfaces.A.plannedAdmission.requirementIds.pop();
+  assert(validate(binding).some(e=>e.includes('planned requirement bindings')));
+  assert.deepEqual(validate(baseline),[]);
+});
+test('planned consumers, locales, state, tests and runtime retain separate identities', () => {
+  for(const field of ['consumer','articles','copy','persistence','tests','runtime']) {
+    const ledger=copy(); delete ledger.identities[0].surfaces.A.plannedAdmission[field];
+    assert(validate(ledger).some(e=>e.includes('planned')),field);
+  }
+  const ledger=copy(); ledger.identities[0].surfaces.D.plannedAdmission.runtime.builtHash='b'.repeat(64);
+  assert(validate(ledger).some(e=>e.includes('falsely proven planned runtime')));
+  assert.deepEqual(validate(baseline),[]);
+});
+test('deleting a subrequirement and every surface binding fails independent inventory comparison', () => {
+  const ledger=copy(), record=ledger.identities[0];
+  const removed=record.subrequirements.pop();
+  for(const entry of Object.values(record.surfaces))entry.plannedAdmission.requirementIds=entry.plannedAdmission.requirementIds.filter(id=>id!==removed.id);
+  assert(validate(ledger).some(e=>e.includes('independent expected inventory')));
+  const edited=copy(); edited.identities[0].subrequirements[0].text+=' changed';
+  assert(validate(edited).some(e=>e.includes('independent expected inventory')));
+  assert.deepEqual(validate(baseline),[]);
+});
+test('every planned file destination rejects nonstrings, empty, absolute, traversal and control paths', () => {
+  const setters=[
+    (p,v)=>p.consumer.path=v,
+    (p,v)=>p.consumer.requestContract=v,
+    (p,v)=>p.articles[0].path=v,
+    (p,v)=>p.copy[0].path=v,
+    (p,v)=>p.tests[0].path=v,
+    (p,v)=>p.runtime.capture.path=v,
+    (p,v)=>p.persistence.store=v
+  ];
+  const invalid=[4,{},null,'',' ','/absolute/file','C:\\absolute\\file','C:relative-drive','../escape','nested/../escape','safe\u0000bad','safe\npath','a//b'];
+  for(const set of setters)for(const value of invalid){
+    const ledger=copy();set(ledger.identities[0].surfaces.A.plannedAdmission,value);
+    assert(validate(ledger).some(e=>e.includes('invalid bounded relative planned path')),JSON.stringify(value));
+  }
+  for(const value of invalid){
+    const ledger=copy(); ledger.identities[0].surfaces.D.plannedAdmission.persistence.store=value;
+    assert(validate(ledger).some(e=>e.includes('invalid bounded planned store reference')));
+  }
+  assert.deepEqual(validate(baseline),[]);
+});
+test('operation, authority, behavior and tuple fields are bounded strings', () => {
+  for(const field of ['operation','authority','behavior'])for(const value of [7,{},null,'','\u0000','x'.repeat(4097)]){
+    const ledger=copy();ledger.identities[0].surfaces.A.plannedAdmission.consumer[field]=value;
+    assert(validate(ledger).some(e=>e.includes('invalid bounded planned string')),field);
+  }
+  for(const value of [7,{},null,'','\n','x'.repeat(513)]){
+    const ledger=copy();ledger.identities[0].surfaces.A.plannedAdmission.runtime.tupleIdTemplate=value;
+    assert(validate(ledger).some(e=>e.includes('invalid bounded planned string')));
+  }
+});
+test('null malformed admission rows report findings without crashing', () => {
+  const mutations=[
+    l=>l.identities[0]=null,
+    l=>l.identities[0].subrequirements[0]=null,
+    l=>l.identities[0].surfaces=null,
+    l=>l.identities[0].surfaces.A=null,
+    l=>l.identities[0].surfaces.A.plannedAdmission=null,
+    l=>l.identities[0].surfaces.A.plannedAdmission.articles[0]=null,
+    l=>l.identities[0].surfaces.A.plannedAdmission.copy[0]=null,
+    l=>l.identities[0].surfaces.A.plannedAdmission.tests[0]=null,
+    l=>l.identities[0].surfaces.A.proof=7
+  ];
+  assert(validate(null).length>0);
+  for(const mutate of mutations){const ledger=copy();mutate(ledger);assert(validate(ledger).length>0);}
+  assert.deepEqual(validate(baseline),[]);
+});
+test('desktop viewport and display scales are exact admitted logical axes', () => {
+  const ledger=copy();ledger.identities[0].surfaces.A.plannedAdmission.runtime.viewports=['normal-1280x800'];
+  assert(validate(ledger).some(e=>e.includes('desktop viewport axes')));
+  const scale=copy();scale.identities[0].surfaces.A.plannedAdmission.runtime.scales=[100,150];
+  assert(validate(scale).some(e=>e.includes('display-scale axes')));
+  assert.deepEqual(validate(baseline),[]);
+});

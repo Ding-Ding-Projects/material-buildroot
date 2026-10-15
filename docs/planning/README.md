@@ -4,7 +4,7 @@
 - [Evidence ledger](evidence-ledger.md): admission schema, separate proof and validation limits.
 - [Machine-readable evidence](feature-evidence.json): 420 independent surface records, no product completion claims.
 - [Managed execution](managed-execution.md): approved destinations, runner choices and separate build/delivery contracts.
-- [Architecture](architecture.md) and [surface boundaries](surfaces.md).
+- [Architecture](architecture.md), [representative versioned request schema](operation-request.schema.json) and [surface boundaries](surfaces.md).
 - [Planning implementation plan](../../PLAN.md), [decisions](../../DECISIONS.md) and [roadmap](../../ROADMAP.md).
 
 These files document admission and pending work; their existence is not runtime evidence. No HTTP API is introduced by this planning category, so a Postman collection is not applicable here. Future admitted HTTP endpoints require their own category/master collections.
