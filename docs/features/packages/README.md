@@ -1,5 +1,7 @@
 # Package workflows
 
+[香港粵語](README.zh-HK.md)
+
 - [套件編寫、patch、hook、overlay 及編輯器交接](package-authoring.zh-HK.md)
 
 - [Package authoring and source-editor handoff](package-authoring.md): structured

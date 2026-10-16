@@ -1,5 +1,7 @@
 # Workspace storage
 
+[香港粵語](README.zh-HK.md)
+
 - [Versioned project model](project-model.md): project identity, ordered external
   trees, known-version migration and surface storage boundaries.
 
