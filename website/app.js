@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 import { mountCompanionConsumers } from './companion-consumers.js';
 import {createPairingIdentity, pairingHeaders} from './pairing-client.js';
-=======
 import {mountBrowserNative} from './browser-native.js';
->>>>>>> 2ddbf3bc05b8b82eddec1e38d7c8a1b705a51df2
 import '@material/web/button/filled-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
@@ -740,19 +737,3 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
-
-
-<<<<<<< HEAD
-
-
-
-
-
-
-
-
-
-
-
-=======
->>>>>>> 2ddbf3bc05b8b82eddec1e38d7c8a1b705a51df2
