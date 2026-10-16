@@ -14,12 +14,17 @@ function main(){
  const {output,provenance}=prepare(root,source),tag=`v${provenance.version}-build.${number}.${attempt}`;
  const latest=api(`repos/${repository}/releases/latest`),previous=/^v(\d+\.\d+\.\d+)(?:-build\.\d+\.\d+)?$/.exec(latest.tag_name||'');
  if(!previous)throw Error('Current release installed version cannot be established.');
- const currentParts=versionParts(provenance.version),previousParts=versionParts(previous[1]);
+ const priorDirectory=fs.mkdtempSync(path.join(root,'.cache/previous-release-'));
+ command(gh,['release','download',latest.tag_name,'--repo',repository,'--pattern','provenance.json','--dir',priorDirectory]);
+ const priorFile=path.join(priorDirectory,'provenance.json');if(fs.statSync(priorFile).size>1024*1024)throw Error('Current release provenance exceeds its bound.');
+ const priorMetadata=JSON.parse(fs.readFileSync(priorFile,'utf8'));
+ if(priorMetadata.schemaVersion!==1||priorMetadata.version!==previous[1]||!/^[a-f0-9]{40}$/.test(priorMetadata.source||'')||priorMetadata.platform!=='windows-x64'||priorMetadata.installer!=='Squirrel.Windows')throw Error('Current release package identity is unavailable or inconsistent.');
+ const currentParts=versionParts(provenance.version),previousParts=versionParts(priorMetadata.version);
  let order=0;for(let i=0;i<3;i++){if(currentParts[i]!==previousParts[i]){order=currentParts[i]>previousParts[i]?1:-1;break;}}
  if(order<=0){
   let prior=api(`repos/${repository}/git/ref/tags/${latest.tag_name}`).object;
   const visited=new Set();for(let depth=0;prior.type==='tag'&&depth<5;depth++){if(visited.has(prior.sha))throw Error('Current release tag cycle.');visited.add(prior.sha);prior=api(`repos/${repository}/git/tags/${prior.sha}`).object;}
-  if(order<0||prior.type!=='commit'||prior.sha!==source)throw Error('A distinct release source requires a strictly newer installed package version.');
+  if(order<0||prior.type!=='commit'||prior.sha!==priorMetadata.source||prior.sha!==source)throw Error('A distinct release source requires a strictly newer installed package version.');
  }
  const photo=verifyPhoto(root,source,{project:repository,releaseTag:tag});dishNote=photo.note;
  const assets=stagePhotoReference(output,provenance,photo);
