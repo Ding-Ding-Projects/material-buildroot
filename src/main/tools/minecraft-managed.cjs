@@ -7,7 +7,7 @@ const { fail, grant, executable, digest, processRun } = require("./runtime.cjs")
 const targets = ["local-process", "local-container", "ssh-process", "ssh-container"];
 const quote = (value) => "'" + value.replace(/'/g, "'\\''") + "'";
 function validate(request) {
-  const allowed = ["action", "serverId", "directoryId", "edition", "target", "memoryMiB", "image", "host", "remoteDirectory", "port", "acceptExecution", "acceptEula", "properties", "version", "flavour"];
+  const allowed = ["action", "serverId", "directoryId", "edition", "target", "memoryMiB", "image", "host", "remoteDirectory", "port", "acceptExecution", "acceptEula", "properties", "version", "flavour", "expectedInstanceId", "entryPoint"];
   if (Object.keys(request).some((key) => !allowed.includes(key))) fail("INVALID_REQUEST");
   if (!["minecraft.managed.start", "minecraft.managed.stop", "minecraft.managed.status", "minecraft.configuration.read", "minecraft.configuration.save"].includes(request.action)) fail("INVALID_REQUEST");
   if (request.action.startsWith("minecraft.configuration.")) {
@@ -20,6 +20,8 @@ function validate(request) {
     return;
   }
   if (typeof request.serverId !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(request.serverId)) fail("INVALID_SERVER_ID");
+  if (request.entryPoint !== undefined && !["server.jar", "fabric-server-launch.jar"].includes(request.entryPoint)) fail("INVALID_SERVER_ENTRYPOINT");
+  if (request.expectedInstanceId !== undefined && !/^[a-f0-9-]{36}$/.test(request.expectedInstanceId)) fail("INVALID_SERVER_INSTANCE");
   if (request.action !== "minecraft.managed.start") return;
   if (typeof request.version !== "string" || !/^[A-Za-z0-9_.+-]{1,80}$/.test(request.version) || !["vanilla", "paper", "fabric"].includes(request.flavour)) fail("INVALID_SERVER_VERSION");
   if (!targets.includes(request.target) || !["java", "bedrock"].includes(request.edition)) fail("INVALID_REQUEST");
@@ -67,7 +69,7 @@ function createManagedMinecraft(options) {
     const saved = (await workflows.store.read()).ownership.find(r => r.directory === directory && !["stopped", "exited", "start-failed"].includes(r.state));
     if (saved && !records.has(saved.serverId)) fail("SERVER_OWNERSHIP_RECONCILIATION_REQUIRED");
   }
-  const workflows = require("./minecraft-workflows.cjs").createWorkflows(options, { records, assertStopped, stop, sshArgs, quote });
+  const workflows = require("./minecraft-workflows.cjs").createWorkflows(options, { records, assertStopped, stop, restart, sshArgs, quote });
   async function execute(request, context = {}) {
     if (require("./minecraft-workflow-contract.cjs").actions.includes(request.action)) { require("./minecraft-workflow-contract.cjs").validate(request); if (disposed) fail("SERVICE_DISPOSED"); return workflows.execute(request, context); }
     validate(request);
@@ -75,7 +77,7 @@ function createManagedMinecraft(options) {
     if (disposed) fail("SERVICE_DISPOSED");
     if (request.action.startsWith("minecraft.configuration.")) {
       const directory = await localDirectory(request), file = path.join(directory, "server.properties");
-      if (locks.has(directory)) fail("SERVER_BUSY");
+      if (locks.has(directory) || (request.action.endsWith("save") && workflows.busy(directory))) fail("SERVER_BUSY");
       locks.add(directory);
       try {
         let existing = "";
@@ -117,9 +119,9 @@ function createManagedMinecraft(options) {
     if (request.action === "minecraft.managed.status") {
       const record = records.get(id);
       if (!record) { const saved = (await workflows.store.read()).ownership.find(row => row.serverId === id); if (saved) return { state: ["stopped", "exited", "start-failed"].includes(saved.state) ? "recorded-stopped" : "ownership-unverified", readinessVerified: false, adoptionVerified: false }; }
-      return record ? { state: record.state, readinessState: record.readinessState || "unknown", persistenceFailed: record.persistenceFailed === true, players: record.players || null, target: record.target, edition: record.edition, exitCode: record.exitCode ?? null, processSpawned: Boolean(record.child), readinessVerified: false } : { state: "not-managed", readinessVerified: false };
+      return record ? { state: record.state, instanceId: record.instanceId, readinessState: record.readinessState || "unknown", persistenceFailed: record.persistenceFailed === true, players: record.players || null, target: record.target, edition: record.edition, exitCode: record.exitCode ?? null, processSpawned: Boolean(record.child), readinessVerified: false } : { state: "not-managed", readinessVerified: false };
     }
-    if (request.action === "minecraft.managed.stop") return stop(id);
+    if (request.action === "minecraft.managed.stop") return stop(id, request.expectedInstanceId);
     if (locks.has(id) || (records.has(id) && !["stopped", "exited", "start-failed"].includes(records.get(id).state))) fail("SERVER_ALREADY_MANAGED");
     const savedIdentity = (await workflows.store.read()).ownership.find(row => row.serverId === id);
     if (savedIdentity && !records.has(id) && !["stopped", "exited", "start-failed"].includes(savedIdentity.state)) fail("SERVER_OWNERSHIP_RECONCILIATION_REQUIRED");
@@ -134,9 +136,10 @@ function createManagedMinecraft(options) {
       resource = (remote ? request.host + ":" : "") + directory;
       if (locks.has(resource) || [...records.values()].some(r => r.resource === resource && !["stopped", "exited", "start-failed"].includes(r.state))) fail("SERVER_DIRECTORY_IN_USE");
       locks.add(resource); ownsResource = true;
-      const entry = request.edition === "java" ? "server.jar" : remote || container || process.platform !== "win32" ? "bedrock_server" : "bedrock_server.exe";
+      const entry = request.edition === "java" ? request.entryPoint || "server.jar" : remote || container || process.platform !== "win32" ? "bedrock_server" : "bedrock_server.exe";
       if (!remote) {
         if (typeof process.getuid === "function" && process.getuid() === 0) fail("ROOT_EXECUTION_REFUSED");
+        for (const marker of [".material-extension-incomplete", ".material-fabric-incomplete"]) { try { await fs.lstat(path.join(directory, marker)); fail("SERVER_OPERATION_INCOMPLETE"); } catch (error) { if (error.code !== "ENOENT") throw error; } }
         await regular(path.join(directory, entry), 1024 ** 3);
         if (request.edition === "java") { await regular(path.join(directory, "eula.txt")); if (!/^eula=true\s*$/m.test(await fs.readFile(path.join(directory, "eula.txt"), "utf8"))) fail("EULA_ACCEPTANCE_REQUIRED"); }
         if (container && directory.includes(",")) fail("INVALID_MOUNT_PATH");
@@ -150,7 +153,7 @@ function createManagedMinecraft(options) {
       if (accepted.response !== 1) fail("SERVER_EXECUTION_CANCELLED");
       let command, args;
       const name = "material-buildroot-minecraft-" + randomUUID();
-      const launch = request.edition === "java" ? ["java", "-Xms512M", "-Xmx" + request.memoryMiB + "M", "-jar", "server.jar", "nogui"] : ["./bedrock_server"];
+      const launch = request.edition === "java" ? ["java", "-Xms512M", "-Xmx" + request.memoryMiB + "M", "-jar", entry, "nogui"] : ["./bedrock_server"];
       const containerArgs = ["run", "--pull=never", "--rm", "--name", name, "--label", "com.dingdingprojects.materialbuildroot.minecraft=" + id, "--interactive", "--user", "1000:1000", "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--memory", request.memoryMiB + "m", "--cpus", "2", "--publish", "127.0.0.1:" + request.port + ":" + request.port + (request.edition === "java" ? "/tcp" : "/udp"), "--mount", "type=bind,source=" + directory + ",target=/server", "--workdir", "/server", "--env", "LD_LIBRARY_PATH=/server", request.image, ...launch];
       if (remote) {
         command = await executable(options, "ssh");
@@ -162,7 +165,8 @@ function createManagedMinecraft(options) {
       else { command = path.join(directory, entry); await digest(command); args = []; }
       if (!remote && await digest(path.join(directory, entry)) !== sourceDigest) fail("SERVER_PAYLOAD_CHANGED");
       if (disposed) fail("SERVICE_DISPOSED");
-      const prepared = { command, directory, resource, sourceDigest, target: request.target, edition: request.edition, version: request.version, flavour: request.flavour, versionVerified, image: request.image || null, host: request.host, containerName: container ? name : null, state: "starting" };
+      context.authorizeExecution?.();
+      const prepared = { instanceId: randomUUID(), launchRequest: structuredClone(request), authorizeExecution: context.authorizeExecution, command, directory, resource, sourceDigest, target: request.target, edition: request.edition, version: request.version, flavour: request.flavour, versionVerified, image: request.image || null, host: request.host, containerName: container ? name : null, state: "starting" };
       await workflows.store.ownership(id, prepared);
       const child = spawn(command, args, { cwd: remote ? undefined : directory, shell: false, windowsHide: true, stdio: ["pipe", "pipe", "ignore"], env: { ...process.env, ...(request.edition === "bedrock" && !remote && !container && process.platform !== "win32" ? { LD_LIBRARY_PATH: directory } : {}) } });
       const record = { ...prepared, child };
@@ -170,18 +174,35 @@ function createManagedMinecraft(options) {
       let output = "";
       child.stdout.on("data", chunk => { output = (output + chunk.toString("utf8")).slice(-4096); if (record.versionVerified && record.edition === "java" && /Done \([0-9.,]+s\)!/.test(output)) { record.readinessState = "server-reported-ready"; } const match = /There are ([0-9]+) of a max of ([0-9]+) players online: ([^\r\n]*)/.exec(output); if (record.edition === "java" && match) { const names = match[3].split(",").map(v => v.trim()).filter(Boolean); if (names.length === Number(match[1]) && names.length <= 1000 && names.every(v => /^[A-Za-z0-9_]{1,16}$/.test(v))) record.players = { names, online: Number(match[1]), maximum: Number(match[2]), observedAt: new Date().toISOString(), source: "owned-console" }; output = ""; } });
       records.set(id, record);
+      if (typeof record.authorizeExecution === "function") {
+        let checkingAuthority = false;
+        record.authorityObserver = setInterval(async () => {
+          if (checkingAuthority) return;
+          if (records.get(id) !== record || ["stopped", "exited", "start-failed"].includes(record.state)) { clearInterval(record.authorityObserver); return; }
+          checkingAuthority = true;
+          try { record.authorizeExecution(); }
+          catch {
+            clearInterval(record.authorityObserver);
+            try { await stop(id, record.instanceId); } catch { record.state = "authority-revoked-stop-unverified"; await persist(); }
+          } finally { checkingAuthority = false; }
+        }, 500);
+        record.authorityObserver.unref();
+        child.once("exit", () => clearInterval(record.authorityObserver));
+        child.once("error", () => clearInterval(record.authorityObserver));
+      }
       child.stdin.on("error", () => {});
       child.on("exit", (code) => { record.exitCode = code; record.state = remote && code !== 0 ? "connection-lost" : code === 0 ? "stopped" : "exited"; void persist(); });
       child.on("error", () => { record.state = "start-failed"; void persist(); });
       await new Promise((resolve, reject) => { child.once("spawn", resolve); child.once("error", () => reject(Object.assign(new Error("PROCESS_START_FAILED"), { code: "PROCESS_START_FAILED" }))); });
       if (record.state === "starting") record.state = "process-started";
       await persist();
-      return { state: record.state, readinessVerified: false, versionVerified, serverId: id };
+      return { state: record.state, readinessVerified: false, versionVerified, serverId: id, instanceId: record.instanceId };
     } finally { locks.delete(id); if (ownsResource) locks.delete(resource); }
   }
-  async function stop(id) {
+  async function stop(id, expectedInstanceId) {
     const record = records.get(id);
     if (!record) fail("SERVER_NOT_MANAGED");
+    if (expectedInstanceId !== undefined && record.instanceId !== expectedInstanceId) fail("SERVER_INSTANCE_CHANGED");
     if (["stopped", "exited"].includes(record.state)) return { state: record.state };
     if (record.state === "connection-lost" && !record.containerName) fail("REMOTE_PROCESS_STATE_UNKNOWN");
     if (record.containerName) {
@@ -196,6 +217,16 @@ function createManagedMinecraft(options) {
     if (!["stopped", "exited"].includes(record.state)) record.state = "stop-requested";
     await workflows.store.ownership(id, record);
     return { state: record.state };
+  }
+  async function restart(id, expectedInstanceId) {
+    const original = records.get(id);
+    if (!original || original.instanceId !== expectedInstanceId || !original.launchRequest) fail("SERVER_INSTANCE_CHANGED");
+    original.authorizeExecution?.();
+    await stop(id, expectedInstanceId);
+    if (original.child && original.child.exitCode === null && original.child.signalCode === null) await new Promise(resolve => { const timer = setTimeout(resolve, 30000); original.child.once("exit", () => { clearTimeout(timer); resolve(); }); });
+    if (records.get(id) !== original || !["stopped", "exited"].includes(original.state)) fail("SERVER_RESTART_STOP_UNVERIFIED");
+    original.authorizeExecution?.();
+    return execute(original.launchRequest, { authorizeExecution: original.authorizeExecution });
   }
   execute.dispose = async () => {
     disposed = true; workflows.dispose();

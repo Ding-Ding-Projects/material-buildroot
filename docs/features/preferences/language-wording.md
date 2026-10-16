@@ -1,5 +1,7 @@
 # Language, voice, and display wording
 
+[香港粵語](language-wording.zh-HK.md)
+
 The desktop keeps its existing persisted English, Hong Kong Cantonese and bilingual language choice. Fresh settings use bilingual and the system theme. The independent voice controls live below the language-save controls in Settings and are indexed by settings search. Both humor levels default to 5 and can be reset independently to 5. Level 1 uses explicit neutral Cantonese alternatives and the factual English base without added tone. Levels 2 through 5 add language-specific tone to complete application-authored message sentences, including warnings and errors. Compact control labels stay unchanged. The original message facts remain intact.
 
 The shared sentence formatter is used by the existing panel localization helpers. Literal-only call sites explicitly identify authored copy; dynamic records and interpolated values remain outside replacement. Neutral Cantonese alternatives are checked-in full-string resources, not runtime search-and-replace rules. Captured status messages retain authored spans separately and format them on display, so changing language, humor or the vocabulary also updates already-visible status messages without changing external values. Tone resources are separate from formatting and preference storage. Connected Lit components repaint when wording preferences change. Shared restricted mode forces English and suppresses tone and vocabulary controls while retaining their saved choices.

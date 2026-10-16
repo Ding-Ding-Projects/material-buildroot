@@ -1,5 +1,7 @@
 # Named build and package targets
 
+[香港粵語](build-targets.zh-HK.md)
+
 The build workspace provides fixed whole-project targets and source-discovered package actions. Selecting a target does not execute anything. Review the runtime, parallelism and reservation settings, then use the existing queue action.
 
 ## Whole-project targets

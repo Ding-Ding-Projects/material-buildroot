@@ -1,12 +1,14 @@
 # Common questions
 
+[香港粵語](FAQ.zh-HK.md) · [Wiki home](Home.md)
+
 ## Can I download Material Buildroot now?
 
-No installer has been published. This website provides the implementation plan, decisions, design handoff and checklist. It does not present a prototype as an available application.
+Normal unsigned Squirrel.Windows installers are published in the [release history](https://github.com/Ding-Ding-Projects/material-buildroot/releases). Select an actual release and read its attached files and source information. A published package is not evidence of installation, update, Buildroot execution or complete feature acceptance. The [current handoff](../../HANDOFF.md) separates implementation, build and deferred acceptance.
 
 ## Does Buildroot run directly on Windows?
 
-The planned desktop application runs on Windows. Buildroot itself runs in Linux through WSL 2 or Docker. Projects will remember the selected backend.
+The desktop application targets Windows. Buildroot itself runs in Linux through WSL 2 or Docker. The source implements per-project runtime selection; real runtime and restart acceptance remain separately tracked. See [project workflows](../features/projects/project-workflows.md) and [runtime setup](../features/execution/setup.md).
 
 ## Is this only a form for entering command-line options?
 
@@ -18,7 +20,7 @@ Both are required initial guest targets. Image presets, hardware and networking 
 
 ## Is the browser companion available?
 
-No. A future companion must use explicit desktop pairing and authenticated local or LAN access. This public static website has no host access and does not start builds or connect to local services.
+The source implements an opt-in HTTPS desktop companion and a browser consumer, using explicit pairing, exact approved origin, native host review, scoped sessions and CSRF protection. Actual paired-browser/TLS/LAN acceptance remains open. The documentation website has no ambient host authority: desktop access requires the separately configured and approved companion session. Read the [protocol and privacy boundaries](../security/companion.md) and [API collection guide](../postman/api-workflow.md) before connecting. An operation receipt is not proof that a delegated build finished.
 
 ## How is completion tracked?
 
@@ -26,4 +28,4 @@ The [roadmap](../../ROADMAP.md) is authoritative. Each checkbox needs the eviden
 
 ## Which decisions still need answers?
 
-See P40–P42 in the [decision log](../../DECISIONS.md) for exact cloud destinations, remote execution targets and flashing or guest-installation routes. Proposed choices do not become defaults without an answer.
+Read the [decision log](../../DECISIONS.md) for the recorded cloud destinations, remote targets and flashing routes. Source implementations are documented in [cloud destinations](../features/cloud-destinations.md), [remote runtimes](../features/remote-runtimes.md) and [flashing and installation](../features/flashing-installation.md). Their remaining runtime and platform limitations stay explicit; a recorded decision or authored adapter is not acceptance.

@@ -1,5 +1,7 @@
 # Reproducibility records and compliance evidence
 
+[香港粵語](reproducibility.zh-HK.md)
+
 The host result API reads the adopted project's output directory. It never executes an output file, extracts an archive, writes into the output directory, or accepts a caller-supplied filesystem root.
 
 ## Record selected outputs

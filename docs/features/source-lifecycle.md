@@ -1,5 +1,7 @@
 # Source acquisition and revision lifecycle
 
+[香港粵語](source-lifecycle.zh-HK.md)
+
 The Source workspace acquires Buildroot with Git over HTTPS, inspects the current revision and local changes, and separates fetch, preview and Apply. The official acquisition action fixes its origin to https://gitlab.com/buildroot.org/buildroot.git. Custom HTTPS repositories retain a separate explicit trust acknowledgement. Neither route replaces an existing nonempty destination.
 
 ## Preserve and apply a revision

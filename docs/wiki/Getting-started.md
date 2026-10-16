@@ -1,5 +1,7 @@
 # Getting started with the plan
 
+[香港粵語](Getting-started.zh-HK.md) · [Wiki home](Home.md)
+
 ## For future users
 
 The intended workflow is to choose a board or virtual-machine preset, select a Linux build backend, configure the system, build it and export an image. Both guided and expert workflows are required.

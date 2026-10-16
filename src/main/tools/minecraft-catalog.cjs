@@ -189,6 +189,8 @@ async function catalog(options, request, context) {
       return {
         installed: true,
         versionId: id,
+        projectId: version.project_id,
+        filename: entry.filename,
         bytes,
         sha512: entry.hashes.sha512,
       };
