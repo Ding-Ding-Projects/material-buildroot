@@ -1135,66 +1135,32 @@ function createOperationsService({
     resolveGrant: (id, mode) => toolFiles.resolve(id, mode),
     authorizeServerExecution: (id) => toolFiles.serverAuthorized(id),
   });
-  // Companion reads deliberately omit local paths, logs, notes, payloads and credentials.
-  const companion =
-    typeof dialog.showMessageBox === "function"
-      ? createCompanionController({
-          dialog,
-          parentWindow,
-          onAction: async (request, context) => {
-            if (disposed || !context.isAuthorized()) reject("UNAUTHORIZED");
-            const summarizeJob = (job) => ({
-              id: job.id,
-              kind: job.kind,
-              state: job.state,
-              sequence: job.sequence,
-              createdAt: job.createdAt,
-              updatedAt: job.updatedAt,
-              logCount: job.logCount,
-              itemCount: job.itemCount,
-            });
-            switch (request.action) {
-              case "workspace.read": {
-                const result = workspaceRead?.();
-                if (!result?.ok) reject("WORKSPACE_UNAVAILABLE");
-                return {
-                  revision: result.state.revision,
-                  onboardingCompleted: result.state.onboardingCompleted,
-                  plans: result.state.plans.map(
-                    ({ id, name, runtime, target, status, updatedAt }) => ({
-                      id,
-                      name,
-                      runtime,
-                      target,
-                      status,
-                      updatedAt,
-                    }),
-                  ),
-                };
-              }
-              case "projects.list":
-                return {
-                  projects: projectStore.list().map(({ id, name }) => ({
-                    id,
-                    name,
-                    authorized: projects.has(id),
-                  })),
-                };
-              case "jobs.list":
-                return {
-                  jobs: jobs
-                    .list()
-                    .filter((job) => job.ownerId === owner)
-                    .map(summarizeJob),
-                };
-              case "jobs.get":
-                return { job: summarizeJob(ownJob(request.args.jobId)) };
-              default:
-                reject("ACTION_NOT_ADMITTED");
-            }
-          },
-        })
-      : null;
+  const {createCompanionConsumers, actionContracts} = require('./security/companion-consumers.cjs');
+  const consumers = createCompanionConsumers({
+    authorizeProject: id => project(id),
+    readWorkspace: () => {
+      const result=workspaceRead?.();
+      if(!result?.ok) reject('WORKSPACE_UNAVAILABLE');
+      return {revision:result.state.revision,onboardingCompleted:result.state.onboardingCompleted,
+        plans:result.state.plans.map(({id,name,runtime,target,status,updatedAt})=>({id,name,runtime,target,status,updatedAt}))};
+    },
+    listProjects: () => projectStore.list().map(({id,name})=>({id,name,authorized:projects.has(id)})),
+    listJobs: () => jobs.list().filter(job=>job.ownerId===owner),
+    getJob: id => ownJob(id),
+    cancelJob: (id,sequence) => {ownJob(id);const result=jobs.cancel(id,owner,sequence);void scheduler.pump().catch(()=>{});return result;},
+    sourceStatus: workspaceId => sources.handle({action:'source.status',workspaceId}),
+    projectOptions: workspaceId => {const item=project(workspaceId);return {...projectOptions.get({workspaceId}),runtime:item.runtime,externalTreesAuthorized:item.externalStateVerified,availableTrees:[...externalWorkspaces.entries()].filter(([,id])=>id===workspaceId)};},
+    defconfigCatalog: workspaceId => changeConfig(projectPaths(workspaceId),()=>defconfigWorkflows.catalog({workspaceId})),
+    buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
+    openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+
+
+  });
+  const companion = typeof dialog.showMessageBox === 'function'
+    ? createCompanionController({dialog,parentWindow,actionContracts,
+        allowedScopes:[...new Set(Object.values(actionContracts).map(value=>value.scope))],
+        onAction:(request,context)=>{if(disposed)reject('UNAUTHORIZED');return consumers.dispatch(request,context);}})
+    : null;
   let updateInstalling = false, activeRequests = 0;
   const updates = updateHostFactory ? updateHostFactory({ canInstall: () => !disposed && activeRequests <= 1 && running.size === 0 && !jobs.list(owner).some(job => ["queued", "running", "cancelling", "dispatching"].includes(job.state)) }) : createUpdateService({
     userData: directory,
@@ -2155,4 +2121,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
+
 

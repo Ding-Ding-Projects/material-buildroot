@@ -1,3 +1,4 @@
+import { mountCompanionConsumers } from './companion-consumers.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
@@ -399,10 +400,29 @@ if (visitor) {
   const companionMessage = visitor.querySelector('#companion-message');
   const sessionPanel = visitor.querySelector('#companion-connected');
   const endpointStorageKey = 'mb-companion-endpoint-v1';
-  const readOnlyScopes = new Set(['workspace:read','projects:read','jobs:read']);
+  const readOnlyScopes = new Set(['workspace:read','projects:read','jobs:read','source:read','outputs:read','jobs:cancel','configuration:read']);
   const actionScope = {'workspace.read':'workspace:read','projects.list':'projects:read','jobs.list':'jobs:read'};
   let companion = null; // Session, CSRF token and sequence intentionally stay in page memory.
   let lastCompanionResult = null;
+  let consumerBusy=false;
+  const consumerWorkspace=mountCompanionConsumers({container:sessionPanel,copy,
+    session:()=>companion?.session||null,
+    request:async(action,args)=>{
+      const active=companion;
+      if(!active||active.sequenceUnknown||consumerBusy)throw Error('SESSION_UNAVAILABLE');
+      consumerBusy=true;
+      const sequence=active.nextSequence;
+      try {
+        const {response,payload}=await companionFetch('/actions',{action,args,sequence,nonce:makeUUID()},active.csrfToken);
+        if(companion!==active)throw Error('SESSION_CHANGED');
+        if(Number.isSafeInteger(payload.nextSequence)&&payload.nextSequence>sequence)active.nextSequence=payload.nextSequence;
+        else active.sequenceUnknown=true;
+        if(!response.ok){if(response.status===401)clearCompanionMemory();throw Error('ACTION_UNAVAILABLE');}
+        if(payload.operation?.action!==action||payload.operation?.sessionId!==active.session.id||payload.operation?.authorityRevoked||payload.operation?.state!=='succeeded'||!Object.hasOwn(payload,'result'))throw Error('INVALID_RESULT');
+        return payload.result;
+      } catch(error){active.sequenceUnknown=true;throw error;}
+      finally{consumerBusy=false;}
+    }});
 
   function parseIPv6(value) {
     if (!/^[0-9a-f:]+$/i.test(value) || value.includes(':::')) return null;
@@ -484,6 +504,7 @@ if (visitor) {
   function makeUUID() { return crypto.randomUUID(); }
   function clearCompanionMemory() {
     companion = null;
+    consumerWorkspace.clear();
     lastCompanionResult = null;
     sessionPanel.hidden = true;
     visitor.querySelector('#companion-refresh').hidden = true;
@@ -494,6 +515,7 @@ if (visitor) {
     challengeField.value = '';
   }
   function showCompanionSession(session) {
+    consumerWorkspace.update();
     sessionPanel.hidden = false;
     visitor.querySelector('#companion-pair').hidden = true;
     visitor.querySelector('#companion-refresh').hidden = false;
@@ -579,10 +601,12 @@ if (visitor) {
     }
   });
   visitor.querySelectorAll('[data-companion-action]').forEach(button=>button.addEventListener('click',async()=>{
-    if(!companion)return;
+    if(!companion||consumerBusy)return;
     const action=button.dataset.companionAction;
     if(!actionScope[action]||!companion.session.scopes.includes(actionScope[action])){companionMessage.textContent=companionError('SCOPE_REJECTED');return;}
     if(companion.sequenceUnknown){companionMessage.textContent=copy('Refresh the session sequence before another action.','請先更新連線序號，然後再進行操作。');return;}
+    if(consumerBusy)return;
+    consumerBusy=true;
     const sequence=companion.nextSequence;
     const actionButtons=[...visitor.querySelectorAll('[data-companion-action]')];
     actionButtons.forEach(item=>item.disabled=true);
@@ -602,7 +626,7 @@ if (visitor) {
       companion.sequenceUnknown=true;
       renderCompanionData(action,null,'INVALID_RESULT');
       companionMessage.textContent=copy('The request may have reached the desktop, but its reply was lost. No automatic retry was sent. Refresh the session before another request; this page cannot infer whether host work stopped.','要求可能已送達桌面，但回覆遺失。頁面無自動重試。請更新連線狀態後再要求資料；此頁無法推斷主機工作是否停止。');
-    } finally {actionButtons.forEach(item=>item.disabled=!companion||!companion.session.scopes.includes(actionScope[item.dataset.companionAction]));}
+    } finally {consumerBusy=false;actionButtons.forEach(item=>item.disabled=!companion||!companion.session.scopes.includes(actionScope[item.dataset.companionAction]));}
   }));
 
   function renderCompanionData(action,result,errorCode) {
@@ -685,3 +709,5 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
+

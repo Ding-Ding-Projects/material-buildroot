@@ -1,0 +1,47 @@
+# Authenticated companion consumers
+
+## Implemented source routes
+
+The authenticated browser has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication.
+
+The typed host adapter admits these exact actions, subject to the current session scope:
+
+| Action | Scope | Consumer |
+| --- | --- | --- |
+| workspace.read | workspace:read | Workspace summary |
+| projects.list | projects:read | Select a currently adopted project |
+| project.options | projects:read | Runtime kind, revision and external-tree authorization summary |
+| source.status | source:read | Actual source revision, branch, dirty state and snapshot count |
+| defconfig.catalog | configuration:read | Trusted configuration catalogue with revision and hashes |
+| build.targets | projects:read | Discovered named/package targets, with native submission boundary |
+| jobs.list | jobs:read | Current host-owned job summaries |
+| jobs.get | jobs:read | Refresh a job previously disclosed to this session |
+| jobs.cancel | jobs:cancel | Request cancellation of a disclosed job at its observed sequence |
+| outputs.browse | outputs:read | Navigate an adopted project's output folders |
+| outputs.inspect | outputs:read | File type, byte count and inspection summary |
+| outputs.checksum | outputs:read | Compute SHA-256 and compare an optional expected digest |
+
+The server validates the argument schema and scope before dispatch. The consumer rechecks authorization before each call and after awaited reads. Project actions revalidate the adopted root identity. Output identifiers are opaque handles scoped to one session and project; each session has its own output viewer. Browser callers cannot submit a host path, invoke a generic IPC operation, create a grant, select an executable or assert native consent.
+
+## Cancellation and recovery
+
+Cancellation is a request, not a completed outcome. It checks the job sequence and existing host ownership, then uses the established queue cancellation method. Refresh the job until the host reports its actual terminal state. A lost response is unknown, not success, and is never automatically retried. An unavailable session stops new calls. Already accepted queue work retains the host's durable lifecycle; disconnect does not claim it was cancelled.
+
+Source/output reads that finish after revocation do not disclose their newly obtained result. Source working-tree paths, raw logs, snapshots, output content previews and credentials are excluded from these projections. The client renders text nodes and accepts only known fields for each view.
+
+## Remaining companion implementation gaps
+
+This increment does not complete PH09-T03 or all C identities. The following are still implementation gaps, not exemptions inferred from missing code:
+
+- Build submission/retry needs a session-aware authorization check at the host's final asynchronous enqueue boundary and native destructive confirmation where applicable.
+- Configuration inspection/edit/reconciliation, defconfig apply/save, presets, account provisioning and package/external-tree editors need dedicated capability-bound projections and controls.
+- Source clone/adopt/ref acquisition/upgrade/rollback need native selection and revision-bound approval bridges; this browser cannot manufacture that approval.
+- Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud destinations need their own narrowly admitted consumers.
+- Converter, server manager, model management/chat, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
+- Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
+- Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
+
+## Verification status
+
+Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
