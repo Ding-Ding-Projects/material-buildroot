@@ -20,6 +20,7 @@ const { createOperationsService } = require("./operations-service.cjs");
 const { createExperienceIPC } = require("./experience-policies.cjs");
 const { createUpdateHost } = require("./updates/host.cjs");
 const { createVault } = require("./security/vault.cjs");
+const { createAuthenticatorIPC } = require("./security/authenticator-controller.cjs");
 const {
   createSharedModeService,
 } = require("./privacy/shared-mode-service.cjs");
@@ -177,6 +178,8 @@ else {
           } catch {}
         }
       });
+      const authenticatorIPC = createAuthenticatorIPC({desktop, directory:app.getPath("userData"), safeStorage});
+      ipcMain.handle("studio:authenticator", (event,value) => authenticatorIPC.request(event,value));
       const experienceIPC = createExperienceIPC({ desktop, directory: app.getPath("userData"), safeStorage, openFolder: folder => shell.openPath(folder), schoolMode: () => sharedModeService?.status()?.active !== false });
       ipcMain.handle("studio:experience-policies", (event, value) => experienceIPC.request(event, value));
       const workspaceService = createWorkspaceService({

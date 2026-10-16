@@ -2,7 +2,7 @@
 const crypto = require("node:crypto");
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 function decodeBase32(text) {
-  if (typeof text !== "string" || !/^[A-Z2-7]+={0,6}$/i.test(text))
+  if (typeof text !== "string" || text.length > 512 || !/^[A-Z2-7]+={0,6}$/i.test(text))
     throw Error("Invalid authenticator secret");
   let bits = 0,
     value = 0,
@@ -15,6 +15,7 @@ function decodeBase32(text) {
       bytes.push((value >>> bits) & 255);
     }
   }
+  if (!bytes.length || (bits && (value & ((1 << bits) - 1)) !== 0)) throw Error("Invalid authenticator secret");
   return Buffer.from(bytes);
 }
 function totp(
@@ -86,4 +87,40 @@ function createAuthenticator({ vault, now = Date.now }) {
     },
   };
 }
-module.exports = { totp, verifyTotp, decodeBase32, createAuthenticator };
+function enrollment(input) {
+  let value = input;
+  if (typeof input === "string") {
+    if (input.length > 2048) throw Error("Invalid enrollment");
+    const uri = new URL(input);
+    if (uri.protocol !== "otpauth:" || uri.hostname !== "totp" || uri.username || uri.password || uri.port || uri.hash) throw Error("Invalid enrollment");
+    const keys = [...uri.searchParams.keys()];
+    if (new Set(keys).size !== keys.length || keys.some(k => !["secret", "issuer", "algorithm", "digits", "period"].includes(k))) throw Error("Invalid enrollment");
+    const label = decodeURIComponent(uri.pathname.slice(1));
+    const split = label.indexOf(":");
+    const labelIssuer = split < 0 ? "" : label.slice(0, split);
+    const issuer = uri.searchParams.get("issuer") || labelIssuer;
+    if (labelIssuer && issuer !== labelIssuer) throw Error("Invalid enrollment");
+    value = { secret: uri.searchParams.get("secret"), issuer, account: split < 0 ? label : label.slice(split + 1), algorithm: (uri.searchParams.get("algorithm") || "SHA1").toLowerCase(), digits: Number(uri.searchParams.get("digits") || 6), period: Number(uri.searchParams.get("period") || 30) };
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(k => !["secret","issuer","account","algorithm","digits","period"].includes(k))) throw Error("Invalid enrollment");
+  const { issuer = "", account, algorithm = "sha1", digits = 6, period = 30 } = value;
+  if ([issuer, account].some(v => typeof v !== "string" || v.length > 128 || /[\x00-\x1f\x7f]/.test(v)) || !account.trim() || issuer.includes(":")) throw Error("Invalid enrollment");
+  const secret = typeof value.secret === "string" ? value.secret.replace(/\s/g, "").toUpperCase().replace(/=+$/, "") : "";
+  const key = decodeBase32(secret);
+  try { if (key.length < 10 || key.length > 128) throw Error("Invalid enrollment"); totp(key, { algorithm, digits, period, time: 0 }); } finally { key.fill(0); }
+  if (period > 86400) throw Error("Invalid enrollment");
+  return { issuer: issuer.trim(), account: account.trim(), secret, algorithm, digits, period };
+}
+function enrollmentUri(value) {
+  const entry = enrollment(value);
+  const label = entry.issuer ? `${entry.issuer}:${entry.account}` : entry.account;
+  const params = new URLSearchParams({ secret: entry.secret, issuer: entry.issuer, algorithm: entry.algorithm.toUpperCase(), digits: String(entry.digits), period: String(entry.period) });
+  return `otpauth://totp/${encodeURIComponent(label)}?${params}`;
+}
+function generateEnrollment({issuer = "Material Buildroot", account = "Local factor"} = {}) {
+  const bytes = crypto.randomBytes(20); let bits = 0, value = 0, secret = "";
+  for (const byte of bytes) { value = (value << 8) | byte; bits += 8; while (bits >= 5) { bits -= 5; secret += alphabet[(value >>> bits) & 31]; } }
+  bytes.fill(0);
+  return enrollment({issuer, account, secret});
+}
+module.exports = { totp, verifyTotp, decodeBase32, createAuthenticator, enrollment, enrollmentUri, generateEnrollment };

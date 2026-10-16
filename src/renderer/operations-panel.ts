@@ -17,6 +17,7 @@ import "./regex-workbench";
 import "./guest-panel";
 import "./tools-panel";
 import "./companion-panel";
+import "./authenticator-panel";
 import "./source-panel";
 import "./package-panel";
 import "./managed-ollama-panel";
@@ -155,7 +156,7 @@ export class OperationsPanel extends LitElement {
       .dock-empty{font:12px/1.5 inherit;padding:8px;color:var(--md-sys-color-on-surface-variant)}
       .operations > .content{overflow:auto;flex:1;min-height:0;padding:12px;gap:8px}
       .operations > [hidden]{display:none!important}
-      .operations > guest-panel,.operations > source-panel,.operations > package-panel,.operations > tools-panel,.operations > companion-panel,.operations > regex-workbench,.operations > documentation-panel{flex:1;min-height:0;overflow:auto;padding:8px}
+      .operations > guest-panel,.operations > source-panel,.operations > package-panel,.operations > tools-panel,.operations > authenticator-panel,.operations > companion-panel,.operations > regex-workbench,.operations > documentation-panel{flex:1;min-height:0;overflow:auto;padding:8px}
       .operations > md-tabs{min-height:38px;--md-primary-tab-container-height:38px}
       .panel{border-radius:0;padding:12px;background:transparent;border-bottom:1px solid var(--md-sys-color-outline-variant)}
       .operations {
@@ -612,6 +613,7 @@ export class OperationsPanel extends LitElement {
       source: ["Source", "來源"],
       package: ["Package authoring", "套件編寫"],
       tools: ["Tools", "工具"],
+      authenticator: ["Authenticator", "驗證器"],
       companion: ["Browser companion", "瀏覽器配對"],
       documentation: ["Help & documentation", "說明同文件"],
       guests: ["Virtual machines", "虛擬機"],
@@ -1253,7 +1255,7 @@ export class OperationsPanel extends LitElement {
     separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
   }
   render() {
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations", "專案操作")}
         .activeTabIndex=${[
@@ -1268,6 +1270,7 @@ export class OperationsPanel extends LitElement {
           "updates",
           "regex",
           "tools",
+          "authenticator",
           "companion",
           "documentation",
         ].indexOf(this.tab)}
@@ -1286,7 +1289,8 @@ export class OperationsPanel extends LitElement {
               "updates",
               "regex",
               "tools",
-              "companion",
+              "authenticator",
+          "companion",
           "documentation",
             ][index] ?? "runtime";
         }}
@@ -1302,6 +1306,7 @@ export class OperationsPanel extends LitElement {
           "updates",
           "regex",
           "tools",
+          "authenticator",
           "companion",
           "documentation",
         ].map(
@@ -1322,7 +1327,7 @@ export class OperationsPanel extends LitElement {
         : nothing}
       <div
         class="content view"
-        ?hidden=${["guests","regex","tools","companion","source","package","documentation"].includes(this.tab)}
+        ?hidden=${["guests","regex","tools","companion","authenticator","source","package","documentation"].includes(this.tab)}
         id="operation-content"
         role="tabpanel"
         aria-labelledby=${"operation-tab-" + this.tab}
@@ -1339,7 +1344,7 @@ export class OperationsPanel extends LitElement {
                   ? nothing
                   : this.tab === "assistant"
                     ? this.assistantView()
-                    : ["regex", "tools", "companion", "source", "package", "documentation"].includes(this.tab)
+                    : ["regex", "tools", "companion", "authenticator", "source", "package", "documentation"].includes(this.tab)
                       ? nothing
                       : this.updatesView()}
       </div>
@@ -1383,7 +1388,7 @@ export class OperationsPanel extends LitElement {
         ?hidden=${this.tab !== "tools"}
         .language=${this.language}
       ></tools-panel
-      ><documentation-panel .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
+      ><authenticator-panel ?hidden=${this.tab!=="authenticator"} .active=${this.tab==="authenticator"} .language=${this.language}></authenticator-panel><documentation-panel .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
         ?hidden=${this.tab !== "companion"}
         .language=${this.language}
       ></companion-panel
