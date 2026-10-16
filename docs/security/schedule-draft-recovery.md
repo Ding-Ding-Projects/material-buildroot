@@ -20,7 +20,7 @@ All actions require the owned top-level frame and a live shared-mode result that
 
 Drafts use a separate profile-scoped directory, SQLite application identity and exact schema. Saved-document revision receipts remain unchanged. Storage opens lazily, so invalid draft storage does not prevent active schedules from starting or being read.
 
-Only complete valid documents containing local-source rules are admitted. Enrollment data, credentials, unknown fields and external rules are rejected. The editor must explicitly project local data when preserving edits from a mixed document, then combine it with current external records during a later explicit restoration. That mixed workflow is still under review.
+Only complete valid documents containing local-source rules are admitted. Enrollment data, credentials, unknown fields and external rules are rejected. The editor explicitly projects local data when preserving edits from a mixed document, then combines it with current external records during later explicit restoration. Its independent source review and browser recovery cases passed; native packaged acceptance remains pending.
 
 Limits are 64 records, 262,144 original document bytes, 16,777,216 aggregate document bytes, 20 receipts per page and a 64 MiB physical database bound. There is no eviction or deletion action. Full storage returns an explicit capacity error and preserves existing records. Since 64 times the maximum document size equals the aggregate limit, a valid append cannot exceed the aggregate bound while a record slot remains. No separate reachable aggregate-refusal branch is claimed.
 

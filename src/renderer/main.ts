@@ -1,4 +1,6 @@
 import "./shared-mode-panel";
+import "./scheduled-preferences-panel";
+import type {ScheduledPreferencesSnapshot} from "../shared/scheduled-preferences";
 import type {SharedModeSnapshot} from "../shared/shared-mode";
 import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
@@ -123,7 +125,7 @@ class MaterialBuildroot extends LitElement {
   private dialogDestination = false;
   private mediaChanged = () => {
     this.dark =
-      this.theme === "dark" || (this.theme === "system" && this.media.matches);
+      this.effectiveTheme === "dark" || (this.effectiveTheme === "system" && this.media.matches);
   };
   static styles = workspaceStyles;
   connectedCallback() {
@@ -133,12 +135,13 @@ class MaterialBuildroot extends LitElement {
     this.mediaChanged();
     this.vocabularyUnsubscribe=vocabulary.subscribe(()=>this.requestUpdate());
     void this.loadSharedMode();
+    void this.loadScheduledPreferences();
     void this.load();
   }
   disconnectedCallback() {
     window.removeEventListener("keydown", this.shortcut);
     this.unsubscribe?.();
-    this.vocabularyUnsubscribe?.();this.modeUnsubscribe?.();
+    this.vocabularyUnsubscribe?.();this.modeUnsubscribe?.();this.scheduleUnsubscribe?.();
     this.media.removeEventListener("change", this.mediaChanged);
     super.disconnectedCallback();
   }
@@ -146,12 +149,25 @@ class MaterialBuildroot extends LitElement {
   private modeUnsubscribe?:()=>void;
   private sharedSnapshot:SharedModeSnapshot|null=null;
   private get restricted(){return vocabulary.school()!=="inactive";}
-  private get effectiveLanguage():Language{return this.restricted?"en":this.state?.language??"bilingual";}
+  private get effectiveLanguage():Language{return this.restricted?"en":this.scheduleSnapshot?.available&&this.scheduleSnapshot.effective?.provenance.language?this.scheduleSnapshot.effective.values.language:this.state?.language??"bilingual";}
+  private scheduleSnapshot:ScheduledPreferencesSnapshot|null=null;
+  private scheduleUnsubscribe?:()=>void;
+  private get effectiveTheme(){return this.scheduleSnapshot?.available&&this.scheduleSnapshot.effective?.provenance['appearance.theme']?this.scheduleSnapshot.effective.values['appearance.theme']:this.theme;}
+  private applyScheduledSnapshot(snapshot:ScheduledPreferencesSnapshot|null){this.scheduleSnapshot=snapshot;this.mediaChanged();this.syncDocumentLanguage();this.requestUpdate();}
+  private async loadScheduledPreferences(){const bridge=window.studio;if(!bridge?.scheduledPreferences)return;let observed=false;this.scheduleUnsubscribe=bridge.onScheduledPreferences?.(snapshot=>{observed=true;this.applyScheduledSnapshot(snapshot);});try{const reply=await bridge.scheduledPreferences({action:'status'});if(!observed)this.applyScheduledSnapshot(reply.ok?reply.result as ScheduledPreferencesSnapshot:null);}catch{if(!observed)this.applyScheduledSnapshot(null);}}
+  private schedulePanel(){return this.renderRoot.querySelector('scheduled-preferences-panel') as import('./scheduled-preferences-panel').ScheduledPreferencesPanel|null;}
+  private async confirmScheduleLeave(){
+    const panel=this.schedulePanel();if(!panel)return true;
+    if(panel.hasPendingDraft&&!this.settingIds.includes('schedules')){this.settingIds=[...this.settingIds,'schedules'];this.requestUpdate();await this.updateComplete;}
+    return panel.confirmLeave();
+  }
+  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
   private applySharedSnapshot(snapshot:SharedModeSnapshot|null){this.sharedSnapshot=snapshot;void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');this.syncDocumentLanguage();this.requestUpdate();}
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
-  private settingIds=['language','appearance','backups','vocabulary','shared'];
+  private settingIds=['language','appearance','backups','vocabulary','shared','schedules'];
   private settingsEntries(){return [
     ...(!this.restricted?[{id:'language',text:this.l('Language Interface language','語言 介面語言')}]:[]),
+    {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記')},
     {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原')},
     {id:'appearance',text:this.l('Appearance Theme','外觀 主題')},
     {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入')},
@@ -166,7 +182,7 @@ class MaterialBuildroot extends LitElement {
   }
   private async sharedPreferenceAction(){
     const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;
-    this.settingIds=['language','appearance','backups','vocabulary','shared'];await this.navigate('settings');await this.updateComplete;
+    this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;
     const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('shared-mode-panel') as import('./shared-mode-panel').SharedModePanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#shared-heading') as HTMLElement|null)?.focus();
   }
@@ -174,7 +190,7 @@ class MaterialBuildroot extends LitElement {
     if(vocabulary.school()!=='inactive')return;
     const dialog=this.renderRoot.querySelector('#actions-dialog');
     const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));
-    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared'];await this.navigate('settings');await this.updateComplete;
+    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;
     const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
     panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
@@ -188,7 +204,7 @@ class MaterialBuildroot extends LitElement {
     if (!value || !Number.isFinite(Date.parse(value)))
       return this.l("Unavailable", "未能取得");
     try {
-      const locale = this.state?.language === "zh-HK" ? "zh-HK" : "en-CA";
+      const locale = this.effectiveLanguage === "zh-HK" ? "zh-HK" : "en-CA";
       const formatter = new Intl.DateTimeFormat(locale, {
         year: "numeric",
         month: "2-digit",
@@ -272,6 +288,7 @@ class MaterialBuildroot extends LitElement {
     }
   }
   private async controlWindow(command: WindowCommand) {
+    if(command==="close"&&!(await this.confirmScheduleLeave()))return;
     try {
       this.windowNotice = !(await window.studio.windowControl(command));
     } catch {
@@ -337,6 +354,7 @@ class MaterialBuildroot extends LitElement {
         : this.l("No operation in progress.", "目前冇操作進行中。");
   }
   private async navigate(route: string) {
+    if(route!==this.route&&!(await this.confirmScheduleLeave()))return;
     if (this.dirty) {
       this.pendingDestination = route;
       this.openDialog("leave-dialog");
@@ -345,6 +363,7 @@ class MaterialBuildroot extends LitElement {
     await this.go(route);
   }
   private async go(route: string) {
+    if(route!==this.route&&!(await this.confirmScheduleLeave()))return;
     this.route = route;
     await this.updateComplete;
     this.renderRoot.querySelector<HTMLElement>("#workspace-heading")?.focus();
@@ -784,7 +803,7 @@ class MaterialBuildroot extends LitElement {
   }
   private date(value: string) {
     return new Intl.DateTimeFormat(
-      this.state?.language === "zh-HK" ? "zh-HK" : "en-GB",
+      this.effectiveLanguage === "zh-HK" ? "zh-HK" : "en-GB",
       { dateStyle: "medium", timeStyle: "short" },
     ).format(new Date(value));
   }
@@ -1385,6 +1404,7 @@ class MaterialBuildroot extends LitElement {
         </p>
       </section>
       <section class="panel stack" ?hidden=${!this.settingIds.includes('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
+      <section class="panel stack" ?hidden=${!this.settingIds.includes('schedules')}><scheduled-preferences-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .snapshot=${this.scheduleSnapshot} .baseLanguage=${this.state?.language||"bilingual"} .baseTheme=${this.theme} @scheduled-snapshot=${(e:CustomEvent<ScheduledPreferencesSnapshot|null>)=>this.applyScheduledSnapshot(e.detail)}></scheduled-preferences-panel></section>
       <div ?hidden=${!this.settingIds.includes('backups')}>${this.historyPanel()}</div>
       ${!this.restricted?html`<section class="panel stack" ?hidden=${!this.settingIds.includes('vocabulary')}><personal-vocabulary-panel .language=${this.effectiveLanguage} .restricted=${this.restricted}></personal-vocabulary-panel></section>`:nothing}
     </div>`;
@@ -1875,7 +1895,7 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
+            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");

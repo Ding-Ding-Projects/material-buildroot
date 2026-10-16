@@ -12,7 +12,7 @@ Practical onboarding creates a saved plan and preserves setup progress. Native f
 
 The local assistant exposes managed Ollama controls, actual installed-model metadata and measured capacity evidence. Offline help packages the public articles with formatted reading, topic navigation and isolated local search. The documentation website adds guided tasks, recipe previews, troubleshooting and saved browser progress.
 
-The host now provides [separate local schedule draft recovery](docs/security/schedule-draft-recovery.md), with append-only bounded storage and explicit restoration that does not activate settings. Focused host checks and interrupted-writer recovery passed. The integrated schedule editor and protected source-enrollment controls remain an unverified candidate; current packaged Windows and complete UI acceptance are still pending.
+The host provides [separate local schedule draft recovery](docs/security/schedule-draft-recovery.md), with append-only bounded storage and explicit restoration that does not activate settings. The [schedule editor](docs/features/scheduled-preferences.md) now includes local rules, effective preferences, protected source enrollment and explicit recovery. All 20 current browser cases passed against the real SQLite service and typed bridge. Current packaged Windows interaction and the complete UI matrix remain pending.
 
 ## Interface captures
 
