@@ -1138,6 +1138,18 @@ function createOperationsService({
   const {createCompanionConsumers, actionContracts} = require('./security/companion-consumers.cjs');
   const consumers = createCompanionConsumers({
     authorizeProject: id => project(id),
+    confirmMutation: async (request,authorize) => {
+      authorize();project(request.args.workspaceId);
+      const result=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review companion change',
+        message:`Approve ${request.action} for the selected project?`,
+        detail:`Browser origin: ${request.origin}\nDevice: ${request.deviceName}\nProject: ${request.args.workspaceId}\nRevision: ${request.args.revision}\n${request.args.symbol ? `Symbol: ${request.args.symbol}\nRequested value: ${String(request.args.change.value)}` : `Configuration: ${request.args.id||request.args.domain}`}\n\nThis uses the existing project trust and configuration transaction. No new filesystem or execution grant is created.`,
+        buttons:['Cancel','Approve this change'],defaultId:0,cancelId:0,noLink:true});
+      authorize();project(request.args.workspaceId);return result.response===1;
+    },
+    inspectConfiguration: request => changeConfig(projectPaths(request.workspaceId),()=>config.inspect(request)),
+    applyConfiguration: request => changeConfig(projectPaths(request.workspaceId),()=>config.apply({workspaceId:request.workspaceId,domain:request.domain,revision:request.revision,changes:{[request.symbol]:request.change}})),
+    undoConfiguration: request => changeConfig(projectPaths(request.workspaceId),()=>config.undo(request)),
+    applyDefconfig: request => changeConfig(projectPaths(request.workspaceId),()=>defconfigWorkflows.apply(request)),
     readWorkspace: () => {
       const result=workspaceRead?.();
       if(!result?.ok) reject('WORKSPACE_UNAVAILABLE');
@@ -2137,6 +2149,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

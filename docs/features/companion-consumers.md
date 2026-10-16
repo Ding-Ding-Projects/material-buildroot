@@ -12,6 +12,10 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | projects.list | projects:read | Select a currently adopted project |
 | project.options | projects:read | Runtime kind, revision and external-tree authorization summary |
 | source.status | source:read | Actual source revision, branch, dirty state and snapshot count |
+| config.inspect | configuration:read | Boolean/numeric configuration rows and observed revision |
+| config.apply | configuration:write | One typed revision-bound change after desktop approval |
+| config.undo | configuration:write | Revision-bound undo after desktop approval |
+| defconfig.apply | configuration:write | Exact catalogue selection after desktop approval |
 | defconfig.catalog | configuration:read | Trusted configuration catalogue with revision and hashes |
 | build.targets | projects:read | Discovered named/package targets |
 | builds.submit | builds:submit | Queue an approved non-destructive named target with bounded parallelism |
@@ -35,7 +39,7 @@ Source/output reads that finish after revocation do not disclose their newly obt
 This increment does not complete PH09-T03 or all C identities. The following are still implementation gaps, not exemptions inferred from missing code:
 
 - Destructive build submission and job retry remain incomplete companion workflows. Non-destructive named builds now recheck the live session at their final enqueue boundary, use the desktop-adopted runtime and source grant, and enter the existing durable scheduler.
-- Configuration inspection/edit/reconciliation, defconfig apply/save, presets, account provisioning and package/external-tree editors need dedicated capability-bound projections and controls.
+- Configuration string/credential editing, complete paged semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Source clone/adopt/ref acquisition/upgrade/rollback need native selection and revision-bound approval bridges; this browser cannot manufacture that approval.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud destinations need their own narrowly admitted consumers.
 - Converter, server manager, model management/chat, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
@@ -45,5 +49,6 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 

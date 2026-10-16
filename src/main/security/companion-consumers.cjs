@@ -6,7 +6,16 @@ function exact(args,keys){if(!args||Object.getPrototypeOf(args)!==Object.prototy
 const id=value=>typeof value==='string'&&UUID.test(value);
 const contract=(scope,keys,check=()=>true)=>Object.freeze({scope,validate(args){exact(args,keys);if(!check(args))fail('INVALID_REQUEST');}});
 const project=args=>id(args.workspaceId);
+const hash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
+const domain=value=>['buildroot','linux','busybox','uboot'].includes(value);
+const symbol=value=>typeof value==='string'&&/^(BR2_|CONFIG_)[A-Z0-9_]{1,160}$/.test(value)&&!/(PASSWORD|SECRET|TOKEN|PRIVATE_KEY|CREDENTIAL)/.test(value);
+function change(value){if(!value||typeof value!=='object')return false;exact(value,['type','value']);switch(value.type){case 'bool':return typeof value.value==='boolean';case 'tristate':return ['y','m','n'].includes(value.value);case 'int':return typeof value.value==='string'&&/^-?[0-9]{1,20}$/.test(value.value);case 'hex':return typeof value.value==='string'&&/^0x[a-fA-F0-9]{1,16}$/.test(value.value);default:return false;}}
+function configProjection(value){return {revision:value.revision,undoDepth:value.undoDepth||0,semanticsAvailable:value.semantics?.available===true,entries:(value.entries||[]).filter(item=>symbol(item.symbol)&&['bool','tristate','int','hex'].includes(item.type)).slice(0,200).map(({symbol,type,value})=>({symbol,type,value})),truncated:(value.entries?.length||0)>200,stringEditing:'native-only'};}
 const actionContracts=Object.freeze({
+ 'config.inspect':contract('configuration:read',['workspaceId','domain'],a=>project(a)&&domain(a.domain)),
+ 'config.apply':contract('configuration:write',['workspaceId','domain','revision','symbol','change'],a=>project(a)&&domain(a.domain)&&hash(a.revision)&&symbol(a.symbol)&&change(a.change)),
+ 'config.undo':contract('configuration:write',['workspaceId','domain','revision'],a=>project(a)&&domain(a.domain)&&hash(a.revision)),
+ 'defconfig.apply':contract('configuration:write',['workspaceId','revision','id'],a=>project(a)&&hash(a.revision)&&hash(a.id)),
  'workspace.read':contract('workspace:read',[]),
  'projects.list':contract('projects:read',[]),
  'jobs.list':contract('jobs:read',[]),
@@ -34,6 +43,16 @@ function createCompanionConsumers(host){
   function viewer(){let value=owned.viewers.get(a.workspaceId);if(!value){if(owned.viewers.size>=100)fail('PROJECT_LIMIT');value=host.openOutputs(a.workspaceId);owned.viewers.set(a.workspaceId,value);}return value;}
   let result;
   switch(request.action){
+   case 'config.inspect':result=configProjection(await host.inspectConfiguration(a));break;
+   case 'config.apply':case 'config.undo':case 'defconfig.apply':{
+    const confirm=await host.confirmMutation({action:request.action,args:a,origin:context.origin,deviceName:context.deviceName},()=>admitted(context,definition.scope));
+    admitted(context,definition.scope);host.authorizeProject(a.workspaceId);
+    if(!confirm){result={state:'cancelled',changed:false};break;}
+    if(request.action==='config.apply')await host.applyConfiguration(a);
+    else if(request.action==='config.undo')await host.undoConfiguration(a);
+    else await host.applyDefconfig(a);
+    result={state:'completed',configuration:configProjection(await host.inspectConfiguration({workspaceId:a.workspaceId,domain:a.domain||'buildroot'}))};break;
+   }
    case 'workspace.read':result=host.readWorkspace();break;
    case 'projects.list':result={projects:host.listProjects()};break;
    case 'jobs.list':{const jobs=host.listJobs();for(const job of jobs)owned.jobs.add(job.id);result={jobs:jobs.map(summary)};break;}
@@ -53,6 +72,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
