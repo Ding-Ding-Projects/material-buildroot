@@ -7,6 +7,7 @@ const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
+const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
@@ -18,6 +19,9 @@ const { createConfigurationConsent } = require("./configuration/runtime-consent.
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { OutputViewers } = require("./deployment/output-viewers.cjs");
+const { SdkExport } = require("./deployment/sdk-export.cjs");
+const { FlashingRoutes } = require("./deployment/flashing-routes.cjs");
+const { FlashingNative } = require("./deployment/flashing-native.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -47,10 +51,29 @@ const {
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
+const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
+const { createExecutionSetup } = require('./execution/setup.cjs');
+const { createWorkflowService } = require('./execution/workflow-service.cjs');
 const owner = "desktop-owner";
 const fields = {
+  'execution.cli': ['kind'],
+  'execution.inspect': ['sourceRepository','executionRepository','mode'],
+  'execution.discover': ['selectionId'],
+  'execution.selectRunner': ['selectionId','kind','runnerId','billingConsent'],
+  'execution.revoke': ['selectionId'],
+  "execution.workflowPreview": ["selectionId", "model", "text"],
+  "execution.workflowPublish": ["previewId", "sha256", "consent"],
+  "execution.workflowAdmission": ["selectionId"],
+  "execution.jobs.list": [],
+  "execution.jobs.dispatch": ["selectionId", "consent"],
+  "execution.jobs.observe": ["id"],
+  "execution.jobs.reconnect": ["id", "selectionId", "consent"],
+  "execution.jobs.cancel": ["id", "consent"],
+  "execution.jobs.outputs": ["id"],
+  "execution.jobs.download": ["id", "artifactId", "consent"],
+  "execution.jobs.cancelDownload": ["id"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -71,6 +94,7 @@ const fields = {
   "project.options": ["workspaceId"],
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
+  "build.targets": ["workspaceId"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
   "build.confirmation.challenge": ["request"],
   "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
@@ -110,6 +134,13 @@ const fields = {
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
+  "sdk.preview": ["workspaceId", "fileId"],
+  "flashing.state": ["workspaceId"],
+  "flashing.discover": ["workspaceId"],
+  "flashing.preview": ["workspaceId", "fileId", "route", "destinationId"],
+  "flashing.execute": ["workspaceId", "id", "reviewedIdentity"],
+  "flashing.cancel": ["workspaceId", "id"],
+  "sdk.export": ["workspaceId", "id"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
   "artifacts.compliance": ["workspaceId"],
@@ -219,6 +250,7 @@ function createOperationsService({
   parentWindow,
   version,
   source,
+  notificationTransition = () => {},
   documentationDirectory,
   openDocumentationExternal,
   updateHostFactory,
@@ -234,12 +266,31 @@ function createOperationsService({
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
+  const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
+  const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
         openExternal: openDocumentationExternal,
       })
     : null;
+  let executionJobs;
+  function hostedJobs() {
+    return executionJobs ??= createExecutionJobs({
+      setup: executionSetup, workflows: executionWorkflows, directory,
+      chooseDirectory: async () => {
+        if (choosing) reject("PICKER_BUSY");
+        choosing = true;
+        try {
+          const selected = await dialog.showOpenDialog(parentWindow, {
+            title: "Choose folder for verified Buildroot outputs",
+            properties: ["openDirectory", "dontAddToRecent"],
+          });
+          return selected.canceled ? null : selected.filePaths[0] || null;
+        } finally { choosing = false; }
+      },
+    });
+  }
   const selections = new Map(),
     portableImports = new Map(),
     projects = new Map(),
@@ -407,6 +458,7 @@ function createOperationsService({
     listJobs: () => jobs.list(owner),
   });
   const jobs = createJobManager({
+    onTransition: notificationTransition,
     directory: path.join(directory, "jobs"),
     adapters: {
       build: async (payload, context) => {
@@ -799,7 +851,7 @@ function createOperationsService({
     if (
       typeof payload.workspaceId !== "string" ||
       !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
-      !TARGETS.includes(payload.target) ||
+      !targetActions.isBuildTarget(payload.target, TARGETS) ||
       !Number.isSafeInteger(payload.jobs) ||
       payload.jobs < 1 ||
       payload.jobs > 32
@@ -1149,6 +1201,29 @@ function createOperationsService({
   });
   const deployments = new Map();
   const outputViewers = new Map();
+  const sdkExports = new Map();
+  const flashingRoutes = new Map();
+  function flashing(id) {
+    project(id);
+    if (!flashingRoutes.has(id)) flashingRoutes.set(id, new FlashingRoutes({
+      viewer: outputViewer(id), guests: deployment(id),
+      native: new FlashingNative(process.resourcesPath || path.join(__dirname, "../../resources"), path.join(directory, "flashing", id)),
+      confirm: async plan => {
+        if(typeof dialog.showMessageBox !== "function") return false;
+        const answer = await dialog.showMessageBox(parentWindow, {type:"warning",buttons:["Cancel / 取消", "Continue / 繼續"],defaultId:0,cancelId:0,noLink:true,
+          title:"Review installation destination / 檢查安裝目的地",
+          message:plan.route === "physical" ? "All data on the exact selected disk will become unusable. / 所選磁碟全部資料將無法使用。" : "Create an owned guest with installation media. No operating system installation is claimed. / 建立附有安裝媒體嘅受管理虛擬機，並不代表完成安裝。",
+          detail:`${plan.destination.name}\n${plan.destination.identity || plan.destination.id}\n${plan.source.name}\nSHA-256: ${plan.source.sha256}\nBytes: ${plan.source.bytes}`});
+        return answer.response === 1;
+      },
+    }));
+    return flashingRoutes.get(id);
+  }
+  function sdkExport(id) {
+    project(id);
+    if (!sdkExports.has(id)) sdkExports.set(id, new SdkExport({ viewer: outputViewer(id), manifest: relative => perform({ action: "artifacts.manifest", workspaceId: id, paths: [relative] }) }));
+    return sdkExports.get(id);
+  }
   function outputViewer(id) {
     const item = project(id);
     if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
@@ -1245,10 +1320,26 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("execution.jobs.")) {
+      const method = action.slice("execution.jobs.".length);
+      const { action: _action, ...args } = request;
+      return hostedJobs()[method](args);
+    }
     const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
+      case 'execution.cli': {
+        if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
+        return executionSetup.host[request.kind]();
+      }
+      case 'execution.inspect': return executionSetup.inspect(request);
+      case 'execution.discover': return executionSetup.discover(request.selectionId);
+      case 'execution.selectRunner': return executionSetup.selectRunner(request);
+      case 'execution.revoke': return {revoked:executionSetup.revoke(request.selectionId)};
+      case "execution.workflowPreview": return executionWorkflows.preview(request);
+      case "execution.workflowPublish": return executionWorkflows.publish(request);
+      case "execution.workflowAdmission": return executionWorkflows.admission(request);
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
@@ -1415,7 +1506,7 @@ function createOperationsService({
       case "project.runtime":
         return changeConfig(projectPaths(request.workspaceId), () => {
           const item = project(request.workspaceId);
-          const selectedRuntime = runtime(request.runtime);
+        const selectedRuntime = runtime(request.runtime);
           const previous = projectOptions.get({
             workspaceId: request.workspaceId,
           });
@@ -1458,10 +1549,11 @@ function createOperationsService({
           expectedRevision: request.expectedRevision,
           layout: request.layout,
         });
+      case "build.targets": return targetActions.catalog(project(request.workspaceId));
       case "build.confirmation.challenge": {
         const candidate=request.request;
         exact(candidate,["action",...fields["build.submit"],...(Object.hasOwn(candidate||{},"resources")?["resources"]:[])]);
-        if(candidate.action!=="build.submit"||candidate.target!=="clean"||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
+        if(candidate.action!=="build.submit"||!targetActions.isDestructiveTarget(candidate.target)||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
         reservations(candidate.resources,runtime(candidate.runtime),candidate.jobs);
         return buildConfirmation.challenge(candidate);
       }
@@ -1475,12 +1567,13 @@ function createOperationsService({
         if (!item.externalStateVerified)
           reject("EXTERNAL_TREES_NOT_AUTHORIZED");
         if (
-          !TARGETS.includes(request.target) ||
+          !targetActions.isBuildTarget(request.target, TARGETS) ||
           !Number.isSafeInteger(request.jobs) ||
           request.jobs < 1 ||
           request.jobs > 32
         )
           reject("INVALID_TARGET");
+        targetActions.assertPackage(item, request.target);
         const selectedRuntime = runtime(request.runtime);
         item.runtime = selectedRuntime;
         const resources = reservations(
@@ -1496,7 +1589,7 @@ function createOperationsService({
         project(request.workspaceId);
         if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
-        if (request.target === "clean") buildConfirmation.consume(request);
+        if (targetActions.isDestructiveTarget(request.target)) buildConfirmation.consume(request);
         else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
         const job = jobs.enqueue({
           kind: "build",
@@ -1605,7 +1698,7 @@ function createOperationsService({
         }
       case "jobs.retry": {
         const previous = ownJob(request.id);
-        if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
+        if(targetActions.isDestructiveTarget(previous.payload.target)) reject("CONFIRMATION_REQUIRED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
@@ -1654,6 +1747,17 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "sdk.preview":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).preview(request.fileId));
+      case "flashing.state": return flashing(request.workspaceId).state();
+      case "flashing.discover": return flashing(request.workspaceId).discover();
+      case "flashing.preview": return flashing(request.workspaceId).preview(request);
+      case "flashing.execute": return changeConfig(projectPaths(request.workspaceId), () => flashing(request.workspaceId).execute(request));
+      case "flashing.cancel": return flashing(request.workspaceId).cancel(request.id);
+      case "sdk.export":
+        if (typeof request.id !== "string" || request.id.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).execute(request.id));
       case "outputs.browse":
         if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
         return outputViewer(request.workspaceId).browse(request.directoryId);
@@ -1778,6 +1882,11 @@ function createOperationsService({
             "ollama.chat.cancel",
             "ollama.chat.forget",
             "converter.catalog",
+            "minecraft.remote.list",
+            "minecraft.remote.preview",
+            "minecraft.remote.execute",
+            "minecraft.remote.cancel",
+            "minecraft.remote.status",
             "minecraft.world.list",
             "minecraft.world.preview",
             "minecraft.world.execute",
@@ -2013,6 +2122,8 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      executionSetup.dispose();
+      executionJobs?.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
@@ -2041,3 +2152,4 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+

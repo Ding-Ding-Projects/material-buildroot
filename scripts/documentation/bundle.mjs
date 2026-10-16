@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from "node:fs";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
@@ -59,6 +60,12 @@ export async function bundleDocumentation({ root, output }) {
     throw Error("Documentation output must not replace source.");
   containedPath(path.dirname(output), path.basename(output));
   const index = indexedSources(root);
+  const releases = JSON.parse(fs.readFileSync(path.join(root, 'src/main/documentation/releases.json'), 'utf8').replace(/^\uFEFF/, ''));
+  if (releases.version !== 1 || !Array.isArray(releases.entries)) throw Error('Release inventory is invalid.');
+  for (const entry of releases.entries) {
+    if (!/^[0-9a-f]{40}$/.test(entry.source)) throw Error('Release source is invalid.');
+    execFileSync('git', ['cat-file', '-e', entry.source + '^{commit}'], {cwd:root,stdio:'pipe'});
+  }
   const prefix = path.relative(root, output).split(path.sep).join("/");
   if (
     [...index].some(

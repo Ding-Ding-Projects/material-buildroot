@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
@@ -112,13 +113,7 @@ export class GuestPanel extends LitElement {
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     }
   }
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private async run(action: string, request?: Record<string, unknown>) {
     const api = window.studio?.operations;
     if (!api || this.pending) return undefined;
@@ -301,32 +296,24 @@ export class GuestPanel extends LitElement {
     if (!this.workspaceId)
       return html`<section class="panel">
         <p>
-          ${this.l(
-            "Adopt a project to manage its output images and guests.",
-            "請先接入專案，再管理輸出映像同客體。",
-          )}
+          ${this.l("Adopt a project to manage its output images and guests.","請先接入專案，再管理輸出映像同客體。",true)}
         </p>
       </section>`;
-    return html`<div class="row"><md-outlined-button @click=${()=>this.topology=true}>${actionIcon('Topology editor')}${this.l("Topology editor","拓樸編輯器")}</md-outlined-button><md-outlined-button @click=${()=>this.topology=false}>${actionIcon('Guest records and disk conversion')}${this.l("Guest records and disk conversion","客體記錄同磁碟轉換")}</md-outlined-button></div><guest-topology ?hidden=${!this.topology} .workspaceId=${this.workspaceId} .language=${this.language}></guest-topology><div class="guests" ?hidden=${this.topology}>
+    return html`<div class="row"><md-outlined-button @click=${()=>this.topology=true}>${actionIcon('Topology editor')}${this.l("Topology editor","拓樸編輯器",true)}</md-outlined-button><md-outlined-button @click=${()=>this.topology=false}>${actionIcon('Guest records and disk conversion')}${this.l("Guest records and disk conversion","客體記錄同磁碟轉換",true)}</md-outlined-button></div><guest-topology ?hidden=${!this.topology} .workspaceId=${this.workspaceId} .language=${this.language}></guest-topology><div class="guests" ?hidden=${this.topology}>
       <section class="panel stack">
-        <h2>${this.l("Managed virtual machines", "受管理虛擬機")}</h2>
+        <h2>${this.l("Managed virtual machines","受管理虛擬機",true)}</h2>
         <p>
-          ${this.l(
-            "These controls manage application-owned guest records. Launch opens the provider’s guest window. Existing unrelated guests are not changed.",
-            "呢啲控制項管理應用程式擁有嘅客體記錄，啟動會開啟供應商嘅客體視窗，唔會變更其他現有客體。",
-          )}
+          ${this.l("These controls manage application-owned guest records. Launch opens the provider’s guest window. Existing unrelated guests are not changed.","呢啲控制項管理應用程式擁有嘅客體記錄，啟動會開啟供應商嘅客體視窗，唔會變更其他現有客體。",true)}
         </p>
         <div class="row">
           <md-outlined-button ?disabled=${this.pending} @click=${this.discover}
-            >${actionIcon('Discover providers')}${this.l("Discover providers", "探索供應商")}</md-outlined-button
+            >${actionIcon('Discover providers')}${this.l("Discover providers","探索供應商",true)}</md-outlined-button
           ><md-outlined-button ?disabled=${this.pending} @click=${this.refresh}
-            >${actionIcon('Refresh managed guests')}${this.l("Refresh managed guests",
-              "重新整理受管理客體",
-            )}</md-outlined-button
+            >${actionIcon('Refresh managed guests')}${this.l("Refresh managed guests","重新整理受管理客體",true)}</md-outlined-button
           ><md-outlined-button
             ?disabled=${this.pending}
             @click=${this.loadFiles}
-            >${actionIcon('Load output files')}${this.l("Load output files", "載入輸出檔案")}</md-outlined-button
+            >${actionIcon('Load output files')}${this.l("Load output files","載入輸出檔案",true)}</md-outlined-button
           >
         </div>
         ${this.providers
@@ -334,14 +321,14 @@ export class GuestPanel extends LitElement {
               <dt>VirtualBox</dt>
               <dd>
                 ${this.providers.virtualbox?.available
-                  ? this.l("Available", "可使用")
-                  : this.l("Unavailable", "未能使用")}
+                  ? this.l("Available","可使用",true)
+                  : this.l("Unavailable","未能使用",true)}
               </dd>
               <dt>VMware</dt>
               <dd>
                 ${this.providers.vmware?.available
-                  ? this.l("Available", "可使用")
-                  : this.l("Unavailable", "未能使用")}
+                  ? this.l("Available","可使用",true)
+                  : this.l("Unavailable","未能使用",true)}
               </dd>
             </dl>`
           : nothing}
@@ -350,11 +337,11 @@ export class GuestPanel extends LitElement {
         <section class="panel stack">
           <h2>
             ${this.editing
-              ? this.l("Edit stopped guest", "編輯已停止客體")
-              : this.l("Create or import guest", "建立或匯入客體")}
+              ? this.l("Edit stopped guest","編輯已停止客體",true)
+              : this.l("Create or import guest","建立或匯入客體",true)}
           </h2>
           <md-outlined-select
-            label=${this.l("Provider", "供應商")}
+            label=${this.l("Provider","供應商",true)}
             .value=${this.provider}
             .displayText=${this.provider === "vmware" ? "VMware" : "VirtualBox"}
             ?disabled=${!!this.editing}
@@ -370,7 +357,7 @@ export class GuestPanel extends LitElement {
               type="number"
               min="128"
               max="65536"
-              label=${this.l("Memory (MiB)", "記憶體（MiB）")}
+              label=${this.l("Memory (MiB)","記憶體（MiB）",true)}
               .value=${String(this.memory)}
               @input=${(e: Event) =>
                 (this.memory = Number(
@@ -381,7 +368,7 @@ export class GuestPanel extends LitElement {
               type="number"
               min="1"
               max="32"
-              label=${this.l("Virtual CPUs", "虛擬 CPU")}
+              label=${this.l("Virtual CPUs","虛擬 CPU",true)}
               .value=${String(this.cpus)}
               @input=${(e: Event) =>
                 (this.cpus = Number(
@@ -389,7 +376,7 @@ export class GuestPanel extends LitElement {
                 ))}
             ></md-outlined-text-field
             ><md-outlined-select
-              label=${this.l("Firmware", "韌體")}
+              label=${this.l("Firmware","韌體",true)}
               .value=${this.firmware}
               .displayText=${this.firmware === "bios" ? "BIOS" : "EFI"}
               @change=${(e: Event) =>
@@ -400,36 +387,33 @@ export class GuestPanel extends LitElement {
               ])}</md-outlined-select
             ><md-outlined-select
               ?disabled=${!!this.editing}
-              label=${this.l("Networking (edit adapters in topology)", "網絡（請喺拓樸編輯介面卡）")}
+              label=${this.l("Networking (edit adapters in topology)","網絡（請喺拓樸編輯介面卡）",true)}
               .value=${this.network}
               .displayText=${this.network === "nat"
                 ? "NAT"
                 : this.network === "none"
-                  ? this.l("None", "無")
-                  : this.l("Host only", "僅主機")}
+                  ? this.l("None","無",true)
+                  : this.l("Host only","僅主機",true)}
               @change=${(e: Event) =>
                 (this.network = (e.target as HTMLSelectElement).value)}
               >${this.options([
                 ["nat", "NAT"],
-                ["none", this.l("None", "無")],
-                ...(this.editing ? [["hostonly", this.l("Host only", "僅主機")]] as [string,string][] : []),
+                ["none", this.l("None","無",true)],
+                ...(this.editing ? [["hostonly", this.l("Host only","僅主機",true)]] as [string,string][] : []),
               ])}</md-outlined-select
             >
           </div>
           <md-outlined-select
-            label=${this.l(
-              "Output disk image (optional)",
-              "輸出磁碟映像（選填）",
-            )}
+            label=${this.l("Output disk image (optional)","輸出磁碟映像（選填）",true)}
             .value=${this.disk}
-            .displayText=${this.disk || this.l("No disk", "無磁碟")}
+            .displayText=${this.disk || this.l("No disk","無磁碟",true)}
             ?disabled=${!!this.editing}
             @change=${(e: Event) => {
               this.disk = (e.target as HTMLSelectElement).value;
               this.preview = undefined;
             }}
             >${this.options([
-              ["", this.l("No disk", "無磁碟")],
+              ["", this.l("No disk","無磁碟",true)],
               ...this.files.map((file: any): [string, string] => [
                 file.path,
                 file.path,
@@ -437,40 +421,31 @@ export class GuestPanel extends LitElement {
             ])}</md-outlined-select
           >
           <p>
-            ${this.l(
-              "Only provider-compatible validated disks are admitted. Appliance archives and unreviewed VMDK dependencies are rejected.",
-              "只會接受供應商相容並已驗證嘅磁碟，設備封存檔同未經審查嘅 VMDK 相依項目會被拒絕。",
-            )}
+            ${this.l("Only provider-compatible validated disks are admitted. Appliance archives and unreviewed VMDK dependencies are rejected.","只會接受供應商相容並已驗證嘅磁碟，設備封存檔同未經審查嘅 VMDK 相依項目會被拒絕。",true)}
           </p>
           <div class="row">
             <md-filled-button
               ?disabled=${this.pending || !this.validHardware}
               @click=${() => (this.editing ? this.applyEdit() : this.create())}
               >${this.editing
-                ? this.l("Apply hardware", "套用硬件")
+                ? this.l("Apply hardware","套用硬件",true)
                 : this.disk
-                  ? this.l("Import disk as new guest", "以磁碟匯入新客體")
-                  : this.l(
-                      "Create empty guest",
-                      "建立空白客體",
-                    )}</md-filled-button
+                  ? this.l("Import disk as new guest","以磁碟匯入新客體",true)
+                  : this.l("Create empty guest","建立空白客體",true)}</md-filled-button
             >${this.editing
               ? html`<md-text-button @click=${() => (this.editing = "")}
-                  >${actionIcon('Cancel edit')}${this.l("Cancel edit", "取消編輯")}</md-text-button
+                  >${actionIcon('Cancel edit')}${this.l("Cancel edit","取消編輯",true)}</md-text-button
                 >`
               : nothing}
           </div>
         </section>
         <section class="panel stack">
-          <h2>${this.l("Convert output disk", "轉換輸出磁碟")}</h2>
+          <h2>${this.l("Convert output disk","轉換輸出磁碟",true)}</h2>
           <p>
-            ${this.l(
-              "Select the source disk in the form. Preview binds its hash and checks that the output does not already exist.",
-              "請喺表格揀選來源磁碟，預覽會綁定其摘要，並檢查輸出尚未存在。",
-            )}
+            ${this.l("Select the source disk in the form. Preview binds its hash and checks that the output does not already exist.","請喺表格揀選來源磁碟，預覽會綁定其摘要，並檢查輸出尚未存在。",true)}
           </p>
           <md-outlined-select
-            label=${this.l("Output format", "輸出格式")}
+            label=${this.l("Output format","輸出格式",true)}
             .value=${this.format}
             .displayText=${this.format}
             @change=${(e: Event) => {
@@ -481,7 +456,7 @@ export class GuestPanel extends LitElement {
               ["raw", "vmdk", "vdi", "qcow2", "iso", "ova"].map((value) => [value, value]),
             )}</md-outlined-select
           ><md-outlined-text-field
-            label=${this.l("New output filename", "新輸出檔名")}
+            label=${this.l("New output filename","新輸出檔名",true)}
             maxlength="120"
             .value=${this.outputName}
             @input=${(e: Event) => {
@@ -494,24 +469,24 @@ export class GuestPanel extends LitElement {
             !this.disk ||
             !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(this.outputName)}
             @click=${this.previewConversion}
-            >${actionIcon('Preview conversion')}${this.l("Preview conversion", "預覽轉換")}</md-outlined-button
+            >${actionIcon('Preview conversion')}${this.l("Preview conversion","預覽轉換",true)}</md-outlined-button
           >${this.preview
             ? html`<dl>
-                  <dt>${this.l("Source", "來源")}</dt>
+                  <dt>${this.l("Source","來源",true)}</dt>
                   <dd>${this.preview.artifact}</dd>
                   <dt>SHA-256</dt>
                   <dd class="code">${this.preview.sha256}</dd>
-                  <dt>${this.l("Output", "輸出")}</dt>
+                  <dt>${this.l("Output","輸出",true)}</dt>
                   <dd>${this.preview.outputName} (${this.preview.format})</dd>
-                  <dt>${this.l("Export operation", "匯出操作")}</dt>
+                  <dt>${this.l("Export operation","匯出操作",true)}</dt>
                   <dd>${this.preview.operation}</dd>
-                  <dt>${this.l("Limits", "限制")}</dt>
-                  <dd>${this.l("ISO export copies existing ISO bytes. OVA exports one CPU, 1024 MiB RAM, SATA storage and no network. Boot and importer compatibility are not verified.", "ISO 匯出只複製現有 ISO 位元組。OVA 使用一個 CPU、1024 MiB 記憶體、SATA 儲存同無網絡。開機同匯入相容性未核實。")}</dd>
+                  <dt>${this.l("Limits","限制",true)}</dt>
+                  <dd>${this.l("ISO export copies existing ISO bytes. OVA exports one CPU, 1024 MiB RAM, SATA storage and no network. Boot and importer compatibility are not verified.","ISO 匯出只複製現有 ISO 位元組。OVA 使用一個 CPU、1024 MiB 記憶體、SATA 儲存同無網絡。開機同匯入相容性未核實。",true)}</dd>
                 </dl>
                 <md-filled-button
                   ?disabled=${this.pending}
                   @click=${this.executeConversion}
-                  >${actionIcon('Confirm conversion')}${this.l("Confirm conversion", "確認轉換")}</md-filled-button
+                  >${actionIcon('Confirm conversion')}${this.l("Confirm conversion","確認轉換",true)}</md-filled-button
                 >`
             : nothing}${this.conversion
             ? html`<p>${this.conversion.path}</p>
@@ -520,7 +495,7 @@ export class GuestPanel extends LitElement {
         </section>
       </div>
       <section class="panel">
-        <h2>${this.l("Managed guests", "受管理客體")}</h2>
+        <h2>${this.l("Managed guests","受管理客體",true)}</h2>
         ${this.guests.length
           ? this.guests.map(
               (guest) =>
@@ -536,36 +511,25 @@ export class GuestPanel extends LitElement {
                     <md-text-button
                       ?disabled=${this.pending}
                       @click=${() => this.act("refresh", guest)}
-                      >${actionIcon('Refresh state')}${this.l("Refresh state",
-                        "重新整理狀態",
-                      )}</md-text-button
+                      >${actionIcon('Refresh state')}${this.l("Refresh state","重新整理狀態",true)}</md-text-button
                     ><md-outlined-button
                       ?disabled=${this.pending || guest.state !== "stopped"}
                       @click=${() => this.edit(guest)}
-                      >${actionIcon('Edit hardware')}${this.l("Edit hardware",
-                        "編輯硬件",
-                      )}</md-outlined-button
+                      >${actionIcon('Edit hardware')}${this.l("Edit hardware","編輯硬件",true)}</md-outlined-button
                     ><md-filled-tonal-button
                       ?disabled=${this.pending || guest.state !== "stopped"}
                       @click=${() => this.act("launch", guest)}
-                      >${actionIcon('Launch guest')}${this.l("Launch guest",
-                        "啟動客體",
-                      )}</md-filled-tonal-button
+                      >${actionIcon('Launch guest')}${this.l("Launch guest","啟動客體",true)}</md-filled-tonal-button
                     ><md-outlined-button
                       ?disabled=${this.pending || guest.state !== "running"}
                       @click=${() => this.act("stop", guest)}
-                      >${actionIcon('Request shutdown')}${this.l("Request shutdown",
-                        "要求關閉",
-                      )}</md-outlined-button
+                      >${actionIcon('Request shutdown')}${this.l("Request shutdown","要求關閉",true)}</md-outlined-button
                     >
                   </div>
                 </div>`,
             )
           : html`<p>
-              ${this.l(
-                "No managed guest records loaded.",
-                "未有已載入嘅受管理客體記錄。",
-              )}
+              ${this.l("No managed guest records loaded.","未有已載入嘅受管理客體記錄。",true)}
             </p>`}
       </section>
       ${this.feedback

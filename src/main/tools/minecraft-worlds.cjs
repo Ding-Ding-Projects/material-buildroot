@@ -106,4 +106,4 @@ function createWorlds(options, assertStopped, log) {
   execute.busy = directory => active.has(directory);
   return execute;
 }
-module.exports = { createWorlds, name };
+module.exports = { createWorlds, name, inventory };
