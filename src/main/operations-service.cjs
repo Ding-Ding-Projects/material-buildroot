@@ -1139,6 +1139,9 @@ function createOperationsService({
   const consumers = createCompanionConsumers({
     authorizeProject: id => project(id),
     chooseSource: () => sources.handle({action:'source.choose'}),
+    previewSource: request => sources.handle({action:'source.upgrade.preview',...request}),
+    applySourceUpgrade: request => sources.handle({action:'source.upgrade.apply',...request,consent:true}),
+    confirmSourceUpgrade: async (preview,context,authorize) => {authorize();if(typeof preview.patch!=='string'||preview.patch.length>16000)reject('NATIVE_SOURCE_REVIEW_REQUIRED');const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review source upgrade',message:`Apply source revision ${preview.toRevision}?`,detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nCurrent revision: ${preview.fromRevision}\nDirty source: ${preview.dirty}\n\n${preview.patch}\n\nThe existing source workflow creates its rollback snapshot and rejects changed or dirty source.`,buttons:['Cancel','Apply reviewed source'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     cloneOfficial: request => sources.handle({action:'source.clone.official',...request,trust:true}),
     confirmSource: async (request,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve source clone',message:'Clone official Buildroot source into the selected folder?',detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nDirectory: ${request.directory}\nRef: ${request.ref}\nSource: https://gitlab.com/buildroot.org/buildroot.git\n\nThis approves source trust and project adoption for this one clone. Existing directories are preserved.`,buttons:['Cancel','Approve clone'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     modelStatus: () => tools.execute({action:'ollama.status'}),
@@ -2166,6 +2169,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

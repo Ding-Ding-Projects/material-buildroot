@@ -29,6 +29,8 @@ const actionContracts=Object.freeze({
  'jobs.list':contract('jobs:read',[]),
  'jobs.get':contract('jobs:read',['jobId'],a=>id(a.jobId)),
  'jobs.cancel':contract('jobs:cancel',['jobId','expectedSequence'],a=>id(a.jobId)&&Number.isSafeInteger(a.expectedSequence)&&a.expectedSequence>=0),
+ 'source.upgrade.preview':contract('source:write',['workspaceId','revision'],a=>project(a)&&typeof a.revision==='string'&&/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(a.revision)),
+ 'source.upgrade.apply':contract('source:write',['workspaceId','previewId'],a=>project(a)&&id(a.previewId)),
  'source.choose':contract('source:write',[]),
  'source.clone.official':contract('source:write',['selectionId','directory','ref'],a=>id(a.selectionId)&&typeof a.directory==='string'&&/^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$/.test(a.directory)&&typeof a.ref==='string'&&/^[A-Za-z0-9][A-Za-z0-9_./-]{0,119}$/.test(a.ref)),
  'source.status':contract('source:read',['workspaceId'],project),
@@ -45,7 +47,7 @@ const summary=job=>({id:job.id,kind:job.kind,state:job.state,sequence:job.sequen
 function createCompanionConsumers(host){
  const sessions=new Map();
  function admitted(context,scope){if(!context||typeof context.isAuthorized!=='function'||!context.isAuthorized()||!context.scopes.includes(scope))fail('UNAUTHORIZED');}
- function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),sourceSelections:new Set(),models:new Set(),chats:new Set()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
+ function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),models:new Set(),chats:new Set()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
  function file(state,args,kind){const entry=state.files.get(args.fileId||args.directoryId);if(!entry||entry.workspaceId!==args.workspaceId||entry.kind!==kind)fail('FILE_NOT_ADMITTED');return entry.id;}
  return Object.freeze({actionContracts,async dispatch(request,context){
   const definition=actionContracts[request.action];if(!definition)fail('ACTION_NOT_ADMITTED');definition.validate(request.args);admitted(context,definition.scope);const owned=state(context),a=request.args;
@@ -75,6 +77,8 @@ function createCompanionConsumers(host){
    case 'jobs.list':{const jobs=host.listJobs();for(const job of jobs)owned.jobs.add(job.id);result={jobs:jobs.map(summary)};break;}
    case 'jobs.get':if(!owned.jobs.has(a.jobId))fail('JOB_NOT_ADMITTED');result={job:summary(host.getJob(a.jobId))};break;
    case 'jobs.cancel':{if(!owned.jobs.has(a.jobId))fail('JOB_NOT_ADMITTED');const job=host.getJob(a.jobId);if(job.payload?.workspaceId)host.authorizeProject(job.payload.workspaceId);admitted(context,definition.scope);host.cancelJob(a.jobId,a.expectedSequence);result={job:summary(host.getJob(a.jobId)),cancellation:'requested-not-confirmed'};break;}
+   case 'source.upgrade.preview':{const value=await host.previewSource(a);if(value.ok===false)fail('SOURCE_PREVIEW_UNAVAILABLE');if(owned.sourcePreviews.size>=32)fail('PREVIEW_LIMIT');owned.sourcePreviews.set(value.previewId,{workspaceId:a.workspaceId,preview:value,expiresAt:Date.now()+300000});result={previewId:value.previewId,fromRevision:value.fromRevision,toRevision:value.toRevision,dirty:value.dirty,changedFileCount:value.changedFiles?.length||0};break;}
+   case 'source.upgrade.apply':{const selected=owned.sourcePreviews.get(a.previewId);if(!selected||selected.workspaceId!==a.workspaceId||selected.expiresAt<=Date.now())fail('PREVIEW_NOT_ADMITTED');const approved=await host.confirmSourceUpgrade(selected.preview,context,()=>admitted(context,definition.scope));admitted(context,definition.scope);host.authorizeProject(a.workspaceId);if(!approved){result={state:'cancelled'};break;}owned.sourcePreviews.delete(a.previewId);const value=await host.applySourceUpgrade({workspaceId:a.workspaceId,previewId:a.previewId,expectedRevision:selected.preview.fromRevision});if(value.ok===false)fail('SOURCE_APPLY_UNAVAILABLE');result={state:'completed',revision:value.revision||selected.preview.toRevision,rollbackId:value.rollbackId};break;}
    case 'source.choose':{const value=await host.chooseSource();if(value.ok===false)fail('SOURCE_SELECTION_UNAVAILABLE');if(value.cancelled){result={cancelled:true};break;}owned.sourceSelections.add(value.selectionId);result={cancelled:false,selectionId:value.selectionId,name:value.name};break;}
    case 'source.clone.official':{if(!owned.sourceSelections.has(a.selectionId))fail('SOURCE_SELECTION_NOT_ADMITTED');const approved=await host.confirmSource(a,context,()=>admitted(context,definition.scope));admitted(context,definition.scope);if(!approved){result={cancelled:true};break;}owned.sourceSelections.delete(a.selectionId);const value=await host.cloneOfficial(a);if(value.ok===false)fail('SOURCE_CLONE_UNAVAILABLE');result={cancelled:false,workspaceId:value.workspaceId,revision:value.revision,branch:value.branch,dirty:value.dirty};break;}
    case 'source.status':{const value=await host.sourceStatus(a.workspaceId);if(value.ok===false)fail('SOURCE_UNAVAILABLE');result={revision:value.revision,branch:value.branch,dirty:value.dirty,snapshotCount:value.snapshots?.length||0};break;}
@@ -91,6 +95,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
