@@ -1135,6 +1135,11 @@ function createOperationsService({
     resolveGrant: (id, mode) => toolFiles.resolve(id, mode),
     authorizeServerExecution: (id) => toolFiles.serverAuthorized(id),
   });
+  const companionQueueAuthorities=new Map();let companionQueueRunning=false;
+  async function executeCompanionTool(kind,payload,context){const authorize=companionQueueAuthorities.get(context.jobId);if(!authorize)reject('CURRENT_NATIVE_GRANTS_REQUIRED');authorize();for(const id of payload.sourceIds||[payload.sourceId])toolFiles.resolve(id,'read');if(payload.destinationId)toolFiles.resolve(payload.destinationId,'write');const observer=setInterval(()=>{try{authorize();if(disposed)throw Error('closed');}catch{try{const current=companionToolQueue.get(context.jobId);if(['queued','running'].includes(current.state))companionToolQueue.cancel(current.id,current.ownerId,current.sequence);}catch{}}},250);observer.unref?.();try{const result=await tools.execute({action:kind==='conversion'?'converter.convert':'pdf.execute',...payload},{signal:context.signal});if(result.ok===false){context.checkpoint({state:'failed',code:result.code||'TOOL_UNAVAILABLE'});reject('TOOL_UNAVAILABLE');}const projection=kind==='conversion'?{bytes:result.bytes,sha256:result.sha256,format:result.format}:payload.operation==='inspect'?{pageCounts:result.pageCounts,encryptedOrInvalid:result.encryptedOrInvalid}:{pages:result.pages,bytes:result.bytes,sha256:result.sha256,operation:result.operation};context.item({state:'completed',result:projection});return projection;}finally{clearInterval(observer);}}
+  const companionToolQueue=createJobManager({directory:path.join(directory,'companion-tools'),adapters:{conversion:(payload,context)=>executeCompanionTool('conversion',payload,context),pdf:(payload,context)=>executeCompanionTool('pdf',payload,context)}});
+  async function pumpCompanionTools(){if(companionQueueRunning||disposed)return;companionQueueRunning=true;try{for(;;){const next=companionToolQueue.list().find(job=>job.state==='queued'&&companionQueueAuthorities.has(job.id));if(!next||disposed)break;try{await companionToolQueue.run(next.id,next.ownerId,next.sequence);}catch{}finally{companionQueueAuthorities.delete(next.id);}}}finally{companionQueueRunning=false;}}
+  function enqueueCompanionTool(kind,payload,sessionId,operationId,authorize){authorize();for(const id of payload.sourceIds||[payload.sourceId])toolFiles.resolve(id,'read');if(payload.destinationId)toolFiles.resolve(payload.destinationId,'write');const job=companionToolQueue.enqueue({kind,payload,ownerId:sessionId,operationId});companionQueueAuthorities.set(job.id,authorize);void pumpCompanionTools();return job;}
   const {createCompanionConsumers, actionContracts} = require('./security/companion-consumers.cjs');
   const consumers = createCompanionConsumers({
     authorizeProject: id => project(id),
@@ -1153,6 +1158,12 @@ function createOperationsService({
     confirmServerStop: async (serverId,target,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review managed server stop',message:`Stop managed server ${serverId}?`,detail:`Target: ${target}\nBrowser origin: ${context.origin}\nDevice: ${context.deviceName}\n\nOnly the existing server manager can determine ownership and whether the process actually stopped. Saved metadata does not grant execution authority.`,buttons:['Cancel','Request server stop'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     chooseConversionFile: access => toolFiles.choose({access,kind:'file'}),
     conversionCatalog: () => tools.execute({action:'converter.catalog'}),
+    queueConversion: (request,context,authorize) => enqueueCompanionTool('conversion',request,context.sessionId,context.operationId,authorize),
+    queuePdf: (request,context,authorize) => enqueueCompanionTool('pdf',request,context.sessionId,context.operationId,authorize),
+    toolQueuePage: (sessionId,after) => {const jobs=companionToolQueue.list(sessionId).sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));const start=after?jobs.findIndex(item=>item.id===after)+1:0;if(after&&start===0)reject('INVALID_CURSOR');const page=jobs.slice(start,start+50);return {jobs:page,next:start+50<jobs.length?page.at(-1).id:null};},
+    toolQueueGet: (sessionId,id) => companionToolQueue.get(id,sessionId),
+    toolQueueCancel: (sessionId,id,sequence) => companionToolQueue.cancel(id,sessionId,sequence),
+    toolQueueHistory: after => {const jobs=companionToolQueue.list().sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));const start=after?jobs.findIndex(item=>item.id===after)+1:0;if(after&&start===0)reject('INVALID_CURSOR');const page=jobs.slice(start,start+50);return {jobs:page,next:start+50<jobs.length?page.at(-1).id:null};},
     runConversion: async (request,authorize) => {authorize();toolFiles.resolve(request.sourceId,'read');toolFiles.resolve(request.destinationId,'write');const controller=new AbortController();const observer=setInterval(()=>{try{authorize();if(disposed)throw Error('closed');}catch{controller.abort();}},250);observer.unref?.();try{return await tools.execute({action:'converter.convert',...request},{signal:controller.signal});}finally{clearInterval(observer);}},
     startModelChat: async (request,authorize) => {
       authorize();const value=await tools.execute({action:'ollama.chat.start',model:request.model,messages:[{role:'user',content:request.prompt}]});
@@ -2180,6 +2191,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

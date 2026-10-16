@@ -25,6 +25,12 @@ const actionContracts=Object.freeze({
  'models.chat.start':contract('tools:write',['model','prompt'],a=>typeof a.model==='string'&&a.model.length<=160&&typeof a.prompt==='string'&&a.prompt.length>0&&a.prompt.length<=8000),
  'models.chat.read':contract('tools:write',['id','offset'],a=>id(a.id)&&Number.isSafeInteger(a.offset)&&a.offset>=0&&a.offset<=1048576),
  'models.chat.cancel':contract('tools:write',['id'],a=>id(a.id)),
+ 'conversion.queue':contract('tools:write',['sourceId','destinationId','category','format'],a=>id(a.sourceId)&&id(a.destinationId)&&['images','audio','video','documents','archives','structured','text','binary'].includes(a.category)&&typeof a.format==='string'&&/^[a-z0-9]{1,16}$/.test(a.format)),
+ 'pdf.queue':contract('tools:write',['sourceIds','destinationId','operation','pages','degrees'],a=>Array.isArray(a.sourceIds)&&a.sourceIds.length>0&&a.sourceIds.length<=100&&a.sourceIds.every(id)&&(a.operation==='inspect'?a.destinationId==='':id(a.destinationId))&&['inspect','merge','split','extract','reorder','rotate','metadata'].includes(a.operation)&&Array.isArray(a.pages)&&a.pages.length<=1000&&a.pages.every(page=>Number.isSafeInteger(page)&&page>=1&&page<=10000)&&[0,90,180,270].includes(a.degrees)),
+ 'tools.queue.page':contract('tools:read',['after'],a=>a.after===''||id(a.after)),
+ 'tools.queue.history':contract('tools:read',['after'],a=>a.after===''||id(a.after)),
+ 'tools.queue.get':contract('tools:read',['id'],a=>id(a.id)),
+ 'tools.queue.cancel':contract('tools:write',['id','sequence'],a=>id(a.id)&&Number.isSafeInteger(a.sequence)&&a.sequence>=1),
  'conversion.choose':contract('tools:write',['access'],a=>['read','write'].includes(a.access)),
  'conversion.catalog':contract('tools:read',[]),
  'conversion.run':contract('tools:write',['sourceId','destinationId','category','format'],a=>id(a.sourceId)&&id(a.destinationId)&&['images','audio','video','documents','archives','structured','text','binary'].includes(a.category)&&typeof a.format==='string'&&/^[a-z0-9]{1,16}$/.test(a.format)),
@@ -80,6 +86,11 @@ function createCompanionConsumers(host){
    }
    case 'models.chat.start':{if(!owned.models.has(a.model))fail('MODEL_NOT_ADMITTED');const value=await host.startModelChat(a,()=>admitted(context,definition.scope));if(value.ok===false)fail('MODEL_CHAT_UNAVAILABLE');owned.chats.add(value.id);result={id:value.id,state:value.state};break;}
    case 'models.chat.read':case 'models.chat.cancel':{if(!owned.chats.has(a.id))fail('CHAT_NOT_ADMITTED');const value=request.action==='models.chat.read'?await host.readModelChat(a.id,a.offset):await host.cancelModelChat(a.id);if(value.ok===false)fail('MODEL_CHAT_UNAVAILABLE');result=request.action==='models.chat.read'?{id:value.id,state:value.state,content:value.content,next:value.next,length:value.length,code:value.code,doneReason:value.doneReason}:{id:value.id,state:value.state,cancelling:value.cancelling};break;}
+   case 'conversion.queue':{if(owned.toolFiles.get(a.sourceId)!=='read'||owned.toolFiles.get(a.destinationId)!=='write')fail('FILE_NOT_ADMITTED');const value=host.queueConversion(a,context,()=>admitted(context,definition.scope));result={job:summary(value)};owned.toolFiles.delete(a.destinationId);break;}
+   case 'pdf.queue':{if(a.sourceIds.some(id=>owned.toolFiles.get(id)!=='read')||a.operation!=='inspect'&&owned.toolFiles.get(a.destinationId)!=='write')fail('FILE_NOT_ADMITTED');if(['split','extract','reorder','rotate','metadata'].includes(a.operation)&&a.sourceIds.length!==1)fail('INVALID_REQUEST');if(['split','extract','reorder','rotate'].includes(a.operation)&&a.pages.length===0)fail('INVALID_REQUEST');const request={operation:a.operation,sourceIds:a.sourceIds,...a.operation==='inspect'?{}:{destinationId:a.destinationId},...['split','extract','reorder','rotate'].includes(a.operation)?{pages:a.pages}:{},...a.operation==='rotate'?{degrees:a.degrees}:{},...a.operation==='metadata'?{mode:'remove'}:{}};const value=host.queuePdf(request,context,()=>admitted(context,definition.scope));if(a.destinationId)owned.toolFiles.delete(a.destinationId);result={job:summary(value)};break;}
+   case 'tools.queue.page':case 'tools.queue.history':{const value=request.action==='tools.queue.page'?host.toolQueuePage(context.sessionId,a.after):host.toolQueueHistory(a.after);result={jobs:value.jobs.map(summary),next:value.next,historical:request.action==='tools.queue.history',authorityRestored:false};break;}
+   case 'tools.queue.get':{const value=host.toolQueueGet(context.sessionId,a.id);result={job:summary(value),result:value.result||null,checkpoint:value.checkpoint||null};break;}
+   case 'tools.queue.cancel':result={job:summary(host.toolQueueCancel(context.sessionId,a.id,a.sequence)),cancellation:'requested-not-confirmed'};break;
    case 'conversion.choose':{if(owned.toolFiles.size>=100)fail('FILE_LIMIT');const value=await host.chooseConversionFile(a.access);owned.toolFiles.set(value.id,a.access);result={id:value.id,name:value.name,access:a.access};break;}
    case 'conversion.catalog':{const value=await host.conversionCatalog();if(value.ok===false)fail('CONVERSION_UNAVAILABLE');result={categories:value.categories.map(item=>({category:item.category,formats:item.formats.map(format=>({format:format.format,available:format.available,reason:format.reason||null}))}))};break;}
    case 'conversion.run':{if(owned.toolFiles.get(a.sourceId)!=='read'||owned.toolFiles.get(a.destinationId)!=='write')fail('FILE_NOT_ADMITTED');admitted(context,definition.scope);const value=await host.runConversion(a,()=>admitted(context,definition.scope));if(value.ok===false)fail('CONVERSION_UNAVAILABLE');owned.toolFiles.delete(a.destinationId);result={bytes:value.bytes,sha256:value.sha256,format:value.format};break;}
@@ -116,6 +127,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
