@@ -203,7 +203,7 @@ The subsequent source correction adds digest-checked historical-output download 
 
 ## Encrypted account snapshot continuation
 
-New account additions and removals retain the preceding account collection inside the encrypted vault payload. The unlocked history exposes only event metadata and whether a snapshot exists. A confirmed restore writes a new encrypted revision, retaining the replaced collection as another history snapshot. Old events without snapshots stay visible but cannot be restored. The existing optimistic storage revision protects writes against another tab. History is never silently pruned; fifty accounts, one hundred events and a 500,000-character serialized payload bound reject further mutations at capacity. Secrets never enter general queue history or plaintext exports.
+New account additions and removals retain the preceding account collection inside the encrypted vault payload. The unlocked history exposes only event metadata and whether a snapshot exists. A confirmed restore writes a new encrypted revision, retaining the replaced collection as another history snapshot. Old events without snapshots stay visible but cannot be restored. The existing optimistic storage revision protects writes against another tab. History is never silently pruned; fifty accounts, one hundred events and a 500,000-byte UTF-8 serialized payload bound reject further mutations at capacity. Secrets never enter general queue history or plaintext exports.
 
 This source adds local snapshot restoration only. Encrypted backup-file import, password rotation, other remaining authenticator routes and tab/group restrictions are still incomplete. No build, test, runtime interaction or capture establishes this new source behavior yet.
 
