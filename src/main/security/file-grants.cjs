@@ -34,7 +34,7 @@ function inspect(absolute) {
   const parsed = path.parse(absolute);
   relativeParts(absolute.slice(parsed.root.length).split(path.sep).join("/"));
   let cursor = parsed.root;
-  const rootInfo = fs.lstatSync(cursor);
+  const rootInfo = fs.lstatSync(cursor, { bigint: true });
   if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink() ||
       fs.realpathSync.native(cursor) !== cursor) failure("UNSAFE_PATH");
   const chain = [{ path: cursor, identity: identity(rootInfo) }];
@@ -43,10 +43,10 @@ function inspect(absolute) {
     .split(path.sep)
     .filter(Boolean)) {
     cursor = path.join(cursor, part);
-    const info = fs.lstatSync(cursor);
+    const info = fs.lstatSync(cursor, { bigint: true });
     if (
       info.isSymbolicLink() ||
-      (info.isFile() && info.nlink !== 1) ||
+      (info.isFile() && info.nlink !== 1n) ||
       (!info.isDirectory() && !info.isFile())
     )
       failure("UNSAFE_PATH");
