@@ -176,7 +176,10 @@ export function createDeploymentService(options: {
     args: string[],
     options: Record<string, unknown>,
   ) => Promise<{ state: string; stdout?: string }>;
-  executables?: Record<string, string>;
+  resolveExecutable?: (toolId: "vboxmanage" | "vmrun" | "qemu-img") => Promise<{
+    path: string; sha256: string; origin: "user-selected" | "bundled";
+    bundled: boolean; receiptId?: string;
+  }>;
   http?: typeof fetch;
   cloudDestinations?: unknown[];
   remoteTargets?: unknown[];
