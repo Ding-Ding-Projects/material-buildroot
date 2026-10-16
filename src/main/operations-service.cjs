@@ -146,6 +146,7 @@ const fields = {
   "outputs.browse": ["workspaceId", "directoryId"],
   "outputs.inspect": ["workspaceId", "fileId"],
   "outputs.editor": ["workspaceId", "entryId", "kind", "accepted", "visibility"],
+  "transfer.window": ["jobId", "accepted", "language"],
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
@@ -272,6 +273,7 @@ function createOperationsService({
   notificationTransition = () => {},
   documentationDirectory,
   openDocumentationExternal,
+  openTransferProgressWindow,
   updateHostFactory,
   openWslPath,
   cloudVault,
@@ -1975,6 +1977,27 @@ function createOperationsService({
         return changeConfig(projectPaths(request.workspaceId), () =>
           deployment(request.workspaceId).executeConversion(request.request),
         );
+      case "transfer.window": {
+        if (request.accepted !== true || typeof request.jobId !== "string" || !/^[0-9a-f-]{36}$/.test(request.jobId) || !["en","zh-HK","bilingual"].includes(request.language) || typeof openTransferProgressWindow !== "function") reject("INVALID_REQUEST");
+        const jobId = request.jobId;
+        async function read() {
+          let after = "";
+          for (let page = 0; page < 10; page++) {
+            const result = await tools.execute({action:"queue.page",after,limit:100});
+            if (!result.ok) reject(result.code);
+            const job = result.items.find(row => row.id === jobId);
+            if (job) {
+              if (job.request.action !== "transfer.download") reject("UNAUTHORIZED");
+              const outcome = job.result?.transfer || job.result?.incompleteOutput;
+              return {id:job.id,version:job.request.version,state:job.state,progress:job.progress,result:job.result?{code:job.result.code,bytes:outcome?.bytes,sha256:outcome?.sha256,destination:outcome?.destination,receipt:outcome?.receipt}:undefined};
+            }
+            if (!result.next) break; after = result.next;
+          }
+          reject("TRANSFER_NOT_FOUND");
+        }
+        await read();
+        return openTransferProgressWindow({jobId,language:request.language,read,cancel:async()=>{await read();const result=await tools.execute({action:"queue.cancel",id:jobId});if(!result.ok)reject(result.code);}});
+      }
       case "tools": {
         if (
           ![
@@ -2282,6 +2305,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

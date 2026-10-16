@@ -4,7 +4,7 @@ import { bundleDocumentation } from "./scripts/documentation/bundle.mjs";
 
 export default defineConfig({
   base: "./",
-  build: { outDir: "dist", sourcemap: false },
+  build: { outDir: "dist", sourcemap: false, rollupOptions: { input: { main: path.resolve(import.meta.dirname, "index.html"), transferProgress: path.resolve(import.meta.dirname, "transfer-progress.html") } } },
   server: { strictPort: true, port: 5173 },
   plugins: [
     {

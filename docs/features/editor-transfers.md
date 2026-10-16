@@ -30,9 +30,10 @@ Cancellation stops the active request. Interrupted queue records remain interrup
 
 - No build, tests, static analysis, editor launch, network download, browser launch, runtime exercise or screen capture was performed for this source change.
 - Installed browser-extension capture and authenticated extension-to-desktop transport are not connected.
-- Start and progress dialogs are inside the existing application window. An explicit control can keep that host window above other applications using its existing window authority, without activating or focusing it. The choice remains until disabled or the application closes; no automatic focus changes occur. Separate secondary windows remain unimplemented.
+- Start confirmation and completion remain inside the primary window. An explicit control can keep that host window above other applications without activating or focusing it. The choice remains until disabled or the application closes. Each transfer offers a separate progress window only on explicit action; it opens inactive and can only read, cancel or close its assigned transfer.
 - Fixed-root discovery is connected. PATH-wide discovery is deliberately absent. Output-browser entries expose direct Code handoff using existing opaque entry grants, and SDK export returns fresh host-issued grants for direct instruction/receipt handoff. Other export surfaces still require selection in Tools. Code admission is required; these actions never silently substitute another editor.
-- The existing workspace-window registry registers full workspace windows and exposes navigation activation. It provides no read/cancel-only secondary transfer-window bridge. A separate secondary transfer surface remains unavailable; this change does not grant a second full-privilege workspace to imitate one.
+- Secondary progress uses a dedicated host-owned registry, fixed bundled HTML, isolated preload, sandbox, context isolation and the same restrictive CSP. IPC admission binds the exact webContents, main frame, fixed URL and one host-assigned job. It exposes no general studio API, paths, queue enumeration, start, retry or configuration authority. Navigation and process loss revoke admission. The host closes owned secondary windows when their parent closes. A maximum of four progress windows is enforced.
 - Native adapter behavior, cancellation races, DNS/TLS behavior, retained-output recovery, accessibility, localization and display-scale acceptance remain unverified.
+
 
 

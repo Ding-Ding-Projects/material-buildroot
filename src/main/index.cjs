@@ -282,7 +282,9 @@ else {
         Promise.resolve(workspace.mutate(event,value)).then(result=>{if(result.ok)notifications?.notify('Workspace saved','A workspace change was saved locally.','success');return result;}),
       );
       try {
+        const transferProgressWindows = require("./transfer-progress-window.cjs").createTransferProgressWindows({BrowserWindow,ipcMain,parentWindow:window,appPath:app.getAppPath()});
         operations = createOperationsService({
+          openTransferProgressWindow: request => transferProgressWindows.open(request),
           directory: path.join(app.getPath("userData"), "operations"),
           cloudVault: createVault({ safeStorage, directory: path.join(app.getPath("userData"), "cloud-credentials") }),
           dialog,
@@ -358,6 +360,7 @@ else {
     store?.close();
   });
 }
+
 
 
 
