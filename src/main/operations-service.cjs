@@ -1123,6 +1123,7 @@ function createOperationsService({
         createDeploymentService({
           root: item.output,
           managedDirectory: path.join(directory, "guests", id),
+          resolveExecutable: (toolId) => payloadManager.resolve(toolId),
         }),
       );
     return deployments.get(id);
