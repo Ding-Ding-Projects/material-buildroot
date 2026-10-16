@@ -80,6 +80,8 @@ const fields = {
   "artifacts.list": ["workspaceId"],
   "artifacts.inspect": ["workspaceId", "path"],
   "artifacts.manifest": ["workspaceId", "paths"],
+  "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
+  "artifacts.compliance": ["workspaceId"],
   tools: ["request"],
   "payload.list": [],
   "payload.choose": ["toolId"],
@@ -1463,10 +1465,22 @@ function createOperationsService({
         return deployment(request.workspaceId).listArtifacts();
       case "artifacts.inspect":
         return deployment(request.workspaceId).inspectArtifact(request.path);
-      case "artifacts.manifest":
-        return deployment(request.workspaceId).createManifest({
+      case "artifacts.manifest": {
+        const item = project(request.workspaceId);
+        const hasConfiguration = fs.existsSync(path.join(item.output, ".config"));
+        const before = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        const manifest = await deployment(request.workspaceId).createManifest({
           paths: request.paths,
+          locks: { sourceRevision: before.sourceRevision, ...(hasConfiguration ? { configurationSha256: before.configRevision } : {}) },
         });
+        const after = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        if (hasConfiguration !== fs.existsSync(path.join(item.output, ".config")) || before.sourceRevision !== after.sourceRevision || before.configRevision !== after.configRevision) reject("REPRODUCIBILITY_INPUTS_CHANGED");
+        return { ...manifest, provenance: { kind: "current-input-observation", buildTimeBinding: false, limitations: before.snapshot.limitations } };
+      }
+      case "artifacts.compare":
+        return deployment(request.workspaceId).compareManifestFiles(request.beforePath, request.afterPath);
+      case "artifacts.compliance":
+        return deployment(request.workspaceId).collectCompliance();
       case "guest.discover":
         return deployment(request.workspaceId).discoverHypervisors();
       case "guest.networks":
