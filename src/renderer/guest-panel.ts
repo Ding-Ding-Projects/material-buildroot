@@ -2,6 +2,7 @@ import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import "./guest-topology";
+import type {Guest} from "../main/deployment/index.cjs";
 import { workspaceStyles } from "./workspace-styles";
 /** Managed guest and disk conversion controls using explicit host previews. */
 export class GuestPanel extends LitElement {
@@ -32,7 +33,7 @@ export class GuestPanel extends LitElement {
   pending = false;
   feedback = "";
   providers: any;
-  guests: any[] = [];
+  guests: Guest[] = [];
   files: any[] = [];
   provider = "virtualbox";
   memory = 1024;
@@ -96,6 +97,12 @@ export class GuestPanel extends LitElement {
   ];
   protected updated(changed: PropertyValues) {
     if (changed.has("workspaceId")) {
+      this.providers = undefined;
+      this.provider = "virtualbox";
+      this.memory = 1024;
+      this.cpus = 1;
+      this.firmware = "bios";
+      this.network = "nat";
       this.guests = [];
       this.files = [];
       this.disk = "";
@@ -219,13 +226,13 @@ export class GuestPanel extends LitElement {
       await this.refresh();
     }
   }
-  private edit(guest: any) {
+  private edit(guest: Guest) {
     this.editing = guest.id;
     this.provider = guest.provider;
-    this.memory = guest.hardware.memoryMiB;
-    this.cpus = guest.hardware.cpus;
-    this.firmware = guest.hardware.firmware;
-    this.network = guest.hardware.network;
+    this.memory = guest.hardware.memoryMiB ?? 1024;
+    this.cpus = guest.hardware.cpus ?? 1;
+    this.firmware = guest.hardware.firmware ?? "bios";
+    this.network = guest.hardware.network ?? "nat";
   }
   private async applyEdit() {
     if (!this.validHardware) return;
@@ -238,8 +245,8 @@ export class GuestPanel extends LitElement {
       await this.refresh();
     }
   }
-  private async act(action: string, guest: any) {
-    const result = await this.run("guest." + action, { id: guest.id });
+  private async act(action: string, guest: Guest) {
+    const result = await this.run("guest." + action, { id: guest.id, ...(action === "refresh" ? {} : {expectedRevision: guest.revision}) });
     if (result !== undefined) {
       await this.refresh();
       this.feedback =
@@ -389,7 +396,8 @@ export class GuestPanel extends LitElement {
                 ["efi", "EFI"],
               ])}</md-outlined-select
             ><md-outlined-select
-              label=${this.l("Networking", "網絡")}
+              ?disabled=${!!this.editing}
+              label=${this.l("Networking (edit adapters in topology)", "網絡（請喺拓樸編輯介面卡）")}
               .value=${this.network}
               .displayText=${this.network === "nat"
                 ? "NAT"
@@ -401,7 +409,7 @@ export class GuestPanel extends LitElement {
               >${this.options([
                 ["nat", "NAT"],
                 ["none", this.l("None", "無")],
-                ["hostonly", this.l("Host only", "僅主機")],
+                ...(this.editing ? [["hostonly", this.l("Host only", "僅主機")]] as [string,string][] : []),
               ])}</md-outlined-select
             >
           </div>
