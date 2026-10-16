@@ -136,6 +136,7 @@ function createExperiencePolicyService({
     escalation: l.escalation,
     rung: l.rung,
     locked: !unlocked.has(l.targetId) || unlocked.get(l.targetId) <= clock(),
+    unlockedUntil: unlocked.get(l.targetId) || 0,
     disclosure:
       "This is a reversible experience preference, not security or encryption.",
   });
@@ -317,6 +318,8 @@ function createExperiencePolicyService({
         });
         l = find(target);
       }
+      for (const [key, challenge] of challenges) if (challenge.target === target || challenge.expires <= clock()) challenges.delete(key);
+      if (challenges.size >= 256) throw Error("Too many active challenges");
       const nonce = crypto.randomUUID(),
         start = clock(),
         c = {
@@ -433,8 +436,13 @@ function createExperiencePolicyService({
         status: "open",
         createdAt: clock(),
       };
+      if (data.tickets.length >= 500) throw Error("Ticket limit reached");
       write((d) => d.tickets.push(ticket));
       return clone(ticket);
+    },
+    deleteTickets(ids) {
+      if (!Array.isArray(ids) || ids.length > 500 || ids.some(x => !id(x))) throw Error("Invalid ticket selection");
+      write(d => { d.tickets = d.tickets.filter(t => !ids.includes(t.id)); });
     },
     tickets() {
       return clone(data.tickets);

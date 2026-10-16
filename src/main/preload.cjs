@@ -155,6 +155,12 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    experiencePolicies: (request) => {
+      let serialized;
+      try { serialized = JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:"INVALID_REQUEST"}); }
+      if (typeof serialized !== "string" || serialized.length > 16384) return Promise.resolve({ok:false,code:"INVALID_REQUEST"});
+      return ipcRenderer.invoke("studio:experience-policies", serialized);
+    },
     scheduledPreferences: scheduleRequest,
     onScheduledPreferences: (listener) => {
       if (typeof listener !== "function")

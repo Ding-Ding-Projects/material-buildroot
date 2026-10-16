@@ -82,6 +82,7 @@ export interface StudioBootstrap {
 }
 /** Only host-admitted documents receive this bridge. */
 export interface StudioAPI {
+  experiencePolicies?(request: import("./experience-policies").ExperienceRequest): Promise<import("./experience-policies").ExperienceReply>;
   scheduledPreferences?(
     request: import("./scheduled-preferences").ScheduledPreferencesRequest,
   ): Promise<import("./scheduled-preferences").ScheduledPreferencesReply>;

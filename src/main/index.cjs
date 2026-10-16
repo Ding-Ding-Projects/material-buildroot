@@ -17,6 +17,7 @@ const { createDesktopSession } = require("./security/desktop-session.cjs");
 const { createWorkspaceService } = require("./workspace-service.cjs");
 const { createWorkspaceIPC } = require("./security/workspace-ipc.cjs");
 const { createOperationsService } = require("./operations-service.cjs");
+const { createExperienceIPC } = require("./experience-policies.cjs");
 const { createVault } = require("./security/vault.cjs");
 const {
   createSharedModeService,
@@ -169,6 +170,8 @@ else {
           } catch {}
         }
       });
+      const experienceIPC = createExperienceIPC({ desktop, directory: app.getPath("userData"), safeStorage, openFolder: folder => shell.openPath(folder), schoolMode: () => sharedModeService?.status()?.active !== false });
+      ipcMain.handle("studio:experience-policies", (event, value) => experienceIPC.request(event, value));
       const workspaceService = createWorkspaceService({
         filePath: path.join(app.getPath("userData"), "workspace.json"),
       });
