@@ -1,3 +1,4 @@
+import {mountBrowserNative} from './browser-native.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
@@ -33,6 +34,7 @@ document.querySelectorAll('.article-bookmark[data-bookmark-url]').forEach(button
   } catch { button.textContent=document.documentElement.dataset.language==='zh'?'無法儲存':'Could not save'; }
 }));
 const language = document.querySelector('#language');
+let browserScheduleApplying = false;
 const setLanguage = (mode) => {
   document.documentElement.dataset.language = mode;
   document.documentElement.lang = 'en'; // Articles retain English; translated spans declare zh-HK.
@@ -40,7 +42,7 @@ const setLanguage = (mode) => {
     element.setAttribute('aria-label', mode==='en' ? element.dataset.ariaEn : mode==='zh' ? element.dataset.ariaZh : `${element.dataset.ariaEn} · ${element.dataset.ariaZh}`);
   });
   if (language) language.value = mode;
-  save('mb-docs-language', mode);
+  if (!browserScheduleApplying) save('mb-docs-language', mode);
 };
 setLanguage(read('mb-docs-language', 'both'));
 language?.addEventListener('change', () => setLanguage(language.value));
@@ -394,6 +396,21 @@ if (visitor) {
     }
   });
 
+  mountBrowserNative(visitor, {
+    applyPreferences: (mode, theme) => {
+      browserScheduleApplying = true;
+      try { setLanguage(['en','zh','both'].includes(mode)?mode:'both'); setTheme(['light','dark','system'].includes(theme)?theme:'system'); language?.dispatchEvent(new Event('change')); }
+      finally { browserScheduleApplying = false; }
+    },
+    readPlan: () => structuredClone(visitorState),
+    restorePlan: plan => {
+      const next = {...plan, updatedAt:new Date().toISOString()};
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      visitorState = next; goalField.value = next.goal; notesField.value = next.notes;
+      visitor.querySelectorAll('[data-check]').forEach(box => { box.checked = next.checks[box.dataset.check] === true; });
+      saved.textContent = copy('Recovery copy restored on this device.', '復原副本已喺此裝置還原。');
+    }
+  });
   const endpointField = visitor.querySelector('#companion-endpoint');
   const challengeField = visitor.querySelector('#companion-challenge');
   const companionMessage = visitor.querySelector('#companion-message');
@@ -685,3 +702,5 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
+

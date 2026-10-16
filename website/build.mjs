@@ -85,7 +85,7 @@ md.renderer.rules.image = (tokens,i,options,env,self) => {
 const render = (text, source='README.md', headings=[]) => md.render(text,{source,headings}).replace(/<table>/g,'<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>').replace(/<\/table>/g,'</table></div>').replace(/<li>(\s*(?:<p>)?<md-checkbox class="task-mark)/g,'<li class="task-item">$1');
 // Render once to discover every linked asset before computing source provenance.
 for (const doc of documents) render(doc.content,doc.source);
-const inputs = [...sources, ...localAssets, 'assets/branding/icon.ico','assets/branding/icon.png', 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json'].sort();
+const inputs = [...sources, ...localAssets, 'assets/branding/icon.ico','assets/branding/icon.png', 'website/package.json','website/package-lock.json','website/build.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json', ...[...sourceIndex].filter(file=>file.startsWith('website/browser-native')), 'src/renderer/regex-worker.ts','src/renderer/documentation-search-worker.ts','src/shared/appearance.ts','src/renderer/appearance-logo-worker.ts'].sort();
 const snapshot = sourceSnapshot(root,inputs,sourceIndex);
 const sourceCommit = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const dirty = Boolean(execFileSync('git',['status','--porcelain','--',...inputs],{cwd:root,encoding:'utf8'}).trim());
@@ -176,11 +176,19 @@ if ((await fs.readdir(outputRoot)).length) throw new Error('Documentation stagin
 await fs.mkdir(path.join(out,'assets'),{recursive:true});
 await fs.copyFile(admittedSource(root,'assets/branding/icon.ico',sourceIndex),path.join(out,'assets/icon.ico'));
 await fs.copyFile(admittedSource(root,'assets/branding/icon.png',sourceIndex),path.join(out,'assets/icon.png'));
-await build({entryPoints:[path.join(here,'app.js')],bundle:true,minify:true,outdir:path.join(out,'assets'),entryNames:'app',assetNames:'[name]-[hash]',loader:{'.woff2':'file','.woff':'file'},target:['chrome120','edge120'],legalComments:'eof'});
+await build({entryPoints:{'browser-native-binary-worker':path.join(here,'browser-native-binary-worker.js'),'browser-native-table-worker':path.join(here,'browser-native-table-worker.js'),'browser-native-audio-worklet':path.join(here,'browser-native-audio-worklet.js'),'browser-native-document-worker':path.join(here,'browser-native-document-worker.js'),'browser-native-image-worker':path.join(here,'browser-native-image-worker.ts'),'browser-native-logo-worker':path.join(root,'src/renderer/appearance-logo-worker.ts'),'browser-native-regex-worker':path.join(root,'src/renderer/regex-worker.ts'),'browser-native-search-worker':path.join(root,'src/renderer/documentation-search-worker.ts')},bundle:true,minify:true,format:'esm',outdir:path.join(out,'assets'),target:['chrome120','edge120']});
+await build({entryPoints:[path.join(here,'app.js')],bundle:true,minify:true,format:'esm',outdir:path.join(out,'assets'),entryNames:'app',assetNames:'[name]-[hash]',loader:{'.woff2':'file','.woff':'file'},target:['chrome120','edge120'],legalComments:'eof'});
 await fs.writeFile(path.join(out,'assets/icon.svg'),`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="13" fill="#4052d6"/><path d="m10 16 14-7 14 7-14 7Z" fill="#fff"/><path d="m10 24 14 7 14-7v8l-14 7-14-7Z" fill="#bfc9ff"/></svg>`);
-for (const [packageName,license] of [['@material/web','LICENSE'],['@fontsource-variable/roboto','LICENSE'],['lit','LICENSE']]) {
+for (const [packageName,license] of [['@material/web','LICENSE'],['@fontsource-variable/roboto','LICENSE'],['lit','LICENSE'],['pdf-lib','LICENSE.md'],['fflate','LICENSE']]) {
   const destination=packageName.replace(/[^a-z0-9-]/g,'_')+'-LICENSE.txt';
   await fs.copyFile(path.join(here,'node_modules',packageName,license),path.join(out,'assets',destination));
+}
+for (const packageName of ['@pdf-lib/standard-fonts','@pdf-lib/upng','pako','tslib']) {
+  const packageRoot=path.join(here,'node_modules',packageName);
+  const files=await fs.readdir(packageRoot);
+  const license=files.find(name=>/^license(?:\.md|\.txt)?$/i.test(name));
+  if(!license) throw new Error(`Required bundled package license is missing: ${packageName}`);
+  await fs.copyFile(path.join(packageRoot,license),path.join(out,'assets',packageName.replace(/[^a-z0-9-]/g,'_')+'-LICENSE.txt'));
 }
 await fs.writeFile(path.join(outputRoot,'index.html'),page('Interactive Buildroot field guide',home,{active:'Learn by doing',description:'Work through an interactive source-to-image guide, package recipe preview and safe troubleshooting steps.'}));
 await fs.writeFile(path.join(outputRoot,'.nojekyll'),'');
@@ -233,3 +241,13 @@ await fs.writeFile(path.join(out,'asset-inventory.json'),JSON.stringify([...loca
 const walkFiles = async directory => (await Promise.all((await fs.readdir(directory,{withFileTypes:true})).map(entry => entry.isDirectory() ? walkFiles(path.join(directory,entry.name)) : [path.relative(outputRoot,path.join(directory,entry.name)).split(path.sep).join('/')]))).flat();
 const offlineFiles = [...new Set([...pages,...await walkFiles(out),'index.html'])].map(file => new URL(file,origin).pathname);
 await fs.writeFile(path.join(outputRoot,'service-worker.js'),`const CACHE='material-buildroot-docs-${snapshot.slice(0,12)}';const FILES=${JSON.stringify(offlineFiles)};self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('material-buildroot-docs-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));self.addEventListener('message',event=>{if(event.data!=='CACHE_DOCUMENTATION')return;event.waitUntil((async()=>{try{const cache=await caches.open(CACHE);await cache.addAll(FILES);event.source?.postMessage({type:'CACHE_COMPLETE',count:FILES.length})}catch(error){event.source?.postMessage({type:'CACHE_ERROR',message:String(error)})}})())});self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(url.origin!==self.location.origin||event.request.method!=='GET')return;event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)))})`);
+
+
+
+
+
+
+
+
+
+
