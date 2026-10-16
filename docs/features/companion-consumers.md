@@ -34,6 +34,9 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | servers.list | servers:read | Saved managed-server ownership summaries without host paths |
 | servers.status | servers:read | Current managed state for a server disclosed to this session |
 | servers.stop | servers:write | Existing manager stop after separate native confirmation |
+| models.catalogue.page / models.catalogue.refresh | tools:read / tools:write | Paged observed official catalogue and native-approved durable refresh |
+| models.pull / models.install | tools:write | Native-approved durable model download and managed runtime acquisition |
+| models.managed.status / models.runtime.start / models.runtime.stop | tools:read / tools:write | Factual native runtime status and separately confirmed owned lifecycle |
 | models.status | tools:read | Actual local model-service version |
 | models.list | tools:read | Installed model names, sizes and digests |
 | workspace.read | workspace:read | Workspace summary |
@@ -82,7 +85,7 @@ Conversion controls use the existing native input/new-output pickers. The browse
 
 ## Local model workflow
 
-Refresh installed models, select one, enter a prompt and explicitly send it through the approved tools scope. Prompts and replies remain ephemeral; neither the local draft nor request history records their content. Read successive bounded chunks and cancel only the chat admitted to the current session. Revocation requests cancellation through the host observer. Cancellation remains requested until the service reports its actual state. This does not implement model acquisition or persistent conversation management.
+Refresh installed models, select one, enter a prompt and explicitly send it through the approved tools scope. Prompts and replies remain ephemeral; neither the local draft nor request history records their content. Read successive bounded chunks and cancel only the chat admitted to the current session. Revocation requests cancellation through the host observer. Cancellation remains requested until the service reports its actual state. The companion also pages the observed official catalogue and uses native-confirmed durable jobs for catalogue refresh, admitted model pulls and managed runtime acquisition. Existing installations/models stay protected by the native service. Runtime start is cancellable while in flight; after a completed native-approved start, the runtime is retained and stopping requires another native approval. Revocation never claims that runtime shut down. Persistent conversation management remains incomplete.
 
 ## Cancellation and recovery
 
@@ -98,7 +101,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 - Configuration string/credential editing, complete semantic menus, defconfig save, presets, account provisioning and structured package/external-tree authoring still need dedicated capability-bound projections and controls. Package discovery, file-hash metadata and visible native editor handoff now have session-bound consumers; browser callers cannot provide an executable or filesystem path. Boolean, tristate, integer and hexadecimal rows now support bounded symbol filtering and 100-row pagination, semantic type/assignability metadata and revision-bound symbol help. Their edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Custom source clone, existing-source adopt/ref acquisition and historical rollback discovery need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean. Source upgrade now retains its immutable preview in the session and requires native review of the actual patch before the existing revision-bound apply. Rollback previews and apply are also bound to rollback records created by this session, with the same native review and current-revision checks. Patches above 16,000 characters require the full native workflow instead of a truncated approval.
 - Rich artifact content, multi-file manifest selection/comparisons, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
-- Full version-specific descriptors and native SSH authentication enrollment, model pulls and full conversation management, assistant/recovery and forge publication need actual dedicated authenticated consumers.
+- Full version-specific descriptors and native SSH authentication enrollment, full persistent conversation management, assistant/recovery and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
 - Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
 
@@ -113,6 +116,7 @@ Package search uses the existing source/external-tree catalogue with 25-row page
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 

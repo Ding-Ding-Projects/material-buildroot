@@ -55,6 +55,13 @@ const actionContracts=Object.freeze({
  'servers.list':contract('servers:read',[]),
  'servers.status':contract('servers:read',['serverId'],a=>typeof a.serverId==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(a.serverId)),
  'servers.stop':contract('servers:write',['serverId'],a=>typeof a.serverId==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(a.serverId)),
+ 'models.catalogue.page':contract('tools:read',['query','offset'],a=>typeof a.query==='string'&&a.query.length<=128&&Number.isSafeInteger(a.offset)&&a.offset>=0&&a.offset<=100000),
+ 'models.catalogue.refresh':contract('tools:write',[]),
+ 'models.pull':contract('tools:write',['model'],a=>typeof a.model==='string'&&a.model.length<=200),
+ 'models.managed.status':contract('tools:read',[]),
+ 'models.install':contract('tools:write',[]),
+ 'models.runtime.start':contract('tools:write',[]),
+ 'models.runtime.stop':contract('tools:write',[]),
  'models.status':contract('tools:read',[]),
  'models.list':contract('tools:read',[]),
  'workspace.read':contract('workspace:read',[]),
@@ -90,7 +97,7 @@ const summary=job=>({id:job.id,kind:job.kind,state:job.state,sequence:job.sequen
 function createCompanionConsumers(host){
  const sessions=new Map();
  function admitted(context,scope){if(!context||typeof context.isAuthorized!=='function'||!context.isAuthorized()||!context.scopes.includes(scope))fail('UNAUTHORIZED');}
- function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),ownedJobs:new Set(),viewers:new Map(),sdkPreviews:new Map(),packages:new Map(),packageFiles:new Map(),editors:new Set(),destinations:new Map(),cloudPreviews:new Map(),cloudJobs:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),sourceRollbacks:new Map(),models:new Set(),chats:new Set(),toolFiles:new Map(),servers:new Map(),serverDirectories:new Set(),serverVersions:new Set(),pluginVersions:new Map(),paperBuilds:new Map(),fabricOptions:new Map(),serverRemotePreviews:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
+ function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),ownedJobs:new Set(),viewers:new Map(),sdkPreviews:new Map(),packages:new Map(),packageFiles:new Map(),editors:new Set(),destinations:new Map(),cloudPreviews:new Map(),cloudJobs:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),sourceRollbacks:new Map(),models:new Set(),catalogueModels:new Set(),modelRuntimeStarted:false,chats:new Set(),toolFiles:new Map(),servers:new Map(),serverDirectories:new Set(),serverVersions:new Set(),pluginVersions:new Map(),paperBuilds:new Map(),fabricOptions:new Map(),serverRemotePreviews:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
  function file(state,args,kind){const entry=state.files.get(args.fileId||args.directoryId);if(!entry||entry.workspaceId!==args.workspaceId||entry.kind!==kind)fail('FILE_NOT_ADMITTED');return entry.id;}
  return Object.freeze({actionContracts,async dispatch(request,context){
   const definition=actionContracts[request.action];if(!definition)fail('ACTION_NOT_ADMITTED');definition.validate(request.args);admitted(context,definition.scope);const owned=state(context),a=request.args;
@@ -134,6 +141,9 @@ function createCompanionConsumers(host){
    case 'servers.list':{const value=await host.listServers();if(value.ok===false||!Array.isArray(value.ownership))fail('SERVER_MANAGER_UNAVAILABLE');owned.servers=new Map(value.ownership.map(item=>[item.serverId,item.target]));result={servers:value.ownership.map(({serverId,target,state,updatedAt,adoptionVerified})=>({serverId,target,state,updatedAt,adoptionVerified}))};break;}
    case 'servers.status':{if(!owned.servers.has(a.serverId))fail('SERVER_NOT_ADMITTED');const value=await host.serverStatus(a.serverId);if(value.ok===false)fail('SERVER_STATUS_UNAVAILABLE');result={serverId:a.serverId,state:value.state,readinessVerified:value.readinessVerified===true,adoptionVerified:value.adoptionVerified===true,readinessState:value.readinessState||'unknown',processSpawned:value.processSpawned===true};break;}
    case 'servers.stop':{if(!owned.servers.has(a.serverId))fail('SERVER_NOT_ADMITTED');const approved=await host.confirmServerStop(a.serverId,owned.servers.get(a.serverId),context,()=>admitted(context,definition.scope));admitted(context,definition.scope);if(!approved){result={serverId:a.serverId,state:'cancelled-before-stop'};break;}const value=await host.stopServer(a.serverId);if(value.ok===false)fail('SERVER_STOP_UNAVAILABLE');result={serverId:a.serverId,state:value.state||'stop-requested'};break;}
+   case 'models.catalogue.page':{const value=await host.modelCataloguePage(a);if(value.ok===false)fail('MODEL_CATALOGUE_UNAVAILABLE');const items=(value.items||[]).map(item=>({model:item.model,family:item.family,tag:item.tag}));for(const item of items)owned.catalogueModels.add(item.model);result={available:value.available===true,items,revision:value.revision||null,next:value.next??null,matching:value.matching||0,lastSuccessfulRefresh:value.lastSuccessfulRefresh||null,exhaustive:false};break;}
+   case 'models.managed.status':{const value=await host.managedModelStatus();if(value.ok===false)fail('MODEL_RUNTIME_UNAVAILABLE');result={phase:value.phase||'unavailable',version:value.version||null,platformSupported:value.platformSupported===true,installed:value.installed===true,running:value.running===true,owned:value.owned===true,code:value.code||null};break;}
+   case 'models.catalogue.refresh':case 'models.pull':case 'models.install':case 'models.runtime.start':case 'models.runtime.stop':{if(request.action==='models.pull'&&!owned.catalogueModels.has(a.model))fail('MODEL_NOT_ADMITTED');if(request.action==='models.runtime.stop'&&!owned.modelRuntimeStarted)fail('RUNTIME_NOT_OWNED');const approved=await host.confirmModelOperation(request.action,a,context,()=>admitted(context,definition.scope));admitted(context,definition.scope);if(!approved){result={state:'cancelled'};break;}if(request.action==='models.runtime.start'){const value=await host.startModelRuntime(()=>admitted(context,definition.scope));if(value.ok===false)fail('MODEL_RUNTIME_UNAVAILABLE');owned.modelRuntimeStarted=value.started===true;result={state:value.started?'started':'unknown',ready:value.ready===true,owned:value.owned===true};}else if(request.action==='models.runtime.stop'){const value=await host.stopModelRuntime();if(value.ok===false)fail('MODEL_STOP_UNAVAILABLE');owned.modelRuntimeStarted=false;result={state:value.stopped?'stopped':'unknown'};}else{const value=request.action==='models.pull'?host.queueModelPull(a,context,()=>admitted(context,definition.scope)):request.action==='models.install'?host.queueModelInstall(context,()=>admitted(context,definition.scope)):host.queueModelCatalogue(context,()=>admitted(context,definition.scope));result={job:summary(value)};}break;}
    case 'models.status':{const value=await host.modelStatus();if(value.ok===false)fail('MODEL_SERVICE_UNAVAILABLE');result={version:typeof value.version==='string'?value.version:'unavailable'};break;}
    case 'models.list':{const value=await host.modelList();if(value.ok===false||!Array.isArray(value.models))fail('MODEL_SERVICE_UNAVAILABLE');owned.models=new Set(value.models.slice(0,100).map(item=>item.name));result={models:value.models.slice(0,100).map(item=>({name:item.name,size:item.size,digest:item.digest,modifiedAt:item.modified_at}))};break;}
    case 'cloud.cancel':{if(owned.cloudJobs.get(a.id)!==a.workspaceId)fail('JOB_NOT_ADMITTED');admitted(context,definition.scope);result=host.cancelCloud(a.workspaceId,a.id);break;}
@@ -171,6 +181,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
