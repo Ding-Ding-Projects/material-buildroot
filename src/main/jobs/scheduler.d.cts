@@ -22,6 +22,10 @@ export function createBuildScheduler(options: {
   acquireLease?(admission: BuildAdmission): Promise<() => void>;
   maxScan?: number; callbackTimeoutMs?: number;
 }): {
+  reserveExternal(input: { id: string; admission: BuildAdmission; observed: ResourceObservation }): { id: string; budgetRevision: number; state: string };
+  restoreExternal(input: { id: string; admission: BuildAdmission }): void;
+  releaseExternal(id: string, terminalState: 'succeeded' | 'failed' | 'cancelled'): {id: string; state: string};
+  externalStatus(): {id: string; state: string; budgetRevision: number; resourceDomain: string; cpuSlots: number; memoryBytes: number; storageBytes: number}[];
   pump(): Promise<void>;
   setLimits(limits: { maxConcurrent: number; cpuSlots: number; memoryBytes: number; storageBytes: number }): void;
   acquireMutationLease(paths: { projectId: string; source: string; output: string; externalTrees?: string[] }): () => void;
@@ -34,3 +38,4 @@ export function createBuildScheduler(options: {
   awaitIdle(): Promise<void>;
   close(): void;
 };
+
