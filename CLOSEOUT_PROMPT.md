@@ -33,3 +33,9 @@ The current verified account reading is 92% used, 8% remaining. Stop new impleme
 ## Final gallery preservation delta
 
 The existing public gallery now has a reviewed source delta for 52 images across seven groups. The added native e722 dialog PNG is byte-identical to its already promoted original, with source revision, actual UTC capture clock, dimensions, scale, executable/build hashes and verified Material component version. All 52 registered image hashes match. The nine newer e463 captures remain withheld for missing capture clocks. The existing live-delivery.json remains historical evidence for 51 images; new publication, image delivery and source README backlink readback must be verified separately after this delta lands. No new browser or full interaction acceptance is claimed.
+
+## Continuation readback, account preservation remains active
+
+The fresh allowance remains 93% used, 7% remaining. No new implementation, build, installer or runtime lane was started. Product source and published main matched cca322b31ac41428a50c36c40e672e4d3eb2f287 before this documentation checkpoint. The prior gallery proof establishes all 52 image deliveries, exact committed text blobs, public visibility, About homepage and source README backlink. No new interaction claim follows.
+
+Original release run 38897500052 and timing annotation run 38897939833 are now both terminal success. Attempt-specific job records were read and retained privately. Direct release-note readback remains incomplete after a later API timeout. Announcement 5 exists; separate stored-body verification reached three bounded timeouts and is retained as unverified. Do not repeat that unchanged lane without an external-state change. All original PH00-PH10 implementation and acceptance gaps remain open. The goal stays active; this continuation made evidence progress, not complete product delivery.
