@@ -45,6 +45,8 @@ export class OperationsPanel extends LitElement {
     selectedJob: { state: true },
     config: { state: true },
     configDomain: { state: true },
+    configTrustPreview: { state: true },
+    configTrustAccepted: { state: true },
     changes: { state: true },
     defconfigs: { state: true },
     artifacts: { state: true },
@@ -81,6 +83,8 @@ export class OperationsPanel extends LitElement {
   selectedJob = "";
   config: any;
   configDomain = "buildroot";
+  configTrustPreview: any;
+  configTrustAccepted = false;
   changes: Record<string, { type: string; value: unknown }> = {};
   defconfigs: any[] = [];
   artifacts: any[] = [];
@@ -339,6 +343,7 @@ export class OperationsPanel extends LitElement {
     });
     if (result !== undefined) {
       this.workspace = result;
+      this.configTrustPreview = undefined; this.configTrustAccepted = false;
       this.config = undefined;
       this.artifacts = [];
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
@@ -436,6 +441,30 @@ export class OperationsPanel extends LitElement {
       this.logCursor = result.next;
       this.logMore = result.hasMore;
     }
+  }
+  private async previewConfigTrust() {
+    if (!this.workspace) return;
+    this.configTrustAccepted = false;
+    this.configTrustPreview = undefined;
+    const workspaceId = this.workspace.workspaceId, domain = this.configDomain;
+    const result = await this.run("config.trustPreview", { workspaceId, domain });
+    if (this.workspace?.workspaceId === workspaceId && this.configDomain === domain && result !== undefined) this.configTrustPreview = result;
+  }
+  private async grantConfigTrust() {
+    if (!this.workspace || !this.configTrustPreview || !this.configTrustAccepted) return;
+    const result = await this.run("config.trustGrant", { workspaceId: this.workspace.workspaceId, challengeId: this.configTrustPreview.id, trusted: true });
+    const discoveryOnly = this.configTrustPreview?.discoveryOnly;
+    this.configTrustAccepted = false;
+    this.configTrustPreview = undefined;
+    if (result !== undefined) {
+      if (discoveryOnly) await this.previewConfigTrust();
+      else await this.inspectConfig();
+    }
+  }
+  private async revokeConfigTrust() {
+    if (!this.workspace) return;
+    await this.run("config.trustRevoke", { workspaceId: this.workspace.workspaceId });
+    this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {};
   }
   private async inspectConfig() {
     if (!this.workspace) return;
@@ -869,7 +898,7 @@ export class OperationsPanel extends LitElement {
     return html`<section class="panel stack">
       <div class="row">
         <h2>${this.l("Configuration domain", "設定範圍")}</h2>
-        <md-outlined-select .label=${this.l("Domain", "範圍")} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
+        <md-outlined-select .label=${this.l("Domain", "範圍")} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
           ${this.options([["buildroot", "Buildroot"], ["linux", "Linux"], ["busybox", "BusyBox"], ["uboot", "U-Boot"]])}
         </md-outlined-select>
         <md-outlined-button
@@ -880,6 +909,23 @@ export class OperationsPanel extends LitElement {
           >${actionIcon('List defconfigs')}${this.l("List defconfigs", "列出預設設定")}</md-text-button
         >
       </div>
+      <p>${this.l("Authoritative inspection can execute commands from the selected Make/Kconfig sources. Review the exact source and runtime before allowing it. WSL commands have your distribution account's access; the container route has read-only source mounts and no network. Configuration apply uses the admitted writable build route.", "權威檢視可以執行所選 Make／Kconfig 來源入面嘅指令。批准前請核對確切來源同執行環境。WSL 指令具有發行版帳戶嘅存取權；容器路線使用唯讀來源掛載同停用網絡。套用設定會使用已授權嘅可寫建置路線。")}</p>
+      <div class="row">
+        <md-outlined-button ?disabled=${this.pending} @click=${this.previewConfigTrust}>${this.l("Review source execution permission", "核對來源執行權限")}</md-outlined-button>
+        <md-text-button ?disabled=${this.pending} @click=${this.revokeConfigTrust}>${this.l("Revoke configuration permission", "撤銷設定權限")}</md-text-button>
+      </div>
+      ${this.configTrustPreview ? html`<section class="panel stack" aria-label=${this.l("Source execution permission", "來源執行權限")}>
+        <h3>${this.configTrustPreview.domain} · ${this.l("Review exact scope", "核對確切範圍")}</h3>
+        <p>${this.configTrustPreview.discoveryOnly ? this.l("First allow this Buildroot revision to discover the selected component. A second review will name that component's actual source.", "先批准呢個 Buildroot 修訂以尋找所選元件。第二次核對會列出該元件嘅實際來源。") : this.l("Permission lasts up to 15 minutes in this session and expires when source, configuration, roots or runtime change.", "權限只喺本次工作階段維持最多 15 分鐘；來源、設定、目錄或執行環境一改就失效。")}</p>
+        <dl><dt>${this.l("Source", "來源")}</dt><dd class="symbol">${this.configTrustPreview.sourceRoot}</dd>
+        <dt>${this.l("Output", "輸出")}</dt><dd class="symbol">${this.configTrustPreview.outputRoot}</dd>
+        <dt>${this.l("Runtime", "執行環境")}</dt><dd class="symbol">${JSON.stringify(this.configTrustPreview.runtime)}</dd>
+        <dt>${this.l("Source revision", "來源修訂")}</dt><dd class="symbol">${this.configTrustPreview.sourceRevision}</dd>
+        <dt>${this.l("Configuration revision", "設定修訂")}</dt><dd class="symbol">${this.configTrustPreview.configRevision}</dd>
+        <dt>${this.l("External sources", "外部來源")}</dt><dd class="symbol">${this.configTrustPreview.externalRoots.join(" · ") || this.l("None", "無")}</dd></dl>
+        <label class="row"><md-checkbox ?disabled=${this.pending} .checked=${this.configTrustAccepted} @change=${(event: Event) => this.configTrustAccepted = (event.target as any).checked}></md-checkbox>${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.", "批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。")}</label>
+        <md-filled-button ?disabled=${this.pending || !this.configTrustAccepted} @click=${this.grantConfigTrust}>${this.l("Allow this scope", "批准此範圍")}</md-filled-button>
+      </section>` : nothing}
       ${this.config
         ? html`<p class="notice">
               ${this.config.semantics?.available
@@ -888,8 +934,8 @@ export class OperationsPanel extends LitElement {
                     "已授權解析器提供 Kconfig 選單、實際值、相依關係同說明，變更會由所選執行環境協調。",
                   )
                 : this.l(
-                    "Full Kconfig semantics are unavailable. Choose a trusted Python interpreter, then inspect again.",
-                    "未能使用完整 Kconfig 語意。請揀選可信 Python 解譯器，再重新檢視。",
+                    "Full Kconfig semantics are unavailable. Review source execution permission for authoritative inspection, or choose a trusted Python interpreter for limited read-only inspection.",
+                    "未能使用完整 Kconfig 語意。請核對來源執行權限以作權威檢視，或選擇可信 Python 解譯器作有限唯讀檢視。",
                   ) +
                   " " +
                   (this.config.semantics?.reason ?? "")}

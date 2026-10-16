@@ -10,6 +10,8 @@ const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
+const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
+const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
@@ -64,6 +66,9 @@ const fields = {
   "jobs.page": ["id", "after", "limit"],
   "jobs.cancel": ["id", "sequence"],
   "jobs.retry": ["id", "sequence"],
+  "config.trustPreview": ["workspaceId"],
+  "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
+  "config.trustRevoke": ["workspaceId"],
   "config.inspect": ["workspaceId"],
   "config.defconfigs": ["workspaceId"],
   "config.apply": ["workspaceId", "revision", "changes"],
@@ -783,16 +788,73 @@ function createOperationsService({
       reject("BLOCKED_INTENT_CHANGED");
   }
   async function configurationDomains(id, item) {
+    await configurationConsent.requireTrust(id);
     const result = await executeProject({ workspaceId: id, runtime: item.runtime, target: "material-config-domains", jobs: 1 });
     if (result.state !== "succeeded") reject("DOMAIN_DISCOVERY_FAILED");
     project(id);
-    return resolveDomains(item, result.stdout);
+    await configurationConsent.requireTrust(id);
+    const domains = resolveDomains(item, result.stdout);
+    for (const roots of Object.values(domains)) { roots.workspaceId = id; roots.kconfig.externalRoots = item.externalTrees; }
+    return domains;
+  }
+  const configurationConsent = createConfigurationConsent({ resolveProject: project, discoverDomains: configurationDomains });
+  async function inspectConfigurationSemantics(roots) {
+    try { await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots); }
+    catch (error) {
+      if (!["KCONFIG_SOURCE_TRUST_REQUIRED", "KCONFIG_SOURCE_TRUST_CHANGED"].includes(error.code)) throw error;
+      if (!kconfigAdapter) throw error;
+      return kconfigAdapter(roots);
+    }
+    const context = async admissionId => {
+      const current = await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots);
+      if (current.admissionId !== admissionId) reject("KCONFIG_ADMISSION_CHANGED");
+      return { grantId: current.grantId, runtime: current.runtime, sourceRoot: current.sourceRoot, outputRoot: current.outputRoot,
+        binding: { admissionId, sourceRevision: current.sourceRevision, configRevision: current.configRevision } };
+    };
+    const adapter = createKconfigAdapter({
+      executeInspection: async operation => {
+        const controller = new AbortController(), jobId = randomUUID();
+        const job = { cancel: async () => controller.abort() };
+        let receipt, recorded = false;
+        const cancel = () => controller.abort();
+        operation.signal?.addEventListener("abort", cancel, { once: true });
+        if (disposed || operation.signal?.aborted) controller.abort();
+        running.add(job);
+        activeRecovery.add(jobId);
+        const executeInspection = createKconfigInspection({ execution, resolveContext: context,
+          onOwnership: async current => {
+            if (!recorded) { quarantine.begin({ jobId, workspaceId: roots.workspaceId }); recorded = true; }
+            quarantine.checkpoint(jobId, current); receipt = current;
+          },
+        });
+        try {
+          const result = await executeInspection({ ...operation, signal: controller.signal });
+          if (recorded) quarantine.clear(jobId);
+          return result;
+        } catch (error) {
+          if (recorded && receipt) {
+            try {
+              const state = await execution.reconcileCleanup(receipt);
+              if (state.state === "verified-stopped") quarantine.clear(jobId);
+            } catch { recoveryUnavailable = true; }
+          }
+          throw error;
+        } finally {
+          activeRecovery.delete(jobId); running.delete(job);
+          operation.signal?.removeEventListener("abort", cancel);
+        }
+      },
+      resolveAdmission: async () => {
+        const current = await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots);
+        return { sourceTrusted: true, runtime: current.runtime.kind === "wsl" ? "wsl2" : "docker", admissionId: current.admissionId,
+          sourceRevision: current.sourceRevision, configRevision: current.configRevision };
+      },
+    });
+    return adapter(roots);
   }
   const config = createConfigurationService({
-    semanticAdapter: async (roots) => {
-      if (!kconfigAdapter) reject("PYTHON_NOT_ADMITTED");
-      return kconfigAdapter(roots);
-    },
+    authorize: roots => configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots),
+    semanticAdapter: inspectConfigurationSemantics,
     resolveWorkspace: async (id, domain = "buildroot") => {
       const item = project(id);
       if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
@@ -817,6 +879,7 @@ function createOperationsService({
         granted: true,
         sourceRoot: item.source,
         outputRoot: item.output,
+        workspaceId: id,
         kconfig: {
           buildroot: true,
           externalRoots: item.externalTrees,
@@ -1337,10 +1400,17 @@ function createOperationsService({
         void scheduler.pump().catch(() => {});
         return job;
       }
+      case "config.trustPreview":
+        return changeConfig(projectPaths(request.workspaceId), () => configurationConsent.preview(request));
+      case "config.trustGrant":
+        return changeConfig(projectPaths(request.workspaceId), () => configurationConsent.grant(request));
+      case "config.trustRevoke":
+        project(request.workspaceId);
+        return configurationConsent.revoke(request);
       case "config.inspect":
-        return config.inspect(request);
+        return changeConfig(projectPaths(request.workspaceId), () => config.inspect(request));
       case "config.defconfigs":
-        return config.listDefconfigs(request);
+        return changeConfig(projectPaths(request.workspaceId), () => config.listDefconfigs(request));
       case "config.apply":
         return changeConfig(projectPaths(request.workspaceId), () =>
           config.apply(request),

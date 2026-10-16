@@ -101,6 +101,7 @@ function createConfigurationService({
   resolveWorkspace,
   executor,
   semanticAdapter,
+  authorize,
 }) {
   if (typeof resolveWorkspace !== "function" || typeof executor !== "function")
     fail("INVALID_ADAPTER");
@@ -201,6 +202,7 @@ function createConfigurationService({
   async function reconcile(input, makeRequested) {
     domain(input);
     return serial(input, async (r, key) => {
+      if (authorize) await authorize(r);
       const before = await read(r.outputRoot);
       if (input.revision !== revision(r, before.text)) fail("REVISION_CONFLICT");
       if (input.changes && semanticAdapter) {
