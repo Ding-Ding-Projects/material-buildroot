@@ -220,7 +220,17 @@ async function unpackOffice(archive, output, tool, cache) {
 async function assemblePayloads({ output, cache, complete = true } = {}) {
   if (!output || !cache || !path.isAbsolute(output) || !path.isAbsolute(cache)) throw new Error("Absolute payload output and cache directories are required.");
   const declared = Object.keys(require("../../src/main/tools/payload-manager.cjs").TOOLS);
-  const missing = declared.filter(id => !registry.tools.some(tool => tool.id === id));
+  const bundled = registry.requiredBundledToolIds;
+  const external = registry.externalTools;
+  if (!Array.isArray(bundled) || !bundled.length || !Array.isArray(external) || new Set(bundled).size !== bundled.length || new Set(external.map(tool => tool.id)).size !== external.length)
+    throw new Error("Explicit unique bundled and external tool classifications are required.");
+  const invalidExternal = external.some(tool => !declared.includes(tool.id) || bundled.includes(tool.id) || tool.classification !== "external-user-admitted" || tool.acquisition !== "user-selected-existing-installation" || tool.licenseBoundary !== "user-managed-installation-not-redistributed" || typeof tool.purpose !== "string" || !tool.purpose);
+  const unclassified = declared.filter(id => !bundled.includes(id) && !external.some(tool => tool.id === id));
+  if (invalidExternal || bundled.some(id => !declared.includes(id)) || unclassified.length)
+    throw new Error("Declared tool distribution classification is missing or inconsistent: " + unclassified.join(", ") + ". No tool is automatically treated as external.");
+  if (new Set(registry.tools.map(tool => tool.id)).size !== registry.tools.length || registry.tools.some(tool => !bundled.includes(tool.id)))
+    throw new Error("Archive pins must belong uniquely to explicitly required bundled tools.");
+  const missing = bundled.filter(id => !registry.tools.some(tool => tool.id === id));
   if (complete && missing.length) throw new Error("Complete offline payload assembly is unavailable: " + missing.join(", ") + ". See scripts/build/offline-payloads.json. No complete package was produced.");
   const parent = await directory(path.dirname(output));
   const cacheRoot = await directory(cache);
@@ -228,7 +238,18 @@ async function assemblePayloads({ output, cache, complete = true } = {}) {
   catch (error) { if (error.code !== "ENOENT") throw error; }
   const staging = await fsp.mkdtemp(path.join(parent, ".payload-assembly-"));
   // On failure staging is intentionally retained for diagnosis; never remove a caller directory.
-  const manifest = { schemaVersion: 1, platform: registry.platform, complete: missing.length === 0, missing, tools: [] };
+  const bundledComplete = missing.length === 0;
+  const externalTools = external.map(tool => ({
+    ...tool,
+    bundled: false,
+    availability: "not-evaluated-during-build",
+    admission: "required-at-runtime",
+    admissionReceipt: "not-present-in-package",
+    installation: "not-performed-by-assembly",
+    runtimeVerified: false,
+    provenance: { admissionRoute: "host-native-picker", receiptScope: "local-user-data", includedInPackage: false, executablePathIncluded: false },
+  }));
+  const manifest = { schemaVersion: 1, platform: registry.platform, scope: "bundled-payload-inventory", bundledComplete, wholeToolsetOffline: bundledComplete && externalTools.length === 0, requiredBundledToolIds: [...bundled], externalTools, complete: bundledComplete, missing, tools: [] };
   for (const tool of registry.tools) {
     const archive = await acquire(tool, cacheRoot);
     const files = tool.format === "7z" ? await unpack7z(archive, staging, tool, cacheRoot) : tool.format === "7z-full" ? await unpackFull7z(archive, staging, tool, cacheRoot) : tool.format === "office-msi" ? await unpackOffice(archive, staging, tool, cacheRoot) : tool.format === "calibre-portable" ? await unpackCalibre(archive, staging, tool, cacheRoot) : await unpack(archive, staging, tool);
@@ -249,10 +270,12 @@ async function assemblePayloads({ output, cache, complete = true } = {}) {
     for (const license of tool.licenseFiles) {
       if (!files.some(member => member.path === tool.id + "/" + license && member.bytes > 0)) throw new Error("Payload license absent: " + tool.id);
     }
-    manifest.tools.push({ id: tool.id, version: tool.version, executable, files, license: tool.license, licenseFiles: tool.licenseFiles.map(name => tool.id + "/" + name), sourceUrl: tool.sourceUrl, composition: tool.composition || "Complete original archive", compositionSources: tool.compositionSources || [], archive: { url: tool.url, sha256: tool.sha256, bytes: tool.bytes } });
+    manifest.tools.push({ id: tool.id, classification: "bundled", runtimeVerified: false, version: tool.version, executable, files, license: tool.license, licenseFiles: tool.licenseFiles.map(name => tool.id + "/" + name), sourceUrl: tool.sourceUrl, profile: tool.profile || "declared-upstream-composition", composition: tool.composition || "Complete original archive", compositionSources: tool.compositionSources || [], excludedMembers: tool.excludedMembers || [], sourceInventory: tool.sourceInventory || null, archive: { url: tool.url, sha256: tool.sha256, bytes: tool.bytes } });
   }
   await fsp.writeFile(path.join(staging, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", { flag: "wx" });
-  await fsp.writeFile(path.join(staging, "THIRD-PARTY-NOTICES.txt"), manifest.tools.map(tool => [tool.id + " " + tool.version, tool.license, tool.sourceUrl, "Original notices: " + tool.licenseFiles.join(", "), "Original archive retained intact; see manifest.json for every member hash."].join("\n")).join("\n\n") + "\n", { flag: "wx" });
+  const notices = manifest.tools.map(tool => [tool.id + " " + tool.version, tool.license, tool.sourceUrl, "Original notices: " + tool.licenseFiles.join(", "), "Original downloaded archive retained in the source cache; see manifest.json for package composition, exclusions and every retained member hash."].join("\n")).join("\n\n");
+  const externalNotices = externalTools.map(tool => [tool.id + " (external, not redistributed)", tool.purpose, "Existing user-managed installation and applicable licenses remain the user's responsibility.", "No installation, local receipt, availability check or runtime verification is included in this package."].join("\n")).join("\n\n");
+  await fsp.writeFile(path.join(staging, "THIRD-PARTY-NOTICES.txt"), notices + "\n\nExternal capabilities\n\n" + externalNotices + "\n", { flag: "wx" });
   await fsp.rename(staging, output);
   return { directory: output, manifest, extraResources: { from: output, to: "offline-payloads", filter: ["**/*"] } };
 }
