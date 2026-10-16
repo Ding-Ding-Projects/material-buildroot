@@ -6,8 +6,8 @@ Choose a task below and read its permission, recovery and verification boundarie
 
 - [Create, adopt, open and import projects](projects/project-workflows.md) · [建立及開啟專案](projects/project-workflows.zh-HK.md)
 - [Preserve, preview and apply source revisions](source-lifecycle.md) · [來源修訂](source-lifecycle.zh-HK.md)
-- [Workspace plans, history and scoped exports](workspace-history.md)
-- [Retained project and utility tabs](workspace-tabs.md)
+- [Workspace plans, history and scoped exports](workspace-history.md) · [工作區歷史](workspace-history.zh-HK.md)
+- [Retained project and utility tabs](workspace-tabs.md) · [工作區分頁](workspace-tabs.zh-HK.md)
 
 ## Configure, build and recover
 
