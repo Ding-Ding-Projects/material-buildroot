@@ -51,6 +51,7 @@ const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
 const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 
+const { createRemoteRuntime } = require("./execution/remote-runtime.cjs");
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const { createExecutionSetup } = require('./execution/setup.cjs');
 const { createWorkflowService } = require('./execution/workflow-service.cjs');
@@ -76,6 +77,7 @@ const fields = {
   "documentation.read": ["id"],
   "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
+  "runtime.remote": ["request"],
   "runtime.discover": [],
   "runtime.wsl": ["kind", "distribution"],
   "runtime.docker.prepare": ["workspaceId", "runtime"],
@@ -266,6 +268,8 @@ function createOperationsService({
         openExternal: openDocumentationExternal,
       })
     : null;
+  let remoteRuntime;
+  function remoteService() { return remoteRuntime ??= createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileGrants,run:boundedProcess}); }
   let executionJobs;
   function hostedJobs() {
     return executionJobs ??= createExecutionJobs({
@@ -1326,6 +1330,7 @@ function createOperationsService({
       case "documentation.open":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
+      case "runtime.remote": return remoteService().perform(request.request);
       case "runtime.wsl":
         if (!["discover", "inspect", "import", "install", "cloneSource", "chooseProject", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
         if (request.kind === "chooseProject") {
@@ -2093,6 +2098,7 @@ function createOperationsService({
       disposed = true;
       executionSetup.dispose();
       executionJobs?.dispose();
+      remoteRuntime?.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
@@ -2121,4 +2127,5 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
