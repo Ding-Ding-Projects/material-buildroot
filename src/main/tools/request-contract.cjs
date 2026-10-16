@@ -105,6 +105,10 @@ function admit(request, nested = false) {
         }
         if (size > 262144) fail("REQUEST_LIMIT");
         break;
+      case "converter.inspect":
+        keys(request, ["action", "sourceId"]);
+        string(request.sourceId);
+        break;
       case "converter.convert":
         keys(request, [
           "action",
@@ -301,6 +305,10 @@ function admit(request, nested = false) {
           fail("INVALID_REQUEST");
         if (request.limit !== undefined && !integer(request.limit, 1, 100))
           fail("INVALID_REQUEST");
+        break;
+      case "queue.export":
+        keys(request, ["action", "destinationId"]);
+        string(request.destinationId);
         break;
       case "queue.rebind":
         keys(request, ["action", "id", "job"]);

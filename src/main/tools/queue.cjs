@@ -2,8 +2,8 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
-const { fail, text } = require("./runtime.cjs");
-function createToolQueue(directory, execute) {
+const { fail, text, grant } = require("./runtime.cjs");
+function createToolQueue(directory, execute, options = {}) {
   let consuming = false,
     disposed = false;
   let paused = false, controlLoaded = false;
@@ -58,6 +58,40 @@ function createToolQueue(directory, execute) {
     record.request = require("./request-contract.cjs").admit(record.request);
     return record;
   }
+  function grants(request) { return [...(request.sourceIds || [request.sourceId]),request.destinationId].filter(Boolean); }
+  async function releaseUnused(record) {
+    if (!options.releaseGrants) return;
+    const candidates = new Set(grants(record.request));
+    const stream = await fs.opendir(directory);
+    for await (const entry of stream) {
+      if (!entry.name.endsWith(".json") || entry.name === record.id + ".json") continue;
+      const other = await read(entry.name.slice(0,-5));
+      if (["queued","running","interrupted"].includes(other.state)) for (const id of grants(other.request)) candidates.delete(id);
+    }
+    await options.releaseGrants([...candidates]);
+  }
+  async function exportHistory(destinationId, context) {
+    const destination = await grant(options,destinationId,"write");
+    const temporary = path.join(path.dirname(destination),".queue-history-"+randomUUID());
+    const handle = await fs.open(temporary,"wx",0o600);
+    let count=0, bytes=0;
+    try {
+      const stream=await fs.opendir(directory);
+      for await(const entry of stream) {
+        if(context.signal?.aborted) fail("CANCELLED");
+        if(!entry.name.endsWith(".json")) continue;
+        const r=await read(entry.name.slice(0,-5));
+        const row={id:r.id,action:r.request.action,category:r.request.category,format:r.request.format,operation:r.request.operation,state:r.state,createdAt:r.createdAt,finishedAt:r.finishedAt,bytes:r.result?.bytes,sha256:r.result?.sha256,code:r.result?.code};
+        const line=JSON.stringify(row)+"\n";bytes+=Buffer.byteLength(line);
+        await handle.writeFile(line);count++;
+      }
+      await handle.sync();await handle.close();
+      await grant(options,destinationId,"write");
+      if(context.signal?.aborted)fail("CANCELLED");
+      await fs.link(temporary,destination);
+      return {count,bytes};
+    } finally {await handle.close().catch(()=>{});await fs.rm(temporary,{force:true});}
+  }
   async function page(after = "", limit = 50) {
     await prepare();
     if (!Number.isInteger(limit) || limit < 1 || limit > 100)
@@ -90,18 +124,22 @@ function createToolQueue(directory, execute) {
       if (disposed) fail("SERVICE_DISPOSED");
       await prepare();
       switch (request.action) {
+        case "queue.export":
+          return exportHistory(request.destinationId,context);
         case "queue.pause":
           paused = true;
           await fs.writeFile(path.join(directory,"queue.control"), "paused", {mode:0o600});
           return { paused, running: consuming };
         case "queue.rebind": {
           const record = await read(request.id);
-          if (active.has(record.id) || record.state === "completed") fail("INVALID_QUEUE_STATE");
+          if (consuming || active.has(record.id) || record.state === "completed") fail("INVALID_QUEUE_STATE");
           if (record.request.action !== request.job.action) fail("INVALID_REQUEST");
+          const previous={...record};
           record.request = require("./request-contract.cjs").admit(request.job);
           record.state = "queued";
           delete record.result;
           await write(record);
+          await releaseUnused(previous);
           return {job:record};
         }
         case "queue.add":
@@ -116,6 +154,11 @@ function createToolQueue(directory, execute) {
             const admitted = require("./request-contract.cjs").admit(
               request,
             ).job;
+            if (admitted.destinationId && options.resolveGrant) {
+              const destination=await grant(options,admitted.destinationId,"write");
+              const storage=await fs.statfs(path.dirname(destination));
+              if(storage.bavail*storage.bsize<512*1024*1024)fail("DESTINATION_STORAGE_LIMIT");
+            }
             const record = {
               id: randomUUID(),
               state: "queued",
@@ -136,6 +179,7 @@ function createToolQueue(directory, execute) {
           if (["queued", "running", "interrupted"].includes(record.state)) {
             record.state = "cancelled";
             await write(record);
+            if (!active.has(record.id)) await releaseUnused(record);
           }
           return { job: record };
         }
@@ -181,6 +225,7 @@ function createToolQueue(directory, execute) {
               const abort = () => controller.abort();
               context.signal?.addEventListener("abort", abort, { once: true });
               active.set(record.id, controller);
+              record.startedAt = new Date().toISOString();
               record.state = "running";
               await write(record);
               if (disposed || context.signal?.aborted) controller.abort();
@@ -195,8 +240,10 @@ function createToolQueue(directory, execute) {
                   : result.ok
                     ? "completed"
                     : "failed";
+                record.finishedAt = new Date().toISOString();
                 record.result = result;
                 await write(record);
+                await releaseUnused(record);
                 if (record.state === "completed") completed++;
                 else failed++;
               } finally {

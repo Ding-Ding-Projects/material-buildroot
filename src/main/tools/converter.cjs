@@ -78,6 +78,18 @@ function createConverter(options) {
       }
       return categories;
     },
+    async inspect(request) {
+      const source = await grant(options,request.sourceId,"read"), stat = await fs.stat(source);
+      if (!stat.isFile() || stat.size > 64 * 1024 * 1024) fail("INPUT_LIMIT");
+      const handle=await fs.open(source,"r"), sample=Buffer.alloc(Math.min(stat.size,65536));
+      try {await handle.read(sample,0,sample.length,0);} finally {await handle.close();}
+      let detected=["png","jpg","pdf","webp","zip","mp4","webm","wav","flac","mp3"].find(f=>signature(sample,f));
+      let text=false;
+      if(!detected)try{new TextDecoder("utf-8",{fatal:true}).decode(sample,{stream:stat.size>sample.length});text=!sample.includes(0);}catch{}
+      detected ||= text?"utf8-text":"binary";
+      return {bytes:stat.size,detected,sampledBytes:sample.length,complete:stat.size===sample.length,
+        nativeCategories:text?["structured","text","binary"]:["binary"]};
+    },
     async convert(request, context) {
       const adapter = formats[request.category]?.[request.format];
       if (!adapter) fail("UNSUPPORTED_FORMAT");

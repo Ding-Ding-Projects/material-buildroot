@@ -20,7 +20,8 @@ type QueueItem = {
   id: string;
   state: string;
   request: { action: string; sourceIds?: string[]; sourceId?: string; destinationId?: string; [key: string]: unknown };
-  result?: { code?: string };
+  result?: { code?: string; bytes?: number };
+  startedAt?: string; finishedAt?: string;
 };
 export class ToolsPanel extends LitElement {
   static properties = { language: { type: String }, revision: { state: true } };
@@ -34,6 +35,7 @@ export class ToolsPanel extends LitElement {
   private category = "text";
   private format = "txt";
   private source?: Grant;
+  private sourcePreview?: {bytes:number;detected:string;sampledBytes:number;complete:boolean};
   private destination?: Grant;
   private pdfSources: Grant[] = [];
   private pdfDestination?: Grant;
@@ -41,6 +43,12 @@ export class ToolsPanel extends LitElement {
   private pages = "1";
   private degrees = "90";
   private jobs: QueueItem[] = [];
+  private queuePoll?: ReturnType<typeof setInterval>;
+  private refreshingQueue = false;
+  private batch: {source:Grant;destination:Grant}[] = [];
+  private selectedBatch = new Set<string>();
+  private batchCategory = "text";
+  private batchFormat = "txt";
   private next: string | null = null;
   private payloads: {
     toolId: string;
@@ -239,6 +247,28 @@ export class ToolsPanel extends LitElement {
   ): Promise<Grant> {
     return this.call("file.choose", { access, kind });
   }
+  disconnectedCallback() { clearInterval(this.queuePoll); super.disconnectedCallback(); }
+  private disclosure(category:string) {
+    if(category==="binary")return this.l("Every input byte is encoded as text. This operation does not decode encoded text.","所有輸入位元組會編碼成文字，此操作唔會解碼已編碼文字。");
+    if(category==="structured")return this.l("JSON and CSV tables only. CSV loses value types; nested values and spreadsheet formulas are rejected.","只支援 JSON 同 CSV 表格。CSV 唔會保留數值類型，巢狀值同試算表公式唔獲接受。");
+    if(category==="text")return this.l("Strict UTF-8 only. Original line endings are preserved.","只支援有效 UTF-8，原有換行符號會保留。");
+    return this.l("The target may omit metadata, fonts, layers, animation, transparency or precision. Keep the original file.","目標格式可能唔保留中繼資料、字體、圖層、動畫、透明度或精確度，請保留原檔。");
+  }
+  private unavailable(code?:string) {
+    const reasons:Record<string,[string,string]>={BUNDLED_ADAPTER_REQUIRED:["Verified packaged adapter required","需要已驗證封裝工具"],MISSING_VERIFIED_PAYLOAD:["Packaged adapter is missing","缺少封裝工具"],ISOLATED_RUNTIME_REQUIRED:["Verified isolated execution unavailable","未有已驗證隔離執行環境"],PAYLOAD_HASH_MISMATCH:["Packaged adapter integrity mismatch","封裝工具完整性不符"]};
+    const reason=code&&reasons[code];return reason?this.l(...reason):code||this.l("Unavailable","未能使用");
+  }
+  private async release(ids:string[]) { if(ids.length) await this.call("file.release",{ids}); }
+  private async reauthorize(j:QueueItem) {
+    const request={...j.request}, added:string[]=[];
+    try {
+      if(request.sourceIds) {const ids=[];for(const _ of request.sourceIds){const id=(await this.choose("read")).id;ids.push(id);added.push(id);}request.sourceIds=ids;}
+      else {request.sourceId=(await this.choose("read")).id;added.push(request.sourceId);}
+      if(request.destinationId){request.destinationId=(await this.choose("write")).id;added.push(request.destinationId);}
+      await this.tool({action:"queue.rebind",id:j.id,job:request});
+    } catch(error) {await this.release(added);throw error;}
+    await this.queuePage();
+  }
   private categoryName(id:string) {
     const names:Record<string,[string,string]>={images:["Images","圖片"],audio:["Audio","音訊"],video:["Video","影片"],documents:["Documents / PDF","文件 / PDF"],archives:["Archives","壓縮檔"],structured:["Structured data / spreadsheets","結構化資料 / 試算表"],text:["Code / text","程式碼 / 文字"],binary:["Binary encodings","二進制編碼"]};
     const n=names[id];return n?this.l(...n):id;
@@ -306,6 +336,8 @@ export class ToolsPanel extends LitElement {
       await this.tool({ action: "queue.add", job: request });
       await this.queuePage();
     } else this.result(await this.tool(request));
+    if(!queued)await this.release([...this.pdfSources.map(s=>s.id),...(this.pdfDestination?[this.pdfDestination.id]:[])]);
+    this.pdfSources=[];
     this.pdfDestination = undefined;
   }
   render() {
@@ -373,20 +405,27 @@ export class ToolsPanel extends LitElement {
             ${c.formats.filter(f=>!this.visibleFormats[c.category]||this.visibleFormats[c.category].includes(f.format)).map(f=>html`<div class="record">
               <md-outlined-button ?disabled=${!f.available||this.pending} aria-pressed=${this.category===c.category&&this.format===f.format}
                 @click=${()=>{this.category=c.category;this.format=f.format;this.changed();}}>${f.format.toUpperCase()}</md-outlined-button>
-              <span>${f.adapter} · ${f.available?this.l("Available", "可用"):f.reason}</span>
+              <span>${f.adapter} · ${f.available?this.l("Available", "可用"):this.unavailable(f.reason)}</span>
             </div>`)}
           </details>`)}
           <p>${this.categoryName(this.category)} · ${this.format.toUpperCase()}</p>
-          <p class="note">${formats?.find(f=>f.format===this.format)?.disclosure}</p>
+          <p class="note">${this.disclosure(this.category)}</p>
           <p class="note">${this.l("Choose a new output name with the selected format extension. Sources remain unchanged. Conversion may change metadata or encoding as described above.","請為新輸出選擇符合格式嘅副檔名。來源保持不變，轉換可能按上述說明改變中繼資料或編碼。")}</p>
           <div class="row">
             ${this.button("Choose source", "選擇來源", async () => {
-              this.source = await this.choose("read");
+              const chosen=await this.choose("read");
+              if(this.source)await this.release([this.source.id]);
+              this.source = chosen;
+              this.sourcePreview=undefined;
+              this.sourcePreview=await this.tool({action:"converter.inspect",sourceId:chosen.id});
             })}<span>${this.source?.name}</span>
+            ${this.sourcePreview?html`<p>${this.l("Detected from bytes","按位元組偵測")}: ${this.sourcePreview.detected} · ${this.sourcePreview.bytes} bytes · ${this.sourcePreview.sampledBytes} ${this.l("bytes inspected","已檢視位元組")}. ${this.l("Preview is not conversion validation.","預覽唔代表轉換驗證。")}</p>`:nothing}
           </div>
           <div class="row">
             ${this.button("Choose new output", "選擇新輸出", async () => {
-              this.destination = await this.choose("write");
+              const chosen=await this.choose("write");
+              if(this.destination)await this.release([this.destination.id]);
+              this.destination = chosen;
             })}<span>${this.destination?.name}</span>
           </div>
           <div class="row">
@@ -395,7 +434,8 @@ export class ToolsPanel extends LitElement {
               "立即轉換",
               async () => {
                 this.result(await this.tool(this.conversion()));
-                this.destination = undefined;
+                await this.release([this.source!.id,this.destination!.id]);
+                this.source=undefined;this.sourcePreview=undefined;this.destination = undefined;
               },
               !this.source || !this.destination || !formats?.find(f=>f.format===this.format)?.available,
             )}${this.button(
@@ -406,12 +446,35 @@ export class ToolsPanel extends LitElement {
                   action: "queue.add",
                   job: this.conversion(),
                 });
-                this.destination = undefined;
+                this.source=undefined;this.sourcePreview=undefined;this.destination = undefined;
                 await this.queuePage();
               },
               !this.source || !this.destination || !formats?.find(f=>f.format===this.format)?.available,
             )}
           </div>
+          <h3>${this.l("Batch conversion", "批次轉換")}</h3>
+          <p>${this.l("Choose up to 100 files per selection. Queue storage has no total-file limit. Process or release a page before selecting another; live permissions stay bounded.","每次選擇最多 100 個檔案，儲存佇列冇總檔案上限。選取下一批前請處理或釋放目前批次，以限制即時權限數量。")}</p>
+          ${this.button("Choose batch and output folder","選擇批次同輸出資料夾",async()=>{
+            const r=await this.call("file.chooseBatch",{format:this.format});
+            await this.release(this.batch.flatMap(i=>[i.source.id,i.destination.id]));
+            this.batchCategory=this.category;this.batchFormat=this.format;
+            this.batch=r.items;this.selectedBatch=new Set(this.batch.map(i=>i.source.id));
+          },!formats?.find(f=>f.format===this.format)?.available)}
+          ${this.batch.length?html`<div class="row">
+            ${this.button("Select all","全選",async()=>{this.selectedBatch=new Set(this.batch.map(i=>i.source.id));})}
+            ${this.button("Select none","全部取消選取",async()=>{this.selectedBatch.clear();})}
+            ${this.button("Queue selected files","加入所選檔案",async()=>{
+              const remaining=[];
+              for(let index=0;index<this.batch.length;index++){
+                const item=this.batch[index];
+                if(!this.selectedBatch.has(item.source.id)){remaining.push(item);continue;}
+                try{await this.tool({action:"queue.add",job:{action:"converter.convert",category:this.batchCategory,format:this.batchFormat,sourceId:item.source.id,destinationId:item.destination.id}});this.selectedBatch.delete(item.source.id);}
+                catch(error){this.batch=[...remaining,...this.batch.slice(index)];throw error;}
+              }
+              this.batch=remaining;await this.queuePage();
+            },!this.selectedBatch.size)}
+            ${this.button("Release batch permissions","釋放批次權限",async()=>{await this.release(this.batch.flatMap(i=>[i.source.id,i.destination.id]));this.batch=[];this.selectedBatch.clear();})}
+          </div>${this.batch.map(i=>html`<label class="row"><md-checkbox aria-label=${i.source.name} ?checked=${this.selectedBatch.has(i.source.id)} @change=${(e:Event)=>{if((e.target as HTMLInputElement).checked)this.selectedBatch.add(i.source.id);else this.selectedBatch.delete(i.source.id);this.changed();}}></md-checkbox><span>${i.source.name} → ${i.destination.name}</span></label>`)}`:nothing}
         </section>
         <section class="panel stack" data-destination="pdf" data-experience-id="tools-section:pdf" tabindex="-1">
           <h2>${this.l("PDF workspace", "PDF 工作區")}</h2>
@@ -450,6 +513,7 @@ export class ToolsPanel extends LitElement {
                   "Remove",
                   "移除",
                   async () => {
+                    await this.release([s.id]);
                     this.pdfSources = this.pdfSources.filter((_, j) => j !== i);
                   },
                 )}
@@ -487,7 +551,9 @@ export class ToolsPanel extends LitElement {
                   "Choose PDF output",
                   "選擇 PDF 輸出",
                   async () => {
-                    this.pdfDestination = await this.choose("write");
+                    const chosen=await this.choose("write");
+                    if(this.pdfDestination)await this.release([this.pdfDestination.id]);
+                    this.pdfDestination = chosen;
                   },
                 )}<span>${this.pdfDestination?.name}</span>
               </div>`
@@ -511,8 +577,8 @@ export class ToolsPanel extends LitElement {
         <h2>${this.l("File and model queue", "檔案同模型佇列")}</h2>
         <p class="note">
           ${this.l(
-            "Jobs run when you choose Run queue. File permissions must be selected again after restarting the app.",
-            "選擇執行佇列先會開始工作，重新啟動應用程式後需要重新選擇檔案權限。",
+            "Jobs run when you choose Run queue. Completed permissions are released. Retry and restart require native file reauthorization.",
+            "選擇執行佇列先會開始工作，已完成權限會釋放，重試同重啟後需要重新用原生選擇器授權檔案。",
           )}
         </p>
         <div class="row">
@@ -535,6 +601,7 @@ export class ToolsPanel extends LitElement {
         </div>
         <div class="row">
           <md-outlined-button ?disabled=${!this.runningQueue} @click=${async()=>{try {await this.tool({action:"queue.pause"});this.feedback=this.l("Pause requested. The current file finishes first.","已要求暫停，會先完成目前檔案。");}catch {this.feedback=this.l("Pause was not accepted.","未能暫停。");}this.changed();}}>${this.l("Pause after current file","完成目前檔案後暫停")}</md-outlined-button>
+          ${this.button("Export queue history", "匯出佇列記錄",async()=>{const destination=await this.choose("write");try{this.result(await this.tool({action:"queue.export",destinationId:destination.id}));}finally{await this.release([destination.id]);}})}
           ${this.button("Refresh queue", "重新整理佇列", () =>
             this.queuePage(),
           )}${this.button(
@@ -549,6 +616,7 @@ export class ToolsPanel extends LitElement {
             ?disabled=${this.runningQueue || this.pending}
             @click=${async () => {
               this.runningQueue = true;
+              this.queuePoll=setInterval(async()=>{if(this.refreshingQueue)return;this.refreshingQueue=true;try{await this.queuePage();this.changed();}catch{}finally{this.refreshingQueue=false;}},1500);
               this.changed();
               try {
                 const r = await this.tool({ action: "queue.run" });
@@ -560,6 +628,7 @@ export class ToolsPanel extends LitElement {
                   "佇列未能完成，請重新整理狀態。",
                 ));
               } finally {
+                clearInterval(this.queuePoll);
                 this.runningQueue = false;
                 this.changed();
               }
@@ -571,14 +640,7 @@ export class ToolsPanel extends LitElement {
           (j) =>
             html`<div class="row record">
               <span>${j.request.action}</span><strong>${j.state}</strong
-              >${j.request.action!=="ollama.pull"&&!["running","completed"].includes(j.state)?this.button("Reauthorize files", "重新授權檔案",async()=>{
-                const request={...j.request};
-                if(request.sourceIds) {const ids=[];for(const _ of request.sourceIds)ids.push((await this.choose("read")).id);request.sourceIds=ids;}
-                else request.sourceId=(await this.choose("read")).id;
-                if(request.destinationId)request.destinationId=(await this.choose("write")).id;
-                await this.tool({action:"queue.rebind",id:j.id,job:request});await this.queuePage();
-              }):nothing}<span
-              ><span>${j.result?.code}</span>${[
+              >${j.request.action!=="ollama.pull"&&!["running","completed"].includes(j.state)?this.button("Reauthorize files", "重新授權檔案",()=>this.reauthorize(j),this.runningQueue):nothing}<span>${j.result?.code}</span><span>${j.result?.bytes!==undefined?`${j.result.bytes} bytes`:""}</span><span>${j.finishedAt||j.startedAt||""}</span>${[
                 "queued",
                 "running",
                 "interrupted",
@@ -591,7 +653,8 @@ export class ToolsPanel extends LitElement {
                 j.state,
               )
                 ? this.button("Retry job", "重試工作", async () => {
-                    await this.tool({ action: "queue.resume", id: j.id });
+                    if(j.request.action!=="ollama.pull") {await this.reauthorize(j);return;}
+                  await this.tool({ action: "queue.resume", id: j.id });
                     await this.queuePage();
                   })
                 : nothing}

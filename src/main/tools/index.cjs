@@ -21,6 +21,7 @@ function createToolsService(options = {}) {
   const queue = require("./queue.cjs").createToolQueue(
     options.queueDirectory,
     (request, context) => execute(request, context),
+    options,
   );
   async function execute(request, context = {}) {
     let settled;
@@ -54,6 +55,8 @@ function createToolsService(options = {}) {
         );
       else if (request.action === "converter.catalog")
         result = { categories: await converter.catalog() };
+      else if (request.action === "converter.inspect")
+        result = await converter.inspect(request);
       else if (request.action === "converter.convert")
         result = await converter.convert(request, context);
       else if (request.action.startsWith("minecraft."))

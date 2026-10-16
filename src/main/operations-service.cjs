@@ -82,6 +82,8 @@ const fields = {
   "payload.list": [],
   "payload.choose": ["toolId"],
   "file.choose": ["access", "kind"],
+  "file.chooseBatch": ["format"],
+  "file.release": ["ids"],
   companion: ["request"],
   source: ["request"],
   "external.choose": ["workspaceId"],
@@ -1000,6 +1002,7 @@ function createOperationsService({
     parentWindow,
     payloadManager,
     resolveGrant: (id, mode) => toolFiles.resolve(id, mode),
+    releaseGrants: (ids) => toolFiles.release(ids),
     authorizeServerExecution: (id) => toolFiles.serverAuthorized(id),
   });
   // Companion reads deliberately omit local paths, logs, notes, payloads and credentials.
@@ -1666,6 +1669,10 @@ function createOperationsService({
       }
       case "payload.choose":
         return payloadManager.choose(request.toolId);
+      case "file.chooseBatch":
+        return toolFiles.chooseBatch(request);
+      case "file.release":
+        return toolFiles.release(request.ids);
       case "file.choose":
         return toolFiles.choose(request);
       case "companion":

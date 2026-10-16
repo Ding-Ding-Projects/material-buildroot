@@ -31,9 +31,10 @@ function convertNative(bytes, category, format) {
   if (value.every(Array.isArray)) rows = value;
   else if (value.every(v => v && typeof v === "object" && !Array.isArray(v))) {
     const columns = [...new Set(value.flatMap(v => Object.keys(v)))];
-    if (columns.length > 1000) fail("STRUCTURED_LIMIT");
+    if (columns.length > 1000 || columns.length * value.length > 1000000) fail("STRUCTURED_LIMIT");
     rows = [columns, ...value.map(v => columns.map(k => v[k] ?? ""))];
   } else fail("TABULAR_DATA_REQUIRED");
+  if (rows.length * rows[0].length > 1000000) fail("STRUCTURED_LIMIT");
   if (rows.some(r => r.length !== rows[0].length || r.length > 1000)) fail("TABULAR_DATA_REQUIRED");
   return rows.map(row => row.map(v => {
     if (v !== null && typeof v === "object") fail("NESTED_DATA_NOT_SUPPORTED");
