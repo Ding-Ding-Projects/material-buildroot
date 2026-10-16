@@ -1250,6 +1250,13 @@ function createOperationsService({
     },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+    discoverGuests: workspaceId => deployment(workspaceId).discoverHypervisors(),
+    listGuests: workspaceId => deployment(workspaceId).listGuests(),
+    refreshGuest: (workspaceId,id) => deployment(workspaceId).refreshGuest({id}),
+    launchGuest: (workspaceId,id,expectedRevision) => changeConfig(projectPaths(workspaceId),()=>deployment(workspaceId).launchGuest({id,expectedRevision})),
+    stopGuest: (workspaceId,id,expectedRevision) => changeConfig(projectPaths(workspaceId),()=>deployment(workspaceId).stopGuest({id,expectedRevision})),
+    createGuestDisk: request => changeConfig(projectPaths(request.workspaceId),()=>deployment(request.workspaceId).createDiskArtifact({outputName:request.outputName,format:request.format,capacityMiB:request.capacityMiB})),
+    createCompanionGuest: async (request,viewer,fileId,context,authorize) => {authorize();const selected=viewer.resolve(fileId,'file');const hashFile=require('./deployment/artifacts.cjs').hashFile;const sha256=await hashFile(selected.file);authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve exact guest creation',message:`Create a ${request.provider} guest using this ${request.kind}?`,detail:`Source: ${selected.file}\nSHA-256: ${sha256}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\nHardware: ${JSON.stringify(request.hardware)}\n\nThe existing guest manager copies owned media into a new guest. Creation is not boot verification. Launch remains a separate visible action.`,buttons:['Cancel','Create reviewed guest'],defaultId:0,cancelId:0,noLink:true});authorize();if(answer.response!==1)return {cancelled:true};return changeConfig(projectPaths(request.workspaceId),async()=>{authorize();const current=viewer.resolve(fileId,'file');if(await hashFile(current.file)!==sha256)reject('OUTPUT_CHANGED_REFRESH');authorize();return deployment(request.workspaceId).createGuest({provider:request.provider,hardware:request.hardware,storage:[{slot:0,kind:request.kind,artifact:current.grant.relative}]});});},
     listPackages: request => packageDiscovery.discover({...request,limit:25}),
     packageFiles: request => packageDiscovery.importPackage(request),
     packageEditors: () => require('./configuration/package-editor.cjs').discoverEditors(),
@@ -2227,6 +2234,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

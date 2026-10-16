@@ -401,7 +401,7 @@ if (visitor) {
   const companionMessage = visitor.querySelector('#companion-message');
   const sessionPanel = visitor.querySelector('#companion-connected');
   const endpointStorageKey = 'mb-companion-endpoint-v1';
-  const readOnlyScopes = new Set(['workspace:read','projects:read','jobs:read','source:read','outputs:read','outputs:write','jobs:cancel','configuration:read','configuration:write','builds:submit','deployment:read','deployment:write','tools:read','tools:write','source:write','servers:read','servers:write','packages:read','packages:write']);
+  const supportedCompanionScopes = new Set(['workspace:read','projects:read','jobs:read','source:read','outputs:read','outputs:write','jobs:cancel','configuration:read','configuration:write','builds:submit','deployment:read','deployment:write','tools:read','tools:write','source:write','servers:read','servers:write','packages:read','packages:write','guests:read','guests:write']);
   const actionScope = {'workspace.read':'workspace:read','projects.list':'projects:read','jobs.list':'jobs:read'};
   let companion = null; // Session, CSRF token and sequence intentionally stay in page memory.
   let lastCompanionResult = null;
@@ -566,15 +566,15 @@ if (visitor) {
       const {response,payload}=await companionFetch('/pair',{challenge,clientNonce,browser});
       if(!response.ok){companionMessage.textContent=companionError(payload.code);return;}
       if(Object.keys(payload).sort().join(',')!=='csrfToken,nextSequence,session'||typeof payload.csrfToken!=='string'||!payload.csrfToken||!Number.isSafeInteger(payload.nextSequence)||payload.nextSequence<1||!validSession(payload.session))throw new Error('response-invalid');
-      const broader=payload.session.scopes.some(scope=>!readOnlyScopes.has(scope));
+      const broader=payload.session.scopes.some(scope=>!supportedCompanionScopes.has(scope));
       companion={endpoint,session:payload.session,csrfToken:payload.csrfToken,nextSequence:payload.nextSequence,sequenceUnknown:false};
       if(broader){
         let revoked=false;
         try {const closed=await companionFetch('/disconnect',{},companion.csrfToken);revoked=closed.response.ok&&closed.payload?.revoked===true&&closed.payload?.session?.id===payload.session.id&&closed.payload?.session?.status==='revoked';} catch {}
         clearCompanionMemory();
         companionMessage.textContent=revoked
-          ? copy('This challenge granted access beyond the read-only scope. The page immediately asked the desktop to revoke it and received confirmation.','此挑戰碼授予超出唯讀範圍嘅權限。頁面已立即要求桌面撤銷，並收到確認。')
-          : copy('This challenge granted access beyond the read-only scope. The page will not use it; the desktop did not confirm revocation. Revoke it from the desktop.','此挑戰碼授予超出唯讀範圍嘅權限。頁面不會使用該權限；桌面未確認撤銷。請喺桌面撤銷連線。');
+          ? copy('This challenge granted a capability this client does not recognize. The page immediately asked the desktop to revoke it and received confirmation.','此挑戰碼授予此客戶端未識別嘅權限。頁面已立即要求桌面撤銷，並收到確認。')
+          : copy('This challenge granted a capability this client does not recognize. The page will not use it; the desktop did not confirm revocation. Revoke it from the desktop.','此挑戰碼授予此客戶端未識別嘅權限。頁面不會使用該權限；桌面未確認撤銷。請喺桌面撤銷連線。');
         return;
       }
       challengeField.value='';showCompanionSession(payload.session);
@@ -720,6 +720,7 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
 
 
 
