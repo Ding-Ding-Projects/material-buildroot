@@ -1,4 +1,5 @@
 import "./update-panel";
+import "./wsl-runtime-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./build-queue-panel";
@@ -634,6 +635,7 @@ export class OperationsPanel extends LitElement {
   private runtimeView() {
     return html`<div class="split">
       <section class="panel stack">
+        <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; this.dispatchEvent(new CustomEvent("source-adopted",{detail:event.detail,bubbles:true,composed:true})); }}></wsl-runtime-panel>
         <h2>${this.l("Runtime discovery", "探索執行環境")}</h2>
         <p>
           ${this.l(
@@ -1392,3 +1394,5 @@ export class OperationsPanel extends LitElement {
   }
 }
 customElements.define("operations-panel", OperationsPanel);
+
+
