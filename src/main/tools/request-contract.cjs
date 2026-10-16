@@ -86,6 +86,16 @@ function admit(request, nested = false) {
         keys(request, ["action", "model"]);
         token(request.model);
         break;
+      case "ollama.chat.read":
+        keys(request,["action","id"],["offset"]);
+        if(!uuid(request.id)||request.offset!==undefined&&!integer(request.offset,0,1048576))fail("INVALID_REQUEST");
+        break;
+      case "ollama.chat.cancel":
+      case "ollama.chat.forget":
+        keys(request,["action","id"]);
+        if(!uuid(request.id))fail("INVALID_REQUEST");
+        break;
+      case "ollama.chat.start":
       case "ollama.chat":
         keys(request, ["action", "model", "messages"]);
         token(request.model);

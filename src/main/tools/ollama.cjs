@@ -12,9 +12,15 @@ function createOllama(options = {}) {
       : null);
   const catalogue = options.ollamaCatalogue || (options.ollamaCatalogueDirectory
     ? require("./ollama-catalogue.cjs").createOllamaCatalogue({directory:options.ollamaCatalogueDirectory,fetchImpl:options.fetchImpl}) : null);
+  const chats = require("./ollama-chat-sessions.cjs").createChatSessions((request, context) => execute(request, context));
   const execute = async function execute(request, context = {}) {
     const common = { signal: context.signal, fetchImpl: options.fetchImpl };
     switch (request.action) {
+      case "ollama.chat.start":
+      case "ollama.chat.read":
+      case "ollama.chat.cancel":
+      case "ollama.chat.forget":
+        return chats.dispatch(request);
       case "ollama.catalogue.status":
       case "ollama.catalogue.page":
       case "ollama.catalogue.refresh":
@@ -117,7 +123,7 @@ function createOllama(options = {}) {
         fail("INVALID_REQUEST");
     }
   };
-  execute.dispose = async () => {await Promise.all([managed?.dispose(),catalogue?.dispose()]);};
+  execute.dispose = async () => {await Promise.all([chats.dispose(),managed?.dispose(),catalogue?.dispose()]);};
   return execute;
 }
 module.exports = { createOllama };
