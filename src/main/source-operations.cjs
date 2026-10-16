@@ -92,7 +92,9 @@ function createSourceOperations({
     const cached = projects.get(workspaceId);
     if (cached) {
       if (cached.source !== workspace.source) fail("SOURCE_PATH_CHANGED");
-      return cached;
+      if (cached.authority === workspace.receipt) return cached;
+      // Re-adoption grants a new process-local authority; old previews cannot migrate with it.
+      projects.delete(workspaceId);
     }
     if (adopting.has(workspaceId)) return adopting.get(workspaceId);
     const pending = (async () => {
@@ -105,7 +107,7 @@ function createSourceOperations({
         trustedSource: true,
       });
       // Existing workspace trust must have been admitted by the host's resolveWorkspace callback.
-      const item = { projectId: adopted.projectId, source: adopted.source, service: selectedService };
+      const item = { projectId: adopted.projectId, source: adopted.source, service: selectedService, authority: workspace.receipt };
       projects.set(workspaceId, item);
       return item;
     })();
