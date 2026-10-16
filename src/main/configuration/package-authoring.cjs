@@ -45,6 +45,7 @@ function validateAuthoringModel(model) {
     "homepage",
     "hashes",
     "pythonSetupType",
+    "patches", "hooks", "overlays", "buildOptions",
   ];
   if (Object.keys(model).some((key) => !allowed.includes(key)))
     fail("UNSUPPORTED_PACKAGE_FIELD");
@@ -138,6 +139,7 @@ function validateAuthoringModel(model) {
     )
   )
     fail("PACKAGE_HASH_REQUIRED");
+  require("./package-recipe-options.cjs").validateOptions(model);
   return model;
 }
 function renderPackage(model, externalName) {
@@ -169,6 +171,7 @@ function renderPackage(model, externalName) {
     make.push(`${prefix}_DEPENDENCIES = ${model.dependencies.join(" ")}`);
   if (model.buildSystem === "python")
     make.push(`${prefix}_SETUP_TYPE = ${model.pythonSetupType}`);
+  make.push(...require("./package-recipe-options.cjs").renderOptions(model, prefix, externalName));
   const infrastructure =
     model.buildSystem === "go" ? "golang" : model.buildSystem;
   make.push("", `$(eval $(${infrastructure}-package))`, "");
@@ -181,6 +184,7 @@ function renderPackage(model, externalName) {
       .join("\n") + "\n";
   return {
     files: {
+      ...(["patches","hooks","overlays","buildOptions"].some(key=>Object.hasOwn(model,key)) ? { [`${base}/material-package.json`]: JSON.stringify({schemaVersion:1, externalName, model}, null, 2) + "\n" } : {}),
       [`${base}/Config.in`]: config,
       [`${base}/${model.name}.mk`]: make.join("\n"),
       [`${base}/${model.name}.hash`]: hash,
@@ -300,6 +304,11 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
     const matches = [...desc.before.matchAll(/^name:\s*([A-Za-z0-9_]+)\s*$/gm)];
     if (matches.length !== 1) fail("INVALID_EXTERNAL_DESCRIPTOR");
     const generated = renderPackage(model, matches[0][1]);
+    const overlaySources = [];
+    for (const overlay of model.overlays || []) {
+      const bytes = await require("./package-discovery.cjs").readSafe(root, overlay.source);
+      overlaySources.push({path:overlay.source, sha256:digest(bytes), identity:bytes.receipt.identity});
+    }
     const files = [];
     for (const [relative, after] of Object.entries(generated.files))
       files.push({ ...(await readFile(root, relative)), after });
@@ -359,6 +368,7 @@ function createPackageAuthoringService({ resolveExternalTree, withLock }) {
     const revision = digest(
       JSON.stringify([
         desc,
+        overlaySources,
         ...files.map(({ path, before, mode, identity }) => ({
           path,
           before,

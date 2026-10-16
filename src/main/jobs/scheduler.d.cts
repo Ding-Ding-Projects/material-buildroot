@@ -23,6 +23,7 @@ export function createBuildScheduler(options: {
   maxScan?: number; callbackTimeoutMs?: number;
 }): {
   pump(): Promise<void>;
+  setLimits(limits: { maxConcurrent: number; cpuSlots: number; memoryBytes: number; storageBytes: number }): void;
   acquireMutationLease(paths: { projectId: string; source: string; output: string; externalTrees?: string[] }): () => void;
   status(): {
     closed: boolean;

@@ -3,6 +3,14 @@ on:
   push:
     branches: ['**']
   workflow_dispatch:
+    inputs:
+      execution_target:
+        description: Compatible hosted Windows X64 image
+        type: choice
+        default: windows-2025
+        options:
+          - windows-2025
+          - windows-2022
 permissions:
   contents: write
   actions: read
@@ -12,11 +20,12 @@ concurrency:
   cancel-in-progress: false
 jobs:
   package:
-    runs-on: windows-2025
+    runs-on: ${{ inputs.execution_target == 'windows-2022' && 'windows-2022' || 'windows-2025' }}
     timeout-minutes: 90
     env:
       GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      MATERIAL_EXECUTION_TARGET: ${{ inputs.execution_target == 'windows-2022' && 'windows-2022' || 'windows-2025' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,10 +33,18 @@ jobs:
       - name: Bootstrap pinned publication CLI
         shell: powershell
         run: .\scripts\release\bootstrap-gh.ps1
+      - name: Record bounded bootstrap inventory
+        shell: powershell
+        run: .\scripts\ci\collect-evidence.ps1
       - name: Build genuine unsigned Squirrel installer
         shell: cmd
         run: build-installer.bat /s
+      - name: Determine exact-source publication eligibility
+        id: publication
+        shell: powershell
+        run: .\scripts\ci\publication-eligibility.ps1
       - name: Publish exact-source normal release
+        if: ${{ steps.publication.outputs.eligible == 'true' }}
         shell: powershell
         run: |
           & .\.cache\toolchains\node-24.22.0\active\node.exe scripts/release/publish.cjs
@@ -38,17 +55,7 @@ jobs:
         shell: powershell
         env:
           RELEASE_JOB_STATUS: ${{ job.status }}
-        run: |
-          $destination = Join-Path $env:RUNNER_TEMP 'material-release-evidence'
-          New-Item -ItemType Directory -Path $destination -Force | Out-Null
-          @{runId=$env:GITHUB_RUN_ID; source=$env:GITHUB_SHA; status=$env:RELEASE_JOB_STATUS; runnerOS=$env:RUNNER_OS; runnerArch=$env:RUNNER_ARCH} | ConvertTo-Json | Set-Content (Join-Path $destination 'run.json')
-          if (Test-Path release/publish) {
-            Get-ChildItem release/publish -File | Where-Object { $_.Name -match '^(Setup\.exe|RELEASES|[A-Za-z0-9_.-]+-(full|delta)\.nupkg|provenance\.json|SHA256SUMS\.txt)$' } | Copy-Item -Destination $destination
-          }
-          if (Test-Path release/installer) {
-            Get-ChildItem release/installer -File -Recurse | Where-Object { $_.Name -match '^(Setup\.exe|RELEASES|[A-Za-z0-9_.-]+-(full|delta)\.nupkg)$' } | Copy-Item -Destination $destination
-          }
-          if (Test-Path release/installer/build-receipt.json) { Copy-Item release/installer/build-receipt.json (Join-Path $destination 'build-receipt.json') }
+        run: .\scripts\ci\collect-evidence.ps1 -CollectOutputs
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         continue-on-error: true
@@ -57,3 +64,6 @@ jobs:
           path: ${{ runner.temp }}/material-release-evidence
           if-no-files-found: warn
           retention-days: 7
+          compression-level: 0
+
+

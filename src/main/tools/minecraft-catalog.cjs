@@ -12,6 +12,7 @@ async function catalog(options, request, context) {
   };
   const fetchImpl = options.fetchImpl || fetch,
     common = { fetchImpl, signal: context.signal };
+  const paperFetch = (url, init) => fetchImpl(url, { ...init, headers: { ...init?.headers, "User-Agent": "MaterialBuildroot/0.1 (https://github.com/Ding-Ding-Projects/material-buildroot)" } });
   if (request.action === "minecraft.flavours") {
     if (request.flavour === "fabric") {
       const game = await fetchBounded(
@@ -39,12 +40,12 @@ async function catalog(options, request, context) {
         ? "/versions/" + encodeURIComponent(token(request.version)) + "/builds"
         : "";
       const data = await fetchBounded(
-        "https://api.papermc.io/v2/projects/paper" + suffix,
-        common,
+        "https://fill.papermc.io/v3/projects/paper" + suffix,
+        { ...common, fetchImpl: paperFetch },
       );
       return {
         flavour: "paper",
-        metadata: data,
+        metadata: request.version ? data : { ...data, versions: Array.isArray(data.versions) ? data.versions : Object.values(data.versions || {}).flat() },
         installationAvailable: false,
         reason:
           "Build acquisition requires reviewed artifact digest and licence admission.",
@@ -121,10 +122,12 @@ async function catalog(options, request, context) {
     if (
       !Array.isArray(version.loaders) ||
       !version.loaders.some((loader) =>
-        ["paper", "spigot", "bukkit", "purpur", "folia"].includes(loader),
+        ["paper", "spigot", "bukkit", "purpur", "folia", "fabric"].includes(loader),
       )
     )
       fail("UNSUPPORTED_PLUGIN_LOADER");
+    if (!version.game_versions?.includes(request.gameVersion) || !version.loaders.includes(request.loader)) fail("PLUGIN_VERSION_INCOMPATIBLE");
+    if (Array.isArray(version.dependencies) && version.dependencies.some(item => item.dependency_type === "required")) fail("PLUGIN_DEPENDENCIES_REQUIRE_MANUAL_INSTALL");
     const entry = version.files?.find((file) => file.primary === true);
     if (
       !entry ||

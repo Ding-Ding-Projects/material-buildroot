@@ -2,6 +2,12 @@
 
 The guest workspace supports VirtualBox and VMware through the existing main-process operation service. The topology toolbar discovers providers and lists only application-managed records. Discovery reports command availability, not guest boot acceptance.
 
+## Executable admission
+
+Before discovery or guest operations, open Tools, refresh the executable list and select the installed `VBoxManage.exe`, `vmrun.exe` or `qemu-img.exe` through its native picker. The native trust dialog displays the exact resolved path and SHA-256 and defaults to Cancel. Only explicit approval executes the fixed probe and persists a local identity receipt. The renderer supplies a tool ID, never a command, executable path or argument list.
+
+Every deployment invocation resolves that receipt again and checks the absolute path and current SHA-256 before calling the fixed argument consumer. Missing admission or a replaced executable stops the operation; there is no bare-name or PATH fallback. Select and approve an updated installation again when its bytes change. The receipt is a user trust decision, not a vendor signature or publisher certification. VMware uses a read-only running-state availability probe and records version as unverified. Discovery returns no guest paths from that probe. QEMU admission is required for disk inspection, creation and conversion as applicable.
+
 ## Create or import
 
 Start with the new guest draft. New drafts reset to NAT, BIOS, 2048 MiB and two CPUs, with no attached media. Add up to four adapters and four storage attachments. VirtualBox bridged and host-only adapters require a discovered interface. VMware uses its provider-managed interface selection. The create action remains unavailable for invalid numeric settings, empty media selections, missing required interfaces or a provider observed unavailable.

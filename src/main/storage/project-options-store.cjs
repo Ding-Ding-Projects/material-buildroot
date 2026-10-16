@@ -367,4 +367,4 @@ function createProjectOptionsStore({ directory }) {
     ),
   );
 }
-module.exports = { createProjectOptionsStore };
+module.exports = { createProjectOptionsStore, validateProjectOptions: options };
