@@ -235,11 +235,14 @@ async function assemblePayloads({ output, cache, complete = true } = {}) {
     for (const supplement of tool.supplements || []) {
       const source = contained(path.resolve(__dirname, "../.."), supplement.source);
       const sourceStat = await fsp.lstat(source);
-      if (!sourceStat.isFile() || sourceStat.isSymbolicLink() || await hash(source) !== supplement.sha256) throw new Error("Pinned original notice changed.");
+      if (!sourceStat.isFile() || sourceStat.isSymbolicLink() || sourceStat.size > 1024 ** 2) throw new Error("Pinned original notice changed.");
+      // Source checkout newline conversion must not change the original text pin.
+      const notice = Buffer.from((await fsp.readFile(source, "utf8")).replaceAll("\r\n", "\n"), "utf8");
+      if (createHash("sha256").update(notice).digest("hex") !== supplement.sha256) throw new Error("Pinned original notice changed.");
       const destination = contained(staging, tool.id + "/" + supplement.path);
       await fsp.mkdir(path.dirname(destination), { recursive: true });
-      await fsp.copyFile(source, destination, fs.constants.COPYFILE_EXCL);
-      files.push({ path: tool.id + "/" + supplement.path, bytes: sourceStat.size, sha256: supplement.sha256 });
+      await fsp.writeFile(destination, notice, { flag: "wx" });
+      files.push({ path: tool.id + "/" + supplement.path, bytes: notice.length, sha256: supplement.sha256 });
     }
     const executable = tool.id + "/" + tool.executable;
     if (!files.some(member => member.path === executable)) throw new Error("Payload executable absent: " + tool.id);

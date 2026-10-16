@@ -321,7 +321,7 @@
         {
           "source": "src/main/tools/ollama-LICENSE.txt",
           "path": "LICENSE.txt",
-          "sha256": "95fa997c6886685f7c1d54ccdfb906519a7e0b33be58d5c1958708688abaa1fd"
+          "sha256": "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226"
         }
       ]
     },
