@@ -1290,6 +1290,15 @@ function createOperationsService({
     },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+    listRemote: authorize => remoteService().perform({action:'list'},authorize),
+    enrollRemote: authorize => remoteService().perform({action:'enroll'},authorize),
+    reconnectRemote: (targetId,authorize) => remoteService().perform({action:'reconnect',targetId},authorize),
+    transferRemote: (request,authorize) => remoteService().perform({action:'transfer',...request},authorize),
+    startRemote: (request,authorize) => remoteService().perform({action:'start',...request},authorize),
+    observeRemote: (id,authorize) => remoteService().perform({action:'observe',id},authorize),
+    cancelRemote: (id,authorize) => remoteService().perform({action:'cancel',id},authorize),
+    remoteOutputs: (id,authorize) => remoteService().perform({action:'outputs',id},authorize),
+    downloadRemote: (request,authorize) => remoteService().perform({action:'download',...request},authorize),
     discoverGuests: workspaceId => deployment(workspaceId).discoverHypervisors(),
     listGuests: workspaceId => deployment(workspaceId).listGuests(),
     refreshGuest: (workspaceId,id) => deployment(workspaceId).refreshGuest({id}),
@@ -2307,3 +2316,4 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
