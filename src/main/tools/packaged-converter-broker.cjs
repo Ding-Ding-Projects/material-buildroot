@@ -17,7 +17,7 @@ function createPackagedConverterBroker({ resources = process.resourcesPath, reso
       manifest.mechanism !== "appcontainer-handle-job" || !/^[a-f0-9]{64}$/.test(manifest.sha256 || "")) fail("INVALID_BROKER_MANIFEST");
   const bundled = require("./bundled-payloads.cjs").loadBundledPayloads(resources);
   const payloads = Object.create(null);
-  for (const [adapterId,toolId] of [["imagemagick","magick"],["ffmpeg","ffmpeg"]]) {
+  for (const [adapterId,toolId] of [["imagemagick","magick"],["ffmpeg","ffmpeg"],["qpdf","qpdf"]]) {
     const record = bundled[toolId];
     if (!record) continue;
     const runtimeRoot = path.dirname(record.path);

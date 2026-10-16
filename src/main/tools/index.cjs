@@ -13,6 +13,7 @@ const {
 function createToolsService(options = {}) {
   const ollama = createOllama(options),
     converter = createConverter(options),
+    pdf = require("./pdf.cjs").createPdfService(options),
     minecraft = createMinecraft(options);
   const editorTransfer = require("./editor-transfer.cjs").createEditorTransfer(options);
   let disposed = false;
@@ -48,12 +49,9 @@ function createToolsService(options = {}) {
         result = await queue.dispatch(request, context);
       else if (request.action.startsWith("ollama."))
         result = await ollama(request, context);
-      else if (request.action === "pdf.execute")
-        result = await require("./pdf.cjs").pdfService(
-          options,
-          request,
-          context,
-        );
+      else if (request.action === "pdf.execute") result = await pdf.execute(request,context);
+      else if (request.action === "pdf.catalog") result = await pdf.catalog();
+      else if (request.action === "pdf.cancel") result = pdf.cancel();
       else if (request.action === "converter.catalog")
         result = { categories: await converter.catalog() };
       else if (request.action === "converter.cancel")

@@ -54,6 +54,8 @@ function admit(request, nested = false) {
     "ollama.managed.cancel",
     "ollama.managed.start",
     "ollama.managed.stop",
+    "pdf.catalog",
+    "pdf.cancel",
     "converter.catalog",
     "converter.cancel",
     "minecraft.bedrock.discovery",
@@ -201,7 +203,7 @@ function admit(request, nested = false) {
           if (
             !Array.isArray(request.pages) ||
             !request.pages.length ||
-            request.pages.length > 10000 ||
+            request.pages.length > 1000 ||
             request.pages.some((page) => !integer(page, 1, 10000))
           )
             fail("INVALID_PAGE_SELECTION");

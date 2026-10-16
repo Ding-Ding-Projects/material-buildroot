@@ -43,7 +43,9 @@ export class ToolsPanel extends LitElement {
   private destination?: Grant;
   private pdfSources: Grant[] = [];
   private pdfDestination?: Grant;
-  private pdfOperation = "inspect";
+  private pdfOperation = "extract";
+  private pdfOperations: {operation:string;attemptAvailable:boolean;reason?:string}[] = [];
+  private visiblePdfOperations: string[] | undefined;
   private pages = "1";
   private degrees = "90";
   private jobs: QueueItem[] = [];
@@ -258,7 +260,7 @@ export class ToolsPanel extends LitElement {
     return this.l("The target may omit metadata, fonts, layers, animation, transparency or precision. Keep the original file.","目標格式可能唔保留中繼資料、字體、圖層、動畫、透明度或精確度，請保留原檔。",true);
   }
   private unavailable(code?:string) {
-    const reasons:Record<string,[string,string]>={BUNDLED_ADAPTER_REQUIRED:["Verified packaged adapter required","需要已驗證封裝工具"],MISSING_VERIFIED_PAYLOAD:["Packaged adapter is missing","缺少封裝工具"],ISOLATED_RUNTIME_REQUIRED:["Verified isolated execution unavailable","未有已驗證隔離執行環境"],PAYLOAD_HASH_MISMATCH:["Packaged adapter integrity mismatch","封裝工具完整性不符"],NATIVE_BROKER_UNAVAILABLE:["Native isolation broker unavailable","原生隔離程序未能使用"],NATIVE_FORMAT_NOT_SUPPORTED:["No native isolated operation for this format","此格式未有原生隔離操作"],ISOLATED_ATTEMPT_UNVERIFIED:["Packaged isolated attempt available; runtime acceptance unverified","可嘗試封裝隔離操作，實際執行驗收未驗證"]};
+    const reasons:Record<string,[string,string]>={BUNDLED_ADAPTER_REQUIRED:["Verified packaged adapter required","需要已驗證封裝工具"],MISSING_VERIFIED_PAYLOAD:["Packaged adapter is missing","缺少封裝工具"],ISOLATED_RUNTIME_REQUIRED:["Verified isolated execution unavailable","未有已驗證隔離執行環境"],PAYLOAD_HASH_MISMATCH:["Packaged adapter integrity mismatch","封裝工具完整性不符"],NATIVE_BROKER_UNAVAILABLE:["Native isolation broker unavailable","原生隔離程序未能使用"],NATIVE_FORMAT_NOT_SUPPORTED:["No native isolated operation for this format","此格式未有原生隔離操作"],NATIVE_PDF_OPERATION_UNAVAILABLE:["No native isolated protocol for this PDF operation","此 PDF 操作未有原生隔離協定"],ISOLATED_ATTEMPT_UNVERIFIED:["Packaged isolated attempt available; runtime acceptance unverified","可嘗試封裝隔離操作，實際執行驗收未驗證"]};
     const reason=code&&reasons[code];return reason?localizedCopy(reason[0],reason[1],this.language,true):code||this.l("Unavailable","未能使用",true);
   }
   private async release(ids:string[]) { if(ids.length) await this.call("file.release",{ids}); }
@@ -300,6 +302,7 @@ export class ToolsPanel extends LitElement {
       l("Completed", "已完成"),
       result.bytes !== undefined ? `${result.bytes} bytes` : "",
       result.validation === "signature-and-decoder-roundtrip" ? l("This output passed signature and decoder round-trip checks", "此輸出已通過格式簽章同解碼往返檢查") : "",
+      result.validation === "qpdf-structure-and-page-count" ? l("PDF structure and page count checked; visual equivalence and page-order equivalence are unverified", "已檢查 PDF 結構同頁數，視覺等同性同頁序等同性未經驗證") : "",
       result.pageCounts
         ? `${l("Pages", "頁數")}: ${result.pageCounts.join(", ")}`
         : "",
@@ -310,8 +313,13 @@ export class ToolsPanel extends LitElement {
       .filter(Boolean)
       .join(" · "));
   }
+  private pdfOperationName(operation:string){
+    const names:Record<string,[string,string]>={inspect:["Inspect","檢視"],split:["Split","分割"],merge:["Merge","合併"],extract:["Extract selected pages","擷取所選頁面"],reorder:["Reorder pages","重排頁面"],rotate:["Rotate","旋轉"],metadata:["Metadata","中繼資料"]};
+    const name=names[operation];return name?localizedCopy(name[0],name[1],this.language,true):operation;
+  }
   private pdfReady() {
     return (
+      this.pdfOperations.some(o=>o.operation===this.pdfOperation&&o.attemptAvailable) &&
       !!this.pdfSources.length &&
       (this.pdfOperation === "inspect" || !!this.pdfDestination) &&
       (["merge", "inspect"].includes(this.pdfOperation) ||
@@ -324,6 +332,7 @@ export class ToolsPanel extends LitElement {
     );
     if (requiresPages && !/^\s*[1-9]\d*(\s*,\s*[1-9]\d*)*\s*$/.test(this.pages))
       throw new Error("INVALID_PAGE_SELECTION");
+    if(requiresPages&&(this.pages.split(",").length>1000||this.pages.split(",").some(p=>Number(p)>10000)))throw new Error("INVALID_PAGE_SELECTION");
     const request = {
       action: "pdf.execute",
       operation: this.pdfOperation,
@@ -485,29 +494,25 @@ export class ToolsPanel extends LitElement {
         <section class="panel stack" data-destination="pdf" data-experience-id="tools-section:pdf" tabindex="-1">
           <h2>${this.l("PDF workspace","PDF 工作區",true)}</h2>
           <p class="note">
-            ${this.l("PDF operations require qpdf and verified isolation. Add sources in merge order. Page numbers start at 1.","PDF 操作需要 qpdf 同已驗證隔離環境。請按合併次序加入來源，頁碼由 1 開始。",true)}
+            ${this.l("Only admitted native PDF operations can be attempted. Packaged readiness is separate from runtime acceptance. Page numbers start at 1.","只可嘗試已接入嘅原生 PDF 操作。封裝準備同實際執行驗收分開，頁碼由 1 開始。",true)}
           </p>
-          ${this.select(
-            this.l("Operation","操作",true),
-            this.pdfOperation,
-            [
-              "inspect",
-              "merge",
-              "split",
-              "extract",
-              "reorder",
-              "rotate",
-              "metadata",
-            ],
-            (v) => (this.pdfOperation = v),
-          )}
+          ${this.button("Load PDF operations","載入 PDF 操作",async()=>{this.pdfOperations=(await this.tool({action:"pdf.catalog"})).operations;})}
+          <settings-search .language=${this.language} .label=${this.l("Search PDF operations","搜尋 PDF 操作",true)}
+            .entries=${this.pdfOperations.map(o=>({id:o.operation,text:`${o.operation} ${this.pdfOperationName(o.operation)} ${o.reason||""}`}))}
+            @settings-filter=${(e:CustomEvent)=>{e.stopPropagation();const ids=e.detail as string[];if(JSON.stringify(this.visiblePdfOperations)!==JSON.stringify(ids)){this.visiblePdfOperations=ids;this.changed();}}}></settings-search>
+          ${this.pdfOperations.filter(o=>!this.visiblePdfOperations||this.visiblePdfOperations.includes(o.operation)).map(o=>html`<div class="record">
+            <md-outlined-button ?disabled=${!o.attemptAvailable||this.pending} aria-pressed=${this.pdfOperation===o.operation} @click=${()=>{this.pdfOperation=o.operation;this.changed();}}>${this.pdfOperationName(o.operation)}</md-outlined-button>
+            <span>${this.unavailable(o.reason)}</span>
+          </div>`)}
+          <p>${this.pdfOperationName(this.pdfOperation)}</p>
+          <p class="note">${this.l("Extract and reorder accept one PDF and 1–1,000 explicit page numbers, each between 1 and 10,000. The broker checks source structure and the resulting page count. This does not prove visual equivalence, signatures or page-order equivalence. Encrypted or unsupported documents can fail; the source remains unchanged.","擷取同重排接受一份 PDF，同 1 至 1,000 個明確頁碼，每個頁碼介乎 1 至 10,000。隔離程序會檢查來源結構同結果頁數，但唔代表已證明視覺等同性、簽署或頁序等同性。加密或不支援文件可能失敗，來源保持不變。",true)}</p>
           ${this.button(
             "Add PDF source",
             "加入 PDF 來源",
             async () => {
               this.pdfSources = [...this.pdfSources, await this.choose("read")];
             },
-            this.pdfSources.length >= 100,
+            this.pdfSources.length >= 1,
           )}
           ${this.pdfSources.map(
             (s, i) =>
@@ -557,16 +562,20 @@ export class ToolsPanel extends LitElement {
             : nothing}
           <div class="row">
             ${this.button(
-              "Run PDF operation",
-              "執行 PDF 操作",
+              "Attempt isolated PDF operation",
+              "嘗試隔離 PDF 操作",
               () => this.executePdf(false),
               !this.pdfReady(),
             )}${this.button(
-              "Queue PDF operation",
-              "排程 PDF 操作",
+              "Queue isolated PDF attempt",
+              "排程隔離 PDF 嘗試",
               () => this.executePdf(true),
               !this.pdfReady(),
             )}
+            <md-outlined-button ?disabled=${!this.pending&&!this.runningQueue} @click=${async()=>{
+              try{const r=await this.tool({action:"pdf.cancel"});this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Cancellation requested for active isolated PDF operations","已要求取消目前隔離 PDF 操作")+`: ${r.requested}`);}
+              catch{this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Cancellation could not be delivered","未能送出取消要求"));}this.changed();
+            }}>${this.l("Cancel active isolated PDF operations","取消目前隔離 PDF 操作",true)}</md-outlined-button>
           </div>
         </section>
       </div>
