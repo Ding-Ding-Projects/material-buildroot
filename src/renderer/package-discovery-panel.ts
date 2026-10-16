@@ -64,6 +64,8 @@ export class PackageDiscoveryPanel extends LitElement {
   private selected?: Package;
   private consent = false;
   private feedback = "";
+  private editors: {id:string;label:string}[] = [];
+  private editorId = "";
   private builder = false;
   private pattern = "";
   private flags = "i";
@@ -335,6 +337,20 @@ export class PackageDiscoveryPanel extends LitElement {
       );
     }
   }
+  private discoverEditors(){
+    void this.run(async current=>{
+      const editors=await this.call<{id:string;label:string}[]>("package.editors",{});
+      if(current()){this.editors=editors;this.editorId=editors[0]?.id||"";this.revision++;}
+    });
+  }
+  private openEditor(file:Imported["files"][number]){
+    const imported=this.imported;if(!imported||!this.editorId)return;
+    void this.run(async current=>{
+      const result=await this.call<{launched:boolean}>("package.editor.open",{packageId:imported.packageId,revision:imported.revision,file:file.path,fileHash:file.sha256,editorId:this.editorId});
+      if(!result.launched)throw Error("EDITOR_LAUNCH_FAILED");
+      if(current())this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Editor launched for the current source file. Refresh discovery after saving external changes; no build was started.","已為目前來源檔案啟動編輯器。儲存外部變更後請重新探索，未有開始建置。"));
+    });
+  }
   render() {
     const c = this.catalogue,
       p = this.imported,
@@ -346,6 +362,10 @@ export class PackageDiscoveryPanel extends LitElement {
           "探索已接入來源同今次工作階段已授權外部樹嘅套件。只讀取宣告，唔會執行 make 配方或啟用外部樹。",
         )}
       </p>
+      <div class="row">
+        <md-outlined-button ?disabled=${disabled} @click=${()=>this.discoverEditors()}>${this.l("Discover installed editors","探索已安裝編輯器")}</md-outlined-button>
+        ${this.editors.length?html`<md-outlined-select .label=${this.l("Source editor","來源編輯器")} .value=${this.editorId} ?disabled=${disabled} @change=${(e:Event)=>{this.editorId=(e.target as HTMLSelectElement).value;this.revision++;}}>${this.editors.map(editor=>html`<md-select-option .value=${editor.id}><div slot="headline">${editor.label}</div></md-select-option>`)}</md-outlined-select>`:html`<span>${this.l("No editor discovered yet.","尚未探索到編輯器。")}</span>`}
+      </div>
       <div class="row search">
         <md-outlined-text-field
           .label=${this.l("Search source packages", "搜尋來源套件")}
@@ -592,6 +612,7 @@ export class PackageDiscoveryPanel extends LitElement {
                           html`<details>
                             <summary>${file.path}</summary>
                             <p class="hash">SHA-256 ${file.sha256}</p>
+                            <md-outlined-button ?disabled=${disabled||!this.editorId||!/[.](mk|in|hash|patch|json|txt|sh|conf)$/i.test(file.path)} @click=${()=>this.openEditor(file)}>${this.l("Open current source in editor","用編輯器開啟目前來源")}</md-outlined-button>
                             <pre tabindex="0">
 ${this.bytes(file.bytesBase64)}</pre
                             >

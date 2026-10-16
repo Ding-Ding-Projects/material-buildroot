@@ -18,6 +18,8 @@ const { createWorkspaceService } = require("./workspace-service.cjs");
 const { createWorkspaceIPC } = require("./security/workspace-ipc.cjs");
 const { createOperationsService } = require("./operations-service.cjs");
 const { createExperienceIPC } = require("./experience-policies.cjs");
+const {createWorkspaceTabRegistry}=require('./workspace-tabs.cjs');
+const workspaceTabs=createWorkspaceTabRegistry();
 const { createUpdateHost } = require("./updates/host.cjs");
 const { createVault } = require("./security/vault.cjs");
 const {
@@ -123,6 +125,8 @@ else {
         metadata,
         storageReady: !!store,
       });
+      workspaceTabs.register(window,desktop,url);
+      ipcMain.handle('studio:workspace-tabs',(event,value)=>workspaceTabs.request(event,value));
       let sharedModeService;
       try {
         // Common protocol location, separate from this application's workspace/profile.
@@ -264,6 +268,7 @@ else {
             "dist/documentation",
           ),
           openDocumentationExternal: (url) => shell.openExternal(url),
+          openWslPath: (folder) => shell.openPath(folder),
           workspaceRead: () => workspaceService.get(),
         });
       } catch {

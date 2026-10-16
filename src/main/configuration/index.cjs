@@ -151,6 +151,7 @@ function createConfigurationService({
     const file = await configFile(root);
     return {
       file,
+      exists: await fs.stat(file).then(() => true, e => { if (e.code === "ENOENT") return false; throw e; }),
       text: await fs.readFile(file, "utf8").catch((e) => {
         if (e.code === "ENOENT") return "";
         throw e;
@@ -188,11 +189,12 @@ function createConfigurationService({
   function revision(r, text) { return hash(JSON.stringify({ domain: r.domain, sourceRoot: r.sourceRoot, outputRoot: r.outputRoot, binding: r.binding || null, text })); }
   async function inspect(input) {
     domain(input);
-    return serial(input, async (r) => {
+    return serial(input, async (r, key) => {
       const { text } = await read(r.outputRoot);
       return {
         revision: revision(r, text),
         domain: r.domain,
+        undoDepth: history.get(key)?.length || 0,
         ...parseConfig(text),
         semantics: await semantics(r),
         domains: DOMAINS,
@@ -220,9 +222,10 @@ function createConfigurationService({
           if (spec.type !== change.type) fail("SYMBOL_TYPE_MISMATCH");
         }
       }
+      const snapshot = { text: before.text, exists: before.exists, binding: revision(r, "") };
       const requested = await makeRequested(before.text, r, key);
-      await atomic(before.file, requested);
       try {
+        await atomic(before.file, requested);
         const result = await executor({
           workspaceId: input.workspaceId,
           sourceRoot: r.sourceRoot,
@@ -239,24 +242,32 @@ function createConfigurationService({
           (result.exitCode !== undefined && result.exitCode !== 0)
         )
           fail("RECONCILIATION_FAILED");
+        if (input._undo && history.get(key)?.at(-1)?.exists === false) {
+          await configFile(r.outputRoot);
+          await fs.rm(before.file, { force: true });
+        }
         const after = await read(r.outputRoot);
         const effective = parseConfig(after.text).values;
         const wanted = parseConfig(requested).values;
-        const diff = Object.keys(wanted)
+        const diff = [...new Set([...Object.keys(wanted), ...Object.keys(effective)])]
           .filter((k) => wanted[k] !== effective[k])
           .map((symbol) => ({
             symbol,
-            requested: wanted[symbol],
+            requested: wanted[symbol] ?? null,
             effective: effective[symbol] ?? null,
           }));
         const stack = history.get(key) || [];
-        if (input._undo) stack.pop();
-        else stack.push(before.text);
+        if (input._undo) {
+          stack.pop();
+          if (stack.length) stack.at(-1).afterRevision = revision(r, after.text);
+        }
+        else stack.push({ ...snapshot, afterRevision: revision(r, after.text) });
         history.set(key, stack.slice(-20));
-        return { revision: revision(r, after.text), values: effective, diff };
+        return { revision: revision(r, after.text), values: effective, diff, semantics: await semantics(r), undoDepth: history.get(key).length };
       } catch (error) {
         await configFile(r.outputRoot);
-        await atomic(before.file, before.text);
+        if (before.exists) await atomic(before.file, before.text);
+        else await fs.rm(before.file, { force: true });
         throw error;
       }
     });
@@ -293,7 +304,9 @@ function createConfigurationService({
     return reconcile({ ...input, _undo: true }, async (_, r, key) => {
       const stack = history.get(key);
       if (!stack?.length) fail("NO_UNDO");
-      return stack.at(-1);
+      const snapshot = stack.at(-1);
+      if (snapshot.binding !== revision(r, "") || snapshot.afterRevision !== input.revision) fail("UNDO_REVISION_CONFLICT");
+      return snapshot.text;
     }).then((result) => result);
   }
   return {
@@ -302,6 +315,7 @@ function createConfigurationService({
       reconcile({ ...input, _undo: false }, (text) =>
         patchConfig(text, input.changes),
       ),
+    applySnapshot: (input, text) => reconcile({ ...input, _undo: false }, () => text),
     listDefconfigs,
     applyDefconfig,
     undo,
