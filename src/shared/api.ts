@@ -85,6 +85,7 @@ export interface WorkspaceTabSummary {id:string;label:string;group:string;pinned
 export type WorkspaceTabsRequest={action:'publish';tabs:WorkspaceTabSummary[]}|{action:'list'}|{action:'activate';windowId:string;tabId:string};
 export type WorkspaceTabsReply={ok:false;code:string}|{ok:true;windowId?:string;currentWindowId?:string;requested?:boolean;windows?:Array<{id:string;tabs:WorkspaceTabSummary[]}>};
 export interface StudioAPI {
+  attentionHistory?(request:{action:string;[key:string]:unknown}):Promise<{ok:boolean;revision?:number;snapshot?:unknown;records?:Array<{revision:number;timestamp:string}>;hasMore?:boolean;code?:string}>;
   workspaceTabs?(request:WorkspaceTabsRequest):Promise<WorkspaceTabsReply>;
   onWorkspaceTabActivate?(listener:(tabId:string)=>void):()=>void;
   onWorkspaceTabsChanged?(listener:()=>void):()=>void;
