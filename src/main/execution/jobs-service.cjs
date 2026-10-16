@@ -6,7 +6,9 @@ const {inflateRawSync} = require("node:zlib");
 const {zipInventory,extractZip,safeName} = require("../tools/zip-payload.cjs");
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const SHA=/^[a-f0-9]{40}$/;
-const LIMIT=1024*1024*1024;
+const LIMIT=1107296256;
+const MANIFEST_LIMIT=1048576;
+const IMAGE_LIMIT=1073741824;
 const fail=code=>{throw Object.assign(Error(code),{code});};
 const digest=buffer=>createHash("sha256").update(buffer).digest("hex");
 const bindingKeys=["repository","workflow","workflowRef","workflowRevision","sourceRevision","sourceRepository","target","defconfig","parallelism","sha256"];
@@ -52,16 +54,21 @@ function createExecutionJobs({setup,workflows,directory,chooseDirectory}){
       if(consent!==true)fail("EXECUTION_DOWNLOAD_CONSENT_REQUIRED");const output=(await outputs(id)).find(a=>a.id===artifactId);if(!output)fail("EXECUTION_OUTPUT_NOT_ADMITTED");const {row,selectionId}=owned(id);const parent=await chooseDirectory();if(!parent)return {cancelled:true};const stat=await fs.lstat(parent);if(!stat.isDirectory()||stat.isSymbolicLink()||await fs.realpath(parent)!==parent)fail("EXECUTION_DESTINATION_UNSAFE");
       await observe(id);
       const root=await fs.mkdtemp(path.join(parent,"buildroot-output-"));const archive=path.join(root,"output.zip");
+      const receipt=path.join(root,"output-status.json");
+      await fs.writeFile(receipt,JSON.stringify({version:1,state:"incomplete",operationId:id,artifactId,expectedBytes:output.bytes,expectedSha256:output.sha256}),{flag:"wx",mode:0o600});
+      row.downloadState="incomplete";
       const controller=new AbortController();downloads.set(id,controller);
       try {
       const received=await setup.download(selectionId,{artifactId,destination:archive,maxBytes:LIMIT,expectedBytes:output.bytes,expectedSha256:output.sha256,signal:controller.signal});if(received.bytes!==output.bytes||received.sha256!==output.sha256)fail("EXECUTION_OUTPUT_DIGEST_MISMATCH");
       if(controller.signal.aborted)fail("EXECUTION_DOWNLOAD_CANCELLED");
-      const inventory=await zipInventory(archive),manifestEntry=inventory.find(e=>e.name==="manifest.json"&&!e.directory);if(!manifestEntry||manifestEntry.bytes>2*1024*1024||manifestEntry.compressed>2*1024*1024)fail("EXECUTION_MANIFEST_MISSING");
+      const inventory=await zipInventory(archive),manifestEntry=inventory.find(e=>e.name==="manifest.json"&&!e.directory);if(!manifestEntry||manifestEntry.bytes>MANIFEST_LIMIT||manifestEntry.compressed>MANIFEST_LIMIT||inventory.length>1002||inventory.some(e=>e.directory&&e.name!=="images/"))fail("EXECUTION_MANIFEST_MISSING");
       const handle=await fs.open(archive,"r"),compressed=Buffer.alloc(manifestEntry.compressed);try{const read=await handle.read(compressed,0,compressed.length,manifestEntry.dataOffset);if(read.bytesRead!==compressed.length)fail("EXECUTION_MANIFEST_INVALID");}finally{await handle.close();}
-      const raw=manifestEntry.method===8?inflateRawSync(compressed,{maxOutputLength:2*1024*1024}):compressed;const manifest=JSON.parse(raw.toString("utf8"));
-      if(raw.length!==manifestEntry.bytes||manifest.schemaVersion!==1||manifest.operationId!==id||manifest.workflowRevision!==row.workflowRevision||manifest.sourceRevision!==row.sourceRevision||!Array.isArray(manifest.files)||manifest.files.length>9999)fail("EXECUTION_MANIFEST_BINDING_MISMATCH");
-      const seen=new Set();let total=0;for(const member of manifest.files){if(!safeName(member.path)||member.path.endsWith("/")||member.path==="manifest.json"||seen.has(member.path.toLowerCase())||!Number.isSafeInteger(member.length)||member.length<0||!/^[a-f0-9]{64}$/.test(member.sha256))fail("EXECUTION_MANIFEST_INVALID");seen.add(member.path.toLowerCase());total+=member.length;if(total>8*1024**3)fail("EXECUTION_EXPANSION_LIMIT");}
-      const destination=path.join(root,"files");await fs.mkdir(destination,{mode:0o700});await extractZip(archive,destination,[...manifest.files,{path:"manifest.json",length:raw.length,sha256:digest(raw)}],{signal:controller.signal});return {verified:true,extracted:true,executed:false,files:manifest.files.length,bytes:output.bytes,sha256:output.sha256,destination};
+      const raw=manifestEntry.method===8?inflateRawSync(compressed,{maxOutputLength:MANIFEST_LIMIT}):compressed;const manifest=JSON.parse(raw.toString("utf8"));
+      if(raw.length!==manifestEntry.bytes||manifest.schemaVersion!==1||manifest.operationId!==id||manifest.workflowRevision!==row.workflowRevision||manifest.sourceRevision!==row.sourceRevision||!Array.isArray(manifest.files)||!manifest.files.length||manifest.files.length>1000)fail("EXECUTION_MANIFEST_BINDING_MISMATCH");
+      const seen=new Set();let total=0;for(const member of manifest.files){if(!member||!safeName(member.path)||!/^images\/[A-Za-z0-9][A-Za-z0-9._+-]{0,199}$/.test(member.path)||seen.has(member.path.toLowerCase())||!Number.isSafeInteger(member.length)||member.length<0||!/^[a-f0-9]{64}$/.test(member.sha256))fail("EXECUTION_MANIFEST_INVALID");seen.add(member.path.toLowerCase());total+=member.length;if(total>IMAGE_LIMIT)fail("EXECUTION_EXPANSION_LIMIT");}
+      const destination=path.join(root,"files");await fs.mkdir(destination,{mode:0o700});await extractZip(archive,destination,[...manifest.files,{path:"manifest.json",length:raw.length,sha256:digest(raw)}],{signal:controller.signal});
+      await fs.writeFile(receipt,JSON.stringify({version:1,state:"verified",operationId:id,artifactId,bytes:output.bytes,sha256:output.sha256,files:manifest.files.length,executed:false}),{mode:0o600});row.downloadState="verified";
+      return {verified:true,extracted:true,executed:false,files:manifest.files.length,bytes:output.bytes,sha256:output.sha256,destination};
       } finally {downloads.delete(id);}
     });}
   };
