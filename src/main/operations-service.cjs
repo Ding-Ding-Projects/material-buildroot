@@ -40,6 +40,7 @@ const {
   createPackageDiscoveryService,
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
+const portableProject = require("./storage/portable-project.cjs");
 
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const owner = "desktop-owner";
@@ -53,6 +54,11 @@ const fields = {
   "runtime.docker.prepare": ["workspaceId", "runtime"],
   "runtime.python.choose": [],
   "project.list": [],
+  "project.open": ["workspaceId"],
+  "project.portable.export": ["workspaceId"],
+  "project.portable.choose": [],
+  "project.portable.import": ["importId", "selectionId", "trust"],
+  "project.portable.wslImport": ["importId", "trust"],
   "project.choose": [],
   "project.adopt": ["selectionId", "trust"],
   "project.runtime": ["workspaceId", "runtime"],
@@ -212,6 +218,7 @@ function createOperationsService({
       })
     : null;
   const selections = new Map(),
+    portableImports = new Map(),
     projects = new Map(),
     fileGrants = createFileGrants(),
     running = new Set();
@@ -1254,6 +1261,76 @@ function createOperationsService({
         return projectStore
           .list()
           .map((item) => ({ ...item, authorized: projects.has(item.id) }));
+      case "project.portable.export": {
+        const item = project(request.workspaceId);
+        const options = projectOptions.get({ workspaceId: request.workspaceId });
+        const imported = portableProject.retained(directory, request.workspaceId);
+        const snapshot = await sources.handle({action:"source.status",workspaceId:request.workspaceId});
+        const source = imported?.source || (snapshot.ok ? {revision:snapshot.revision,branch:snapshot.branch,dirty:snapshot.dirty,observedAt:new Date().toISOString(),state:"observed"} : {revision:null,branch:null,dirty:null,observedAt:new Date().toISOString(),state:"unavailable"});
+        const descriptor = portableProject.validate({format:"material-buildroot-project",version:1,name:item.name,options:{runtime:item.runtime,externalTrees:options.externalTrees},source});
+        return {document:JSON.stringify(descriptor,null,2)};
+      }
+      case "project.portable.choose": {
+        if(choosing)reject("PICKER_BUSY");
+        choosing=true;
+        try {
+          const result=await dialog.showOpenDialog(parentWindow,{title:"Import portable project descriptor",properties:["openFile","dontAddToRecent"],filters:[{name:"Project descriptor",extensions:["json"]}]});
+          if(result.canceled || result.filePaths.length!==1)reject("CANCELLED");
+          const descriptor=portableProject.read(result.filePaths[0]);
+          const importId=randomUUID();
+          if(portableImports.size>=16)portableImports.delete(portableImports.keys().next().value);
+          portableImports.set(importId,{descriptor,expires:Date.now()+15*60*1000});
+          return {importId,...descriptor};
+        } finally {choosing=false;}
+      }
+      case "project.portable.import":
+      case "project.portable.wslImport": {
+        const held=portableImports.get(request.importId);
+        if(!held || held.expires<Date.now() || request.trust!==true)reject("IMPORT_CONSENT_REQUIRED");
+        const descriptor=held.descriptor;
+        let selected, granted;
+        if(action==="project.portable.wslImport") {
+          if(descriptor.options.runtime?.kind!=="wsl")reject("INVALID_RUNTIME");
+          selected=await wslRuntime.chooseProject(descriptor.options.runtime.distribution);
+          if(!selected)reject("CANCELLED");
+        } else {
+          if(descriptor.options.runtime?.kind==="wsl")reject("WSL_IMPORT_REQUIRED");
+          selected=selections.get(request.selectionId);
+          if(!selected)reject("SOURCE_CONSENT_REQUIRED");
+          for(const id of selected.capabilities)fileGrants.resolve({id,owner});
+        }
+        if(!portableImports.delete(request.importId))reject("IMPORT_CONSENT_REQUIRED");
+        const imported=await changeConfig([selected.source,selected.output],async()=>{
+          if(projectStore.list().some(item=>item.root===selected.root && item.source===selected.source && item.output===selected.output))reject("IMPORT_REQUIRES_NEW_PROJECT_LOCATION");
+          if(selected.storage)granted=await execution.grantWslProject(selected.receipt);
+          let registered;
+          try { registered=registerProject({...selected,name:descriptor.name},granted); }
+          catch(error) { if(granted)execution.revoke(granted.grantId);throw error; }
+          try {
+          const options=projectOptions.get({workspaceId:registered.workspaceId});
+          portableProject.retain(directory,registered.workspaceId,descriptor);
+          projectOptions.save({workspaceId:registered.workspaceId,expectedRevision:options.revision,...descriptor.options});
+          const item=project(registered.workspaceId);
+          item.runtime=descriptor.options.runtime;
+          item.externalStateVerified=descriptor.options.externalTrees.length===0;
+          return {...registered,importedSource:descriptor.source};
+          } catch(error) {
+            const incomplete=projects.get(registered.workspaceId);
+            if(incomplete)execution.revoke(incomplete.grantId);
+            projects.delete(registered.workspaceId);
+            throw error;
+          }
+        },{metadataOnly:true});
+        portableImports.delete(request.importId);
+        if(selected.capabilities){selections.delete(request.selectionId);for(const id of selected.capabilities)fileGrants.revoke({id,owner});}
+        return imported;
+      }
+      case "project.open": {
+        // Metadata is not authority. Only a live, identity-checked grant opens directly.
+        const item = project(request.workspaceId);
+        const options = projectOptions.get({ workspaceId: request.workspaceId });
+        return { workspaceId: request.workspaceId, name: item.name, runtime: item.runtime || options.runtime };
+      }
       case "project.choose":
         return choose();
       case "project.adopt": {
@@ -1293,6 +1370,7 @@ function createOperationsService({
         const item = project(request.workspaceId);
         return {
           ...projectOptions.get({ workspaceId: request.workspaceId }),
+          runtime: item.runtime,
           externalTreesAuthorized: item.externalStateVerified,
           availableTrees: [...externalWorkspaces.entries()]
             .filter(([, id]) => id === request.workspaceId)
