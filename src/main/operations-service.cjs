@@ -1293,6 +1293,13 @@ function createOperationsService({
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
     adoptRemoteJob: async (id,context,authorize) => {authorize();const current=await remoteService().perform({action:'list'},authorize);const job=current.jobs.find(item=>item.id===id);const target=current.targets.find(item=>item.id===job?.targetId);if(!job||!target?.authorized)reject('REMOTE_RECONNECT_REQUIRED');const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve remote job recovery',message:`Allow this paired session to manage recorded job ${id}?`,detail:`Target: ${target.name}\nSource digest: ${job.sourceDigest}\nBuild target: ${job.target}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n\nThis is a new native authorization, not restored browser state. Observation is still required; a historical record does not prove completion.`,buttons:['Cancel','Authorize exact job recovery'],defaultId:0,cancelId:0,noLink:true});authorize();if(answer.response!==1)return {cancelled:true};const latest=await remoteService().perform({action:'list'},authorize);const match=latest.jobs.find(item=>item.id===id&&item.targetId===job.targetId&&item.sourceDigest===job.sourceDigest);if(!match||!latest.targets.some(item=>item.id===job.targetId&&item.authorized))reject('REMOTE_RECOVERY_CHANGED');return {id:job.id,sourceDigest:job.sourceDigest,targetId:job.targetId};},
+    inspectProduct: request => productSetup.inspect(request),
+    productRunners: selectionId => productSetup.discover(selectionId),
+    selectProductRunner: async (request,context,authorize) => {authorize();const selected=productSetup.selected(request.selectionId);const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review product runner and billing',message:`Select ${request.kind} execution for ${selected.repository}?`,detail:`Source: ${selected.sourceRepository}\nRunner ID: ${request.runnerId||'hosted Windows 2022'}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n\nRunner usage can incur account-dependent charges. This approves the exact runner selection, not a workflow dispatch. Inventory and account identity are rechecked by the native service.`,buttons:['Cancel','Approve runner and billing scope'],defaultId:0,cancelId:0,noLink:true});authorize();if(answer.response!==1)return {cancelled:true};return productSetup.selectRunner({...request,billingConsent:true});},
+    previewProduct: request => {const selected=productSetup.selected(request.selectionId);return productWorkflows.preview({selectionId:request.selectionId,model:{sourceRepository:selected.sourceRepository,sourceRevision:request.sourceRevision,target:request.target},text:null});},
+    confirmProductOutput: async (operation,preview,context,authorize) => {authorize();if(preview.yaml.length>16000)reject('NATIVE_WORKFLOW_REVIEW_REQUIRED');const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review exact product workflow',message:`${operation==='product.publish'?'Publish':'Export'} ${preview.workflow}?`,detail:`Destination: ${preview.repository} @ ${preview.workflowRef}\nBase revision: ${preview.baseRevision}\nSource revision: ${preview.sourceRevision}\nSHA-256: ${preview.sha256}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n\n${preview.yaml}\n\nPublication creates this exact workflow; it does not dispatch it or prove a build/release.`,buttons:['Cancel','Approve reviewed workflow'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
+    publishProduct: (preview,authorize) => productWorkflows.publish({previewId:preview.previewId,sha256:preview.sha256,consent:true},authorize),
+    exportProduct: (preview,authorize) => productWorkflows.exportYaml({previewId:preview.previewId,sha256:preview.sha256,consent:true},authorize),
     listRemote: authorize => remoteService().perform({action:'list'},authorize),
     enrollRemote: authorize => remoteService().perform({action:'enroll'},authorize),
     reconnectRemote: (targetId,authorize) => remoteService().perform({action:'reconnect',targetId},authorize),
@@ -2319,6 +2326,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

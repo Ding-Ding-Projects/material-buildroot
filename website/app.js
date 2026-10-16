@@ -418,7 +418,7 @@ if (visitor) {
   const companionMessage = visitor.querySelector('#companion-message');
   const sessionPanel = visitor.querySelector('#companion-connected');
   const endpointStorageKey = 'mb-companion-endpoint-v1';
-  const supportedCompanionScopes = new Set(['workspace:read','projects:read','projects:write','jobs:read','source:read','outputs:read','outputs:write','jobs:cancel','configuration:read','configuration:write','builds:submit','deployment:read','deployment:write','tools:read','tools:write','source:write','servers:read','servers:write','packages:read','packages:write','guests:read','guests:write','remote:read','remote:write']);
+  const supportedCompanionScopes = new Set(['workspace:read','projects:read','projects:write','jobs:read','source:read','outputs:read','outputs:write','jobs:cancel','configuration:read','configuration:write','builds:submit','deployment:read','deployment:write','tools:read','tools:write','source:write','servers:read','servers:write','packages:read','packages:write','guests:read','guests:write','remote:read','remote:write','forge:read','forge:write']);
   const actionScope = {'workspace.read':'workspace:read','projects.list':'projects:read','jobs.list':'jobs:read'};
   let companion = null; // Session, CSRF token and sequence intentionally stay in page memory.
   let lastCompanionResult = null;
@@ -737,5 +737,6 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
 
 
