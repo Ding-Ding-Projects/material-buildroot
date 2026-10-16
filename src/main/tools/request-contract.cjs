@@ -53,6 +53,7 @@ function admit(request, nested = false) {
     "converter.catalog",
     "minecraft.bedrock.discovery",
     "queue.run",
+    "queue.pause",
     "queue.recover",
   ];
   if (simple.includes(action)) keys(request, ["action"]);
@@ -300,6 +301,11 @@ function admit(request, nested = false) {
           fail("INVALID_REQUEST");
         if (request.limit !== undefined && !integer(request.limit, 1, 100))
           fail("INVALID_REQUEST");
+        break;
+      case "queue.rebind":
+        keys(request, ["action", "id", "job"]);
+        if (!uuid(request.id) || nested || !["converter.convert", "pdf.execute"].includes(request.job?.action)) fail("INVALID_REQUEST");
+        admit(request.job, true);
         break;
       case "queue.cancel":
       case "queue.resume":

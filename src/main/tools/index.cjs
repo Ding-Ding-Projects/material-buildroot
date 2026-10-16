@@ -53,7 +53,7 @@ function createToolsService(options = {}) {
           context,
         );
       else if (request.action === "converter.catalog")
-        result = { categories: converter.catalog() };
+        result = { categories: await converter.catalog() };
       else if (request.action === "converter.convert")
         result = await converter.convert(request, context);
       else if (request.action.startsWith("minecraft."))

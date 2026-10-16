@@ -6,12 +6,18 @@ const { fail, text } = require("./runtime.cjs");
 function createToolQueue(directory, execute) {
   let consuming = false,
     disposed = false;
+  let paused = false, controlLoaded = false;
   const idle = [];
   const active = new Map();
   async function prepare() {
     if (!directory || !path.isAbsolute(directory))
       fail("QUEUE_STORAGE_UNAVAILABLE");
     await fs.mkdir(directory, { recursive: true, mode: 0o700 });
+    if (!controlLoaded) {
+      try { paused = (await fs.readFile(path.join(directory, "queue.control"), "utf8")) === "paused"; }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+      controlLoaded = true;
+    }
   }
   function file(id) {
     if (!/^[0-9a-f-]{36}$/.test(id)) fail("INVALID_REQUEST");
@@ -21,10 +27,8 @@ function createToolQueue(directory, execute) {
     const destination = file(record.id),
       temporary = destination + ".tmp-" + randomUUID();
     try {
-      await fs.writeFile(temporary, JSON.stringify(record), {
-        flag: "wx",
-        mode: 0o600,
-      });
+      const handle = await fs.open(temporary, "wx", 0o600);
+      try { await handle.writeFile(JSON.stringify(record)); await handle.sync(); } finally { await handle.close(); }
       await fs.rename(temporary, destination);
     } finally {
       await fs.rm(temporary, { force: true });
@@ -59,6 +63,7 @@ function createToolQueue(directory, execute) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 100)
       fail("INVALID_REQUEST");
     const records = [];
+    let more = false;
     const stream = await fs.opendir(directory);
     for await (const entry of stream) {
       if (!entry.name.endsWith(".json")) continue;
@@ -66,12 +71,13 @@ function createToolQueue(directory, execute) {
       if (record.id > after) {
         records.push(record);
         records.sort((a, b) => a.id.localeCompare(b.id));
-        if (records.length > limit) records.pop();
+        if (records.length > limit) { records.pop(); more = true; }
       }
     }
     return {
       items: records,
-      next: records.length === limit ? records.at(-1).id : null,
+      next: more ? records.at(-1).id : null,
+      paused,
     };
   }
   return {
@@ -84,6 +90,20 @@ function createToolQueue(directory, execute) {
       if (disposed) fail("SERVICE_DISPOSED");
       await prepare();
       switch (request.action) {
+        case "queue.pause":
+          paused = true;
+          await fs.writeFile(path.join(directory,"queue.control"), "paused", {mode:0o600});
+          return { paused, running: consuming };
+        case "queue.rebind": {
+          const record = await read(request.id);
+          if (active.has(record.id) || record.state === "completed") fail("INVALID_QUEUE_STATE");
+          if (record.request.action !== request.job.action) fail("INVALID_REQUEST");
+          record.request = require("./request-contract.cjs").admit(request.job);
+          record.state = "queued";
+          delete record.result;
+          await write(record);
+          return {job:record};
+        }
         case "queue.add":
           if (
             !request.job ||
@@ -145,15 +165,17 @@ function createToolQueue(directory, execute) {
         case "queue.run": {
           if (consuming) fail("QUEUE_ALREADY_RUNNING");
           consuming = true;
+          paused = false;
+          await fs.writeFile(path.join(directory,"queue.control"), "running", {mode:0o600});
           let completed = 0,
             failed = 0;
           try {
             const stream = await fs.opendir(directory);
             for await (const entry of stream) {
-              if (disposed || context.signal?.aborted) break;
+              if (disposed || paused || context.signal?.aborted) break;
               if (!entry.name.endsWith(".json")) continue;
               const record = await read(entry.name.slice(0, -5));
-              if (disposed || context.signal?.aborted) break;
+              if (disposed || paused || context.signal?.aborted) break;
               if (record.state !== "queued") continue;
               const controller = new AbortController();
               const abort = () => controller.abort();
@@ -186,6 +208,7 @@ function createToolQueue(directory, execute) {
               completed,
               failed,
               cancelled: context.signal?.aborted === true,
+              paused,
             };
           } finally {
             consuming = false;

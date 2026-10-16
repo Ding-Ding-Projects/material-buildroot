@@ -19,7 +19,7 @@ const formats = {
     html: "pandoc",
     epub: "pandoc",
   },
-  archives: { zip: "archive" },
+  archives: { zip: "tar" },
   structured: { json: "native", csv: "native" },
   text: { txt: "native" },
   binary: { base64: "native", hex: "native" },
@@ -48,23 +48,36 @@ function signature(bytes, format) {
       bytes.subarray(0, 3).toString() === "ID3" ||
       (bytes[0] === 255 && (bytes[1] & 224) === 224)
     );
+  if (format === "html") return /<(?:!doctype|html|head|body|p|h[1-6])/i.test(bytes.toString());
   return false;
 }
 function createConverter(options) {
   return {
-    catalog: () =>
-      Object.entries(formats).map(([category, targets]) => ({
-        category,
-        formats: Object.entries(targets).map(([format, adapter]) => ({
-          format,
-          adapter,
-          available: adapter === "native",
-          reason:
-            adapter === "native"
-              ? undefined
-              : "Requires packaged adapter and isolated runtime verification",
-        })),
-      })),
+    async catalog() {
+      const categories = [];
+      for (const [category, targets] of Object.entries(formats)) {
+        const entries = [];
+        for (const [format, adapter] of Object.entries(targets)) {
+          let available = adapter === "native", reason;
+          if (!available) {
+            try {
+              const record = await options.payloadManager?.resolve(adapter);
+              if (!record?.bundled) fail("BUNDLED_ADAPTER_REQUIRED");
+              await executable(options, adapter);
+              if (!options.isolationVerified) fail("ISOLATED_RUNTIME_REQUIRED");
+              available = true;
+            } catch (error) { reason = /^[A-Z_]+$/.test(error.code || "") ? error.code : "BUNDLED_ADAPTER_REQUIRED"; }
+          }
+          entries.push({format, adapter, available, reason,
+            disclosure: category === "binary" ? "Encodes every input byte as text."
+              : category === "structured" ? "JSON and CSV tables only. CSV loses value types. Nested values and spreadsheet formulas are rejected."
+              : category === "text" ? "Strict UTF-8 only. Line endings are preserved."
+              : "The target may omit metadata, fonts, layers, animation, transparency or precision."});
+        }
+        categories.push({category, formats: entries});
+      }
+      return categories;
+    },
     async convert(request, context) {
       const adapter = formats[request.category]?.[request.format];
       if (!adapter) fail("UNSUPPORTED_FORMAT");
@@ -73,6 +86,8 @@ function createConverter(options) {
       if (source === destination) fail("INPUT_OVERWRITE_FORBIDDEN");
       const stat = await fs.stat(source);
       if (!stat.isFile() || stat.size > 64 * 1024 * 1024) fail("INPUT_LIMIT");
+      const capacity = await fs.statfs(path.dirname(destination));
+      if (capacity.bavail * capacity.bsize < 256 * 1024 * 1024) fail("DESTINATION_STORAGE_LIMIT");
       const temporary = path.join(
         path.dirname(destination),
         ".conversion-" + randomUUID() + "." + request.format,
@@ -81,23 +96,11 @@ function createConverter(options) {
         if (adapter === "native") {
           const bytes = await fs.readFile(source);
           if (context.signal?.aborted) fail("CANCELLED");
-          let output;
-          if (request.category === "binary")
-            output = bytes.toString(request.format);
-          else {
-            const input = new TextDecoder("utf-8", { fatal: true }).decode(
-              bytes,
-            );
-            if (request.format === "json")
-              output = JSON.stringify(JSON.parse(input), null, 2);
-            else if (request.format === "csv") {
-              if (!input.includes(",") || input.includes("\0"))
-                fail("UNSUPPORTED_SOURCE");
-              output = input;
-            } else output = input;
-          }
+          const output = require("./converter-native.cjs").convertNative(bytes, request.category, request.format);
           await fs.writeFile(temporary, output, { flag: "wx", mode: 0o600 });
         } else {
+          const record = await options.payloadManager?.resolve(adapter);
+          if (!record?.bundled) fail("BUNDLED_ADAPTER_REQUIRED");
           const file = await executable(options, adapter);
           if (!options.isolationVerified) fail("ISOLATED_RUNTIME_REQUIRED");
           let args;
@@ -124,8 +127,17 @@ function createConverter(options) {
             ];
           else if (adapter === "pandoc")
             args = ["--sandbox", source, "-o", temporary];
-          else fail("ADAPTER_RUNTIME_UNAVAILABLE");
-          await processRun(file, args, context);
+          else if (adapter === "tar") args = ["-a", "-c", "-f", temporary, "-C", path.dirname(source), "--", path.basename(source)];
+          else if (adapter === "libreoffice") {
+            const folder = await fs.mkdtemp(path.join(path.dirname(destination), ".document-"));
+            try {
+              const { pathToFileURL } = require("node:url");
+              const profile = pathToFileURL(path.join(folder, "profile")).href;
+              await processRun(file, ["-env:UserInstallation=" + profile, "--headless", "--convert-to", "pdf", "--outdir", folder, source], context);
+              await fs.rename(path.join(folder, path.parse(source).name + ".pdf"), temporary);
+            } finally { await fs.rm(folder, {recursive:true, force:true}); }
+          } else fail("ADAPTER_RUNTIME_UNAVAILABLE");
+          if (args) await processRun(file, args, context);
         }
         const out = await fs.stat(temporary);
         if (!out.isFile() || out.size === 0 || out.size > 128 * 1024 * 1024)
@@ -141,6 +153,9 @@ function createConverter(options) {
           if (!signature(bytes, request.format)) fail("OUTPUT_TYPE_MISMATCH");
         }
         const sha256 = await digest(temporary);
+        if (context.signal?.aborted) fail("CANCELLED");
+        await grant(options, request.sourceId, "read");
+        await grant(options, request.destinationId, "write");
         await fs.link(temporary, destination);
         return { bytes: out.size, sha256, format: request.format };
       } finally {

@@ -1,3 +1,4 @@
+import "./settings-search";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
@@ -13,12 +14,12 @@ import { workspaceStyles } from "./workspace-styles";
 type Grant = { id: string; name: string; kind: string };
 type Category = {
   category: string;
-  formats: { format: string; adapter: string; available: boolean }[];
+  formats: { format: string; adapter: string; available: boolean; reason?: string; disclosure?: string }[];
 };
 type QueueItem = {
   id: string;
   state: string;
-  request: { action: string };
+  request: { action: string; sourceIds?: string[]; sourceId?: string; destinationId?: string; [key: string]: unknown };
   result?: { code?: string };
 };
 export class ToolsPanel extends LitElement {
@@ -29,6 +30,7 @@ export class ToolsPanel extends LitElement {
   private runningQueue = false;
   private feedback = "";
   private categories: Category[] = [];
+  private visibleFormats: Record<string, string[]> = {};
   private category = "text";
   private format = "txt";
   private source?: Grant;
@@ -237,6 +239,10 @@ export class ToolsPanel extends LitElement {
   ): Promise<Grant> {
     return this.call("file.choose", { access, kind });
   }
+  private categoryName(id:string) {
+    const names:Record<string,[string,string]>={images:["Images","圖片"],audio:["Audio","音訊"],video:["Video","影片"],documents:["Documents / PDF","文件 / PDF"],archives:["Archives","壓縮檔"],structured:["Structured data / spreadsheets","結構化資料 / 試算表"],text:["Code / text","程式碼 / 文字"],binary:["Binary encodings","二進制編碼"]};
+    const n=names[id];return n?this.l(...n):id;
+  }
   private conversion() {
     return {
       action: "converter.convert",
@@ -248,7 +254,7 @@ export class ToolsPanel extends LitElement {
   }
   private async queuePage(after = "") {
     const result = await this.tool({ action: "queue.page", after, limit: 25 });
-    this.jobs = after ? [...this.jobs, ...result.items] : result.items;
+    this.jobs = result.items;
     this.next = result.next;
   }
   private result(result: {
@@ -359,35 +365,20 @@ export class ToolsPanel extends LitElement {
               await this.tool({ action: "converter.catalog" })
             ).categories;
           })}
-          ${this.categories.length
-            ? html`${this.select(
-                  this.l("Category", "類別"),
-                  this.category,
-                  this.categories.map((c) => c.category),
-                  (v) => {
-                    this.category = v;
-                    this.format = this.categories.find(
-                      (c) => c.category === v,
-                    )!.formats[0].format;
-                  },
-                )}${this.select(
-                  this.l("Output format", "輸出格式"),
-                  this.format,
-                  formats?.map((f) => f.format) || [],
-                  (v) => (this.format = v),
-                )}
-                <p class="note">
-                  ${formats?.find((f) => f.format === this.format)?.available
-                    ? this.l(
-                        "Built-in conversion is available.",
-                        "內置轉換可用。",
-                      )
-                    : this.l(
-                        "Requires a verified adapter and an isolated runtime. Admission alone does not enable conversion.",
-                        "需要已驗證轉換工具同隔離執行環境，單靠接入工具唔會啟用轉換。",
-                      )}
-                </p>`
-            : nothing}
+          ${this.categories.map(c => html`<details ?open=${c.category === this.category}>
+            <summary>${this.categoryName(c.category)}</summary>
+            <settings-search .language=${this.language} .label=${this.l("Search formats", "搜尋格式")}
+              .entries=${c.formats.map(f=>({id:f.format,text:`${f.format} ${f.adapter} ${f.reason||""}`}))}
+              @settings-filter=${(e:CustomEvent)=>{e.stopPropagation();const ids=e.detail as string[];if(JSON.stringify(this.visibleFormats[c.category])!==JSON.stringify(ids)){this.visibleFormats[c.category]=ids;this.changed();}}}></settings-search>
+            ${c.formats.filter(f=>!this.visibleFormats[c.category]||this.visibleFormats[c.category].includes(f.format)).map(f=>html`<div class="record">
+              <md-outlined-button ?disabled=${!f.available||this.pending} aria-pressed=${this.category===c.category&&this.format===f.format}
+                @click=${()=>{this.category=c.category;this.format=f.format;this.changed();}}>${f.format.toUpperCase()}</md-outlined-button>
+              <span>${f.adapter} · ${f.available?this.l("Available", "可用"):f.reason}</span>
+            </div>`)}
+          </details>`)}
+          <p>${this.categoryName(this.category)} · ${this.format.toUpperCase()}</p>
+          <p class="note">${formats?.find(f=>f.format===this.format)?.disclosure}</p>
+          <p class="note">${this.l("Choose a new output name with the selected format extension. Sources remain unchanged. Conversion may change metadata or encoding as described above.","請為新輸出選擇符合格式嘅副檔名。來源保持不變，轉換可能按上述說明改變中繼資料或編碼。")}</p>
           <div class="row">
             ${this.button("Choose source", "選擇來源", async () => {
               this.source = await this.choose("read");
@@ -406,7 +397,7 @@ export class ToolsPanel extends LitElement {
                 this.result(await this.tool(this.conversion()));
                 this.destination = undefined;
               },
-              !this.source || !this.destination || !this.categories.length,
+              !this.source || !this.destination || !formats?.find(f=>f.format===this.format)?.available,
             )}${this.button(
               "Add to queue",
               "加入佇列",
@@ -418,7 +409,7 @@ export class ToolsPanel extends LitElement {
                 this.destination = undefined;
                 await this.queuePage();
               },
-              !this.source || !this.destination || !this.categories.length,
+              !this.source || !this.destination || !formats?.find(f=>f.format===this.format)?.available,
             )}
           </div>
         </section>
@@ -543,6 +534,7 @@ export class ToolsPanel extends LitElement {
           )}
         </div>
         <div class="row">
+          <md-outlined-button ?disabled=${!this.runningQueue} @click=${async()=>{try {await this.tool({action:"queue.pause"});this.feedback=this.l("Pause requested. The current file finishes first.","已要求暫停，會先完成目前檔案。");}catch {this.feedback=this.l("Pause was not accepted.","未能暫停。");}this.changed();}}>${this.l("Pause after current file","完成目前檔案後暫停")}</md-outlined-button>
           ${this.button("Refresh queue", "重新整理佇列", () =>
             this.queuePage(),
           )}${this.button(
@@ -579,6 +571,13 @@ export class ToolsPanel extends LitElement {
           (j) =>
             html`<div class="row record">
               <span>${j.request.action}</span><strong>${j.state}</strong
+              >${j.request.action!=="ollama.pull"&&!["running","completed"].includes(j.state)?this.button("Reauthorize files", "重新授權檔案",async()=>{
+                const request={...j.request};
+                if(request.sourceIds) {const ids=[];for(const _ of request.sourceIds)ids.push((await this.choose("read")).id);request.sourceIds=ids;}
+                else request.sourceId=(await this.choose("read")).id;
+                if(request.destinationId)request.destinationId=(await this.choose("write")).id;
+                await this.tool({action:"queue.rebind",id:j.id,job:request});await this.queuePage();
+              }):nothing}<span
               ><span>${j.result?.code}</span>${[
                 "queued",
                 "running",
@@ -605,7 +604,7 @@ export class ToolsPanel extends LitElement {
               )}
             </p>`
           : nothing}${this.next
-          ? this.button("Load more jobs", "載入更多工作", () =>
+          ? this.button("Next page", "下一頁", () =>
               this.queuePage(this.next!),
             )
           : nothing}
