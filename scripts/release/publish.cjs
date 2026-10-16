@@ -21,11 +21,10 @@ function main(){
  if(priorMetadata.schemaVersion!==1||priorMetadata.version!==previous[1]||!/^[a-f0-9]{40}$/.test(priorMetadata.source||'')||priorMetadata.platform!=='windows-x64'||priorMetadata.installer!=='Squirrel.Windows')throw Error('Current release package identity is unavailable or inconsistent.');
  const currentParts=versionParts(provenance.version),previousParts=versionParts(priorMetadata.version);
  let order=0;for(let i=0;i<3;i++){if(currentParts[i]!==previousParts[i]){order=currentParts[i]>previousParts[i]?1:-1;break;}}
- if(order<=0){
-  let prior=api(`repos/${repository}/git/ref/tags/${latest.tag_name}`).object;
-  const visited=new Set();for(let depth=0;prior.type==='tag'&&depth<5;depth++){if(visited.has(prior.sha))throw Error('Current release tag cycle.');visited.add(prior.sha);prior=api(`repos/${repository}/git/tags/${prior.sha}`).object;}
-  if(order<0||prior.type!=='commit'||prior.sha!==priorMetadata.source||prior.sha!==source)throw Error('A distinct release source requires a strictly newer installed package version.');
- }
+ let prior=api(`repos/${repository}/git/ref/tags/${latest.tag_name}`).object;
+ const visited=new Set();for(let depth=0;prior.type==='tag'&&depth<5;depth++){if(visited.has(prior.sha))throw Error('Current release tag cycle.');visited.add(prior.sha);prior=api(`repos/${repository}/git/tags/${prior.sha}`).object;}
+ if(prior.type!=='commit'||prior.sha!==priorMetadata.source)throw Error('Current release tag and package source disagree.');
+ if(order<0||(order===0&&prior.sha!==source))throw Error('A distinct release source requires a strictly newer installed package version.');
  const photo=verifyPhoto(root,source,{project:repository,releaseTag:tag});dishNote=photo.note;
  const assets=stagePhotoReference(output,provenance,photo);
  const body=path.join(root,'.cache/release-notes.md');fs.mkdirSync(path.dirname(body),{recursive:true});fs.writeFileSync(body,notes(provenance,`Original workflow: ${run}, attempt ${attempt}\n\n<!-- workflow-timing:begin -->\nWorkflow started: unavailable until terminal workflow metadata is verified\n\nWorkflow completed: publication workflow still running\n\nWorkflow duration: unavailable until terminal workflow metadata is verified\n\nTiming is pending separate terminal-run annotation and exact release-note readback.\n<!-- workflow-timing:end -->`));
