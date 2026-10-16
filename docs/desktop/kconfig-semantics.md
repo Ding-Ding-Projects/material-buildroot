@@ -1,5 +1,7 @@
 # Kconfig evaluation and source trust
 
+[香港粵語](kconfig-semantics.zh-HK.md)
+
 The bundled Kconfiglib 14.1.0 parser remains pinned by the file digests in
 `scripts/configuration/vendor/provenance.json`. It provides evaluated menu,
 symbol, choice, range, dependency and visibility metadata. The source tree's
