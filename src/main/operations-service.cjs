@@ -1242,6 +1242,10 @@ function createOperationsService({
     },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+    previewSdk: (workspaceId,viewer,fileId) => {const selected=viewer.resolve(fileId,'file');const admitted=outputViewer(workspaceId).admit(selected.grant.relative,'file');return changeConfig(projectPaths(workspaceId),()=>sdkExport(workspaceId).preview(admitted));},
+    exportSdk: (workspaceId,id) => changeConfig(projectPaths(workspaceId),()=>sdkExport(workspaceId).execute(id)),
+    createOutputManifest: (workspaceId,viewer,fileIds) => {const localIds=fileIds.map(id=>outputViewer(workspaceId).admit(viewer.resolve(id,'file').grant.relative,'file'));return perform({action:'outputs.manifest',workspaceId,fileIds:localIds});},
+    confirmOutputMutation: async (operation,workspaceId,details,context,authorize) => {authorize();const item=project(workspaceId);const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve output operation',message:`Approve ${operation}?`,detail:`Project output: ${item.output}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n${JSON.stringify(details,null,2)}\n\nNew output is retained if interrupted. Existing files are never silently replaced. SDK export does not run the toolchain or prove a consumer build.`,buttons:['Cancel','Approve exact output'],defaultId:0,cancelId:0,noLink:true});authorize();project(workspaceId);return answer.response===1;},
 
 
   });
@@ -2210,6 +2214,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

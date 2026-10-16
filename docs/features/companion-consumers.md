@@ -58,6 +58,8 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | jobs.list | jobs:read | Current host-owned job summaries |
 | jobs.get | jobs:read | Refresh a job previously disclosed to this session |
 | jobs.cancel | jobs:cancel | Request cancellation of a build started by this session at its observed sequence |
+| sdk.preview / sdk.export | outputs:read / outputs:write | Session-bound archive metadata preview and native-confirmed byte-preserving SDK export |
+| outputs.manifest | outputs:write | Native-confirmed manifest of currently selected output handles |
 | outputs.browse | outputs:read | Navigate an adopted project's output folders |
 | outputs.inspect | outputs:read | File type, byte count and inspection summary |
 | outputs.checksum | outputs:read | Compute SHA-256 and compare an optional expected digest |
@@ -93,14 +95,19 @@ This increment does not complete PH09-T03 or all C identities. The following are
 - Destructive build submission and job retry remain incomplete companion workflows. Non-destructive named builds now recheck the live session at their final enqueue boundary, use the desktop-adopted runtime and source grant, and enter the existing durable scheduler.
 - Configuration string/credential editing, complete semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal rows now support bounded symbol filtering and 100-row pagination, semantic type/assignability metadata and revision-bound symbol help. Their edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Custom source clone, existing-source adopt/ref acquisition and historical rollback discovery need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean. Source upgrade now retains its immutable preview in the session and requires native review of the actual patch before the existing revision-bound apply. Rollback previews and apply are also bound to rollback records created by this session, with the same native review and current-revision checks. Patches above 16,000 characters require the full native workflow instead of a truncated approval.
-- Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
+- Rich artifact content, multi-file manifest selection/comparisons, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
 - Full version-specific descriptors and native SSH authentication enrollment, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
 - Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
 
+## SDK and output provenance
+
+Select a current output file to preview SDK metadata or create its manifest. SDK previews are scoped to the session/project and expire; export requires native approval of the exact hash, size and destination folder, then uses the existing byte-preserving export workflow. The result keeps consumer-build/runtime verification false. No archive extraction, toolchain execution or existing-output overwrite is implied. Manifest creation translates only session-owned handles inside the host.
+
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
