@@ -2,7 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const PACKAGE = /^([a-z0-9][a-z0-9+_.-]{0,79})-(rebuild|reconfigure|dirclean|download)$/;
-const NAMED = Object.freeze(["all", "source", "legal-info", "show-info", "graph-depends", "clean"]);
+const NAMED = Object.freeze(["all", "sdk", "source", "legal-info", "show-info", "graph-depends", "clean"]);
 function packageTarget(target) { return typeof target === "string" ? PACKAGE.exec(target) : null; }
 function isDestructiveTarget(target) { return target === "clean" || packageTarget(target)?.[2] === "dirclean"; }
 function isBuildTarget(target, internalTargets) { return internalTargets.includes(target) || !!packageTarget(target); }
@@ -34,3 +34,4 @@ function assertPackage(project,target) {
   if (match && !catalog(project).packages.includes(match[1])) throw Object.assign(new Error("Package target unavailable"),{code:"PACKAGE_TARGET_NOT_DISCOVERED"});
 }
 module.exports={catalog,assertPackage,isBuildTarget,isDestructiveTarget,packageTarget};
+

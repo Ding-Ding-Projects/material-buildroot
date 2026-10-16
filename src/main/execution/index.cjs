@@ -8,6 +8,7 @@ const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs
 const { isBuildTarget, assertPackage } = require("../build/target-actions.cjs");
 const TARGETS = Object.freeze([
   "all",
+  "sdk",
   "clean",
   "olddefconfig",
   "linux-olddefconfig",
@@ -970,6 +971,7 @@ class ExecutionService {
   }
 }
 module.exports = { ExecutionService, TARGETS, boundedProcess, validateOwnershipReceipt };
+
 
 
 

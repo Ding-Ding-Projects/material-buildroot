@@ -5,6 +5,7 @@ The build workspace provides fixed whole-project targets and source-discovered p
 ## Whole-project targets
 
 - `all`: build the configured system and final images.
+- `sdk`: build the relocatable SDK using the existing admitted runtime and queue. SDK output export is handled by the separate SDK workflow.
 - `source`: obtain configured sources.
 - `legal-info`: produce the selected configuration's legal-information output.
 - `show-info`: emit package information.
@@ -47,3 +48,4 @@ This change was implemented in the explicitly scoped fast-release pass. Tests, r
 套件操作包括下載、重新編譯、重新設定及移除套件建置目錄。套件存在唔代表目前設定已啟用。重新編譯唔會自動重建反向依賴或最終映像，之後應執行 `all`；工具鏈或 ABI 改變可能需要完整清理重建。套件清理唔係解除安裝。
 
 破壞性操作需要原有雙重確認鍵、滑桿及重建確認，綁定確切輸出目的地。取消確認唔會建立工作。即時記錄每兩秒讀取目前專案狀態，保留最新 500 個顯示事件；完整儲存記錄唔會因此刪除。取消請求唔代表執行已停止。此輪未執行測試、審核、靜態分析、實際執行或畫面擷取。
+
