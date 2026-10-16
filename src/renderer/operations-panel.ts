@@ -638,6 +638,7 @@ export class OperationsPanel extends LitElement {
           this.config = undefined; this.artifacts = []; this.artifact = undefined; this.changes = {};
           this.configTrustPreview = undefined; this.configTrustAccepted = false;
           const runtime = event.detail.runtime;
+          this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
           if (runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = runtime.distribution; }
           if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
           this.dispatchEvent(new CustomEvent("source-adopted", { bubbles: true, composed: true, detail: event.detail }));
