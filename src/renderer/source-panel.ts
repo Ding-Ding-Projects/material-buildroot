@@ -9,8 +9,8 @@ import "@material/web/progress/linear-progress.js";
 import { workspaceStyles } from "./workspace-styles";
 import type { SourceOperation, SourceOperationSuccess } from "../main/source-operations.cjs";
 
-type Snapshot = Required<Pick<SourceOperationSuccess, "revision" | "branch" | "dirty" | "changes">>;
-type Preview = Required<Pick<SourceOperationSuccess, "previewId" | "kind" | "fromRevision" | "toRevision" | "diff" | "dirty">>;
+type Snapshot = Required<Pick<SourceOperationSuccess, "revision" | "branch" | "dirty" | "changes">> & Pick<SourceOperationSuccess,"snapshots">;
+type Preview = Required<Pick<SourceOperationSuccess, "previewId" | "kind" | "fromRevision" | "toRevision" | "diff" | "dirty">> & Pick<SourceOperationSuccess,"patch"|"changedFiles"|"compatibilityAreas">;
 
 /** Source changes require a host-generated preview bound to the active workspace. */
 export class SourcePanel extends LitElement {
@@ -148,6 +148,14 @@ export class SourcePanel extends LitElement {
     this.adopted = {workspaceId:result.workspaceId,name:this.directory};
     this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Source cloned and adopted. Choose a runtime in Projects & runtime before building.","來源已複製並接入。建置前請喺專案同執行環境選擇執行環境。"));
   }
+  private async snapshot(current: () => boolean) {
+    if (!this.status || this.status.dirty) return;
+    const result = await this.request({action:"source.snapshot",workspaceId:this.workspaceId,expectedRevision:this.status.revision,consent:true});
+    if (!current()) return;
+    this.status = result as Snapshot;
+    this.invalidatePreview();
+    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Revision snapshot retained in this repository. Local edits and output files are not included.","已喺此儲存庫保留修訂快照，唔包括本機編輯同輸出檔案。"));
+  }
   private async acquire(current: () => boolean) {
     this.invalidatePreview();
     const result = await this.request({action:"source.ref",workspaceId:this.workspaceId,ref:this.ref});
@@ -194,8 +202,13 @@ export class SourcePanel extends LitElement {
         <section class="panel stack"><h2>${this.l("Active source revision","目前來源修訂版本")}</h2>
           ${!this.workspaceId ? html`<p>${this.l("Adopt an existing project in Projects & runtime, or clone a source here to inspect revisions.","請喺專案同執行環境接入現有專案，或喺呢度複製來源以檢視修訂版本。")}</p>` : html`
             ${this.button("Refresh source status","重新整理來源狀態",current=>this.refresh(current))}
+            <p class="note">${this.l("This workflow manages native local Git source trees. WSL Linux projects use their separate acquisition route; revision upgrades for those projects are not available here.","此流程管理原生本機 Git 來源樹。WSL Linux 專案使用獨立取得流程，呢度未提供該類專案嘅修訂升級。")}</p>
             ${this.status ? html`<dl><dt>${this.l("Revision","修訂版本")}</dt><dd class="hash">${this.status.revision}</dd><dt>${this.l("Branch","分支")}</dt><dd>${this.status.branch || this.l("Detached revision","獨立修訂版本")}</dd><dt>${this.l("Working tree","工作樹")}</dt><dd>${this.status.dirty?this.l("Local changes present","有本機變更"):this.l("Clean","乾淨")}</dd></dl>${this.status.changes?html`<pre class="diff" tabindex="0" role="region" aria-label=${this.l("Working tree changes","工作樹變更")}>${this.status.changes}</pre>`:nothing}` : html`<p>${this.l("Refresh to inspect the current source before changing revisions.","更改修訂版本前，請先重新整理以檢視目前來源。")}</p>`}
             <h3>${this.l("Acquire and review a revision","取得並審核修訂版本")}</h3>
+            <h3>${this.l("Retained revision snapshots","已保留修訂快照")}</h3>
+            <p class="note">${this.l("Snapshots retain committed source revisions locally across restarts. They do not back up uncommitted files, ignored files, configuration drafts, external trees or output. Apply also retains the previous revision before switching. Up to 100 recent snapshots are listed; older snapshots remain retained.","快照會喺本機保留已提交來源修訂，重新啟動後仍可使用。唔會備份未提交檔案、忽略檔案、設定草稿、外部樹或輸出。套用前亦會保留上一個修訂。最多列出最近 100 個快照，較舊快照仍會保留。")}</p>
+            ${this.button("Retain current revision","保留目前修訂",current=>this.snapshot(current),!this.status||this.status.dirty)}
+            ${this.status?.snapshots?.map(snapshot=>html`<article><p class="hash">${snapshot.revision}</p><p>${snapshot.createdAt}</p>${this.button("Preview this snapshot","預覽此快照",current=>{this.rollback={id:snapshot.id,revision:snapshot.revision};return this.review(current,true);})}</article>`)}
             <p class="note">${this.l("Fetching a branch or tag does not change the working tree. Preview and apply are separate steps. Local changes block applying a revision.","取得分支或標籤唔會改變工作樹。預覽同套用係獨立步驟，有本機變更時唔可以套用修訂版本。")}</p>
             ${this.field(this.l("Branch or tag to fetch","要取得嘅分支或標籤"),this.ref,v=>{this.ref=v;this.targetRevision="";this.invalidatePreview();})}
             ${this.button("Fetch reference","取得參照",current=>this.acquire(current),!this.ref.trim())}
@@ -209,6 +222,10 @@ export class SourcePanel extends LitElement {
         <dl><dt>${this.l("Current revision","目前修訂版本")}</dt><dd class="hash">${this.preview.fromRevision}</dd><dt>${this.l("Proposed revision","建議修訂版本")}</dt><dd class="hash">${this.preview.toRevision}</dd></dl>
         <p>${this.l("Unsaved configuration edits will be cleared. Output files will be preserved. Compatibility with this revision has not been verified. The preview reports changed files and counts; inspect the source before accepting unfamiliar changes.","未儲存嘅設定編輯會被清除。會保留輸出檔案，但尚未驗證同呢個修訂版本嘅相容性。預覽列出變更檔案同數量，接受唔熟悉嘅變更前請先檢視來源。")}</p>
         <pre class="diff" tabindex="0" role="region" aria-label=${this.l("Source change summary","來源變更摘要")}>${this.preview.diff||this.l("No file differences reported.","未報告檔案差異。")}</pre>
+        <p>${this.l("Changed files","變更檔案")}: ${this.preview.changedFiles?.length??0}. ${this.l("Output compatibility remains unknown. Changed areas are advisory, not compatibility approval.","輸出相容性仍未確認，變更範圍只供參考，唔代表相容性批准。")}</p>
+        ${(this.preview.compatibilityAreas||[]).length?html`<ul>${this.preview.compatibilityAreas!.map(area=>html`<li>${({toolchain:this.l("Toolchain and architecture","工具鏈同架構"),configuration:this.l("Configuration definitions","設定定義"),packages:this.l("Packages","套件"),kernel:this.l("Kernel and boot","核心同開機"),'build-system':this.l("Build infrastructure","建置基礎設施")} as Record<string,string>)[area]||this.l("Other changes","其他變更")}</li>`)}</ul>`:nothing}
+        <details><summary>${this.l("Full source patch","完整來源差異")}</summary><pre class="diff" tabindex="0" role="region" aria-label=${this.l("Source patch","來源差異")}>${this.preview.patch||this.l("No text patch reported. Binary changes appear in the summary.","未報告文字差異，二進位變更會喺摘要顯示。")}</pre></details>
+        <p class="note">${this.l("This preview expires after ten minutes. Apply refuses changed or dirty source and refuses overwriting ignored files. A retained prior revision remains available if switching fails; refresh status to inspect the actual outcome.","預覽十分鐘後到期。來源有變更或未儲存內容時唔會套用，亦唔會覆寫忽略檔案。切換失敗時仍會保留先前修訂，請重新整理狀態檢視實際結果。")}</p>
         ${this.preview.dirty?html`<p role="alert">${this.l("Local changes block this operation. Preserve them outside this workflow and refresh source status before reviewing again.","本機變更阻止呢個操作。請喺此流程以外保存變更，再重新整理來源狀態同審核。")}</p>`:nothing}
         <label class="row consent"><md-checkbox aria-label=${this.l("I reviewed these revisions and accept changing the source working tree.","我已審核以上修訂版本，並接受更改來源工作樹。")} ?checked=${this.consent} ?disabled=${this.pending||this.preview.dirty} @change=${(e:Event)=>{this.consent=(e.target as HTMLInputElement).checked;this.changed();}}></md-checkbox><span>${this.l("I reviewed these revisions and accept changing the source working tree.","我已審核以上修訂版本，並接受更改來源工作樹。")}</span></label>
         <div class="row">${this.button(this.preview.kind==="rollback"?"Apply reviewed rollback":"Apply reviewed source update",this.preview.kind==="rollback"?"套用已審核復原":"套用已審核來源更新",current=>this.apply(current),!this.consent||this.preview.dirty)}${this.button("Discard preview","放棄預覽",async()=>this.invalidatePreview())}</div>

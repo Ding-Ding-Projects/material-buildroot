@@ -6,6 +6,7 @@ const fields = {
   "source.choose": [],
   "source.clone": ["selectionId", "directory", "url", "ref", "trust"],
   "source.status": ["workspaceId"],
+  "source.snapshot": ["workspaceId", "expectedRevision", "consent"],
   "source.ref": ["workspaceId", "ref"],
   "source.upgrade.preview": ["workspaceId", "revision"],
   "source.upgrade.apply": [
@@ -55,6 +56,8 @@ const errorCodes = {
   "git-timed-out": "SOURCE_TIMEOUT",
   "git-output-limit": "SOURCE_OUTPUT_LIMIT",
   "git-failed": "SOURCE_GIT_FAILED",
+  "snapshot-unavailable": "ROLLBACK_UNAVAILABLE",
+  "upgrade-consent-or-preview-invalid": "PREVIEW_UNAVAILABLE",
 };
 /** Host callbacks carry all filesystem and workspace authority. Never pass renderer paths to them. */
 function createSourceOperations({
@@ -169,6 +172,11 @@ function createSourceOperations({
       const item = await project(request.workspaceId);
       if (request.action === "source.status")
         return { ok: true, ...(await service.status(item.projectId)) };
+      if (request.action === "source.snapshot") {
+        if (request.consent !== true) fail("SOURCE_APPLY_CONSENT_REQUIRED");
+        if (!revision(request.expectedRevision)) fail("INVALID_REVISION");
+        return { ok: true, ...(await service.snapshot({projectId:item.projectId, expectedRevision:request.expectedRevision})) };
+      }
       if (request.action === "source.ref") {
         if (typeof request.ref !== "string") fail("INVALID_REQUEST");
         if (
@@ -189,9 +197,8 @@ function createSourceOperations({
           kind = "upgrade";
         if (request.action === "source.rollback.preview") {
           const rollback = rollbacks.get(request.rollbackId);
-          if (!rollback || rollback.workspaceId !== request.workspaceId)
-            fail("ROLLBACK_UNAVAILABLE");
-          target = rollback.revision;
+          if (rollback && rollback.workspaceId === request.workspaceId) target = rollback.revision;
+          else target = await service.snapshotRevision(item.projectId, request.rollbackId);
           kind = "rollback";
         }
         if (!revision(target)) fail("INVALID_REVISION");
@@ -226,7 +233,7 @@ function createSourceOperations({
         consent: true,
       });
       previews.delete(request.previewId);
-      const rollbackId = randomUUID();
+      const rollbackId = applied.snapshot?.id || randomUUID();
       rollbacks.set(rollbackId, {
         workspaceId: request.workspaceId,
         revision: applied.rollbackRevision,

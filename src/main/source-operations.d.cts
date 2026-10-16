@@ -10,6 +10,7 @@ export type SourceOperation =
       trust: true;
     }
   | { action: "source.status"; workspaceId: string }
+  | { action: "source.snapshot"; workspaceId: string; expectedRevision: string; consent: true }
   | { action: "source.ref"; workspaceId: string; ref: string }
   | { action: "source.upgrade.preview"; workspaceId: string; revision: string }
   | {
@@ -63,12 +64,17 @@ export interface SourceOperationSuccess {
   branch?: string | null;
   dirty?: boolean;
   changes?: string;
+  snapshots?: { id: string; revision: string; createdAt: string }[];
+  snapshot?: { id: string; revision: string; createdAt: string };
   fetchedRevision?: string;
   previewId?: string;
   kind?: "upgrade" | "rollback";
   fromRevision?: string;
   toRevision?: string;
   diff?: string;
+  patch?: string;
+  changedFiles?: string[];
+  compatibilityAreas?: string[];
   outputCompatibility?: "unknown";
   outputPreserved?: true;
   rollbackId?: string;
