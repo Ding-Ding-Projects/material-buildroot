@@ -157,6 +157,7 @@ contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
     appearanceHistory: (request) => { let data; try { data=JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); } if(data.length>650000)return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); return ipcRenderer.invoke('studio:appearance-history',JSON.parse(data)); },
+    dimSum: (value) => { if(!value||!['catalog','photo','surprise'].includes(value.action)||Object.keys(value).some(k=>!['action','id'].includes(k))||value.id!==undefined&&(typeof value.id!=='string'||!/^hk-dish-\d{4}$/.test(value.id)))return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:dim-sum',{action:value.action,...(value.id?{id:value.id}:{})}); },
     appearanceFonts: () => ipcRenderer.invoke('studio:appearance-fonts'),
     experiencePolicies: (request) => {
       let serialized;

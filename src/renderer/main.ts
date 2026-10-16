@@ -5,6 +5,7 @@ import {repeat} from "lit/directives/repeat.js";
 import {WorkspaceTabs, type WorkspaceDestination} from "./workspace-tabs";
 import "./command-surfaces";
 import "./shared-mode-panel";
+import "./attention-mode-panel";
 import "./scheduled-preferences-panel";
 import type {ScheduledPreferencesSnapshot} from "../shared/scheduled-preferences";
 import type {SharedModeSnapshot} from "../shared/shared-mode";
@@ -1790,6 +1791,7 @@ class MaterialBuildroot extends LitElement {
   }
   render() {
     return html`<div class="shell ${this.dark ? "dark" : ""}">
+      <attention-mode-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .startupEligible=${this.setupDone&&this.state?.origin==='saved'} data-experience-exempt></attention-mode-panel>
       <header>
         <md-text-button
           class="menu"
