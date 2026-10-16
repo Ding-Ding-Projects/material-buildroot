@@ -20,10 +20,10 @@ function label(el:Control){return (el.label||el.getAttribute('aria-label')||el.g
 function controls(root:ParentNode):Control[]{
   const found:Control[]=[];
   for(const el of root.querySelectorAll<Control>('*')){
-    if(el.closest('command-surfaces,regex-workbench,settings-search'))continue;
+    if(el.closest('command-surfaces,searchable-picker,regex-workbench,settings-search'))continue;
     if(el.matches(selector))found.push(el);
     // Material controls own their internal anatomy. Index the public control once.
-    if(el.shadowRoot&&!el.localName.startsWith('md-')&&!['command-surfaces','regex-workbench','settings-search'].includes(el.localName))found.push(...controls(el.shadowRoot));
+    if(el.shadowRoot&&!el.localName.startsWith('md-')&&!['command-surfaces','searchable-picker','regex-workbench','settings-search'].includes(el.localName))found.push(...controls(el.shadowRoot));
   }
   return found;
 }
@@ -32,7 +32,7 @@ function activeElement():Control|null {let el=document.activeElement as Control|
 class CommandSurfaces extends LitElement {
   static properties={mode:{state:true},actions:{state:true},matched:{state:true},language:{state:true},wide:{state:true},targetName:{state:true},notice:{state:true}};
   mode:'palette'|'context'|'picker'='palette';actions:Action[]=[];matched:string[]=[];language='bilingual';wide=false;targetName='';notice='';
-  private searches=new WeakMap<Control,Map<string,SettingsSearch>>();private searchControl?:SettingsSearch;private origin?:Control;private contextTarget?:Control;private searchEntries:{id:string;text:string}[]=[];private rowIndex=0;
+  private pickers=new WeakMap<Control,SearchablePicker>();private searches=new WeakMap<Control,Map<string,SettingsSearch>>();private searchControl?:SettingsSearch;private origin?:Control;private contextTarget?:Control;private searchEntries:{id:string;text:string}[]=[];private rowIndex=0;
   static styles=css`:host{font:inherit;color:var(--md-sys-color-on-surface)}md-dialog{--md-dialog-container-color:var(--md-sys-color-surface-container-high,#fff);max-width:calc(100vw - 24px);width:720px;max-height:calc(100dvh - 24px)}md-dialog.wide{width:calc(100vw - 24px);height:calc(100dvh - 24px)}[slot=content]{display:grid;gap:12px;min-width:0}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px;border-bottom:1px solid var(--md-sys-color-outline-variant)}.row>div{display:grid;gap:8px;min-width:0}.row small{overflow-wrap:anywhere}.row md-outlined-text-field{width:100%;min-width:0}md-text-button{min-height:48px;white-space:normal}kbd{font:inherit;white-space:nowrap}.preview{padding:8px;border-radius:12px;background:var(--md-sys-color-surface-container);overflow-wrap:anywhere}settings-search{display:block}p{overflow-wrap:anywhere}`;
   private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
   private get app(){return document.querySelector('material-buildroot') as Control|null;}
@@ -49,6 +49,38 @@ class CommandSurfaces extends LitElement {
       return !!label(el);
     }).map((el,index)=>({id:`control-${index}`,label:label(el),context:ancestors(el).filter(p=>p.localName.endsWith('-panel')||p.id).map(p=>p.id||p.localName).reverse().join(' / '),target:el,disabled:disabled(el),kind:el.matches(pickerSelector)?'picker':el.matches(toggleSelector)?'toggle':el.matches(fieldSelector)?'field':undefined,run:()=>this.activate(el)}));
   }
+  private settingActions():Action[]{
+    const app=this.app as any;
+    const definitions:[string,string,string,string,string?][]=[
+      ['theme','Theme','主題','.settings-grid md-outlined-select'],
+      ['schedules','Scheduled preferences','偏好排程','scheduled-preferences-panel','#schedule-heading'],
+      ['schedule-history','Schedule history','排程歷史','scheduled-preferences-panel','#schedule-history'],
+      ['source-enrollment','External settings source enrollment','外部設定來源登記','scheduled-preferences-panel','#source-enrollment-heading'],
+      ['shared','Shared preference','共用偏好','shared-mode-panel','#shared-heading'],
+      ...(!app?.restricted?[['language','Interface language','介面語言','#language-select'],['vocabulary-status','Personal vocabulary status','個人詞彙狀態','personal-vocabulary-panel','#status'],['vocabulary-upload','Import or replace personal vocabulary','匯入或取代個人詞彙','personal-vocabulary-panel','#upload'],['vocabulary-clear','Clear personal vocabulary','清除個人詞彙','personal-vocabulary-panel','#clear']] as [string,string,string,string,string?][]:[])
+    ];
+    return definitions.map(([id,en,zh,selector,inner])=>({id:'setting-'+id,label:this.l(en,zh),context:this.l('Settings','設定'),run:async()=>{
+      await this.dialog().close();await app.navigate('settings');await app.updateComplete;if(app.route!=='settings')return;
+      (app.shadowRoot.querySelector('settings-search') as SettingsSearch|null)?.reset();await app.updateComplete;
+      let control:Control|null=id==='theme'?Array.from(app.shadowRoot.querySelectorAll('.settings-grid md-outlined-select') as NodeListOf<Control>).find(el=>el.id!=='language-select')||null:app.shadowRoot.querySelector(selector);
+      if(inner&&control){await control.updateComplete;control=control.shadowRoot?.querySelector(inner)||null;}
+      if(control){for(const element of ancestors(control))if(element instanceof HTMLDetailsElement)element.open=true;await this.reveal(control);}
+    }}));
+  }
+  private async articleActions():Promise<Action[]>{
+    const app=this.app as any;if(app?.restricted||!window.studio?.operations)return [];
+    try{
+      const response=await window.studio.operations({action:'documentation.list'});if(!response.ok||app.restricted)return [];
+      const articles=(response.result as {articles?:{id:string;title:string;category:string}[]})?.articles;
+      if(!Array.isArray(articles))return [];
+      return articles.filter(a=>typeof a.id==='string'&&typeof a.title==='string').map(a=>({id:'article-'+a.id,label:a.title,context:this.l('Documentation','文件')+' / '+String(a.category||''),run:async()=>{
+        await this.dialog().close();await app.navigate('operations');await app.updateComplete;if(app.route!=='operations'||app.restricted)return;
+        const operations=app.shadowRoot.querySelector('operations-panel') as any;if(!operations)return;operations.tab='documentation';await operations.updateComplete;
+        const panel=operations.shadowRoot?.querySelector('documentation-panel') as any;if(!panel||panel.restricted)return;await panel.open(a.id);await panel.updateComplete;
+        const heading=panel.shadowRoot?.querySelector('article h1,article h2,h1,h2') as HTMLElement|null;if(heading){heading.tabIndex=-1;heading.scrollIntoView({block:'nearest'});heading.focus();}
+      }}));
+    }catch{return [];}
+  }
   private async reveal(el:Control){
     const chain=ancestors(el);
     // Navigate using the original destination consumers, preserving unsaved-work prompts.
@@ -60,6 +92,7 @@ class CommandSurfaces extends LitElement {
       const map:Record<string,string>={'source-panel':'source','package-panel':'package','guest-panel':'guests','tools-panel':'tools','documentation-panel':'documentation','companion-panel':'companion','regex-workbench':'regex'};
       const panel=chain.find(p=>map[p.localName]);if(panel){operations.tab=map[panel.localName];await operations.updateComplete;}
     }
+    for(const element of chain)if(element instanceof HTMLDetailsElement)element.open=true;
     if(!el.isConnected)return false;
     // Hidden or locked surfaces must never be revealed by removing their restrictions.
     if(ancestors(el).some(p=>p.hasAttribute('hidden')||p.hasAttribute('inert')))return false;
@@ -91,7 +124,7 @@ class CommandSurfaces extends LitElement {
   async openPalette(origin?:Control){
     const modal=this.app?.shadowRoot?.querySelector('md-dialog[open]');
     if(modal&&modal.id!=='actions-dialog')return;
-    const actions=this.makeActions();this.targetName=this.l('Commands and current workspace controls','指令同目前工作區控制項');await this.present(actions,'palette',origin);
+    const actions=[...this.settingActions(),...this.makeActions()];this.targetName=this.l('Commands and workspace controls','指令同工作區控制項');await this.present(actions,'palette',origin);const articles=await this.articleActions();if(this.mode==='palette'&&this.dialog().open&&articles.length){this.actions=[...actions,...articles];this.searchEntries=this.actions.map(a=>({id:a.id,text:a.label+' '+a.context}));if(this.searchControl)this.searchControl.entries=this.searchEntries;}
   }
   async openContext(target:Control){
     this.contextTarget=target;this.targetName=label(target)||target.localName;
@@ -103,13 +136,9 @@ class CommandSurfaces extends LitElement {
   }
   async openPicker(target:Control){
     if(disabled(target))return;
-    const options=Array.from(target.querySelectorAll<Control>('md-select-option,option'));
-    this.targetName=label(target)||this.l('Choose an option','選擇選項');
-    const actions:Action[]=options.map((option,index)=>({id:`option-${index}`,label:label(option)||String(option.value??''),context:option.value===target.value?this.l('Selected','已選取'):'',disabled:!!option.disabled,run:async()=>{
-      if(!target.isConnected||disabled(target)||option.disabled)return;
-      target.value=String(option.value??'');target.dispatchEvent(new Event('input',{bubbles:true,composed:true}));target.dispatchEvent(new Event('change',{bubbles:true,composed:true}));await this.dialog().close();target.focus();
-    }}));
-    await this.present(actions,'picker',target);
+    let picker=this.pickers.get(target);
+    if(!picker){picker=document.createElement('searchable-picker') as SearchablePicker;this.parentElement?.append(picker);this.pickers.set(target,picker);}
+    await picker.openFor(target,this.currentLanguage());
   }
   private async run(action:Action){if(action.disabled||action.target&&disabled(action.target))return;await action.run();}
   private write(action:Action,value:string|boolean){
@@ -129,6 +158,41 @@ class CommandSurfaces extends LitElement {
 }
 customElements.define('command-surfaces',CommandSurfaces);
 
+/** Each select owns a separate searchable dialog, including selects inside workbenches. */
+class SearchablePicker extends LitElement {
+  static properties={language:{state:true},options:{state:true},matched:{state:true},heading:{state:true}};
+  language='bilingual';options:Control[]=[];matched:string[]=[];heading='';
+  private target?:Control;private entries:{id:string;text:string}[]=[];
+  static styles=css`md-dialog{width:640px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);--md-dialog-container-color:var(--md-sys-color-surface-container-high,#fff)}[slot=content]{display:grid;gap:8px;min-width:0}md-text-button{min-height:48px;white-space:normal}small{padding-inline-start:8px}`;
+  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:en+' · '+zh;}
+  private dialog(){return this.renderRoot.querySelector('md-dialog') as HTMLElement&{show:()=>Promise<void>;close:()=>Promise<void>;open:boolean};}
+  async openFor(target:Control,language:string){
+    this.target=target;this.language=language;this.heading=label(target)||this.l('Choose an option','選擇選項');
+    this.options=Array.from(target.querySelectorAll<Control>('md-select-option,option'));
+    this.entries=this.options.map((o,i)=>({id:String(i),text:label(o)||String(o.value??'')}));
+    this.matched=this.entries.map(e=>e.id);await this.updateComplete;
+    if(!this.dialog().open)await this.dialog().show();
+    const search=this.renderRoot.querySelector('settings-search') as SettingsSearch;await search?.updateComplete;search?.focusQuery();
+  }
+  private async choose(option:Control){
+    const target=this.target;if(!target?.isConnected||disabled(target)||option.disabled)return;
+    target.value=String(option.value??'');
+    target.dispatchEvent(new Event('input',{bubbles:true,composed:true}));target.dispatchEvent(new Event('change',{bubbles:true,composed:true}));
+    await this.dialog().close();if(target.isConnected)target.focus();
+  }
+  private keys(e:KeyboardEvent){
+    const search=this.renderRoot.querySelector('settings-search') as SettingsSearch;
+    if(e.key==='Escape'&&(search.query||search.pattern)){e.preventDefault();e.stopPropagation();search.reset();return;}
+    if(!['ArrowDown','ArrowUp'].includes(e.key)||e.composedPath().some(p=>p instanceof Element&&p.localName==='regex-workbench'))return;
+    const items=Array.from(this.renderRoot.querySelectorAll<Control>('[data-option]')).filter(e=>!e.disabled);if(!items.length)return;
+    const focused=e.composedPath().find(p=>p instanceof Element&&p.hasAttribute('data-option'));
+    const current=items.indexOf(focused as Control);e.preventDefault();items[(current+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus();
+  }
+  render(){return html`<md-dialog @keydown=${this.keys} @closed=${()=>{if(this.target?.isConnected)this.target.focus();}}><div slot="headline">${this.heading}</div><div slot="content"><settings-search .language=${this.language} .label=${this.l('Filter options','篩選選項')} .entries=${this.entries} @settings-filter=${(e:CustomEvent)=>this.matched=e.detail}></settings-search>${this.options.map((option,index)=>this.matched.includes(String(index))?html`<md-text-button data-option=${index} ?disabled=${!!option.disabled} @click=${()=>this.choose(option)}>${label(option)||String(option.value??'')}${option.value===this.target?.value?html`<small>${this.l('Selected','已選取')}</small>`:nothing}</md-text-button>`:nothing)}${!this.matched.length?html`<p role="status">${this.l('No matching options. Clear or change the filter.','搵唔到符合選項，請清除或更改篩選。')}</p>`:nothing}</div><div slot="actions"><md-text-button @click=${()=>this.dialog().close()}>${this.l('Close','關閉')}</md-text-button></div></md-dialog>`;}
+}
+customElements.define('searchable-picker',SearchablePicker);
+
+
 customElements.whenDefined('material-buildroot').then(async()=>{
   const app=document.querySelector('material-buildroot') as Control|null;if(!app)return;await app.updateComplete;
   const surface=document.createElement('command-surfaces') as CommandSurfaces;
@@ -140,13 +204,13 @@ customElements.whenDefined('material-buildroot').then(async()=>{
     if(bindings[0].matches(e)){e.preventDefault();e.stopImmediatePropagation();void surface.openPalette(target(e));return;}
     if(!inside(e)&&(bindings[1].matches(e)||e.key==='ContextMenu')){const el=target(e);if(el){e.preventDefault();e.stopImmediatePropagation();void surface.openContext(el);}return;}
     const select=e.composedPath().find(p=>p instanceof HTMLElement&&p.matches(pickerSelector)) as Control|undefined;
-    if(select&&!inside(e)&&['Enter',' ','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();void surface.openPicker(select);}
+    if(select&&['Enter',' ','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();void surface.openPicker(select);}
   },true);
   document.addEventListener('contextmenu',e=>{if(inside(e))return;const el=target(e);if(!el||!ancestors(el).includes(app))return;e.preventDefault();void surface.openContext(el);},true);
   document.addEventListener('click',e=>{
-    if(inside(e))return;
     const path=e.composedPath();const select=path.find(p=>p instanceof HTMLElement&&p.matches(pickerSelector)) as Control|undefined;
     if(select){e.preventDefault();e.stopImmediatePropagation();void surface.openPicker(select);return;}
+    if(inside(e))return;
     const button=path.find(p=>p instanceof HTMLElement&&p.querySelector('.palette-label')) as Control|undefined;
     if(button&&button.localName==='md-text-button'){e.preventDefault();e.stopImmediatePropagation();void surface.openPalette(button);}
   },true);
