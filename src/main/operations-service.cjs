@@ -45,8 +45,14 @@ const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
 
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
+const { createExecutionSetup } = require('./execution/setup.cjs');
+const { createWorkflowService } = require('./execution/workflow-service.cjs');
 const owner = "desktop-owner";
 const fields = {
+  'execution.inspect': ['sourceRepository','executionRepository','mode'],
+  'execution.discover': ['selectionId'],
+  'execution.selectRunner': ['selectionId','kind','runnerId','billingConsent'],
+  'execution.revoke': ['selectionId'],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -217,6 +223,8 @@ function createOperationsService({
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
+  const executionSetup = createExecutionSetup();
+  const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
@@ -1209,6 +1217,10 @@ function createOperationsService({
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
+      case 'execution.inspect': return executionSetup.inspect(request);
+      case 'execution.discover': return executionSetup.discover(request.selectionId);
+      case 'execution.selectRunner': return executionSetup.selectRunner(request);
+      case 'execution.revoke': return {revoked:executionSetup.revoke(request.selectionId)};
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
@@ -1921,6 +1933,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
