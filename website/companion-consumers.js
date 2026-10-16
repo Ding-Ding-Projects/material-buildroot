@@ -52,7 +52,7 @@ export function mountCompanionConsumers({container,session,request,copy:outerCop
    row(copy('Configuration revision','配置修訂'),value.revision);row(copy('Matching symbols','符合符號'),value.total);if(value.next!==null)results.append(button('Next configuration page','下一頁配置','config.inspect',()=>({...projectArgs(),domain:configDomain.value,offset:value.next,query:configQuery.value})));if(value.offset>0)results.append(button('First configuration page','第一頁配置','config.inspect',()=>({...projectArgs(),domain:configDomain.value,offset:0,query:configQuery.value})));row(copy('Authoritative semantics available','權威語義可用'),value.semanticsAvailable);
    row(copy('Editing boundary','編輯界線'),copy('Boolean and numeric changes require a separate approval on the desktop. String and credential editing remain on the desktop.','布林同數值更改需要桌面另外批准。字串同憑證編輯留喺桌面。'));
    const workspaceId=projects.value,domain=configDomain.value,revision=value.revision;
-   for(const item of value.entries){fields(item,['symbol','type','value']);const panel=document.createElement('div');panel.className='companion-record';const label=document.createElement('p');label.textContent=` · ${item.symbol} · ${item.menu||''}`;panel.append(label,button('Symbol help and constraints','符號說明同限制','config.details',{workspaceId,domain,revision,symbol:item.symbol}));let control;
+   for(const item of value.entries){fields(item,['symbol','type','value']);const panel=document.createElement('div');panel.className='companion-record';const label=document.createElement('p');label.textContent=(item.prompt||item.symbol)+' · '+item.symbol+' · '+(item.menu||'');panel.append(label,button('Symbol help and constraints','符號說明同限制','config.details',{workspaceId,domain,revision,symbol:item.symbol}));let control;
     if(item.type==='bool'){control=document.createElement('md-switch');control.selected=item.value===true;control.setAttribute('aria-label',item.symbol);}
     else if(item.type==='tristate'){control=document.createElement('md-outlined-select');control.label=item.symbol;for(const choice of ['n','m','y']){const option=document.createElement('md-select-option');option.value=choice;option.textContent=choice;control.append(option);}control.value=item.value;}
     else {control=document.createElement('md-outlined-text-field');control.label=item.symbol;control.value=String(item.value);control.maxLength=24;}
@@ -116,6 +116,7 @@ export function mountCompanionConsumers({container,session,request,copy:outerCop
  applyPreferences();selectWorkflow();
  update();return {update,clear(){generation++;currentSession='';observations=[];selectedFile=null;sourceSelection=null;modelChat=null;conversionSource=null;conversionDestination=null;modelPrompt.value='';modelChoice.replaceChildren();projects.replaceChildren();results.replaceChildren();checksum.value='';root.hidden=true;}};
 }
+
 
 
 
