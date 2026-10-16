@@ -1,7 +1,9 @@
+import {registerAppearancePermissionCheck,appearanceExperienceId} from './appearance-panel';
 import type {ExperienceLock,ExperienceRequest,ExperienceState} from '../shared/experience-policies';
 import {registerContextActionProvider,registerCommandAccessProvider} from './command-surfaces';
 import './experience-policy-panel';
 const locks=new Map<string,ExperienceLock>();
+let availableState=false;
 const values=new WeakMap<HTMLElement,{value?:string;checked?:boolean;selected?:boolean}>();
 const ancestor=(el:Element):Element|null=>el.parentElement||(el.getRootNode() instanceof ShadowRoot?(el.getRootNode() as ShadowRoot).host:null);
 export function resolveExperienceTarget(target:HTMLElement):string|null {
@@ -50,6 +52,7 @@ export function refreshExperience():Promise<any>{
 }
 async function performRefresh(){
   const reply=await experienceRequest({action:'status'});
+  availableState=reply.ok;
 
   if(reply.ok){locks.clear();for(const lock of (reply.result as ExperienceState).locks)locks.set(lock.targetId,lock);}
   decorate(document);
@@ -70,6 +73,7 @@ export async function openExperiencePolicy(target:HTMLElement,language='bilingua
   panel.language=language;await panel.openFor(target,id);return panel;
 }
 export function requestExperienceUnlock(target:HTMLElement){void openExperiencePolicy(target);}
+registerAppearancePermissionCheck((targetKey,state,properties)=>availableState&&properties.every(property=>!experienceIdLocked('element:'+appearanceExperienceId(targetKey,state,property))));
 registerContextActionProvider('experience',({target,language})=>resolveExperienceTarget(target)?[{id:'lock',label:language==='en'?'Lock this element…':language==='zh-HK'?'鎖定呢個元素…':'Lock this element… · 鎖定呢個元素…',run:()=>openExperiencePolicy(target,language).then(()=>{})}]:[]);
 registerCommandAccessProvider('experience',target=>{if(experienceLocked(target)){requestExperienceUnlock(target);return false;}return true;});
 let pending=false;

@@ -45,6 +45,7 @@ function createExperienceIPC({desktop,directory,safeStorage,openFolder,schoolMod
       try{
         let result;
         const {action,targetId}=input;
+        if(action==='enroll'||action==='remove'){preserveConfiguration();if(historyWarning)return {ok:false,code:'HISTORY_UNAVAILABLE'};}
         if(action==='status')result=state();
         else if(action==='enroll'){
           if(!protectedVault.availability().available)return {ok:false,code:'VAULT_UNAVAILABLE'};
