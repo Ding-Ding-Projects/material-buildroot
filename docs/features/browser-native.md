@@ -188,3 +188,13 @@ The binary worker admits recognized PNG/JPEG/PDF/ZIP/WAV/FLAC/MP3/MP4/WebM signa
 粵語媒體補充：音訊同影片使用瀏覽器原生介面，只讀取明確選取嘅檔案，唔使用咪高峰、鏡頭、桌面畫面或伺服器。預覽會按所選秒數裁短，WAV 使用實際樣本數，WebM 只按列明編碼能力輸出，完整時序同視覺等效未有驗收。
 
 粵語表格及編碼補充：表格保留字串，唔會推斷數字日期；畫面只預覽二十列，但匯出包含完整已接納結果。CSV 安全前綴會明確改變似公式嘅儲存格，其他結構匯出保留原值。二進位工具只做列明格式嘅可還原編碼，唔係加密或安全掃描。全部新增來源仍待指定建置及另行執行驗收。
+
+## Inactive shared-queue continuation
+
+The next source candidate connects all eight category consumers to one durable IndexedDB queue, preserving the existing image queue database. Admission stores selected original bytes, typed options, source revision, adapter version and input digests. A browser Web Lock owns execution; pause and cancellation intents persist, interrupted work is recorded, and retry requires an explicit compatible revalidation. Publication checks the active attempt and cancellation state. Quota estimates are checked before admission and publication, but do not reserve storage. Browser-data deletion still removes these records.
+
+Worker filenames are content-addressed and embedded in the compiled consumer map so an old page does not silently load a replacement worker at a fixed URL. Media contexts are prepared by explicit interaction, released after the queue pass, and share one worklet load per context. A hidden page interrupts media processing. The record list has bounded pages, selection, category/state filters, local search, metadata export and transition history.
+
+This is an inactive recovery checkpoint, not a production or runtime verdict. Outstanding source work includes the image retained-result preview, digest verification for retained historical-output downloads, explicit original-input recovery, complete encrypted authenticator history/restore and remaining authenticator routes, and tab/group restrictions integration. Existing format limitations remain. Tests, runtime interaction and captures were not run. The previous documentation production receipt binds only to the earlier source candidate, not this continuation.
+
+粵語：呢個係未啟用嘅來源恢復點，八類工具已接入共用持久佇列來源，但仍有歷史輸出、原始輸入恢復、受保護歷史及分頁群組工作未完成。未有執行測試、實際介面操作或畫面驗收；之前建置證據唔適用於呢次延續。
