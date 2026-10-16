@@ -82,7 +82,11 @@ try {
             if ((Get-Item -LiteralPath $manifestPath).Length -gt 1048576) { continue }
             $compiled = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
             if ($compiled.schemaVersion -eq 1 -and $compiled.file -eq $spec.expected -and $compiled.sha256 -match '^[a-f0-9]{64}$' -and $compiled.runtimeVerified -eq $false) {
-                $ownership.compilation += @{file=$compiled.file; sha256=$compiled.sha256; runtimeVerified=$false}
+                $compiledRecord = @{file=$compiled.file; sha256=$compiled.sha256; runtimeVerified=$false}
+                if ($compiled.PSObject.Properties.Name -contains 'genuineSha256' -and $compiled.genuineSha256 -match '^[a-f0-9]{64}$') { $compiledRecord['genuineHelperSha256']=$compiled.genuineSha256 }
+                if ($compiled.PSObject.Properties.Name -contains 'proxySourceSha256' -and $compiled.proxySourceSha256 -match '^[a-f0-9]{64}$') { $compiledRecord['proxySourceSha256']=$compiled.proxySourceSha256 }
+                if ($compiled.PSObject.Properties.Name -contains 'role' -and $compiled.role -eq 'genuine-helper-invocation-observer') { $compiledRecord['role']=$compiled.role }
+                $ownership.compilation += $compiledRecord
             }
         }
         $sources += @{label='retained-installer'; directory=(Join-Path $staging 'output')}
@@ -99,7 +103,7 @@ foreach ($source in $sources) {
     try { Assert-UnlinkedPath $sourceRoot } catch { continue }
     # Only direct known package outputs are collected. Never recurse into arbitrary build trees.
     foreach ($file in @(Get-ChildItem -LiteralPath $sourceRoot -File | Sort-Object Name | Select-Object -First 64)) {
-        if ($file.Name -notmatch '^(Setup\.exe|RELEASES|[A-Za-z0-9_.-]+-(full|delta)\.nupkg|provenance\.json|SHA256SUMS\.txt|build-receipt\.json|setup-format\.json)$') { continue }
+        if ($file.Name -notmatch '^(Setup\.exe|RELEASES|[A-Za-z0-9_.-]+-(full|delta)\.nupkg|provenance\.json|SHA256SUMS\.txt|build-receipt\.json|setup-format\.json|setup-embedding\.json)$') { continue }
         if (($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { continue }
         $record = @{path="$relativeRoot/$($file.Name)"; bytes=$file.Length; sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant(); copied=$false}
         if ($file.Length -le 1400000000 -and $total + $file.Length -le $limit) {

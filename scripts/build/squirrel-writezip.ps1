@@ -19,12 +19,19 @@ foreach ($file in $provenance.files) {
 $compiler = Get-Command cl.exe -ErrorAction SilentlyContinue
 if (!$compiler -or $env:VSCMD_ARG_TGT_ARCH -ne 'x64') { throw 'Genuine Squirrel helper production requires the root-initialized supported MSVC x64 environment.' }
 [IO.Directory]::CreateDirectory($destination) | Out-Null
-$executable = Join-Path $destination 'WriteZipToSetup.exe'
+$genuine = Join-Path $destination 'WriteZipToSetup.Genuine.exe'
 # Compile unchanged official source. This does not create a substitute SFX format.
-& $compiler.Source /nologo /EHsc /W3 /O2 /MT /DUNICODE /D_UNICODE (Join-Path $sourceRoot 'WriteZipToSetup.cpp') ('/Fe:' + $executable) ('/Fo:' + (Join-Path $destination 'WriteZipToSetup.obj')) /link /MACHINE:X64 /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA
+& $compiler.Source /nologo /EHsc /W3 /O2 /MT /DUNICODE /D_UNICODE (Join-Path $sourceRoot 'WriteZipToSetup.cpp') ('/Fe:' + $genuine) ('/Fo:' + (Join-Path $destination 'WriteZipToSetup.Genuine.obj')) /link /MACHINE:X64 /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-$bytes = [IO.File]::ReadAllBytes($executable)
+$bytes = [IO.File]::ReadAllBytes($genuine)
 $pe = [BitConverter]::ToUInt32($bytes,60)
 if ([BitConverter]::ToUInt16($bytes,$pe+4) -ne 0x8664) { throw 'Genuine Squirrel embedding helper is not an x64 executable.' }
-$receipt = @{schemaVersion=1; source=$provenance.revision; architecture='x64'; file='WriteZipToSetup.exe'; sha256=(Get-Sha256 $executable); runtimeVerified=$false}
+$executable = Join-Path $destination 'WriteZipToSetup.exe'
+$proxySource = Join-Path $sourceRoot 'invocation-proxy.cpp'
+& $compiler.Source /nologo /std:c++17 /EHsc /W3 /O2 /MT /DUNICODE /D_UNICODE $proxySource ('/Fe:' + $executable) ('/Fo:' + (Join-Path $destination 'invocation-proxy.obj')) /link /MACHINE:X64 /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA bcrypt.lib
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$proxyBytes = [IO.File]::ReadAllBytes($executable)
+$proxyPe = [BitConverter]::ToUInt32($proxyBytes,60)
+if ([BitConverter]::ToUInt16($proxyBytes,$proxyPe+4) -ne 0x8664) { throw 'Squirrel invocation observer is not an x64 executable.' }
+$receipt = @{schemaVersion=1; source=$provenance.revision; architecture='x64'; file='WriteZipToSetup.exe'; sha256=(Get-Sha256 $executable); genuineFile='WriteZipToSetup.Genuine.exe'; genuineSha256=(Get-Sha256 $genuine); proxySourceSha256=(Get-Sha256 $proxySource); role='genuine-helper-invocation-observer'; runtimeVerified=$false}
 [IO.File]::WriteAllText((Join-Path $destination 'helper-manifest.json'),($receipt | ConvertTo-Json),[Text.UTF8Encoding]::new($false))

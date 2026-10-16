@@ -196,7 +196,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null;
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, setupEmbedding = null;
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -245,16 +245,19 @@ async function main() {
       const helperOutput=contained(root,`.cache/squirrel-writezip/${generation}`);
       execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(root,'scripts/build/squirrel-writezip.ps1'),'-OutputDirectory',helperOutput]);
       const helperManifest=JSON.parse(fs.readFileSync(nonempty(helperOutput,'helper-manifest.json'),'utf8'));
-      if(helperManifest.architecture!=='x64'||helperManifest.source!=='eef37460aef77b2f9de8cd2237c1e55b344a6554'||helperManifest.sha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.exe')))) throw Error('Genuine x64 Squirrel helper identity is inconsistent.');
+      if(helperManifest.architecture!=='x64'||helperManifest.source!=='eef37460aef77b2f9de8cd2237c1e55b344a6554'||helperManifest.role!=='genuine-helper-invocation-observer'||helperManifest.sha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.exe')))||helperManifest.genuineSha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.Genuine.exe')))) throw Error('Genuine x64 Squirrel helper and observer identities are inconsistent.');
       const vendor=path.join(staging,'squirrel-vendor');
       fs.cpSync(path.join(path.dirname(require.resolve('electron-winstaller/package.json')),'vendor'),vendor,{recursive:true});
       // These are the same immutable vendor coordinates used by the pinned target.
       const pinnedVendor=await require('app-builder-lib/out/binDownload').getBinFromUrl('squirrel.windows@1.0.0','squirrel.windows-2.0.1-patched.7z','76851f0c192eaf9bc6f8f3eecdfe325857ebe70d7833ec62ed846a1acd50c846');
       fs.cpSync(path.join(pinnedVendor,'electron-winstaller/vendor'),vendor,{recursive:true});
       fs.copyFileSync(path.join(helperOutput,'WriteZipToSetup.exe'),path.join(vendor,'WriteZipToSetup.exe'));
+      fs.copyFileSync(path.join(helperOutput,'WriteZipToSetup.Genuine.exe'),path.join(vendor,'WriteZipToSetup.Genuine.exe'));
       genuineUpdater=path.join(vendor,'Squirrel.exe');
       nonempty(vendor,'Squirrel.exe');nonempty(vendor,'Setup.exe');
-      squirrelHelper={source:helperManifest.source,architecture:'x64',sha256:helperManifest.sha256,genuineUpdaterSha256:sha256(fs.readFileSync(genuineUpdater)),runtimeVerified:false};
+      squirrelHelper={source:helperManifest.source,architecture:'x64',role:helperManifest.role,sha256:helperManifest.sha256,genuineHelperSha256:helperManifest.genuineSha256,proxySourceSha256:helperManifest.proxySourceSha256,genuineUpdaterSha256:sha256(fs.readFileSync(genuineUpdater)),runtimeVerified:false};
+      squirrelTrace=path.join(staging,'squirrel-invocation');fs.mkdirSync(squirrelTrace);
+      childEnv.MATERIAL_BUILD_SQUIRREL_TRACE=squirrelTrace;childEnv.MATERIAL_BUILD_SOURCE_SHA=before.commit;
       const baseConfiguration=JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build;
       const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']}]};
       const configurationPath = path.join(staging,'installer-config.json');
@@ -267,7 +270,25 @@ async function main() {
       if (baseline.releaseTag) delta = {...delta,releaseTag:baseline.releaseTag,source:baseline.source,provenanceSha256:baseline.provenanceSha256};
     }
   }
-  execute(node,command,{env:childEnv});
+  let packageError=null;
+  try {execute(node,command,{env:childEnv});}catch(error){packageError=error;}
+  if(installer&&target.kind==='desktop') {
+    setupEmbedding={schemaVersion:1,source:before.commit,status:'invocation-unavailable',runtimeVerified:false};
+    try {
+      const report=path.join(squirrelTrace,'setup-helper-invocation.json');
+      if(fs.statSync(report).size>65536)throw Error('Invocation evidence exceeds its bound.');
+      setupEmbedding={...require('./squirrel-setup.cjs').admitInvocation(JSON.parse(fs.readFileSync(report,'utf8')),before.commit,squirrelHelper),status:'genuine-helper-observed'};
+    }catch{setupEmbedding.status='invocation-unavailable-or-invalid';}
+    fs.mkdirSync(output,{recursive:true});
+    fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
+  }
+  if(packageError)throw packageError;
+  if(installer&&target.kind==='desktop') {
+    if(setupEmbedding.status!=='genuine-helper-observed')throw Error('No source-bound genuine setup embedding invocation was retained.');
+    if(setupEmbedding.childExitCode!==0)throw Error(`Genuine Squirrel embedding helper exited with code ${setupEmbedding.childExitCode}; exact invocation evidence retained.`);
+    const data=setupEmbedding.after.dataResource;
+    if(!data.present||data.bytes!==setupEmbedding.inputZip.bytes||data.sha256!==setupEmbedding.inputZip.sha256)throw Error('Genuine helper output did not retain a nonempty DATA resource matching its input ZIP; invocation evidence retained.');
+  }
   if (target.kind === 'desktop') {
     const asar = require('@electron/asar');
     const packaged = JSON.parse(asar.extractFile(nonempty(output,'win-unpacked/resources/app.asar'),'package.json').toString('utf8'));
@@ -287,7 +308,13 @@ async function main() {
       } catch {}
       const describe=()=>fs.writeFileSync(path.join(output,'setup-format.json'),JSON.stringify({schemaVersion:1,source:before.commit,packageVersion,runtimeVerified:false,...description},null,2)+'\n');
       describe();
+      setupEmbedding.finalFormat=description;
+      fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
+      if(description.status==='format-unavailable')throw Error('Configured final Setup has no readable embedded ZIP after genuine helper resource preservation.');
       setupPayload=await setupAdmission.verifySetupPayload(setupFile,{packageFile:nonempty(output,`squirrel-windows/MaterialBuildroot-${packageVersion}-full.nupkg`),packageName:`MaterialBuildroot-${packageVersion}-full.nupkg`,updateFile:genuineUpdater});
+      if(setupPayload.resourceBytes!==setupEmbedding.after.dataResource.bytes||setupPayload.resourceSha256!==setupEmbedding.after.dataResource.sha256)throw Error('Configured final Setup resource differs from the genuine helper post-embedding resource.');
+      setupEmbedding.status='final-resource-preserved';setupEmbedding.finalResourceSha256=setupPayload.resourceSha256;
+      fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
       description={status:'embedded-identity-verified',...setupPayload};describe();
     }
   }
@@ -314,7 +341,7 @@ async function main() {
     }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupPayload, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupEmbedding, setupPayload, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);

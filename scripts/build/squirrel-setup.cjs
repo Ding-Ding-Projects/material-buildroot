@@ -67,7 +67,7 @@ function embeddedZip(setup) {
       entries.push({name,bytes,compressed,method,offset:zip.offset+data});p+=46+nameLength+extra+comment;
     }
     if(p!==central.length)throw Error('Setup embedded ZIP has trailing inventory records.');
-    return {bytes:size,resourceBytes:zip.bytes,entries};
+    return {bytes:size,resourceBytes:zip.bytes,resourceOffset:zip.offset,entries};
   } finally {fs.closeSync(fd);}
 }
 
@@ -90,7 +90,24 @@ async function verifySetupPayload(setup,{packageFile,packageName,updateFile}) {
     expected.delete(entry.name);members.push({name:entry.name,bytes:result.bytes,sha256:result.sha256});
   }
   if(expected.size||feed!==`${full.sha1} ${packageName} ${full.bytes}`&&feed?.toLowerCase()!==`${full.sha1} ${packageName} ${full.bytes}`.toLowerCase())throw Error('Setup must embed the exact current full package, its one-record feed and genuine updater.');
-  return {status:'embedded-package-verified',bytes:zip.bytes,resourceBytes:zip.resourceBytes,members,runtimeVerified:false};
+  const resource=await digests(fs.createReadStream(setup,{start:zip.resourceOffset,end:zip.resourceOffset+zip.resourceBytes-1}),zip.resourceBytes);
+  if(resource.bytes!==zip.resourceBytes)throw Error('Setup resource bytes are incomplete.');
+  return {status:'embedded-package-verified',bytes:zip.bytes,resourceBytes:zip.resourceBytes,resourceSha256:resource.sha256,members,runtimeVerified:false};
 }
 
-module.exports={embeddedZip,verifySetupPayload};
+function admitInvocation(record,source,helper) {
+  const validHash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
+  const identity=value=>{
+    if(!value||!Number.isSafeInteger(value.bytes)||value.bytes<0||value.bytes>2000000000||!validHash(value.sha256))throw Error('Genuine helper identity record is invalid.');
+    return {bytes:value.bytes,sha256:value.sha256};
+  };
+  const setup=value=>{
+    const file=identity(value),resource=value.dataResource;
+    if(!resource||typeof resource.present!=='boolean'||!Number.isSafeInteger(resource.bytes)||resource.bytes<0||resource.bytes>2000000000||!Number.isSafeInteger(resource.error)||resource.error<0||resource.error>0xffffffff||(resource.present?!resource.bytes||!validHash(resource.sha256):resource.bytes!==0||resource.sha256!==''))throw Error('Genuine helper resource record is invalid.');
+    return {...file,dataResource:{present:resource.present,bytes:resource.bytes,sha256:resource.sha256,error:resource.error}};
+  };
+  if(!record||record.schemaVersion!==1||record.source!==source||record.kind!=='genuine-embedding-invocation'||record.genuineHelperSha256!==helper.genuineHelperSha256||record.proxySha256!==helper.sha256||!Number.isSafeInteger(record.childExitCode)||record.childExitCode<0||record.childExitCode>0xffffffff||record.runtimeVerified!==false)throw Error('Actual Squirrel helper invocation is missing or does not match compiled source.');
+  return {schemaVersion:1,source,kind:record.kind,genuineHelperSha256:record.genuineHelperSha256,proxySha256:record.proxySha256,childExitCode:record.childExitCode,inputZip:identity(record.inputZip),before:setup(record.before),after:setup(record.after),runtimeVerified:false};
+}
+
+module.exports={embeddedZip,verifySetupPayload,admitInvocation};
