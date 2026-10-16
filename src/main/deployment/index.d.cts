@@ -137,10 +137,20 @@ export interface DeploymentService {
   }>;
   previewConversion(input: {
     artifact: string;
-    format: "raw" | "vmdk" | "vdi" | "qcow2";
+    format: "raw" | "vmdk" | "vdi" | "qcow2" | "iso" | "ova";
     outputName: string;
   }): Promise<Record<string, unknown>>;
-  executeConversion(input: { id: string }): Promise<Artifact>;
+  executeConversion(input: { id: string }): Promise<{
+    path: string;
+    format: "raw" | "vmdk" | "vdi" | "qcow2" | "iso" | "ova";
+    size: number;
+    sha256: string;
+    sourceSha256: string;
+    contentVerified: true;
+    bootVerified: false;
+    importerCompatibilityVerified: false;
+    overwritten: false;
+  }>;
   previewUpload(input: {
     artifact: string;
     destinationId: string;
@@ -176,7 +186,10 @@ export function createDeploymentService(options: {
     args: string[],
     options: Record<string, unknown>,
   ) => Promise<{ state: string; stdout?: string }>;
-  executables?: Record<string, string>;
+  resolveExecutable?: (toolId: "vboxmanage" | "vmrun" | "qemu-img") => Promise<{
+    path: string; sha256: string; origin: "user-selected" | "bundled";
+    bundled: boolean; receiptId?: string;
+  }>;
   http?: typeof fetch;
   cloudDestinations?: unknown[];
   remoteTargets?: unknown[];

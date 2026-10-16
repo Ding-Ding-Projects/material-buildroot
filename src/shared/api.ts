@@ -88,6 +88,7 @@ export interface StudioAPI {
   workspaceTabs?(request:WorkspaceTabsRequest):Promise<WorkspaceTabsReply>;
   onWorkspaceTabActivate?(listener:(tabId:string)=>void):()=>void;
   onWorkspaceTabsChanged?(listener:()=>void):()=>void;
+  dimSum?(request:{action:'catalog'|'photo'|'surprise';id?:string}):Promise<{ok:boolean;code?:string;source?:string;revision?:string;dishes?:Array<{id:string;en:string;zh:string;photo:string|null}>;dish?:{id:string;en:string;zh:string;photo:string|null;image?:string}|null}>;
   appearanceHistory?(request:{action:string;[key:string]:unknown}):Promise<{ok:boolean;revision?:number;snapshot?:any;records?:Array<{revision:number;timestamp:string;elementCount:number;trackTargetCount:number}>;hasMore?:boolean;code?:string}>;
   appearanceFonts?(): Promise<{ok:true;fonts:string[];variableAxesAvailable:false}|{ok:false;code:string}>;
   authenticator?(request: Record<string, unknown>): Promise<import("./authenticator").AuthenticatorReply>;
