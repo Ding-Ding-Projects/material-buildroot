@@ -250,6 +250,7 @@ function createOperationsService({
   parentWindow,
   version,
   source,
+  notificationTransition = () => {},
   documentationDirectory,
   openDocumentationExternal,
   updateHostFactory,
@@ -457,6 +458,7 @@ function createOperationsService({
     listJobs: () => jobs.list(owner),
   });
   const jobs = createJobManager({
+    onTransition: notificationTransition,
     directory: path.join(directory, "jobs"),
     adapters: {
       build: async (payload, context) => {
