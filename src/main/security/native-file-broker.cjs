@@ -49,10 +49,25 @@ function execute(file, args, signal) {
     child.once("error", () => { cleanup(); reject(Object.assign(new Error("BROKER_UNAVAILABLE"), { code: "BROKER_UNAVAILABLE" })); });
     child.once("close", code => {
       cleanup();
-      if (reason || code !== 0) return reject(Object.assign(new Error(reason || "BROKER_UNAVAILABLE"), { code: reason || "BROKER_UNAVAILABLE" }));
+      if (reason || code !== 0) {
+        const error = Object.assign(new Error(reason || "BROKER_UNAVAILABLE"), { code: reason || "BROKER_UNAVAILABLE", incompleteOutput: { state: "unknown", publication: "unconfirmed" } });
+        try {
+          const receipt = JSON.parse(stdout);
+          if (receipt.protocol === 1 && receipt.state === "incomplete" && receipt.publication === "not-published" && /^\.material-incomplete-[a-fA-F0-9-]{36}\.tmp$/.test(receipt.temporaryName) && Object.keys(receipt).length === 4)
+            error.incompleteOutput = { state: "retained", name: receipt.temporaryName, publication: "not-published" };
+        } catch {}
+        return reject(error);
+      }
       try {
         const receipt = JSON.parse(stdout);
-        if (receipt.protocol !== 1 || receipt.state !== "completed" || receipt.mechanism !== "appcontainer-handle-job" || Object.keys(receipt).length !== 3) fail("INVALID_BROKER_RECEIPT");
+        const operation = args[0];
+        const admission = receipt.admission;
+        if (receipt.protocol !== 1 || receipt.state !== "completed" || receipt.operation !== operation || receipt.mechanism !== "appcontainer-handle-job" ||
+            !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes < 1 || receipt.outputBytes > 128 * 1024 * 1024 ||
+            !/^[a-f0-9]{64}$/.test(receipt.sourceSha256 || "") || !/^[a-f0-9]{64}$/.test(receipt.outputSha256 || "") ||
+            receipt.validation !== "signature-and-decoder-roundtrip" || receipt.publication !== "atomic-no-replace" ||
+            !admission || admission.appContainer !== true || admission.lpac !== true || admission.capabilityCount !== 0 || admission.jobAssigned !== true || admission.handleList !== true ||
+            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== 10) fail("INVALID_BROKER_RECEIPT");
         resolve(receipt);
       } catch { reject(Object.assign(new Error("INVALID_BROKER_RECEIPT"), { code: "INVALID_BROKER_RECEIPT" })); }
     });
@@ -64,6 +79,29 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
   const service = Object.freeze({
     // These are implemented operations, not a claim of runtime acceptance.
     formats: supported,
+    async describe(adapterId) {
+      try {
+        if (process.platform !== "win32" || !supported[adapterId]) fail("BROKER_FORMAT_UNAVAILABLE");
+        await verified(brokerPath, brokerSha256, 16 * 1024 * 1024);
+        const manifest = payloads?.[adapterId];
+        if (!manifest || !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 4096 || typeof manifest.root !== "string") fail("MISSING_VERIFIED_PAYLOAD");
+        const executable = relative(manifest.executable);
+        if (executable.includes("/")) fail("INVALID_BROKER_PAYLOAD");
+        let total = 0; const seen = new Set();
+        for (const entry of manifest.files) {
+          const name = relative(entry.path), key = name.toLowerCase();
+          if (seen.has(key)) fail("INVALID_BROKER_PAYLOAD");
+          seen.add(key);
+          const bytes = await verified(path.join(manifest.root, ...name.split("/")), entry.sha256, 256 * 1024 * 1024);
+          total += bytes.length;
+          if (total > 1024 * 1024 * 1024) fail("BROKER_PAYLOAD_LIMIT");
+        }
+        if (!seen.has(executable.toLowerCase())) fail("MISSING_VERIFIED_PAYLOAD");
+        return { adapterId, formats: [...supported[adapterId]], attemptAvailable: true, runtimeAcceptance: "unverified", mechanism: "appcontainer-handle-job" };
+      } catch (error) {
+        return { adapterId, formats: [], attemptAvailable: false, runtimeAcceptance: "unverified", reason: /^[A-Z_]+$/.test(error.code || "") ? error.code : "BROKER_UNAVAILABLE" };
+      }
+    },
     async run(request, context = {}) {
       if (process.platform !== "win32") fail("NATIVE_BROKER_PLATFORM_REQUIRED");
       const { adapterId, sourceId, destinationId, format } = request;
