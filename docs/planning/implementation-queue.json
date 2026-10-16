@@ -44,22 +44,22 @@
     {
       "id": "PH05-T11-C01",
       "description": "Guided setup for source or dedicated execution repositories, scoped credentials and compatible hosted/self-hosted Linux runner discovery.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/execution-setup",
       "verification": "deferred"
     },
     {
       "id": "PH05-T11-C02",
       "description": "Generate workflows and validate reviewed expert YAML through the same admitted action model.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/execution-workflows",
       "verification": "deferred"
     },
     {
       "id": "PH05-T11-C03",
       "description": "Queue, observe, cancel, reconnect and download verified outputs from standard public hosted Linux builds.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/execution-jobs",
       "verification": "deferred"
     },
     {
@@ -115,7 +115,7 @@
     {
       "id": "PH02-T03",
       "description": "[A+R] Implement canonical file capabilities with picker/import grants, revalidation, path translation and symlink/reparse/case escape rejection.",
-      "state": "integrated-source-acceptance-deferred",
+      "state": "owned-implementation-in-progress",
       "owner": "task/file-capabilities",
       "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
       "sourceCommit": "08cf7b42215ecf2018329971c3f82da4d5516c29"
@@ -148,8 +148,9 @@
       "description": "[A+D-native+R] Implement the productive workspace shell, real window controls, tabs on all four edges, grouping/pinning/reordering/overflow and all discovery searches; use genuine registered Material Design 3 controls, with phone-friendly browser layouts and no generic control substitutes.",
       "state": "integrated-source-acceptance-deferred",
       "owner": "task/workspace-tabs",
-      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "41852953b8c49d793994e17efa36b93147be2e48"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "709661ccaf2c4d9e69484451b93083dfb7ef407b",
+      "productionReceiptSha256": "b926380c572da68dc15673ab362bcac31a3a02363489cd311b00503f5658d91d"
     },
     {
       "id": "PH03-T02",
@@ -161,9 +162,11 @@
     {
       "id": "PH03-T03",
       "description": "[A+D-native+R] Implement shared School mode, narration/voice discovery, five ADHD modes, scheduled settings with timezone/DST precedence and required surprise/catalogue behavior.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/shared-modes",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "6febdda98b43d6c2e03c2fbe1675e647c9c14886",
+      "productionReceiptSha256": "b5accc47fc01740d7817420068d2f603b4d9b62e0c84d2eed3e74931b3fbb4fb"
     },
     {
       "id": "PH03-T04",
@@ -206,17 +209,20 @@
     {
       "id": "PH04-T02",
       "description": "[A+D-native+R] Implement reversible per-element experience policies, protected enrollment, support-ticket records and preserved-budget timed unlock ladders; never use these as broker authentication.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/experience-policies",
-      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "a80921169de5bf5be974ae014313dd5a25181e3a"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "617db048533e477273bf7dfa3e7be4c4bde03b46",
+      "productionReceiptSha256": "2e23b3e64d8fda90063ef5586fe0d1ea95b6b3dc07048104c7571ac2bd281205"
     },
     {
       "id": "PH04-T03",
       "description": "[A+D-native+R] Implement standards-tested local authenticators and real QR/manual pairing with protected secret handling.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/authenticator-workflows",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "617db048533e477273bf7dfa3e7be4c4bde03b46",
+      "productionReceiptSha256": "2e23b3e64d8fda90063ef5586fe0d1ea95b6b3dc07048104c7571ac2bd281205"
     },
     {
       "id": "PH04-T04",
@@ -250,9 +256,11 @@
     {
       "id": "PH05-T01",
       "description": "[A+R] Implement create/open/adopt/import/clone projects with source/ref/branch status, maintained-LTS recommendation, actual revision provenance and per-project WSL/Docker choice.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/project-workflows",
-      "verification": "deferred"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "6664eabff93be0006510b48509556b91c6beae23",
+      "productionReceiptSha256": "7a7bc7807af11bfe18df0b585e36207e64b22db24648286fb86f16c0850358a5"
     },
     {
       "id": "PH05-T02",
@@ -272,16 +280,20 @@
     {
       "id": "PH05-T04",
       "description": "[A+R] Implement source download/clone/ref acquisition and snapshot/diff/preview/explicit-Apply upgrades with rollback and compatibility boundaries.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/source-lifecycle",
-      "verification": "deferred"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "04e9e6435ec6eab8e0f307a32ca3d6001ea072b3",
+      "productionReceiptSha256": "ca2a8e165b08dd746847da3c78302b4406b2402095feb2bab97aa6807bb0aa43"
     },
     {
       "id": "PH05-T05",
       "description": "[A+R] Implement concurrent per-project queues with global CPU/RAM/storage limits, serialization per canonical output tree, safe process-group/container cancellation and scoped terminals.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/build-queues",
-      "verification": "deferred"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "5d257c7b8c0634664d99e35820b3fb1174dfa696",
+      "productionReceiptSha256": "7cdcad725e743ad3f788b76266dc49a67a828bbae744bf829913f83cec5bc22b"
     },
     {
       "id": "PH05-T06",
@@ -301,9 +313,11 @@
     {
       "id": "PH06-T02",
       "description": "[A+R] Implement typed configuration controls and immediate queued reconciliation with requested/effective diff, atomic snapshots, undo ordering and failure restoration.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/configuration-controls",
-      "verification": "deferred"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "3314d1559a5c3e4eef05a81a2d2aeff07eb7a9e2",
+      "productionReceiptSha256": "5d79a54f7471c375a0b9ec949ba54d0c75551da72c71a4f1fe93df3b5d609a80"
     },
     {
       "id": "PH06-T03",
@@ -316,16 +330,20 @@
     {
       "id": "PH06-T04",
       "description": "[A+R] Implement real defconfig browsing/apply/minimal-save provenance, ordered external trees and separate output directories.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/defconfig-workflows",
-      "verification": "deferred"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "2af12fd7cf8a5d648dd6585511c210369a6b6993",
+      "productionReceiptSha256": "121e65a73d094234d4c7f991549926405aea15ce559080e0187cbe882e851262"
     },
     {
       "id": "PH06-T05",
       "description": "[A+R] Implement complete package source/build/hash/license/dependency editors, ordered patch/hook workflows, overlays with mappings/permissions and discovered external-editor handoff.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/package-editors",
-      "verification": "deferred"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "2f2aa74b78f91e8d8f22888f597cbcbd87c6243a",
+      "productionReceiptSha256": "8c38d3f8e76fb21c6d38efc3ae6033c0579f7ca1cf97c4756a1b4937d5902bc9"
     },
     {
       "id": "PH06-T06",
@@ -344,24 +362,29 @@
     {
       "id": "PH07-T01",
       "description": "[A+R] Implement minimal/desktop/server/appliance presets and genuinely supported desktop/compositor previews with account/SSH provisioning and protected credentials.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/image-presets",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "af826915474a0c36732acf9e072de3b97d7ab6ad",
+      "productionReceiptSha256": "80560daafd7ade849013ac600ecbe00bad78a680b55750e997f443748270e00f"
     },
     {
       "id": "PH07-T02",
       "description": "[A+R] Implement safe artifact viewers, checksums/graphs/licenses, filesystem/archive/image inspection, disk/partition canvas and validated ISO/VMDK/VDI/OVA conversion/export.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/artifact-viewers",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "a2790c838b7c964af117223e94cc650ac4bd7754",
+      "productionReceiptSha256": "107299ca9ecd02b69ee193094f9a80cce91a626c0db53b7c11ab394fe8cd0a62"
     },
     {
       "id": "PH07-T03",
       "description": "[A+R] Implement VMware Workstation and VirtualBox discovery/create/import/hardware/storage/network/firmware edit/launch/stop with topology controls, NAT default and advanced network options.",
       "state": "integrated-source-acceptance-deferred",
       "owner": "task/hypervisor-controls",
-      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "22d02fa001009e0bf0abfc1978d9b90554029052"
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "734e882ad1ecf279148c402683829ca1e0f4f4cf",
+      "productionReceiptSha256": "f7a9eb43faabf7c57fb110eee0f817535304f51be11271c1f1a9fe513c5f51f8"
     },
     {
       "id": "PH07-T04",
@@ -373,9 +396,11 @@
     {
       "id": "PH07-T05",
       "description": "[A+R] Implement source/config locks, manifests, hashes, SBOM/license outputs and repeat-build comparisons with explicit nonreproducible differences.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/reproducibility",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "a2790c838b7c964af117223e94cc650ac4bd7754",
+      "productionReceiptSha256": "107299ca9ecd02b69ee193094f9a80cce91a626c0db53b7c11ab394fe8cd0a62"
     },
     {
       "id": "PH07-T06",
@@ -408,23 +433,27 @@
     {
       "id": "PH08-T01",
       "description": "[A+D-native+R] Implement all eight converter categories and PDF operations with packaged offline adapters, searchable rich controls and unlimited disk-backed paged queues; validate genuine outputs.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/converter-workflows",
       "verification": "deferred"
     },
     {
       "id": "PH08-T02",
       "description": "[A+D-native+R] Implement Java/Bedrock version/flavour/plugin discovery and rich Minecraft server creation/configuration/lifecycle across local process, local container, SSH process and SSH container.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/minecraft-manager",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "7218f688219c909a46223778d7b51b66315962b5",
+      "productionReceiptSha256": "6ce85d8ee83a00a8d099000f1c26a01f2cb5ac6d17bd6dd1d5a31130c96ae5bf"
     },
     {
       "id": "PH08-T03",
       "description": "[A+D-native+R] Implement Ollama discovery and one-click managed install/recovery, full catalogue/tags/hardware fit, durable model pulls and streamed chat preserving existing models.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/ollama-workflows",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "09f31e1191b2e2a50ba8579925eeed9d6f0373ef",
+      "productionReceiptSha256": "534348e6bf4903cc63dd39b95bf45a47019c6de6d502b1b5d8a4d39342509900"
     },
     {
       "id": "PH08-T04",
@@ -492,8 +521,8 @@
     {
       "id": "PH09-T06",
       "description": "[A+D+C+R (through-PH09 scope)] Implement authenticated status integration and truthful unavailable states; verify authorized status bridge, protected webhooks and display-event delivery with separate R evidence.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/status-integration",
       "verification": "deferred"
     },
     {
@@ -570,5 +599,5 @@
     }
   ],
   "updatedAt": "2026-10-16T18:35:07.7280332Z",
-  "integrationCommit": "fb3dcdf3d782a7807d4ece621dea99d652f1f62e"
+  "integrationCommit": "63ab3d4a81b24b2880b28d1eda9c6c29133c72c9"
 }
