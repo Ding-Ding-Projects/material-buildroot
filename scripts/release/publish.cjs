@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto');
 const {prepare}=require('./prepare.cjs');
-const {verifyPhoto,stagePhoto}=require('./photo.cjs');
+const {verifyPhoto,stagePhotoReference}=require('./photo.cjs');
 const root=path.resolve(__dirname,'../..'),gh=process.env.MATERIAL_RELEASE_GH||'gh',repository=process.env.GITHUB_REPOSITORY,source=process.env.GITHUB_SHA,run=process.env.GITHUB_RUN_ID,number=process.env.GITHUB_RUN_NUMBER,attempt=process.env.GITHUB_RUN_ATTEMPT;
 function command(exe,args){const r=cp.spawnSync(exe,args,{cwd:root,encoding:'utf8',windowsHide:true,maxBuffer:32*1024*1024});if(r.error||r.status!==0)throw Error(`Release command failed: ${args[0]}`);return r.stdout.trim();}
 const api=route=>JSON.parse(command(gh,['api',route]));
@@ -11,9 +11,9 @@ function notes(provenance,timing){return `# Material Buildroot ${provenance.vers
 function main(){
  if(!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository||'')||!/^[0-9a-f]{40}$/.test(source||'')||![run,number,attempt].every(v=>/^\d+$/.test(v||'')))throw Error('Trusted workflow identity is unavailable.');
  command('git',['fetch','origin','main']);const main=command('git',['rev-parse','origin/main']);const ancestry=cp.spawnSync('git',['merge-base','--is-ancestor',main,source],{cwd:root,windowsHide:true});if(ancestry.status!==0)command('git',['merge-base','--is-ancestor',source,main]);
- const photo=verifyPhoto(root,source);dishNote=photo.note;
  const {output,provenance}=prepare(root,source),tag=`v${provenance.version}-build.${number}.${attempt}`;
- const assets=stagePhoto(output,provenance,photo);
+ const photo=verifyPhoto(root,source,{project:repository,releaseTag:tag});dishNote=photo.note;
+ const assets=stagePhotoReference(output,provenance,photo);
  const jobs=api(`repos/${repository}/actions/runs/${run}/attempts/${attempt}/jobs`);const starts=jobs.jobs.map(j=>j.started_at).filter(Boolean).sort();const started=starts[0];if(!started||!Number.isFinite(Date.parse(started)))throw Error('Workflow first-job start is unavailable.');
  const body=path.join(root,'.cache/release-notes.md');fs.mkdirSync(path.dirname(body),{recursive:true});fs.writeFileSync(body,notes(provenance,`Workflow started: ${started}\n\nWorkflow completed: publication in progress\n\nWorkflow duration: unavailable until publication completes`));
  command(gh,['release','create',tag,...assets,'--repo',repository,'--target',source,'--title',`Material Buildroot ${provenance.version} · Build ${number}.${attempt}`,'--notes-file',body]);
