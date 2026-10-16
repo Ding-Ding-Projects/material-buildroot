@@ -70,12 +70,13 @@ function canonical(file, id) {
 }
 function createPayloadManager({
   directory,
-  bundledManifest = {},
+  bundledManifest,
   dialog,
   parentWindow,
 } = {}) {
   if (!directory || !path.isAbsolute(directory))
     fail("INVALID_PAYLOAD_DIRECTORY");
+  bundledManifest ??= require("./bundled-payloads.cjs").loadBundledPayloads();
   const receiptFile = path.join(directory, "executable-receipts.json");
   let tail = Promise.resolve();
   function locked(work) {
@@ -140,6 +141,21 @@ function createPayloadManager({
     if (!stat.isFile() || stat.size < 1 || stat.size > 1024 ** 3)
       fail("INVALID_EXECUTABLE");
     if ((await digest(real)) !== record.sha256) fail("PAYLOAD_HASH_MISMATCH");
+    if (record.bundled && record.files) {
+      for (const member of record.files) {
+        let cursor = member.path;
+        while (cursor !== record.root) {
+          if ((await fs.lstat(cursor)).isSymbolicLink()) fail("PAYLOAD_PATH_CHANGED");
+          const parent = path.dirname(cursor);
+          if (parent === cursor) fail("PAYLOAD_PATH_CHANGED");
+          cursor = parent;
+        }
+        if ((await fs.lstat(record.root)).isSymbolicLink()) fail("PAYLOAD_PATH_CHANGED");
+        const entry = await fs.lstat(member.path);
+        if (!entry.isFile() || entry.size !== member.bytes || (await digest(member.path)) !== member.sha256)
+          fail("PAYLOAD_HASH_MISMATCH");
+      }
+    }
     return record;
   }
   async function resolve(value) {
