@@ -4,9 +4,35 @@ param(
   [Parameter(Mandatory=$true)][string]$Output
 )
 $ErrorActionPreference = 'Stop'
+function SafeSegment([string]$Value) {
+  return ($Value -and $Value -notin @('.', '..') -and $Value -notmatch '[\\/<>:"|?*\x00-\x1f]' -and $Value -notmatch '[. ]$' -and $Value -notmatch '^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)')
+}
+function AbsolutePath([string]$Value) {
+  $valuePath = $Value.Replace('/', '\')
+  if ($valuePath.StartsWith('\\?\UNC\', [StringComparison]::OrdinalIgnoreCase)) { $valuePath = '\\' + $valuePath.Substring(8) }
+  elseif ($valuePath.StartsWith('\\?\')) { $valuePath = $valuePath.Substring(4) }
+  if ($valuePath -notmatch '^[A-Za-z]:\\' -and -not $valuePath.StartsWith('\\')) {
+    if ($valuePath -match '^[A-Za-z]:|^\\') { throw 'Ambiguous Office source path.' }
+    $valuePath = $PWD.ProviderPath.TrimEnd('\') + '\' + $valuePath
+  }
+  if ($valuePath -match '^[A-Za-z]:\\') { $segments = $valuePath.Substring(3).TrimEnd('\').Split('\') }
+  elseif ($valuePath.StartsWith('\\')) {
+    $segments = $valuePath.Substring(2).TrimEnd('\').Split('\')
+    if ($segments.Length -lt 3) { throw 'Office UNC path must name a file or directory below its share.' }
+  } else { throw 'Office path is not absolute.' }
+  foreach ($segment in $segments) { if (-not (SafeSegment $segment)) { throw 'Invalid Office source path segment.' } }
+  return $valuePath.TrimEnd('\')
+}
+function ExtendedPath([string]$Value) {
+  if ($Value.StartsWith('\\')) { return '\\?\UNC\' + $Value.Substring(2) }
+  return '\\?\' + $Value
+}
+$databasePath = AbsolutePath $Database
+$cabPath = AbsolutePath $ExtractedCab
+$destination = AbsolutePath $Output
 # Read-only MSI database access. Never invoke an install action or custom action.
 $installer = New-Object -ComObject WindowsInstaller.Installer
-$db = $installer.OpenDatabase([IO.Path]::GetFullPath($Database), 0)
+$db = $installer.OpenDatabase((ExtendedPath $databasePath), 0)
 function Rows([string]$Sql, [int]$Columns) {
   $view = $db.OpenView($Sql)
   try {
@@ -41,9 +67,9 @@ function RelativeDirectory([string]$Id) {
   if ($Id -ne 'INSTALLLOCATION') { return $null }
   return ($parts -join '/')
 }
-$destination = [IO.Path]::GetFullPath($Output)
-if (Test-Path -LiteralPath $destination) { throw 'Office output already exists and is retained.' }
-[void][IO.Directory]::CreateDirectory($destination)
+$destinationIo = ExtendedPath $destination
+if ([IO.Directory]::Exists($destinationIo) -or [IO.File]::Exists($destinationIo)) { throw 'Office output already exists and is retained.' }
+[void][IO.Directory]::CreateDirectory($destinationIo)
 $seenTargets = @{}
 $copied = 0
 foreach ($row in (Rows 'SELECT `File`, `Component_`, `FileName` FROM `File`' 3)) {
@@ -56,17 +82,20 @@ foreach ($row in (Rows 'SELECT `File`, `Component_`, `FileName` FROM `File`' 3))
     $relative = 'program'
   }
   $parts = @($relative -split '/' | Where-Object { $_ }) + @($name)
-  if ($parts | Where-Object { $_ -in @('.', '..') -or $_ -match '[\\/:\x00-\x1f]' -or $_ -match '[. ]$' }) { throw 'Invalid MSI target path.' }
-  if ($row[0] -match '[\\/:\x00-\x1f]') { throw 'Invalid MSI cabinet member.' }
-  $target = [IO.Path]::GetFullPath((Join-Path $destination ($parts -join '/')))
-  if (-not $target.StartsWith($destination + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or $seenTargets.ContainsKey($target)) { throw 'MSI target collision or escape.' }
+  foreach ($part in $parts) { if (-not (SafeSegment $part)) { throw 'Invalid MSI target path.' } }
+  if (-not (SafeSegment $row[0])) { throw 'Invalid MSI cabinet member.' }
+  # All segments are validated before concatenation. Avoid GetFullPath/Join-Path
+  # on a long target: legacy framework normalization can reject it before IO.
+  $target = $destination + '\' + ($parts -join '\')
+  if (-not $target.StartsWith($destination + '\', [StringComparison]::OrdinalIgnoreCase) -or $seenTargets.ContainsKey($target)) { throw 'MSI target collision or escape.' }
   $seenTargets[$target] = $true
-  $source = Join-Path $ExtractedCab $row[0]
-  $info = Get-Item -LiteralPath $source
-  if ($info.PSIsContainer -or ($info.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'MSI cabinet member is not a regular file.' }
-  [void][IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($target))
-  [IO.File]::Copy($source, $target, $false)
+  $sourceIo = ExtendedPath ($cabPath + '\' + $row[0])
+  $attributes = [IO.File]::GetAttributes($sourceIo)
+  if (($attributes -band [IO.FileAttributes]::Directory) -or ($attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'MSI cabinet member is not a regular file.' }
+  $parentIo = ExtendedPath ($target.Substring(0, $target.LastIndexOf('\')))
+  [void][IO.Directory]::CreateDirectory($parentIo)
+  [IO.File]::Copy($sourceIo, (ExtendedPath $target), $false)
   $copied++
 }
-if ($copied -lt 100 -or -not (Test-Path -LiteralPath (Join-Path $destination 'program/soffice.exe'))) { throw 'Office payload is incomplete.' }
+if ($copied -lt 100 -or -not [IO.File]::Exists((ExtendedPath ($destination + '\program\soffice.exe')))) { throw 'Office payload is incomplete.' }
 Write-Output ('Reconstructed {0} original files using read-only MSI metadata; no installer action was executed.' -f $copied)
