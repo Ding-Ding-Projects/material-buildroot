@@ -23,7 +23,7 @@
 | `POST /actions` | `{action,args,sequence,nonce}`，工作階段範圍加實際處理端授權 |
 | `POST /disconnect` | `{}`，目前 cookie、精確來源、CSRF 及 client-binding 標頭 |
 
-集合有 83 個動作，名稱同範圍由已整合 `src/main/security/companion-consumers.cjs` 列舉。[處理端文章](../features/companion-consumers.md)列範圍、流程、原生批准及缺口。`scripts/api/action-examples.cjs` 只係結構範本，佔位值要換成本次工作階段真正探索及獲准值；任意 UUID 或其他工作階段預覽唔授權。桌面預設唯讀，集合有修改動作唔代表已啟用範圍、已原生確認或者成功。新動作冇範例會停止產生，唔默默漏項。
+集合有 107 個動作，名稱同範圍由已整合 `src/main/security/companion-consumers.cjs` 列舉。[處理端文章](../features/companion-consumers.md)列範圍、流程、原生批准及缺口。`scripts/api/action-examples.cjs` 只係結構範本，佔位值要換成本次工作階段真正探索及獲准值；任意 UUID 或其他工作階段預覽唔授權。桌面預設唯讀，集合有修改動作唔代表已啟用範圍、已原生確認或者成功。新動作冇範例會停止產生，唔默默漏項。
 
 ## 回覆不確定時
 

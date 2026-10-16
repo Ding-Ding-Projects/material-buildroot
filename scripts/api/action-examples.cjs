@@ -1,6 +1,7 @@
 'use strict';
 // Documentation examples only. Returned IDs must come from this session's actual earlier replies.
 const keys={
+ 'projects.choose':'','projects.adopt':'selectionId',
  'config.trust.preview':'workspaceId domain','config.trust.grant':'workspaceId challengeId',
  'runtimes.list':'','runtimes.configure':'workspaceId choiceId uid gid','runtimes.prepare':'workspaceId',
  'runtimes.wsl.project':'choiceId',
