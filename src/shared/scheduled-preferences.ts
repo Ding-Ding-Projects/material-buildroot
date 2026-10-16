@@ -11,6 +11,7 @@ import type { Language } from "./api";
 export interface ScheduledValues {
   language: Language;
   "appearance.theme": "system" | "light" | "dark";
+  "appearance.profile": string | null;
 }
 export interface ScheduledEffective {
   values: ScheduledValues;

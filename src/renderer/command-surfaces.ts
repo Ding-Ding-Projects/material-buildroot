@@ -23,6 +23,47 @@ export function registerCommandAccessProvider(providerId:string,provider:(target
   accessProviders.set(providerId,provider);
   return ()=>{if(accessProviders.get(providerId)===provider)accessProviders.delete(providerId);};
 }
+export type CommandProviderAction = ContextProviderAction & {target?:HTMLElement};
+export type CommandActionEntry = CommandProviderAction & {providerId:string};
+export type CommandActionProvider = (context:{language:string})=>readonly CommandProviderAction[];
+const commandProviders=new Map<string,CommandActionProvider>();
+const commandIdValid=(id:unknown):id is string=>typeof id==='string'&&id.trim().length>0&&id.length<=256&&!/[\u0000-\u001f\u007f]/.test(id);
+function commandContributions(provider:CommandActionProvider,language:string):CommandProviderAction[]{
+  try{
+    const values=provider({language});if(!Array.isArray(values)||values.length>256)return [];
+    const seen=new Set<string>();const accepted:CommandProviderAction[]=[];
+    for(const value of values){
+      if(!value||!commandIdValid(value.id)||seen.has(value.id)||typeof value.label!=='string'||!value.label.trim()||value.label.length>240||typeof value.run!=='function'||value.context!==undefined&&(typeof value.context!=='string'||value.context.length>500)||value.target!==undefined&&!(value.target instanceof HTMLElement))continue;
+      seen.add(value.id);accepted.push(value);
+    }
+    return accepted;
+  }catch{return [];}
+}
+/** Providers expose real navigation/editor consumers, not renderer command strings. */
+export function registerCommandActionProvider(providerId:string,provider:CommandActionProvider):()=>void {
+  if(!providerIdPattern.test(providerId)||typeof provider!=='function'||commandProviders.has(providerId)||commandProviders.size>=16)throw new Error('INVALID_COMMAND_ACTION_PROVIDER');
+  commandProviders.set(providerId,provider);window.dispatchEvent(new Event('command-action-providers-changed'));
+  return ()=>{if(commandProviders.get(providerId)===provider){commandProviders.delete(providerId);window.dispatchEvent(new Event('command-action-providers-changed'));}};
+}
+/** Stable, duplicate-free inventory shared by the command card and destination catalogs. */
+export function getCommandActionEntries(language:string):readonly CommandActionEntry[]{
+  const entries:CommandActionEntry[]=[];
+  for(const [providerId,provider] of commandProviders){
+    for(const action of commandContributions(provider,language)){
+      if(entries.length>=512)return entries;
+      const id=providerId+':'+action.id;
+      entries.push({...action,id,providerId,disabled:action.disabled===true||!!action.target&&(!action.target.isConnected||disabled(action.target)),run:async()=>{
+        if(commandProviders.get(providerId)!==provider)return;
+        // Resolve the current action again: removed targets and changed restrictions stay current.
+        const current=commandContributions(provider,language).find(item=>item.id===action.id);
+        if(!current||current.disabled===true||current.target&&(!current.target.isConnected||disabled(current.target)))return;
+        await current.run();
+      }});
+    }
+  }
+  return entries;
+}
+
 function commandAccessBlocked(target:HTMLElement):boolean {
   for(const provider of accessProviders.values()){try{if(provider(target)!==true)return true;}catch{return true;}}
   return false;
@@ -71,6 +112,19 @@ class CommandSurfaces extends LitElement {
       if(el.type==='password'||el.getAttribute('type')==='file'||el.hasAttribute('hidden'))return false;
       return !!label(el);
     }).map((el,index)=>({id:`control-${index}`,label:label(el),context:ancestors(el).filter(p=>p.localName.endsWith('-panel')||p.id).map(p=>p.id||p.localName).reverse().join(' / '),target:el,disabled:disabled(el),kind:el.matches(pickerSelector)?'picker':el.matches(toggleSelector)?'toggle':el.matches(fieldSelector)?'field':undefined,run:()=>this.activate(el)}));
+  }
+  private registeredActions():Action[]{
+    return getCommandActionEntries(this.currentLanguage()).map(entry=>({id:'registered-'+entry.id,label:entry.label,context:entry.context||'',target:entry.target,disabled:entry.disabled,run:async()=>{
+      await this.dialog().close();
+      try{await entry.run();}catch{this.notice=this.l('The selected command could not be completed. Inspect its original surface before retrying.','未能完成所選指令，重試之前請檢視原有介面。');if(!this.dialog().open)await this.dialog().show();}
+    }}));
+  }
+  private paletteInventory(actions:Action[]){
+    const unique=new Map<string,Action>();for(const action of actions)if(!unique.has(action.id))unique.set(action.id,action);
+    this.actions=Array.from(unique.values()).slice(0,1000);
+    this.searchEntries=this.actions.map(a=>({id:a.id,text:a.label+' '+a.context}));
+    if(this.searchControl)this.searchControl.entries=this.searchEntries;
+    if(unique.size>1000)this.notice=this.l('Showing the first 1,000 commands. Open a narrower destination to find its controls.','顯示首 1,000 項指令，請開啟較細範圍目的地尋找控制項。');
   }
   private settingActions():Action[]{
     const app=this.app as any;
@@ -147,7 +201,7 @@ class CommandSurfaces extends LitElement {
   async openPalette(origin?:Control){
     const modal=this.app?.shadowRoot?.querySelector('md-dialog[open]');
     if(modal&&modal.id!=='actions-dialog')return;
-    const actions=[...this.settingActions(),...this.makeActions()];this.targetName=this.l('Commands and workspace controls','指令同工作區控制項');await this.present(actions,'palette',origin);const articles=await this.articleActions();if(this.mode==='palette'&&this.dialog().open&&articles.length){this.actions=[...actions,...articles];this.searchEntries=this.actions.map(a=>({id:a.id,text:a.label+' '+a.context}));if(this.searchControl)this.searchControl.entries=this.searchEntries;}
+    const actions=[...this.registeredActions(),...this.settingActions(),...this.makeActions()];this.targetName=this.l('Commands and workspace controls','指令同工作區控制項');await this.present(actions.slice(0,1000),'palette',origin);this.paletteInventory(actions);const articles=await this.articleActions();if(this.mode==='palette'&&this.dialog().open&&articles.length){this.paletteInventory([...actions,...articles]);}
   }
   async openContext(target:Control){
     this.contextTarget=target;this.targetName=label(target)||target.localName;
