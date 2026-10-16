@@ -86,7 +86,7 @@ The authenticated workspace keeps its own English/Cantonese/bilingual language, 
 
 ## Existing managed servers
 
-The companion lists sanitized ownership records, refreshes the existing manager state and requests native-confirmed stopping of a disclosed server. It does not infer ownership or readiness from persisted metadata. Native directory selection, typed configuration, actual version/flavour/plugin discovery and native-approved vanilla/Paper/Fabric/plugin installation now use the existing services and durable queue. Bedrock discovery explicitly reports missing checksum admission rather than pretending installation is available. Fabric retains its bootstrap-only and unpublished-digest limitations. All four process/container targets now use exact native confirmation and existing ownership checks; SSH retains existing strict known-host and authentication handling. A native-reviewed source distribution preview binds its hash and exact destination to the session before entering the durable transfer queue. Cancellation retains remote-state-unknown/partial-destination facts and never pretends rollback. Revocation requests stopping only the started server. Target/runtime/distribution availability remains enforced by the existing adapters.
+The companion lists sanitized ownership records, refreshes the existing manager state and requests native-confirmed stopping of a disclosed server. It does not infer ownership or readiness from persisted metadata. Native directory selection, typed configuration, actual version/flavour/plugin discovery and native-approved vanilla/Paper/Fabric/plugin installation now use the existing services and durable queue. Bedrock discovery explicitly reports missing checksum admission rather than pretending installation is available. Fabric retains its bootstrap-only and unpublished-digest limitations. All four process/container targets now use exact native confirmation and existing ownership checks; SSH retains existing strict known-host and authentication handling. A native-reviewed source distribution preview binds its hash and exact destination to the session before entering the durable transfer queue. Cancellation retains remote-state-unknown/partial-destination facts and never pretends rollback. The trusted start context supplies `authorizeExecution` outside request JSON for the native manager to retain across scheduled restart. Automatic revocation stop is armed only when the manager returns a per-launch `instanceId`; it supplies `expectedInstanceId` and retires on identity replacement. Without that receipt, no automatic stop claim is made. Target/runtime/distribution availability remains enforced by the existing adapters.
 
 ## Native file conversion
 
@@ -133,6 +133,7 @@ Remote target descriptors and private host details are selected and confirmed on
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
