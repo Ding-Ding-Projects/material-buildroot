@@ -30,19 +30,34 @@ function Initialize-NativeToolchain {
         throw 'Native compiler is unavailable: registered Visual Studio discovery is absent. No installation was attempted.'
     }
     Assert-MicrosoftExecutable $vswhere
-    $json = & $vswhere -products '*' -version '[17.0,19.0)' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json -utf8
-    if ($LASTEXITCODE -ne 0) { throw 'Visual Studio discovery did not complete successfully.' }
-    $instances = @((($json -join "`n") | ConvertFrom-Json) | Where-Object { $_.isComplete -and $_.isLaunchable } | Sort-Object installationVersion -Descending)
+    $discoveryStart = [Diagnostics.ProcessStartInfo]::new()
+    $discoveryStart.FileName = $vswhere
+    $discoveryStart.Arguments = '-products * -version [17.0,19.0) -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json -utf8'
+    $discoveryStart.UseShellExecute = $false
+    $discoveryStart.CreateNoWindow = $true
+    $discoveryStart.RedirectStandardOutput = $true
+    $discoveryStart.StandardOutputEncoding = [Text.UTF8Encoding]::new($false)
+    $discovery = [Diagnostics.Process]::new()
+    $discovery.StartInfo = $discoveryStart
+    try {
+        if (!$discovery.Start()) { throw 'Visual Studio discovery did not start.' }
+        $jsonOutput = $discovery.StandardOutput.ReadToEndAsync()
+        if (!$discovery.WaitForExit(30000)) { $discovery.Kill(); throw 'Visual Studio discovery exceeded thirty seconds.' }
+        $json = $jsonOutput.GetAwaiter().GetResult()
+        if ($discovery.ExitCode -ne 0) { throw 'Visual Studio discovery did not complete successfully.' }
+    } finally { $discovery.Dispose() }
+    $instances = @(($json | ConvertFrom-Json) | Where-Object { $_.isComplete -and $_.isLaunchable } | Sort-Object installationVersion -Descending)
     if (!$instances.Count) { throw 'No complete supported Visual Studio C++ installation was found. No installation was attempted.' }
     $instance = $instances[0]
     $devcmd = [IO.Path]::GetFullPath((Join-Path $instance.installationPath 'Common7/Tools/VsDevCmd.bat'))
     if (!(Test-Path -LiteralPath $devcmd -PathType Leaf) -or $devcmd -match '["%!\r\n]') { throw 'Installed developer command path is unavailable or unsafe.' }
     $start = [Diagnostics.ProcessStartInfo]::new()
     $start.FileName = Join-Path ([Environment]::GetFolderPath('System')) 'cmd.exe'
-    $start.Arguments = '/d /v:off /s /c "call "' + $devcmd + '" -no_logo -arch=x64 -host_arch=x64 >nul && set"'
+    $start.Arguments = '/u /d /v:off /s /c "call "' + $devcmd + '" -no_logo -arch=x64 -host_arch=x64 >nul && set"'
     $start.UseShellExecute = $false
     $start.CreateNoWindow = $true
     $start.RedirectStandardOutput = $true
+    $start.StandardOutputEncoding = [Text.Encoding]::Unicode
     $start.RedirectStandardError = $true
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $start
