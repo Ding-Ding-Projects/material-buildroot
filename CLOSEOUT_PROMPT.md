@@ -29,3 +29,7 @@ Before stopping, review every tracked/nonignored change, preserve and push safe 
 ## Account preservation boundary
 
 The current verified account reading is 92% used, 8% remaining. Stop new implementation and preserve current work. One final public-gallery inventory lane is active, reusing the existing gallery and withholding images with missing capture clocks. The goal remains active and incomplete; this is the first account-boundary continuation turn, not evidence of three blocked turns. No new build, installer or runtime operation is started. The next resumed session should read current allowance and goal state before resuming the queued documentation deployment, repaired native proof and remaining implementation.
+
+## Final gallery preservation delta
+
+The existing public gallery now has a reviewed source delta for 52 images across seven groups. The added native e722 dialog PNG is byte-identical to its already promoted original, with source revision, actual UTC capture clock, dimensions, scale, executable/build hashes and verified Material component version. All 52 registered image hashes match. The nine newer e463 captures remain withheld for missing capture clocks. The existing live-delivery.json remains historical evidence for 51 images; new publication, image delivery and source README backlink readback must be verified separately after this delta lands. No new browser or full interaction acceptance is claimed.

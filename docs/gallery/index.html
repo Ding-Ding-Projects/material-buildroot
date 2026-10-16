@@ -35,8 +35,8 @@
       <h1 id="page-title"><span class="en">Screenshots with their source and limits.</span><span class="zh" lang="zh-HK">每張截圖都附有來源與驗證限制。</span></h1>
       <p class="lede"><span class="en">Browse the retained workspace, historical interface captures and documentation-site previews. Every image is an unchanged original with its source identity and evidence boundary shown alongside it.</span><span class="zh" lang="zh-HK">瀏覽保留的工作區、歷史介面截圖與文件網站預覽。每張圖片都保留原始內容，並列出來源及驗證限制。</span></p>
       <div class="summary-row" aria-label="Gallery inventory / 截圖集目錄">
-        <div class="summary-card"><strong id="capture-count">51</strong><span><span class="en">reviewed original images</span><span class="zh" lang="zh-HK">張已檢視原始圖片</span></span></div>
-        <div class="summary-card"><strong>6</strong><span><span class="en">source-bound capture groups</span><span class="zh" lang="zh-HK">組綁定來源的截圖</span></span></div>
+        <div class="summary-card"><strong id="capture-count">52</strong><span><span class="en">reviewed original images</span><span class="zh" lang="zh-HK">張已檢視原始圖片</span></span></div>
+        <div class="summary-card"><strong>7</strong><span><span class="en">source-bound capture groups</span><span class="zh" lang="zh-HK">組綁定來源的截圖</span></span></div>
         <div class="summary-card"><strong>320–1440 px</strong><span><span class="en">recorded viewport widths</span><span class="zh" lang="zh-HK">有記錄的檢視區寬度</span></span></div>
       </div>
       <p class="boundary-note"><strong><span class="en">Evidence boundary:</span><span class="zh" lang="zh-HK">證據限制：</span></strong> <span class="en">Renderer and browser captures document visible interface states. Fixture-backed panels and unverified native operations are called out per image. This gallery does not claim Windows, installer, build, guest, or LAN acceptance.</span><span class="zh" lang="zh-HK">Renderer 與瀏覽器截圖只記錄可見介面狀態。每張圖片會註明測試資料或未驗證的原生操作。本截圖集不代表 Windows、安裝程式、建置、客體系統或區域網絡驗收。</span></p>
@@ -50,6 +50,7 @@
         <md-chip-set id="filter-row" aria-label="Choose a screenshot collection / 選擇截圖分類">
           <md-filter-chip data-filter="all" label="All captures / 全部截圖" selected></md-filter-chip>
           <md-filter-chip data-filter="current-app" label="Workspace / 工作區"></md-filter-chip>
+          <md-filter-chip data-filter="native-windows" label="Native desktop / 原生桌面"></md-filter-chip>
           <md-filter-chip data-filter="historical-workspace" label="Historical workspace / 歷史工作區"></md-filter-chip>
           <md-filter-chip data-filter="legacy-shell" label="Legacy shell / 舊版介面"></md-filter-chip>
           <md-filter-chip data-filter="website-current" label="Interactive website / 互動網站"></md-filter-chip>
@@ -72,6 +73,7 @@
       <h2 id="method-title"><span class="en">Current and historical captures stay distinct.</span><span class="zh" lang="zh-HK">目前保留的截圖與歷史截圖會分開標示。</span></h2>
       <div class="method-grid">
         <article><h3><span class="en">Latest retained workspace captures</span><span class="zh" lang="zh-HK">最新保留的工作區截圖</span></h3><p><span class="en">Twenty-four captures from one source-bound renderer run. Each card records its typed-fixture and native-operation limits. Later shared-mode, queue/catalogue and schedule changes are not pictured.</span><span class="zh" lang="zh-HK">二十四張截圖來自同一次綁定來源的 Renderer 執行。每張卡片都註明型別化測試資料與原生操作限制。較後新增的共用模式、工作佇列／目錄及排程功能未有截圖。</span></p></article>
+        <article><h3><span class="en">Current native desktop capture</span><span class="zh" lang="zh-HK">目前原生桌面截圖</span></h3><p><span class="en">One inspected image records a specific dialog in the built desktop executable. Its card identifies the exact capture time and limits the claim to that visible state.</span><span class="zh" lang="zh-HK">一張已檢視圖片記錄已建置桌面程式中的指定對話框。圖片卡列出確切截圖時間，並把證明範圍限於可見狀態。</span></p></article>
         <article><h3><span class="en">Historical product images</span><span class="zh" lang="zh-HK">歷史產品截圖</span></h3><p><span class="en">Earlier interface states remain in their own collections with original source revisions and capture times. They are never labelled as the latest workspace.</span><span class="zh" lang="zh-HK">較早期介面會保留在獨立分類，並列出原始來源版本及截圖時間，不會標示成最新工作區。</span></p></article>
         <article><h3><span class="en">Documentation-site images</span><span class="zh" lang="zh-HK">文件網站截圖</span></h3><p><span class="en">Website images are local Chromium source previews. Receipt check times are not used as screenshot times when the source did not record an individual capture clock.</span><span class="zh" lang="zh-HK">網站圖片是本機 Chromium 來源預覽。若來源沒有記錄個別截圖時間，收據檢查時間不會當作截圖時間。</span></p></article>
       </div>

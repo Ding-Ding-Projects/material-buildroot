@@ -16,6 +16,7 @@ let language = 'both';
 const filterLabels = {
   all: ['All captures', '全部截圖'],
   'current-app': ['Workspace', '工作區'],
+  'native-windows': ['Native desktop', '原生桌面'],
   'historical-workspace': ['Historical workspace', '歷史工作區'],
   'legacy-shell': ['Legacy shell', '舊版介面'],
   'website-current': ['Interactive website', '互動網站'],

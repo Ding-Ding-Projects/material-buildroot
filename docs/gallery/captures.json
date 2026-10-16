@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "title": "Material Buildroot reviewed screenshot gallery",
-  "reviewedCaptureCount": 51,
+  "reviewedCaptureCount": 52,
   "imageBytePolicy": "Every PNG is a byte-for-byte copy of its reviewed source capture. No image was edited, resized, recompressed, or retouched.",
   "captureDatePolicy": "A capture timestamp is shown only when its source manifest records one. Website receipt check times are listed separately and do not stand in for screenshot capture times.",
   "groups": [
@@ -67,6 +67,15 @@
       "note": "Two inspected captures from the archived v0.1.0 packaged desktop executable. Capture-host operating system is not identified by the public inventory.",
       "labelEn": "Historical v0.1.0 desktop shell",
       "labelZh": "歷史 v0.1.0 桌面介面"
+    },
+    {
+      "id": "native-windows",
+      "label": "Current native desktop capture (e722cf1)",
+      "sourceRevision": "e722cf1b91ccc46465eb449df4abd84d9d6df2a1",
+      "count": 1,
+      "note": "One inspected capture from the built desktop executable. Its evidence boundary is shown on the card.",
+      "labelEn": "Current native desktop capture (e722cf1)",
+      "labelZh": "目前原生桌面截圖（e722cf1）"
     }
   ],
   "captures": [
@@ -1957,6 +1966,45 @@
         "height": 960
       },
       "materialWebVersion": "2.4.1"
+    },
+    {
+      "id": "native-windows-052",
+      "category": "Current native desktop capture",
+      "section": "native-windows",
+      "title": "Schedule draft leave confirmation | bilingual, light, 1920 × 1128",
+      "file": "images/native-windows/dialog-actions-e722cf1.png",
+      "originalFilename": "dialog-actions-e722cf1.png",
+      "sha256": "cf450358cc4ad6eb1c79cdbd192836ff1b77649ac25c6f4fcbe1c6dc26ee77ad",
+      "kind": "Native desktop capture",
+      "sourceRevision": "e722cf1b91ccc46465eb449df4abd84d9d6df2a1",
+      "artifactSha256": "47ed433b93e9c924ba510207f670a455c54ec28a5c8c59b5883a8090f5f77c6b",
+      "buildReceiptSha256": "00d8933d9f763899ccde2023e9c34f4f4da5c77b0bdaf8db28d29fc2665a9273",
+      "capturedAt": "2026-10-16T10:04:39.245Z",
+      "captureTimezone": "UTC",
+      "receiptCheckedAt": null,
+      "language": "English and Hong Kong Cantonese",
+      "theme": "light",
+      "route": "task-owned-hidden-desktop",
+      "boundary": "Captured from the built desktop executable on a task-owned hidden desktop. This image documents the shown leave-confirmation dialog only; it does not establish full feature acceptance.",
+      "reviewedPixels": true,
+      "categoryEn": "Current native desktop capture",
+      "categoryZh": "目前原生桌面截圖",
+      "titleEn": "Schedule draft leave confirmation | bilingual, light, 1920 × 1128",
+      "titleZh": "排程草稿離開確認｜雙語，淺色，1920 × 1128",
+      "kindEn": "Native desktop capture",
+      "kindZh": "原生桌面截圖",
+      "boundaryEn": "Captured from the built desktop executable on a task-owned hidden desktop. This image documents the shown leave-confirmation dialog only; it does not establish full feature acceptance.",
+      "boundaryZh": "此截圖來自已建置的桌面程式及任務專用隱藏桌面，只記錄畫面中的離開確認對話框，並不代表整項功能已完成驗收。",
+      "imageDimensions": {
+        "width": 1920,
+        "height": 1128
+      },
+      "recordedViewport": {
+        "width": 1280,
+        "height": 752,
+        "scale": 1.5
+      },
+      "materialWebVersion": "2.5.0"
     }
   ]
 }
