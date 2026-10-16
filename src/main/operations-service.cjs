@@ -1151,6 +1151,22 @@ function createOperationsService({
     sourceStatus: workspaceId => sources.handle({action:'source.status',workspaceId}),
     projectOptions: workspaceId => {const item=project(workspaceId);return {...projectOptions.get({workspaceId}),runtime:item.runtime,externalTreesAuthorized:item.externalStateVerified,availableTrees:[...externalWorkspaces.entries()].filter(([,id])=>id===workspaceId)};},
     defconfigCatalog: workspaceId => changeConfig(projectPaths(workspaceId),()=>defconfigWorkflows.catalog({workspaceId})),
+    submitBuild: async (request,authorize) => {
+      authorize();
+      const item=project(request.workspaceId);
+      if(disposed||updateInstalling)reject('UNAVAILABLE');
+      if(!item.externalStateVerified)reject('EXTERNAL_TREES_NOT_AUTHORIZED');
+      const selectedRuntime=runtime(item.runtime);
+      const resources=reservations(undefined,selectedRuntime,request.jobs);
+      const captured=await captureBuildIntent({source:item.source,output:item.output,externalTrees:authorizedExternalPaths(request.workspaceId,item)});
+      // Recheck at the enqueue boundary after every asynchronous preparation step.
+      authorize();project(request.workspaceId);
+      if(disposed||updateInstalling)reject('UNAVAILABLE');
+      const job=jobs.enqueue({kind:'build',ownerId:owner,payload:{workspaceId:request.workspaceId,target:request.target,runtime:selectedRuntime,jobs:request.jobs,resources,
+        intent:{projectId:request.workspaceId,sourceRevision:captured.sourceRevision,configRevision:captured.configRevision},
+        snapshot:{version:captured.snapshot.version,entries:captured.snapshot.entries,bytes:captured.snapshot.bytes,excludesGitObjectHistory:true,symlinkPolicy:captured.snapshot.symlinkPolicy,symlinks:captured.snapshot.symlinks,limitations:[...captured.snapshot.limitations]}}});
+      void scheduler.pump().catch(()=>{});return job;
+    },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
 
@@ -2121,6 +2137,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

@@ -15,6 +15,7 @@ const actionContracts=Object.freeze({
  'source.status':contract('source:read',['workspaceId'],project),
  'project.options':contract('projects:read',['workspaceId'],project),
  'defconfig.catalog':contract('configuration:read',['workspaceId'],project),
+ 'builds.submit':contract('builds:submit',['workspaceId','target','jobs'],a=>project(a)&&['all','sdk','source','legal-info','show-info','graph-depends'].includes(a.target)&&Number.isSafeInteger(a.jobs)&&a.jobs>=1&&a.jobs<=32),
  'build.targets':contract('projects:read',['workspaceId'],project),
  'outputs.browse':contract('outputs:read',['workspaceId','directoryId'],a=>project(a)&&(a.directoryId==='root'||id(a.directoryId))),
  'outputs.inspect':contract('outputs:read',['workspaceId','fileId'],a=>project(a)&&id(a.fileId)),
@@ -41,7 +42,8 @@ function createCompanionConsumers(host){
    case 'source.status':{const value=await host.sourceStatus(a.workspaceId);if(value.ok===false)fail('SOURCE_UNAVAILABLE');result={revision:value.revision,branch:value.branch,dirty:value.dirty,snapshotCount:value.snapshots?.length||0};break;}
    case 'project.options':{const value=host.projectOptions(a.workspaceId);result={revision:value.revision,runtime:value.runtime?.kind||'unconfigured',externalTreesAuthorized:value.externalTreesAuthorized,externalTreeCount:value.availableTrees?.length||0};break;}
    case 'defconfig.catalog':{const value=await host.defconfigCatalog(a.workspaceId);result={revision:value.revision,entries:value.entries.slice(0,200).map(({id,name,origin,order,sha256})=>({id,name,origin,order,sha256})),truncated:value.entries.length>200,apply:'native-only'};break;}
-   case 'build.targets':{const value=host.buildTargets(a.workspaceId);result={targets:value.targets.filter(target=>target!=='clean'),packages:value.packages.slice(0,200),packageActions:value.packageActions.filter(action=>action!=='dirclean'),packageAvailability:value.packageAvailability,submission:'native-only'};break;}
+   case 'builds.submit':{const job=await host.submitBuild(a,()=>admitted(context,definition.scope));owned.jobs.add(job.id);result={job:summary(job)};break;}
+   case 'build.targets':{const value=host.buildTargets(a.workspaceId);result={targets:value.targets.filter(target=>target!=='clean'),packages:value.packages.slice(0,200),packageActions:value.packageActions.filter(action=>action!=='dirclean'),packageAvailability:value.packageAvailability,submission:'approved-scope-required'};break;}
    case 'outputs.browse':{const directory=a.directoryId==='root'?'root':file(owned,a,'directory');const value=viewer().browse(directory);if(a.directoryId==='root')for(const [key,item]of owned.files)if(item.workspaceId===a.workspaceId)owned.files.delete(key);if(owned.files.size+value.rows.length>4000)fail('FILE_LIMIT');result={truncated:value.truncated,rows:value.rows.map(item=>{const handle=randomUUID();owned.files.set(handle,{workspaceId:a.workspaceId,kind:item.kind,id:item.id});return {id:handle,name:item.name,kind:item.kind,size:item.size};})};break;}
    case 'outputs.inspect':{const value=await viewer().inspect(file(owned,a,'file'));result={fileId:a.fileId,name:value.name,size:value.size,format:value.format,sectorBytes:value.sectorBytes,checksumState:value.checksumState,truncated:value.truncated,preview:'native-only'};break;}
    case 'outputs.checksum':{const value=await viewer().checksum(file(owned,a,'file'),a.expected);result={fileId:a.fileId,sha256:value.sha256,matches:value.matches};break;}
@@ -51,5 +53,6 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 

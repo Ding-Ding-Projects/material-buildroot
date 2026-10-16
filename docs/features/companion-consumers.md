@@ -4,7 +4,7 @@
 
 The authenticated browser has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication.
 
-The typed host adapter admits these exact actions, subject to the current session scope:
+The typed host adapter admits these exact actions, subject to the current session scope. Non-destructive build submission uses a named target selector and bounded parallel-job control, never a command string:
 
 | Action | Scope | Consumer |
 | --- | --- | --- |
@@ -13,7 +13,8 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | project.options | projects:read | Runtime kind, revision and external-tree authorization summary |
 | source.status | source:read | Actual source revision, branch, dirty state and snapshot count |
 | defconfig.catalog | configuration:read | Trusted configuration catalogue with revision and hashes |
-| build.targets | projects:read | Discovered named/package targets, with native submission boundary |
+| build.targets | projects:read | Discovered named/package targets |
+| builds.submit | builds:submit | Queue an approved non-destructive named target with bounded parallelism |
 | jobs.list | jobs:read | Current host-owned job summaries |
 | jobs.get | jobs:read | Refresh a job previously disclosed to this session |
 | jobs.cancel | jobs:cancel | Request cancellation of a disclosed job at its observed sequence |
@@ -33,7 +34,7 @@ Source/output reads that finish after revocation do not disclose their newly obt
 
 This increment does not complete PH09-T03 or all C identities. The following are still implementation gaps, not exemptions inferred from missing code:
 
-- Build submission/retry needs a session-aware authorization check at the host's final asynchronous enqueue boundary and native destructive confirmation where applicable.
+- Destructive build submission and job retry remain incomplete companion workflows. Non-destructive named builds now recheck the live session at their final enqueue boundary, use the desktop-adopted runtime and source grant, and enter the existing durable scheduler.
 - Configuration inspection/edit/reconciliation, defconfig apply/save, presets, account provisioning and package/external-tree editors need dedicated capability-bound projections and controls.
 - Source clone/adopt/ref acquisition/upgrade/rollback need native selection and revision-bound approval bridges; this browser cannot manufacture that approval.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud destinations need their own narrowly admitted consumers.
@@ -44,4 +45,5 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
