@@ -11,5 +11,6 @@ export function createVocabularyController(options: {privateCache: PrivateVocabu
  importBytes(bytes: Uint8Array): Promise<VocabularyStatus>;
  clear(): Promise<VocabularyStatus>;
  formatOwnedText(text: string, options?: {kind?: 'ui-copy' | 'accessible-name'; mode?: 'en' | 'zh-HK' | 'bilingual'}): string;
+ appliedHeadline(): string | null;
  exportDisclosure(): string;
 }>;

@@ -1,7 +1,6 @@
 import {LitElement,html,css,nothing} from 'lit';
 import {materialIcon} from './material-icons';
 import {vocabulary} from './owned-copy';
-import {VOCABULARY_LIMITS} from '../shared/personal-vocabulary.mjs';
 import '@material/web/button/outlined-button.js';
 export class PersonalVocabularyPanel extends LitElement{
  static properties={language:{type:String},revision:{state:true},busy:{state:true},error:{state:true}};
@@ -11,7 +10,7 @@ export class PersonalVocabularyPanel extends LitElement{
  disconnectedCallback(){this.unsubscribe?.();super.disconnectedCallback();}
  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
  focusAction(action:'upload'|'status'|'clear'){(this.renderRoot.querySelector('#'+action) as HTMLElement|null)?.focus();}
- private async importFile(event:Event){const input=event.target as HTMLInputElement,file=input.files?.[0];input.value='';if(!file||vocabulary.school()!=='inactive')return;this.busy=true;this.error=false;try{const bytes=file.size>VOCABULARY_LIMITS.bytes?new Uint8Array(VOCABULARY_LIMITS.bytes+1):new Uint8Array(await file.arrayBuffer());await vocabulary.import(bytes);}catch{this.error=true;}finally{this.busy=false;}}
+ private async importFile(event:Event){const input=event.target as HTMLInputElement,file=input.files?.[0];input.value='';if(!file||vocabulary.school()!=='inactive')return;this.busy=true;this.error=false;try{const result=await vocabulary.importFile(file);if(result.state==='unavailable')this.error=true;}catch{this.error=true;}finally{this.busy=false;}}
  private async clear(){this.busy=true;this.error=false;try{await vocabulary.clear();}catch{this.error=true;}finally{this.busy=false;}}
  render(){const school=vocabulary.school();if(school==='active')return nothing;const status=vocabulary.status();return html`
  <h2>${this.l('Personal vocabulary','個人詞彙')}</h2>

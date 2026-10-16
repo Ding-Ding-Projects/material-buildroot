@@ -1,6 +1,12 @@
 # Active implementation and verification handoff, 2026-10-16
 
+## Current desktop source checkpoint
+
+The nine-path desktop wording-drop and celebration implementation has TypeScript, 18 source-preview renderer passes and bounded independent review. Settings and drop share full validation/durable storage; modal success/error feedback uses admitted components and the proper accessible boundary. The repeated-invalid Lit-anchor repair passed and remains part of the existing feedback finding. Native package, actual drag delivery, speech and full tuple acceptance remain pending. Preserve this source before the exact native build. The public source audit remains a baseline inventory, not a claim that these later changes or all 109 features are fully accepted.
+
 ## Current timing implementation
+
+Hosted timing is now verified at source 065497b: original release run 38892342358 and annotation run 38892731384 succeeded; normal release 51.1's block matches terminal attempt data exactly at 00:03:12. This supersedes only the hosted-pending statement below, without upgrading installer/update or wider acceptance.
 
 The future publisher/annotation route is implemented with six passing focused tests, syntax/YAML validation and bounded independent security/correctness review. A completed original workflow supplies first-job start through final publication-step completion; its later job completion is separate evidence. Trusted default-branch code alone edits the owned block and verifies exact source/tag/normal-release identity and unchanged assets. Hosted execution remains pending. Release 49.1's existing notes were separately corrected and read back against actual API duration 00:03:42. The complete roadmap, installer/update and feature acceptance remain incomplete.
 

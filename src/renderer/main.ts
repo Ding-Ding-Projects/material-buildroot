@@ -4,6 +4,7 @@ import type {ScheduledPreferencesSnapshot} from "../shared/scheduled-preferences
 import type {SharedModeSnapshot} from "../shared/shared-mode";
 import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
+import "./personal-vocabulary-drop";
 import "./settings-search";
 import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
 import {materialIcon, actionIcon} from "./material-icons";
@@ -1746,6 +1747,7 @@ class MaterialBuildroot extends LitElement {
       <div class="status" role="status" aria-live="polite">
         ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
       </div>
+      <personal-vocabulary-drop .language=${this.effectiveLanguage}></personal-vocabulary-drop>
       ${this.dialog(
         "navigation-dialog",
         this.l("Navigation", "導覽"),

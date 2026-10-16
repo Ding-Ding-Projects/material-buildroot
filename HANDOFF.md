@@ -1,6 +1,12 @@
 # Latest evidence continuation, 2026-10-16
 
+## Desktop wording-drop source ready for native verification
+
+The desktop now shares one serialized, bounded file-import route between Settings and window-wide drops. Successful application uses the imported exact headline or localized neutral fallback, a real Material Web filled card, reduced-motion behavior and a polite announcement inside the active modal boundary. Invalid/unavailable outcomes share nonblocking feedback; mode changes suppress private presentation immediately. Source review corrected modal/primitive defects before application. A repeated-invalid renderer regression exposed removed Lit anchors; clearing now blanks text nodes while retaining bindings, and independent review closed that residual source finding. TypeScript and 18 renderer cases passed. Shared/headline checks passed 11 cases, with a separate real IndexedDB pass accounting for its earlier browser skip; native ACL and file-link proof remain unavailable. Native dragging, screen-reader speech, installed-package behavior and the complete current-source matrix remain pending. No complete feature acceptance is claimed.
+
 ## Terminal release timing correction
+
+The first hosted annotation is now verified: original run `38892342358` and annotation `38892731384` succeeded at source `065497b05ebf09c9b90012a9cda87cffd8e52218`. Normal release 51.1 reads back the exact owned timing block computed from terminal API records: `2026-10-16T11:13:24.000Z` through publication-step completion `2026-10-16T11:16:36.000Z`, duration `00:03:12`. The later terminal-job timestamp remains separately labelled. This supersedes only this route's hosted-pending statement below.
 
 The publisher now leaves timing explicitly pending until a separate completed-workflow listener reads the original attempt's actual first-job start and final publication-step completion. The listener executes reviewed default-branch code, never triggering-branch code or artifacts, validates exact source/tag/normal-release identity, edits only its owned timing block and reads back unchanged assets. Six focused cases, syntax/YAML checks and independent security/correctness review passed. Hosted trigger/bootstrap/annotation remain unverified. Release 49.1 was manually corrected from terminal API records and read back at `00:03:42`; its five published digests and three independent metadata downloads are recorded separately. Source publication remains a checkpoint, not complete product acceptance.
 

@@ -113,6 +113,12 @@ export function createVocabularyController({ privateCache, schoolMode = () => fa
    if (!['ui-copy', 'accessible-name'].includes(kind) || !['en', 'zh-HK', 'bilingual'].includes(mode) || schoolMode()) return text;
    return replace(text);
   },
+  // Expose only the exact approved celebration heading, never the mapping inventory.
+  appliedHeadline() {
+   if (schoolMode() || state !== 'loaded' || !selected) return null;
+   const entry = handles.get(selected).entries.find(([key]) => key === 'private vocabulary');
+   return entry ? entry[1] : null;
+  },
   exportDisclosure() { return 'Local language data and file metadata are excluded from exports and history.'; },
  });
 }

@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createVocabularyController} from '../src/shared/personal-vocabulary.mjs';
+const bytes=entries=>new TextEncoder().encode(JSON.stringify({schemaVersion:1,entries}));
+test('the successful import exposes only its exact heading and invalid imports never report success',async()=>{
+ let cache=null,blocked=false;
+ const controller=createVocabularyController({privateCache:{read:async()=>cache,replace:async value=>{cache=value;},clear:async()=>{cache=null;}},schoolMode:()=>blocked});
+ assert.equal(controller.appliedHeadline(),null);
+ assert.equal((await controller.importBytes(bytes({'private vocabulary':'Local labels applied',Settings:'Preferences'}))).state,'loaded');
+ assert.equal(controller.appliedHeadline(),'Local labels applied');
+ const saved=cache;
+ assert.equal((await controller.importBytes(new TextEncoder().encode('{}'))).state,'invalid');
+ assert.equal(controller.appliedHeadline(),null);
+ assert.equal(controller.formatOwnedText('Settings',{kind:'ui-copy',mode:'en'}),'Preferences');
+ assert.equal(cache,saved);
+ await controller.load();assert.equal(controller.appliedHeadline(),'Local labels applied');
+ blocked=true;assert.equal(controller.appliedHeadline(),null);
+ blocked=false;await controller.clear();assert.equal(controller.appliedHeadline(),null);assert.equal(cache,null);
+ assert.equal((await controller.importBytes(bytes({Settings:'Options'}))).state,'loaded');
+ assert.equal(controller.appliedHeadline(),null);
+ assert.equal((await controller.importBytes(bytes({'private vocabulary':'Local labels applied'}))).state,'loaded');
+ assert.equal(controller.appliedHeadline(),'Local labels applied');
+});
