@@ -1,3 +1,4 @@
+import "./wsl-runtime-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./build-queue-panel";
@@ -110,6 +111,17 @@ export class OperationsPanel extends LitElement {
   private logCursor = 0;
   private logMore = false;
   private confirmingClean = false;
+  protected updated(changed: Map<string, unknown>) {
+    if (!changed.has("workspace")) return;
+    const workspaceId = this.workspace?.workspaceId;
+    this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
+    if (!workspaceId) return;
+    void this.run("project.options", { workspaceId }).then(options => {
+      if (this.workspace?.workspaceId !== workspaceId || !options) return;
+      if (options.runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = options.runtime.distribution; }
+      if (options.runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = options.runtime.image; }
+    });
+  }
   static styles = [
     workspaceStyles,
     css`
@@ -635,6 +647,7 @@ export class OperationsPanel extends LitElement {
     return html`<div class="split">
       <project-workflow-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId || ""}
         @project-opened=${(event: CustomEvent) => {
+          if (!this.dispatchEvent(new CustomEvent("workspace-adopted", { bubbles: true, composed: true, cancelable: true, detail: event.detail }))) return;
           this.workspace = event.detail;
           this.config = undefined; this.artifacts = []; this.artifact = undefined; this.changes = {};
           this.configTrustPreview = undefined; this.configTrustAccepted = false;
@@ -642,9 +655,9 @@ export class OperationsPanel extends LitElement {
           this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
           if (runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = runtime.distribution; }
           if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
-          this.dispatchEvent(new CustomEvent("source-adopted", { bubbles: true, composed: true, detail: event.detail }));
         }}></project-workflow-panel>
       <section class="panel stack">
+        <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { if(!this.dispatchEvent(new CustomEvent("workspace-adopted",{detail:event.detail,bubbles:true,composed:true,cancelable:true})))return; this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; }}></wsl-runtime-panel>
         <h2>${this.l("Runtime discovery", "探索執行環境")}</h2>
         <p>
           ${this.l(
@@ -1449,3 +1462,5 @@ export class OperationsPanel extends LitElement {
   }
 }
 customElements.define("operations-panel", OperationsPanel);
+
+

@@ -252,6 +252,7 @@ else {
             "dist/documentation",
           ),
           openDocumentationExternal: (url) => shell.openExternal(url),
+          openWslPath: (folder) => shell.openPath(folder),
           workspaceRead: () => workspaceService.get(),
         });
       } catch {
@@ -310,3 +311,4 @@ else {
     store?.close();
   });
 }
+
