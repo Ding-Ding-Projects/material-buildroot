@@ -16,7 +16,7 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
   if (!jobs || !text(ownerId) || typeof resolveAdmission !== "function" || typeof observeResources !== "function" || !limits || !["maxConcurrent", "cpuSlots", "memoryBytes"].every(key => safeInteger(limits[key], 1)) || !safeInteger(limits.storageBytes) || !safeInteger(maxScan, 1) || maxScan > 1000 || !safeInteger(callbackTimeoutMs, 1) || callbackTimeoutMs > 60000) fail("INVALID_SCHEDULER_OPTIONS");
   limits = { ...limits };
   const running = new Map(), leases = new Set(), blocked = new Map(), faulted = new Set();
-  let pumping = null, requested = false, closed = false, scanOffset = 0;
+  let pumping = null, requested = false, closed = false, scanOffset = 0, budgetRevision = 0;
   async function boundedCallback(work, releaseLate = false) {
     let expired = false, timer;
     const result = Promise.resolve().then(work).then(value => {
@@ -78,6 +78,7 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
         if (closed) break;
         const current = jobs.get(job.id, ownerId);
         if (current.state !== "queued" || current.sequence !== job.sequence) { blocked.delete(job.id); continue; }
+        const admittedBudgetRevision = budgetRevision;
         const why = reason(admission, observed); if (why) { blocked.set(job.id, why); continue; }
         release = acquireMutationLease(admission, false);
         if (acquireLease) { externalRelease = await boundedCallback(() => acquireLease(admission), true); if (typeof externalRelease !== "function") fail("BLOCKED_LEASE_UNAVAILABLE"); }
@@ -88,6 +89,7 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
         if (closed) { release(); externalRelease?.(); break; }
         const latest = jobs.get(job.id, ownerId);
         if (latest.state !== "queued" || latest.sequence !== job.sequence) { release(); externalRelease?.(); continue; }
+        if (admittedBudgetRevision !== budgetRevision) fail("BLOCKED_BUDGET_CHANGED");
         blocked.delete(job.id);
         const item = { admission, promise: null }; running.set(job.id, item);
         const releaseLocal = release, releaseExternal = externalRelease; release = null; externalRelease = null;
@@ -110,6 +112,11 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
   }
   return {
     pump,
+    setLimits(next) {
+      if (!next || Object.keys(next).length !== 4 || !["maxConcurrent", "cpuSlots", "memoryBytes"].every(key => safeInteger(next[key], 1)) || !safeInteger(next.storageBytes)) fail("INVALID_SCHEDULER_LIMITS");
+      limits = { ...next };
+      budgetRevision++;
+    },
     acquireMutationLease,
     status() { return { closed, running: [...running].map(([jobId, item]) => ({ jobId, projectId: item.admission.projectId, cpuSlots: item.admission.cpuSlots, memoryBytes: item.admission.memoryBytes, storageBytes: item.admission.storageBytes })), blocked: [...blocked].map(([jobId, reason]) => ({ jobId, reason })), reservations: usage() }; },
     async awaitIdle() { for (;;) { await pumping; const active = [...running.values()].map(item => item.promise); if (!active.length && !pumping) return; await Promise.allSettled(active); } },

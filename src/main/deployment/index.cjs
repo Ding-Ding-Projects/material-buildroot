@@ -18,6 +18,7 @@ function createDeploymentService(options) {
         "listArtifacts",
         "inspectArtifact",
         "createManifest",
+        "compareManifestFiles",
         "collectCompliance",
       ],
     ],

@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { createRecord, readManifest, readBoundedText, compareRecords, parseLegalManifest } = require("./reproducibility.cjs");
 function fail(message) {
   throw new Error(message);
 }
@@ -209,13 +210,12 @@ class ArtifactStore {
       locks: cleanLocks,
       entries,
     };
-    return {
-      ...payload,
-      digest: crypto
-        .createHash("sha256")
-        .update(JSON.stringify(payload))
-        .digest("hex"),
-    };
+    return createRecord(payload);
+  }
+  async compareManifestFiles(beforePath, afterPath, bind = null) {
+    const before = readManifest(safePath(this.root, beforePath));
+    const after = readManifest(safePath(this.root, afterPath));
+    return compareRecords(before, after, bind ? [bind(before), bind(after)] : []);
   }
   async collectCompliance(directory = "legal-info") {
     const records = [],
@@ -232,21 +232,50 @@ class ArtifactStore {
     const csv = records.filter((x) =>
       /(?:manifest|license).*\.csv$/i.test(x.path),
     );
+    const packages = [], manifestErrors = [];
+    let parsedBytes = 0;
+    for (const record of csv) {
+      try {
+        if ((parsedBytes += record.size) > 16 * 1024 * 1024) fail("legal-manifest-total-limit");
+        const text = readBoundedText(safePath(this.root, record.path), 2 * 1024 * 1024);
+        if (crypto.createHash("sha256").update(text).digest("hex") !== record.sha256) fail("legal-manifest-changed");
+        packages.push(...parseLegalManifest(text).map(item => ({ ...item, manifestPath: record.path, manifestSha256: record.sha256 })));
+      } catch (error) {
+        manifestErrors.push({ path: record.path, code: /^[a-z-]+$/.test(error.message) ? error.message : "legal-manifest-unavailable" });
+      }
+    }
+    const collectionDigest = crypto.createHash("sha256").update(JSON.stringify(records.map(({ path, sha256 }) => ({ path, sha256 })))).digest("hex");
     return {
       schemaVersion: 1,
       source: "buildroot-legal-info",
+      packages,
+      manifestErrors,
+      licenseAssessment: "Source declarations only; license compatibility, completeness and legal obligations have not been assessed.",
       files: records,
       manifests: csv.map((x) => ({
         path: x.path,
         content: x.preview,
         truncated: x.previewTruncated,
       })),
-      completeness: records.length ? "collected-not-legally-reviewed" : "empty",
+      completeness: manifestErrors.length ? "partial-manifest-parsing" : records.length ? "collected-not-legally-reviewed" : "empty",
       spdx: {
         spdxVersion: "SPDX-2.3",
         dataLicense: "CC0-1.0",
         SPDXID: "SPDXRef-DOCUMENT",
         name: "Buildroot legal-info collection",
+        documentNamespace: `https://spdx.org/spdxdocs/buildroot-legal-info-${collectionDigest}`,
+        creationInfo: { creators: ["Tool: Material Buildroot"], created: new Date().toISOString() },
+        packages: packages.map((item, i) => ({
+          SPDXID: `SPDXRef-Package-${i}`,
+          name: item.name,
+          ...(item.version ? { versionInfo: item.version } : {}),
+          downloadLocation: "NOASSERTION",
+          filesAnalyzed: false,
+          licenseConcluded: "NOASSERTION",
+          licenseDeclared: "NOASSERTION",
+          copyrightText: "NOASSERTION",
+          comment: `Source declaration: ${item.sourceLicenseDeclaration || "unavailable"}. Evidence: ${item.manifestPath} (SHA256 ${item.manifestSha256}). No SPDX-expression or legal validation is claimed.`,
+        })),
         files: records.map((x, i) => ({
           SPDXID: `SPDXRef-File-${i}`,
           fileName: x.path,
@@ -258,46 +287,7 @@ class ArtifactStore {
   }
 }
 function compareManifests(before, after) {
-  const validate = (value) => {
-    if (
-      value?.schemaVersion !== 1 ||
-      !Array.isArray(value.entries) ||
-      value.entries.some(
-        (x) => typeof x.path !== "string" || !/^[a-f0-9]{64}$/.test(x.sha256),
-      )
-    )
-      fail("invalid-manifest");
-    return new Map(value.entries.map((x) => [x.path, x]));
-  };
-  const a = validate(before),
-    b = validate(after),
-    differences = [];
-  for (const name of new Set([...a.keys(), ...b.keys()])) {
-    const left = a.get(name),
-      right = b.get(name);
-    if (
-      !left ||
-      !right ||
-      left.sha256 !== right.sha256 ||
-      left.size !== right.size
-    )
-      differences.push({
-        path: name,
-        kind: !left ? "added" : !right ? "removed" : "content-changed",
-        before: left || null,
-        after: right || null,
-      });
-  }
-  const locksChanged =
-    JSON.stringify(before.locks) !== JSON.stringify(after.locks);
-  return {
-    reproducible: differences.length === 0 && !locksChanged,
-    differences,
-    locksChanged,
-    interpretation: differences.length
-      ? "Byte differences detected; investigate timestamps, randomness, source and environment."
-      : "Selected artifact bytes match; unselected outputs and runtime behavior are unverified.",
-  };
+  return compareRecords(before, after);
 }
 module.exports = {
   ArtifactStore,

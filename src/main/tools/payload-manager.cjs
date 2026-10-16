@@ -4,6 +4,9 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { fail, digest, processRun } = require("./runtime.cjs");
 const TOOLS = Object.freeze({
+  vboxmanage: { names: ["vboxmanage"], args: ["--version"], version: /^([0-9]+\.[0-9]+[^\s]*)/m },
+  vmrun: { names: ["vmrun"], args: ["-T", "ws", "list"], capability: /^Total running VMs:\s*\d+\s*$/m },
+  "qemu-img": { names: ["qemu-img"], args: ["--version"], version: /qemu-img version\s+([^\s]+)/i },
   ffmpeg: {
     names: ["ffmpeg"],
     args: ["-version"],
@@ -34,6 +37,7 @@ const TOOLS = Object.freeze({
     args: ["--version"],
     version: /qpdf version\s+([^\s]+)/i,
   },
+  ssh: { names: ["ssh"], args: ["-V"], version: /(OpenSSH[^\s,]*)/i },
   java: {
     names: ["java"],
     args: ["-version"],
@@ -70,12 +74,13 @@ function canonical(file, id) {
 }
 function createPayloadManager({
   directory,
-  bundledManifest = {},
+  bundledManifest,
   dialog,
   parentWindow,
 } = {}) {
   if (!directory || !path.isAbsolute(directory))
     fail("INVALID_PAYLOAD_DIRECTORY");
+  bundledManifest ??= require("./bundled-payloads.cjs").loadBundledPayloads();
   const receiptFile = path.join(directory, "executable-receipts.json");
   let tail = Promise.resolve();
   function locked(work) {
@@ -140,6 +145,21 @@ function createPayloadManager({
     if (!stat.isFile() || stat.size < 1 || stat.size > 1024 ** 3)
       fail("INVALID_EXECUTABLE");
     if ((await digest(real)) !== record.sha256) fail("PAYLOAD_HASH_MISMATCH");
+    if (record.bundled && record.files) {
+      for (const member of record.files) {
+        let cursor = member.path;
+        while (cursor !== record.root) {
+          if ((await fs.lstat(cursor)).isSymbolicLink()) fail("PAYLOAD_PATH_CHANGED");
+          const parent = path.dirname(cursor);
+          if (parent === cursor) fail("PAYLOAD_PATH_CHANGED");
+          cursor = parent;
+        }
+        if ((await fs.lstat(record.root)).isSymbolicLink()) fail("PAYLOAD_PATH_CHANGED");
+        const entry = await fs.lstat(member.path);
+        if (!entry.isFile() || entry.size !== member.bytes || (await digest(member.path)) !== member.sha256)
+          fail("PAYLOAD_HASH_MISMATCH");
+      }
+    }
     return record;
   }
   async function resolve(value) {
@@ -217,7 +237,7 @@ function createPayloadManager({
       title: "Trust selected tool",
       message: "Allow this " + id + " executable?",
       detail:
-        "Selecting Allow executes its fixed version probe now and allows later tool operations. This executable runs with your account permissions. Choose only a trusted installation. It is user-selected and is not an application-bundled dependency.\n\n" +
+        "Selecting Allow executes its fixed version or availability probe now and allows later tool operations. This executable runs with your account permissions. Choose only a trusted installation. It is user-selected and is not an application-bundled dependency.\n\n" +
         file +
         "\nSHA-256: " +
         sha256,
@@ -236,7 +256,7 @@ function createPayloadManager({
       maxBytes: 65536,
     });
     const match = (output.stdout + "\n" + (output.stderr || "")).match(
-      TOOLS[id].version,
+      TOOLS[id].version || TOOLS[id].capability,
     );
     if (!match) fail("VERSION_PROBE_MISMATCH");
     if ((await digest(file)) !== sha256) fail("PAYLOAD_HASH_MISMATCH");
@@ -244,7 +264,8 @@ function createPayloadManager({
       toolId: id,
       path: file,
       sha256,
-      version: match[1].slice(0, 128),
+      // A capability response is not a product version, and its paths are never persisted.
+      version: TOOLS[id].version ? match[1].slice(0, 128) : "unverified",
       receiptId: randomUUID(),
       origin: "user-selected",
       admittedAt: new Date().toISOString(),

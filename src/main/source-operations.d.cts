@@ -1,6 +1,7 @@
 import type { SourceService } from "./execution/source.cjs";
 export type SourceOperation =
   | { action: "source.choose" }
+  | { action: "source.clone.official"; selectionId: string; directory: string; ref: string; trust: true }
   | {
       action: "source.clone";
       selectionId: string;
@@ -10,6 +11,7 @@ export type SourceOperation =
       trust: true;
     }
   | { action: "source.status"; workspaceId: string }
+  | { action: "source.snapshot"; workspaceId: string; expectedRevision: string; consent: true }
   | { action: "source.ref"; workspaceId: string; ref: string }
   | { action: "source.upgrade.preview"; workspaceId: string; revision: string }
   | {
@@ -63,12 +65,17 @@ export interface SourceOperationSuccess {
   branch?: string | null;
   dirty?: boolean;
   changes?: string;
+  snapshots?: { id: string; revision: string; createdAt: string }[];
+  snapshot?: { id: string; revision: string; createdAt: string };
   fetchedRevision?: string;
   previewId?: string;
   kind?: "upgrade" | "rollback";
   fromRevision?: string;
   toRevision?: string;
   diff?: string;
+  patch?: string;
+  changedFiles?: string[];
+  compatibilityAreas?: string[];
   outputCompatibility?: "unknown";
   outputPreserved?: true;
   rollbackId?: string;
@@ -86,6 +93,7 @@ export function createSourceOperations(options: {
   acquireSourceLock?(canonicalSource: string): Promise<() => void>;
   sourceOptions?: { git?: string; allowLocalFixture?: boolean };
   sourceService?: SourceService;
+  sourceServiceForWorkspace?(workspace: {source: string}): SourceService | undefined;
 }): {
   handle(
     request: SourceOperation,

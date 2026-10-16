@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
+const { metadataPaths } = require("../execution/wsl-project.cjs");
 const MAX_BYTES = 8 * 1024 * 1024;
 const STORAGE_IDENTITY = Object.freeze({
   applicationId: "com.dingdingprojects.materialbuildroot",
@@ -63,21 +64,21 @@ function canonical(value) {
   return value;
 }
 function descriptor(value, stored = false) {
-  exact(
-    value,
-    stored
-      ? ["id", "name", "root", "source", "output"]
-      : ["name", "root", "source", "output"],
-  );
+  const keys = stored ? ["id", "name", "root", "source", "output"] : ["name", "root", "source", "output"];
+  if (Object.hasOwn(value || {}, "storage")) keys.push("storage");
+  exact(value, keys);
+  const wslPaths = value.storage ? metadataPaths(value.storage) : null;
+  if (wslPaths && ["root", "source", "output"].some(key => value[key] !== wslPaths[key])) fail("INVALID_REQUEST");
   text(value.name, 320);
   if (value.name.length > 80 || !value.name.trim()) fail("INVALID_REQUEST");
   if (stored && (typeof value.id !== "string" || !UUID.test(value.id)))
     fail("INVALID_REQUEST");
   const normalized = {
     name: value.name,
-    root: canonical(value.root),
-    source: canonical(value.source),
-    output: canonical(value.output),
+    root: wslPaths ? wslPaths.root : canonical(value.root),
+    source: wslPaths ? wslPaths.source : canonical(value.source),
+    output: wslPaths ? wslPaths.output : canonical(value.output),
+    ...(wslPaths ? { storage: { ...value.storage } } : {}),
   };
   return stored ? { id: value.id, ...normalized } : normalized;
 }
@@ -285,3 +286,4 @@ function createProjectStore({ filePath }) {
   );
 }
 module.exports = { createProjectStore };
+

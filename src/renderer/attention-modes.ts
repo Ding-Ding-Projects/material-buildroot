@@ -1,0 +1,8 @@
+import {narrationDefaults,type NarrationPreferences} from './narration';
+export const attentionKeys=['focus','lowStimulation','timeAwareness','oneThing','momentum'] as const;
+export type AttentionKey=typeof attentionKeys[number];
+export interface AttentionPreferences {schemaVersion:1;modes:Record<AttentionKey,boolean>;nextAction:string;snoozeUntil:number;narration:NarrationPreferences}
+const key='material-buildroot.attention.v1';
+export const defaultAttention=():AttentionPreferences=>({schemaVersion:1,modes:{focus:false,lowStimulation:false,timeAwareness:false,oneThing:false,momentum:false},nextAction:'',snoozeUntil:0,narration:narrationDefaults()});
+export function readAttention():AttentionPreferences {try{const raw=localStorage.getItem(key);if(!raw||raw.length>10000)return defaultAttention();const value=JSON.parse(raw);if(value.schemaVersion!==1||attentionKeys.some(k=>typeof value.modes?.[k]!=='boolean')||typeof value.nextAction!=='string'||value.nextAction.length>240||!Number.isFinite(value.snoozeUntil)||typeof value.narration?.enabled!=='boolean'||!['en','zh-HK','both'].includes(value.narration.language)||!['englishVoice','cantoneseVoice'].every(k=>typeof value.narration[k]==='string'&&value.narration[k].length<=1024)||!Number.isFinite(value.narration.rate)||value.narration.rate<0.1||value.narration.rate>10||!Number.isFinite(value.narration.pitch)||value.narration.pitch<0||value.narration.pitch>2)return defaultAttention();return value;}catch{return defaultAttention();}}
+export function saveAttention(value:AttentionPreferences){localStorage.setItem(key,JSON.stringify(value));}

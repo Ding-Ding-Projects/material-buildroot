@@ -1,6 +1,12 @@
+import "./account-provisioning-panel";
+import "./image-presets-panel";
+import "./configuration-panel";
+import "./defconfig-panel";
 import "./update-panel";
+import "./wsl-runtime-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
+import "./ollama-workspace-panel";
 import "./build-queue-panel";
 import { requestDestructiveConfirmation } from "./destructive-confirmation";
 import "./ollama-catalogue-panel";
@@ -14,9 +20,12 @@ import "@material/web/switch/switch.js";
 import "@material/web/progress/linear-progress.js";
 import "./regex-workbench";
 import "./guest-panel";
+import "./artifact-viewers";
 import "./tools-panel";
 import "./companion-panel";
+import "./authenticator-panel";
 import "./source-panel";
+import "./project-workflow-panel";
 import "./package-panel";
 import "./managed-ollama-panel";
 import { workspaceStyles } from "./workspace-styles";
@@ -110,6 +119,17 @@ export class OperationsPanel extends LitElement {
   private logCursor = 0;
   private logMore = false;
   private confirmingClean = false;
+  protected updated(changed: Map<string, unknown>) {
+    if (!changed.has("workspace")) return;
+    const workspaceId = this.workspace?.workspaceId;
+    this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
+    if (!workspaceId) return;
+    void this.run("project.options", { workspaceId }).then(options => {
+      if (this.workspace?.workspaceId !== workspaceId || !options) return;
+      if (options.runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = options.runtime.distribution; }
+      if (options.runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = options.runtime.image; }
+    });
+  }
   static styles = [
     workspaceStyles,
     css`
@@ -154,7 +174,7 @@ export class OperationsPanel extends LitElement {
       .dock-empty{font:12px/1.5 inherit;padding:8px;color:var(--md-sys-color-on-surface-variant)}
       .operations > .content{overflow:auto;flex:1;min-height:0;padding:12px;gap:8px}
       .operations > [hidden]{display:none!important}
-      .operations > guest-panel,.operations > source-panel,.operations > package-panel,.operations > tools-panel,.operations > companion-panel,.operations > regex-workbench,.operations > documentation-panel{flex:1;min-height:0;overflow:auto;padding:8px}
+      .operations > guest-panel,.operations > source-panel,.operations > package-panel,.operations > tools-panel,.operations > authenticator-panel,.operations > companion-panel,.operations > regex-workbench,.operations > documentation-panel{flex:1;min-height:0;overflow:auto;padding:8px}
       .operations > md-tabs{min-height:38px;--md-primary-tab-container-height:38px}
       .panel{border-radius:0;padding:12px;background:transparent;border-bottom:1px solid var(--md-sys-color-outline-variant)}
       .operations {
@@ -611,6 +631,7 @@ export class OperationsPanel extends LitElement {
       source: ["Source", "來源"],
       package: ["Package authoring", "套件編寫"],
       tools: ["Tools", "工具"],
+      authenticator: ["Authenticator", "驗證器"],
       companion: ["Browser companion", "瀏覽器配對"],
       documentation: ["Help & documentation", "說明同文件"],
       guests: ["Virtual machines", "虛擬機"],
@@ -633,7 +654,19 @@ export class OperationsPanel extends LitElement {
   }
   private runtimeView() {
     return html`<div class="split">
+      <project-workflow-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId || ""}
+        @project-opened=${(event: CustomEvent) => {
+          if (!this.dispatchEvent(new CustomEvent("workspace-adopted", { bubbles: true, composed: true, cancelable: true, detail: event.detail }))) return;
+          this.workspace = event.detail;
+          this.config = undefined; this.artifacts = []; this.artifact = undefined; this.changes = {};
+          this.configTrustPreview = undefined; this.configTrustAccepted = false;
+          const runtime = event.detail.runtime;
+          this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
+          if (runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = runtime.distribution; }
+          if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
+        }}></project-workflow-panel>
       <section class="panel stack">
+        <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { if(!this.dispatchEvent(new CustomEvent("workspace-adopted",{detail:event.detail,bubbles:true,composed:true,cancelable:true})))return; this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; }}></wsl-runtime-panel>
         <h2>${this.l("Runtime discovery", "探索執行環境")}</h2>
         <p>
           ${this.l(
@@ -923,7 +956,7 @@ export class OperationsPanel extends LitElement {
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`<section class="panel stack">
+    return html`<image-presets-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></account-provisioning-panel><defconfig-panel .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
       <div class="row">
         <h2>${this.l("Configuration domain", "設定範圍")}</h2>
         <md-outlined-select .label=${this.l("Domain", "範圍")} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
@@ -968,126 +1001,9 @@ export class OperationsPanel extends LitElement {
                   " " +
                   (this.config.semantics?.reason ?? "")}
             </p>
-            ${entries
-              .slice(this.configPage * 30, this.configPage * 30 + 30)
-              .map((entry: any) => {
-                const value = this.changes[entry.symbol]?.value ?? entry.value;
-                return html`<div class="config-row">
-                  <div>
-                    <label class="symbol">${entry.symbol}</label>${entry.prompt
-                      ? html`<p>${entry.prompt}</p>`
-                      : nothing}${entry.menu
-                      ? html`<small>${entry.menu}</small>`
-                      : nothing}${entry.dependency || entry.help
-                      ? html`<details>
-                          <summary>
-                            ${this.l("Help and dependencies", "說明同相依關係")}
-                          </summary>
-                          <p>
-                            ${entry.help ||
-                            this.l(
-                              "No help text supplied by this source.",
-                              "呢個來源未提供說明文字。",
-                            )}
-                          </p>
-                          <p class="symbol">${entry.dependency}</p>
-                          ${entry.ranges?.map(
-                            (range: any) =>
-                              html`<p>
-                                ${range.min} … ${range.max} (${range.condition})
-                              </p>`,
-                          )}
-                        </details>`
-                      : nothing}
-                  </div>
-                  ${entry.type === "bool"
-                    ? html`<md-switch
-                        ?disabled=${entry.visibility === 0 ||
-                        entry.assignable?.length === 1}
-                        aria-label=${entry.symbol}
-                        .selected=${value === true}
-                        @change=${(e: Event) =>
-                          (this.changes = {
-                            ...this.changes,
-                            [entry.symbol]: {
-                              type: "bool",
-                              value: (e.target as any).selected,
-                            },
-                          })}
-                      ></md-switch>`
-                    : entry.type === "tristate"
-                      ? html`<md-outlined-select
-                          ?disabled=${entry.visibility === 0 ||
-                          entry.assignable?.length === 1}
-                          label=${entry.symbol}
-                          .value=${String(value)}
-                          .displayText=${String(value)}
-                          @change=${(e: Event) =>
-                            (this.changes = {
-                              ...this.changes,
-                              [entry.symbol]: {
-                                type: "tristate",
-                                value: (e.target as HTMLSelectElement).value,
-                              },
-                            })}
-                          >${this.options([
-                            ["y", "y"],
-                            ["m", "m"],
-                            ["n", "n"],
-                          ])}</md-outlined-select
-                        >`
-                      : entry.type === "raw"
-                        ? html`<span>${String(value)}</span>`
-                        : html`<md-outlined-text-field
-                            ?disabled=${entry.visibility === 0}
-                            label=${entry.symbol}
-                            .value=${String(value)}
-                            @input=${(e: Event) =>
-                              (this.changes = {
-                                ...this.changes,
-                                [entry.symbol]: {
-                                  type: entry.type,
-                                  value: (
-                                    e.composedPath()[0] as HTMLInputElement
-                                  ).value,
-                                },
-                              })}
-                          ></md-outlined-text-field>`}
-                </div>`;
-              })}
-            <div class="row">
-              <md-text-button
-                ?disabled=${this.configPage === 0}
-                @click=${() => this.configPage--}
-                >${actionIcon('Previous')}${this.l("Previous", "上一頁")}</md-text-button
-              ><span
-                >${this.configPage + 1} /
-                ${Math.max(1, Math.ceil(entries.length / 30))}</span
-              ><md-text-button
-                ?disabled=${(this.configPage + 1) * 30 >= entries.length}
-                @click=${() => this.configPage++}
-                >${actionIcon('Next')}${this.l("Next", "下一頁")}</md-text-button
-              >
-            </div>
-            <div class="row">
-              <md-filled-button
-                ?disabled=${this.pending || !Object.keys(this.changes).length}
-                @click=${this.applyConfig}
-                >${actionIcon('Apply and reconcile')}${this.l("Apply and reconcile",
-                  "套用並協調",
-                )}</md-filled-button
-              ><md-text-button
-                ?disabled=${this.pending || !Object.keys(this.changes).length}
-                @click=${() => (this.changes = {})}
-                >${actionIcon('Discard changes')}${this.l("Discard changes", "放棄變更")}</md-text-button
-              ><md-outlined-button
-                ?disabled=${this.pending || !!Object.keys(this.changes).length}
-                @click=${this.undoConfig}
-                >${actionIcon('Undo last application')}${this.l("Undo last application",
-                  "復原上次套用",
-                )}</md-outlined-button
-              >
-            </div>`
+            <configuration-panel .config=${this.config} .api=${this.api} .language=${this.language} .workspaceId=${this.workspace.workspaceId} .domain=${this.configDomain}
+              @configuration-queue=${(event: CustomEvent) => { this.pending=event.detail.pending; this.changes=event.detail.blocked ? {__retained:{type:'raw',value:true}} : {}; }}
+              @configuration-result=${(event: CustomEvent) => { this.config=event.detail; }}></configuration-panel>`
         : html`<p>
             ${this.l(
               "Inspect the active output configuration before editing.",
@@ -1125,120 +1041,10 @@ export class OperationsPanel extends LitElement {
   }
   private artifactsView() {
     if (!this.workspace) return this.noProject();
-    return html`<section class="panel stack">
-      <div class="row">
-        <h2>${this.l("Output artifacts", "輸出檔案")}</h2>
-        <md-outlined-button
-          ?disabled=${this.pending}
-          @click=${this.listArtifacts}
-          >${actionIcon('List artifacts')}${this.l("List artifacts", "列出輸出檔案")}</md-outlined-button
-        >
-      </div>
-      ${this.artifacts.map(
-        (item) =>
-          html`<div class="row record">
-            <span class="symbol">${item.path}</span
-            ><span>${item.size} ${this.l("bytes", "位元組")}</span
-            >${item.kind === "file"
-              ? html`<md-text-button
-                  ?disabled=${this.pending}
-                  @click=${() => this.inspectArtifact(item.path)}
-                  >${actionIcon('Inspect')}${this.l("Inspect", "檢視")}</md-text-button
-                >`
-              : html`<span>${this.l("Directory", "目錄")}</span>`}
-          </div>`,
-      )}${this.artifact
-        ? html`<dl>
-              <dt>${this.l("File", "檔案")}</dt>
-              <dd>${this.artifact.path}</dd>
-              <dt>${this.l("Format", "格式")}</dt>
-              <dd>${this.artifact.format}</dd>
-              <dt>SHA-256</dt>
-              <dd class="symbol">${this.artifact.sha256}</dd>
-              <dt>${this.l("Size", "大小")}</dt>
-              <dd>${this.artifact.size}</dd>
-            </dl>
-            ${this.artifact.preview
-              ? html`<div
-                    class="log"
-                    role="region"
-                    tabindex="0"
-                    aria-label=${this.l("Text preview", "文字預覽")}
-                  >
-                    ${this.artifact.preview}
-                  </div>
-                  <p>
-                    ${this.artifact.previewTruncated
-                      ? this.l(
-                          "Preview truncated to the supported limit.",
-                          "預覽已按支援上限截短。",
-                        )
-                      : this.l("Text preview", "文字預覽")}
-                  </p>`
-              : nothing}
-            <p>
-              ${this.l(
-                "Inspection reads metadata and hashes; archives are not extracted.",
-                "檢視只會讀取中繼資料同計算摘要，唔會解壓縮封存檔。",
-              )}
-            </p>`
-        : nothing}
-    </section>`;
+    return html`<artifact-viewers .workspaceId=${this.workspace.workspaceId} .language=${this.language}></artifact-viewers>`;
   }
   private assistantView() {
-    return html`<section class="panel stack">
-      <h2>${this.l("Local Ollama assistant", "本機 Ollama 助理")}</h2>
-      <managed-ollama-panel .language=${this.language}></managed-ollama-panel>
-      <ollama-catalogue-panel .language=${this.language}></ollama-catalogue-panel>
-      <p>
-        ${this.l(
-          "Messages are sent only to Ollama on this computer. No project files or logs are attached automatically. Model installation is not performed here.",
-          "訊息只會傳送到呢部電腦嘅 Ollama，唔會自動附加專案檔案或記錄，呢度唔會安裝模型。",
-        )}
-      </p>
-      <md-outlined-button ?disabled=${this.pending} @click=${this.loadModels}
-        >${actionIcon('Load installed models')}${this.l("Load installed models",
-          "載入已安裝模型",
-        )}</md-outlined-button
-      >${this.models.length
-        ? html`<md-outlined-select
-            label=${this.l("Model", "模型")}
-            id="assistant-model"
-            .value=${this.model}
-            .displayText=${this.model}
-            @change=${(e: Event) =>
-              (this.model = (e.target as HTMLSelectElement).value)}
-            >${this.options(
-              this.models.map((model) => [model.name, model.name]),
-            )}</md-outlined-select
-          >`
-        : nothing}<ollama-evidence-panel .model=${this.model} .language=${this.language}></ollama-evidence-panel>${this.messages.map(
-        (message) =>
-          html`<div class="message">
-            <strong
-              >${message.role === "user"
-                ? this.l("You", "你")
-                : this.l("Local model", "本機模型")}</strong
-            >${message.content}
-          </div>`,
-      )}<md-outlined-text-field
-        type="textarea"
-        rows="3"
-        maxlength="4000"
-        label=${this.l("Message to local model", "傳送到本機模型嘅訊息")}
-        .value=${this.prompt}
-        @input=${(e: Event) =>
-          (this.prompt = (e.composedPath()[0] as HTMLInputElement).value)}
-      ></md-outlined-text-field
-      ><md-filled-button
-        ?disabled=${this.pending ||
-        !this.model ||
-        !this.prompt.trim() ||
-        this.messages.length >= 98}
-        @click=${this.sendMessage}
-        >${actionIcon('Send message')}${this.l("Send message", "傳送訊息")}</md-filled-button
-      >
-    </section>`;
+    return html`<section class="panel"><ollama-workspace-panel .language=${this.language}></ollama-workspace-panel></section>`;
   }
   private updatesView() {
     return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.", "儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。")}</p></section>`;
@@ -1251,7 +1057,7 @@ export class OperationsPanel extends LitElement {
     separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
   }
   render() {
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations", "專案操作")}
         .activeTabIndex=${[
@@ -1266,6 +1072,7 @@ export class OperationsPanel extends LitElement {
           "updates",
           "regex",
           "tools",
+          "authenticator",
           "companion",
           "documentation",
         ].indexOf(this.tab)}
@@ -1284,7 +1091,8 @@ export class OperationsPanel extends LitElement {
               "updates",
               "regex",
               "tools",
-              "companion",
+              "authenticator",
+          "companion",
           "documentation",
             ][index] ?? "runtime";
         }}
@@ -1300,6 +1108,7 @@ export class OperationsPanel extends LitElement {
           "updates",
           "regex",
           "tools",
+          "authenticator",
           "companion",
           "documentation",
         ].map(
@@ -1320,7 +1129,7 @@ export class OperationsPanel extends LitElement {
         : nothing}
       <div
         class="content view"
-        ?hidden=${["guests","regex","tools","companion","source","package","documentation"].includes(this.tab)}
+        ?hidden=${["guests","regex","tools","companion","authenticator","source","package","documentation"].includes(this.tab)}
         id="operation-content"
         role="tabpanel"
         aria-labelledby=${"operation-tab-" + this.tab}
@@ -1337,7 +1146,7 @@ export class OperationsPanel extends LitElement {
                   ? nothing
                   : this.tab === "assistant"
                     ? this.assistantView()
-                    : ["regex", "tools", "companion", "source", "package", "documentation"].includes(this.tab)
+                    : ["regex", "tools", "companion", "authenticator", "source", "package", "documentation"].includes(this.tab)
                       ? nothing
                       : this.updatesView()}
       </div>
@@ -1381,7 +1190,7 @@ export class OperationsPanel extends LitElement {
         ?hidden=${this.tab !== "tools"}
         .language=${this.language}
       ></tools-panel
-      ><documentation-panel .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
+      ><authenticator-panel ?hidden=${this.tab!=="authenticator"} .active=${this.tab==="authenticator"} .language=${this.language}></authenticator-panel><documentation-panel .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
         ?hidden=${this.tab !== "companion"}
         .language=${this.language}
       ></companion-panel

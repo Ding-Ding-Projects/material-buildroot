@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID, createHash } = require("node:crypto");
+const { createBudgetStore } = require("./jobs/budgets.cjs");
 const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
@@ -9,10 +10,14 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { createAccountProvisioning } = require("./configuration/account-provisioning.cjs");
+const { createImagePresets } = require("./configuration/image-presets.cjs");
+const { createDefconfigWorkflows } = require("./configuration/defconfig-workflows.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
 const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
+const { OutputViewers } = require("./deployment/output-viewers.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -32,6 +37,8 @@ const {
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
 const { createSourceOperations } = require("./source-operations.cjs");
+const { WslSourceService } = require("./execution/wsl-source.cjs");
+const { createBuildProvenance } = require("./deployment/build-provenance.cjs");
 const {
   createPackageAuthoringService,
 } = require("./configuration/package-authoring.cjs");
@@ -39,7 +46,9 @@ const {
   createPackageDiscoveryService,
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
+const portableProject = require("./storage/portable-project.cjs");
 
+const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const owner = "desktop-owner";
 const fields = {
   "documentation.list": [],
@@ -47,9 +56,15 @@ const fields = {
   "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
   "runtime.discover": [],
+  "runtime.wsl": ["kind", "distribution"],
   "runtime.docker.prepare": ["workspaceId", "runtime"],
   "runtime.python.choose": [],
   "project.list": [],
+  "project.open": ["workspaceId"],
+  "project.portable.export": ["workspaceId"],
+  "project.portable.choose": [],
+  "project.portable.import": ["importId", "selectionId", "trust"],
+  "project.portable.wslImport": ["importId", "trust"],
   "project.choose": [],
   "project.adopt": ["selectionId", "trust"],
   "project.runtime": ["workspaceId", "runtime"],
@@ -62,6 +77,10 @@ const fields = {
   "build.confirmation.cancel": ["id"],
   "jobs.list": [],
   "scheduler.status": [],
+  "scheduler.configure": ["limits"],
+  "jobs.project": ["workspaceId"],
+  "jobs.projectPage": ["workspaceId", "id", "after", "limit"],
+  "jobs.projectCancel": ["workspaceId", "id", "sequence"],
   "jobs.pump": [],
   "jobs.reconcile": ["id"],
   "jobs.page": ["id", "after", "limit"],
@@ -70,6 +89,15 @@ const fields = {
   "config.trustPreview": ["workspaceId"],
   "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
   "config.trustRevoke": ["workspaceId"],
+  "accountProvisioning.choose": ["workspaceId"],
+  "accountProvisioning.preview": ["workspaceId", "username", "uid", "keyId"],
+  "accountProvisioning.apply": ["workspaceId", "planId"],
+  "imagePreset.catalog": ["workspaceId"],
+  "imagePreset.plan": ["workspaceId", "revision", "preset", "desktop", "ssh"],
+  "imagePreset.apply": ["workspaceId", "revision", "preset", "desktop", "ssh"],
+  "defconfig.catalog": ["workspaceId"],
+  "defconfig.apply": ["workspaceId", "revision", "id"],
+  "defconfig.save": ["workspaceId", "revision"],
   "config.inspect": ["workspaceId"],
   "config.defconfigs": ["workspaceId"],
   "config.apply": ["workspaceId", "revision", "changes"],
@@ -77,7 +105,14 @@ const fields = {
   "config.defconfig": ["workspaceId", "revision", "path"],
   "artifacts.list": ["workspaceId"],
   "artifacts.inspect": ["workspaceId", "path"],
+  "outputs.browse": ["workspaceId", "directoryId"],
+  "outputs.inspect": ["workspaceId", "fileId"],
+  "outputs.checksum": ["workspaceId", "fileId", "expected"],
+  "outputs.manifest": ["workspaceId", "fileIds"],
+  "outputs.compare": ["workspaceId", "beforeId", "afterId"],
   "artifacts.manifest": ["workspaceId", "paths"],
+  "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
+  "artifacts.compliance": ["workspaceId"],
   tools: ["request"],
   "payload.list": [],
   "payload.choose": ["toolId"],
@@ -104,6 +139,8 @@ const fields = {
   "package.preview": ["workspaceId", "externalTreeId", "model"],
   "package.discover": ["workspaceId", "query", "offset", "limit"],
   "package.import": ["workspaceId", "packageId", "revision"],
+  "package.editors": ["workspaceId"],
+  "package.editor.open": ["workspaceId", "packageId", "revision", "file", "fileHash", "editorId"],
   "package.apply": [
     "workspaceId",
     "externalTreeId",
@@ -187,6 +224,7 @@ function createOperationsService({
   documentationDirectory,
   openDocumentationExternal,
   updateHostFactory,
+  openWslPath,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -197,6 +235,7 @@ function createOperationsService({
   },
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
@@ -204,6 +243,7 @@ function createOperationsService({
       })
     : null;
   const selections = new Map(),
+    portableImports = new Map(),
     projects = new Map(),
     fileGrants = createFileGrants(),
     running = new Set();
@@ -246,8 +286,8 @@ function createOperationsService({
     }
     return item;
   }
-  function registerProject(selected) {
-    const granted = execution.grantProject({
+  function registerProject(selected, wslGranted) {
+    const granted = wslGranted || execution.grantProject({
       ...selected,
       trustedSource: true,
     });
@@ -256,6 +296,7 @@ function createOperationsService({
       root: selected.root,
       source: selected.source,
       output: selected.output,
+      ...(selected.storage ? { storage: selected.storage } : {}),
     });
     const identities = Object.fromEntries(
       ["root", "source", "output"].map((key) => {
@@ -268,7 +309,7 @@ function createOperationsService({
       ...selected,
       identities,
       grantId: granted.grantId,
-      runtime: options.runtime,
+      runtime: selected.storage ? { kind: "wsl", distribution: selected.storage.distribution } : options.runtime,
       externalTrees: [],
       externalTreeIds: [],
       externalStateVerified: options.externalTrees.length === 0,
@@ -288,6 +329,20 @@ function createOperationsService({
       }
     },
     resolveWorkspace: (id) => project(id),
+    sourceServiceForWorkspace: (workspace) => {
+      if (!workspace.storage) return undefined;
+      const grant = execution.grants.get(workspace.grantId);
+      if (!grant?.wslReceipt || grant.wslReceipt !== workspace.receipt) reject("WSL_SOURCE_OPERATION_UNAVAILABLE");
+      return new WslSourceService({
+        receipt: grant.wslReceipt,
+        run: (args) => boundedProcess(execution.executables.wsl, args, {timeoutMs:600000,maxBytes:4*1024*1024}).completion,
+        acquireSourceLock: () => {
+          if (disposed) reject("SOURCE_BUSY");
+          project([...projects].find(([,item])=>item===workspace)?.[0]);
+          return acquirePathLeases([workspace.source,workspace.output]);
+        },
+      });
+    },
     acquireSourceLock: (sourceRoot) => {
       if (disposed) reject("SOURCE_BUSY");
       let existing = sourceRoot;
@@ -348,6 +403,11 @@ function createOperationsService({
       signal?.removeEventListener("abort", cancel);
     }
   }
+  const provenance = createBuildProvenance({
+    directory: path.join(directory, "reproducibility"),
+    getJob: id => jobs.get(id, owner),
+    listJobs: () => jobs.list(owner),
+  });
   const jobs = createJobManager({
     directory: path.join(directory, "jobs"),
     adapters: {
@@ -369,6 +429,7 @@ function createOperationsService({
           });
           throw error;
         }
+        const buildLineage = provenance.begin(project(payload.workspaceId), payload);
         quarantine.begin({
           jobId: context.jobId,
           workspaceId: payload.workspaceId,
@@ -421,7 +482,14 @@ function createOperationsService({
         context.item({ state: result.state, code: result.code });
         if (result.state !== "succeeded")
           reject("BUILD_" + result.state.toUpperCase().replaceAll("-", "_"));
-        return { state: result.state, code: result.code };
+        let reproducibility;
+        try {
+          reproducibility = await provenance.complete({ item: project(payload.workspaceId), payload, jobId: context.jobId, signal: context.signal, lineage: buildLineage });
+        } catch (error) {
+          reproducibility = { state: "unbound", reason: typeof error.code === "string" && /^(?:PROVENANCE|BLOCKED)_[A-Z_]+$/.test(error.code) ? error.code : "PROVENANCE_UNAVAILABLE" };
+        }
+        context.item({ kind: "reproducibility", ...reproducibility });
+        return { state: result.state, code: result.code, reproducibility };
       },
     },
   });
@@ -439,6 +507,8 @@ function createOperationsService({
       .list()
       .filter((record) => !activeRecovery.has(record.jobId));
   }
+  const budgetStore = createBudgetStore(path.join(directory, "scheduler-budgets.json"), schedulerLimits);
+  schedulerLimits = budgetStore.read();
   const scheduler = createBuildScheduler({
     jobs: {
       list: (who) => jobs.list(who),
@@ -914,6 +984,14 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const accountProvisioning = createAccountProvisioning({ resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; }, authorize: id => configurationConsent.requireTrust(id), configuration: config, dialog, parentWindow });
+  const imagePresets = createImagePresets({ configuration: config });
+  const defconfigWorkflows = createDefconfigWorkflows({
+    resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; },
+    authorize: id => configurationConsent.requireTrust(id),
+    configuration: config,
+    execute: id => { const item = project(id); return executeProject({ workspaceId: id, runtime: item.runtime, target: "material-save-defconfig", jobs: 1 }); },
+  });
   const payloadManager = createPayloadManager({
     directory: path.join(directory, "payloads"),
     dialog,
@@ -1006,6 +1084,7 @@ function createOperationsService({
     nativeFileBroker,
     nativeFileBrokerError,
     queueDirectory: path.join(directory, "tool-queue"),
+    minecraftManagedDirectory: path.join(directory, "minecraft-manager"),
     ollamaManagedDirectory: path.join(directory, "ollama"),
     ollamaCatalogueDirectory: path.join(directory, "ollama-catalogue"),
     dialog,
@@ -1082,6 +1161,12 @@ function createOperationsService({
     currentSource: source,
   });
   const deployments = new Map();
+  const outputViewers = new Map();
+  function outputViewer(id) {
+    const item = project(id);
+    if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
+    return outputViewers.get(id);
+  }
   function deployment(id) {
     const item = project(id);
     if (!deployments.has(id))
@@ -1090,6 +1175,7 @@ function createOperationsService({
         createDeploymentService({
           root: item.output,
           managedDirectory: path.join(directory, "guests", id),
+          resolveExecutable: (toolId) => payloadManager.resolve(toolId),
         }),
       );
     return deployments.get(id);
@@ -1172,6 +1258,9 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
+    const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
+    if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
@@ -1185,6 +1274,16 @@ function createOperationsService({
       case "documentation.open":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
+      case "runtime.wsl":
+        if (!["discover", "inspect", "import", "install", "cloneSource", "chooseProject", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
+        if (request.kind === "chooseProject") {
+          const selected = await wslRuntime.chooseProject(request.distribution);
+          if (!selected) return {state:"cancelled"};
+          const granted = await execution.grantWslProject(selected.receipt);
+          try { return { ...registerProject(selected, granted), state:"project-adopted", distribution:request.distribution }; }
+          catch (error) { execution.revoke(granted.grantId); throw error; }
+        }
+        return wslRuntime.perform(request.kind, request.distribution);
       case "runtime.discover":
         return execution.discover();
       case "runtime.docker.prepare": {
@@ -1237,6 +1336,76 @@ function createOperationsService({
         return projectStore
           .list()
           .map((item) => ({ ...item, authorized: projects.has(item.id) }));
+      case "project.portable.export": {
+        const item = project(request.workspaceId);
+        const options = projectOptions.get({ workspaceId: request.workspaceId });
+        const imported = portableProject.retained(directory, request.workspaceId);
+        const snapshot = await sources.handle({action:"source.status",workspaceId:request.workspaceId});
+        const source = imported?.source || (snapshot.ok ? {revision:snapshot.revision,branch:snapshot.branch,dirty:snapshot.dirty,observedAt:new Date().toISOString(),state:"observed"} : {revision:null,branch:null,dirty:null,observedAt:new Date().toISOString(),state:"unavailable"});
+        const descriptor = portableProject.validate({format:"material-buildroot-project",version:1,name:item.name,options:{runtime:item.runtime,externalTrees:options.externalTrees},source});
+        return {document:JSON.stringify(descriptor,null,2)};
+      }
+      case "project.portable.choose": {
+        if(choosing)reject("PICKER_BUSY");
+        choosing=true;
+        try {
+          const result=await dialog.showOpenDialog(parentWindow,{title:"Import portable project descriptor",properties:["openFile","dontAddToRecent"],filters:[{name:"Project descriptor",extensions:["json"]}]});
+          if(result.canceled || result.filePaths.length!==1)reject("CANCELLED");
+          const descriptor=portableProject.read(result.filePaths[0]);
+          const importId=randomUUID();
+          if(portableImports.size>=16)portableImports.delete(portableImports.keys().next().value);
+          portableImports.set(importId,{descriptor,expires:Date.now()+15*60*1000});
+          return {importId,...descriptor};
+        } finally {choosing=false;}
+      }
+      case "project.portable.import":
+      case "project.portable.wslImport": {
+        const held=portableImports.get(request.importId);
+        if(!held || held.expires<Date.now() || request.trust!==true)reject("IMPORT_CONSENT_REQUIRED");
+        const descriptor=held.descriptor;
+        let selected, granted;
+        if(action==="project.portable.wslImport") {
+          if(descriptor.options.runtime?.kind!=="wsl")reject("INVALID_RUNTIME");
+          selected=await wslRuntime.chooseProject(descriptor.options.runtime.distribution);
+          if(!selected)reject("CANCELLED");
+        } else {
+          if(descriptor.options.runtime?.kind==="wsl")reject("WSL_IMPORT_REQUIRED");
+          selected=selections.get(request.selectionId);
+          if(!selected)reject("SOURCE_CONSENT_REQUIRED");
+          for(const id of selected.capabilities)fileGrants.resolve({id,owner});
+        }
+        if(!portableImports.delete(request.importId))reject("IMPORT_CONSENT_REQUIRED");
+        const imported=await changeConfig([selected.source,selected.output],async()=>{
+          if(projectStore.list().some(item=>item.root===selected.root && item.source===selected.source && item.output===selected.output))reject("IMPORT_REQUIRES_NEW_PROJECT_LOCATION");
+          if(selected.storage)granted=await execution.grantWslProject(selected.receipt);
+          let registered;
+          try { registered=registerProject({...selected,name:descriptor.name},granted); }
+          catch(error) { if(granted)execution.revoke(granted.grantId);throw error; }
+          try {
+          const options=projectOptions.get({workspaceId:registered.workspaceId});
+          portableProject.retain(directory,registered.workspaceId,descriptor);
+          projectOptions.save({workspaceId:registered.workspaceId,expectedRevision:options.revision,...descriptor.options});
+          const item=project(registered.workspaceId);
+          item.runtime=descriptor.options.runtime;
+          item.externalStateVerified=descriptor.options.externalTrees.length===0;
+          return {...registered,importedSource:descriptor.source};
+          } catch(error) {
+            const incomplete=projects.get(registered.workspaceId);
+            if(incomplete)execution.revoke(incomplete.grantId);
+            projects.delete(registered.workspaceId);
+            throw error;
+          }
+        },{metadataOnly:true});
+        portableImports.delete(request.importId);
+        if(selected.capabilities){selections.delete(request.selectionId);for(const id of selected.capabilities)fileGrants.revoke({id,owner});}
+        return imported;
+      }
+      case "project.open": {
+        // Metadata is not authority. Only a live, identity-checked grant opens directly.
+        const item = project(request.workspaceId);
+        const options = projectOptions.get({ workspaceId: request.workspaceId });
+        return { workspaceId: request.workspaceId, name: item.name, runtime: item.runtime || options.runtime };
+      }
       case "project.choose":
         return choose();
       case "project.adopt": {
@@ -1276,6 +1445,7 @@ function createOperationsService({
         const item = project(request.workspaceId);
         return {
           ...projectOptions.get({ workspaceId: request.workspaceId }),
+          runtime: item.runtime,
           externalTreesAuthorized: item.externalStateVerified,
           availableTrees: [...externalWorkspaces.entries()]
             .filter(([, id]) => id === request.workspaceId)
@@ -1369,6 +1539,29 @@ function createOperationsService({
         void scheduler.pump().catch(() => {});
         return job;
       }
+      case "scheduler.configure": {
+        schedulerLimits = budgetStore.write(request.limits);
+        scheduler.setLimits(schedulerLimits);
+        void scheduler.pump().catch(() => {});
+        return schedulerStatus();
+      }
+      case "jobs.project":
+        project(request.workspaceId);
+        return jobs.list(owner).filter(job => job.payload.workspaceId === request.workspaceId);
+      case "jobs.projectPage": {
+        project(request.workspaceId);
+        const job = ownJob(request.id);
+        if (job.payload.workspaceId !== request.workspaceId) reject("UNAUTHORIZED");
+        return jobs.page(request.id, "log", { after: request.after, limit: request.limit }, owner);
+      }
+      case "jobs.projectCancel": {
+        project(request.workspaceId);
+        const job = ownJob(request.id);
+        if (job.payload.workspaceId !== request.workspaceId) reject("UNAUTHORIZED");
+        const result = jobs.cancel(request.id, owner, request.sequence);
+        void scheduler.pump().catch(() => {});
+        return result;
+      }
       case "scheduler.status":
         return schedulerStatus();
       case "jobs.pump":
@@ -1438,6 +1631,24 @@ function createOperationsService({
       case "config.trustRevoke":
         project(request.workspaceId);
         return configurationConsent.revoke(request);
+      case "accountProvisioning.choose":
+        return accountProvisioning.choose(request);
+      case "accountProvisioning.preview":
+        return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.preview(request));
+      case "accountProvisioning.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.apply(request));
+      case "imagePreset.catalog":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.catalog(request));
+      case "imagePreset.plan":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.plan(request));
+      case "imagePreset.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.apply(request));
+      case "defconfig.catalog":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.catalog(request));
+      case "defconfig.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.apply(request));
+      case "defconfig.save":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.save(request));
       case "config.inspect":
         return changeConfig(projectPaths(request.workspaceId), () => config.inspect(request));
       case "config.defconfigs":
@@ -1456,12 +1667,53 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "outputs.browse":
+        if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).browse(request.directoryId);
+      case "outputs.inspect":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).inspect(request.fileId);
+      case "outputs.checksum":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36 || typeof request.expected !== "string") reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).checksum(request.fileId, request.expected);
       case "artifacts.inspect":
         return deployment(request.workspaceId).inspectArtifact(request.path);
-      case "artifacts.manifest":
-        return deployment(request.workspaceId).createManifest({
-          paths: request.paths,
+      case "outputs.manifest": {
+        if (!Array.isArray(request.fileIds) || !request.fileIds.length || request.fileIds.length > 1000 || new Set(request.fileIds).size !== request.fileIds.length || request.fileIds.some(id => typeof id !== "string" || id.length !== 36)) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), async () => {
+          const viewer = outputViewer(request.workspaceId);
+          const paths = request.fileIds.map(id => viewer.resolve(id, "file").grant.relative.split(path.sep).join("/"));
+          const manifest = await perform({ action: "artifacts.manifest", workspaceId: request.workspaceId, paths });
+          const content = JSON.stringify(manifest, null, 2) + "\n";
+          if (Buffer.byteLength(content) > 4 * 1024 * 1024) reject("MANIFEST_SIZE_LIMIT");
+          const name = `manifest-${randomUUID()}.json`;
+          fs.writeFileSync(path.join(project(request.workspaceId).output, name), content, {flag:"wx", mode:0o600});
+          return {manifest, name, fileId:viewer.admit(name,"file")};
         });
+      }
+      case "outputs.compare": {
+        if (typeof request.beforeId !== "string" || typeof request.afterId !== "string" || request.beforeId.length !== 36 || request.afterId.length !== 36) reject("INVALID_REQUEST");
+        const viewer = outputViewer(request.workspaceId);
+        return perform({ action:"artifacts.compare", workspaceId:request.workspaceId,
+          beforePath:viewer.resolve(request.beforeId,"file").grant.relative,
+          afterPath:viewer.resolve(request.afterId,"file").grant.relative });
+      }
+      case "artifacts.manifest": {
+        const item = project(request.workspaceId);
+        const hasConfiguration = fs.existsSync(path.join(item.output, ".config"));
+        const before = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        const manifest = await deployment(request.workspaceId).createManifest({
+          paths: request.paths,
+          locks: { sourceRevision: before.sourceRevision, ...(hasConfiguration ? { configurationSha256: before.configRevision } : {}) },
+        });
+        const after = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        if (hasConfiguration !== fs.existsSync(path.join(item.output, ".config")) || before.sourceRevision !== after.sourceRevision || before.configRevision !== after.configRevision) reject("REPRODUCIBILITY_INPUTS_CHANGED");
+        return { ...manifest, provenance: { ...provenance.bind(manifest, item, request.workspaceId), limitations: before.snapshot.limitations } };
+      }
+      case "artifacts.compare":
+        return deployment(request.workspaceId).compareManifestFiles(request.beforePath, request.afterPath, manifest => provenance.bind(manifest, project(request.workspaceId), request.workspaceId, manifest.provenance?.buildTimeBinding ? manifest.provenance : null));
+      case "artifacts.compliance":
+        return deployment(request.workspaceId).collectCompliance();
       case "guest.discover":
         return deployment(request.workspaceId).discoverHypervisors();
       case "guest.networks":
@@ -1499,9 +1751,13 @@ function createOperationsService({
       case "guest.refresh":
         return deployment(request.workspaceId).refreshGuest(request.request);
       case "conversion.preview":
-        return deployment(request.workspaceId).previewConversion(
-          request.request,
-        );
+        exact(request.request, ["fileId", "format", "outputName"]);
+        if (typeof request.request.fileId !== "string" || request.request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return deployment(request.workspaceId).previewConversion({
+          artifact: outputViewer(request.workspaceId).resolve(request.request.fileId, "file").grant.relative,
+          format: request.request.format,
+          outputName: request.request.outputName,
+        });
       case "conversion.execute":
         return changeConfig(projectPaths(request.workspaceId), () =>
           deployment(request.workspaceId).executeConversion(request.request),
@@ -1526,7 +1782,33 @@ function createOperationsService({
             "ollama.running",
             "ollama.show",
             "ollama.chat",
+            "ollama.conversations.list",
+            "ollama.conversations.save",
+            "ollama.conversations.load",
+            "ollama.conversations.delete",
+            "ollama.chat.start",
+            "ollama.chat.read",
+            "ollama.chat.cancel",
+            "ollama.chat.forget",
             "converter.catalog",
+            "minecraft.world.list",
+            "minecraft.world.preview",
+            "minecraft.world.execute",
+            "minecraft.records.list",
+            "minecraft.records.save",
+            "minecraft.records.import",
+            "minecraft.records.export",
+            "minecraft.players.read",
+            "minecraft.players.write",
+            "minecraft.command",
+            "minecraft.schedule.add",
+            "minecraft.schedule.cancel",
+            "minecraft.schedule.list",
+            "minecraft.managed.reconnect",
+            "minecraft.fabric.options",
+            "minecraft.fabric.install",
+            "minecraft.paper.builds",
+            "minecraft.paper.install",
             "minecraft.versions",
             "minecraft.flavours",
             "minecraft.plugins",
@@ -1537,6 +1819,11 @@ function createOperationsService({
             "minecraft.start",
             "minecraft.stop",
             "minecraft.status",
+            "minecraft.managed.start",
+            "minecraft.managed.stop",
+            "minecraft.managed.status",
+            "minecraft.configuration.read",
+            "minecraft.configuration.save",
             "ollama.pull",
             "converter.convert",
             "pdf.execute",
@@ -1653,6 +1940,10 @@ function createOperationsService({
       }
       case "package.preview":
         return packageAuthoring.preview(request);
+      case "package.editors":
+        return require("./configuration/package-editor.cjs").discoverEditors();
+      case "package.editor.open":
+        return packageDiscovery.openEditor(request);
       case "package.discover":
         return packageDiscovery.discover({
           workspaceId: request.workspaceId,
@@ -1672,7 +1963,8 @@ function createOperationsService({
         return packageAuthoring.applyInitialize(request);
       case "package.apply":
         return packageAuthoring.apply(request);
-      case "source": {
+      case "source":
+        {
         const result = await sources.handle(request.request);
         if (!result.ok) reject(result.code);
         return result;

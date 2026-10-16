@@ -1,0 +1,31 @@
+{
+  "tag": "2.0.1",
+  "license": "MIT",
+  "revision": "eef37460aef77b2f9de8cd2237c1e55b344a6554",
+  "purpose": "Build the unchanged genuine WriteZipToSetup helper for x64 using the supported native compiler.",
+  "files": [
+    {
+      "blob": "3cfdd34da8d0c6ea3c6e1f6510af9a5264a3176b",
+      "sha256": "8d2be12e95c06779b5542547703248edc8c23ae6fb905186b6042599e85aee42",
+      "upstreamPath": "src/WriteZipToSetup/WriteZipToSetup.cpp",
+      "path": "WriteZipToSetup.cpp",
+      "bytes": 3486
+    },
+    {
+      "blob": "757a8b9ca816989ba42584b7d3efac31ab566724",
+      "sha256": "97bd2682663f66eb4a48e9f2eef0705dfe95d2ab7f9a3def30c749304e5f9b7b",
+      "upstreamPath": "src/WriteZipToSetup/stdafx.h",
+      "path": "stdafx.h",
+      "bytes": 491
+    },
+    {
+      "blob": "0f05796d15580e07c69d93966b32357c9d0e260a",
+      "sha256": "6ec2f61e4e21623d0c008af4d664db8bb029bca354c09ed54926e04a4d9e8a24",
+      "upstreamPath": "COPYING",
+      "path": "COPYING",
+      "bytes": 1059
+    }
+  ],
+  "schemaVersion": 1,
+  "repository": "https://github.com/Squirrel/Squirrel.Windows"
+}

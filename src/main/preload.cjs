@@ -156,8 +156,17 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    workspaceTabs: (request) => {let value;try{value=JSON.stringify(request);}catch{return Promise.resolve({ok:false,code:'INVALID_REQUEST'});}if(typeof value!=='string'||value.length>262144)return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:workspace-tabs',value);},
+    onWorkspaceTabActivate: (listener) => {if(typeof listener!=='function')return ()=>{};const handler=(_event,value)=>{if(value&&typeof value.tabId==='string'&&value.tabId.length<=256)listener(value.tabId);};ipcRenderer.on('studio:workspace-tabs:activate',handler);return ()=>ipcRenderer.removeListener('studio:workspace-tabs:activate',handler);},
+    onWorkspaceTabsChanged: (listener) => {if(typeof listener!=='function')return ()=>{};const handler=()=>listener();ipcRenderer.on('studio:workspace-tabs:changed',handler);return ()=>ipcRenderer.removeListener('studio:workspace-tabs:changed',handler);},
     appearanceHistory: (request) => { let data; try { data=JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); } if(data.length>650000)return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); return ipcRenderer.invoke('studio:appearance-history',JSON.parse(data)); },
+    dimSum: (value) => { if(!value||!['catalog','photo','surprise'].includes(value.action)||Object.keys(value).some(k=>!['action','id'].includes(k))||value.id!==undefined&&(typeof value.id!=='string'||!/^hk-dish-\d{4}$/.test(value.id)))return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:dim-sum',{action:value.action,...(value.id?{id:value.id}:{})}); },
     appearanceFonts: () => ipcRenderer.invoke('studio:appearance-fonts'),
+    authenticator: (request) => {
+      let serialized; try { serialized=JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:"INVALID_REQUEST"}); }
+      if(typeof serialized!=="string" || serialized.length>8192) return Promise.resolve({ok:false,code:"INVALID_REQUEST"});
+      return ipcRenderer.invoke("studio:authenticator",serialized);
+    },
     experiencePolicies: (request) => {
       let serialized;
       try { serialized = JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:"INVALID_REQUEST"}); }

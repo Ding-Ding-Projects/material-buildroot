@@ -1,0 +1,23 @@
+# Ollama workspace
+
+The Local assistant workspace joins managed runtime installation and repair, official catalogue browsing, local model discovery, hardware evidence, durable model pulls, and streamed local conversation.
+
+Select a catalogue tag or an installed model. Catalogue selection never starts a download. Save a pull explicitly, review the shared tool queue, then start it. The queue also runs other queued tool jobs. Refresh saved pulls to inspect state, cancel an owned pull, or requeue a failed, cancelled, or interrupted pull. Recovery marks abandoned running records as interrupted. Ollama determines reusable downloaded blobs; recovery does not delete installed models.
+
+Managed installation remains a separate reviewed action, with verified bundled/cache preference and optional official acquisition. Starting or stopping the managed listener remains separate from installation. Existing installations and model directories are preserved by the existing managed controller.
+
+Chat requires a discovered installed model. The host creates one bounded in-memory generation session, streams from the fixed loopback Ollama endpoint, and exposes bounded response chunks through validated polling actions. Cancel acts on that session's AbortController. Reconnect retries response polling without replaying the prompt. Leaving the component requests cancellation. Completed sessions are forgotten by the consumer; abandoned terminal sessions expire after five minutes. There are at most eight retained sessions and one active generation. Prompts and responses are not written to the durable tool queue or application logs. Explicit Save local snapshot writes a bounded record to local application data for the current account. Open restores a saved transcript and model; Delete saved copy requires a second confirmation and removes only that snapshot. Clearing a conversation removes the displayed in-memory transcript, not saved copies. The store admits at most 100 snapshots, validates message bounds, rejects linked directories and records, and serializes writes. It does not add encryption; the visible storage notice explains this before saving.
+
+A cancelled or failed partial response remains visibly partial and is not appended as a completed assistant turn. Switching models clears the conversation. No project files or logs are automatically attached.
+
+## Limits and verification
+
+The official catalogue is an observed paginated snapshot, not a claimed exhaustive atomic inventory. Exact size, licensing, capability and hardware-fit evidence can remain unknown. No native GPU probe is added. Ollama pulls use a finite 60-minute deadline and chat uses a finite 10-minute deadline, each retaining owned cancellation. Other bounded tool requests retain their 120-second default. The host validates deadlines within 1 second to 60 minutes, and the renderer cannot supply an arbitrary timeout. Expired pulls can be explicitly requeued; no automatic retry or successful resume claim is made.
+
+Implementation and package compilation do not establish runtime acceptance. No tests, runtime execution, model downloads, installation, visual inspection, or screen captures were performed for this change under the selected fast-release workflow. Existing historical captures do not depict the new workspace. Native installation recovery, cancelled pulls, stream cancellation, navigation, accessibility and restart behavior remain unverified.
+
+## Native adapter observation
+
+An explicit hardware-evidence request invokes the fixed bundled `ollama-hardware.ps1` through the operating-system PowerShell executable, hidden and noninteractive. It queries only `Win32_VideoController`, with a two-second CIM limit, four-second host deadline, 32 KiB output ceiling and at most 16 records. Caller cancellation terminates only the owned query process. The renderer supplies no executable, script, query or command arguments. No engine or driver is installed or launched.
+
+The panel displays adapter name, vendor, driver version and the raw reported `AdapterRAM` value. Microsoft documents `AdapterRAM` as a read-only unsigned 32-bit byte count: https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-videocontroller. This inventory deliberately leaves usable VRAM and backend support unknown and never feeds that raw field into fit calculations. Detecting an adapter does not upgrade a CPU-only package to GPU support. Unsupported hosts, query failures, malformed output and timeouts retain an explicit unavailable result. The source path has not been executed or runtime-verified in this task.

@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "platform": "win32-x64",
+  "tools": [
+    {
+      "id": "pandoc",
+      "version": "3.12.1",
+      "url": "https://github.com/jgm/pandoc/releases/download/3.12.1/pandoc-3.12.1-windows-x86_64.zip",
+      "sha256": "6ef431cb20b2c24a0371fc19200dc49d452be54b1b5c9239f3462841ef53e587",
+      "bytes": 42154914,
+      "executable": "pandoc-3.12.1/pandoc.exe",
+      "license": "GPL-2.0-or-later",
+      "licenseFiles": [
+        "pandoc-3.12.1/COPYING.rtf"
+      ],
+      "sourceUrl": "https://github.com/jgm/pandoc/tree/3.12.1"
+    },
+    {
+      "id": "qpdf",
+      "version": "12.4.2",
+      "url": "https://github.com/qpdf/qpdf/releases/download/v12.4.2/qpdf-12.4.2-mingw64.zip",
+      "sha256": "773d2fa0c7d161e2271430734338e560a07b25d0edf11ceee8e53de435012766",
+      "bytes": 24013395,
+      "executable": "qpdf-12.4.2-mingw64/bin/qpdf.exe",
+      "license": "Apache-2.0 AND runtime-component-licenses",
+      "licenseFiles": [
+        "qpdf-12.4.2-mingw64/share/doc/qpdf/manual-html/license.html",
+        "LICENSE.txt",
+        "NOTICE.md",
+        "GCC-COPYING3",
+        "GCC-COPYING.RUNTIME",
+        "WINPTHREADS-COPYING"
+      ],
+      "sourceUrl": "https://github.com/qpdf/qpdf/tree/v12.4.2",
+      "supplements": [
+        {
+          "source": "scripts/build/licenses/qpdf/LICENSE.txt",
+          "path": "LICENSE.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "source": "scripts/build/licenses/qpdf/NOTICE.md",
+          "path": "NOTICE.md",
+          "sha256": "b207f65a9e5491195ded63b2941199b19a4d30148871f2742c88eae7bfc513a6"
+        },
+        {
+          "source": "scripts/build/licenses/qpdf/GCC-COPYING3",
+          "path": "GCC-COPYING3",
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "sourceUrl": "https://github.com/gcc-mirror/gcc/blob/releases/gcc-15.2.0/COPYING3"
+        },
+        {
+          "source": "scripts/build/licenses/qpdf/GCC-COPYING.RUNTIME",
+          "path": "GCC-COPYING.RUNTIME",
+          "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+          "sourceUrl": "https://github.com/gcc-mirror/gcc/blob/releases/gcc-15.2.0/COPYING.RUNTIME"
+        },
+        {
+          "source": "scripts/build/licenses/qpdf/WINPTHREADS-COPYING",
+          "path": "WINPTHREADS-COPYING",
+          "sha256": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+          "sourceUrl": "https://github.com/mingw-w64/mingw-w64/blob/v13.0.0/mingw-w64-libraries/winpthreads/COPYING"
+        }
+      ]
+    },
+    {
+      "id": "java",
+      "version": "21.0.12.1+1",
+      "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_windows_hotspot_21.0.12.1_1.zip",
+      "sha256": "d35f31e712f0fcf6ac5a093edc90204fbff22f720ba3950bd09d331d5e621636",
+      "bytes": 48999141,
+      "executable": "jdk-21.0.12.1+1-jre/bin/java.exe",
+      "license": "GPL-2.0-only WITH Classpath-exception-2.0 AND bundled-component-licenses",
+      "licenseFiles": [
+        "jdk-21.0.12.1+1-jre/legal/java.base/LICENSE"
+      ],
+      "sourceUrl": "https://github.com/adoptium/temurin21-binaries/releases/tag/jdk-21.0.12.1%2B1"
+    },
+    {
+      "id": "ollama",
+      "version": "0.40.5",
+      "url": "https://github.com/ollama/ollama/releases/download/v0.40.5/ollama-windows-amd64.zip",
+      "sha256": "5134ce7e3bc8e94d0494721c799ec293b429450d0c52461b0ee3647dd3bb4bb7",
+      "bytes": 1471226485,
+      "executable": "ollama.exe",
+      "license": "MIT AND bundled-component-licenses",
+      "licenseFiles": [
+        "LICENSE.txt",
+        "lib/ollama/LLAMA_CPP_LICENSE",
+        "lib/ollama/GO_LICENSE"
+      ],
+      "sourceUrl": "https://github.com/ollama/ollama/tree/v0.40.5",
+      "composition": "CPU-only base payload. GPU subdirectories are not bundled.",
+      "compositionSources": [
+        "https://github.com/ollama/ollama/blob/v0.40.5/scripts/build_windows.ps1",
+        "https://github.com/ollama/ollama/blob/v0.40.5/docs/development.md"
+      ],
+      "members": [
+        {
+          "path": "lib/ollama/CPP_HTTPLIB_LICENSE",
+          "length": 1097,
+          "sha256": "bb546eae5924d8ee842e0e567e6d533c5824bdebccf605f99a5b3429034e6697"
+        },
+        {
+          "path": "lib/ollama/CUDNN_LICENSE.txt",
+          "length": 1169,
+          "sha256": "b6fe452605fe29245f0cbafa724b42df94a5e170bedb9d45bc9cfaa4883ad907"
+        },
+        {
+          "path": "lib/ollama/CUTLASS_LICENSE.txt",
+          "length": 1888,
+          "sha256": "48eb34a9124af8fdd2ad1858a64be9827ebc42e5389c6dd4b5a93e411ac7e693"
+        },
+        {
+          "path": "lib/ollama/DLFCN_WIN32_COPYING",
+          "length": 1040,
+          "sha256": "4cc7ac997b9293db5919baf630100cc09b3508efdfe6a6611c95511fb863b3c7"
+        },
+        {
+          "path": "lib/ollama/DLPACK_LICENSE",
+          "length": 11546,
+          "sha256": "9bda2385fa325d1df6dc39772eba3cc6d07bdfaf2c656cd644cd29f7509514fd"
+        },
+        {
+          "path": "lib/ollama/FMT_LICENSE",
+          "length": 1458,
+          "sha256": "25b5db04aa6070c12ac518b91cbd0a59725c050ecb091456e6ebc3d3eeb369cf"
+        },
+        {
+          "path": "lib/ollama/ggml-base.dll",
+          "length": 820104,
+          "sha256": "9cf5fd149c8a17806a482f6ddca6c508065f484e2b23711b47e28be0ceb6faee"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-alderlake.dll",
+          "length": 1729928,
+          "sha256": "c3b86b24f64ae696f5a176bd26bab1b7cecf89190d23b5f7008ecd04bf3b8ab3"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-cannonlake.dll",
+          "length": 2003336,
+          "sha256": "197f5e3c32e1f7e062905b1a6f9c3cf0c00fc34d11451fb69b22e6936394b998"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-cascadelake.dll",
+          "length": 1986440,
+          "sha256": "b1345e31ea0430eaad5f7ec628c0b5cb12304f9f2688542abe270dd90d06b7ff"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-cooperlake.dll",
+          "length": 1984392,
+          "sha256": "31ce4c7785b9b0e5c88f127afcb8f02fd430c3a13f4b93cd4b9e9431e871a680"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-haswell.dll",
+          "length": 1737096,
+          "sha256": "63ac3f771fbf23842642a2f596b87eae8ddb17a3efe0474d74cbe0ec813c9943"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-icelake.dll",
+          "length": 1993608,
+          "sha256": "14c48edece9aa894de3b4cfc44327a1d45f9d3e11c2992c183fe4b6a80f84f19"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-ivybridge.dll",
+          "length": 1615240,
+          "sha256": "db8afe5bc17ef25130143f7fd8bc36e2962282b1783cb4dcd5721ba30a2ed904"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-piledriver.dll",
+          "length": 1620360,
+          "sha256": "a077622724e70f60be0efd735848933bbac0538ee1b4525aa6015e2a35898362"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-sandybridge.dll",
+          "length": 1634696,
+          "sha256": "cfa3913efda13fb84a7021fb34c044aeb2b1c43a83dd309f0ed2b2f0f7b79388"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-sapphirerapids.dll",
+          "length": 2285960,
+          "sha256": "8e0bb146d5de0c477ad07181bee24597523502a2503cf2c88e570e2b024118c5"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-skylakex.dll",
+          "length": 1996680,
+          "sha256": "72cb907f3bad205d5235897622a276d4551f00cbf60238ca1431e6bba6317da8"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-sse42.dll",
+          "length": 1259400,
+          "sha256": "a7d79ed314e3dc8e6e7fa9df45226f162f775b0ce0adbe8947c3e0260a477aba"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-x64.dll",
+          "length": 1246600,
+          "sha256": "3024c033c3d17b301bc6442b25fea31c3a68066a6be38f79fd16b3ebd4667ebc"
+        },
+        {
+          "path": "lib/ollama/ggml-cpu-zen4.dll",
+          "length": 1991560,
+          "sha256": "d5a8cdc13eb08f52e969f8ca1c957d96b1c7d2ea8838d24d536149c15da30de6"
+        },
+        {
+          "path": "lib/ollama/ggml.dll",
+          "length": 49032,
+          "sha256": "ef5d17357446e32c28ca04130c363038a2d426e2c93313b2f77ff372ac76f96c"
+        },
+        {
+          "path": "lib/ollama/GO_LICENSE",
+          "length": 166573,
+          "sha256": "7fee9b29a1541b5a9ec03c5d57e095ad280f67a824cf3818445ba6996f86fe85"
+        },
+        {
+          "path": "lib/ollama/JSON_LICENSE.MIT",
+          "length": 1076,
+          "sha256": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14"
+        },
+        {
+          "path": "lib/ollama/libc++.dll",
+          "length": 1767816,
+          "sha256": "b53e59a72265c3682b8c320b29706e94045f57204eeacdfa138ae7273d8e83cd"
+        },
+        {
+          "path": "lib/ollama/libllama-common.dll",
+          "length": 4282248,
+          "sha256": "69000a2bc261abf392e8c6137d6844aa11cf59b9730f96509380693aa23b3677"
+        },
+        {
+          "path": "lib/ollama/libllama-quantize-impl.dll",
+          "length": 83848,
+          "sha256": "e41cf7e91d86b4f4faa3bdde7a8d2c333d3b5dec47722302a466b1e57848fab2"
+        },
+        {
+          "path": "lib/ollama/libllama-server-impl.dll",
+          "length": 2705800,
+          "sha256": "557fbf02723589787c4500dee4da659128d97423f726e267e7b083c6d376a9ab"
+        },
+        {
+          "path": "lib/ollama/libllama.dll",
+          "length": 3858824,
+          "sha256": "087dd75d829e2eb2580d51aead3106fd9ceb173b979aae729161ea9f2d3a5a3e"
+        },
+        {
+          "path": "lib/ollama/libmtmd.dll",
+          "length": 1465736,
+          "sha256": "278803cd35b84180502cab9af6284360d403160996ae50ca05831032ef686377"
+        },
+        {
+          "path": "lib/ollama/libomp.dll",
+          "length": 965000,
+          "sha256": "c135973b44f87ffd3c8ef32fc51c00984ad3f94f3d1cc7e9bb8640a342a62d87"
+        },
+        {
+          "path": "lib/ollama/libunwind.dll",
+          "length": 107912,
+          "sha256": "7e06951631cc4e82789a2ab8246d6ec1d6ca746677b5389072e393121d653091"
+        },
+        {
+          "path": "lib/ollama/libwinpthread-1.dll",
+          "length": 390024,
+          "sha256": "9e62ee2e42544eee75415f48d3ca1eee4b35679a0607c50d844aa66562535948"
+        },
+        {
+          "path": "lib/ollama/llama-quantize.exe",
+          "length": 22920,
+          "sha256": "7f209940f36454aa9dffb90e0b35322bd5690385ac591a624b8ffce71f5ca10d"
+        },
+        {
+          "path": "lib/ollama/llama-server.exe",
+          "length": 22920,
+          "sha256": "00d2b16c587dc73fe86af6226676dfa707cac803e352882c857bf6c69ee6f5bc"
+        },
+        {
+          "path": "lib/ollama/LLAMA_CPP_LICENSE",
+          "length": 1099,
+          "sha256": "bcd8ec749126d45cb06737d0690295d73df4b6e7e194205bcf91190368f27285"
+        },
+        {
+          "path": "lib/ollama/LLAMA_CPP_VENDORS_LICENSE",
+          "length": 7424,
+          "sha256": "7547ae6372a35e7382898dd9f5519ebc16e93095f69c2466b5b74b617c33d4da"
+        },
+        {
+          "path": "lib/ollama/MLX_C_LICENSE",
+          "length": 1088,
+          "sha256": "d8d63c7fa57071d80d30116d014e4189c52ef4cb2d1671f6d848e78d9f6cfad0"
+        },
+        {
+          "path": "lib/ollama/MLX_LICENSE",
+          "length": 1087,
+          "sha256": "e93675e97d080c4fcfef6dd530448b9a6fd7c1ad43c736d593537079cd669d3d"
+        },
+        {
+          "path": "lib/ollama/NVTX3_LICENSE.txt",
+          "length": 12706,
+          "sha256": "c3b19baa37cf18bac07b65700824acadcfa617316f02af10d3852ed20f4f6ab8"
+        },
+        {
+          "path": "lib/ollama/PICOJSON_LICENSE",
+          "length": 1441,
+          "sha256": "02f4aea46c66a0c110bb4fd995817db2dc2af0b57c18336b367e6bc9c27eb91f"
+        },
+        {
+          "path": "lib/ollama/XGRAMMAR_LICENSE",
+          "length": 11558,
+          "sha256": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6"
+        },
+        {
+          "path": "lib/ollama/XGRAMMAR_NOTICE",
+          "length": 57,
+          "sha256": "93971ad2b725c8398df171dbd7c8145fc9d11bf016294aa69a8a783b55a40775"
+        },
+        {
+          "path": "ollama.exe",
+          "length": 27924872,
+          "sha256": "ec9f3325f134597c7188b735dcc4e79a9eca4bf53f6b958ddf22aa04bf5ce57a"
+        }
+      ],
+      "supplements": [
+        {
+          "source": "src/main/tools/ollama-LICENSE.txt",
+          "path": "LICENSE.txt",
+          "sha256": "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226"
+        }
+      ]
+    },
+    {
+      "id": "ffmpeg",
+      "version": "9.0.2",
+      "url": "https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-essentials_build.zip",
+      "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+      "bytes": 114768076,
+      "executable": "ffmpeg-9.0.2-essentials_build/bin/ffmpeg.exe",
+      "license": "GPL-3.0-or-later AND bundled-component-licenses",
+      "licenseFiles": [
+        "ffmpeg-9.0.2-essentials_build/LICENSE"
+      ],
+      "sourceUrl": "https://github.com/FFmpeg/FFmpeg/tree/946fcce07b",
+      "endorsementUrl": "https://ffmpeg.org/download.html"
+    },
+    {
+      "id": "magick",
+      "format": "7z",
+      "version": "7.1.2-34",
+      "url": "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-34/ImageMagick-7.1.2-34-portable-Q16-x64.7z",
+      "sha256": "52cc6a441c7884f5ff4274b410c9b90c4b7d54245dcdf4d32988bb4e4df4e5d1",
+      "bytes": 12022003,
+      "executable": "magick.exe",
+      "license": "ImageMagick AND bundled-component-licenses",
+      "licenseFiles": [
+        "LICENSE.txt",
+        "NOTICE.txt"
+      ],
+      "sourceUrl": "https://github.com/ImageMagick/ImageMagick/tree/7.1.2-34",
+      "members": [
+        {
+          "path": "ChangeLog.md",
+          "length": 911634,
+          "sha256": "a516c754211753dab050498d2fc104e6a37775191cce32b9eed459d89b0b9e1a"
+        },
+        {
+          "path": "colors.xml",
+          "length": 1411,
+          "sha256": "37b986dc355641021434859f77b5e1f30b21670c847706ee9b77418e0874dfa6"
+        },
+        {
+          "path": "compare.exe",
+          "length": 32114352,
+          "sha256": "5cb870c5ddcf4dbe0d7c1b57e1c49988d11ca7240207a80dcd346f7b16f231c2"
+        },
+        {
+          "path": "composite.exe",
+          "length": 32114352,
+          "sha256": "b141814cad913e828617da9d839284242c2768cb4fc04e82c8ee5a61f6f6f07b"
+        },
+        {
+          "path": "configure.xml",
+          "length": 1169,
+          "sha256": "e5c1bde8c9eeb9369e99944a7f8ffa69c2238585e499747765bb6b2e39ed894b"
+        },
+        {
+          "path": "conjure.exe",
+          "length": 32114352,
+          "sha256": "3d6f968f621509a6080c768267f592befc760dd2c2d776000ae0621693eba05d"
+        },
+        {
+          "path": "delegates.xml",
+          "length": 10004,
+          "sha256": "d6447b0e9c748690b63717d7942987f854b021761613fcb212f6148c8a63d665"
+        },
+        {
+          "path": "english.xml",
+          "length": 54885,
+          "sha256": "d32c7b50db08bd3be6a5d898f34eac1e34460fb91bec3b18f7364defe8774cb2"
+        },
+        {
+          "path": "identify.exe",
+          "length": 32114352,
+          "sha256": "412b152e0aaf3cddde52730ba9c6e0bb97b560c3eed78397c0f1d3822fee7149"
+        },
+        {
+          "path": "LICENSE.txt",
+          "length": 12663,
+          "sha256": "5ffcbc771d4cc2827ca8c4505f6b5b61e0bc1d933e0f41a47eea16ed06db4f90"
+        },
+        {
+          "path": "locale.xml",
+          "length": 2509,
+          "sha256": "9a22865c9ba728a88aeea2bd64d238e39886ec1a87d791353e9266a3198ab296"
+        },
+        {
+          "path": "log.xml",
+          "length": 1701,
+          "sha256": "c246daab249adda19a7754fe8769e6ef08a7d0b5c8ce4742a036593a6e47ea17"
+        },
+        {
+          "path": "magick.exe",
+          "length": 32114352,
+          "sha256": "1232979c05fa7c4bd28a7a1d0101568b10afeb0c31b8a04414a463b4c0e007d0"
+        },
+        {
+          "path": "mime.xml",
+          "length": 136869,
+          "sha256": "e7ca58e71b1e30cf2d18453e3fce2e266e3c85a090253f6d5a1d2ed2011b1c81"
+        },
+        {
+          "path": "mogrify.exe",
+          "length": 32114352,
+          "sha256": "fa6f246cd0c625c4923f74393bb98bf30a98637ad627e77cfa58152628feebdb"
+        },
+        {
+          "path": "montage.exe",
+          "length": 32114352,
+          "sha256": "348523db7d7cbf0a4eea6aa85d849e562de1ef56171d5a6eef89372dc13e6de2"
+        },
+        {
+          "path": "NOTICE.txt",
+          "length": 427876,
+          "sha256": "e3b886c90cd022d1767f89d61522be57bb77b7e9c44d5bf92f57fa231ac7b6bf"
+        },
+        {
+          "path": "policy.xml",
+          "length": 8127,
+          "sha256": "0a0abfe60f9ba85c50660a998f9e9894c1f809bafaa91414f9cf0f1bc8d13138"
+        },
+        {
+          "path": "sRGB.icc",
+          "length": 60960,
+          "sha256": "83174717332326ddc198d9df188a4daec27b8979ba152cebbfc470c793d0bb11"
+        },
+        {
+          "path": "stream.exe",
+          "length": 32114352,
+          "sha256": "9020d34fbe343b3401df5e77fd80f481681b9ee97fa3152da45b7d327d422c7e"
+        },
+        {
+          "path": "thresholds.xml",
+          "length": 11788,
+          "sha256": "068487187c65f8ba9963ee0d73b31261cde9cd255bf879edcb093241e1c6a36b"
+        },
+        {
+          "path": "type-ghostscript.xml",
+          "length": 9470,
+          "sha256": "8cdd0a89929342e438d90b4b95b4417fc90737858cefc9161f454e0f7e1435b4"
+        },
+        {
+          "path": "type.xml",
+          "length": 691,
+          "sha256": "ba4160241fb0fff29563b40430b24f5d993cd5f1e423f85ee99c17749901c8ad"
+        }
+      ]
+    },
+    {
+      "id": "ebook-convert",
+      "format": "calibre-portable",
+      "version": "9.16.0",
+      "url": "https://github.com/kovidgoyal/calibre/releases/download/v9.16.0/calibre-portable-installer-9.16.0.exe",
+      "sha256": "be3b24228133ec64148acf5e6a3244dbc88a9b509ae8992b7922c425da0f1aae",
+      "bytes": 217118472,
+      "executable": "Calibre Portable/Calibre/ebook-convert.exe",
+      "license": "GPL-3.0-only AND bundled-component-licenses",
+      "licenseFiles": [
+        "Calibre Portable/Calibre/LICENSE"
+      ],
+      "sourceUrl": "https://github.com/kovidgoyal/calibre/tree/v9.16.0",
+      "compositionSources": [
+        "https://github.com/kovidgoyal/calibre/blob/v9.16.0/bypy/windows/portable-installer.cpp"
+      ],
+      "resourceSha256": "1a2db1c1398ca59dd70713fc096dd845dc73388c4b25f434329ca75134ce028c",
+      "zipSha256": "bbc54e9026a5e13ec43a972779d54a5f14091a404479b15597f51fe25bc09bc7"
+    },
+    {
+      "id": "docker",
+      "version": "29.4.0",
+      "url": "https://download.docker.com/win/static/stable/x86_64/docker-29.4.0.zip",
+      "sha256": "a788f9ff37af446419a24eaf579da5c3da59995c708e6a5c908fe21519845b01",
+      "bytes": 46992370,
+      "executable": "docker/docker.exe",
+      "license": "Apache-2.0 AND bundled-component-licenses",
+      "licenseFiles": [
+        "LICENSE",
+        "NOTICE"
+      ],
+      "sourceUrl": "https://github.com/docker/cli/tree/v29.4.0",
+      "composition": "Official standalone Windows client only. Linux container engine and host virtualization are external setup requirements.",
+      "members": [
+        {
+          "path": "docker/docker.exe",
+          "length": 43089408,
+          "sha256": "b7eca0be4ca875e383a4175f2b9ddda839279a7062a276c1499982cad9d7e5e4"
+        }
+      ],
+      "supplements": [
+        {
+          "source": "scripts/build/licenses/docker/LICENSE",
+          "path": "LICENSE",
+          "sha256": "2d81ea060825006fc8f3fe28aa5dc0ffeb80faf325b612c955229157b8c10dc0"
+        },
+        {
+          "source": "scripts/build/licenses/docker/NOTICE",
+          "path": "NOTICE",
+          "sha256": "a8c869fbda819afb8d80e0ac19bac52e766bc6c19cb38cf94f52d64c4be2aab6"
+        }
+      ]
+    },
+    {
+      "id": "tar",
+      "format": "7z-full",
+      "version": "Git-for-Windows-2.56.0.2",
+      "url": "https://github.com/git-for-windows/git/releases/download/v2.56.0.windows.2/PortableGit-2.56.0.2-64-bit.7z.exe",
+      "sha256": "075e158ef8e1f0ab80b347e245405d3eca735c2dc88fd8e032e137d0ca61f61b",
+      "bytes": 60027568,
+      "executable": "usr/bin/tar.exe",
+      "license": "GPL-2.0-only AND GPL-3.0-or-later AND bundled-component-licenses",
+      "licenseFiles": [
+        "LICENSE.txt"
+      ],
+      "sourceUrl": "https://github.com/git-for-windows/git/tree/v2.56.0.windows.2",
+      "composition": "Complete original portable archive, preserving MSYS runtime, notices and icons. Only the archive executable is registered."
+    },
+    {
+      "id": "soffice",
+      "format": "office-msi",
+      "version": "26.8.1.1",
+      "url": "https://download.documentfoundation.org/libreoffice/stable/26.8.1/win/x86_64/LibreOffice_26.8.1_Win_x86-64.msi",
+      "redirectHosts": [
+        "download.documentfoundation.org",
+        "mirror1.cs-georgetown.net",
+        "mirror.clarkson.edu",
+        "mirror.fcix.net",
+        "ftp.osuosl.org",
+        "mirror.usi.edu"
+      ],
+      "sha256": "c6298b10cfa1748bcbedad94c62ce771e240e5021bfd6d7a967cd571b04b5312",
+      "bytes": 374870016,
+      "executable": "program/soffice.exe",
+      "license": "MPL-2.0 AND LGPL-3.0-or-later AND bundled-component-licenses",
+      "licenseFiles": [
+        "license.txt",
+        "LICENSE.html",
+        "NOTICE"
+      ],
+      "sourceUrl": "https://www.libreoffice.org/download/license/",
+      "composition": "Read-only MSI File/Component/Directory-table reconstruction under INSTALLLOCATION, plus original embedded x64 Microsoft app-local runtime DLLs in program/. No installer or custom action runs."
+    }
+  ],
+  "unresolved": [],
+  "extractor": {
+    "id": "7zr",
+    "url": "https://github.com/ip7z/7zip/releases/download/26.04/7zr.exe",
+    "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282",
+    "bytes": 602624
+  },
+  "fullExtractor": {
+    "id": "7zip",
+    "url": "https://github.com/ip7z/7zip/releases/download/26.04/7z2604-x64.exe",
+    "sha256": "d54bf805f9f3704d1e8db2fa3498ae7ef2df0312b40b558e7c71c734430a665d",
+    "bytes": 1664082,
+    "members": [
+      {
+        "path": "7z.exe",
+        "bytes": 577536,
+        "sha256": "95fff19b73eff77c87c0d7bd32822e43fb90dd2932459f962eb532d8dfb6ba53"
+      },
+      {
+        "path": "7z.dll",
+        "bytes": 1907712,
+        "sha256": "899cd73d7fc60e1c1c35c7de0f5bed3dc69bfe2cecbd48014d868a347970a0b1"
+      },
+      {
+        "path": "License.txt",
+        "bytes": 6031,
+        "sha256": "519ac0a4bded9c18ea02e0afb71f663d8c47373bd9facd3ac96a79f51d77765d"
+      }
+    ]
+  }
+}
