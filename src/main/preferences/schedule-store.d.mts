@@ -13,6 +13,7 @@ export class ScheduleStorageError extends Error {
   constructor(code?: string);
 }
 export interface SqliteScheduleAdapter extends ScheduleCommitAdapter {
+  historyRead(input:{revision:number}):Promise<{document:ScheduleDocument}|null>;
   history(page?: { after?: number; limit?: number }): Promise<{
     records: Array<{ sequence: number; receipt: ScheduleHistoryReceipt }>;
     next: number;
