@@ -10,8 +10,10 @@ const hash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
 const domain=value=>['buildroot','linux','busybox','uboot'].includes(value);
 const symbol=value=>typeof value==='string'&&/^(BR2_|CONFIG_)[A-Z0-9_]{1,160}$/.test(value)&&!/(PASSWORD|SECRET|TOKEN|PRIVATE_KEY|CREDENTIAL)/.test(value);
 function change(value){if(!value||typeof value!=='object')return false;exact(value,['type','value']);switch(value.type){case 'bool':return typeof value.value==='boolean';case 'tristate':return ['y','m','n'].includes(value.value);case 'int':return typeof value.value==='string'&&/^-?[0-9]{1,20}$/.test(value.value);case 'hex':return typeof value.value==='string'&&/^0x[a-fA-F0-9]{1,16}$/.test(value.value);default:return false;}}
-function configProjection(value,{offset=0,query=''}={}){const entries=(value.entries||[]).filter(item=>symbol(item.symbol)&&['bool','tristate','int','hex'].includes(item.type)&&item.symbol.toLowerCase().includes(query.toLowerCase()));return {revision:value.revision,undoDepth:value.undoDepth||0,semanticsAvailable:value.semantics?.available===true,entries:entries.slice(offset,offset+200).map(({symbol,type,value})=>({symbol,type,value})),offset,total:entries.length,next:offset+200<entries.length?offset+200:null,stringEditing:'native-only'};}
+function semanticSymbols(value){const found=new Map();let count=0;function walk(node,parents=[]){if(!node||++count>100000)return;const labels=node.kind==='menu'&&typeof node.prompt==='string'?[...parents,node.prompt.slice(0,80)]:parents;if(symbol(node.symbol))found.set(node.symbol,{...node,menu:labels.join(' / ').slice(0,160)});for(const child of node.children||[])walk(child,labels);}walk(value.semantics?.tree);return found;}
+function configProjection(value,{offset=0,query=''}={}){const semantics=semanticSymbols(value);const entries=(value.entries||[]).filter(item=>symbol(item.symbol)&&['bool','tristate','int','hex'].includes(semantics.get(item.symbol)?.type||item.type)&&item.symbol.toLowerCase().includes(query.toLowerCase()));return {revision:value.revision,undoDepth:value.undoDepth||0,semanticsAvailable:value.semantics?.available===true,entries:entries.slice(offset,offset+100).map(item=>{const spec=semantics.get(item.symbol),type=spec?.type||item.type;return {symbol:item.symbol,type,value:type==='tristate'?(item.value===true?'y':item.value===false?'n':item.value):item.value,prompt:typeof spec?.prompt==='string'?spec.prompt.slice(0,120):item.symbol,menu:spec?.menu||'',assignable:Array.isArray(spec?.assignable)?spec.assignable.filter(value=>[0,1,2].includes(value)):[],visible:typeof spec?.visibility==='number'?spec.visibility>0:false};}),offset,total:entries.length,next:offset+100<entries.length?offset+100:null,stringEditing:'native-only'};}
 const actionContracts=Object.freeze({
+ 'config.details':contract('configuration:read',['workspaceId','domain','revision','symbol'],a=>project(a)&&domain(a.domain)&&hash(a.revision)&&symbol(a.symbol)),
  'config.inspect':contract('configuration:read',['workspaceId','domain','offset','query'],a=>project(a)&&domain(a.domain)&&Number.isSafeInteger(a.offset)&&a.offset>=0&&a.offset<=1000000&&typeof a.query==='string'&&a.query.length<=160),
  'config.apply':contract('configuration:write',['workspaceId','domain','revision','symbol','change'],a=>project(a)&&domain(a.domain)&&hash(a.revision)&&symbol(a.symbol)&&change(a.change)),
  'config.undo':contract('configuration:write',['workspaceId','domain','revision'],a=>project(a)&&domain(a.domain)&&hash(a.revision)),
@@ -65,6 +67,7 @@ function createCompanionConsumers(host){
   function viewer(){let value=owned.viewers.get(a.workspaceId);if(!value){if(owned.viewers.size>=100)fail('PROJECT_LIMIT');value=host.openOutputs(a.workspaceId);owned.viewers.set(a.workspaceId,value);}return value;}
   let result;
   switch(request.action){
+   case 'config.details':{const value=await host.inspectConfiguration(a);if(value.revision!==a.revision)fail('REVISION_CONFLICT');const spec=semanticSymbols(value).get(a.symbol);if(!spec)fail('SEMANTICS_UNAVAILABLE');result={symbol:a.symbol,prompt:typeof spec.prompt==='string'?spec.prompt.slice(0,1000):a.symbol,help:typeof spec.help==='string'?spec.help.slice(0,8000):'',dependency:typeof spec.dependency==='string'?spec.dependency.slice(0,2048):'',menu:spec.menu,visibility:spec.visibility,ranges:(spec.ranges||[]).slice(0,16).map(item=>({min:String(item.min).slice(0,80),max:String(item.max).slice(0,80),active:item.active===true})),assignable:spec.assignable||[]};break;}
    case 'config.inspect':result=configProjection(await host.inspectConfiguration(a),a);break;
    case 'config.apply':case 'config.undo':case 'defconfig.apply':{
     const confirm=await host.confirmMutation({action:request.action,args:a,origin:context.origin,deviceName:context.deviceName},()=>admitted(context,definition.scope));
@@ -113,6 +116,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
