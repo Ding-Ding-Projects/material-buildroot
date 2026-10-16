@@ -1,5 +1,6 @@
 "use strict";
 const path = require('node:path');
+const fs = require('node:fs');
 const {spawn} = require('node:child_process');
 function observeAdapters({signal}={}) {
  const unknown=reason=>({state:'unknown',source:'windows-cim-video-controller',reason,adapters:[]});
@@ -10,12 +11,14 @@ function observeAdapters({signal}={}) {
  // Neither the command nor its script accepts renderer-supplied arguments.
  const executable=path.join(systemRoot,'System32','WindowsPowerShell','v1.0','powershell.exe');
  const script=path.join(__dirname,'ollama-hardware.ps1');
+ let encoded;
+ try{const source=fs.readFileSync(script,'utf8');if(Buffer.byteLength(source)>8192)throw Error();encoded=Buffer.from(source,'utf16le').toString('base64');}catch{return Promise.resolve(unknown('ADAPTER_QUERY_SOURCE_UNAVAILABLE'));}
  return new Promise(resolve=>{
   let settled=false,bytes=0,output='',child,timer;
   const finish=result=>{if(settled)return;settled=true;clearTimeout(timer);signal?.removeEventListener('abort',cancel);resolve(result);};
   const stop=reason=>{child?.kill();finish(unknown(reason));};
   const cancel=()=>stop('CANCELLED');
-  try{child=spawn(executable,['-NoLogo','-NoProfile','-NonInteractive','-File',script],{windowsHide:true,shell:false,stdio:['ignore','pipe','ignore']});}catch{return finish(unknown('ADAPTER_INVENTORY_UNAVAILABLE'));}
+  try{child=spawn(executable,['-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],{windowsHide:true,shell:false,stdio:['ignore','pipe','ignore']});}catch{return finish(unknown('ADAPTER_INVENTORY_UNAVAILABLE'));}
   timer=setTimeout(()=>stop('ADAPTER_INVENTORY_TIMEOUT'),4000);
   signal?.addEventListener('abort',cancel,{once:true});
   if(signal?.aborted)cancel();

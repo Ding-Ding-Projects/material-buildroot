@@ -30,7 +30,6 @@ type Hardware = {
 type Fit = {
   verdict: string;
   observedAt: string;
-  adapterInventory?: {state:string;reason?:string;observedAt?:string;adapters:{name:string|null;vendor:string|null;driverVersion:string|null;reportedAdapterRamBytes:number|null}[]};
   reasons: string[];
   limitations: string[];
   hardware: Hardware;
@@ -53,7 +52,6 @@ type Fit = {
 };
 type Capabilities = {
   observedAt: string;
-  adapterInventory?: {state:string;reason?:string;observedAt?:string;adapters:{name:string|null;vendor:string|null;driverVersion:string|null;reportedAdapterRamBytes:number|null}[]};
   model: string;
   digest: string;
   capabilities: string[] | null;
