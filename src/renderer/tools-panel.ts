@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import "./settings-search";
-=======
 import "./minecraft-panel";
->>>>>>> bc5531d7b5c3c9fbf0c6da84a3f6c5b490ad25cf
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
