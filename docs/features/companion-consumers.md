@@ -2,7 +2,7 @@
 
 ## Implemented source routes
 
-The authenticated browser has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication. A separate explicit Save/Restore/Clear local draft workflow persists only the named build target, parallelism, configuration domain and clone folder/ref draft, bounded to 1,024 characters. Restoration never submits a request and never restores session, project, file or source-selection capabilities.
+The authenticated browser has six explicit task workflows: source/projects, configuration/build, output/cloud transfer, local models, file conversion, and preferences/recovery. Switching workflows only changes visible controls and sends no host request. It has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication. A separate explicit Save/Restore/Clear local draft workflow persists only the named build target, parallelism, configuration domain and clone folder/ref draft, bounded to 1,024 characters. Restoration never submits a request and never restores session, project, file or source-selection capabilities.
 
 The typed host adapter admits these exact actions, subject to the current session scope. Non-destructive build submission uses a named target selector and bounded parallel-job control, never a command string:
 
@@ -78,6 +78,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 

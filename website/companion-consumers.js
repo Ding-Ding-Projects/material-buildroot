@@ -9,6 +9,8 @@ export function mountCompanionConsumers({container,session,request,copy:outerCop
  const clientLanguage=document.createElement('md-outlined-select'),clientTheme=document.createElement('md-outlined-select'),clientScale=document.createElement('md-outlined-select');
  for(const [control,values] of [[clientLanguage,['en','zh-HK','bilingual']],[clientTheme,['system','light','dark']],[clientScale,['100','125','150','200']]])for(const value of values){const option=document.createElement('md-select-option');option.value=value;option.textContent=value;control.append(option);}
  clientLanguage.value=preferences.language;clientTheme.value=preferences.theme;clientScale.value=String(preferences.textScale);preferencePanel.append(clientLanguage,clientTheme,clientScale);
+ const workflow=document.createElement('md-outlined-select');workflow.label=copy('Companion workflow','伴隨工作流程');
+ for(const [value,en,zh]of [['project','Source and projects','原始碼與項目'],['configuration','Configure and build','配置與建置'],['output','Outputs and cloud transfer','輸出與雲端傳輸'],['models','Local model conversation','本機模型對話'],['conversion','Convert selected files','轉換所選檔案'],['preferences','Preferences and recovery','偏好與復原']]){const option=document.createElement('md-select-option');option.value=value;option.textContent=copy(en,zh);option.dataset.labelEn=en;option.dataset.labelZh=zh;workflow.append(option);}workflow.value='project';
  const heading=document.createElement('h4');heading.textContent=copy('Paired project workspace','配對項目工作區');
  const status=document.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const projects=document.createElement('md-outlined-select');projects.label=copy('Approved project','已批准項目');
@@ -31,7 +33,7 @@ export function mountCompanionConsumers({container,session,request,copy:outerCop
  conversionCategory.addEventListener('change',renderFormats);
  const results=document.createElement('div');
  const actions=document.createElement('div');actions.className='visitor-actions';
- root.append(heading,preferencePanel,projects,buildTarget,parallel,configDomain,configQuery,sourceDirectory,sourceRef,sourceRevision,modelChoice,modelPrompt,conversionCategory,conversionFormat,actions,checksum,status,results);
+ root.append(heading,workflow,preferencePanel,projects,buildTarget,parallel,configDomain,configQuery,sourceDirectory,sourceRef,sourceRevision,modelChoice,modelPrompt,conversionCategory,conversionFormat,actions,checksum,status,results);
  let generation=0,busy=false,currentSession='',observations=[],selectedFile=null;
  const buttons=new Set();
  const scopes={'conversion.choose':'tools:write','conversion.catalog':'tools:read','conversion.run':'tools:write','source.rollback.preview':'source:write','source.rollback.apply':'source:write','source.upgrade.preview':'source:write','source.upgrade.apply':'source:write','models.chat.start':'tools:write','models.chat.read':'tools:write','models.chat.cancel':'tools:write','source.choose':'source:write','source.clone.official':'source:write','cloud.start':'deployment:write','cloud.list':'deployment:read','cloud.preview':'deployment:write','models.status':'tools:read','models.list':'tools:read','config.inspect':'configuration:read','config.apply':'configuration:write','config.undo':'configuration:write','defconfig.apply':'configuration:write','builds.submit':'builds:submit','defconfig.catalog':'configuration:read','projects.list':'projects:read','project.options':'projects:read','source.status':'source:read','build.targets':'projects:read','outputs.browse':'outputs:read','outputs.inspect':'outputs:read','outputs.checksum':'outputs:read','jobs.list':'jobs:read','jobs.get':'jobs:read','jobs.cancel':'jobs:cancel'};
@@ -95,13 +97,23 @@ export function mountCompanionConsumers({container,session,request,copy:outerCop
   root.style.colorScheme=dark?'dark':'light';root.style.backgroundColor=dark?'#1c1b1f':'#fffbfe';root.style.color=dark?'#e6e1e5':'#1c1b1f';
   for(const [key,value] of Object.entries(dark?{'surface':'#1c1b1f','on-surface':'#e6e1e5','primary':'#d0bcff','on-primary':'#381e72','outline':'#938f99','surface-container':'#211f26'}:{'surface':'#fffbfe','on-surface':'#1c1b1f','primary':'#6750a4','on-primary':'#ffffff','outline':'#79747e','surface-container':'#f3edf7'}))root.style.setProperty(`--md-sys-color-${key}`,value);
   for(const control of root.querySelectorAll('[data-label-en]'))control.textContent=copy(control.dataset.labelEn,control.dataset.labelZh);
-  for(const [control,en,zh]of [[clientLanguage,'Companion language','伴隨語言'],[clientTheme,'Companion theme','伴隨主題'],[clientScale,'Companion text scale','伴隨文字比例'],[projects,'Approved project','已批准項目'],[buildTarget,'Build target','建置目標'],[parallel,'Parallel jobs','並行工作數'],[configDomain,'Configuration domain','配置範圍'],[configQuery,'Configuration symbol filter','配置符號篩選'],[sourceDirectory,'New source folder name','新原始碼資料夾名稱'],[sourceRef,'Official source ref','官方原始碼參照'],[sourceRevision,'Immutable source revision','不可變原始碼修訂'],[modelChoice,'Installed model','已安裝模型'],[modelPrompt,'Local model prompt (not saved)','本機模型提示（不儲存）'],[conversionCategory,'Conversion category','轉換類別'],[conversionFormat,'Output format','輸出格式'],[checksum,'Expected SHA-256 (optional)','預期 SHA-256（可選）']])control.label=copy(en,zh);
+  for(const [control,en,zh]of [[workflow,'Companion workflow','伴隨工作流程'],[clientLanguage,'Companion language','伴隨語言'],[clientTheme,'Companion theme','伴隨主題'],[clientScale,'Companion text scale','伴隨文字比例'],[projects,'Approved project','已批准項目'],[buildTarget,'Build target','建置目標'],[parallel,'Parallel jobs','並行工作數'],[configDomain,'Configuration domain','配置範圍'],[configQuery,'Configuration symbol filter','配置符號篩選'],[sourceDirectory,'New source folder name','新原始碼資料夾名稱'],[sourceRef,'Official source ref','官方原始碼參照'],[sourceRevision,'Immutable source revision','不可變原始碼修訂'],[modelChoice,'Installed model','已安裝模型'],[modelPrompt,'Local model prompt (not saved)','本機模型提示（不儲存）'],[conversionCategory,'Conversion category','轉換類別'],[conversionFormat,'Output format','輸出格式'],[checksum,'Expected SHA-256 (optional)','預期 SHA-256（可選）']])control.label=copy(en,zh);
   heading.textContent=copy('Paired project workspace','配對項目工作區');root.setAttribute('aria-label',heading.textContent);
  }
  for(const control of [clientLanguage,clientTheme,clientScale])control.addEventListener('change',()=>{preferences={version:1,language:clientLanguage.value,theme:clientTheme.value,textScale:Number(clientScale.value)};applyPreferences();try{localStorage.setItem(preferenceKey,JSON.stringify(preferences));status.textContent=copy('Companion preferences saved locally. Existing host result text keeps its original language until refreshed.','伴隨偏好已喺本機儲存。現有主機結果文字會保留原本語言，直到更新。');}catch{status.textContent=copy('Preferences applied for this tab; local storage is unavailable.','偏好已套用至此分頁，但本機儲存無法使用。');}});
- applyPreferences();
+ function selectWorkflow(){
+  const active=workflow.value;
+  const grouped=[[preferencePanel,'preferences'],[buildTarget,'configuration'],[parallel,'configuration'],[configDomain,'configuration'],[configQuery,'configuration'],[sourceDirectory,'project'],[sourceRef,'project'],[sourceRevision,'project'],[modelChoice,'models'],[modelPrompt,'models'],[conversionCategory,'conversion'],[conversionFormat,'conversion'],[checksum,'output']];
+  for(const [field,group]of grouped)field.hidden=group!==active;
+  const group=action=>action?.startsWith('models.')?'models':action?.startsWith('conversion.')?'conversion':action?.startsWith('outputs.')||action?.startsWith('cloud.')?'output':action?.startsWith('config.')||action?.startsWith('defconfig.')||action?.startsWith('build')||action?.startsWith('jobs.')?'configuration':action?'project':'preferences';
+  for(const control of actions.children)control.hidden=group(control.dataset.action)!==active;
+  results.replaceChildren();status.textContent=copy('Choose a current project where needed, then use the controls for this workflow. Changing workflows sends no host request.','需要時先選擇現有項目，再使用此流程控制。切換流程唔會發送主機要求。');
+ }
+ workflow.addEventListener('change',selectWorkflow);
+ applyPreferences();selectWorkflow();
  update();return {update,clear(){generation++;currentSession='';observations=[];selectedFile=null;projects.replaceChildren();results.replaceChildren();checksum.value='';root.hidden=true;}};
 }
+
 
 
 
