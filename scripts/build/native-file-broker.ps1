@@ -24,7 +24,7 @@ while ($cursor) {
 }
 [IO.Directory]::CreateDirectory($destination) | Out-Null
 $executable = Join-Path $destination 'material-file-broker.exe'
-& $compiler.Source /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /guard:cf /DUNICODE /D_UNICODE $source ('/Fe:' + $executable) ('/Fo:' + (Join-Path $destination 'material-file-broker.obj')) /link /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA userenv.lib advapi32.lib ole32.lib
+& $compiler.Source /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /guard:cf /DUNICODE /D_UNICODE $source ('/Fe:' + $executable) ('/Fo:' + (Join-Path $destination 'material-file-broker.obj')) /link /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA userenv.lib advapi32.lib ole32.lib bcrypt.lib
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (!(Test-Path -LiteralPath $executable -PathType Leaf)) { throw 'Compiler did not produce the broker.' }
 $hash = (Get-FileHash -LiteralPath $executable -Algorithm SHA256).Hash.ToLowerInvariant()
