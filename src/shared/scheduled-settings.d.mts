@@ -68,6 +68,18 @@ export interface ScheduleHistoryReceipt {
   fromRevision: number | null;
   toRevision: number;
 }
+export interface ScheduleDraftReceipt {
+  sequence: number;
+  discardedAt: number;
+}
+export interface ScheduleDraftPage {
+  records: ScheduleDraftReceipt[];
+  next: number;
+  hasMore: boolean;
+}
+export interface ScheduleDraftRecord extends ScheduleDraftReceipt {
+  document: ScheduleDocument;
+}
 export interface ScheduleCommitAdapter {
   read(): Promise<Uint8Array | null>;
   commit(transaction: {

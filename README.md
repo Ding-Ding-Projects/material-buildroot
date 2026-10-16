@@ -12,6 +12,8 @@ Practical onboarding creates a saved plan and preserves setup progress. Native f
 
 The local assistant exposes managed Ollama controls, actual installed-model metadata and measured capacity evidence. Offline help packages the public articles with formatted reading, topic navigation and isolated local search. The documentation website adds guided tasks, recipe previews, troubleshooting and saved browser progress.
 
+The host now provides [separate local schedule draft recovery](docs/security/schedule-draft-recovery.md), with append-only bounded storage and explicit restoration that does not activate settings. Focused host checks and interrupted-writer recovery passed. The integrated schedule editor and protected source-enrollment controls remain an unverified candidate; current packaged Windows and complete UI acceptance are still pending.
+
 ## Interface captures
 
 These are genuine, unretouched Linux Chromium captures of renderer source `e8f9beb`. Workspace storage and the offline documentation service are real; native-operation boundaries use explicit fixtures. Later shared-preference and queue/catalogue controls are not shown in this retained set. The [capture manifest](docs/evidence/modern-workspace/README.md) records exact source and image hashes, capture clocks, language/theme/viewport and each workflow's verification limit. The [public gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) also preserves reviewed historical application and website originals. These captures do not establish current packaged Windows acceptance.

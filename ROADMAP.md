@@ -5,6 +5,7 @@
 - [x] Resume implementation and establish an actual Windows desktop build plus six native build-toolchain checks at source `1b7ea15359ac2870a9f8bc02889770db4cb48d08`. This is bounded build/test evidence, not phase acceptance.
 - [ ] Repair the native full suite. Latest combined run: 466 discovered, 423 passed, nine failed, 34 skipped. Corrected interpreter selection separately passed eight affected cases with two explicit skips. Two corrected positive HTTPS fixtures and the unchanged short-deadline negative case passed. Retain unsupported cases and establish a passing combined verdict before acceptance.
 - [ ] Complete reviewed scheduled-preferences consumers and their browser/native acceptance.
+- [ ] Accept separate durable local draft history in the packaged application. Host implementation has eleven passing focused cases and a passing active-store regression with four explicit native skips; integrated browser/native acceptance remains pending.
 
 Windows runtime testing is now requested. This supersedes the historical deferral in the status text below. See [native continuation evidence](docs/evidence/native-windows-20261016/README.md).
 

@@ -7,6 +7,9 @@ import type {
   ScheduleDocument,
   SettingRegistry,
   ScheduleHistoryReceipt,
+  ScheduleDraftReceipt,
+  ScheduleDraftPage,
+  ScheduleDraftRecord,
 } from "../../shared/scheduled-settings.mjs";
 import type { SqliteScheduleAdapter } from "./schedule-store.mjs";
 import type {
@@ -59,6 +62,9 @@ export function createSchedulePreferencesService(options: {
 }): Readonly<{
   start(): Promise<SchedulePreferencesSnapshot>;
   read(): Promise<ScheduleDocument | null>;
+  draftDiscard(input:{document:ScheduleDocument;authorize?:()=>boolean}):Promise<ScheduleDraftReceipt>;
+  draftList(input?:{after?:number;limit?:number;authorize?:()=>boolean}):Promise<ScheduleDraftPage>;
+  draftRead(input:{sequence:number;authorize?:()=>boolean}):Promise<ScheduleDraftRecord|null>;
   enrollmentList(): Promise<SourceEnrollmentList>;
   enrollmentSave(input: SourceEnrollmentSave): Promise<SourceEnrollmentList>;
   enrollmentRemove(

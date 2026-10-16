@@ -15,6 +15,9 @@ const CODES = new Set([
   "STORAGE_UNAVAILABLE",
   "STORAGE_INVALID",
   "SCHEDULE_STORAGE_UNAVAILABLE",
+  "SCHEDULE_STORAGE_INVALID",
+  "INVALID_SCHEDULE_DRAFT",
+  "SCHEDULE_DRAFT_LIMIT",
   "SCHEDULE_STORAGE_BUSY",
   "SCHEDULE_RECOVERY_UNAVAILABLE",
   "INVALID_HISTORY_PAGE",
@@ -60,6 +63,9 @@ function admit(serialized) {
       "kind",
     ],
     "enrollment.remove": ["action", "expectedRevision", "id"],
+    "draft.discard": ["action", "document"],
+    "draft.list": ["action", "after", "limit"],
+    "draft.read": ["action", "sequence"],
   };
   const optional =
     value?.action === "enrollment.save"
@@ -106,20 +112,25 @@ function admit(serialized) {
   )
     throw Error();
   if (
-    value.action === "history" &&
+    ["history","draft.list"].includes(value.action) &&
     (!Number.isSafeInteger(value.after) ||
       value.after < 0 ||
       !Number.isSafeInteger(value.limit) ||
       value.limit < 1 ||
-      value.limit > 100)
+      value.limit > (value.action === "draft.list" ? 20 : 100))
   )
     throw Error();
+  if(value.action === "draft.read" && (!Number.isSafeInteger(value.sequence) || value.sequence<1)) throw Error();
   return value;
 }
 /** Authority, storage destinations, network enrollment and credentials stay in the host. */
-function createScheduleIPC({ desktop, service }) {
+function createScheduleIPC({ desktop, service, sharedModeStatus }) {
   let closed = false;
   const authorized = (event) => !closed && desktop.admitted(event);
+  const draftAuthorized = event => {
+    if(!authorized(event)) return false;
+    try { const status=sharedModeStatus?.(); return status?.available === true && status.active === false; } catch { return false; }
+  };
   return Object.freeze({
     async request(event, serialized) {
       if (!authorized(event)) return { ok: false, code: "UNAUTHORIZED" };
@@ -132,26 +143,35 @@ function createScheduleIPC({ desktop, service }) {
       }
       try {
         const { action, ...options } = input;
+        const draftAction=action.startsWith("draft.");
+        const permitted=()=>draftAction ? draftAuthorized(event) : authorized(event);
+        if(!permitted()) return {ok:false,code:"UNAUTHORIZED"};
         const method =
           {
             "enrollment.list": "enrollmentList",
             "enrollment.save": "enrollmentSave",
             "enrollment.remove": "enrollmentRemove",
+            "draft.discard": "draftDiscard",
+            "draft.list": "draftList",
+            "draft.read": "draftRead",
           }[action] || action;
         const result = [
           "replace",
           "enrollment.save",
           "enrollment.remove",
+          "draft.discard",
+          "draft.list",
+          "draft.read",
         ].includes(action)
           ? await service[method]({
               ...options,
-              authorize: () => authorized(event),
+              authorize: permitted,
             })
           : await service[method](options);
-        if (!authorized(event)) return { ok: false, code: "UNAUTHORIZED" };
+        if (!permitted()) return { ok: false, code: "UNAUTHORIZED" };
         return { ok: true, result };
       } catch (error) {
-        if (!authorized(event)) return { ok: false, code: "UNAUTHORIZED" };
+        if (!authorized(event) || (input.action.startsWith("draft.") && !draftAuthorized(event))) return { ok: false, code: "UNAUTHORIZED" };
         return {
           ok: false,
           code: CODES.has(error?.code) ? error.code : "UNAVAILABLE",

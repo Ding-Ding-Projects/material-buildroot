@@ -215,7 +215,7 @@ else {
         await scheduleService?.close();
         scheduleService = undefined;
       }
-      scheduleIPC = createScheduleIPC({ desktop, service: scheduleService });
+      scheduleIPC = createScheduleIPC({ desktop, service: scheduleService, sharedModeStatus: () => sharedModeService?.status() });
       ipcMain.handle("studio:scheduled-preferences", (event, value) =>
         scheduleIPC.request(event, value),
       );

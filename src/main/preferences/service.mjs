@@ -10,7 +10,7 @@ import {
   createExternalScheduleCoordinator,
   evaluateSchedule,
 } from "../../shared/scheduled-settings.mjs";
-import { createSqliteScheduleAdapter } from "./schedule-store.mjs";
+import { createSqliteScheduleAdapter, createSqliteScheduleDiscardStore } from "./schedule-store.mjs";
 import { createScheduleSourceProvider } from "./schedule-provider.mjs";
 export const CURRENT_SCHEDULE_REGISTRY = Object.freeze({
   language: (value) => ["en", "zh-HK", "bilingual"].includes(value),
@@ -91,6 +91,8 @@ export function createSchedulePreferencesService({
       return bytes === null ? null : parseStoredSchedule(bytes, options);
     },
   };
+  let discardStore;
+  const drafts = () => discardStore ??= createSqliteScheduleDiscardStore({directory,profileId,registry:CURRENT_SCHEDULE_REGISTRY,clock});
 
   let current = null,
     identity = null,
@@ -409,6 +411,21 @@ export function createSchedulePreferencesService({
       return snapshot();
     },
     read: load,
+    async draftDiscard({document,authorize=()=>true}) {
+      ready();
+      if(typeof authorize!=="function" || authorize()!==true) fail("UNAUTHORIZED");
+      return drafts().append({document,authorize});
+    },
+    async draftList({after=0,limit=20,authorize=()=>true}={}) {
+      ready();
+      if(typeof authorize!=="function" || authorize()!==true) fail("UNAUTHORIZED");
+      return drafts().list({after,limit,authorize});
+    },
+    async draftRead({sequence,authorize=()=>true}) {
+      ready();
+      if(typeof authorize!=="function" || authorize()!==true) fail("UNAUTHORIZED");
+      return drafts().read({sequence,authorize});
+    },
     async enrollmentList() {
       ready();
       try {
@@ -543,6 +560,7 @@ export function createSchedulePreferencesService({
         watcher?.close();
       } catch {}
       adapter.close();
+      discardStore?.close();
       enrollmentStore.close();
       listeners.clear();
     },

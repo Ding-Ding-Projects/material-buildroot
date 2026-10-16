@@ -1,7 +1,11 @@
 import type {
   ScheduleDocument,
   ScheduleHistoryReceipt,
+  ScheduleDraftReceipt,
+  ScheduleDraftPage,
+  ScheduleDraftRecord,
 } from "./scheduled-settings.mjs";
+export type {ScheduleDraftReceipt, ScheduleDraftPage, ScheduleDraftRecord} from "./scheduled-settings.mjs";
 import type { Language } from "./api";
 
 export interface ScheduledValues {
@@ -45,6 +49,9 @@ export interface ScheduledSourceList {
 export type ScheduledPreferencesRequest =
   | { action: "status" | "read" | "refresh" | "cancel" }
   | { action: "enrollment.list" }
+  | { action: "draft.discard"; document: ScheduleDocument }
+  | { action: "draft.list"; after: number; limit: number }
+  | { action: "draft.read"; sequence: number }
   | {
       action: "enrollment.save";
       expectedRevision: string | null;
@@ -72,6 +79,9 @@ export type ScheduledPreferencesReply =
         | ScheduleDocument
         | ScheduledHistoryPage
         | ScheduledSourceList
+        | ScheduleDraftReceipt
+        | ScheduleDraftPage
+        | ScheduleDraftRecord
         | null;
     }
   | { ok: false; code: string };
