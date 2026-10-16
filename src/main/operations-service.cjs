@@ -9,6 +9,7 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { createAccountProvisioning } = require("./configuration/account-provisioning.cjs");
 const { createImagePresets } = require("./configuration/image-presets.cjs");
 const { createDefconfigWorkflows } = require("./configuration/defconfig-workflows.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
@@ -81,6 +82,9 @@ const fields = {
   "config.trustPreview": ["workspaceId"],
   "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
   "config.trustRevoke": ["workspaceId"],
+  "accountProvisioning.choose": ["workspaceId"],
+  "accountProvisioning.preview": ["workspaceId", "username", "uid", "keyId"],
+  "accountProvisioning.apply": ["workspaceId", "planId"],
   "imagePreset.catalog": ["workspaceId"],
   "imagePreset.plan": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "imagePreset.apply": ["workspaceId", "revision", "preset", "desktop", "ssh"],
@@ -949,6 +953,7 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const accountProvisioning = createAccountProvisioning({ resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; }, authorize: id => configurationConsent.requireTrust(id), configuration: config, dialog, parentWindow });
   const imagePresets = createImagePresets({ configuration: config });
   const defconfigWorkflows = createDefconfigWorkflows({
     resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; },
@@ -1553,6 +1558,12 @@ function createOperationsService({
       case "config.trustRevoke":
         project(request.workspaceId);
         return configurationConsent.revoke(request);
+      case "accountProvisioning.choose":
+        return accountProvisioning.choose(request);
+      case "accountProvisioning.preview":
+        return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.preview(request));
+      case "accountProvisioning.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.apply(request));
       case "imagePreset.catalog":
         return changeConfig(projectPaths(request.workspaceId), () => imagePresets.catalog(request));
       case "imagePreset.plan":

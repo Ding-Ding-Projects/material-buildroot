@@ -29,7 +29,7 @@ function createImagePresets({ configuration }) {
   async function catalog({ workspaceId }) {
     const snapshot = await configuration.inspect({ workspaceId, domain: "buildroot" });
     const map = symbols(snapshot);
-    return { revision: snapshot.revision, presets: PRESETS.map(preset => ({ id: preset.id, requirements: preset.symbols.map(symbol => capability(map, symbol)) })), desktops: DESKTOPS.map(desktop => ({ ...desktop, ...capability(map, desktop.symbol) })), provisioning: { accountCreationAvailable: false, credentialInputAvailable: false, reason: "PROTECTED_ACCOUNT_PROVISIONER_NOT_CONNECTED" }, previewKind: "configuration-plan" };
+    return { revision: snapshot.revision, presets: PRESETS.map(preset => ({ id: preset.id, requirements: preset.symbols.map(symbol => capability(map, symbol)) })), desktops: DESKTOPS.map(desktop => ({ ...desktop, ...capability(map, desktop.symbol) })), provisioning: { accountWorkflow: "separate-source-bound-plan", passwordEnrollmentAvailable: false }, previewKind: "configuration-plan" };
   }
   async function plan(input) {
     const preset = PRESETS.find(p => p.id === input.preset);
@@ -43,13 +43,13 @@ function createImagePresets({ configuration }) {
     if (input.ssh) selected.push("BR2_PACKAGE_DROPBEAR");
     const requirements = [...new Set(selected)].map(symbol => capability(map, symbol));
     const changes = Object.fromEntries(requirements.map(row => [row.symbol, { type: "bool", value: true }]));
-    return { revision: snapshot.revision, preset: preset.id, desktop: input.desktop, requirements, changes, applicable: requirements.every(r => r.selectable), previewKind: "configuration-plan", additive: true, accountProvisioning: "unavailable", sshSelected: selected.includes("BR2_PACKAGE_DROPBEAR") };
+    return { revision: snapshot.revision, preset: preset.id, desktop: input.desktop, requirements, changes, applicable: requirements.every(r => r.selectable), previewKind: "configuration-plan", additive: true, accountProvisioning: "separate-source-bound-plan", sshSelected: selected.includes("BR2_PACKAGE_DROPBEAR") };
   }
   async function apply(input) {
     const preview = await plan(input);
     if (!preview.applicable) fail("PRESET_REQUIREMENTS_UNAVAILABLE");
     const result = await configuration.apply({ workspaceId: input.workspaceId, domain: "buildroot", revision: input.revision, changes: preview.changes });
-    return { ...result, preset: preview.preset, previewKind: "configuration-plan", requestedSymbols: Object.keys(preview.changes), accountProvisioning: "unavailable" };
+    return { ...result, preset: preview.preset, previewKind: "configuration-plan", requestedSymbols: Object.keys(preview.changes), accountProvisioning: "separate-source-bound-plan" };
   }
   return { catalog, plan, apply };
 }
