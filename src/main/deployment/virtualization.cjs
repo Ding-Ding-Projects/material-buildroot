@@ -750,95 +750,11 @@ class Virtualization {
       fs.rmSync(temporary, { recursive: true, force: true });
     }
   }
-  async previewConversion({ artifact, format, outputName }) {
-    if (
-      !["raw", "vmdk", "vdi", "qcow2"].includes(format) ||
-      typeof outputName !== "string" ||
-      !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(outputName)
-    )
-      throw new Error("invalid-conversion");
-    const file = safePath(this.store.root, artifact),
-      info = await this.store.inspectArtifact(artifact);
-    if (!["raw-disk", "gpt-disk", "vdi", "qcow2"].includes(info.format))
-      throw new Error("unsupported-source-format");
-    const metadata = JSON.parse(
-      await this.run("qemu", [
-        "info",
-        "--output=json",
-        "-f",
-        ["raw-disk", "gpt-disk"].includes(info.format) ? "raw" : info.format,
-        file,
-      ]),
-    );
-    if (
-      metadata["backing-filename"] ||
-      metadata["full-backing-filename"] ||
-      metadata.encrypted ||
-      metadata.snapshots?.length
-    )
-      throw new Error("dependent-or-encrypted-image-not-admitted");
-    const output = path.join(this.store.root, outputName);
-    if (fs.existsSync(output)) throw new Error("conversion-output-exists");
-    const id = crypto.randomUUID();
-    const plan = {
-      id,
-      artifact,
-      sha256: info.sha256,
-      format,
-      outputName,
-      file,
-      output,
-      inputFormat: ["raw-disk", "gpt-disk"].includes(info.format)
-        ? "raw"
-        : info.format,
-    };
-    this.plans.set(id, plan);
-    return {
-      id,
-      artifact,
-      sha256: info.sha256,
-      format,
-      outputName,
-      destructive: false,
-      command: [
-        "qemu-img",
-        "convert",
-        "-f",
-        plan.inputFormat,
-        "-O",
-        format,
-        artifact,
-        outputName,
-      ],
-    };
+  async previewConversion(request) {
+    return require("./conversion-exports.cjs").previewConversion.call(this, request);
   }
-  async executeConversion({ id }) {
-    const p = this.plans.get(id);
-    if (!p) throw new Error("conversion-preview-required");
-    this.plans.delete(id);
-    if (
-      (await hashFile(safePath(this.store.root, p.artifact))) !== p.sha256 ||
-      fs.existsSync(p.output)
-    )
-      throw new Error("conversion-preview-stale");
-    // Reserve a unique output in a private directory so qemu cannot overwrite an existing file.
-    const temporary = fs.mkdtempSync(
-      path.join(this.store.root, ".conversion-"),
-    );
-    const output = path.join(temporary, "output");
-    try {
-      await this.run(
-        "qemu",
-        ["convert", "-f", p.inputFormat, "-O", p.format, p.file, output],
-        600000,
-      );
-      fs.linkSync(output, p.output);
-      const inspected = await this.store.inspectArtifact(p.outputName);
-      this.convertedDisks.set(p.output, inspected.sha256);
-      return inspected;
-    } finally {
-      fs.rmSync(temporary, { recursive: true, force: true });
-    }
+  async executeConversion(request) {
+    return require("./conversion-exports.cjs").executeConversion.call(this, request);
   }
 }
 module.exports = {

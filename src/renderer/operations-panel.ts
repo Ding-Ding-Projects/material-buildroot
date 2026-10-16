@@ -18,6 +18,7 @@ import "@material/web/switch/switch.js";
 import "@material/web/progress/linear-progress.js";
 import "./regex-workbench";
 import "./guest-panel";
+import "./artifact-viewers";
 import "./tools-panel";
 import "./companion-panel";
 import "./authenticator-panel";
@@ -1038,65 +1039,7 @@ export class OperationsPanel extends LitElement {
   }
   private artifactsView() {
     if (!this.workspace) return this.noProject();
-    return html`<section class="panel stack">
-      <div class="row">
-        <h2>${this.l("Output artifacts", "輸出檔案")}</h2>
-        <md-outlined-button
-          ?disabled=${this.pending}
-          @click=${this.listArtifacts}
-          >${actionIcon('List artifacts')}${this.l("List artifacts", "列出輸出檔案")}</md-outlined-button
-        >
-      </div>
-      ${this.artifacts.map(
-        (item) =>
-          html`<div class="row record">
-            <span class="symbol">${item.path}</span
-            ><span>${item.size} ${this.l("bytes", "位元組")}</span
-            >${item.kind === "file"
-              ? html`<md-text-button
-                  ?disabled=${this.pending}
-                  @click=${() => this.inspectArtifact(item.path)}
-                  >${actionIcon('Inspect')}${this.l("Inspect", "檢視")}</md-text-button
-                >`
-              : html`<span>${this.l("Directory", "目錄")}</span>`}
-          </div>`,
-      )}${this.artifact
-        ? html`<dl>
-              <dt>${this.l("File", "檔案")}</dt>
-              <dd>${this.artifact.path}</dd>
-              <dt>${this.l("Format", "格式")}</dt>
-              <dd>${this.artifact.format}</dd>
-              <dt>SHA-256</dt>
-              <dd class="symbol">${this.artifact.sha256}</dd>
-              <dt>${this.l("Size", "大小")}</dt>
-              <dd>${this.artifact.size}</dd>
-            </dl>
-            ${this.artifact.preview
-              ? html`<div
-                    class="log"
-                    role="region"
-                    tabindex="0"
-                    aria-label=${this.l("Text preview", "文字預覽")}
-                  >
-                    ${this.artifact.preview}
-                  </div>
-                  <p>
-                    ${this.artifact.previewTruncated
-                      ? this.l(
-                          "Preview truncated to the supported limit.",
-                          "預覽已按支援上限截短。",
-                        )
-                      : this.l("Text preview", "文字預覽")}
-                  </p>`
-              : nothing}
-            <p>
-              ${this.l(
-                "Inspection reads metadata and hashes; archives are not extracted.",
-                "檢視只會讀取中繼資料同計算摘要，唔會解壓縮封存檔。",
-              )}
-            </p>`
-        : nothing}
-    </section>`;
+    return html`<artifact-viewers .workspaceId=${this.workspace.workspaceId} .language=${this.language}></artifact-viewers>`;
   }
   private assistantView() {
     return html`<section class="panel"><ollama-workspace-panel .language=${this.language}></ollama-workspace-panel></section>`;
