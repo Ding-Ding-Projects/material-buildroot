@@ -17,6 +17,13 @@ The visitor workspace has real local operations alongside separately labelled le
 | `support-tickets` | Real local requests with create/edit, optimistic revision checks, open/resolved/archive statuses and search/export | Protected recovery ladder and authenticated support submission are not provided by this local desk |
 | `notifications` | Persisted fixed generic local operation notices, own search/export and unavailable-storage state | Full notification category coverage, advanced date range and bulk review/dismissal |
 | `bulk-actions` | Loaded request selection, shift-click range, all/invert/clear, per-record revision checks, cancellable status updates and partial results | Complete keyboard-range support and every other collection |
+| `appearance-editor` | Real per-element/state shared-schema controls, validated local JSON, undo/redo, scoped reset | Full timeline/layers, every shadow-internal element, durable dynamic identities and automatic protected history |
+| `color-picker` | Continuous HSV/alpha controls, exact color grammar conversion, representation readouts, opaque contrast and actual target application | Complete gamut/profile-aware contrast, saved color history and all palette routes |
+| `logo-customization` | Bounded isolated PNG/JPEG decode, fit/focal/crop/background, PNG derivatives, local apply/reset/export | Additional admitted image formats, broader icon surfaces and runtime proof |
+| `context-menus` | Pointer, Shift+F10/context key and touch-hold element actions with adjacent search | Protected element locks and every shadow-internal/menu surface |
+| `command-palette` | Ctrl+Shift+F discovers current visitor controls, inline switches/single-line edits use original events, exact control navigation | Complete menu/destination inventory, all control kinds and appearance-access coordination |
+| `super-confirmation` | Fresh two-key/full-slider confirmation for current plan reset/import, preference reset, appearance import/reset, schedule reset and logo reset | Every remaining destructive or replacement action, complete animation/proof matrix |
+| `scheduled-settings` | Actual recurring weekday/overnight language/theme interval with local-time semantics, preserved manual base, reset/export | Multiple rule precedence, complete appearance settings, protected external sources and Home Assistant |
 | `progress-recovery` | Initiator status for reading/export/storage/bulk mutations; stale-edit preservation and retry instructions | Durable cross-process jobs and complete recovery inventory |
 
 These are source implementations, not complete acceptance of any catalogue identity. PH09-T01 remains open. Existing language, theme, visitor plan/import/export and offline documentation consumers remain independent.
@@ -39,13 +46,13 @@ File selection checks extension and byte size before reading; fatal UTF-8 decodi
 
 Text and Markdown exports normalize line endings to LF and retain the remaining text. Markdown is source, not rendered or sanitized HTML. JSON text envelopes contain `version`, `encoding`, `lineEndings` and `text`; they are not plan backups. Export buttons request a browser download and expressly cannot prove its final saved path or completion. JSON plan exports preserve the current version 1 backup shape. Human-readable plan exports are not round-trip backups.
 
-The public visitor surface cannot discover native editors, run Buildroot, manage host services, install models, publish using host credentials or imply shared-mode state from local flags. Those authority boundaries do not excuse browser-native feature gaps. Full appearance editing, native-style tabs, command palette, protected locks, authenticator, scheduling, complete converter categories, per-control guidance, language humor controls and required complete exports remain unresolved source work here.
+The public visitor surface cannot discover native editors, run Buildroot, manage host services, install models, publish using host credentials or imply shared-mode state from local flags. Those authority boundaries do not excuse browser-native feature gaps. Full appearance timeline/layers, native-style tabs, protected locks, authenticator, complete multi-source scheduling, complete converter categories, per-control guidance, language humor controls and required complete exports remain unresolved source work here.
 
 ## Expression evaluation and provenance
 
 The browser adapter copies the existing full renderer expression workbench but replaces desktop wording/status imports with neutral browser-local helpers. It imports no private vocabulary cache or desktop bridge. Each search owns its own pattern, flags, mode, sample and worker. Plain search is the default. Expression evaluation has the existing bounded startup/evaluation timeouts and terminates its worker. History, requests, notices, preferences and voice pickers mount distinct adjacent builders. Search and workbench state currently remains session-local.
 
-The documentation producer emits both evaluator workers as same-origin ES modules and preserves module URL semantics in the main bundle. Their source paths, browser-native modules and shared presentation styles participate in the input snapshot. Offline documentation uses the existing generated asset inventory; actual cache completeness still requires runtime proof.
+The documentation producer emits both evaluator workers as same-origin ES modules and preserves module URL semantics in the main bundle. Their source paths, browser-native modules and isolated browser presentation styles and shared appearance/decoder source participate in the input snapshot. Offline documentation uses the existing generated asset inventory; actual cache completeness still requires runtime proof.
 
 ## Verification state
 
@@ -64,3 +71,17 @@ Implementation was prepared in a build-only delivery mode. No tests, static anal
 復原事項只儲存喺瀏覽器，唔會提交畀維護者。編輯會核對版本，批次變更會分開回報成功、舊版本同未嘗試項目。請勿輸入憑證，因為本機記錄未加密。新搜尋欄各自有相鄰表達式工作台，預設使用普通文字搜尋。
 
 目前只完成來源實作，尚未執行建置、測試、瀏覽器操作、無障礙驗證或畫面擷取。完整功能身分同 PH09-T01 仍未完成，唔應根據此文件勾選驗收。
+
+## Appearance, navigation, confirmation and scheduling
+
+The appearance editor consumes the shared bounded property schema without importing the desktop wording/cache or authority modules. Every admitted field writes actual scoped CSS for its selected visitor element and real interaction state. Property/state selectors cannot be supplied by imported files. Appearance imports validate the complete document before confirmation and storage. Undo/redo retains up to 50 session revisions. Structural target identity is explicitly limited across page updates and repeated dynamic records; the companion, recovery-record collection and shadow-internal controls are excluded rather than falsely treated as covered.
+
+Continuous HSV/alpha sliders and exact browser color grammar feed real foreground/background actions. Conversion uses an sRGB canvas and discloses gamut/profile loss. Opaque contrast is not represented as final contrast on an alpha or animated surface. The workspace logo uses a dedicated same-origin worker with format/header/dimension/output bounds and a five-second deadline. Only generated PNG derivatives are stored; the selected original remains in memory. Fit, focal point, zoom and background reach that worker. The heading image is a visitor presentation change, not a package/icon identity change.
+
+The command palette enumerates up to 300 current admitted visitor controls. Inline switches and single-line fields use the original control state and input/change handlers. Navigation opens the actual control rather than claiming an operation executed. Companion controls and credentials are excluded. Pointer, keyboard and touch element menus offer real appearance navigation with their own local search; protected element locking remains unimplemented.
+
+Destructive confirmation is a fresh in-page Material dialog with two independent keys, a full-range slider, an expiry, cancellation and focus return. Plan clearing, backup replacement, preference reset and the new appearance/schedule/logo reset/import controls use it. This is a user-experience confirmation, not authentication or host authorization. Other unwrapped operations remain listed as incomplete rather than inheriting a blanket claim.
+
+The language/theme schedule stores one bounded recurring interval. Start is inclusive and end exclusive. For overnight rules, the early-morning portion belongs to the preceding selected weekday. Evaluation uses the current local wall clock and reports the observed timezone; clock/DST changes immediately affect subsequent evaluations. It operates only while the page is open, reevaluates every 30 seconds and on visibility changes, and restores the saved manual base outside the interval. Scheduled effective values are not persisted over manual preferences. Multiple rules, protected external APIs, Home Assistant and other appearance settings are not implemented by this consumer.
+
+粵語補充：外觀控制會實際套用至所選訪客元素同互動狀態，唔會製造成功或載入證據。顏色工具同標誌轉換有實際輸出，但完整動畫時間軸、受保護元素鎖同全部 Shadow 內部控制仍未完成。Ctrl+Shift+F 選單使用原有控制項事件；配對權限保持獨立。重設及指定取代操作須完成兩項確認同百分之一百滑桿。語言／主題排程只喺此頁開啟期間運作，按本機時間同所選星期套用，時段以外會恢復手動設定。

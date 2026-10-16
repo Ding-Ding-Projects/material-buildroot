@@ -1,3 +1,8 @@
+import {mountBrowserLogo} from './browser-native-logo.js';
+import {mountBrowserSchedule} from './browser-native-schedule.js';
+import {mountBrowserAppearance} from './browser-native-appearance.js';
+import {mountBrowserNavigation} from './browser-native-navigation.js';
+import {protectBrowserMutation} from './browser-native-confirmation.js';
 import {mountBrowserRecords} from './browser-native-records.js';
 import {mountLocalSearch} from './browser-native-search-mount.js';
 import {mountBrowserPreferences} from './browser-native-preferences.js';
@@ -8,7 +13,7 @@ const text = (en, zh) => document.documentElement.dataset.language === 'zh' ? zh
 const validPlan = value => value && value.version === 1 && typeof value.goal === 'string' && value.goal.length <= 180 && typeof value.notes === 'string' && value.notes.length <= 4000 && value.checks && typeof value.checks === 'object' && CHECKS.every(key => typeof value.checks[key] === 'boolean');
 
 // Browser-owned operations never call the companion transport or grant host access.
-export function mountBrowserNative(visitor, {readPlan, restorePlan}) {
+export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPreferences}) {
   const root = document.createElement('section');
   root.className = 'visitor-card'; root.id = 'browser-native-tools';
   root.setAttribute('aria-labelledby', 'browser-native-title');
@@ -148,9 +153,18 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan}) {
   if (!root.isConnected) visitor.append(root);
   mountBrowserPreferences(visitor);
   mountBrowserRecords(visitor);
+  mountBrowserAppearance(visitor);
+  mountBrowserSchedule(visitor, applyPreferences);
+  mountBrowserLogo(visitor);
+  mountBrowserNavigation(visitor);
+  protectBrowserMutation(visitor.querySelector('#visitor-reset'),()=>text('Clear the current visitor goal, notes and checklist in this browser. Recovery copies, learning progress, preferences and companion sessions are not cleared. Export or save a recovery copy first if needed.','清除此瀏覽器目前訪客目標、筆記同清單。不會清除復原副本、學習進度、偏好或配對連線。如有需要請先匯出或儲存復原副本。'));
+  protectBrowserMutation(visitor.querySelector('#visitor-import'),()=>text('Replace the current visitor goal, notes and checklist with the validated backup entered above. Invalid input changes nothing. Recovery copies and companion sessions are not replaced.','以上方輸入且通過驗證嘅備份取代目前訪客目標、筆記同清單。無效輸入不會更改資料，亦唔會取代復原副本或配對連線。'));
   localized.forEach(update => update());
   document.querySelector('#language')?.addEventListener('change', () => localized.forEach(update => update()));
 }
+
+
+
 
 
 

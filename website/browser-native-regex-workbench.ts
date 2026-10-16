@@ -2,7 +2,7 @@ import {localizedCopy} from './browser-native-copy';
 import {captureOwnedStatus,displayOwnedStatus} from "./browser-native-copy";
 import {actionIcon} from "./browser-native-copy";
 import { LitElement, html, nothing, css } from "lit";
-import { workspaceStyles } from "../src/renderer/workspace-styles";
+import { workspaceStyles } from "./browser-native-styles";
 type Case = { text: string; expected: boolean };
 type Snippet = {
   name: string;
@@ -800,5 +800,6 @@ export class RegexWorkbench extends LitElement {
   }
 }
 customElements.define("browser-native-regex-workbench", RegexWorkbench);
+
 
 

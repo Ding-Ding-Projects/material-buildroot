@@ -1,3 +1,4 @@
+import {protectBrowserMutation} from './browser-native-confirmation.js';
 import {mountSectionSearch,mountLocalSearch} from './browser-native-search-mount.js';
 const KEY = 'mb-visitor-preferences-v1';
 const initial = () => ({version:1,name:'',focus:false,lowStimulation:false,timeAwareness:false,oneThing:false,momentum:false,nextAction:'',snoozeUntil:0,narration:false,screenReader:false,voiceEn:'',voiceZh:'',rate:1,pitch:1,textScale:1});
@@ -98,7 +99,8 @@ export function mountBrowserPreferences(visitor) {
   });
   const buttons=make('div');buttons.className='visitor-actions';
   make('md-outlined-button','Export browser preferences','匯出瀏覽器偏好',buttons).addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(prefs,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='visitor-preferences.json';section.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);report('Preference download requested; confirm it in browser downloads. Voice identifiers and the chosen name/action are included.','已要求下載偏好，請喺瀏覽器下載記錄確認。內容包括聲音識別碼同所選名稱／下一步。');});
-  make('md-outlined-button','Reset browser preferences','重設瀏覽器偏好',buttons).addEventListener('click',()=>{try{localStorage.removeItem(KEY);}catch{report('Stored preferences could not be removed. Settings are unchanged.','未能移除已儲存偏好，設定保持不變。');return;}prefs=initial();storageState='default';stop();render();report('Browser preferences reset to their shipped defaults. Workbench notes and recovery copies are unchanged.','瀏覽器偏好已重設為原有預設值，工作區筆記同復原副本不變。');});
+  const resetPreferences=make('md-outlined-button','Reset browser preferences','重設瀏覽器偏好',buttons);resetPreferences.addEventListener('click',()=>{try{localStorage.removeItem(KEY);}catch{report('Stored preferences could not be removed. Settings are unchanged.','未能移除已儲存偏好，設定保持不變。');return;}prefs=initial();storageState='default';stop();render();report('Browser preferences reset to their shipped defaults. Workbench notes and recovery copies are unchanged.','瀏覽器偏好已重設為原有預設值，工作區筆記同復原副本不變。');});
+  protectBrowserMutation(resetPreferences,()=>l('Reset only browser attention, narration, name and next-action preferences. Plan notes, recovery copies and companion authentication are unchanged.','只重設瀏覽器專注、旁白、名稱同下一步偏好。計劃筆記、復原副本同配對驗證保持不變。'));
   const render=()=>{
     visitor.dataset.browserFocusMode=String(prefs.focus);visitor.dataset.browserLowStimulation=String(prefs.lowStimulation);
     if(heading){if(prefs.name)heading.textContent=prefs.name;else heading.replaceChildren(...[...originalHeading.childNodes].map(n=>n.cloneNode(true)));}
@@ -114,4 +116,5 @@ export function mountBrowserPreferences(visitor) {
   relocalize();
   mountSectionSearch(section, 'Search browser preferences', '搜尋瀏覽器偏好');
 }
+
 
