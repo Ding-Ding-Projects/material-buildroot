@@ -14,6 +14,55 @@ const field=(page,name)=>panel(page).getByRole('textbox',{name,exact:true});
 const fixtures=new Set();
 test.afterEach(()=>{for(const close of fixtures)close();});
 
+test.describe('scheduled preference decision actions',()=>{
+ test.use({deviceScaleFactor:1.5});
+ for(const width of [1280,360])for(const kind of ['schedule-leave','source-discard','source-remove'])test(`decision actions stay inside ${kind} at ${width}x752`,async({page})=>{
+  await page.setViewportSize({width:1280,height:752});await page.emulateMedia({colorScheme:'light'});
+  const f=await open(page,{language:'bilingual'});
+  try{
+   if(kind==='schedule-leave'){
+    await button(page,'Add local rule · 新增本機規則').click();
+    await panel(page).evaluate(el=>void el.confirmLeave());
+   }else{
+    if(kind==='source-remove')await f.service.enrollmentSave({expectedRevision:null,label:'Fixture source',origin:'https://example.com',kind:'https'});
+    await button(page,'Read stored sources · 讀取儲存來源').click();
+    if(kind==='source-discard'){
+     await field(page,'Source label · 來源標籤').fill('Unsaved source');
+     await button(page,'Discard source draft · 放棄來源草稿').click();
+    }else await button(page,'Remove enrollment · 移除登記 Fixture source').click();
+   }
+   const dialog=panel(page).locator(`#${kind}-dialog`);
+   await expect(dialog.locator('dialog')).toBeVisible();
+   await page.setViewportSize({width,height:752});
+   await dialog.evaluate(async el=>{await Promise.all(el.shadowRoot.getAnimations().map(animation=>animation.finished.catch(()=>{})));});
+   const rectangles=await dialog.evaluate(el=>{
+    const bounds=el.shadowRoot.querySelector('dialog').getBoundingClientRect();
+    return [...el.querySelector('[slot="actions"]').children].map(action=>{
+     const r=action.getBoundingClientRect(),textBounds=[];
+     const walker=document.createTreeWalker(action,NodeFilter.SHOW_TEXT);let text;
+     while(text=walker.nextNode()){if(!text.textContent.trim())continue;const range=document.createRange();range.selectNodeContents(text);for(const fragment of range.getClientRects())if(fragment.width>0)textBounds.push({left:fragment.left-r.left,right:fragment.right-r.right,top:fragment.top-r.top,bottom:fragment.bottom-r.bottom});}
+     return {label:action.textContent.trim(),left:r.left-bounds.left,right:r.right-bounds.right,top:r.top-bounds.top,bottom:r.bottom-bounds.bottom,width:r.width,height:r.height,viewportLeft:r.left,viewportRight:r.right,viewportBottom:r.bottom,textBounds};
+    });
+   });
+   expect(rectangles).toHaveLength(kind==='schedule-leave'?3:2);
+   for(const action of rectangles){
+    expect(action.left,action.label).toBeGreaterThanOrEqual(-1);expect(action.right,action.label).toBeLessThanOrEqual(1);
+    expect(action.top,action.label).toBeGreaterThanOrEqual(-1);expect(action.bottom,action.label).toBeLessThanOrEqual(1);
+    expect(action.viewportLeft,action.label).toBeGreaterThanOrEqual(0);expect(action.viewportRight,action.label).toBeLessThanOrEqual(width);
+    expect(action.viewportBottom,action.label).toBeLessThanOrEqual(752);expect(action.height,action.label).toBeGreaterThanOrEqual(48);
+    expect(action.textBounds.length,action.label).toBeGreaterThan(0);
+    for(const fragment of action.textBounds){expect(fragment.left,action.label).toBeGreaterThanOrEqual(-1);expect(fragment.right,action.label).toBeLessThanOrEqual(1);expect(fragment.top,action.label).toBeGreaterThanOrEqual(-1);expect(fragment.bottom,action.label).toBeLessThanOrEqual(1);}
+   }
+   const focused=()=>dialog.evaluate(el=>[...el.querySelector('[slot="actions"]').children].findIndex(action=>action.matches(':focus-within')));
+   const visited=new Set();for(let step=0;step<rectangles.length*3+4;step++){await page.keyboard.press('Tab');const index=await focused();if(index>=0)visited.add(index);if(visited.size===rectangles.length)break;}
+   expect(visited.size).toBe(rectangles.length);
+   for(let step=0;step<rectangles.length+3&&await focused()!==0;step++)await page.keyboard.press('Tab');
+   expect(await focused()).toBe(0);await page.keyboard.press('Enter');await expect(dialog).toHaveJSProperty('open',false);
+   expect(await f.service.read()).toBeNull();expect(f.errors).toEqual([]);
+  }finally{f.close();}
+ });
+});
+
 test.describe('schedule panel container sizing',()=>{
  test.use({deviceScaleFactor:1.5});
  for(const width of [1200,1280,1440])test(`schedule panel fits a narrow settings column at ${width}x752`,async({page})=>{

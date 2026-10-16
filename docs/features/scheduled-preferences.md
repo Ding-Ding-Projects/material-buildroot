@@ -64,4 +64,24 @@ original styles, then passed at 1200, 1280 and 1440 px widths in bilingual light
 at device ratio 1.5. TypeScript and independent source review passed. The expanded
 Material touch region is excluded from visible-content geometry checks; panel,
 field and control bounds and owning-main scroll containment remain asserted.
-The rebuilt native after-state and identical-tuple measurement are still pending.
+The rebuilt native after-state at `2ed493d3f0f001f13e3c21422d6a598ae451d85b`
+passed the identical 1280 × 752, actual scale 1.5, bilingual/light tuple: both layout
+and editor measured 503 px client width and 503 px scroll width. The seven-element
+receipt validated and the contained fields were visually inspected.
+
+## Decision-dialog action repair
+
+That native run exposed a separate action-row defect. In a settled decision dialog
+spanning x=360–920, Keep editing spanned x=147.760–316.615, entirely outside its
+owner. A five-element receipt and a separate animation-settled capture confirmed
+the non-wrapping, right-aligned action row. The earlier transitional capture was
+excluded from the finding. A scroll-width-only assertion would miss this case.
+
+The current repair wraps the three owned dialog action rows and bounds their
+wrap-capable labels without removing actions or hiding overflow. Six focused cases
+at 1280 and 360 px, bilingual/light and device ratio 1.5, passed action/text-fragment
+bounds, minimum height and keyboard traversal/cancellation. TypeScript and
+independent source review passed. Rebuilt native after proof remains pending.
+The 360 px case opens at 1280 before resizing; it does not prove fresh opening at
+360 px. Source-enrollment preservation and complete keyboard accessibility remain
+separate from the bounded cancellation assertions.
