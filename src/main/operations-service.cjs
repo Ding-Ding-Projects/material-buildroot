@@ -8,6 +8,7 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { resolveDomains } = require("./configuration/domains.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
@@ -776,15 +777,22 @@ function createOperationsService({
     )
       reject("BLOCKED_INTENT_CHANGED");
   }
+  async function configurationDomains(id, item) {
+    const result = await executeProject({ workspaceId: id, runtime: item.runtime, target: "material-config-domains", jobs: 1 });
+    if (result.state !== "succeeded") reject("DOMAIN_DISCOVERY_FAILED");
+    project(id);
+    return resolveDomains(item, result.stdout);
+  }
   const config = createConfigurationService({
     semanticAdapter: async (roots) => {
       if (!kconfigAdapter) reject("PYTHON_NOT_ADMITTED");
       return kconfigAdapter(roots);
     },
-    resolveWorkspace: async (id) => {
+    resolveWorkspace: async (id, domain = "buildroot") => {
       const item = project(id);
       if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
       if (!item.runtime) reject("SELECT_RUNTIME");
+      if (domain !== "buildroot") return { domains: await configurationDomains(id, item) };
       const environment = await execution.probeEnvironment({
         grantId: item.grantId,
         runtime: item.runtime,
@@ -817,6 +825,10 @@ function createOperationsService({
     },
     executor: async (input) => {
       const item = project(input.workspaceId);
+      if (input.domain !== "buildroot") {
+        const roots = (await configurationDomains(input.workspaceId, item))[input.domain];
+        if (!roots || roots.sourceRoot !== input.sourceRoot || roots.outputRoot !== input.outputRoot || roots.binding !== input.binding || roots.reconcileTarget !== input.target) reject("DOMAIN_BINDING_CHANGED");
+      }
       if (!item.runtime) reject("SELECT_RUNTIME");
       const result = await executeProject({
         workspaceId: input.workspaceId,
@@ -1072,7 +1084,7 @@ function createOperationsService({
       action === "build.submit" && Object.hasOwn(request, "resources")
         ? ["resources"]
         : [];
-    exact(request, ["action", ...fields[action], ...optional]);
+    exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     switch (action) {
       case "documentation.list":

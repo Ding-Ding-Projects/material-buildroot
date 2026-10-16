@@ -107,13 +107,13 @@ function createConfigurationService({
   const queues = new Map(),
     history = new Map();
   async function roots(workspaceId, domain = "buildroot") {
-    const workspace = await resolveWorkspace(workspaceId);
+    const workspace = await resolveWorkspace(workspaceId, domain);
     const grant =
       domain === "buildroot" ? workspace : workspace?.domains?.[domain];
     if (!grant || grant.granted !== true) fail("ROOT_NOT_GRANTED");
     const sourceRoot = await fs.realpath(grant.sourceRoot),
       outputRoot = await fs.realpath(grant.outputRoot);
-    if (sourceRoot === outputRoot) fail("SEPARATE_OUTPUT_REQUIRED");
+    if (sourceRoot === outputRoot && !(domain !== "buildroot" && grant.componentInTree === true)) fail("SEPARATE_OUTPUT_REQUIRED");
     if (
       grant.reconcileTarget &&
       ![
@@ -125,7 +125,7 @@ function createConfigurationService({
       ].includes(grant.reconcileTarget)
     )
       fail("INVALID_RECONCILE_TARGET");
-    return { ...grant, sourceRoot, outputRoot };
+    return { ...grant, sourceRoot, outputRoot, domain, reconcileTarget: grant.reconcileTarget || DOMAINS[domain], kconfig: grant.kconfig || (domain === "buildroot" ? {} : { entrypoint: domain === "busybox" ? "Config.in" : "Kconfig", prefix: "CONFIG_" }) };
   }
   async function configFile(root) {
     const file = path.join(root, ".config");
@@ -184,12 +184,14 @@ function createConfigurationService({
       };
     }
   }
+  function revision(r, text) { return hash(JSON.stringify({ domain: r.domain, sourceRoot: r.sourceRoot, outputRoot: r.outputRoot, binding: r.binding || null, text })); }
   async function inspect(input) {
     domain(input);
     return serial(input, async (r) => {
       const { text } = await read(r.outputRoot);
       return {
-        revision: hash(text),
+        revision: revision(r, text),
+        domain: r.domain,
         ...parseConfig(text),
         semantics: await semantics(r),
         domains: DOMAINS,
@@ -200,9 +202,10 @@ function createConfigurationService({
     domain(input);
     return serial(input, async (r, key) => {
       const before = await read(r.outputRoot);
-      if (input.revision !== hash(before.text)) fail("REVISION_CONFLICT");
+      if (input.revision !== revision(r, before.text)) fail("REVISION_CONFLICT");
       if (input.changes && semanticAdapter) {
         const semantic = await semanticAdapter(r);
+        if (!semantic?.available || !semantic.tree) fail("KCONFIG_SEMANTICS_UNAVAILABLE");
         const symbols = new Map();
         const walk = (node) => {
           if (node.symbol) symbols.set(node.symbol, node);
@@ -222,7 +225,8 @@ function createConfigurationService({
           workspaceId: input.workspaceId,
           sourceRoot: r.sourceRoot,
           outputRoot: r.outputRoot,
-          target: r.reconcileTarget || "olddefconfig",
+          target: r.reconcileTarget,
+          binding: r.binding,
           domain: input.domain || "buildroot",
           args: [],
         });
@@ -247,7 +251,7 @@ function createConfigurationService({
         if (input._undo) stack.pop();
         else stack.push(before.text);
         history.set(key, stack.slice(-20));
-        return { revision: hash(after.text), values: effective, diff };
+        return { revision: revision(r, after.text), values: effective, diff };
       } catch (error) {
         await configFile(r.outputRoot);
         await atomic(before.file, before.text);
@@ -255,32 +259,31 @@ function createConfigurationService({
       }
     });
   }
+  function defconfigDirectory(r) {
+    if (r.domain !== "linux") return "configs";
+    const arch = r.kconfig?.environment?.SRCARCH;
+    if (!/^[A-Za-z0-9_+-]+$/.test(arch || "")) fail("KERNEL_ARCHITECTURE_UNAVAILABLE");
+    return "arch/" + arch + "/configs";
+  }
   async function listDefconfigs(input) {
+    domain(input);
     return serial(input, async (r) => {
-      const base = path.join(r.sourceRoot, "configs");
+      const relative = defconfigDirectory(r), base = path.join(r.sourceRoot, relative);
+      if (!(await fs.stat(base).catch(() => null))?.isDirectory()) return [];
       if ((await fs.realpath(base)) !== base) fail("UNSAFE_DEFCONFIG_PATH");
       const names = await fs.readdir(base, { withFileTypes: true });
       if (names.length > 10000) fail("DEFCONFIG_LIMIT");
-      return names
-        .filter(
-          (e) => e.isFile() && /^[A-Za-z0-9_.+-]+_defconfig$/.test(e.name),
-        )
-        .map((e) => ({ name: e.name, path: `configs/${e.name}` }));
+      return names.filter(e => e.isFile() && /^(?:[A-Za-z0-9_.+-]+_)?defconfig$/.test(e.name)).map(e => ({ name: e.name, path: relative + "/" + e.name }));
     });
   }
   async function applyDefconfig(input) {
-    if (!/^configs\/[A-Za-z0-9_.+-]+_defconfig$/.test(input.path || ""))
-      fail("INVALID_DEFCONFIG");
     return reconcile(input, async (_, r) => {
-      const file = path.join(r.sourceRoot, input.path);
-      if (
-        (await fs.realpath(path.dirname(file))) !==
-        path.join(r.sourceRoot, "configs")
-      )
-        fail("UNSAFE_DEFCONFIG_PATH");
+      const relative = defconfigDirectory(r), name = String(input.path || "").slice(relative.length + 1);
+      if (input.path !== relative + "/" + name || !/^(?:[A-Za-z0-9_.+-]+_)?defconfig$/.test(name)) fail("INVALID_DEFCONFIG");
+      const file = path.join(r.sourceRoot, relative, name);
+      if ((await fs.realpath(path.dirname(file))) !== path.join(r.sourceRoot, relative)) fail("UNSAFE_DEFCONFIG_PATH");
       const st = await fs.lstat(file);
-      if (!st.isFile() || st.isSymbolicLink() || st.size > 4 * 1024 * 1024)
-        fail("UNSAFE_DEFCONFIG_PATH");
+      if (!st.isFile() || st.isSymbolicLink() || st.nlink !== 1 || st.size > 4 * 1024 * 1024) fail("UNSAFE_DEFCONFIG_PATH");
       return fs.readFile(file, "utf8");
     });
   }

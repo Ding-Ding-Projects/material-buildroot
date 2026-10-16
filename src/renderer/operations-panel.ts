@@ -43,6 +43,7 @@ export class OperationsPanel extends LitElement {
     logs: { state: true },
     selectedJob: { state: true },
     config: { state: true },
+    configDomain: { state: true },
     changes: { state: true },
     defconfigs: { state: true },
     artifacts: { state: true },
@@ -78,6 +79,7 @@ export class OperationsPanel extends LitElement {
   logs: any[] = [];
   selectedJob = "";
   config: any;
+  configDomain = "buildroot";
   changes: Record<string, { type: string; value: unknown }> = {};
   defconfigs: any[] = [];
   artifacts: any[] = [];
@@ -413,6 +415,7 @@ export class OperationsPanel extends LitElement {
     if (!this.workspace) return;
     const result = await this.run("config.inspect", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
     });
     if (result !== undefined) {
       this.config = result;
@@ -424,6 +427,7 @@ export class OperationsPanel extends LitElement {
     if (!this.config || !Object.keys(this.changes).length) return;
     const result = await this.run("config.apply", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
       revision: this.config.revision,
       changes: this.changes,
     });
@@ -438,6 +442,7 @@ export class OperationsPanel extends LitElement {
   private async listDefconfigs() {
     const result = await this.run("config.defconfigs", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
     });
     if (Array.isArray(result)) this.defconfigs = result;
   }
@@ -445,6 +450,7 @@ export class OperationsPanel extends LitElement {
     if (!this.config) return;
     const result = await this.run("config.defconfig", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
       revision: this.config.revision,
       path,
     });
@@ -453,6 +459,7 @@ export class OperationsPanel extends LitElement {
   private async undoConfig() {
     const result = await this.run("config.undo", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
       revision: this.config.revision,
     });
     if (result !== undefined) await this.inspectConfig();
@@ -834,7 +841,10 @@ export class OperationsPanel extends LitElement {
     const entries = this.configEntries();
     return html`<section class="panel stack">
       <div class="row">
-        <h2>${this.l("Buildroot configuration", "Buildroot 設定")}</h2>
+        <h2>${this.l("Configuration domain", "設定範圍")}</h2>
+        <md-outlined-select .label=${this.l("Domain", "範圍")} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
+          ${this.options([["buildroot", "Buildroot"], ["linux", "Linux"], ["busybox", "BusyBox"], ["uboot", "U-Boot"]])}
+        </md-outlined-select>
         <md-outlined-button
           ?disabled=${this.pending || !!Object.keys(this.changes).length}
           @click=${this.inspectConfig}

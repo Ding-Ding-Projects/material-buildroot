@@ -6,6 +6,10 @@ const { spawn } = require("node:child_process");
 const TARGETS = Object.freeze([
   "all",
   "olddefconfig",
+  "linux-olddefconfig",
+  "busybox-oldconfig",
+  "uboot-olddefconfig",
+  "material-config-domains",
   "savedefconfig",
   "legal-info",
   "source",
@@ -166,7 +170,7 @@ function canonicalDirectory(value) {
   return real;
 }
 const LINUX_SCRIPT =
-  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "$4"';
+  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; if [ "$4" = material-config-domains ]; then printf "MATERIAL_CONFIG_OUTPUT=%s\n" "$2"; exec make -s --no-print-directory -C "$1" "O=$2" "BR2_EXTERNAL=$5" printvars "VARS=LINUX_DIR BUSYBOX_DIR UBOOT_DIR"; fi; case "$4" in linux-olddefconfig) set -- "$@" "LINUX_KCONFIG_EDITORS=olddefconfig" ;; uboot-olddefconfig) set -- "$@" "UBOOT_KCONFIG_EDITORS=olddefconfig" ;; busybox-oldconfig) yes "" | make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "BUSYBOX_KCONFIG_EDITORS=oldconfig" "$4"; exit $? ;; *) set -- "$@" "MATERIAL_CONFIG_UNUSED=1" ;; esac; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "${7:-$6}" "$4"';
 const ENVIRONMENT_SCRIPT =
   'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; gcc -dumpmachine; gcc -dumpfullversion -dumpversion';
 const RESOURCE_SCRIPT = `set -eu
