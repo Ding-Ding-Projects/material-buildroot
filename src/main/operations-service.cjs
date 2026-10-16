@@ -102,6 +102,8 @@ const fields = {
   "package.preview": ["workspaceId", "externalTreeId", "model"],
   "package.discover": ["workspaceId", "query", "offset", "limit"],
   "package.import": ["workspaceId", "packageId", "revision"],
+  "package.editors": ["workspaceId"],
+  "package.editor.open": ["workspaceId", "packageId", "revision", "file", "fileHash", "editorId"],
   "package.apply": [
     "workspaceId",
     "externalTreeId",
@@ -1640,6 +1642,10 @@ function createOperationsService({
       }
       case "package.preview":
         return packageAuthoring.preview(request);
+      case "package.editors":
+        return require("./configuration/package-editor.cjs").discoverEditors();
+      case "package.editor.open":
+        return packageDiscovery.openEditor(request);
       case "package.discover":
         return packageDiscovery.discover({
           workspaceId: request.workspaceId,
