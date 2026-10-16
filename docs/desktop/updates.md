@@ -1,5 +1,7 @@
 # Desktop updates
 
+[香港粵語](updates.zh-HK.md)
+
 The installed Windows package starts a host-owned update check after 15 seconds and repeats discovery every six hours. A manual check resumes discovery after cancellation. Development and non-Windows processes report that automatic installation is unavailable. One updater instance is shared by the operations workspace and persistent application banner; the renderer polls its redacted state every two seconds without initiating discovery.
 
 ## Feed and version selection
