@@ -54,3 +54,24 @@ The additive `appearance.profile` field is null or a stable local profile ID. Ex
 ### Additional motion consumers
 
 The expanded workspace adds per-keyframe easing, numeric markers, timeline zoom, parallel groups, sequence offsets, iteration start, infinite iteration, state-attribute triggers and renderer-supported scroll/view timelines. A scroll timeline uses the nearest actual scroll container; a view timeline uses the exact target. Unsupported renderer APIs retain the authored track and report an unavailable preview. Reduced motion continues to cancel animation without erasing authoring values. These source changes do not establish runtime timing, accessibility or screenshot acceptance.
+
+### Motion authoring and identity continuation
+
+The motion workspace now authors a bounded cubic path through six numeric relative coordinates, each within ±24 px. Orientation stays upright. A damped spring model uses explicit mass, stiffness, damping and velocity, emits exactly 32 sampled points, clamps values to the admitted property bounds and snaps the final sample to the target. It is a declared bounded sampling model, not a claim that the browser supplies a native spring engine. Repeat holds append a stationary endpoint segment; automatic timing delegates duration to the renderer. Keyframe sets can be copied locally, pasted and reversed, and cubic-Bezier points have individual numeric controls.
+
+Unsupported JSON imports remain unapplied. The user can explicitly retain the bounded original locally and re-export it unchanged; the retained original never enters history, schedules or renderer styles. Invalid JSON is not admitted to that retained store. This preserves portable input without pretending the unavailable fields executed.
+
+Existing plan, snapshot, revision, native-history and activity rows now carry appearance identities derived from their actual record IDs/revisions. No display label or personal wording is persisted as an identity. Appearance history restore preserves the current named-preset collection and existing local track names because those user-authored names are deliberately excluded from the safe historical projection.
+
+| Capability | Source consumer | Persistence | Runtime verdict |
+| --- | --- | --- | --- |
+| Static properties and semantic states | Validated declarations and scoped state selectors | Local appearance document | Unrun |
+| Installed fonts and standard axes | Host family catalog and CSS font axes | Local values, admitted family metadata in history | Unrun |
+| Color translation and rainbow | sRGB translator and CSS animation | Local values/shared speed | Unrun |
+| Motion tracks/keyframes/timing | Web Animations with bounded schema | Local tracks, safe history, profiles | Unrun |
+| Cubic paths and sampled springs | Numeric path keyframes and 32-point spring sampler | Typed track parameters | Unrun |
+| Scroll/view progress | Feature-detected renderer timelines | Typed timeline/axis values | Unrun |
+| Schedules | Existing evaluated rule snapshots and temporary local profile overlay | Stable profile ID in schedule; profile bytes local only | Unrun |
+| Local history | Separate host-owned append-only history adapter | Immutable validated revisions | Unrun |
+| Unsupported portable input | Explicit local retention and unchanged export | Separate bounded local store | Unrun |
+| Custom logos | Isolated decoder, fixed PNG derivatives | Local derivative cache; excluded from history/export | Unrun |
