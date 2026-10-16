@@ -1,0 +1,4 @@
+/** Only non-secret, schema-bound presentation snapshots reach the host history adapter. */
+export function historySnapshot(appearance:unknown,motion:Record<string,{version:number;tracks:any[]}>){const a=structuredClone(appearance) as {presets:Record<string,unknown>};a.presets={};const tracks=structuredClone(motion);for(const record of Object.values(tracks))for(const track of record.tracks)track.name='';return {appearance:a,motion:tracks};}
+let queue=Promise.resolve(true);
+export function preserveAppearance(appearance:unknown,motion:Record<string,{version:number;tracks:any[]}>):Promise<boolean>{const snapshot=historySnapshot(appearance,motion);const result=queue.then(async()=>{try{const reply=await window.studio?.appearanceHistory?.({action:'append',snapshot});return reply?.ok===true;}catch{return false;}});queue=result;return result;}

@@ -1,5 +1,5 @@
 /** Bounded presentation schema. No imported selector, CSS declaration or executable value is accepted. */
-export type AppearanceState='normal'|'hover'|'focus'|'pressed'|'selected'|'disabled';
+export type AppearanceState='normal'|'hover'|'focus'|'pressed'|'selected'|'disabled'|'dragged'|'validation'|'loading'|'success'|'warning'|'error';
 export type Values=Record<string,string>;
 export type AppearanceRecord={states:Partial<Record<AppearanceState,Values>>};
 export type AppearanceDocument={version:1;elements:Record<string,AppearanceRecord>;rainbowSpeed:number;reducedMotion:boolean;presets:Record<string,Values>};
@@ -15,20 +15,26 @@ export const properties:Property[]=[
  choice('case','Capitalization','大小寫','type','text-transform',['none','uppercase','lowercase','capitalize']),
  choice('caps','Small capitals','小型大寫','type','font-variant-caps',['normal','small-caps','all-small-caps']),
  choice('align','Text alignment','文字對齊','type','text-align',['start','center','end','justify']),choice('direction','Text direction','文字方向','type','direction',['ltr','rtl']),
- number('letters','Character spacing','字距','type','letter-spacing',0,12),number('words','Word spacing','詞距','type','word-spacing',0,24),number('line','Line height','行距','type','line-height',1,3,''),
- ...[['foreground','Text color','文字顏色','color'],['background','Background','背景','background-color'],['borderColor','Border color','邊框顏色','border-color'],['decorationColor','Decoration color','裝飾線顏色','text-decoration-color']].map(([id,en,zh,css])=>({id,en,zh,css,section:'color',kind:'color'} as Property)),
+ number('axisWeight','Variable weight axis','可變字重軸','type','--appearance-axis-weight',100,900,''),number('axisWidth','Variable width axis','可變寬度軸','type','--appearance-axis-width',50,200,''),number('axisSlant','Variable slant axis','可變傾斜軸','type','--appearance-axis-slant',-30,30,''),number('axisOptical','Optical size axis','光學大小軸','type','--appearance-axis-optical',8,144,''),
+ number('shadowX','Text shadow horizontal','文字陰影水平','type','--appearance-shadow-x',-24,24),number('shadowY','Text shadow vertical','文字陰影垂直','type','--appearance-shadow-y',-24,24),number('shadowBlur','Text shadow blur','文字陰影模糊','type','--appearance-shadow-blur',0,32),
+ number('baseline','Baseline offset','基線位移','type','vertical-align',-24,24),number('outline','Text outline','文字描邊','type','-webkit-text-stroke-width',0,3),
+ choice('script','Superscript / subscript','上標／下標','type','vertical-align',['baseline','super','sub','middle']),
+ number('letters','Character spacing','字距','type','letter-spacing',-2,12),number('words','Word spacing','詞距','type','word-spacing',-4,24),number('line','Line height','行距','type','line-height',1,3,''),
+ ...[['foreground','Text color','文字顏色','color'],['background','Background','背景','background-color'],['borderColor','Border color','邊框顏色','border-color'],['decorationColor','Decoration color','裝飾線顏色','text-decoration-color'],['outlineColor','Text outline color','文字描邊顏色','-webkit-text-stroke-color']].map(([id,en,zh,css])=>({id,en,zh,css,section:'color',kind:'color'} as Property)),
  number('padding','Padding','內距','geometry','padding',0,48),number('gap','Gap','間距','geometry','gap',0,48),number('radius','Corner radius','圓角','geometry','border-radius',0,64),number('border','Border width','邊框粗細','geometry','border-width',0,8),
  choice('borderStyle','Border style','邊框款式','geometry','border-style',['none','solid','dashed','dotted','double']),
+ number('opacity','Opacity','不透明度','geometry','opacity',.6,1,''),number('rotate','Rotation','旋轉','geometry','rotate',-15,15,'deg'),number('scale','Scale','縮放','geometry','scale',.8,1.2,''),number('translateX','Horizontal translation','水平位移','geometry','translate',-24,24),
  number('width','Maximum width','最大寬度','geometry','max-width',240,1600),number('minHeight','Minimum height','最小高度','geometry','min-height',44,600),
  number('duration','Transition duration','過渡時間','motion','transition-duration',0,2000,'ms'),number('delay','Transition delay','過渡延遲','motion','transition-delay',0,2000,'ms'),
  choice('easing','Transition easing','過渡緩動','motion','transition-timing-function',['linear','ease','ease-in','ease-out','ease-in-out','steps(4, end)']),
  choice('transition','Transition property','過渡屬性','motion','transition-property',['none','color','background-color','border-color','border-radius','letter-spacing'])
 ];
-export const states:AppearanceState[]=['normal','hover','focus','pressed','selected','disabled'];
+export const states:AppearanceState[]=['normal','hover','focus','pressed','selected','disabled','dragged','validation','loading','success','warning','error'];
 export const defaultDocument=():AppearanceDocument=>({version:1,elements:{},rainbowSpeed:3,reducedMotion:false,presets:{}});
 export function validValue(property:Property,value:unknown):value is string{
- if(typeof value!=='string'||value.length>100)return false;
+ if(typeof value!=='string'||value.length>128)return false;
  if(property.kind==='color')return /^#[\da-f]{6}([\da-f]{2})?$/i.test(value)||(property.id==='background'&&value==='rainbow');
+ if(property.id==='family')return /^[\p{L}\p{N} ._-]{1,128}$/u.test(value);
  if(property.kind==='choice')return !!property.choices?.includes(value);
  return value.trim()!==''&&Number.isFinite(Number(value))&&Number(value)>=property.min!&&Number(value)<=property.max!;
 }
@@ -45,6 +51,8 @@ export function validateDocument(value:unknown):AppearanceDocument{
 }
 export const rainbowSeconds=(level:number)=>Math.max(2,24-2*level);
 export function declarations(values:Values):string{
+ const extra:string[]=[];if(['shadowX','shadowY','shadowBlur'].some(key=>key in values))extra.push('text-shadow:var(--appearance-shadow-x,0px) var(--appearance-shadow-y,0px) var(--appearance-shadow-blur,0px) currentColor!important');
+ const axes=[['axisWeight','wght'],['axisWidth','wdth'],['axisSlant','slnt'],['axisOptical','opsz']].filter(([key])=>key in values).map(([key,tag])=>`"${tag}" ${Number(values[key])}`).join(',');if(axes)extra.push('font-variation-settings:'+axes+'!important');
  return properties.filter(p=>p.id in values&&validValue(p,values[p.id])).map(p=>{
   const v=values[p.id];if(v==='rainbow')return 'background-color:#6750a4;animation:appearance-rainbow var(--appearance-rainbow-duration,18s) linear infinite';
   const cssValue=p.kind==='number'?`${Number(v)}${p.unit}`:p.id==='family'?`"${v}","Microsoft JhengHei",sans-serif`:v;
@@ -52,9 +60,9 @@ export function declarations(values:Values):string{
   if(p.id==='foreground')for(const token of ['--md-sys-color-on-surface','--md-outlined-button-label-text-color','--md-text-button-label-text-color','--md-filled-button-label-text-color','--md-outlined-text-field-input-text-color'])rule+=`;${token}:${cssValue}`;
   if(p.id==='size')rule+=`;--md-outlined-button-label-text-size:${cssValue};--md-text-button-label-text-size:${cssValue};--md-outlined-text-field-input-text-size:${cssValue}`;
   return rule;
- }).join(';');
+ }).concat(extra).join(';');
 }
-export const stateSelectors:Record<AppearanceState,string>={normal:'',hover:':hover',focus:':focus-within',pressed:':active',selected:':is([selected],[aria-selected="true"],[checked])',disabled:':is([disabled],[aria-disabled="true"])'};
+export const stateSelectors:Record<AppearanceState,string>={normal:'',hover:':hover',focus:':focus-within',pressed:':active',selected:':is([selected],[aria-selected="true"],[checked])',disabled:':is([disabled],[aria-disabled="true"])',dragged:'[data-dragging="true"]',validation:':is([aria-invalid="true"],[invalid],[error],[data-state="validation"])',loading:':is([aria-busy="true"],[data-state="loading"])',success:'[data-state="success"]',warning:'[data-state="warning"]',error:'[data-state="error"]'};
 export const rainbowCss='@keyframes appearance-rainbow{0%,100%{background-color:#bd3357}16%{background-color:#b86b00}33%{background-color:#548200}50%{background-color:#008480}66%{background-color:#4e62be}83%{background-color:#a442ab}}';
 export function contrast(a:string,b:string){const luminance=(hex:string)=>{const c=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 export function hsvToHex(h:number,s:number,v:number,a=1){const f=(n:number)=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1));};return '#'+[f(5),f(3),f(1),a].map(x=>Math.round(Math.max(0,Math.min(1,x))*255).toString(16).padStart(2,'0')).join('');}
@@ -87,3 +95,4 @@ const permissionChecks=new Set<AppearancePermissionCheck>();
 export function registerAppearancePermissionCheck(check:AppearancePermissionCheck){permissionChecks.add(check);return ()=>{permissionChecks.delete(check);};}
 export function appearancePermissionsAllowed(targetKey:string,state:string,keys:readonly string[]){for(const check of permissionChecks){try{if(!check(targetKey,state,keys))return false;}catch{return false;}}return true;}
 export function appearanceExperienceId(targetKey:string,state:string,property:string){return `appearance:${targetKey}:${state}:${property}`;}
+

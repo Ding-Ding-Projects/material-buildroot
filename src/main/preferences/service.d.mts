@@ -20,8 +20,9 @@ export interface ScheduleEffective {
   values: {
     language: "en" | "zh-HK" | "bilingual";
     "appearance.theme": "system" | "light" | "dark";
+  "appearance.profile": string | null;
   };
-  provenance: Record<"language" | "appearance.theme", string | null>;
+  provenance: Record<"language" | "appearance.theme" | "appearance.profile", string | null>;
   appliedRuleIds: string[];
   issues: Array<{ ruleId: string; code: string }>;
 }

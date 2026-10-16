@@ -1,7 +1,7 @@
 export type LogoOptions={fit:'contain'|'cover';x:number;y:number;zoom:number;background:string};
 export type LogoRecord={version:1;variants:{size:number;data:string}[]};
 const key='material-buildroot.appearance-logo.v1';
-function validDerivative(size:number,data:string){try{const encoded=data.slice('data:image/png;base64,'.length);const header=atob(encoded.slice(0,44));if(header.length<24)return false;const bytes=Uint8Array.from(header,c=>c.charCodeAt(0));const view=new DataView(bytes.buffer);return String.fromCharCode(...bytes.slice(12,16))==='IHDR'&&view.getUint32(16)===size&&view.getUint32(20)===size;}catch{return false;}}
+export function validDerivative(size:number,data:string){try{const encoded=data.slice('data:image/png;base64,'.length);const header=atob(encoded.slice(0,44));if(header.length<24)return false;const bytes=Uint8Array.from(header,c=>c.charCodeAt(0));const view=new DataView(bytes.buffer);return String.fromCharCode(...bytes.slice(12,16))==='IHDR'&&view.getUint32(16)===size&&view.getUint32(20)===size;}catch{return false;}}
 export async function convertLogo(file:File,options:LogoOptions):Promise<LogoRecord>{
  if(file.size>2097152||file.size<32)throw Error('bounds');
  const bytes=await file.arrayBuffer();return new Promise((resolve,reject)=>{

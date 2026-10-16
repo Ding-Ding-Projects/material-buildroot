@@ -22,6 +22,9 @@ const {
   createSharedModeService,
 } = require("./privacy/shared-mode-service.cjs");
 const { createSharedModeIPC } = require("./privacy/shared-mode-ipc.cjs");
+const { createAppearanceFonts } = require('./appearance-fonts.cjs');
+const appearanceFonts = createAppearanceFonts();
+const {createAppearanceHistory}=require('./appearance-history.cjs');
 const { createScheduleIPC } = require("./preferences/schedule-ipc.cjs");
 const verification = process.argv.filter((arg) =>
   arg.startsWith("--verification-user-data="),
@@ -151,6 +154,9 @@ else {
         sharedModeService?.close();
         sharedModeService = undefined;
       }
+      const appearanceHistory=createAppearanceHistory({filePath:path.join(app.getPath('userData'),'appearance-history'),fonts:appearanceFonts});
+      ipcMain.handle('studio:appearance-history',(event,value)=>desktop.admitted(event)?appearanceHistory.request(value):{ok:false,code:'UNAUTHORIZED'});
+      ipcMain.handle('studio:appearance-fonts', (event) => desktop.admitted(event) ? appearanceFonts.read() : {ok:false,code:'UNAUTHORIZED'});
       sharedModeIPC = createSharedModeIPC({
         desktop,
         service: sharedModeService,
@@ -199,6 +205,7 @@ else {
             return {
               language,
               "appearance.theme": workspace.state.preferences.theme,
+              "appearance.profile": null,
             };
           },
           vault: createVault({
@@ -310,3 +317,5 @@ else {
     store?.close();
   });
 }
+
+
