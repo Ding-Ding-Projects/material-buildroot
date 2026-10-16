@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing} from 'lit';
 import '@material/web/labs/card/filled-card.js';
 import '@material/web/focus/md-focus-ring.js';
@@ -72,12 +73,12 @@ export class PersonalVocabularyDrop extends LitElement{
   this.unsubscribe?.();this.unsubscribeOutcome?.();this.motion.removeEventListener('change',this.motionChanged);this.observer.disconnect();
   this.reset();this.view.remove();super.disconnectedCallback();
  }
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
  private presentationHeadline(headline:string|null){
   // Display-only fallback. Never normalize the mapping or a nonblank heading;
   // other Unicode formatting characters retain their existing behavior.
   return headline===null||/^[ \t\r\n]*$/u.test(headline)
-   ?this.l('Personal wording applied','已套用個人用語'):headline;
+   ?this.l('Personal wording applied','已套用個人用語',true):headline;
  }
  private clearRenderedText(){
   // Retain Lit's comment anchors and TextPart nodes so the next outcome can
@@ -131,7 +132,7 @@ export class PersonalVocabularyDrop extends LitElement{
  private async receive(outcome:VocabularyOutcome){
   this.reset();if(!this.isConnected||!vocabulary.available()||outcome.state==='suppressed')return;
   this.kind=outcome.state;
-  this.currentText=outcome.state==='applied'?this.presentationHeadline(outcome.headline):outcome.state==='invalid'?this.l('Choose one valid vocabulary JSON file, no larger than 256 KiB. Existing wording was not changed.','請選擇一個有效嘅詞彙 JSON 檔，最大 256 KiB。原有用語未有變更。'):this.l('The local file or storage could not confirm the change. Reload and review the saved wording before retrying.','本機檔案或儲存未能確認變更。請重新載入並檢視已儲存用語，再試一次。');
+  this.currentText=outcome.state==='applied'?this.presentationHeadline(outcome.headline):outcome.state==='invalid'?this.l('Choose one valid vocabulary JSON file, no larger than 256 KiB. Existing wording was not changed.','請選擇一個有效嘅詞彙 JSON 檔，最大 256 KiB。原有用語未有變更。',true):this.l('The local file or storage could not confirm the change. Reload and review the saved wording before retrying.','本機檔案或儲存未能確認變更。請重新載入並檢視已儲存用語，再試一次。',true);
   this.view.kind=this.kind;this.view.setAttribute('data-outcome',this.kind);this.view.phase=this.motion.matches?'hold':'enter';
   const version=this.epoch;await this.syncBoundary();
   if(version!==this.epoch||!this.currentText||!this.isConnected||!vocabulary.available())return;
