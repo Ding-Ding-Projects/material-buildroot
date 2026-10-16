@@ -21,6 +21,7 @@ const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs"
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { OutputViewers } = require("./deployment/output-viewers.cjs");
 const { SdkExport } = require("./deployment/sdk-export.cjs");
+const { ForgePublication } = require('./execution/forge-publication.cjs');
 const { CloudDestinations } = require("./deployment/cloud-destinations.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
@@ -152,6 +153,12 @@ const fields = {
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
   "sdk.preview": ["workspaceId", "fileId"],
   "sdk.export": ["workspaceId", "id"],
+  "forge.list": ["workspaceId"],
+  "forge.inspect": ["workspaceId", "repository"],
+  "forge.preview": ["workspaceId", "selectionId", "sourceRevision", "fileIds", "visibility"],
+  "forge.start": ["workspaceId", "id", "consent"],
+  "forge.cancel": ["workspaceId", "id"],
+  "forge.readback": ["workspaceId", "id", "selectionId", "consent"],
   "cloud.list": ["workspaceId"],
   "cloud.import": ["workspaceId"],
   "cloud.remove": ["workspaceId", "id"],
@@ -1253,6 +1260,16 @@ function createOperationsService({
   const outputViewers = new Map();
   const sdkExports = new Map();
   const cloudDestinations = new Map();
+  const forgePublications = new Map();
+  function forgePublication(id) {
+    project(id);
+    if (!forgePublications.has(id)) forgePublications.set(id, new ForgePublication({
+      directory: path.join(directory, "forge-publication", id), setup: executionSetup,
+      viewer: outputViewer(id), dialog, parentWindow,
+      manifest: paths => perform({action:"artifacts.manifest",workspaceId:id,paths}),
+    }));
+    return forgePublications.get(id);
+  }
   function cloudDestination(id) {
     project(id);
     if (!cloudDestinations.has(id)) cloudDestinations.set(id, new CloudDestinations({
@@ -1491,6 +1508,17 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("forge.")) {
+      const forge = forgePublication(request.workspaceId);
+      switch (action) {
+        case "forge.list": return forge.list();
+        case "forge.inspect": return forge.inspect(request);
+        case "forge.preview": return forge.preview(request);
+        case "forge.start": return forge.start(request);
+        case "forge.cancel": return forge.cancel(request.id);
+        case "forge.readback": return forge.readback(request);
+      }
+    }
     if (action.startsWith("cloud.")) {
       const cloud = cloudDestination(request.workspaceId);
       switch (action) {
@@ -2297,6 +2325,7 @@ function createOperationsService({
       executionSetup.dispose();
       executionJobs?.dispose();
       for (const cloud of cloudDestinations.values()) cloud.dispose();
+      for (const forge of forgePublications.values()) forge.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
