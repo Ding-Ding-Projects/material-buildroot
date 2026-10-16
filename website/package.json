@@ -11,7 +11,9 @@
     "@fontsource-variable/roboto": "5.2.9",
     "@material/web": "2.4.1",
     "esbuild": "0.28.2",
-    "markdown-it": "15.0.2"
+    "fflate": "0.8.2",
+    "markdown-it": "15.0.2",
+    "pdf-lib": "1.17.1"
   },
   "devDependencies": {
     "playwright": "1.62.1"
