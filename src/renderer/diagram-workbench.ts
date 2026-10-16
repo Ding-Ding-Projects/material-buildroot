@@ -19,7 +19,7 @@ export class DiagramWorkbench extends LitElement {
   private undoStack:Layout[]=[];private redoStack:Layout[]=[];
   private drag?:{id:string;start:Point;origin:Point;before:Layout};
   static styles=css`
-    :host{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;color:var(--md-sys-color-on-surface);font:13px Roboto,Arial,sans-serif}
+    :host{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;color:var(--md-sys-color-on-surface);font:13px 'Roboto Variable','Noto Sans HK Variable',Roboto,Arial,sans-serif}
     .tools{flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container)}
     .tools:first-child{gap:0;padding:0 2px}.tools:first-child strong{flex-basis:100%;padding:4px 6px}.tools:last-of-type span{flex:1;min-width:100px}
     .tools strong{margin-right:auto;font-size:12px}.tools span{font-variant-numeric:tabular-nums;font-size:11px}

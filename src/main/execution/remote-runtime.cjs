@@ -1,6 +1,7 @@
 "use strict";
 const fs=require('node:fs'), path=require('node:path'), {randomUUID,createHash}=require('node:crypto');
 const {createJobManager}=require('../jobs/manager.cjs');
+const {AsyncLocalStorage}=require('node:async_hooks');
 const fail=code=>{throw Object.assign(Error(code),{code});};
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const SHA=/^[a-f0-9]{64}$/;
@@ -21,6 +22,7 @@ function descriptor(v){
  return structuredClone(v);
 }
 function createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileGrants,run,scheduler,sourceForTransfer,revalidateSource}){
+ const authorityContext=new AsyncLocalStorage();const checkAuthority=()=>{const authority=authorityContext.getStore();if(authority)authority();};
  const root=path.join(directory,'remote-runtimes');fs.mkdirSync(root,{recursive:true,mode:0o700});
  const file=path.join(root,'targets.json');let rows=[];const active=new Set(),authorized=new Set();let busy=false,closed=false;
  const helper=fs.readFileSync(path.join(__dirname,'remote-helper.py'),'utf8');const encoded=Buffer.from(helper).toString('base64');
@@ -28,19 +30,20 @@ function createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileG
  const save=()=>{const tmp=file+'.'+randomUUID();fs.writeFileSync(tmp,JSON.stringify({version:1,targets:rows}),{flag:'wx',mode:0o600});fs.renameSync(tmp,file);};
  const view=row=>({id:row.id,name:row.descriptor.name,kind:row.descriptor.kind,host:row.descriptor.host,port:row.descriptor.port,authorized:authorized.has(row.id)});
  const target=id=>{const row=rows.find(x=>x.id===id);if(!row)fail('REMOTE_TARGET_UNKNOWN');if(!authorized.has(id))fail('REMOTE_RECONNECT_REQUIRED');return row;};
- async function confirm(message){return (await dialog.showMessageBox(parentWindow,{type:'warning',title:'Remote Buildroot / 遠端 Buildroot',message,buttons:['Cancel / 取消','Continue / 繼續'],defaultId:0,cancelId:0,noLink:true})).response===1;}
- async function choose(title,directory=false){const result=await dialog.showOpenDialog(parentWindow,{title,properties:[directory?'openDirectory':'openFile','dontAddToRecent']});return result.canceled?null:result.filePaths[0]||null;}
+ async function confirm(message){checkAuthority();const result=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Remote Buildroot / 遠端 Buildroot',message,buttons:['Cancel / 取消','Continue / 繼續'],defaultId:0,cancelId:0,noLink:true});checkAuthority();return result.response===1;}
+ async function choose(title,directory=false){checkAuthority();const result=await dialog.showOpenDialog(parentWindow,{title,properties:[directory?'openDirectory':'openFile','dontAddToRecent']});checkAuthority();return result.canceled?null:result.filePaths[0]||null;}
  async function withFile(title,action){const selected=await choose(title);if(!selected)return {cancelled:true};const grant=fileGrants.importFile({path:selected,owner:'remote-runtime'});try{const granted=fileGrants.resolve({id:grant,owner:'remote-runtime'});return await action(granted.path,()=>fileGrants.resolve({id:grant,owner:'remote-runtime'}));}finally{fileGrants.revoke({id:grant,owner:'remote-runtime'});}}
  async function call(row,body){
-  if(closed)fail('REMOTE_CLOSED');const d=row.descriptor,tool=await payloadManager.resolve('ssh');
+  checkAuthority();
+  if(closed)fail('REMOTE_CLOSED');const d=row.descriptor,tool=await payloadManager.resolve('ssh');checkAuthority();
   const hosts=path.join(root,row.id+'.known_hosts'),expected=`${d.port===22?d.host:`[${d.host}]:${d.port}`} ${d.hostKey}\n`;
   if(!fs.existsSync(hosts))fs.writeFileSync(hosts,expected,{flag:'wx',mode:0o600});
   if(fs.lstatSync(hosts).isSymbolicLink()||fs.readFileSync(hosts,'utf8')!==expected)fail('REMOTE_HOST_IDENTITY_CHANGED');
   const python=`python3 -I -c "import sys,json,base64,io;v=json.load(sys.stdin);sys.stdin=io.TextIOWrapper(io.BytesIO(json.dumps(v['request']).encode()));exec(base64.b64decode(v['script']))"`;
   const command=d.kind==='windows-wsl'?`wsl.exe --distribution ${d.distribution} --exec ${python}`:d.kind==='windows-docker'?python.replace(/^python3/,'python'):python;
   const args=['-F','none','-T','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','UpdateHostKeys=no','-o','GlobalKnownHostsFile=none','-o',`UserKnownHostsFile=${hosts}`,'-o','PasswordAuthentication=no','-o','KbdInteractiveAuthentication=no','-o','ForwardAgent=no','-o','ClearAllForwardings=yes','-o','ConnectTimeout=15','-p',String(d.port),`${d.username}@${d.host}`,command];
-  const process=run(tool.path,args,{timeoutMs:10*60*1000,maxBytes:2*1024*1024,inputPipe:true});active.add(process);
-  try{if(!process.writeInput(JSON.stringify({script:encoded,request:{...Object.fromEntries(Object.entries(body).filter(([key])=>['action','id','transferId','sourceDigest','target','parallelism','worker','uid','gid','image','sha256','bytes','chunk','offset','fileIdentity','name','logIdentity'].includes(key))),root:d.root,kind:d.kind,rootIdentity:row.rootIdentity}})))fail('REMOTE_TRANSPORT_UNAVAILABLE');const result=await process.completion;if(result.state!=='succeeded')fail('REMOTE_OUTCOME_UNKNOWN');let value;try{value=JSON.parse(result.stdout);}catch{fail('REMOTE_RESPONSE_INVALID');}if(!value||value.code)fail('REMOTE_OUTCOME_UNKNOWN');return value;}finally{active.delete(process);}
+  checkAuthority();const process=run(tool.path,args,{timeoutMs:10*60*1000,maxBytes:2*1024*1024,inputPipe:true});active.add(process);const authority=authorityContext.getStore();const observer=authority?setInterval(()=>{try{authority();}catch{try{Promise.resolve(process.cancel()).catch(()=>{});}catch{}}},250):null;observer?.unref?.();
+  try{if(!process.writeInput(JSON.stringify({script:encoded,request:{...Object.fromEntries(Object.entries(body).filter(([key])=>['action','id','transferId','sourceDigest','target','parallelism','worker','uid','gid','image','sha256','bytes','chunk','offset','fileIdentity','name','logIdentity'].includes(key))),root:d.root,kind:d.kind,rootIdentity:row.rootIdentity}})))fail('REMOTE_TRANSPORT_UNAVAILABLE');const result=await process.completion;checkAuthority();if(result.state!=='succeeded')fail('REMOTE_OUTCOME_UNKNOWN');let value;try{value=JSON.parse(result.stdout);}catch{fail('REMOTE_RESPONSE_INVALID');}if(!value||value.code)fail('REMOTE_OUTCOME_UNKNOWN');return value;}finally{if(observer)clearInterval(observer);active.delete(process);}
  }
  const jobs=createJobManager({directory:path.join(root,'queue'),adapters:{'remote-build':async(payload,context)=>{
   const row=target(payload.targetId);context.checkpoint({remoteId:payload.id,targetId:payload.targetId,state:'dispatch-unconfirmed'});
@@ -54,7 +57,7 @@ function createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileG
  const saveBindings=()=>{const tmp=recordsFile+'.'+randomUUID();fs.writeFileSync(tmp,JSON.stringify(bindings),{flag:'wx',mode:0o600});fs.renameSync(tmp,recordsFile);};
  const transfers=new Map(),logCursors=new Map();
  for(const binding of bindings)if(binding.admission&&!binding.terminal)scheduler.restoreExternal({id:binding.id,admission:binding.admission});
- async function perform(q){
+ async function performRequest(q){checkAuthority();
   if(!q||typeof q.action!=='string')fail('REMOTE_INVALID_REQUEST');
   const fields={list:[],enroll:[],reconnect:['targetId'],transfer:['targetId','workspaceId'],start:['targetId','transferId','target','parallelism'],observe:['id'],cancel:['id'],outputs:['id'],logs:['id'],download:['id','name','sha256']};
   if(!Object.hasOwn(fields,q.action))fail('REMOTE_INVALID_REQUEST');exact(q,['action',...fields[q.action]]);
@@ -84,10 +87,10 @@ function createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileG
     const row=target(q.targetId),transfer=transfers.get(q.transferId);if(!transfer||transfer.targetId!==row.id||!['all','sdk','legal-info','source'].includes(q.target)||!Number.isInteger(q.parallelism)||q.parallelism<1||q.parallelism>32)fail('REMOTE_BUILD_INVALID');
     if(!await confirm(`Execute ${q.target} from the transferred source on ${row.descriptor.name} with ${q.parallelism} CPU slots? Source code may execute commands on this trusted target.\n喺可信遠端目標執行已傳送來源嘅建置？來源程式碼可執行指令。`))return {cancelled:true};
     if(bindings.length>=500)fail('REMOTE_HISTORY_FULL');
-    await revalidateSource(transfer.workspaceId,transfer.intent);
+    await revalidateSource(transfer.workspaceId,transfer.intent);checkAuthority();
     const resourceDomain='remote:'+hash(row.descriptor.hostKey),storageDomain=resourceDomain+':'+row.rootIdentity;
     const observed={...await call(row,{action:'resources'}),resourceDomain,storageDomain};
-    await revalidateSource(transfer.workspaceId,transfer.intent);
+    await revalidateSource(transfer.workspaceId,transfer.intent);checkAuthority();
     const admission={projectId:transfer.workspaceId,source:transfer.source,output:transfer.output,externalTrees:[],resourceDomain,storageDomain,cpuSlots:q.parallelism,memoryBytes:4*1024**3,storageBytes:16*1024**3,intent:transfer.intent};
     const binding={id:randomUUID(),targetId:q.targetId,transferId:q.transferId,sourceDigest:transfer.sourceDigest,target:q.target,parallelism:q.parallelism,admission,terminal:null};
     scheduler.reserveExternal({id:binding.id,admission,observed});
@@ -119,9 +122,12 @@ fs.writeFileSync(receipt,JSON.stringify({state:'verified',id:q.id,sourceDigest:b
    return result;
   }finally{busy=false;}
  }
+ function perform(q,authority=null){if(authority!==null&&typeof authority!=='function')fail('REMOTE_AUTHORITY_INVALID');return authorityContext.run(authority,()=>performRequest(q));}
  return {perform,dispose(){closed=true;authorized.clear();for(const process of active)process.cancel();},active:()=>busy};
 }
 module.exports={createRemoteRuntime,descriptor};
+
+
 
 
 

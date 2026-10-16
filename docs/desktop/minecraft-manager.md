@@ -22,7 +22,7 @@ Saving preserves unrecognized property lines and creates a uniquely named backup
 
 Choose the exact Minecraft version and Paper or Fabric loader, then enter a Modrinth project identifier. The manager only offers releases whose declared game version and loader match both selections. The host independently checks those values again before installation. Choose the existing `plugins` or `mods` directory as appropriate and explicitly accept executable code and its licence.
 
-The extension download requires an allowlisted HTTPS origin, declared size, SHA-512, and JAR archive signature. Installation never replaces an existing file. Releases declaring required dependencies are refused for automatic installation because dependency resolution is not implemented. Update, remove, dependency orchestration and rollback remain unavailable. A compatibility declaration is not runtime acceptance.
+The extension download requires an allowlisted HTTPS origin, declared size, SHA-512, and JAR archive signature. Installation never replaces an existing file. Releases declaring required dependencies are refused for automatic installation because dependency resolution is not implemented. Managed update/remove/rollback are described in the later continuation below; automatic dependency orchestration remains unavailable. A compatibility declaration is not runtime acceptance.
 
 ## Execution targets
 
@@ -83,7 +83,7 @@ Up to 100 named profiles store edition/version/flavour/target/port/memory values
 
 ### One-time graceful-stop schedules
 
-Choose a local time with its IANA time zone, at most 30 days ahead, for a currently managed server. The application must remain open. Pending actions can be cancelled; due actions are claimed before execution. Restart marks past pending actions missed, future pending actions requiring explicit rescheduling, and in-progress actions interrupted/unverified. It never replays them. A stop request is not an exit confirmation. Recurrence, scheduled start/restart, host shutdown and an operating-system scheduler remain unavailable.
+Choose a local time with its IANA time zone, at most 30 days ahead, for a currently managed server. The application must remain open. Pending actions can be cancelled; due actions are claimed before execution. Restart marks past pending actions missed, future pending actions requiring explicit rescheduling, and in-progress actions interrupted/unverified. It never replays them. A stop request is not an exit confirmation. The later continuation adds bounded elapsed-time recurring restart. Scheduled start from an unmanaged profile, host shutdown and an operating-system scheduler remain unavailable.
 
 ### Remaining completion boundary
 
@@ -123,4 +123,38 @@ Private local transfer records retain the destination, host, state and byte/file
 
 This unit is source-only: no remote host, SSH command, server, container, runtime installer, test, review, capture or producer was invoked. The earlier build receipt for `7218f688219c909a46223778d7b51b66315962b5` does not cover this later source.
 
-Historical Bedrock acquisition, full Fabric runtime provisioning, remote runtime installation, remote Windows destinations, automatic extension provisioning, world activation/migration, recurring schedules and full runtime acceptance remain incomplete. Strict SSH transport and file hashes do not establish game readiness.
+Historical Bedrock acquisition, remote runtime installation, remote Windows destinations, automatic extension dependency provisioning, world activation/migration and full runtime acceptance remain incomplete. The source continuation below adds complete-file Fabric setup, managed extension transactions and bounded recurring restart. Strict SSH transport and file hashes do not establish game readiness.
+
+## Complete-file Fabric setup, managed extensions and recurring restart
+
+### Official installer path
+
+The Distribution view now offers a separate complete-file setup action alongside bootstrap-only acquisition. It creates a new named subfolder and runs only the official Fabric installer with fixed `server`, `-dir`, `-mcversion`, `-loader` and `-downloadMinecraft` arguments. The route follows the [Fabric CLI installation documentation](https://wiki.fabricmc.net/install). No renderer-supplied command or alternate metadata/Maven endpoint is accepted.
+
+Current official metadata must admit the exact game/loader/installer combination. The installer is downloaded from its official Maven URL and verified against the published `.sha256` before native execution consent. The [official Maven index](https://maven.fabricmc.net/net/fabricmc/fabric-installer/1.1.2/) documents the checksum sidecar format. A separately admitted Java executable is required, and the existing selected folder must grant server execution authority. Root is refused where the platform exposes a Unix UID.
+
+After installer exit, the vanilla server archive must match its exact Mojang metadata SHA-1 and length. Every required library in the official Fabric server profile must exist and match the corresponding official Maven SHA-1. Missing metadata, unsupported coordinates, missing checksums or mismatched files leave installation incomplete. Output inventory is bounded to 10,000 files, 32 levels and 2 GiB; the installer itself has a ten-minute process timeout and bounded output. Cancellation uses only the owned installer process. Created incomplete output remains marked and retained.
+
+The receipt names `fabric-server-launch.jar` as the entry point, preserves vanilla `server.jar`, records verified installation-file identities and explicitly leaves `runtimeVerified: false`. Choose the new folder and the Fabric entry point, create configuration and accept the Minecraft EULA before the separate start action. The installer is not a game-server launch and Java/runtime compatibility is not inferred from a successful download. The remote file-provisioning workflow can include the receipt-bound launcher, vanilla archive and verified library inventory, with a 2 GiB total bound.
+
+### Managed extension transactions
+
+The Extensions view now operates from the selected server root rather than an arbitrary plugins/mods folder. Its current distribution receipt and exact entry bytes must match the selected game version and Paper/Fabric loader. Managed install/update uses the existing provider metadata and published SHA-512 acquisition route. Required third-party dependency orchestration remains unavailable and is refused before admission.
+
+A bounded local registry records each provider project, active version and up to 20 retained historical versions. Update/remove first copies the exact verified previous bytes into an independent history file. Promotion never overwrites an unrelated destination. Unknown files are not adopted. Rollback selects an explicit retained version with matching game-version/loader metadata and verifies its saved bytes before restoring them. Remove retains history instead of destroying the old payload.
+
+Transactions write an incomplete journal before destructive changes and retain staged bytes on failure. Startup refuses `.material-extension-incomplete`. The explicit recovery control restores the prior version from verified history, retains a verified proposed payload separately when necessary, and refuses changed/unknown bytes. Only after registry publication and exact restoration does it remove the owned marker. These are stopped-server file operations; they do not establish plugin runtime compatibility.
+
+### Instance-bound scheduled controls
+
+Every managed start returns an opaque `instanceId`; status returns the same identity. Managed stop accepts optional `expectedInstanceId` and refuses a mismatched instance before effect. A saved server identifier alone never authorizes a schedule to act on a later replacement.
+
+Schedules now support stop or restart of the exact current instance. Restart can repeat 1–100 times at an elapsed-time interval of 5–43,200 minutes. The initial instant remains at most 30 days ahead, with the chosen IANA timezone recorded. Intervals are elapsed minutes, not an implicit daylight-saving-aware calendar recurrence. Each successful restart binds the remaining occurrences to its returned replacement identity. A missed, failed or interrupted action is not replayed. The application must remain open.
+
+Restart requests graceful stop and waits for its owned exit before a new launch. The new launch still requires native confirmation when due. A host-only `authorizeExecution` callback is retained, rechecked before stop/start and monitored on the replacement process. It never comes from renderer JSON. Revocation targets only the same instance; a changed instance retires the observer without touching a newer process. Reconnected containers lacking their original launch request do not acquire restart authority.
+
+Companion integration must pair these receipts with its host-only start callback, compare `status.instanceId` and send `expectedInstanceId` on revocation stop. No new extension, installer or schedule API is automatically exposed to a paired browser.
+
+### Current evidence boundary
+
+This continuation is source-only. No installer, Java process, game server, SSH, container, tests, static analysis, review pass, screenshots or producer ran. Earlier desktop receipts do not cover this later candidate. Historical Bedrock distributions without authentic official bytes/checksums remain unavailable. Arbitrary plugin dependency graphs, full version-specific administration, durable native-process adoption and full runtime acceptance remain unfinished.
