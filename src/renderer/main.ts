@@ -113,12 +113,15 @@ class MaterialBuildroot extends LitElement {
     ...this.projectSessions.map(p=>({id:`project:${p.workspaceId}`,en:p.name,zh:p.name,icon:'folder_open'})),
     ...[['projects','Plans','計劃','dashboard'],['activity','Activity','活動','history'],['settings','Settings','設定','settings'],['about','About','關於','info']].map(([id,en,zh,icon])=>({id,en,zh,icon})),
     ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
+    ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
     ...this.settingsEntries().map(e=>({id:`setting:${e.id}`,en:e.text,zh:e.text,icon:'settings'})),
     {id:'setup',en:'First-run setup',zh:'首次設定',icon:'tune'}
   ];}
   private async workspaceDestination(event:CustomEvent){
     const destination=event.detail.destination as string;
     if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before switching tabs.','切換分頁前請先儲存或捨棄目前草稿。');return;}
+    const owner=event.detail.projectContext;
+    if(typeof owner==='string'&&owner){if(!this.projectSessions.some(p=>p.workspaceId===owner)){this.notice=this.noticeText('Reopen the owning project before using its saved utility tab.','使用已儲存工具分頁前，請重新開啟所屬專案。');return;}this.activeProject=owner;}
     if(destination.startsWith('project:')){
       const id=destination.slice(8),project=this.projectSessions.find(p=>p.workspaceId===id);
       if(!project){await this.navigate('operations');if(this.route==='operations'){this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';}this.notice=this.noticeText('Reopen this project through the folder picker to renew access.','請透過資料夾選擇器重新開啟專案，以更新存取權。');return;}
@@ -130,14 +133,16 @@ class MaterialBuildroot extends LitElement {
       this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';this.tabsHost()?.acknowledge(destination);return;
     }
     if(destination==='setup'){this.openDialog('setup-dialog');return;}
-    if(destination.startsWith('operation:')){
+    if(destination.startsWith('tool:')){
+      await this.navigate('operations');if(this.route!=='operations')return;const panel=this.activeOperations();if(panel){panel.tab='tools';await panel.updateComplete;const tools=panel.shadowRoot?.querySelector('tools-panel') as import('lit').LitElement|null;await tools?.updateComplete;const section=tools?.shadowRoot?.querySelector<HTMLElement>(`[data-destination="${destination.slice(5)}"]`);section?.scrollIntoView({block:'start'});section?.focus();}
+    }else if(destination.startsWith('operation:')){
       await this.navigate('operations');if(this.route!=='operations')return;
       const panel=this.activeOperations();if(panel)panel.tab=destination.slice(10);
     }else if(destination.startsWith('setting:')){
       await this.navigate('settings');if(this.route!=='settings')return;
       const id=destination.slice(8);const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;const entry=this.settingsEntries().find(e=>e.id===id);if(search&&entry){search.regex=false;search.query=entry.text;search.focusQuery();}
     }else{await this.navigate(destination);if(this.route!==destination)return;}
-    this.tabsHost()?.acknowledge(destination);
+    this.tabsHost()?.acknowledge(destination,'','',destination.startsWith('operation:')||destination.startsWith('tool:')?this.activeProject:'');
   }
   private async adoptedProject(event:CustomEvent){
     event.preventDefault();event.stopPropagation();
