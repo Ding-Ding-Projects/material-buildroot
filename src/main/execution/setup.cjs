@@ -29,12 +29,13 @@ function createExecutionSetup({run,now=()=>Date.now(),directory,dialog,parentWin
   const item=await verify(selectionId),file=await host.executable();if(signal?.aborted)throw Error('artifact-download-cancelled');
   const temporary=path.join(parent,`.material-download-${randomUUID()}.partial`),controller=new AbortController(),abort=()=>controller.abort();signal?.addEventListener('abort',abort,{once:true});const timer=setTimeout(abort,10*60*1000);let child,bytes=0;const hash=createHash('sha256');
   try{child=spawn(file,['api','--hostname','github.com',`repos/${item.repository}/actions/artifacts/${artifactId}/zip`],{shell:false,windowsHide:true,env:environment(),stdio:['ignore','pipe','pipe'],signal:controller.signal});child.stderr.on('data',()=>{});const exited=new Promise((resolve,reject)=>{child.on('error',reject);child.on('close',code=>code===0?resolve():reject(Error('artifact-download-failed')));});const meter=new Transform({transform(chunk,encoding,callback){bytes+=chunk.length;if(bytes>maxBytes||bytes>expectedBytes){child.kill();return callback(Error('artifact-size-limit'));}hash.update(chunk);callback(null,chunk);}});const results=await Promise.allSettled([exited,pipeline(child.stdout,meter,fs.createWriteStream(temporary,{flags:'wx',mode:0o600}),{signal:controller.signal})]);if(results.some(x=>x.status==='rejected'))throw Error('artifact-download-failed');const sha256=hash.digest('hex');if(bytes!==expectedBytes||sha256!==expectedSha256)throw Error('artifact-verification-failed');if(controller.signal.aborted)throw Error('artifact-download-cancelled');fs.linkSync(temporary,destination);fs.unlinkSync(temporary);return {bytes,sha256};}
-  catch{child?.kill();throw Error(controller.signal.aborted?'artifact-download-cancelled':'artifact-download-failed');}
-  finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);try{fs.unlinkSync(temporary);}catch{}}
+  catch{child?.kill();const error=Error(controller.signal.aborted?'artifact-download-cancelled':'artifact-download-failed');try{const partial=fs.statSync(temporary);if(partial.size>0){error.partialPath=temporary;error.partialBytes=partial.size;error.incomplete=true;}}catch{}throw error;}
+  finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);try{if(fs.statSync(temporary).size===0)fs.unlinkSync(temporary);}catch{}}
  }
  return {inspect,selected,discover,selectRunner,call,sourceCommit,download,host,revoke:id=>selections.delete(id),dispose(){selections.clear();host.dispose();}};
 }
 module.exports={createExecutionSetup};
+
 
 
 
