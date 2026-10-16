@@ -36,7 +36,7 @@ export class DiagramWorkbench extends LitElement {
     .hint{font-size:11px;color:var(--md-sys-color-on-surface-variant);margin:0;padding:4px 8px;background:var(--md-sys-color-surface-container)}
     .empty{padding:24px;color:var(--md-sys-color-on-surface-variant)}
   `;
-  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   protected updated(changed:PropertyValues){
     if(changed.has("layoutKey")){this.layout={positions:{},x:30,y:30,scale:1};this.undoStack=[];this.redoStack=[];this.selected="";this.savedRevision=undefined;this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>"");}
     if(changed.has("nodes")||changed.has("layoutKey")){
@@ -86,22 +86,22 @@ export class DiagramWorkbench extends LitElement {
   }
   private icon(label:string,icon:string,action:()=>void,disabled=false){return html`<md-icon-button aria-label=${label} title=${label} ?disabled=${disabled} @click=${action}>${materialIcon(icon)}</md-icon-button>`;}
   render(){const selected=this.nodes.find(n=>n.id===this.selected);return html`
-    <div class="tools" role="toolbar" aria-label=${this.l("Canvas tools","畫布工具")}><strong>${this.title}</strong>
-      ${this.icon(this.l("Undo layout","復原佈局"),"undo",()=>this.history(),!this.undoStack.length)}${this.icon(this.l("Redo layout","重做佈局"),"redo",()=>this.history(true),!this.redoStack.length)}
-      ${this.icon(this.l("Zoom out","縮小"),"zoom_out",()=>this.zoom(-.1),this.layout.scale<=.25)}<span>${Math.round(this.layout.scale*100)}%</span>${this.icon(this.l("Zoom in","放大"),"zoom_in",()=>this.zoom(.1),this.layout.scale>=2)}
-      ${this.icon(this.l("Fit diagram","符合畫布"),"crop_square",()=>this.fit(),!this.nodes.length)}
-      ${this.icon(this.l("Pan left","向左平移"),"arrow_back",()=>this.adjust(()=>this.layout.x-=40))}${this.icon(this.l("Pan right","向右平移"),"arrow_forward",()=>this.adjust(()=>this.layout.x+=40))}
+    <div class="tools" role="toolbar" aria-label=${this.l("Canvas tools","畫布工具",true)}><strong>${this.title}</strong>
+      ${this.icon(this.l("Undo layout","復原佈局",true),"undo",()=>this.history(),!this.undoStack.length)}${this.icon(this.l("Redo layout","重做佈局",true),"redo",()=>this.history(true),!this.redoStack.length)}
+      ${this.icon(this.l("Zoom out","縮小",true),"zoom_out",()=>this.zoom(-.1),this.layout.scale<=.25)}<span>${Math.round(this.layout.scale*100)}%</span>${this.icon(this.l("Zoom in","放大",true),"zoom_in",()=>this.zoom(.1),this.layout.scale>=2)}
+      ${this.icon(this.l("Fit diagram","符合畫布",true),"crop_square",()=>this.fit(),!this.nodes.length)}
+      ${this.icon(this.l("Pan left","向左平移",true),"arrow_back",()=>this.adjust(()=>this.layout.x-=40))}${this.icon(this.l("Pan right","向右平移",true),"arrow_forward",()=>this.adjust(()=>this.layout.x+=40))}
     </div>
     <div class="viewport" role="region" aria-label=${this.title} @pointerdown=${(e:PointerEvent)=>this.start(e)} @pointermove=${this.move} @pointerup=${this.end} @pointercancel=${this.end}>
-      ${!this.nodes.length?html`<p class="empty">${this.l("Add records in the inspector to populate this canvas.","喺檢視器加入記錄以填入畫布。")}</p>`:nothing}
+      ${!this.nodes.length?html`<p class="empty">${this.l("Add records in the inspector to populate this canvas.","喺檢視器加入記錄以填入畫布。",true)}</p>`:nothing}
       <div class="world" style=${`transform:translate(${this.layout.x}px,${this.layout.y}px) scale(${this.layout.scale})`}>
         <svg aria-hidden="true">${this.edges.map(edge=>{const a=this.point(edge.from),b=this.point(edge.to);return svg`<line x1=${a.x+180} y1=${a.y+33} x2=${b.x} y2=${b.y+33}></line>`;})}</svg>
         ${this.nodes.map(node=>html`<md-outlined-button class="node" style=${`left:${this.point(node.id).x}px;top:${this.point(node.id).y}px`} ?selected=${this.selected===node.id} aria-pressed=${this.selected===node.id} title=${`${node.label}, ${node.detail||node.kind}`} aria-label=${`${node.label}, ${node.detail||node.kind}`} @click=${()=>this.select(node.id)} @pointerdown=${(e:PointerEvent)=>this.start(e,node.id)} @pointermove=${this.move} @pointerup=${this.end} @pointercancel=${this.end} @keydown=${(e:KeyboardEvent)=>this.keys(e,node.id)}><span aria-hidden="true">${this.layout.scale>=.85?html`${node.label}<small>${node.detail||node.kind}</small>`:nothing}</span></md-outlined-button>${this.layout.scale<.85?html`<span class="node-name" aria-hidden="true" style=${`left:${this.point(node.id).x+90}px;top:${this.point(node.id).y+33}px;transform:translate(-50%,-50%) scale(${1/this.layout.scale})`}>${node.label}</span>`:nothing}`)}
       </div>
     </div>
-    <div class="footer"><md-outlined-select .label=${this.l("Selected node","已選節點")} .value=${this.selected} .displayText=${selected?.label||this.l("Select a node","選擇節點")} @change=${(e:Event)=>this.select((e.target as HTMLSelectElement).value)}>${this.nodes.map(node=>html`<md-select-option .value=${node.id}><div slot="headline">${node.label}</div></md-select-option>`)}</md-outlined-select>${this.icon(this.l("Remove selected dependency","移除所選相依項目"),"delete",()=>this.removeSelected(),!selected?.removable)}</div>
-    <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局"),"download",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局"),"save",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${displayOwnedStatus(this,"saveMessage",this.saveMessage,this.language)||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。")}</span></div>
-    <p class="hint">${this.l("Drag to arrange, background to pan. Arrow keys move a focused node by 10 units. Undo/redo changes layout only.","拖曳排列，拖曳背景平移。方向鍵每次移動已聚焦節點 10 單位，復原／重做只會改變佈局。")}</p>
+    <div class="footer"><md-outlined-select .label=${this.l("Selected node","已選節點",true)} .value=${this.selected} .displayText=${selected?.label||this.l("Select a node","選擇節點",true)} @change=${(e:Event)=>this.select((e.target as HTMLSelectElement).value)}>${this.nodes.map(node=>html`<md-select-option .value=${node.id}><div slot="headline">${node.label}</div></md-select-option>`)}</md-outlined-select>${this.icon(this.l("Remove selected dependency","移除所選相依項目",true),"delete",()=>this.removeSelected(),!selected?.removable)}</div>
+    <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局",true),"download",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局",true),"save",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${displayOwnedStatus(this,"saveMessage",this.saveMessage,this.language)||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。",true)}</span></div>
+    <p class="hint">${this.l("Drag to arrange, background to pan. Arrow keys move a focused node by 10 units. Undo/redo changes layout only.","拖曳排列，拖曳背景平移。方向鍵每次移動已聚焦節點 10 單位，復原／重做只會改變佈局。",true)}</p>
   `;}
 }
 customElements.define("diagram-workbench",DiagramWorkbench);

@@ -267,7 +267,7 @@ export class OperationsPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private get api() {
     return (
       window.studio as unknown as {
@@ -355,11 +355,11 @@ export class OperationsPanel extends LitElement {
   }
   private containerRecovery(reason: string) {
     switch (reason) {
-      case "ready": return this.l("Linux engine is available. Image compatibility and volume permissions are checked when the build starts.", "Linux 引擎可用，建置開始時會檢查映像相容性同磁碟區權限。");
-      case "client-unavailable": return this.l("Install the Docker CLI using its supported installer, then retry discovery.", "請透過支援嘅安裝程式安裝 Docker CLI，再重新探索。");
-      case "permission-denied": return this.l("Docker access was denied. Ask the runtime administrator to grant your account access, then retry. No elevation or permission change is performed here.", "Docker 存取被拒絕。請執行環境管理員授予帳戶權限，再重試；此處唔會提升或更改權限。");
-      case "linux-engine-required": return this.l("Select the Linux container engine in Docker, then retry discovery.", "請喺 Docker 選擇 Linux 容器引擎，再重新探索。");
-      default: return this.l("Start the intended Docker engine and check its selected context, then retry discovery. Existing volumes and containers are preserved.", "請啟動指定 Docker 引擎並檢查所選環境，再重新探索；現有磁碟區同容器會保留。");
+      case "ready": return this.l("Linux engine is available. Image compatibility and volume permissions are checked when the build starts.","Linux 引擎可用，建置開始時會檢查映像相容性同磁碟區權限。",true);
+      case "client-unavailable": return this.l("Install the Docker CLI using its supported installer, then retry discovery.","請透過支援嘅安裝程式安裝 Docker CLI，再重新探索。",true);
+      case "permission-denied": return this.l("Docker access was denied. Ask the runtime administrator to grant your account access, then retry. No elevation or permission change is performed here.","Docker 存取被拒絕。請執行環境管理員授予帳戶權限，再重試；此處唔會提升或更改權限。",true);
+      case "linux-engine-required": return this.l("Select the Linux container engine in Docker, then retry discovery.","請喺 Docker 選擇 Linux 容器引擎，再重新探索。",true);
+      default: return this.l("Start the intended Docker engine and check its selected context, then retry discovery. Existing volumes and containers are preserved.","請啟動指定 Docker 引擎並檢查所選環境，再重新探索；現有磁碟區同容器會保留。",true);
     }
   }
   private async choose() {
@@ -635,15 +635,12 @@ export class OperationsPanel extends LitElement {
   }
   private noProject() {
     return html`<section class="panel">
-      <h2>${this.l("Adopt a project first", "請先接入專案")}</h2>
+      <h2>${this.l("Adopt a project first","請先接入專案",true)}</h2>
       <p>
-        ${this.l(
-          "Choose an existing trusted Buildroot source and a separate output directory in Projects & runtime.",
-          "請喺專案同執行環境揀選現有可信嘅 Buildroot 來源同獨立輸出目錄。",
-        )}
+        ${this.l("Choose an existing trusted Buildroot source and a separate output directory in Projects & runtime.","請喺專案同執行環境揀選現有可信嘅 Buildroot 來源同獨立輸出目錄。",true)}
       </p>
       <md-filled-button @click=${() => (this.tab = "runtime")}
-        >${actionIcon('Choose project')}${this.l("Choose project", "選擇專案")}</md-filled-button
+        >${actionIcon('Choose project')}${this.l("Choose project","選擇專案",true)}</md-filled-button
       >
     </section>`;
   }
@@ -662,35 +659,27 @@ export class OperationsPanel extends LitElement {
         }}></project-workflow-panel>
       <section class="panel stack">
         <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { if(!this.dispatchEvent(new CustomEvent("workspace-adopted",{detail:event.detail,bubbles:true,composed:true,cancelable:true})))return; this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; }}></wsl-runtime-panel>
-        <h2>${this.l("Runtime discovery", "探索執行環境")}</h2>
+        <h2>${this.l("Runtime discovery","探索執行環境",true)}</h2>
         <p>
-          ${this.l(
-            "Inspect installed WSL distributions and Docker availability. Discovery does not install or start a runtime.",
-            "檢視已安裝嘅 WSL 發行版同 Docker 可用狀態，探索唔會安裝或啟動執行環境。",
-          )}
+          ${this.l("Inspect installed WSL distributions and Docker availability. Discovery does not install or start a runtime.","檢視已安裝嘅 WSL 發行版同 Docker 可用狀態，探索唔會安裝或啟動執行環境。",true)}
         </p>
         <md-outlined-button ?disabled=${this.pending} @click=${this.discover}
-          >${actionIcon('Discover runtimes')}${this.l("Discover runtimes", "探索執行環境")}</md-outlined-button
+          >${actionIcon('Discover runtimes')}${this.l("Discover runtimes","探索執行環境",true)}</md-outlined-button
         >
         <p>
-          ${this.l(
-            "Kconfig inspection executes a Python interpreter you select. Choose only an interpreter you trust.",
-            "Kconfig 檢視會執行你揀選嘅 Python 解譯器，請只揀選可信嘅解譯器。",
-          )}
+          ${this.l("Kconfig inspection executes a Python interpreter you select. Choose only an interpreter you trust.","Kconfig 檢視會執行你揀選嘅 Python 解譯器，請只揀選可信嘅解譯器。",true)}
         </p>
         <md-outlined-button
           ?disabled=${this.pending}
           @click=${this.choosePython}
-          >${actionIcon('Choose trusted Python')}${this.l("Choose trusted Python",
-            "揀選可信 Python",
-          )}</md-outlined-button
+          >${actionIcon('Choose trusted Python')}${this.l("Choose trusted Python","揀選可信 Python",true)}</md-outlined-button
         >${this.runtime
           ? html`<dl>
               <dt>Docker</dt>
               <dd>
                 ${this.runtime.docker?.available
-                  ? this.l("Available", "可使用")
-                  : this.l("Unavailable", "未能使用")}
+                  ? this.l("Available","可使用",true)
+                  : this.l("Unavailable","未能使用",true)}
               </dd>
               <dd role="status">${this.containerRecovery(this.runtime.docker?.reason)}</dd>
               <dt>WSL</dt>
@@ -706,52 +695,39 @@ export class OperationsPanel extends LitElement {
           : nothing}
       </section>
       <section class="panel stack">
-        <h2>${this.l("Existing Buildroot project", "現有 Buildroot 專案")}</h2>
+        <h2>${this.l("Existing Buildroot project","現有 Buildroot 專案",true)}</h2>
         <p>
-          ${this.l(
-            "The native picker grants access to the source and output directories you choose. Existing files are preserved during adoption.",
-            "原生選擇器會授權存取你揀選嘅來源同輸出目錄，接入專案時會保留現有檔案。",
-          )}
+          ${this.l("The native picker grants access to the source and output directories you choose. Existing files are preserved during adoption.","原生選擇器會授權存取你揀選嘅來源同輸出目錄，接入專案時會保留現有檔案。",true)}
         </p>
         <md-filled-button ?disabled=${this.pending} @click=${this.choose}
-          >${actionIcon('Choose source and output')}${this.l("Choose source and output",
-            "選擇來源同輸出",
-          )}</md-filled-button
+          >${actionIcon('Choose source and output')}${this.l("Choose source and output","選擇來源同輸出",true)}</md-filled-button
         >${this.selection
           ? html`<dl>
-                <dt>${this.l("Project", "專案")}</dt>
+                <dt>${this.l("Project","專案",true)}</dt>
                 <dd>${this.selection.name}</dd>
-                <dt>${this.l("Source", "來源")}</dt>
+                <dt>${this.l("Source","來源",true)}</dt>
                 <dd>${this.selection.source}</dd>
-                <dt>${this.l("Output", "輸出")}</dt>
+                <dt>${this.l("Output","輸出",true)}</dt>
                 <dd>${this.selection.output}</dd>
               </dl>
               <label class="consent"
                 ><md-checkbox
-                  aria-label=${this.l(
-                    "I trust this source. Build steps execute code from it.",
-                    "我信任呢個來源，建置步驟會執行當中嘅程式碼。",
-                  )}
+                  aria-label=${this.l("I trust this source. Build steps execute code from it.","我信任呢個來源，建置步驟會執行當中嘅程式碼。",true)}
                   .checked=${this.trust}
                   @change=${(e: Event) =>
                     (this.trust = (e.target as HTMLInputElement).checked)}
                 ></md-checkbox
                 ><span
-                  >${this.l(
-                    "I trust this source. Build steps execute code from it.",
-                    "我信任呢個來源，建置步驟會執行當中嘅程式碼。",
-                  )}</span
+                  >${this.l("I trust this source. Build steps execute code from it.","我信任呢個來源，建置步驟會執行當中嘅程式碼。",true)}</span
                 ></label
               ><md-filled-tonal-button
                 ?disabled=${this.pending || !this.trust}
                 @click=${this.adopt}
-                >${actionIcon('Adopt trusted project')}${this.l("Adopt trusted project",
-                  "接入可信專案",
-                )}</md-filled-tonal-button
+                >${actionIcon('Adopt trusted project')}${this.l("Adopt trusted project","接入可信專案",true)}</md-filled-tonal-button
               >`
           : nothing}${this.workspace
           ? html`<p class="badge">
-              ${this.l("Active project", "目前專案")}: ${this.workspace.name}
+              ${this.l("Active project","目前專案",true)}: ${this.workspace.name}
             </p>`
           : nothing}
       </section>
@@ -761,18 +737,18 @@ export class OperationsPanel extends LitElement {
     return html`${this.workspace
         ? html`<section class="panel stack">
             <h2>${this.workspace.name}</h2>
-            ${this.runtimeKind === "docker" ? html`<section class="panel stack" aria-label=${this.l("Container storage", "容器儲存")}>
-              <h3>${this.l("Managed download cache", "受管理下載快取")}</h3>
-              <md-outlined-button ?disabled=${this.pending} @click=${this.discover}>${this.l("Refresh local images and engine", "重新整理本機映像同引擎")}</md-outlined-button>
-              ${this.runtime?.docker ? html`<p role="status">${this.containerRecovery(this.runtime.docker.reason)}</p><md-outlined-select label=${this.l("Installed digest-pinned image", "已安裝固定摘要映像")} .value=${this.image} @change=${(e: Event) => { this.image = (e.target as HTMLSelectElement).value; this.containerStorage = undefined; }}>${this.options((this.runtime.docker.images ?? []).map((value: string) => [value, value]))}</md-outlined-select>` : nothing}
-              <p>${this.l("Prepare a retained cache volume for this project, image and UID/GID 1000. No image is downloaded. The image must contain /material-buildroot-cache writable by UID/GID 1000 so Docker can initialize its volume without a root helper. Existing cache data is never deleted or repaired automatically.", "為此專案、映像同 UID/GID 1000 準備保留快取磁碟區，唔會下載映像。映像必須有 UID/GID 1000 可寫入嘅 /material-buildroot-cache，讓 Docker 毋須 root 輔助程序初始化磁碟區。現有快取唔會自動刪除或修復。")}</p>
-              <md-outlined-button ?disabled=${this.pending || !/^[a-z0-9][a-z0-9./:_-]*@sha256:[0-9a-f]{64}$/.test(this.image)} @click=${this.prepareContainerStorage}>${this.l("Prepare retained cache", "準備保留快取")}</md-outlined-button>
-              ${this.containerStorage ? html`<p role="status">${this.containerStorage.name}: ${this.l("Prepared. Write permissions remain unverified until execution.", "已準備；寫入權限仍待執行時驗證。")}</p>` : nothing}
-              <p>${this.l("If storage access fails, preserve the existing volume and correct the image directory ownership or output-folder permissions through your administrator. Retry preparation and then the failed job. Cancellation stops only an ownership-verified container; uncertain cleanup remains quarantined until job reconciliation proves it stopped.", "如果儲存存取失敗，請保留現有磁碟區，經管理員修正映像目錄擁有權或輸出資料夾權限，再重新準備同重試工作。取消只會停止已確認擁有權嘅容器；未確認清理會繼續隔離，直到工作復核證明已停止。")}</p>
+            ${this.runtimeKind === "docker" ? html`<section class="panel stack" aria-label=${this.l("Container storage","容器儲存",true)}>
+              <h3>${this.l("Managed download cache","受管理下載快取",true)}</h3>
+              <md-outlined-button ?disabled=${this.pending} @click=${this.discover}>${this.l("Refresh local images and engine","重新整理本機映像同引擎",true)}</md-outlined-button>
+              ${this.runtime?.docker ? html`<p role="status">${this.containerRecovery(this.runtime.docker.reason)}</p><md-outlined-select label=${this.l("Installed digest-pinned image","已安裝固定摘要映像",true)} .value=${this.image} @change=${(e: Event) => { this.image = (e.target as HTMLSelectElement).value; this.containerStorage = undefined; }}>${this.options((this.runtime.docker.images ?? []).map((value: string) => [value, value]))}</md-outlined-select>` : nothing}
+              <p>${this.l("Prepare a retained cache volume for this project, image and UID/GID 1000. No image is downloaded. The image must contain /material-buildroot-cache writable by UID/GID 1000 so Docker can initialize its volume without a root helper. Existing cache data is never deleted or repaired automatically.","為此專案、映像同 UID/GID 1000 準備保留快取磁碟區，唔會下載映像。映像必須有 UID/GID 1000 可寫入嘅 /material-buildroot-cache，讓 Docker 毋須 root 輔助程序初始化磁碟區。現有快取唔會自動刪除或修復。",true)}</p>
+              <md-outlined-button ?disabled=${this.pending || !/^[a-z0-9][a-z0-9./:_-]*@sha256:[0-9a-f]{64}$/.test(this.image)} @click=${this.prepareContainerStorage}>${this.l("Prepare retained cache","準備保留快取",true)}</md-outlined-button>
+              ${this.containerStorage ? html`<p role="status">${this.containerStorage.name}: ${this.l("Prepared. Write permissions remain unverified until execution.","已準備；寫入權限仍待執行時驗證。",true)}</p>` : nothing}
+              <p>${this.l("If storage access fails, preserve the existing volume and correct the image directory ownership or output-folder permissions through your administrator. Retry preparation and then the failed job. Cancellation stops only an ownership-verified container; uncertain cleanup remains quarantined until job reconciliation proves it stopped.","如果儲存存取失敗，請保留現有磁碟區，經管理員修正映像目錄擁有權或輸出資料夾權限，再重新準備同重試工作。取消只會停止已確認擁有權嘅容器；未確認清理會繼續隔離，直到工作復核證明已停止。",true)}</p>
             </section>` : nothing}
             <div class="fields">
               <md-outlined-select
-                label=${this.l("Runtime", "執行環境")}
+                label=${this.l("Runtime","執行環境",true)}
                 id="build-runtime"
                 .value=${this.runtimeKind}
                 .displayText=${this.runtimeKind === "wsl" ? "WSL 2" : "Docker"}
@@ -784,7 +760,7 @@ export class OperationsPanel extends LitElement {
                 ])}</md-outlined-select
               >${this.runtimeKind === "wsl"
                 ? html`<md-outlined-text-field
-                    label=${this.l("WSL distribution", "WSL 發行版")}
+                    label=${this.l("WSL distribution","WSL 發行版",true)}
                     .value=${this.distribution}
                     @input=${(e: Event) =>
                       (this.distribution = (
@@ -792,15 +768,12 @@ export class OperationsPanel extends LitElement {
                       ).value)}
                   ></md-outlined-text-field>`
                 : html`<md-outlined-text-field
-                    label=${this.l(
-                      "Container image with SHA-256 digest",
-                      "包含 SHA-256 摘要嘅容器映像",
-                    )}
+                    label=${this.l("Container image with SHA-256 digest","包含 SHA-256 摘要嘅容器映像",true)}
                     .value=${this.image}
                     @input=${(e: Event) =>
                       { this.image = (e.composedPath()[0] as HTMLInputElement).value; this.containerStorage = undefined; }}
                   ></md-outlined-text-field>`}<md-outlined-select
-                label=${this.l("Build target", "建置目標")}
+                label=${this.l("Build target","建置目標",true)}
                 id="build-target"
                 .value=${this.target}
                 .displayText=${this.target}
@@ -822,7 +795,7 @@ export class OperationsPanel extends LitElement {
                 type="number"
                 min="1"
                 max="32"
-                label=${this.l("Parallel jobs", "並行工作數")}
+                label=${this.l("Parallel jobs","並行工作數",true)}
                 .value=${String(this.parallelism)}
                 @input=${(e: Event) =>
                   (this.parallelism = Number(
@@ -831,23 +804,18 @@ export class OperationsPanel extends LitElement {
               ></md-outlined-text-field>
             </div>
             <p>
-              ${this.l(
-                "The build runs trusted project code and writes to its chosen output directory. Docker runs as UID/GID 1000.",
-                "建置會執行可信專案程式碼，並寫入所選輸出目錄。Docker 會以 UID/GID 1000 執行。",
-              )}
+              ${this.l("The build runs trusted project code and writes to its chosen output directory. Docker runs as UID/GID 1000.","建置會執行可信專案程式碼，並寫入所選輸出目錄。Docker 會以 UID/GID 1000 執行。",true)}
             </p>
-            <label class="row"><md-checkbox aria-label=${this.l("Customize build reservations","自訂建置預留")} ?checked=${this.customResources} @change=${(e:Event)=>this.customResources=(e.target as HTMLInputElement).checked}></md-checkbox>${this.l("Customize build reservations","自訂建置預留")}</label>
+            <label class="row"><md-checkbox aria-label=${this.l("Customize build reservations","自訂建置預留",true)} ?checked=${this.customResources} @change=${(e:Event)=>this.customResources=(e.target as HTMLInputElement).checked}></md-checkbox>${this.l("Customize build reservations","自訂建置預留",true)}</label>
             ${this.customResources?html`<div class="row">${([['CPU slots','CPU 配額','cpuSlots',this.runtimeKind==='docker'?2:this.parallelism,64],['Memory reservation (MiB)','記憶體預留（MiB）','memoryMiB',this.runtimeKind==='docker'?4096:256,262144],['Free storage floor (GiB)','可用儲存空間下限（GiB）','storageGiB',0,1024]] as const).map(([en,zh,key,min,max])=>html`<md-outlined-text-field type="number" .label=${this.l(en,zh)} .value=${String(this[key])} min=${String(min)} max=${String(max)} @input=${(e:Event)=>this[key]=(e.target as HTMLInputElement).value.trim()===""?NaN:Number((e.target as HTMLInputElement).value)}></md-outlined-text-field>`)}</div>`:nothing}
-            <p>${this.l("Defaults reserve at least 2 CPU slots (or WSL parallel jobs), 4 GiB RAM and an 8 GiB free-storage floor. Docker keeps its fixed 2 CPU / 4 GiB execution envelope; reservations do not expand it. Queued source/configuration intent cannot be edited.","預設預留至少 2 個 CPU 配額（或 WSL 並行工作數）、4 GiB 記憶體及 8 GiB 可用儲存空間下限。Docker 保持固定 2 CPU／4 GiB 執行範圍，預留唔會擴大範圍。佇列中來源／設定意圖不可編輯。")}</p>
+            <p>${this.l("Defaults reserve at least 2 CPU slots (or WSL parallel jobs), 4 GiB RAM and an 8 GiB free-storage floor. Docker keeps its fixed 2 CPU / 4 GiB execution envelope; reservations do not expand it. Queued source/configuration intent cannot be edited.","預設預留至少 2 個 CPU 配額（或 WSL 並行工作數）、4 GiB 記憶體及 8 GiB 可用儲存空間下限。Docker 保持固定 2 CPU／4 GiB 執行範圍，預留唔會擴大範圍。佇列中來源／設定意圖不可編輯。",true)}</p>
             <md-outlined-button
               ?disabled=${this.pending ||
               (this.runtimeKind === "wsl"
                 ? !this.distribution
                 : !/^.+@sha256:[a-f0-9]{64}$/.test(this.image))}
               @click=${this.selectRuntime}
-              >${actionIcon('Use runtime for configuration')}${this.l("Use runtime for configuration",
-                "設定使用呢個執行環境",
-              )}</md-outlined-button
+              >${actionIcon('Use runtime for configuration')}${this.l("Use runtime for configuration","設定使用呢個執行環境",true)}</md-outlined-button
             ><md-filled-button
               ?disabled=${this.pending ||
               !this.validResources() ||
@@ -858,16 +826,16 @@ export class OperationsPanel extends LitElement {
                 ? !this.distribution
                 : !/^.+@sha256:[a-f0-9]{64}$/.test(this.image))}
               @click=${this.submit}
-              >${actionIcon('Start build')}${this.l("Start build", "開始建置")}</md-filled-button
+              >${actionIcon('Start build')}${this.l("Start build","開始建置",true)}</md-filled-button
             >
           </section>`
         : this.noProject()}
       <section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
       <section class="panel">
         <div class="row">
-          <h2>${this.l("Build jobs", "建置工作")}</h2>
+          <h2>${this.l("Build jobs","建置工作",true)}</h2>
           <md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}
-            >${actionIcon('Refresh')}${this.l("Refresh", "重新整理")}</md-text-button
+            >${actionIcon('Refresh')}${this.l("Refresh","重新整理",true)}</md-text-button
           >
         </div>
         ${this.jobs.length
@@ -877,20 +845,18 @@ export class OperationsPanel extends LitElement {
                   <strong>${job.kind}</strong>
                   <span class="badge">${job.state}</span>
                   <p class="muted">${job.id}</p>
-                  ${job.payload?html`<p>${this.l("Captured intent","已擷取意圖")}: ${job.payload.target} · ${job.payload.jobs} ${this.l("parallel jobs","並行工作")}</p><p>${this.l("Source revision","來源版本")}: ${job.payload.intent?.sourceRevision||this.l("Unknown","未知")}</p><p>${this.l("Configuration revision","設定版本")}: ${job.payload.intent?.configRevision||this.l("Unknown","未知")}</p>${job.payload.resources?html`<p>${job.payload.resources.cpuSlots} CPU · ${job.payload.resources.memoryBytes/1024**2} MiB · ${job.payload.resources.storageBytes/1024**3} GiB</p>`:nothing}`:nothing}
-                  ${job.state==='interrupted'?html`<p>${this.l("Interrupted is not proof of stopped runtime or successful cleanup. Inspect queue recovery before a new attempt.","中斷唔代表執行環境已停止或清理成功，新增嘗試前請檢視佇列復原。")}</p>`:nothing}
+                  ${job.payload?html`<p>${this.l("Captured intent","已擷取意圖",true)}: ${job.payload.target} · ${job.payload.jobs} ${this.l("parallel jobs","並行工作",true)}</p><p>${this.l("Source revision","來源版本",true)}: ${job.payload.intent?.sourceRevision||this.l("Unknown","未知",true)}</p><p>${this.l("Configuration revision","設定版本",true)}: ${job.payload.intent?.configRevision||this.l("Unknown","未知",true)}</p>${job.payload.resources?html`<p>${job.payload.resources.cpuSlots} CPU · ${job.payload.resources.memoryBytes/1024**2} MiB · ${job.payload.resources.storageBytes/1024**3} GiB</p>`:nothing}`:nothing}
+                  ${job.state==='interrupted'?html`<p>${this.l("Interrupted is not proof of stopped runtime or successful cleanup. Inspect queue recovery before a new attempt.","中斷唔代表執行環境已停止或清理成功，新增嘗試前請檢視佇列復原。",true)}</p>`:nothing}
                   <div class="row">
                     <md-text-button
                       ?disabled=${this.pending}
                       @click=${() => this.readLogs(job)}
-                      >${actionIcon('Read logs')}${this.l("Read logs", "檢視記錄")}</md-text-button
+                      >${actionIcon('Read logs')}${this.l("Read logs","檢視記錄",true)}</md-text-button
                     >${["queued", "running"].includes(job.state)
                       ? html`<md-outlined-button
                           ?disabled=${this.pending}
                           @click=${() => this.jobAction("cancel", job)}
-                          >${actionIcon('Request cancellation')}${this.l("Request cancellation",
-                            "要求取消",
-                          )}</md-outlined-button
+                          >${actionIcon('Request cancellation')}${this.l("Request cancellation","要求取消",true)}</md-outlined-button
                         >`
                       : nothing}${[
                       "failed",
@@ -900,26 +866,21 @@ export class OperationsPanel extends LitElement {
                       ? html`<md-outlined-button
                           ?disabled=${this.pending}
                           @click=${() => this.jobAction("retry", job)}
-                          >${actionIcon('New attempt')}${this.l("New attempt",
-                            "新增嘗試",
-                          )}</md-outlined-button
+                          >${actionIcon('New attempt')}${this.l("New attempt","新增嘗試",true)}</md-outlined-button
                         >`
                       : nothing}
                   </div>
                 </div>`,
             )
           : html`<p>
-              ${this.l(
-                "Refresh to load recorded jobs. No success is inferred from an empty list.",
-                "重新整理以載入工作記錄，空白清單唔代表建置成功。",
-              )}
+              ${this.l("Refresh to load recorded jobs. No success is inferred from an empty list.","重新整理以載入工作記錄，空白清單唔代表建置成功。",true)}
             </p>`}${this.selectedJob
-          ? html`<h3>${this.l("Job logs", "工作記錄")}</h3>
+          ? html`<h3>${this.l("Job logs","工作記錄",true)}</h3>
               <div
                 class="log"
                 role="region"
                 tabindex="0"
-                aria-label=${this.l("Job logs", "工作記錄")}
+                aria-label=${this.l("Job logs","工作記錄",true)}
               >
                 ${this.logs.map(
                   (record) =>
@@ -928,7 +889,7 @@ export class OperationsPanel extends LitElement {
                         ? record.value
                         : (record.value?.text ??
                           record.value?.message ??
-                          this.l("Structured job event", "結構化工作事件"))}
+                          this.l("Structured job event","結構化工作事件",true))}
                     </div>`,
                 )}
               </div>
@@ -940,9 +901,7 @@ export class OperationsPanel extends LitElement {
                       );
                       if (job) void this.readLogs(job, true);
                     }}
-                    >${actionIcon('Load next records')}${this.l("Load next records",
-                      "載入下一批記錄",
-                    )}</md-text-button
+                    >${actionIcon('Load next records')}${this.l("Load next records","載入下一批記錄",true)}</md-text-button
                   >`
                 : nothing}`
           : nothing}
@@ -953,46 +912,40 @@ export class OperationsPanel extends LitElement {
     const entries = this.configEntries();
     return html`<image-presets-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></account-provisioning-panel><defconfig-panel .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
       <div class="row">
-        <h2>${this.l("Configuration domain", "設定範圍")}</h2>
-        <md-outlined-select .label=${this.l("Domain", "範圍")} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
+        <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
+        <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
           ${this.options([["buildroot", "Buildroot"], ["linux", "Linux"], ["busybox", "BusyBox"], ["uboot", "U-Boot"]])}
         </md-outlined-select>
         <md-outlined-button
           ?disabled=${this.pending || !!Object.keys(this.changes).length}
           @click=${this.inspectConfig}
-          >${actionIcon('Inspect configuration')}${this.l("Inspect configuration", "檢視設定")}</md-outlined-button
+          >${actionIcon('Inspect configuration')}${this.l("Inspect configuration","檢視設定",true)}</md-outlined-button
         ><md-text-button ?disabled=${this.pending} @click=${this.listDefconfigs}
-          >${actionIcon('List defconfigs')}${this.l("List defconfigs", "列出預設設定")}</md-text-button
+          >${actionIcon('List defconfigs')}${this.l("List defconfigs","列出預設設定",true)}</md-text-button
         >
       </div>
-      <p>${this.l("Authoritative inspection can execute commands from the selected Make/Kconfig sources. Review the exact source and runtime before allowing it. WSL commands have your distribution account's access; the container route has read-only source mounts and no network. Configuration apply uses the admitted writable build route.", "權威檢視可以執行所選 Make／Kconfig 來源入面嘅指令。批准前請核對確切來源同執行環境。WSL 指令具有發行版帳戶嘅存取權；容器路線使用唯讀來源掛載同停用網絡。套用設定會使用已授權嘅可寫建置路線。")}</p>
+      <p>${this.l("Authoritative inspection can execute commands from the selected Make/Kconfig sources. Review the exact source and runtime before allowing it. WSL commands have your distribution account's access; the container route has read-only source mounts and no network. Configuration apply uses the admitted writable build route.","權威檢視可以執行所選 Make／Kconfig 來源入面嘅指令。批准前請核對確切來源同執行環境。WSL 指令具有發行版帳戶嘅存取權；容器路線使用唯讀來源掛載同停用網絡。套用設定會使用已授權嘅可寫建置路線。",true)}</p>
       <div class="row">
-        <md-outlined-button ?disabled=${this.pending} @click=${this.previewConfigTrust}>${this.l("Review source execution permission", "核對來源執行權限")}</md-outlined-button>
-        <md-text-button ?disabled=${this.pending} @click=${this.revokeConfigTrust}>${this.l("Revoke configuration permission", "撤銷設定權限")}</md-text-button>
+        <md-outlined-button ?disabled=${this.pending} @click=${this.previewConfigTrust}>${this.l("Review source execution permission","核對來源執行權限",true)}</md-outlined-button>
+        <md-text-button ?disabled=${this.pending} @click=${this.revokeConfigTrust}>${this.l("Revoke configuration permission","撤銷設定權限",true)}</md-text-button>
       </div>
-      ${this.configTrustPreview ? html`<section class="panel stack" aria-label=${this.l("Source execution permission", "來源執行權限")}>
-        <h3>${this.configTrustPreview.domain} · ${this.l("Review exact scope", "核對確切範圍")}</h3>
-        <p>${this.configTrustPreview.discoveryOnly ? this.l("First allow this Buildroot revision to discover the selected component. A second review will name that component's actual source.", "先批准呢個 Buildroot 修訂以尋找所選元件。第二次核對會列出該元件嘅實際來源。") : this.l("Permission lasts up to 15 minutes in this session and expires when source, configuration, roots or runtime change.", "權限只喺本次工作階段維持最多 15 分鐘；來源、設定、目錄或執行環境一改就失效。")}</p>
-        <dl><dt>${this.l("Source", "來源")}</dt><dd class="symbol">${this.configTrustPreview.sourceRoot}</dd>
-        <dt>${this.l("Output", "輸出")}</dt><dd class="symbol">${this.configTrustPreview.outputRoot}</dd>
-        <dt>${this.l("Runtime", "執行環境")}</dt><dd class="symbol">${JSON.stringify(this.configTrustPreview.runtime)}</dd>
-        <dt>${this.l("Source revision", "來源修訂")}</dt><dd class="symbol">${this.configTrustPreview.sourceRevision}</dd>
-        <dt>${this.l("Configuration revision", "設定修訂")}</dt><dd class="symbol">${this.configTrustPreview.configRevision}</dd>
-        <dt>${this.l("External sources", "外部來源")}</dt><dd class="symbol">${this.configTrustPreview.externalRoots.join(" · ") || this.l("None", "無")}</dd></dl>
-        <label class="row"><md-checkbox ?disabled=${this.pending} .checked=${this.configTrustAccepted} @change=${(event: Event) => this.configTrustAccepted = (event.target as any).checked}></md-checkbox>${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.", "批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。")}</label>
-        <md-filled-button ?disabled=${this.pending || !this.configTrustAccepted} @click=${this.grantConfigTrust}>${this.l("Allow this scope", "批准此範圍")}</md-filled-button>
+      ${this.configTrustPreview ? html`<section class="panel stack" aria-label=${this.l("Source execution permission","來源執行權限",true)}>
+        <h3>${this.configTrustPreview.domain} · ${this.l("Review exact scope","核對確切範圍",true)}</h3>
+        <p>${this.configTrustPreview.discoveryOnly ? this.l("First allow this Buildroot revision to discover the selected component. A second review will name that component's actual source.","先批准呢個 Buildroot 修訂以尋找所選元件。第二次核對會列出該元件嘅實際來源。",true) : this.l("Permission lasts up to 15 minutes in this session and expires when source, configuration, roots or runtime change.","權限只喺本次工作階段維持最多 15 分鐘；來源、設定、目錄或執行環境一改就失效。",true)}</p>
+        <dl><dt>${this.l("Source","來源",true)}</dt><dd class="symbol">${this.configTrustPreview.sourceRoot}</dd>
+        <dt>${this.l("Output","輸出",true)}</dt><dd class="symbol">${this.configTrustPreview.outputRoot}</dd>
+        <dt>${this.l("Runtime","執行環境",true)}</dt><dd class="symbol">${JSON.stringify(this.configTrustPreview.runtime)}</dd>
+        <dt>${this.l("Source revision","來源修訂",true)}</dt><dd class="symbol">${this.configTrustPreview.sourceRevision}</dd>
+        <dt>${this.l("Configuration revision","設定修訂",true)}</dt><dd class="symbol">${this.configTrustPreview.configRevision}</dd>
+        <dt>${this.l("External sources","外部來源",true)}</dt><dd class="symbol">${this.configTrustPreview.externalRoots.join(" · ") || this.l("None","無",true)}</dd></dl>
+        <label class="row"><md-checkbox ?disabled=${this.pending} .checked=${this.configTrustAccepted} @change=${(event: Event) => this.configTrustAccepted = (event.target as any).checked}></md-checkbox>${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.","批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。",true)}</label>
+        <md-filled-button ?disabled=${this.pending || !this.configTrustAccepted} @click=${this.grantConfigTrust}>${this.l("Allow this scope","批准此範圍",true)}</md-filled-button>
       </section>` : nothing}
       ${this.config
         ? html`<p class="notice">
               ${this.config.semantics?.available
-                ? this.l(
-                    "Kconfig menus, effective values, dependencies and help are provided by the admitted parser. Changes are reconciled by the selected runtime.",
-                    "已授權解析器提供 Kconfig 選單、實際值、相依關係同說明，變更會由所選執行環境協調。",
-                  )
-                : this.l(
-                    "Full Kconfig semantics are unavailable. Review source execution permission for authoritative inspection, or choose a trusted Python interpreter for limited read-only inspection.",
-                    "未能使用完整 Kconfig 語意。請核對來源執行權限以作權威檢視，或選擇可信 Python 解譯器作有限唯讀檢視。",
-                  ) +
+                ? this.l("Kconfig menus, effective values, dependencies and help are provided by the admitted parser. Changes are reconciled by the selected runtime.","已授權解析器提供 Kconfig 選單、實際值、相依關係同說明，變更會由所選執行環境協調。",true)
+                : this.l("Full Kconfig semantics are unavailable. Review source execution permission for authoritative inspection, or choose a trusted Python interpreter for limited read-only inspection.","未能使用完整 Kconfig 語意。請核對來源執行權限以作權威檢視，或選擇可信 Python 解譯器作有限唯讀檢視。",true) +
                   " " +
                   (this.config.semantics?.reason ?? "")}
             </p>
@@ -1000,17 +953,11 @@ export class OperationsPanel extends LitElement {
               @configuration-queue=${(event: CustomEvent) => { this.pending=event.detail.pending; this.changes=event.detail.blocked ? {__retained:{type:'raw',value:true}} : {}; }}
               @configuration-result=${(event: CustomEvent) => { this.config=event.detail; }}></configuration-panel>`
         : html`<p>
-            ${this.l(
-              "Inspect the active output configuration before editing.",
-              "編輯之前，請先檢視目前輸出設定。",
-            )}
+            ${this.l("Inspect the active output configuration before editing.","編輯之前，請先檢視目前輸出設定。",true)}
           </p>`}${this.defconfigs.length
-        ? html`<h3>${this.l("Available defconfigs", "可用預設設定")}</h3>
+        ? html`<h3>${this.l("Available defconfigs","可用預設設定",true)}</h3>
             <p>
-              ${this.l(
-                "Applying a defconfig replaces the current configuration and reconciles it.",
-                "套用預設設定會取代目前設定，並進行協調。",
-              )}
+              ${this.l("Applying a defconfig replaces the current configuration and reconciles it.","套用預設設定會取代目前設定，並進行協調。",true)}
             </p>
             ${this.defconfigs
               .slice(0, 100)
@@ -1023,12 +970,12 @@ export class OperationsPanel extends LitElement {
                       !this.config ||
                       !!Object.keys(this.changes).length}
                       @click=${() => this.applyDefconfig(item.path)}
-                      >${actionIcon('Apply')}${this.l("Apply", "套用")}</md-outlined-button
+                      >${actionIcon('Apply')}${this.l("Apply","套用",true)}</md-outlined-button
                     >
                   </div>`,
               )}${this.defconfigs.length > 100
               ? html`<p>
-                  ${this.l("Showing the first 100 entries.", "顯示首 100 項。")}
+                  ${this.l("Showing the first 100 entries.","顯示首 100 項。",true)}
                 </p>`
               : nothing}`
         : nothing}
@@ -1042,7 +989,7 @@ export class OperationsPanel extends LitElement {
     return html`<section class="panel"><ollama-workspace-panel .language=${this.language}></ollama-workspace-panel></section>`;
   }
   private updatesView() {
-    return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.", "儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。")}</p></section>`;
+    return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.","儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。",true)}</p></section>`;
   }  private resizeDock(event: PointerEvent) {
     const separator = event.currentTarget as HTMLElement;
     const start = event.clientY, original = this.dockHeight;
@@ -1052,9 +999,9 @@ export class OperationsPanel extends LitElement {
     separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
   }
   render() {
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管")}><h2>${this.l("Explorer","總管")}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案")}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案"):this.l("No execution context","無執行內容")}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作"):this.l("Show jobs","顯示工作")}</md-text-button></div><div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div><div class="operations">
       <md-tabs
-        aria-label=${this.l("Project operations", "專案操作")}
+        aria-label=${this.l("Project operations","專案操作",true)}
         .activeTabIndex=${[
           "runtime",
           "source",
@@ -1119,7 +1066,7 @@ export class OperationsPanel extends LitElement {
       >${this.pending
         ? html`<md-linear-progress
             indeterminate
-            aria-label=${this.l("Operation in progress", "操作進行中")}
+            aria-label=${this.l("Operation in progress","操作進行中",true)}
           ></md-linear-progress>`
         : nothing}
       <div
@@ -1192,7 +1139,7 @@ export class OperationsPanel extends LitElement {
       >${this.feedback
         ? html`<div class="status" role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>`
         : nothing}
-    </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板")}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小")} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出")}</strong><span>${this.jobs.length} ${this.l("loaded","已載入")}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${actionIcon('Refresh jobs')}${this.l("Refresh jobs","重新整理工作")}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出")}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件")}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。")}</span>`}</div></div></section>`:nothing}</div></div>`;
+    </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板",true)}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小",true)} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出",true)}</strong><span>${this.jobs.length} ${this.l("loaded","已載入",true)}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${actionIcon('Refresh jobs')}${this.l("Refresh jobs","重新整理工作",true)}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出",true)}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件",true)}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。",true)}</span>`}</div></div></section>`:nothing}</div></div>`;
   }
 }
 customElements.define("operations-panel", OperationsPanel);

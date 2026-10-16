@@ -139,7 +139,7 @@ export class ToolsPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private changed() {
     this.revision++;
   }
@@ -309,17 +309,14 @@ export class ToolsPanel extends LitElement {
       ${this.pending || this.runningQueue
         ? html`<md-linear-progress
             indeterminate
-            aria-label=${this.l("Operation in progress", "操作進行中")}
+            aria-label=${this.l("Operation in progress","操作進行中",true)}
           ></md-linear-progress>`
         : nothing}
       <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
       <section class="panel stack" data-destination="local" data-experience-id="tools-section:local" tabindex="-1">
-        <h2>${this.l("Local tools", "本機工具")}</h2>
+        <h2>${this.l("Local tools","本機工具",true)}</h2>
         <p class="note">
-          ${this.l(
-            "Choose trusted executables through the desktop review. Files are selected with native dialogs; outputs must be new files.",
-            "透過桌面審核選擇可信執行檔。請用原生對話框選擇檔案，輸出必須係新檔案。",
-          )}
+          ${this.l("Choose trusted executables through the desktop review. Files are selected with native dialogs; outputs must be new files.","透過桌面審核選擇可信執行檔。請用原生對話框選擇檔案，輸出必須係新檔案。",true)}
         </p>
         ${this.button("Check tool availability", "檢查工具可用性", async () => {
           const r = await this.call("payload.list");
@@ -331,8 +328,8 @@ export class ToolsPanel extends LitElement {
               <strong>${p.toolId}</strong
               ><span
                 >${p.available
-                  ? this.l("Available", "可用")
-                  : p.code || this.l("Unavailable", "未能使用")}</span
+                  ? this.l("Available","可用",true)
+                  : p.code || this.l("Unavailable","未能使用",true)}</span
               >${p.version
                 ? html`<span>${p.version}</span>`
                 : nothing}${this.button(
@@ -349,7 +346,7 @@ export class ToolsPanel extends LitElement {
       </section>
       <div class="columns">
         <section class="panel stack" data-destination="convert" data-experience-id="tools-section:convert" tabindex="-1">
-          <h2>${this.l("Convert a file", "轉換檔案")}</h2>
+          <h2>${this.l("Convert a file","轉換檔案",true)}</h2>
           ${this.button("Load formats", "載入格式", async () => {
             this.categories = (
               await this.tool({ action: "converter.catalog" })
@@ -357,7 +354,7 @@ export class ToolsPanel extends LitElement {
           })}
           ${this.categories.length
             ? html`${this.select(
-                  this.l("Category", "類別"),
+                  this.l("Category","類別",true),
                   this.category,
                   this.categories.map((c) => c.category),
                   (v) => {
@@ -367,21 +364,15 @@ export class ToolsPanel extends LitElement {
                     )!.formats[0].format;
                   },
                 )}${this.select(
-                  this.l("Output format", "輸出格式"),
+                  this.l("Output format","輸出格式",true),
                   this.format,
                   formats?.map((f) => f.format) || [],
                   (v) => (this.format = v),
                 )}
                 <p class="note">
                   ${formats?.find((f) => f.format === this.format)?.available
-                    ? this.l(
-                        "Built-in conversion is available.",
-                        "內置轉換可用。",
-                      )
-                    : this.l(
-                        "Requires a verified adapter and an isolated runtime. Admission alone does not enable conversion.",
-                        "需要已驗證轉換工具同隔離執行環境，單靠接入工具唔會啟用轉換。",
-                      )}
+                    ? this.l("Built-in conversion is available.","內置轉換可用。",true)
+                    : this.l("Requires a verified adapter and an isolated runtime. Admission alone does not enable conversion.","需要已驗證轉換工具同隔離執行環境，單靠接入工具唔會啟用轉換。",true)}
                 </p>`
             : nothing}
           <div class="row">
@@ -419,15 +410,12 @@ export class ToolsPanel extends LitElement {
           </div>
         </section>
         <section class="panel stack" data-destination="pdf" data-experience-id="tools-section:pdf" tabindex="-1">
-          <h2>${this.l("PDF workspace", "PDF 工作區")}</h2>
+          <h2>${this.l("PDF workspace","PDF 工作區",true)}</h2>
           <p class="note">
-            ${this.l(
-              "PDF operations require qpdf and verified isolation. Add sources in merge order. Page numbers start at 1.",
-              "PDF 操作需要 qpdf 同已驗證隔離環境。請按合併次序加入來源，頁碼由 1 開始。",
-            )}
+            ${this.l("PDF operations require qpdf and verified isolation. Add sources in merge order. Page numbers start at 1.","PDF 操作需要 qpdf 同已驗證隔離環境。請按合併次序加入來源，頁碼由 1 開始。",true)}
           </p>
           ${this.select(
-            this.l("Operation", "操作"),
+            this.l("Operation","操作",true),
             this.pdfOperation,
             [
               "inspect",
@@ -462,17 +450,14 @@ export class ToolsPanel extends LitElement {
           )}
           ${requiresPages
             ? this.field(
-                this.l(
-                  "Pages in order (for example 3,1,2)",
-                  "頁碼次序（例如 3,1,2）",
-                ),
+                this.l("Pages in order (for example 3,1,2)","頁碼次序（例如 3,1,2）",true),
                 this.pages,
                 (v) => (this.pages = v),
               )
             : nothing}
           ${this.pdfOperation === "rotate"
             ? this.select(
-                this.l("Clockwise degrees", "順時針角度"),
+                this.l("Clockwise degrees","順時針角度",true),
                 this.degrees,
                 ["90", "180", "270"],
                 (v) => (this.degrees = v),
@@ -480,10 +465,7 @@ export class ToolsPanel extends LitElement {
             : nothing}
           ${this.pdfOperation === "metadata"
             ? html`<p>
-                ${this.l(
-                  "Removes document information and metadata.",
-                  "移除文件資訊同中繼資料。",
-                )}
+                ${this.l("Removes document information and metadata.","移除文件資訊同中繼資料。",true)}
               </p>`
             : nothing}
           ${this.pdfOperation !== "inspect"
@@ -513,16 +495,13 @@ export class ToolsPanel extends LitElement {
         </section>
       </div>
       <section class="panel stack" data-destination="queue" data-experience-id="tools-section:queue" tabindex="-1">
-        <h2>${this.l("File and model queue", "檔案同模型佇列")}</h2>
+        <h2>${this.l("File and model queue","檔案同模型佇列",true)}</h2>
         <p class="note">
-          ${this.l(
-            "Jobs run when you choose Run queue. File permissions must be selected again after restarting the app.",
-            "選擇執行佇列先會開始工作，重新啟動應用程式後需要重新選擇檔案權限。",
-          )}
+          ${this.l("Jobs run when you choose Run queue. File permissions must be selected again after restarting the app.","選擇執行佇列先會開始工作，重新啟動應用程式後需要重新選擇檔案權限。",true)}
         </p>
         <div class="row">
           ${this.field(
-            this.l("Ollama model name", "Ollama 模型名稱"),
+            this.l("Ollama model name","Ollama 模型名稱",true),
             this.model,
             (v) => (this.model = v),
           )}${this.button(
@@ -568,7 +547,7 @@ export class ToolsPanel extends LitElement {
                 this.changed();
               }
             }}
-            >${actionIcon('Run queue')}${this.l("Run queue", "執行佇列")}</md-outlined-button
+            >${actionIcon('Run queue')}${this.l("Run queue","執行佇列",true)}</md-outlined-button
           >
         </div>
         ${this.jobs.map(
@@ -595,10 +574,7 @@ export class ToolsPanel extends LitElement {
             </div>`,
         )}${!this.jobs.length
           ? html`<p>
-              ${this.l(
-                "No jobs loaded. Refresh to check saved jobs.",
-                "未載入工作，請重新整理以檢查已儲存工作。",
-              )}
+              ${this.l("No jobs loaded. Refresh to check saved jobs.","未載入工作，請重新整理以檢查已儲存工作。",true)}
             </p>`
           : nothing}${this.next
           ? this.button("Load more jobs", "載入更多工作", () =>

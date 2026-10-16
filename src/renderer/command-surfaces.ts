@@ -99,7 +99,7 @@ class CommandSurfaces extends LitElement {
   mode:'palette'|'context'|'picker'='palette';actions:Action[]=[];matched:string[]=[];language='bilingual';wide=false;targetName='';notice='';
   private pickers=new WeakMap<Control,SearchablePicker>();private searches=new WeakMap<Control,Map<string,SettingsSearch>>();private searchControl?:SettingsSearch;private origin?:Control;private contextTarget?:Control;private searchEntries:{id:string;text:string}[]=[];private rowIndex=0;
   static styles=css`:host{font:inherit;color:var(--md-sys-color-on-surface)}md-dialog{--md-dialog-container-color:var(--md-sys-color-surface-container-high,#fff);max-width:calc(100vw - 24px);width:720px;max-height:calc(100dvh - 24px)}md-dialog.wide{width:calc(100vw - 24px);height:calc(100dvh - 24px)}[slot=content]{display:grid;gap:12px;min-width:0}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px;border-bottom:1px solid var(--md-sys-color-outline-variant)}.row>div{display:grid;gap:8px;min-width:0}.row small{overflow-wrap:anywhere}.row md-outlined-text-field{width:100%;min-width:0}md-text-button{min-height:48px;white-space:normal}kbd{font:inherit;white-space:nowrap}.preview{padding:8px;border-radius:12px;background:var(--md-sys-color-surface-container);overflow-wrap:anywhere}settings-search{display:block}p{overflow-wrap:anywhere}`;
-  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   private get app(){return document.querySelector('material-buildroot') as Control|null;}
   private currentLanguage(){const app=this.app as any;return app?.effectiveLanguage||app?.state?.language||'bilingual';}
   private dialog(){return this.renderRoot.querySelector('md-dialog') as HTMLElement&{show:()=>Promise<void>;close:()=>Promise<void>;open:boolean};}
@@ -117,7 +117,7 @@ class CommandSurfaces extends LitElement {
   private registeredActions():Action[]{
     return getCommandActionEntries(this.currentLanguage()).map(entry=>({id:'registered-'+entry.id,label:entry.label,context:entry.context||'',target:entry.target,disabled:entry.disabled,run:async()=>{
       await this.dialog().close();
-      try{await entry.run();}catch{this.notice=this.l('The selected command could not be completed. Inspect its original surface before retrying.','未能完成所選指令，重試之前請檢視原有介面。');if(!this.dialog().open)await this.dialog().show();}
+      try{await entry.run();}catch{this.notice=this.l('The selected command could not be completed. Inspect its original surface before retrying.','未能完成所選指令，重試之前請檢視原有介面。',true);if(!this.dialog().open)await this.dialog().show();}
     }}));
   }
   private paletteInventory(actions:Action[]){
@@ -125,7 +125,7 @@ class CommandSurfaces extends LitElement {
     this.actions=Array.from(unique.values()).slice(0,1000);
     this.searchEntries=this.actions.map(a=>({id:a.id,text:a.label+' '+a.context}));
     if(this.searchControl)this.searchControl.entries=this.searchEntries;
-    if(unique.size>1000)this.notice=this.l('Showing the first 1,000 commands. Open a narrower destination to find its controls.','顯示首 1,000 項指令，請開啟較細範圍目的地尋找控制項。');
+    if(unique.size>1000)this.notice=this.l('Showing the first 1,000 commands. Open a narrower destination to find its controls.','顯示首 1,000 項指令，請開啟較細範圍目的地尋找控制項。',true);
   }
   private settingActions():Action[]{
     const app=this.app as any;
@@ -137,7 +137,7 @@ class CommandSurfaces extends LitElement {
       ['shared','Shared preference','共用偏好','shared-mode-panel','#shared-heading'],
       ...(!app?.restricted?[['language','Interface language','介面語言','#language-select'],['vocabulary-status','Personal vocabulary status','個人詞彙狀態','personal-vocabulary-panel','#status'],['vocabulary-upload','Import or replace personal vocabulary','匯入或取代個人詞彙','personal-vocabulary-panel','#upload'],['vocabulary-clear','Clear personal vocabulary','清除個人詞彙','personal-vocabulary-panel','#clear']] as [string,string,string,string,string?][]:[])
     ];
-    return definitions.map(([id,en,zh,selector,inner])=>({id:'setting-'+id,label:this.l(en,zh),context:this.l('Settings','設定'),run:async()=>{
+    return definitions.map(([id,en,zh,selector,inner])=>({id:'setting-'+id,label:this.l(en,zh),context:this.l('Settings','設定',true),run:async()=>{
       await this.dialog().close();await app.navigate('settings');await app.updateComplete;if(app.route!=='settings')return;
       (app.shadowRoot.querySelector('settings-search') as SettingsSearch|null)?.reset();await app.updateComplete;
       let control:Control|null=id==='theme'?Array.from(app.shadowRoot.querySelectorAll('.settings-grid md-outlined-select') as NodeListOf<Control>).find(el=>el.id!=='language-select')||null:app.shadowRoot.querySelector(selector);
@@ -151,7 +151,7 @@ class CommandSurfaces extends LitElement {
       const response=await window.studio.operations({action:'documentation.list'});if(!response.ok||app.restricted)return [];
       const articles=(response.result as {articles?:{id:string;title:string;category:string}[]})?.articles;
       if(!Array.isArray(articles))return [];
-      return articles.filter(a=>typeof a.id==='string'&&typeof a.title==='string').map(a=>({id:'article-'+a.id,label:a.title,context:this.l('Documentation','文件')+' / '+String(a.category||''),run:async()=>{
+      return articles.filter(a=>typeof a.id==='string'&&typeof a.title==='string').map(a=>({id:'article-'+a.id,label:a.title,context:this.l('Documentation','文件',true)+' / '+String(a.category||''),run:async()=>{
         await this.dialog().close();await app.navigate('operations');await app.updateComplete;if(app.route!=='operations'||app.restricted)return;
         const operations=app.shadowRoot.querySelector('operations-panel') as any;if(!operations)return;operations.tab='documentation';await operations.updateComplete;
         const panel=operations.shadowRoot?.querySelector('documentation-panel') as any;if(!panel||panel.restricted)return;await panel.open(a.id);await panel.updateComplete;
@@ -194,7 +194,7 @@ class CommandSurfaces extends LitElement {
     const key=(mode==='palette'?this.app:origin)||this.app;
     if(key){let byMode=this.searches.get(key);if(!byMode){byMode=new Map();this.searches.set(key,byMode);}let control=byMode.get(mode);
       if(!control){control=document.createElement('settings-search') as SettingsSearch;control.addEventListener('settings-filter',(event:Event)=>{if(this.searchControl!==control)return;this.matched=(event as CustomEvent<string[]>).detail;this.rowIndex=0;});byMode.set(mode,control);}
-      control.language=this.language;control.label=this.l('Filter these actions','篩選呢啲操作');control.entries=this.searchEntries;this.searchControl=control;
+      control.language=this.language;control.label=this.l('Filter these actions','篩選呢啲操作',true);control.entries=this.searchEntries;this.searchControl=control;
     }
     this.requestUpdate();await this.updateComplete;const search=this.searchControl;
     if(!this.dialog().open)await this.dialog().show();await search?.updateComplete;search?.focusQuery();
@@ -202,13 +202,13 @@ class CommandSurfaces extends LitElement {
   async openPalette(origin?:Control){
     const modal=this.app?.shadowRoot?.querySelector('md-dialog[open]');
     if(modal&&modal.id!=='actions-dialog')return;
-    const actions=[...this.registeredActions(),...this.settingActions(),...this.makeActions()];this.targetName=this.l('Commands and workspace controls','指令同工作區控制項');await this.present(actions.slice(0,1000),'palette',origin);this.paletteInventory(actions);const articles=await this.articleActions();if(this.mode==='palette'&&this.dialog().open&&articles.length){this.paletteInventory([...actions,...articles]);}
+    const actions=[...this.registeredActions(),...this.settingActions(),...this.makeActions()];this.targetName=this.l('Commands and workspace controls','指令同工作區控制項',true);await this.present(actions.slice(0,1000),'palette',origin);this.paletteInventory(actions);const articles=await this.articleActions();if(this.mode==='palette'&&this.dialog().open&&articles.length){this.paletteInventory([...actions,...articles]);}
   }
   async openContext(target:Control){
     this.contextTarget=target;this.targetName=label(target)||target.localName;
     const actionTarget=ancestors(target).find(p=>p.matches(selector)) as Control|undefined;
-    const actions:Action[]=[{id:'focus',label:this.l('Go to this element','前往呢個元素'),context:this.targetName,target,run:async()=>{await this.dialog().close();await this.reveal(target);}}];
-    if(actionTarget)actions.push({id:'activate',label:this.l('Open or activate','開啟或啟用'),context:label(actionTarget),target:actionTarget,disabled:disabled(actionTarget),kind:actionTarget.matches(pickerSelector)?'picker':actionTarget.matches(toggleSelector)?'toggle':actionTarget.matches(fieldSelector)?'field':undefined,run:()=>this.activate(actionTarget)});
+    const actions:Action[]=[{id:'focus',label:this.l('Go to this element','前往呢個元素',true),context:this.targetName,target,run:async()=>{await this.dialog().close();await this.reveal(target);}}];
+    if(actionTarget)actions.push({id:'activate',label:this.l('Open or activate','開啟或啟用',true),context:label(actionTarget),target:actionTarget,disabled:disabled(actionTarget),kind:actionTarget.matches(pickerSelector)?'picker':actionTarget.matches(toggleSelector)?'toggle':actionTarget.matches(fieldSelector)?'field':undefined,run:()=>this.activate(actionTarget)});
     let providerUnavailable=false;
     for(const [providerId,provider] of contextProviders){
       try{
@@ -222,13 +222,13 @@ class CommandSurfaces extends LitElement {
           actions.push({id:'provider-'+providerId+'-'+action.id,label:action.label,context:action.context||'',disabled:action.disabled===true,run:async()=>{
             if(!target.isConnected)return;
             await this.dialog().close();
-            try{await action.run();}catch{this.notice=this.l('The selected editor could not be opened. No original action was executed.','未能開啟所選編輯器，冇執行原有操作。');if(!this.dialog().open)await this.dialog().show();}
+            try{await action.run();}catch{this.notice=this.l('The selected editor could not be opened. No original action was executed.','未能開啟所選編輯器，冇執行原有操作。',true);if(!this.dialog().open)await this.dialog().show();}
           }});
         }
       }catch{providerUnavailable=true;}
     }
-    actions.push({id:'palette',label:this.l('Find commands','尋找指令'),context:'',shortcut:bindings[0].shortcut,run:()=>this.openPalette(target)});
-    await this.present(actions,'context',target);if(providerUnavailable)this.notice=this.l('Some element actions are unavailable. Existing actions remain available.','部分元素操作未能使用，現有操作仍可使用。');
+    actions.push({id:'palette',label:this.l('Find commands','尋找指令',true),context:'',shortcut:bindings[0].shortcut,run:()=>this.openPalette(target)});
+    await this.present(actions,'context',target);if(providerUnavailable)this.notice=this.l('Some element actions are unavailable. Existing actions remain available.','部分元素操作未能使用，現有操作仍可使用。',true);
   }
   async openPicker(target:Control){
     if(disabled(target))return;
@@ -250,7 +250,7 @@ class CommandSurfaces extends LitElement {
       e.preventDefault();this.rowIndex=e.key==='Home'?0:e.key==='End'?rows.length-1:(this.rowIndex+(e.key==='ArrowDown'?1:-1)+rows.length)%Math.max(rows.length,1);rows[this.rowIndex]?.focus();
     }
   }
-  render(){const visible=this.actions.filter(a=>this.matched.includes(a.id));return html`<md-dialog class=${this.wide?'wide':''} @keydown=${this.keys} @closed=${()=>{if(this.origin?.isConnected)this.origin.focus();}}><div slot="headline">${this.targetName}</div><div slot="content">${this.searchControl}${this.mode==='palette'?html`<p class="preview">${this.l('Results use the current controls. Opening a destination refreshes the available controls on your next search. Passwords and file inputs are excluded.','結果使用目前控制項。開啟目的地後，下次搜尋會更新可用控制項。密碼同檔案輸入唔會列出。')}</p>`:nothing}${visible.length?visible.map(action=>html`<div class="row"><div><md-text-button data-action=${action.id} ?disabled=${action.disabled} aria-keyshortcuts=${action.shortcut||nothing} @click=${()=>this.run(action)}>${materialIcon(action.kind?'tune':'arrow_forward','icon')}${action.label}</md-text-button><small>${action.context}</small>${action.kind==='toggle'?html`<label><md-switch ?selected=${!!(action.target?.localName==='md-switch'?action.target.selected:action.target?.checked)} aria-label=${action.label} ?disabled=${action.disabled} @change=${(e:Event)=>this.write(action,!!(e.target as Control).selected)}></md-switch>${this.l('Current value','目前值')}</label>`:action.kind==='field'?html`<md-outlined-text-field .label=${action.label} .value=${String(action.target?.value??'')} .type=${action.target?.type==='number'?'number':'text'} ?disabled=${action.disabled} @input=${(e:Event)=>this.write(action,(e.target as Control).value||'')}></md-outlined-text-field>`:nothing}</div>${action.shortcut?html`<kbd aria-hidden="true">${action.shortcut}</kbd>`:nothing}</div>`):html`<p role="status">${this.l('No matching actions. Clear or change the filter.','搵唔到符合操作，請清除或更改篩選。')}</p>`}${this.notice?html`<p role="status">${this.notice}</p>`:nothing}</div><div slot="actions">${this.mode==='palette'?html`<md-text-button @click=${()=>{this.wide=!this.wide;try{localStorage.setItem('command-palette-size',this.wide?'wide':'card');}catch{this.notice=this.l('Size applies for this session only.','大小只適用於本次工作階段。');}}}>${this.wide?this.l('Card view','卡片檢視'):this.l('Full-window view','全視窗檢視')}</md-text-button>`:nothing}<md-text-button @click=${()=>this.dialog().close()}>${this.l('Close','關閉')}</md-text-button></div></md-dialog>`;}
+  render(){const visible=this.actions.filter(a=>this.matched.includes(a.id));return html`<md-dialog class=${this.wide?'wide':''} @keydown=${this.keys} @closed=${()=>{if(this.origin?.isConnected)this.origin.focus();}}><div slot="headline">${this.targetName}</div><div slot="content">${this.searchControl}${this.mode==='palette'?html`<p class="preview">${this.l('Results use the current controls. Opening a destination refreshes the available controls on your next search. Passwords and file inputs are excluded.','結果使用目前控制項。開啟目的地後，下次搜尋會更新可用控制項。密碼同檔案輸入唔會列出。',true)}</p>`:nothing}${visible.length?visible.map(action=>html`<div class="row"><div><md-text-button data-action=${action.id} ?disabled=${action.disabled} aria-keyshortcuts=${action.shortcut||nothing} @click=${()=>this.run(action)}>${materialIcon(action.kind?'tune':'arrow_forward','icon')}${action.label}</md-text-button><small>${action.context}</small>${action.kind==='toggle'?html`<label><md-switch ?selected=${!!(action.target?.localName==='md-switch'?action.target.selected:action.target?.checked)} aria-label=${action.label} ?disabled=${action.disabled} @change=${(e:Event)=>this.write(action,!!(e.target as Control).selected)}></md-switch>${this.l('Current value','目前值',true)}</label>`:action.kind==='field'?html`<md-outlined-text-field .label=${action.label} .value=${String(action.target?.value??'')} .type=${action.target?.type==='number'?'number':'text'} ?disabled=${action.disabled} @input=${(e:Event)=>this.write(action,(e.target as Control).value||'')}></md-outlined-text-field>`:nothing}</div>${action.shortcut?html`<kbd aria-hidden="true">${action.shortcut}</kbd>`:nothing}</div>`):html`<p role="status">${this.l('No matching actions. Clear or change the filter.','搵唔到符合操作，請清除或更改篩選。',true)}</p>`}${this.notice?html`<p role="status">${this.notice}</p>`:nothing}</div><div slot="actions">${this.mode==='palette'?html`<md-text-button @click=${()=>{this.wide=!this.wide;try{localStorage.setItem('command-palette-size',this.wide?'wide':'card');}catch{this.notice=this.l('Size applies for this session only.','大小只適用於本次工作階段。',true);}}}>${this.wide?this.l('Card view','卡片檢視',true):this.l('Full-window view','全視窗檢視',true)}</md-text-button>`:nothing}<md-text-button @click=${()=>this.dialog().close()}>${this.l('Close','關閉',true)}</md-text-button></div></md-dialog>`;}
 }
 customElements.define('command-surfaces',CommandSurfaces);
 
@@ -260,10 +260,10 @@ class SearchablePicker extends LitElement {
   language='bilingual';options:Control[]=[];matched:string[]=[];heading='';
   private target?:Control;private entries:{id:string;text:string}[]=[];
   static styles=css`md-dialog{width:640px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);--md-dialog-container-color:var(--md-sys-color-surface-container-high,#fff)}[slot=content]{display:grid;gap:8px;min-width:0}md-text-button{min-height:48px;white-space:normal}small{padding-inline-start:8px}`;
-  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language);}
   private dialog(){return this.renderRoot.querySelector('md-dialog') as HTMLElement&{show:()=>Promise<void>;close:()=>Promise<void>;open:boolean};}
   async openFor(target:Control,language:string){
-    this.target=target;this.language=language;this.heading=label(target)||this.l('Choose an option','選擇選項');
+    this.target=target;this.language=language;this.heading=label(target)||this.l('Choose an option','選擇選項',true);
     this.options=Array.from(target.querySelectorAll<Control>('md-select-option,option'));
     this.entries=this.options.map((o,i)=>({id:String(i),text:label(o)||String(o.value??'')}));
     this.matched=this.entries.map(e=>e.id);await this.updateComplete;
@@ -284,7 +284,7 @@ class SearchablePicker extends LitElement {
     const focused=e.composedPath().find(p=>p instanceof Element&&p.hasAttribute('data-option'));
     const current=items.indexOf(focused as Control);e.preventDefault();items[(current+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus();
   }
-  render(){return html`<md-dialog @keydown=${this.keys} @closed=${()=>{if(this.target?.isConnected)this.target.focus();}}><div slot="headline">${this.heading}</div><div slot="content"><settings-search .language=${this.language} .label=${this.l('Filter options','篩選選項')} .entries=${this.entries} @settings-filter=${(e:CustomEvent)=>this.matched=e.detail}></settings-search>${this.options.map((option,index)=>this.matched.includes(String(index))?html`<md-text-button data-option=${index} ?disabled=${!!option.disabled} @click=${()=>this.choose(option)}>${label(option)||String(option.value??'')}${option.value===this.target?.value?html`<small>${this.l('Selected','已選取')}</small>`:nothing}</md-text-button>`:nothing)}${!this.matched.length?html`<p role="status">${this.l('No matching options. Clear or change the filter.','搵唔到符合選項，請清除或更改篩選。')}</p>`:nothing}</div><div slot="actions"><md-text-button @click=${()=>this.dialog().close()}>${this.l('Close','關閉')}</md-text-button></div></md-dialog>`;}
+  render(){return html`<md-dialog @keydown=${this.keys} @closed=${()=>{if(this.target?.isConnected)this.target.focus();}}><div slot="headline">${this.heading}</div><div slot="content"><settings-search .language=${this.language} .label=${this.l('Filter options','篩選選項',true)} .entries=${this.entries} @settings-filter=${(e:CustomEvent)=>this.matched=e.detail}></settings-search>${this.options.map((option,index)=>this.matched.includes(String(index))?html`<md-text-button data-option=${index} ?disabled=${!!option.disabled} @click=${()=>this.choose(option)}>${label(option)||String(option.value??'')}${option.value===this.target?.value?html`<small>${this.l('Selected','已選取',true)}</small>`:nothing}</md-text-button>`:nothing)}${!this.matched.length?html`<p role="status">${this.l('No matching options. Clear or change the filter.','搵唔到符合選項，請清除或更改篩選。',true)}</p>`:nothing}</div><div slot="actions"><md-text-button @click=${()=>this.dialog().close()}>${this.l('Close','關閉',true)}</md-text-button></div></md-dialog>`;}
 }
 customElements.define('searchable-picker',SearchablePicker);
 

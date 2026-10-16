@@ -174,7 +174,7 @@ export class PackageDiscoveryPanel extends LitElement {
       }
     }
   `;
-  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   protected updated(changed: PropertyValues) {
     if (changed.has("workspaceId")) {
       this.serial++;
@@ -317,19 +317,13 @@ export class PackageDiscoveryPanel extends LitElement {
   }
   private bytes(value?: string) {
     if (value === undefined)
-      return this.l(
-        "Bytes omitted by the host limit; inspect the original file without replacing it.",
-        "內容因主機限制而省略，請檢查原檔案，唔好取代。 ",
-      );
+      return this.l("Bytes omitted by the host limit; inspect the original file without replacing it.","內容因主機限制而省略，請檢查原檔案，唔好取代。 ",true);
     try {
       return new TextDecoder("utf-8", { fatal: true }).decode(
         Uint8Array.from(atob(value), (c) => c.charCodeAt(0)),
       );
     } catch {
-      return this.l(
-        "Binary or non-UTF-8 file; original bytes are preserved.",
-        "二進位或非 UTF-8 檔案，原始位元組已保留。",
-      );
+      return this.l("Binary or non-UTF-8 file; original bytes are preserved.","二進位或非 UTF-8 檔案，原始位元組已保留。",true);
     }
   }
   private discoverEditors(){
@@ -352,24 +346,18 @@ export class PackageDiscoveryPanel extends LitElement {
       disabled = this.pending || this.locked || !this.workspaceId;
     return html`<div class="stack">
       <p>
-        ${this.l(
-          "Discover packages in the adopted source and session-authorized external trees. This reads declarations; it does not evaluate make recipes or activate trees.",
-          "探索已接入來源同今次工作階段已授權外部樹嘅套件。只讀取宣告，唔會執行 make 配方或啟用外部樹。",
-        )}
+        ${this.l("Discover packages in the adopted source and session-authorized external trees. This reads declarations; it does not evaluate make recipes or activate trees.","探索已接入來源同今次工作階段已授權外部樹嘅套件。只讀取宣告，唔會執行 make 配方或啟用外部樹。",true)}
       </p>
       <div class="row">
-        <md-outlined-button ?disabled=${disabled} @click=${()=>this.discoverEditors()}>${this.l("Discover installed editors","探索已安裝編輯器")}</md-outlined-button>
-        ${this.editors.length?html`<md-outlined-select .label=${this.l("Source editor","來源編輯器")} .value=${this.editorId} ?disabled=${disabled} @change=${(e:Event)=>{this.editorId=(e.target as HTMLSelectElement).value;this.revision++;}}>${this.editors.map(editor=>html`<md-select-option .value=${editor.id}><div slot="headline">${editor.label}</div></md-select-option>`)}</md-outlined-select>`:html`<span>${this.l("No editor discovered yet.","尚未探索到編輯器。")}</span>`}
+        <md-outlined-button ?disabled=${disabled} @click=${()=>this.discoverEditors()}>${this.l("Discover installed editors","探索已安裝編輯器",true)}</md-outlined-button>
+        ${this.editors.length?html`<md-outlined-select .label=${this.l("Source editor","來源編輯器",true)} .value=${this.editorId} ?disabled=${disabled} @change=${(e:Event)=>{this.editorId=(e.target as HTMLSelectElement).value;this.revision++;}}>${this.editors.map(editor=>html`<md-select-option .value=${editor.id}><div slot="headline">${editor.label}</div></md-select-option>`)}</md-outlined-select>`:html`<span>${this.l("No editor discovered yet.","尚未探索到編輯器。",true)}</span>`}
       </div>
       <div class="row search">
         <md-outlined-text-field
-          .label=${this.l("Search source packages", "搜尋來源套件")}
+          .label=${this.l("Search source packages","搜尋來源套件",true)}
           .value=${this.query}
           maxlength="128"
-          .supportingText=${this.l(
-            "Host substring search across names, paths and declared symbols.",
-            "主機文字搜尋名稱、路徑同已宣告符號。",
-          )}
+          .supportingText=${this.l("Host substring search across names, paths and declared symbols.","主機文字搜尋名稱、路徑同已宣告符號。",true)}
           ?disabled=${disabled}
           @input=${(e: Event) => {
             this.query = (e.target as HTMLInputElement).value;
@@ -381,17 +369,14 @@ export class PackageDiscoveryPanel extends LitElement {
           }}
         ></md-outlined-text-field
         ><md-icon-button
-          aria-label=${this.l("Search package catalogue", "搜尋套件目錄")}
-          title=${this.l("Search package catalogue", "搜尋套件目錄")}
+          aria-label=${this.l("Search package catalogue","搜尋套件目錄",true)}
+          title=${this.l("Search package catalogue","搜尋套件目錄",true)}
           ?disabled=${disabled}
           @click=${() => this.discover()}
           >${materialIcon("search")}</md-icon-button
         ><md-icon-button
-          aria-label=${this.l(
-            "Package page regex builder",
-            "套件頁面表達式建構器",
-          )}
-          title=${this.l("Package page regex builder", "套件頁面表達式建構器")}
+          aria-label=${this.l("Package page regex builder","套件頁面表達式建構器",true)}
+          title=${this.l("Package page regex builder","套件頁面表達式建構器",true)}
           aria-expanded=${this.builder}
           aria-controls="package-regex"
           @click=${() => {
@@ -404,10 +389,7 @@ export class PackageDiscoveryPanel extends LitElement {
               id="package-regex" style="display:block;max-height:65vh;overflow:auto;width:min(760px,calc(100vw - 48px))"
               class="builder stack"
               role="region"
-              aria-label=${this.l(
-                "Package page regex builder",
-                "套件頁面表達式建構器",
-              )}
+              aria-label=${this.l("Package page regex builder","套件頁面表達式建構器",true)}
               @keydown=${(e: KeyboardEvent) => {
                 if (e.key === "Escape") {
                   e.stopPropagation();
@@ -422,13 +404,10 @@ export class PackageDiscoveryPanel extends LitElement {
               }}
             >
               <h3>
-                ${this.l("Filter the loaded page only", "只篩選已載入頁面")}
+                ${this.l("Filter the loaded page only","只篩選已載入頁面",true)}
               </h3>
               <p>
-                ${this.l(
-                  "ECMAScript regex; not a full-catalogue query. Clear to show the complete loaded page.",
-                  "ECMAScript 表達式，唔係完整目錄搜尋。清除以顯示整個已載入頁面。",
-                )}
+                ${this.l("ECMAScript regex; not a full-catalogue query. Clear to show the complete loaded page.","ECMAScript 表達式，唔係完整目錄搜尋。清除以顯示整個已載入頁面。",true)}
               </p>
               <regex-workbench .language=${this.language} .pattern=${this.pattern} .flags=${this.flags}
                 @pattern-change=${(e:CustomEvent)=>{e.stopPropagation();this.pattern=e.detail.pattern;this.flags=e.detail.flags;this.filter();}}
@@ -438,7 +417,7 @@ export class PackageDiscoveryPanel extends LitElement {
                   this.pattern = "";
                   this.filter();
                 }}
-                >${this.l("Clear page filter", "清除頁面篩選")}</md-text-button
+                >${this.l("Clear page filter","清除頁面篩選",true)}</md-text-button
               >
             </section>`
           : nothing}
@@ -447,21 +426,18 @@ export class PackageDiscoveryPanel extends LitElement {
       ${this.pending
         ? html`<md-linear-progress
             indeterminate
-            aria-label=${this.l("Inspecting source packages", "檢視來源套件")}
+            aria-label=${this.l("Inspecting source packages","檢視來源套件",true)}
           ></md-linear-progress>`
         : nothing}${c
         ? html`<p>
-              ${c.total} ${this.l("catalogue matches", "目錄符合項目")} ·
+              ${c.total} ${this.l("catalogue matches","目錄符合項目",true)} ·
               ${c.packages.length ? c.offset + 1 : 0}–${c.offset +
               c.packages.length}.
               ${c.semantics}
             </p>
             ${c.symbolStats?.truncated
               ? html`<p>
-                  ${this.l(
-                    "Symbol declarations were truncated by host limits; search and static help are incomplete.",
-                    "符號宣告因主機限制而截短，搜尋同靜態說明並唔完整。",
-                  )}
+                  ${this.l("Symbol declarations were truncated by host limits; search and static help are incomplete.","符號宣告因主機限制而截短，搜尋同靜態說明並唔完整。",true)}
                   ${c.symbolStats.retainedCount} /
                   ${c.symbolStats.declaredCount}
                 </p>`
@@ -470,14 +446,14 @@ export class PackageDiscoveryPanel extends LitElement {
             )}
             <div class="row">
               <md-icon-button
-                title=${this.l("Previous package page", "上一頁套件")}
-                aria-label=${this.l("Previous package page", "上一頁套件")}
+                title=${this.l("Previous package page","上一頁套件",true)}
+                aria-label=${this.l("Previous package page","上一頁套件",true)}
                 ?disabled=${disabled || c.offset === 0}
                 @click=${() => this.discover(Math.max(0, c.offset - c.limit))}
                 >${materialIcon("arrow_back")}</md-icon-button
               ><md-icon-button
-                title=${this.l("Next package page", "下一頁套件")}
-                aria-label=${this.l("Next package page", "下一頁套件")}
+                title=${this.l("Next package page","下一頁套件",true)}
+                aria-label=${this.l("Next package page","下一頁套件",true)}
                 ?disabled=${disabled ||
                 c.nextOffset >= c.total ||
                 c.nextOffset <= c.offset}
@@ -485,10 +461,7 @@ export class PackageDiscoveryPanel extends LitElement {
                 >${materialIcon("arrow_forward")}</md-icon-button
               ><span
                 >${this.pattern
-                  ? this.l(
-                      "Regex applies to this page only.",
-                      "表達式只套用到此頁。",
-                    )
+                  ? this.l("Regex applies to this page only.","表達式只套用到此頁。",true)
                   : ""}</span
               >
             </div>
@@ -515,14 +488,8 @@ export class PackageDiscoveryPanel extends LitElement {
                   ? html`<h3>${this.selected?.name}</h3>
                       <p>
                         ${p.treeId === "source"
-                          ? this.l(
-                              "Source package: import as an external-tree draft; source files stay read-only.",
-                              "來源套件：匯入為外部樹草稿，來源檔案保持唯讀。",
-                            )
-                          : this.l(
-                              "Authorized external-tree package.",
-                              "已授權外部樹套件。",
-                            )}
+                          ? this.l("Source package: import as an external-tree draft; source files stay read-only.","來源套件：匯入為外部樹草稿，來源檔案保持唯讀。",true)
+                          : this.l("Authorized external-tree package.","已授權外部樹套件。",true)}
                       </p>
                       ${p.symbols.map(
                         (symbol) =>
@@ -531,14 +498,11 @@ export class PackageDiscoveryPanel extends LitElement {
                             <p>
                               ${symbol.prompt || ""} ·
                               ${symbol.type ||
-                              this.l("Unknown type", "類型未知")}
+                              this.l("Unknown type","類型未知",true)}
                             </p>
                             <p>
                               ${symbol.help ||
-                              this.l(
-                                "No static help declaration.",
-                                "無靜態說明宣告。",
-                              )}
+                              this.l("No static help declaration.","無靜態說明宣告。",true)}
                             </p>
                             <small
                               >${symbol.location.path}:${symbol.location
@@ -547,26 +511,17 @@ export class PackageDiscoveryPanel extends LitElement {
                           </section>`,
                       )}${p.symbolsTruncated
                         ? html`<p>
-                            ${this.l(
-                              "Some symbols were omitted by the host limit.",
-                              "部分符號因主機限制而省略。",
-                            )}
+                            ${this.l("Some symbols were omitted by the host limit.","部分符號因主機限制而省略。",true)}
                           </p>`
                         : nothing}${p.unsupportedReasons.map(
                         (reason) => html`<p>${reason}</p>`,
                       )}${!p.roundTripAllowed || !p.draft
                         ? html`<p>
-                            ${this.l(
-                              "Read-only review. This recipe cannot be safely round-tripped by the typed editor.",
-                              "唯讀審核，此配方未能安全地由類型化編輯器來回轉換。",
-                            )}
+                            ${this.l("Read-only review. This recipe cannot be safely round-tripped by the typed editor.","唯讀審核，此配方未能安全地由類型化編輯器來回轉換。",true)}
                           </p>`
                         : html`<label class="row"
                               ><md-checkbox
-                                aria-label=${this.l(
-                                  "Replace current package draft with reviewed import",
-                                  "用已審核匯入內容取代目前套件草稿",
-                                )}
+                                aria-label=${this.l("Replace current package draft with reviewed import","用已審核匯入內容取代目前套件草稿",true)}
                                 ?disabled=${disabled}
                                 ?checked=${this.consent}
                                 @change=${(e: Event) => {
@@ -576,10 +531,7 @@ export class PackageDiscoveryPanel extends LitElement {
                                   this.revision++;
                                 }}
                               ></md-checkbox
-                              >${this.l(
-                                "Replace the current editor draft. Files are written only after a separate preview and Apply.",
-                                "取代目前編輯器草稿，只會喺獨立預覽同套用後寫入檔案。",
-                              )}</label
+                              >${this.l("Replace the current editor draft. Files are written only after a separate preview and Apply.","取代目前編輯器草稿，只會喺獨立預覽同套用後寫入檔案。",true)}</label
                             ><md-outlined-button
                               ?disabled=${disabled || !this.consent}
                               @click=${() => {
@@ -598,26 +550,20 @@ export class PackageDiscoveryPanel extends LitElement {
                                 this.consent = false;
                                 this.revision++;
                               }}
-                              >${materialIcon("download", "icon")}${this.l(
-                                "Import reviewed draft",
-                                "匯入已審核草稿",
-                              )}</md-outlined-button
+                              >${materialIcon("download", "icon")}${this.l("Import reviewed draft","匯入已審核草稿",true)}</md-outlined-button
                             >`}${p.files.map(
                         (file) =>
                           html`<details>
                             <summary>${file.path}</summary>
                             <p class="hash">SHA-256 ${file.sha256}</p>
-                            <md-outlined-button ?disabled=${disabled||!this.editorId||!/[.](mk|in|hash|patch|json|txt|sh|conf)$/i.test(file.path)} @click=${()=>this.openEditor(file)}>${this.l("Open current source in editor","用編輯器開啟目前來源")}</md-outlined-button>
+                            <md-outlined-button ?disabled=${disabled||!this.editorId||!/[.](mk|in|hash|patch|json|txt|sh|conf)$/i.test(file.path)} @click=${()=>this.openEditor(file)}>${this.l("Open current source in editor","用編輯器開啟目前來源",true)}</md-outlined-button>
                             <pre tabindex="0">
 ${this.bytes(file.bytesBase64)}</pre
                             >
                           </details>`,
                       )}`
                   : html`<p>
-                      ${this.l(
-                        "Select a package to inspect its source declarations and original files.",
-                        "選擇套件以檢視來源宣告同原始檔案。",
-                      )}
+                      ${this.l("Select a package to inspect its source declarations and original files.","選擇套件以檢視來源宣告同原始檔案。",true)}
                     </p>`}
               </div>
             </div>`

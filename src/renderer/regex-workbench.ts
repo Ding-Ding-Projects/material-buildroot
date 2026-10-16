@@ -158,7 +158,7 @@ export class RegexWorkbench extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   disconnectedCallback() {
     this.stop();
     super.disconnectedCallback();
@@ -437,37 +437,34 @@ export class RegexWorkbench extends LitElement {
       token,
       meaning:
         token === "^"
-          ? this.l("Start anchor", "起點錨點")
+          ? this.l("Start anchor","起點錨點",true)
           : token === "$"
-            ? this.l("End anchor", "終點錨點")
+            ? this.l("End anchor","終點錨點",true)
             : token === "|"
-              ? this.l("Alternation", "選擇分支")
+              ? this.l("Alternation","選擇分支",true)
               : token.startsWith("[")
-                ? this.l("Character class", "字元類別")
+                ? this.l("Character class","字元類別",true)
                 : token.startsWith("\\")
-                  ? this.l("Escape or character property", "跳脫序列或字元屬性")
+                  ? this.l("Escape or character property","跳脫序列或字元屬性",true)
                   : token.startsWith("(")
-                    ? this.l("Group or assertion start", "群組或斷言開始")
+                    ? this.l("Group or assertion start","群組或斷言開始",true)
                     : token === ")"
-                      ? this.l("Group end", "群組結束")
+                      ? this.l("Group end","群組結束",true)
                       : /^[?*+{]/.test(token)
-                        ? this.l("Quantifier", "數量詞")
-                        : this.l("Literal text", "字面文字"),
+                        ? this.l("Quantifier","數量詞",true)
+                        : this.l("Literal text","字面文字",true),
     }));
   }
   render() {
     const match = this.result?.matches?.[this.matchIndex];
     return html`<div class="workbench">
       <section class="panel stack">
-        <h2>${this.l("Regular expression workbench", "正規表達式工作台")}</h2>
+        <h2>${this.l("Regular expression workbench","正規表達式工作台",true)}</h2>
         <p>
-          ${this.l(
-            "Local ECMAScript RegExp engine. Evaluation uses an isolated worker with a 250 ms wall-time limit, 2000-character patterns, 64 KiB samples and at most 500 matches.",
-            "使用本機 ECMAScript RegExp 引擎，獨立運算程序限時 250 毫秒，模式最多 2000 個字元、樣本最多 64 KiB，最多顯示 500 個符合項目。",
-          )}
+          ${this.l("Local ECMAScript RegExp engine. Evaluation uses an isolated worker with a 250 ms wall-time limit, 2000-character patterns, 64 KiB samples and at most 500 matches.","使用本機 ECMAScript RegExp 引擎，獨立運算程序限時 250 毫秒，模式最多 2000 個字元、樣本最多 64 KiB，最多顯示 500 個符合項目。",true)}
         </p>
         <md-outlined-text-field
-          label=${this.l("Pattern", "模式")}
+          label=${this.l("Pattern","模式",true)}
           .value=${this.pattern}
           maxlength="2000"
           @input=${(e: Event) =>
@@ -476,13 +473,13 @@ export class RegexWorkbench extends LitElement {
         <div
           class="flags"
           role="group"
-          aria-label=${this.l("Expression flags", "表達式旗標")}
+          aria-label=${this.l("Expression flags","表達式旗標",true)}
         >
           ${["d", "g", "i", "m", "s", "u", "v", "y"].map(
             (flag) =>
               html`<label
                 ><md-checkbox
-                  aria-label=${this.l("Flag", "旗標") + " " + flag}
+                  aria-label=${this.l("Flag","旗標",true) + " " + flag}
                   .checked=${this.flags.includes(flag)}
                   @change=${(e: Event) =>
                     this.toggleFlag(
@@ -495,16 +492,13 @@ export class RegexWorkbench extends LitElement {
           )}
         </div>
         <p class="muted">
-          ${this.l(
-            "d indices · g global · i ignore case · m multiline · s dot all · u Unicode · v Unicode sets · y sticky. u and v cannot be combined.",
-            "d 位置 · g 全域 · i 忽略大小寫 · m 多行 · s 點符合全部 · u Unicode · v Unicode 集合 · y 黏附。u 同 v 唔可以一齊使用。",
-          )}
+          ${this.l("d indices · g global · i ignore case · m multiline · s dot all · u Unicode · v Unicode sets · y sticky. u and v cannot be combined.","d 位置 · g 全域 · i 忽略大小寫 · m 多行 · s 點符合全部 · u Unicode · v Unicode 集合 · y 黏附。u 同 v 唔可以一齊使用。",true)}
         </p>
         <div class="columns">
           <md-outlined-text-field
             type="textarea"
             rows="5"
-            label=${this.l("Sample text", "樣本文字")}
+            label=${this.l("Sample text","樣本文字",true)}
             .value=${this.sample}
             maxlength="65536"
             @input=${(e: Event) => {
@@ -515,7 +509,7 @@ export class RegexWorkbench extends LitElement {
           ><md-outlined-text-field
             type="textarea"
             rows="5"
-            label=${this.l("Replacement template", "取代範本")}
+            label=${this.l("Replacement template","取代範本",true)}
             .value=${this.replacement}
             maxlength="2000"
             @input=${(e: Event) => {
@@ -527,23 +521,20 @@ export class RegexWorkbench extends LitElement {
           ></md-outlined-text-field>
         </div>
         <p class="muted">
-          ${this.l(
-            "Replacement references include $&, $1 and $<name>. Samples and patterns are never sent to a server.",
-            "取代參照包括 $&、$1 同 $<name>，樣本同模式唔會傳送到伺服器。",
-          )}
+          ${this.l("Replacement references include $&, $1 and $<name>. Samples and patterns are never sent to a server.","取代參照包括 $&、$1 同 $<name>，樣本同模式唔會傳送到伺服器。",true)}
         </p>
         <div class="row">
           <md-filled-button @click=${this.run}
-            >${actionIcon('Evaluate')}${this.l("Evaluate", "運算")}</md-filled-button
+            >${actionIcon('Evaluate')}${this.l("Evaluate","運算",true)}</md-filled-button
           ><md-outlined-button
             ?disabled=${!this.busy}
             @click=${() => {
               this.stop();
               this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Evaluation cancelled.", "已取消運算。"));
             }}
-            >${actionIcon('Cancel evaluation')}${this.l("Cancel evaluation", "取消運算")}</md-outlined-button
+            >${actionIcon('Cancel evaluation')}${this.l("Cancel evaluation","取消運算",true)}</md-outlined-button
           ><md-text-button @click=${this.copyPattern}
-            >${actionIcon('Copy pattern')}${this.l("Copy pattern", "複製模式")}</md-text-button
+            >${actionIcon('Copy pattern')}${this.l("Copy pattern","複製模式",true)}</md-text-button
           >
         </div>
         ${this.feedback
@@ -554,50 +545,47 @@ export class RegexWorkbench extends LitElement {
       </section>
       <section class="panel">
         <details>
-          <summary>${this.l("Guided construction", "引導式建立")}</summary>
+          <summary>${this.l("Guided construction","引導式建立",true)}</summary>
           <div class="stack">
             <md-outlined-select
-              label=${this.l("Construct", "結構")}
+              label=${this.l("Construct","結構",true)}
               .value=${this.construct}
               .displayText=${this.constructLabel()}
               @change=${(e: Event) =>
                 (this.construct = (e.target as HTMLSelectElement).value)}
               >${this.options([
-                ["literal", this.l("Escaped literal", "已跳脫字面文字")],
-                ["class", this.l("Character class", "字元類別")],
-                ["capture", this.l("Capture group", "擷取群組")],
-                ["named", this.l("Named capture group", "具名擷取群組")],
-                ["noncapture", this.l("Non-capturing group", "非擷取群組")],
+                ["literal", this.l("Escaped literal","已跳脫字面文字",true)],
+                ["class", this.l("Character class","字元類別",true)],
+                ["capture", this.l("Capture group","擷取群組",true)],
+                ["named", this.l("Named capture group","具名擷取群組",true)],
+                ["noncapture", this.l("Non-capturing group","非擷取群組",true)],
                 [
                   "alternation",
-                  this.l("Alternatives, one per line", "選項，每行一個"),
+                  this.l("Alternatives, one per line","選項，每行一個",true),
                 ],
-                ["lookahead", this.l("Positive lookahead", "正向前瞻")],
-                ["lookbehind", this.l("Positive lookbehind", "正向後顧")],
-                ["start", this.l("Start anchor", "起點錨點")],
-                ["end", this.l("End anchor", "終點錨點")],
-                ["boundary", this.l("Word boundary", "字詞邊界")],
-                ["digit", this.l("Digit class", "數字類別")],
+                ["lookahead", this.l("Positive lookahead","正向前瞻",true)],
+                ["lookbehind", this.l("Positive lookbehind","正向後顧",true)],
+                ["start", this.l("Start anchor","起點錨點",true)],
+                ["end", this.l("End anchor","終點錨點",true)],
+                ["boundary", this.l("Word boundary","字詞邊界",true)],
+                ["digit", this.l("Digit class","數字類別",true)],
                 [
                   "unicode",
-                  this.l("Unicode letter property", "Unicode 字母屬性"),
+                  this.l("Unicode letter property","Unicode 字母屬性",true),
                 ],
                 [
                   "codepoint",
-                  this.l(
-                    "Unicode code point, hexadecimal",
-                    "Unicode 碼位，十六進位",
-                  ),
+                  this.l("Unicode code point, hexadecimal","Unicode 碼位，十六進位",true),
                 ],
                 [
                   "backreference",
-                  this.l("First group backreference", "第一組反向參照"),
+                  this.l("First group backreference","第一組反向參照",true),
                 ],
               ])}</md-outlined-select
             ><md-outlined-text-field
               type="textarea"
               rows="2"
-              label=${this.l("Construct content", "結構內容")}
+              label=${this.l("Construct content","結構內容",true)}
               .value=${this.literal}
               @input=${(e: Event) =>
                 (this.literal = (
@@ -605,10 +593,10 @@ export class RegexWorkbench extends LitElement {
                 ).value)}
             ></md-outlined-text-field
             ><md-outlined-select
-              label=${this.l("Quantifier", "數量詞")}
+              label=${this.l("Quantifier","數量詞",true)}
               .value=${this.quantifier}
               .displayText=${this.quantifier === "one"
-                ? this.l("Exactly once", "一次")
+                ? this.l("Exactly once","一次",true)
                 : (
                     {
                       optional: "?",
@@ -621,7 +609,7 @@ export class RegexWorkbench extends LitElement {
               @change=${(e: Event) =>
                 (this.quantifier = (e.target as HTMLSelectElement).value)}
               >${this.options([
-                ["one", this.l("Exactly once", "一次")],
+                ["one", this.l("Exactly once","一次",true)],
                 ["optional", "?"],
                 ["many", "*"],
                 ["some", "+"],
@@ -629,19 +617,16 @@ export class RegexWorkbench extends LitElement {
                 ["range", "{1,3}"],
               ])}</md-outlined-select
             ><md-filled-tonal-button @click=${this.appendConstruct}
-              >${this.l("Append construct", "加入結構")}</md-filled-tonal-button
+              >${this.l("Append construct","加入結構",true)}</md-filled-tonal-button
             >
             <p>
-              ${this.l(
-                "Group contents are raw expressions. Literal and alternative text is escaped. Edit group names and ranges in the pattern field.",
-                "群組內容係原始表達式，字面文字同選項會自動跳脫。請喺模式欄位編輯群組名稱同範圍。",
-              )}
+              ${this.l("Group contents are raw expressions. Literal and alternative text is escaped. Edit group names and ranges in the pattern field.","群組內容係原始表達式，字面文字同選項會自動跳脫。請喺模式欄位編輯群組名稱同範圍。",true)}
             </p>
           </div>
         </details>
         <details>
           <summary>
-            ${this.l("Explanation and engine capabilities", "解釋同引擎能力")}
+            ${this.l("Explanation and engine capabilities","解釋同引擎能力",true)}
           </summary>
           <div class="tokens">
             ${this.explanations().map(
@@ -652,63 +637,54 @@ export class RegexWorkbench extends LitElement {
             )}
           </div>
           <p>
-            ${this.l(
-              "This is lexical annotation, not a complete parse tree. ECMAScript supports lookarounds, captures, backreferences and lazy quantifiers. Unicode-set intersection/subtraction needs the v flag and a compatible engine.",
-              "呢個係詞法註解，唔係完整語法樹。ECMAScript 支援前後顧、擷取、反向參照同非貪婪數量詞。Unicode 集合交集同差集需要 v 旗標同相容引擎。",
-            )}
+            ${this.l("This is lexical annotation, not a complete parse tree. ECMAScript supports lookarounds, captures, backreferences and lazy quantifiers. Unicode-set intersection/subtraction needs the v flag and a compatible engine.","呢個係詞法註解，唔係完整語法樹。ECMAScript 支援前後顧、擷取、反向參照同非貪婪數量詞。Unicode 集合交集同差集需要 v 旗標同相容引擎。",true)}
           </p>
           <p>
-            ${this.l(
-              "Atomic groups, possessive quantifiers, conditionals, subroutines and execution traces are not exposed by this engine. Inline modifiers depend on the embedded engine version; evaluation reports unsupported syntax.",
-              "呢個引擎唔提供原子群組、佔有式數量詞、條件式、子常式同執行追蹤。行內修飾詞視乎內嵌引擎版本，運算會指出不支援嘅語法。",
-            )}
+            ${this.l("Atomic groups, possessive quantifiers, conditionals, subroutines and execution traces are not exposed by this engine. Inline modifiers depend on the embedded engine version; evaluation reports unsupported syntax.","呢個引擎唔提供原子群組、佔有式數量詞、條件式、子常式同執行追蹤。行內修飾詞視乎內嵌引擎版本，運算會指出不支援嘅語法。",true)}
           </p>
           <p class="notice">
-            ${this.l(
-              "Nested quantifiers, overlapping alternatives and unanchored repetition can cause excessive backtracking. Timing is measured for this sample only and is not a safety proof. The worker is terminated at the time limit.",
-              "巢狀數量詞、重疊選項同無錨點重複可能造成過量回溯。時間只反映呢個樣本，唔代表安全證明。超時會終止運算程序。",
-            )}
+            ${this.l("Nested quantifiers, overlapping alternatives and unanchored repetition can cause excessive backtracking. Timing is measured for this sample only and is not a safety proof. The worker is terminated at the time limit.","巢狀數量詞、重疊選項同無錨點重複可能造成過量回溯。時間只反映呢個樣本，唔代表安全證明。超時會終止運算程序。",true)}
           </p>
         </details>
       </section>
       ${this.result?.ok
         ? html`<section class="panel stack">
-            <h2>${this.l("Results", "結果")}</h2>
+            <h2>${this.l("Results","結果",true)}</h2>
             <p>
-              ${this.result.matches.length} ${this.l("matches", "個符合項目")} ·
+              ${this.result.matches.length} ${this.l("matches","個符合項目",true)} ·
               ${this.result.milliseconds.toFixed(2)} ms
               ${this.result.truncated
-                ? this.l("(500-match display limit)", "（500 項顯示上限）")
+                ? this.l("(500-match display limit)","（500 項顯示上限）",true)
                 : ""}
             </p>
             <div class="row">
               <md-text-button
                 ?disabled=${this.matchIndex === 0}
                 @click=${() => this.matchIndex--}
-                >${actionIcon('Previous match')}${this.l("Previous match", "上一個符合項目")}</md-text-button
+                >${actionIcon('Previous match')}${this.l("Previous match","上一個符合項目",true)}</md-text-button
               ><span
                 >${this.result.matches.length ? this.matchIndex + 1 : 0} /
                 ${this.result.matches.length}</span
               ><md-text-button
                 ?disabled=${this.matchIndex + 1 >= this.result.matches.length}
                 @click=${() => this.matchIndex++}
-                >${actionIcon('Next match')}${this.l("Next match", "下一個符合項目")}</md-text-button
+                >${actionIcon('Next match')}${this.l("Next match","下一個符合項目",true)}</md-text-button
               >
             </div>
             ${match
               ? html`<p>
-                    ${this.l("UTF-16 range", "UTF-16 範圍")}:
+                    ${this.l("UTF-16 range","UTF-16 範圍",true)}:
                     ${match.index}–${match.end}
                   </p>
                   <div class="code">
                     ${match.text ||
-                    this.l("(zero-width match)", "（零寬度符合項目）")}
+                    this.l("(zero-width match)","（零寬度符合項目）",true)}
                   </div>
                   <table>
                     <thead>
                       <tr>
-                        <th>${this.l("Capture", "擷取")}</th>
-                        <th>${this.l("Value", "值")}</th>
+                        <th>${this.l("Capture","擷取",true)}</th>
+                        <th>${this.l("Value","值",true)}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -716,7 +692,7 @@ export class RegexWorkbench extends LitElement {
                         (value: any, index: number) =>
                           html`<tr>
                             <td>${index + 1}</td>
-                            <td>${value ?? this.l("Unmatched", "未符合")}</td>
+                            <td>${value ?? this.l("Unmatched","未符合",true)}</td>
                           </tr>`,
                       )}${Object.entries(match.groups).map(
                         ([key, value]) =>
@@ -727,15 +703,15 @@ export class RegexWorkbench extends LitElement {
                       )}
                     </tbody>
                   </table>`
-              : html`<p>${this.l("No matches.", "未有符合項目。")}</p>`}
-            <h3>${this.l("Replacement preview", "取代預覽")}</h3>
+              : html`<p>${this.l("No matches.","未有符合項目。",true)}</p>`}
+            <h3>${this.l("Replacement preview","取代預覽",true)}</h3>
             <div class="code">${this.result.replaced}</div>
           </section>`
         : nothing}
       <section class="panel stack">
-        <h2>${this.l("Test cases", "測試個案")}</h2>
+        <h2>${this.l("Test cases","測試個案",true)}</h2>
         <md-outlined-text-field
-          label=${this.l("Test text", "測試文字")}
+          label=${this.l("Test text","測試文字",true)}
           .value=${this.caseText}
           maxlength="4096"
           @input=${(e: Event) =>
@@ -743,52 +719,47 @@ export class RegexWorkbench extends LitElement {
         ></md-outlined-text-field
         ><label
           ><md-checkbox
-            aria-label=${this.l("Expected to match", "預期符合")}
+            aria-label=${this.l("Expected to match","預期符合",true)}
             .checked=${this.caseExpected}
             @change=${(e: Event) =>
               (this.caseExpected = (e.target as HTMLInputElement).checked)}
           ></md-checkbox
-          >${this.l("Expected to match", "預期符合")}</label
+          >${this.l("Expected to match","預期符合",true)}</label
         ><md-outlined-button
           ?disabled=${this.cases.length >= 20}
           @click=${this.addCase}
-          >${actionIcon('Add test (maximum 20)')}${this.l("Add test (maximum 20)",
-            "加入測試（最多 20 個）",
-          )}</md-outlined-button
+          >${actionIcon('Add test (maximum 20)')}${this.l("Add test (maximum 20)","加入測試（最多 20 個）",true)}</md-outlined-button
         >${this.cases.map(
           (test, index) =>
             html`<div class="test-case">
               <span class="code">${test.text}</span
               ><span
                 >${test.expected
-                  ? this.l("Match", "符合")
-                  : this.l("No match", "唔符合")}</span
+                  ? this.l("Match","符合",true)
+                  : this.l("No match","唔符合",true)}</span
               ><span
                 >${this.result?.outcomes?.[index]
                   ? this.result.outcomes[index].passed
-                    ? this.l("Passed", "通過")
-                    : this.l("Failed", "失敗")
-                  : this.l("Not run", "未執行")}</span
+                    ? this.l("Passed","通過",true)
+                    : this.l("Failed","失敗",true)
+                  : this.l("Not run","未執行",true)}</span
               ><md-text-button
                 @click=${() => {
                   this.cases = this.cases.filter((_, i) => i !== index);
                   this.result = undefined;
                 }}
-                >${actionIcon('Remove')}${this.l("Remove", "移除")}</md-text-button
+                >${actionIcon('Remove')}${this.l("Remove","移除",true)}</md-text-button
               >
             </div>`,
         )}
       </section>
       <section class="panel stack">
-        <h2>${this.l("Session snippets", "工作階段片段")}</h2>
+        <h2>${this.l("Session snippets","工作階段片段",true)}</h2>
         <p>
-          ${this.l(
-            "Snippets stay in memory. Export before closing to keep them. Import replaces this session list.",
-            "片段只存喺記憶體，關閉前請匯出以保留。匯入會取代今次工作階段清單。",
-          )}
+          ${this.l("Snippets stay in memory. Export before closing to keep them. Import replaces this session list.","片段只存喺記憶體，關閉前請匯出以保留。匯入會取代今次工作階段清單。",true)}
         </p>
         <md-outlined-text-field
-          label=${this.l("Snippet name", "片段名稱")}
+          label=${this.l("Snippet name","片段名稱",true)}
           maxlength="80"
           .value=${this.snippetName}
           @input=${(e: Event) =>
@@ -800,11 +771,11 @@ export class RegexWorkbench extends LitElement {
           <md-outlined-button
             ?disabled=${!this.snippetName.trim() || this.snippets.length >= 50}
             @click=${this.saveSnippet}
-            >${actionIcon('Save snippet')}${this.l("Save snippet", "儲存片段")}</md-outlined-button
+            >${actionIcon('Save snippet')}${this.l("Save snippet","儲存片段",true)}</md-outlined-button
           ><md-text-button
             ?disabled=${!this.snippets.length}
             @click=${this.exportSnippets}
-            >${actionIcon('Export snippets')}${this.l("Export snippets", "匯出片段")}</md-text-button
+            >${actionIcon('Export snippets')}${this.l("Export snippets","匯出片段",true)}</md-text-button
           >
         </div>
         ${this.snippets.map(
@@ -815,12 +786,12 @@ export class RegexWorkbench extends LitElement {
               ><md-text-button
                 @click=${() =>
                   (this.snippets = this.snippets.filter((_, i) => i !== index))}
-                >${actionIcon('Remove')}${this.l("Remove", "移除")}</md-text-button
+                >${actionIcon('Remove')}${this.l("Remove","移除",true)}</md-text-button
               >
             </div>`,
         )}<md-outlined-button
           @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#snippet-import-file")?.click()}
-        >${actionIcon("Import snippets")}${this.l("Import snippet JSON, maximum 1 MiB", "匯入片段 JSON，最大 1 MiB")}</md-outlined-button>
+        >${actionIcon("Import snippets")}${this.l("Import snippet JSON, maximum 1 MiB","匯入片段 JSON，最大 1 MiB",true)}</md-outlined-button>
         <input id="snippet-import-file" hidden style="display:none" tabindex="-1"
           type="file" accept=".json,application/json" @change=${this.importSnippets}
         />

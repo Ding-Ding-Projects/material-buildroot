@@ -310,7 +310,7 @@ export class DocumentationPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   protected updated(changed: PropertyValues) {
     if(changed.has("restricted")){if(this.restricted)this.stopSearch();else if(this.index)this.search();}
     if ((changed.has("active")||changed.has("restricted")) && this.active && !this.restricted && !this.index && !this.loading)
@@ -332,10 +332,7 @@ export class DocumentationPanel extends LitElement {
   }
   private error(e: unknown) {
     return (
-      this.l(
-        "Offline resource unavailable. Retry loading the bundled documentation.",
-        "離線資源未能使用，請重試載入內附文件。",
-      ) +
+      this.l("Offline resource unavailable. Retry loading the bundled documentation.","離線資源未能使用，請重試載入內附文件。",true) +
       " " +
       (e instanceof Error && /^[A-Z_]+$/.test(e.message) ? e.message : "")
     );
@@ -395,10 +392,7 @@ export class DocumentationPanel extends LitElement {
       ? this.renderRoot.querySelector<HTMLElement>("#" + CSS.escape(id))
       : body;
     if (!target) {
-      this.feedback = this.l(
-        "This section is unavailable in the bundled article.",
-        "內附文章未有此章節。",
-      );
+      this.feedback = this.l("This section is unavailable in the bundled article.","內附文章未有此章節。",true);
       this.revision++;
       return;
     }
@@ -464,19 +458,13 @@ export class DocumentationPanel extends LitElement {
         );
         if (!result.opened) throw Error("EXTERNAL_UNAVAILABLE");
         if (this.document?.article.id === id)
-          this.feedback = this.l(
-            "External link opened through the desktop.",
-            "已透過桌面開啟外部連結。",
-          );
+          this.feedback = this.l("External link opened through the desktop.","已透過桌面開啟外部連結。",true);
       } catch (err) {
         if (this.document?.article.id === id) this.feedback = this.error(err);
       }
       this.revision++;
     } else {
-      this.feedback = this.l(
-        "This resource is not available in the offline bundle.",
-        "離線文件未提供此資源。",
-      );
+      this.feedback = this.l("This resource is not available in the offline bundle.","離線文件未提供此資源。",true);
       this.revision++;
     }
   }
@@ -526,16 +514,10 @@ export class DocumentationPanel extends LitElement {
   }
   private scopeNotice() {
     return this.bodyState === "ready"
-      ? this.l("titles, summaries and article text", "標題、摘要及文章內容")
+      ? this.l("titles, summaries and article text","標題、摘要及文章內容",true)
       : this.bodyState === "loading"
-        ? this.l(
-            "titles and summaries while article text loads",
-            "標題及摘要（文章內容載入中）",
-          )
-        : this.l(
-            "titles and summaries only; article text is unavailable",
-            "只限標題及摘要；文章內容未能使用",
-          );
+        ? this.l("titles and summaries while article text loads","標題及摘要（文章內容載入中）",true)
+        : this.l("titles and summaries only; article text is unavailable","只限標題及摘要；文章內容未能使用",true);
   }
   private stopSearch() {
     this.worker?.terminate();
@@ -576,20 +558,14 @@ export class DocumentationPanel extends LitElement {
       e.data.ok
         ? done("", e.data.ids)
         : done(
-            this.l(
-              "Invalid expression. Correct the pattern or flags.",
-              "表達式無效，請修正模式或旗標。",
-            ),
+            this.l("Invalid expression. Correct the pattern or flags.","表達式無效，請修正模式或旗標。",true),
           );
     worker.onerror = () =>
-      done(this.l("Search worker unavailable.", "搜尋工作程序未能使用。"));
+      done(this.l("Search worker unavailable.","搜尋工作程序未能使用。",true));
     this.timer = setTimeout(
       () =>
         done(
-          this.l(
-            "Expression timed out. Simplify it or use literal search.",
-            "表達式逾時，請簡化或使用文字搜尋。",
-          ),
+          this.l("Expression timed out. Simplify it or use literal search.","表達式逾時，請簡化或使用文字搜尋。",true),
         ),
       600,
     );
@@ -651,7 +627,7 @@ export class DocumentationPanel extends LitElement {
           this.cursor >= this.history.length - 1 || this.loading,
         )}${this.icon("Documentation home", "文件首頁", "dashboard", () =>
           this.home(),
-        )}<strong>${this.l("Offline help", "離線說明")}</strong>${this.icon(
+        )}<strong>${this.l("Offline help","離線說明",true)}</strong>${this.icon(
           "Reload documentation",
           "重新載入文件",
           "refresh",
@@ -661,12 +637,9 @@ export class DocumentationPanel extends LitElement {
       </div>
       <div class="search">
         <md-outlined-text-field
-          .label=${this.l("Search documentation", "搜尋文件")}
+          .label=${this.l("Search documentation","搜尋文件",true)}
           .value=${this.mode === "regex" ? this.pattern : this.query}
-          .supportingText=${this.l(
-            "Titles, topics and summaries; local only.",
-            "只喺本機搜尋標題、主題同摘要。",
-          )}
+          .supportingText=${this.l("Titles, topics and summaries; local only.","只喺本機搜尋標題、主題同摘要。",true)}
           @input=${(e: Event) => {
             this.query = (e.target as HTMLInputElement).value;
             if (this.mode === "regex") this.pattern=this.query;
@@ -674,11 +647,8 @@ export class DocumentationPanel extends LitElement {
           }}
         ></md-outlined-text-field
         ><md-icon-button
-          aria-label=${this.l(
-            "Documentation regex builder",
-            "文件正規表達式建構器",
-          )}
-          title=${this.l("Documentation regex builder", "文件正規表達式建構器")}
+          aria-label=${this.l("Documentation regex builder","文件正規表達式建構器",true)}
+          title=${this.l("Documentation regex builder","文件正規表達式建構器",true)}
           aria-expanded=${this.builder}
           aria-controls="documentation-regex"
           @click=${() => {
@@ -693,10 +663,7 @@ export class DocumentationPanel extends LitElement {
               class="builder" style="display:block;max-height:65vh;overflow:auto;width:min(760px,calc(100vw - 48px))"
               id="documentation-regex"
               role="region"
-              aria-label=${this.l(
-                "Documentation regex builder",
-                "文件正規表達式建構器",
-              )}
+              aria-label=${this.l("Documentation regex builder","文件正規表達式建構器",true)}
               @keydown=${(e: KeyboardEvent) => {
                 if (e.key === "Escape") {
                   e.stopPropagation();
@@ -712,10 +679,7 @@ export class DocumentationPanel extends LitElement {
             >
               <div class="row">
                 <strong
-                  >${this.l(
-                    "Local ECMAScript filter",
-                    "本機 ECMAScript 篩選",
-                  )}</strong
+                  >${this.l("Local ECMAScript filter","本機 ECMAScript 篩選",true)}</strong
                 >${this.icon(
                   "Close regex builder",
                   "關閉表達式建構器",
@@ -734,7 +698,7 @@ export class DocumentationPanel extends LitElement {
                   this.mode = "literal";
                   this.search();
                 }}
-                >${this.l("Use literal query", "使用文字查詢")}</md-text-button
+                >${this.l("Use literal query","使用文字查詢",true)}</md-text-button
               >
             </section>`
           : nothing}
@@ -746,18 +710,18 @@ export class DocumentationPanel extends LitElement {
           `${articles.length} articles · ${this.mode} search`,
           `${articles.length} 篇文章 · ${this.mode === "regex" ? "表達式" : "文字"}搜尋`,
         )}
-        · ${this.l("Searching", "搜尋範圍")}: ${this.scopeNotice()}
+        · ${this.l("Searching","搜尋範圍",true)}: ${this.scopeNotice()}
       </p>
       ${this.loading || this.searching
         ? html`<md-linear-progress
             indeterminate
-            aria-label=${this.l("Loading documentation", "載入文件")}
+            aria-label=${this.l("Loading documentation","載入文件",true)}
           ></md-linear-progress>`
         : nothing}
       <div class="layout">
         <nav
           class="topics"
-          aria-label=${this.l("Documentation topics", "文件主題")}
+          aria-label=${this.l("Documentation topics","文件主題",true)}
         >
           ${this.index?.navigation.categories.map((category) => {
             const items = articles.filter((a) => a.category === category.name);
@@ -780,12 +744,12 @@ export class DocumentationPanel extends LitElement {
                   )}`
               : nothing;
           })}${this.index && !articles.length
-            ? html`<p>${this.l("No matching articles.", "無符合文章。")}</p>`
+            ? html`<p>${this.l("No matching articles.","無符合文章。",true)}</p>`
             : nothing}
         </nav>
         <section
           class="article"
-          aria-label=${this.l("Documentation article", "文件文章")}
+          aria-label=${this.l("Documentation article","文件文章",true)}
           tabindex="0"
           @click=${this.link}
         >
@@ -796,7 +760,7 @@ export class DocumentationPanel extends LitElement {
                 </div>
                 ${this.document.navigation.headings.length
                   ? html`<details class="outline">
-                      <summary>${this.l("On this page", "本頁內容")}</summary>
+                      <summary>${this.l("On this page","本頁內容",true)}</summary>
                       ${this.document.navigation.headings.map(
                         (h) =>
                           html`<a
@@ -813,13 +777,10 @@ export class DocumentationPanel extends LitElement {
                   : nothing}${unsafeHTML(this.document.html)}`
             : html`<div class="intro">
                 <h1>
-                  ${this.l("Work with your local project", "使用本機專案")}
+                  ${this.l("Work with your local project","使用本機專案",true)}
                 </h1>
                 <p>
-                  ${this.l(
-                    "Choose a task to read the bundled guide. Reading never starts a build, changes a project or downloads a runtime.",
-                    "選擇工作以閱讀內附指引，閱讀唔會開始建置、更改專案或下載執行環境。",
-                  )}
+                  ${this.l("Choose a task to read the bundled guide. Reading never starts a build, changes a project or downloads a runtime.","選擇工作以閱讀內附指引，閱讀唔會開始建置、更改專案或下載執行環境。",true)}
                 </p>
                 <div class="tasks">
                   ${articles.map(
@@ -837,19 +798,13 @@ export class DocumentationPanel extends LitElement {
                 </div>
                 ${!this.index
                   ? html`<p>
-                      ${this.l(
-                        "Load the bundled documentation using Reload documentation.",
-                        "請使用重新載入文件以載入內附說明。",
-                      )}
+                      ${this.l("Load the bundled documentation using Reload documentation.","請使用重新載入文件以載入內附說明。",true)}
                     </p>`
                   : nothing}
               </div>`}${(this.document?.issues || this.index?.issues)?.length
             ? html`<details class="issues">
                 <summary>
-                  ${this.l(
-                    "Unavailable offline resources",
-                    "未能離線使用嘅資源",
-                  )}
+                  ${this.l("Unavailable offline resources","未能離線使用嘅資源",true)}
                   (${(this.document?.issues || this.index?.issues)?.length})
                 </summary>
                 <ul>
