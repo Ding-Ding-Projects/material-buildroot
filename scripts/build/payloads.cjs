@@ -31,6 +31,18 @@ async function directory(root) {
   }
   return resolved;
 }
+function diagnosticHost(url) {
+  const host = url?.hostname?.toLowerCase() || "";
+  if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(host) || /(?:^|\.)(?:localhost|local|internal|lan|home|test|invalid|example)$/.test(host)) return "withheld-nonpublic-host";
+  return host;
+}
+function acquisitionFailure(tool, url, code, redirect = 0) {
+  const id = /^[a-z0-9-]{1,40}$/.test(tool.id || "") ? tool.id : "invalid-id";
+  const archive = /^[a-f0-9]{64}$/.test(tool.sha256 || "") ? tool.sha256 : "invalid-pin";
+  // Never include URL paths, userinfo, query strings, response bodies or raw
+  // transport errors. Host-only evidence identifies a public trust mismatch.
+  return new Error(`Payload acquisition stopped: code=${code}; tool=${id}; archiveSha256=${archive}; observedHost=${diagnosticHost(url)}; redirect=${redirect}.`);
+}
 async function acquire(tool, cache) {
   if (!/^[a-f0-9]{64}$/.test(tool.sha256) || !Number.isSafeInteger(tool.bytes) || tool.bytes < 1 || tool.bytes > 1500000000) throw new Error("Invalid pinned payload.");
   const file = path.join(cache, tool.sha256 + ".zip");
@@ -44,19 +56,25 @@ async function acquire(tool, cache) {
   const timeout = setTimeout(() => controller.abort(), 15 * 60 * 1000);
   try {
     let url = new URL(tool.url), response;
+    console.log(`Acquiring pinned payload: tool=${tool.id}; archiveSha256=${tool.sha256}; sourceHost=${diagnosticHost(url)}.`);
+    const trustedHosts = new Set(url.hostname === "github.com"
+      ? ["github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com"]
+      : ["download.docker.com", ...(tool.redirectHosts || [])]);
     for (let redirect = 0; redirect <= 4; redirect++) {
-      if (url.protocol !== "https:" || url.username || url.password || url.port || !["github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "download.docker.com", ...(tool.redirectHosts || [])].includes(url.hostname)) throw new Error("Untrusted payload source or redirect.");
-      response = await fetch(url, { redirect: "manual", signal: controller.signal });
+      if (url.protocol !== "https:" || url.username || url.password || url.port || !trustedHosts.has(url.hostname)) throw acquisitionFailure(tool, url, "UNTRUSTED_SOURCE_OR_REDIRECT", redirect);
+      try { response = await fetch(url, { redirect: "manual", signal: controller.signal }); }
+      catch { throw acquisitionFailure(tool, url, controller.signal.aborted ? "DOWNLOAD_TIMEOUT" : "TRANSPORT_UNAVAILABLE", redirect); }
       if ([301, 302, 303, 307, 308].includes(response.status)) {
         const location = response.headers.get("location");
         await response.body?.cancel();
-        if (!location || redirect === 4) throw new Error("Payload redirect limit.");
-        url = new URL(location, url);
+        if (!location || redirect === 4) throw acquisitionFailure(tool, url, "REDIRECT_LIMIT", redirect);
+        try { url = new URL(location, url); }
+        catch { throw acquisitionFailure(tool, url, "INVALID_REDIRECT", redirect); }
         continue;
       }
       break;
     }
-    if (!response?.ok || !response.body) throw new Error("Official payload download unavailable.");
+    if (!response?.ok || !response.body) throw acquisitionFailure(tool, url, "HTTP_" + (response?.status || "UNAVAILABLE"));
     let bytes = 0;
     const limit = new Transform({ transform(chunk, _encoding, done) {
       bytes += chunk.length;
@@ -270,7 +288,7 @@ async function assemblePayloads({ output, cache, complete = true } = {}) {
     for (const license of tool.licenseFiles) {
       if (!files.some(member => member.path === tool.id + "/" + license && member.bytes > 0)) throw new Error("Payload license absent: " + tool.id);
     }
-    manifest.tools.push({ id: tool.id, classification: "bundled", runtimeVerified: false, version: tool.version, executable, files, license: tool.license, licenseFiles: tool.licenseFiles.map(name => tool.id + "/" + name), sourceUrl: tool.sourceUrl, profile: tool.profile || "declared-upstream-composition", composition: tool.composition || "Complete original archive", compositionSources: tool.compositionSources || [], excludedMembers: tool.excludedMembers || [], sourceInventory: tool.sourceInventory || null, archive: { url: tool.url, sha256: tool.sha256, bytes: tool.bytes } });
+    manifest.tools.push({ id: tool.id, classification: "bundled", runtimeVerified: false, version: tool.version, executable, files, license: tool.license, licenseFiles: tool.licenseFiles.map(name => tool.id + "/" + name), sourceUrl: tool.sourceUrl, profile: tool.profile || "declared-upstream-composition", composition: tool.composition || "Complete original archive", compositionSources: tool.compositionSources || [], excludedMembers: tool.excludedMembers || [], sourceInventory: tool.sourceInventory || null, archive: { url: tool.url, originUrl: tool.originUrl || tool.url, sha256: tool.sha256, bytes: tool.bytes } });
   }
   await fsp.writeFile(path.join(staging, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", { flag: "wx" });
   const notices = manifest.tools.map(tool => [tool.id + " " + tool.version, tool.license, tool.sourceUrl, "Original notices: " + tool.licenseFiles.join(", "), "Original downloaded archive retained in the source cache; see manifest.json for package composition, exclusions and every retained member hash."].join("\n")).join("\n\n");

@@ -40,6 +40,16 @@ All listed original source archives were acquired and matched to the checked-in 
 
 The registry records original source URLs, per-archive SHA-256, byte lengths, executable paths and required notice paths. Official release digests supply the GitHub-hosted pins. LibreOffice's official distribution SHA-256 agrees with the upstream installer manifest. The Docker static ZIP is pinned to the bytes acquired directly from the official download host; that pin is not a detached signature or an independent authenticity claim.
 
+### Fixed LibreOffice source and bounded acquisition diagnostics
+
+Hosted root production `38979123512` at source `714cd3d2ca7d5857b1cc5cfbe84658db25c48666` stopped during assembly with the former generic source-or-redirect rejection. Its retained diagnostics did not identify the payload or rejected host. The exact rejected hosted redirect therefore remains unproven, and this correction does not attribute that historical event to a particular mirror.
+
+Primary-origin source acquisition showed that the official LibreOffice stable URL redirects regionally; the official archive URL is also a regional redirector. The stable origin selected `ftp.osuosl.org` during the bounded source read. The exact direct HTTPS OSU mirror URL then returned the same 374,870,016-byte MSI, independently acquired without following redirects and matched to the unchanged SHA-256 `c6298b10cfa1748bcbedad94c62ce771e240e5021bfd6d7a967cd571b04b5312`.
+
+The registry now selects that fixed, already trusted mirror. Its per-payload trust list narrows to that exact hostname. The original official URL remains recorded as `archive.originUrl`; it is provenance, not an automatic fallback to arbitrary regional mirrors. No wildcard host admission, HTTP downgrade, TLS exception, hash change, length change or missing-payload fallback is introduced. A different host remains rejected.
+
+Acquisition diagnostics now identify the declared tool ID, public archive SHA-256, bounded failure code, public hostname and redirect index. They never print URL paths, URL userinfo, signed query strings, response bodies or raw transport errors. Bare, local, internal and IP host forms are withheld. GitHub source archives retain only their expected GitHub release-asset hosts; unrelated service hosts no longer share that redirect trust set. A changed-source root producer remains required to establish the hosted result.
+
 ## FFmpeg transcoder profile and package size
 
 The registered FFmpeg payload family admits only `ffmpeg.exe`. The converter in `src/main/tools/converter.cjs`, native adapter in `src/main/security/native-file-broker.cjs` and fixed operations in `native/file-broker/main.cpp` use that transcoder. The installed converter-loader handoff also stages the executable named by the FFmpeg record. No supported consumer or declared tool requirement names the upstream standalone `ffplay.exe` player or `ffprobe.exe` analyzer.
