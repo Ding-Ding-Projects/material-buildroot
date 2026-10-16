@@ -41,6 +41,7 @@ try {
     if ($parsed.run) { $driverArguments += '--run' }
     if ($parsed.installer) { $driverArguments += '--installer' }
     if ($parsed.dependenciesOnly) { $driverArguments += '--dependencies-only' }
+    if ($parsed.payloadCache) { $driverArguments += @('--payload-cache', $parsed.payloadCache) }
     if ($parsed.target -eq 'desktop') {
         $electronRoot = Install-PinnedTool $manifest.electron $toolsRoot
         $env:MATERIAL_BUILD_ELECTRON_DIST = $electronRoot

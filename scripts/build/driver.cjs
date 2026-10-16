@@ -180,7 +180,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null;
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',complete:false};
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -190,6 +190,34 @@ async function main() {
     command.push(`--config.extraMetadata.version=${packageVersion}`);
     command.push(`--config.electronDist=${process.env.MATERIAL_BUILD_ELECTRON_DIST}`);
     if (installer) {
+      const cache = contained(root,'.cache/payload-downloads');
+      fs.mkdirSync(cache,{recursive:true});
+      if (args.includes('--payload-cache')) {
+        const input = args[args.indexOf('--payload-cache')+1];
+        if (!input || !path.isAbsolute(input)) throw Error('Payload cache input must be an absolute directory.');
+        const origin = path.resolve(input);
+        for(let cursor=origin;;cursor=path.dirname(cursor)) {
+          if(fs.lstatSync(cursor).isSymbolicLink()) throw Error('Payload cache input contains a linked ancestor.');
+          if(cursor===path.dirname(cursor)) break;
+        }
+        const registry = require('./offline-payloads.json');
+        for(const item of [...registry.tools,registry.extractor,registry.fullExtractor].filter(Boolean)) {
+          const name = `${item.sha256}.zip`, source = path.join(origin,name), destination = path.join(cache,name);
+          if(fs.existsSync(source)&&!fs.existsSync(destination)) {
+            const stat=fs.lstatSync(source);
+            if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==item.bytes) throw Error('Payload input cache member does not match its pinned size.');
+            fs.copyFileSync(source,destination,fs.constants.COPYFILE_EXCL);
+          }
+        }
+      }
+      console.log('Assembling the complete declared offline payload inventory. Original cache inputs are read only.');
+      const assembled = await require('./payloads.cjs').assemblePayloads({output:path.join(staging,'offline-payloads'),cache,complete:true});
+      if(assembled.manifest.complete!==true) throw Error('Normal installer production requires the complete offline payload inventory.');
+      const configuration = {...JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build,extraResources:[assembled.extraResources]};
+      const configurationPath = path.join(staging,'installer-config.json');
+      fs.writeFileSync(configurationPath,JSON.stringify(configuration));
+      command.push(`--config=${configurationPath}`);
+      payloads={status:'assembled',complete:true,manifestSha256:sha256(fs.readFileSync(path.join(assembled.directory,'manifest.json'))),tools:assembled.manifest.tools.map(tool=>({id:tool.id,version:tool.version,archive:tool.archive,license:tool.license,sourceUrl:tool.sourceUrl}))};
       const baseline = acquireHostedBaseline(root,packageVersion);
       delta = stageBaseline(baseline.directory,output,packageVersion);
       if (!baseline.directory) delta.reason = baseline.reason;
@@ -201,6 +229,11 @@ async function main() {
     const asar = require('@electron/asar');
     const packaged = JSON.parse(asar.extractFile(nonempty(output,'win-unpacked/resources/app.asar'),'package.json').toString('utf8'));
     if (packaged.version !== packageVersion) throw new Error('Packaged application metadata differs from the installed package version.');
+    if(installer) {
+      const bundled=nonempty(output,'win-unpacked/resources/offline-payloads/manifest.json');
+      if(sha256(fs.readFileSync(bundled))!==payloads.manifestSha256) throw Error('Packaged offline payload manifest differs from the complete assembled inventory.');
+      nonempty(output,'win-unpacked/resources/offline-payloads/THIRD-PARTY-NOTICES.txt');
+    }
   }
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
   if (installer) verifyInstaller(output);
@@ -211,6 +244,10 @@ async function main() {
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   const files = inventory(output);
   if (installer && target.kind === 'desktop') {
+    for(const file of files.filter(file=>/(^|\/)(Setup\.exe|RELEASES|[^/]+\.nupkg)$/.test(file.path))) {
+      console.log(`Installer transfer asset: ${path.basename(file.path)} (${file.bytes} bytes).`);
+      if(file.bytes>1400000000) throw Error('Installer asset exceeds the supported 1.4 GB transfer budget; original output is retained and no release is permitted.');
+    }
     const expectedFull = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-full.nupkg`);
     if (!expectedFull) throw new Error('Squirrel full package identity differs from the requested installed version.');
     const generatedDelta = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-delta.nupkg`);
@@ -221,7 +258,7 @@ async function main() {
     }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);
