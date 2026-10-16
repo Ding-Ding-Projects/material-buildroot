@@ -1142,6 +1142,15 @@ function createOperationsService({
     cloneOfficial: request => sources.handle({action:'source.clone.official',...request,trust:true}),
     confirmSource: async (request,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve source clone',message:'Clone official Buildroot source into the selected folder?',detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nDirectory: ${request.directory}\nRef: ${request.ref}\nSource: https://gitlab.com/buildroot.org/buildroot.git\n\nThis approves source trust and project adoption for this one clone. Existing directories are preserved.`,buttons:['Cancel','Approve clone'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     modelStatus: () => tools.execute({action:'ollama.status'}),
+    startModelChat: async (request,authorize) => {
+      authorize();const value=await tools.execute({action:'ollama.chat.start',model:request.model,messages:[{role:'user',content:request.prompt}]});
+      if(value.ok===false)return value;
+      let checking=false;
+      const observer=setInterval(async()=>{if(checking)return;checking=true;try{try{authorize();if(disposed)throw Error('closed');}catch{await tools.execute({action:'ollama.chat.cancel',id:value.id});clearInterval(observer);return;}const current=await tools.execute({action:'ollama.chat.read',id:value.id,offset:0});if(current.ok===false||current.state!=='running')clearInterval(observer);}finally{checking=false;}},500);observer.unref?.();
+      try{authorize();}catch{await tools.execute({action:'ollama.chat.cancel',id:value.id});clearInterval(observer);throw Object.assign(Error('Chat authority expired.'),{code:'UNAUTHORIZED'});}return value;
+    },
+    readModelChat: (id,offset) => tools.execute({action:'ollama.chat.read',id,offset}),
+    cancelModelChat: id => tools.execute({action:'ollama.chat.cancel',id}),
     modelList: () => tools.execute({action:'ollama.tags'}),
     cloudList: workspaceId => cloudDestination(workspaceId).list(),
     startCloud: (workspaceId,id,authorize) => cloudDestination(workspaceId).start({id,consent:true},authorize),
@@ -2157,6 +2166,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

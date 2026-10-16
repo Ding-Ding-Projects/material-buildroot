@@ -11,6 +11,9 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | cloud.list | deployment:read | Enrolled destination labels and transfer state without credentials |
 | cloud.start | deployment:write | Start the session preview after native exact-file approval |
 | cloud.preview | deployment:write | Hash and preview the session-selected output for an enrolled destination |
+| models.chat.start | tools:write | Start an ephemeral response using a model disclosed to this session |
+| models.chat.read | tools:write | Read the next bounded response chunk for a session-owned chat |
+| models.chat.cancel | tools:write | Request cancellation of that session-owned chat |
 | models.status | tools:read | Actual local model-service version |
 | models.list | tools:read | Installed model names, sizes and digests |
 | workspace.read | workspace:read | Workspace summary |
@@ -35,6 +38,10 @@ The typed host adapter admits these exact actions, subject to the current sessio
 
 The server validates the argument schema and scope before dispatch. The consumer rechecks authorization before each call and after awaited reads. Project actions revalidate the adopted root identity. Output identifiers are opaque handles scoped to one session and project; each session has its own output viewer. Browser callers cannot submit a host path, invoke a generic IPC operation, create a grant, select an executable or assert native consent.
 
+## Local model workflow
+
+Refresh installed models, select one, enter a prompt and explicitly send it through the approved tools scope. Prompts and replies remain ephemeral; neither the local draft nor request history records their content. Read successive bounded chunks and cancel only the chat admitted to the current session. Revocation requests cancellation through the host observer. Cancellation remains requested until the service reports its actual state. This does not implement model acquisition or persistent conversation management.
+
 ## Cancellation and recovery
 
 Cancellation is a request, not a completed outcome. It checks the job sequence and existing host ownership, then uses the established queue cancellation method. Refresh the job until the host reports its actual terminal state. A lost response is unknown, not success, and is never automatically retried. An unavailable session stops new calls. Already accepted queue work retains the host's durable lifecycle; disconnect does not claim it was cancelled.
@@ -49,13 +56,14 @@ This increment does not complete PH09-T03 or all C identities. The following are
 - Configuration string/credential editing, complete paged semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Custom source clone, existing-source adopt/ref acquisition/upgrade/rollback need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
-- Converter, server manager, model pulls/chat, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
+- Converter, server manager, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
 - Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
 
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 

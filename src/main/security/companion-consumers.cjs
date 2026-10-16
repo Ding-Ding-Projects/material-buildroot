@@ -19,6 +19,9 @@ const actionContracts=Object.freeze({
  'cloud.start':contract('deployment:write',['workspaceId','id'],a=>project(a)&&id(a.id)),
  'cloud.list':contract('deployment:read',['workspaceId'],project),
  'cloud.preview':contract('deployment:write',['workspaceId','fileId','destinationId'],a=>project(a)&&id(a.fileId)&&id(a.destinationId)),
+ 'models.chat.start':contract('tools:write',['model','prompt'],a=>typeof a.model==='string'&&a.model.length<=160&&typeof a.prompt==='string'&&a.prompt.length>0&&a.prompt.length<=8000),
+ 'models.chat.read':contract('tools:write',['id','offset'],a=>id(a.id)&&Number.isSafeInteger(a.offset)&&a.offset>=0&&a.offset<=1048576),
+ 'models.chat.cancel':contract('tools:write',['id'],a=>id(a.id)),
  'models.status':contract('tools:read',[]),
  'models.list':contract('tools:read',[]),
  'workspace.read':contract('workspace:read',[]),
@@ -42,7 +45,7 @@ const summary=job=>({id:job.id,kind:job.kind,state:job.state,sequence:job.sequen
 function createCompanionConsumers(host){
  const sessions=new Map();
  function admitted(context,scope){if(!context||typeof context.isAuthorized!=='function'||!context.isAuthorized()||!context.scopes.includes(scope))fail('UNAUTHORIZED');}
- function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),sourceSelections:new Set()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
+ function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),sourceSelections:new Set(),models:new Set(),chats:new Set()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
  function file(state,args,kind){const entry=state.files.get(args.fileId||args.directoryId);if(!entry||entry.workspaceId!==args.workspaceId||entry.kind!==kind)fail('FILE_NOT_ADMITTED');return entry.id;}
  return Object.freeze({actionContracts,async dispatch(request,context){
   const definition=actionContracts[request.action];if(!definition)fail('ACTION_NOT_ADMITTED');definition.validate(request.args);admitted(context,definition.scope);const owned=state(context),a=request.args;
@@ -60,8 +63,10 @@ function createCompanionConsumers(host){
     else await host.applyDefconfig(a);
     result={state:'completed',configuration:configProjection(await host.inspectConfiguration({workspaceId:a.workspaceId,domain:a.domain||'buildroot'}))};break;
    }
+   case 'models.chat.start':{if(!owned.models.has(a.model))fail('MODEL_NOT_ADMITTED');const value=await host.startModelChat(a,()=>admitted(context,definition.scope));if(value.ok===false)fail('MODEL_CHAT_UNAVAILABLE');owned.chats.add(value.id);result={id:value.id,state:value.state};break;}
+   case 'models.chat.read':case 'models.chat.cancel':{if(!owned.chats.has(a.id))fail('CHAT_NOT_ADMITTED');const value=request.action==='models.chat.read'?await host.readModelChat(a.id,a.offset):await host.cancelModelChat(a.id);if(value.ok===false)fail('MODEL_CHAT_UNAVAILABLE');result=request.action==='models.chat.read'?{id:value.id,state:value.state,content:value.content,next:value.next,length:value.length,code:value.code,doneReason:value.doneReason}:{id:value.id,state:value.state,cancelling:value.cancelling};break;}
    case 'models.status':{const value=await host.modelStatus();if(value.ok===false)fail('MODEL_SERVICE_UNAVAILABLE');result={version:typeof value.version==='string'?value.version:'unavailable'};break;}
-   case 'models.list':{const value=await host.modelList();if(value.ok===false||!Array.isArray(value.models))fail('MODEL_SERVICE_UNAVAILABLE');result={models:value.models.slice(0,100).map(item=>({name:item.name,size:item.size,digest:item.digest,modifiedAt:item.modified_at}))};break;}
+   case 'models.list':{const value=await host.modelList();if(value.ok===false||!Array.isArray(value.models))fail('MODEL_SERVICE_UNAVAILABLE');owned.models=new Set(value.models.slice(0,100).map(item=>item.name));result={models:value.models.slice(0,100).map(item=>({name:item.name,size:item.size,digest:item.digest,modifiedAt:item.modified_at}))};break;}
    case 'cloud.start':{const preview=owned.cloudPreviews.get(a.id);if(!preview||preview.workspaceId!==a.workspaceId||preview.expiresAt<=Date.now())fail('PREVIEW_NOT_ADMITTED');owned.cloudPreviews.delete(a.id);result=await host.startCloud(a.workspaceId,a.id,()=>{admitted(context,definition.scope);host.authorizeProject(a.workspaceId);});break;}
    case 'cloud.list':{const value=host.cloudList(a.workspaceId);owned.destinations.set(a.workspaceId,new Set(value.profiles.map(item=>item.id)));result={credentialStorage:value.credentialStorage,profiles:value.profiles.map(({id,label,provider})=>({id,label,provider})),jobs:value.jobs.slice(0,100).map(({id,state,sequence,createdAt,updatedAt,sha256,size})=>({id,state,sequence,createdAt,updatedAt,sha256,size}))};break;}
    case 'cloud.preview':{if(!owned.destinations.get(a.workspaceId)?.has(a.destinationId))fail('DESTINATION_NOT_ADMITTED');const value=await host.previewCloud(a.workspaceId,viewer(),file(owned,a,'file'),a.destinationId);owned.cloudPreviews.set(value.id,{workspaceId:a.workspaceId,expiresAt:value.expiresAt});result={id:value.id,sha256:value.sha256,size:value.size,expiresAt:value.expiresAt,destination:{provider:value.destination.provider,label:value.destination.label},networkState:value.networkState,overwrite:value.overwrite};break;}
@@ -86,6 +91,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
