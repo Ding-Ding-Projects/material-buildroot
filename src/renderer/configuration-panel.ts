@@ -15,7 +15,7 @@ export class ConfigurationPanel extends LitElement {
   private queue:Array<{symbol?:string;change?:Change;undo?:boolean}>=[];
   private stopped=false;
   static styles=css`:host{display:block;min-width:0}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--md-sys-color-outline-variant)}.description{flex:1;min-width:180px}.symbol{overflow-wrap:anywhere;font-family:monospace}md-outlined-text-field{max-width:100%;width:280px}p{overflow-wrap:anywhere}table{width:100%;table-layout:fixed;border-collapse:collapse}td,th{text-align:left;overflow-wrap:anywhere;padding:8px;border-bottom:1px solid var(--md-sys-color-outline-variant)}`;
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='yue'?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
   private entries(){const entries:any[]=[];const seen=new Set<string>();const walk=(node:any,menus:string[])=>{const next=node.kind==='menu'&&node.prompt?[...menus,node.prompt]:menus;if(node.symbol&&!seen.has(node.symbol)){seen.add(node.symbol);entries.push({...node,menu:next.join(' / ')});}for(const child of node.children||[])walk(child,next);};if(this.config?.semantics?.available)walk(this.config.semantics.tree,[]);return entries;}
   private signal(){this.dispatchEvent(new CustomEvent('configuration-queue',{bubbles:true,composed:true,detail:{pending:this.busy||this.queue.length>0,blocked:this.stopped}}));}
   private enqueue(symbol:string,change:Change){this.drafts={...this.drafts,[symbol]:change};this.queue.push({symbol,change});this.signal();void this.drain();}
