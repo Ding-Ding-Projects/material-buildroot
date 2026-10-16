@@ -12,10 +12,16 @@ function createOllama(options = {}) {
       : null);
   const catalogue = options.ollamaCatalogue || (options.ollamaCatalogueDirectory
     ? require("./ollama-catalogue.cjs").createOllamaCatalogue({directory:options.ollamaCatalogueDirectory,fetchImpl:options.fetchImpl}) : null);
+  const conversations = require("./ollama-conversations.cjs").createConversations(options.queueDirectory);
   const chats = require("./ollama-chat-sessions.cjs").createChatSessions((request, context) => execute(request, context));
   const execute = async function execute(request, context = {}) {
     const common = { signal: context.signal, fetchImpl: options.fetchImpl };
     switch (request.action) {
+      case "ollama.conversations.list":
+      case "ollama.conversations.save":
+      case "ollama.conversations.load":
+      case "ollama.conversations.delete":
+        return conversations.dispatch(request);
       case "ollama.chat.start":
       case "ollama.chat.read":
       case "ollama.chat.cancel":
@@ -53,6 +59,7 @@ function createOllama(options = {}) {
           ...common,
           method: "POST",
           maxBytes: 64 * 1024 * 1024,
+          timeoutMs: 3600000,
           body: { model: token(request.model), stream: true },
           onLine: (item) => {
             if (item.error) fail("MODEL_PULL_FAILED");
@@ -70,7 +77,8 @@ function createOllama(options = {}) {
         const messages = request.messages.map((message) => {
           if (!["user", "assistant", "system"].includes(message.role))
             fail("INVALID_REQUEST");
-          const content = text(message.content, 65536);
+          const content = message.content;
+          if (typeof content !== "string" || !content.length || content.length > 65536 || /[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(content)) fail("INVALID_REQUEST");
           total += content.length;
           if (total > 262144) fail("REQUEST_LIMIT");
           return { role: message.role, content };
@@ -82,6 +90,7 @@ function createOllama(options = {}) {
           ...common,
           method: "POST",
           maxBytes: 16 * 1024 * 1024,
+          timeoutMs: 600000,
           body: { model: token(request.model), messages, stream: true },
           onLine: (item) => {
             if (item.error) fail("MODEL_CHAT_FAILED");
@@ -89,7 +98,7 @@ function createOllama(options = {}) {
               if (typeof item.message.content !== "string")
                 fail("INVALID_CHAT_RESPONSE");
               content += item.message.content;
-              if (content.length > 1048576) fail("RESPONSE_LIMIT");
+              if (content.length > 65536) fail("RESPONSE_LIMIT");
             }
             if (item.done === true) {
               complete = true;
@@ -123,7 +132,7 @@ function createOllama(options = {}) {
         fail("INVALID_REQUEST");
     }
   };
-  execute.dispose = async () => {await Promise.all([chats.dispose(),managed?.dispose(),catalogue?.dispose()]);};
+  execute.dispose = async () => {await Promise.all([conversations.dispose(),chats.dispose(),managed?.dispose(),catalogue?.dispose()]);};
   return execute;
 }
 module.exports = { createOllama };
