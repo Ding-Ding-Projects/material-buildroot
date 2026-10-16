@@ -9,6 +9,24 @@ function createToolQueue(directory, execute, options = {}) {
   let paused = false, controlLoaded = false;
   const idle = [];
   const active = new Map();
+  const writes = new Map();
+  const transitions = new Map();
+  async function transition(id, work) {
+    const previous = transitions.get(id) || Promise.resolve();
+    const pending = previous.catch(() => {}).then(work);
+    transitions.set(id, pending);
+    try { return await pending; }
+    finally { if (transitions.get(id) === pending) transitions.delete(id); }
+  }
+  function retainOutcome(record) {
+    if (!record.result) return;
+    const outcomes = record.previousOutcomes || [];
+    if (!Array.isArray(outcomes) || outcomes.length >= 10) fail("QUEUE_HISTORY_LIMIT");
+    record.previousOutcomes = [...outcomes, {state:record.state,finishedAt:record.finishedAt,result:record.result}];
+    delete record.result;
+    delete record.finishedAt;
+    delete record.cancelRequested;
+  }
   async function prepare() {
     if (!directory || !path.isAbsolute(directory))
       fail("QUEUE_STORAGE_UNAVAILABLE");
@@ -24,11 +42,20 @@ function createToolQueue(directory, execute, options = {}) {
     return path.join(directory, id + ".json");
   }
   async function write(record) {
-    const destination = file(record.id),
+    const serialized = JSON.stringify(record);
+    if (Buffer.byteLength(serialized) > 131072) fail("QUEUE_RECORD_LIMIT");
+    const prior = writes.get(record.id) || Promise.resolve();
+    const pending = prior.catch(() => {}).then(() => writeRecord(record.id, serialized));
+    writes.set(record.id, pending);
+    try { await pending; }
+    finally { if (writes.get(record.id) === pending) writes.delete(record.id); }
+  }
+  async function writeRecord(id, serialized) {
+    const destination = file(id),
       temporary = destination + ".tmp-" + randomUUID();
     try {
       const handle = await fs.open(temporary, "wx", 0o600);
-      try { await handle.writeFile(JSON.stringify(record)); await handle.sync(); } finally { await handle.close(); }
+      try { await handle.writeFile(serialized); await handle.sync(); } finally { await handle.close(); }
       await fs.rename(temporary, destination);
     } finally {
       await fs.rm(temporary, { force: true });
@@ -45,6 +72,7 @@ function createToolQueue(directory, execute, options = {}) {
       ![
         "queued",
         "running",
+        "cancelling",
         "interrupted",
         "completed",
         "failed",
@@ -66,7 +94,7 @@ function createToolQueue(directory, execute, options = {}) {
     for await (const entry of stream) {
       if (!entry.name.endsWith(".json") || entry.name === record.id + ".json") continue;
       const other = await read(entry.name.slice(0,-5));
-      if (["queued","running","interrupted"].includes(other.state)) for (const id of grants(other.request)) candidates.delete(id);
+      if (["queued","running","cancelling","interrupted"].includes(other.state)) for (const id of grants(other.request)) candidates.delete(id);
     }
     await options.releaseGrants([...candidates]);
   }
@@ -117,7 +145,7 @@ function createToolQueue(directory, execute, options = {}) {
   return {
     async dispose() {
       disposed = true;
-      for (const controller of active.values()) controller.abort();
+      for (const entry of active.values()) entry.controller.abort();
       if (consuming) await new Promise((resolve) => idle.push(resolve));
     },
     async dispatch(request, context) {
@@ -131,16 +159,19 @@ function createToolQueue(directory, execute, options = {}) {
           await fs.writeFile(path.join(directory,"queue.control"), "paused", {mode:0o600});
           return { paused, running: consuming };
         case "queue.rebind": {
+          return transition(request.id, async () => {
           const record = await read(request.id);
           if (consuming || active.has(record.id) || record.state === "completed") fail("INVALID_QUEUE_STATE");
           if (record.request.action !== request.job.action) fail("INVALID_REQUEST");
           const previous={...record};
+          retainOutcome(record);
           record.request = require("./request-contract.cjs").admit(request.job);
           record.state = "queued";
           delete record.result;
           await write(record);
           await releaseUnused(previous);
           return {job:record};
+          });
         }
         case "queue.add":
           if (
@@ -174,23 +205,41 @@ function createToolQueue(directory, execute, options = {}) {
           return page(request.after || "", request.limit || 50);
         case "queue.cancel": {
           text(request.id, 36);
-          active.get(request.id)?.abort();
+          return transition(request.id, async () => {
+          const current = active.get(request.id);
+          if (current) {
+            current.record.cancelRequested = true;
+            if (current.record.state === "running") current.record.state = "cancelling";
+            const pending = write(current.record);
+            current.controller.abort();
+            await pending;
+            return { job: current.record };
+          }
           const record = await read(request.id);
-          if (["queued", "running", "interrupted"].includes(record.state)) {
+          if (active.has(request.id)) fail("QUEUE_STATE_CHANGED");
+          if (record.state === "queued") {
             record.state = "cancelled";
             await write(record);
             if (!active.has(record.id)) await releaseUnused(record);
+          } else if (["running", "cancelling", "interrupted"].includes(record.state)) {
+            // No owned live controller means cancellation cannot prove rollback.
+            record.state = "interrupted";
+            record.result ||= {ok:false,code:"QUEUE_OUTCOME_UNKNOWN",incompleteOutput:{state:"unknown",publication:"unconfirmed"}};
+            await write(record);
           }
           return { job: record };
+          });
         }
         case "queue.recover": {
+          if (consuming) fail("QUEUE_ALREADY_RUNNING");
           const stream = await fs.opendir(directory);
           let recovered = 0;
           for await (const entry of stream) {
             if (!entry.name.endsWith(".json")) continue;
             const record = await read(entry.name.slice(0, -5));
-            if (record.state === "running" && !active.has(record.id)) {
+            if (["running", "cancelling"].includes(record.state) && !active.has(record.id)) {
               record.state = "interrupted";
+              record.result ||= {ok:false,code:"QUEUE_OUTCOME_UNKNOWN",incompleteOutput:{state:"unknown",publication:"unconfirmed"}};
               await write(record);
               recovered++;
             }
@@ -198,49 +247,74 @@ function createToolQueue(directory, execute, options = {}) {
           return { recovered };
         }
         case "queue.resume": {
+          return transition(request.id, async () => {
           const record = await read(request.id);
+          if (consuming || active.has(record.id)) fail("QUEUE_ALREADY_RUNNING");
+          if (record.state === "interrupted" || record.result?.incompleteOutput?.state === "unknown") fail("QUEUE_OUTCOME_UNKNOWN");
           if (!["interrupted", "failed", "cancelled"].includes(record.state))
             fail("INVALID_QUEUE_STATE");
+          retainOutcome(record);
           record.state = "queued";
           delete record.result;
           await write(record);
           return { job: record };
+          });
         }
         case "queue.run": {
           if (consuming) fail("QUEUE_ALREADY_RUNNING");
           consuming = true;
           paused = false;
-          await fs.writeFile(path.join(directory,"queue.control"), "running", {mode:0o600});
           let completed = 0,
             failed = 0;
+          const outcomes = [];
           try {
+            await fs.writeFile(path.join(directory,"queue.control"), "running", {mode:0o600});
             const stream = await fs.opendir(directory);
             for await (const entry of stream) {
               if (disposed || paused || context.signal?.aborted) break;
               if (!entry.name.endsWith(".json")) continue;
-              const record = await read(entry.name.slice(0, -5));
+              let record = await read(entry.name.slice(0, -5));
               if (disposed || paused || context.signal?.aborted) break;
               if (record.state !== "queued") continue;
               const controller = new AbortController();
               const abort = () => controller.abort();
               context.signal?.addEventListener("abort", abort, { once: true });
-              active.set(record.id, controller);
-              record.startedAt = new Date().toISOString();
-              record.state = "running";
-              await write(record);
+              let claimed;
+              try {
+                claimed = await transition(record.id, async () => {
+                  record = await read(record.id);
+                  if (record.state !== "queued") return false;
+                  active.set(record.id, {controller, record});
+                  record.startedAt = new Date().toISOString();
+                  record.state = "running";
+                  await write(record);
+                  return true;
+                });
+              } catch (error) {
+                active.delete(record.id);
+                context.signal?.removeEventListener("abort", abort);
+                throw error;
+              }
+              if (!claimed) { context.signal?.removeEventListener("abort", abort); continue; }
               if (disposed || context.signal?.aborted) controller.abort();
               try {
-                const result = await execute(record.request, {
+                let result;
+                try { result = await execute(record.request, {
                   signal: controller.signal,
                   onProgress: (event) =>
                     context.onProgress?.({ jobId: record.id, ...event }),
-                });
+                }); } catch {
+                  result = {ok:false,code:"QUEUE_ADAPTER_OUTCOME_UNKNOWN",incompleteOutput:{state:"unknown",publication:"unconfirmed"}};
+                }
+                if (!result || typeof result.ok !== "boolean") result = {ok:false,code:"QUEUE_ADAPTER_OUTCOME_UNKNOWN",incompleteOutput:{state:"unknown",publication:"unconfirmed"}};
                 // A validated published result wins over a cancellation arriving after completion.
-                record.state = result.ok ? "completed" : controller.signal.aborted ? "cancelled" : "failed";
+                record.state = result.ok ? "completed" : result.incompleteOutput?.state === "unknown" ? "interrupted" : controller.signal.aborted ? "cancelled" : "failed";
                 record.finishedAt = new Date().toISOString();
                 record.result = result;
                 await write(record);
-                await releaseUnused(record);
+                if (record.state !== "interrupted") await releaseUnused(record);
+                outcomes.push({id:record.id,state:record.state,code:record.result.code,...(record.result.incompleteOutput?{incompleteOutput:record.result.incompleteOutput}:{})});
+                if (outcomes.length > 100) outcomes.shift();
                 if (record.state === "completed") completed++;
                 else failed++;
               } finally {
@@ -251,6 +325,9 @@ function createToolQueue(directory, execute, options = {}) {
             return {
               completed,
               failed,
+              outcomes,
+              outcomeCount: completed + failed,
+              outcomesTruncated: completed + failed > outcomes.length,
               cancelled: context.signal?.aborted === true,
               paused,
             };

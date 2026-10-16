@@ -24,6 +24,7 @@ type QueueItem = {
   request: { action: string; sourceIds?: string[]; sourceId?: string; destinationId?: string; [key: string]: unknown };
   result?: { code?: string; bytes?: number; incompleteOutput?: {state:string;name?:string;publication:string} };
   startedAt?: string; finishedAt?: string;
+  previousOutcomes?: {state:string;finishedAt?:string;result?:{code?:string;incompleteOutput?:{state:string;name?:string;publication:string}}}[];
 };
 export class ToolsPanel extends LitElement {
   static properties = { language: { type: String }, revision: { state: true } };
@@ -637,10 +638,10 @@ export class ToolsPanel extends LitElement {
                     await this.tool({ action: "queue.cancel", id: j.id });
                     await this.queuePage();
                   })
-                : nothing}${["interrupted", "failed", "cancelled"].includes(
+                : nothing}${j.previousOutcomes?.length?html`<details><summary>${this.l("Earlier attempt outcomes","較早嘗試結果",true)}</summary><ul>${j.previousOutcomes.map(outcome=>html`<li>${outcome.state} · ${outcome.finishedAt||""} · ${outcome.result?.code||""} · ${outcome.result?.incompleteOutput?.state||""} ${outcome.result?.incompleteOutput?.publication||""} ${outcome.result?.incompleteOutput?.name||""}</li>`)}</ul></details>`:nothing}${["interrupted", "failed", "cancelled"].includes(
                 j.state,
               )
-                ? this.button("Retry job", "重試工作", async () => {
+                && !(j.request.action==="ollama.pull"&&(j.state==="interrupted"||j.result?.incompleteOutput?.state==="unknown")) ? this.button("Retry job", "重試工作", async () => {
                     if(j.request.action!=="ollama.pull") {await this.reauthorize(j);return;}
                   await this.tool({ action: "queue.resume", id: j.id });
                     await this.queuePage();

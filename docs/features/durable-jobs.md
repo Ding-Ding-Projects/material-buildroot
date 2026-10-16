@@ -11,6 +11,10 @@ The build queue includes a durable recovery panel. It reads the existing job man
 
 Hosted jobs retain their separate bound-run history and explicit destination reconnection. Recovery never dispatches another hosted run. Converter and model queues retain their existing separate authority and grants.
 
+The file and model queue records active cancellation as `cancelling` until its adapter returns. A validated published output remains completed even if cancellation arrived late. A thrown or malformed adapter response becomes interrupted with output publication unconfirmed. Explicit recovery turns abandoned running or cancelling records into interrupted records; it never asserts rollback. Generic resume rejects interrupted or publication-unknown work. File conversion recovery uses native reauthorization and preserves the previous outcome before the next attempt. Up to ten prior outcomes remain on a queue record; the host refuses another replacement when that bound is reached. Earlier outcomes are expandable on the queue row. Interrupted model pulls require inspecting the model state before deliberately creating another request; they are not exposed as a generic retry.
+
+Per-job state transitions serialize cancellation, admission, reauthorization and resume. Record writes are ordered and synchronized before replacement. The queue's run response includes the last one hundred per-item receipts and an explicit truncation indicator; every outcome also remains in its authoritative durable job record. Existing bounded queue pages, pause, grant renewal/release, retained incomplete files and unconfirmed-publication semantics are preserved.
+
 ## Bulk requests
 
 Select individual displayed jobs, all displayed jobs, or invert the displayed selection. Preview cancellation or retry to inspect the exact identities, states and sequences, then explicitly confirm. The host admits only the fixed `cancel` and `retry` operations, validates ownership, and delegates each item to the same operation used by an individual request. Stale or ineligible items produce separate receipts rather than disappearing from a successful aggregate.
