@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { inspectCanonicalPath } = require("./file-grants.cjs");
 const capabilities = new WeakSet();
-const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder", "merge", "rotate", "metadata"]), zipstore: Object.freeze(["zip"]) });
+const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder", "merge", "rotate", "metadata"]), zipstore: Object.freeze(["zip"]), pandoc: Object.freeze(["html", "docx", "epub"]) });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function hash(bytes) { return crypto.createHash("sha256").update(bytes).digest("hex"); }
 function relative(value) {
@@ -65,14 +65,18 @@ function execute(file, args, signal) {
         const pdf = operation.startsWith("qpdf-");
         const merge = operation === "qpdf-merge", rotate = operation === "qpdf-rotate", metadata = operation === "qpdf-metadata";
         const zip = operation === "zipstore-zip";
+        const document = operation.startsWith("pandoc-");
+        const documentZip = operation === "pandoc-docx" || operation === "pandoc-epub";
         const selection = pdf && !merge && !metadata ? args[7].split(",").map(Number) : [];
-        const validation = zip ? "zip-stored-member-crc-and-source-hash" : rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip";
+        const validation = documentZip ? "pandoc-reader-and-safe-zip-directory" : document ? "pandoc-html-reader" : zip ? "zip-stored-member-crc-and-source-hash" : rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip";
         if (receipt.protocol !== 1 || receipt.state !== "completed" || receipt.operation !== operation || receipt.mechanism !== "appcontainer-handle-job" ||
             !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes < 1 || receipt.outputBytes > 128 * 1024 * 1024 ||
             !/^[a-f0-9]{64}$/.test(receipt.sourceSha256 || "") || !/^[a-f0-9]{64}$/.test(receipt.outputSha256 || "") ||
             receipt.validation !== validation || receipt.publication !== "atomic-no-replace" ||
             !admission || admission.appContainer !== true || admission.lpac !== true || admission.capabilityCount !== 0 || admission.jobAssigned !== true || admission.handleList !== true ||
-            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (merge || rotate || metadata ? 15 : pdf ? 13 : zip ? 12 : 10)) fail("INVALID_BROKER_RECEIPT");
+            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (merge || rotate || metadata ? 15 : pdf || documentZip ? 13 : zip || document ? 12 : 10)) fail("INVALID_BROKER_RECEIPT");
+        if (document && (receipt.sourceFormat !== "markdown-strict" || receipt.readerAccepted !== true)) fail("INVALID_BROKER_RECEIPT");
+        if (documentZip && (!Number.isSafeInteger(receipt.memberCount) || receipt.memberCount < 1 || receipt.memberCount > 4096)) fail("INVALID_BROKER_RECEIPT");
         if (zip && (receipt.memberCount !== 1 || receipt.memberName !== "input.bin" || receipt.outputBytes > 64 * 1024 * 1024 + 116)) fail("INVALID_BROKER_RECEIPT");
         if (pdf && (!Number.isSafeInteger(receipt.inputPages) || receipt.inputPages < 1 || receipt.inputPages > 10000 ||
             receipt.expectedPages !== (merge || rotate || metadata ? receipt.inputPages : selection.length) || receipt.outputPages !== receipt.expectedPages || selection.some(page => page > receipt.inputPages))) fail("INVALID_BROKER_RECEIPT");
@@ -127,6 +131,7 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
       if (process.platform !== "win32") fail("NATIVE_BROKER_PLATFORM_REQUIRED");
       const { adapterId, sourceId, destinationId, format } = request;
       if (!supported[adapterId]?.includes(format)) fail("BROKER_FORMAT_UNAVAILABLE");
+      if (adapterId === "pandoc" && request.sourceFormat !== "markdown-strict") fail("UNSUPPORTED_SOURCE_FORMAT");
       const pdf = adapterId === "qpdf";
       const merge = pdf && format === "merge", rotate = pdf && format === "rotate", metadata = pdf && format === "metadata";
       if (pdf && !merge && !metadata && (!Array.isArray(request.pages) || !request.pages.length || request.pages.length > 1000 || request.pages.some(page => !Number.isInteger(page) || page < 1 || page > 10000))) fail("INVALID_PAGE_SELECTION");

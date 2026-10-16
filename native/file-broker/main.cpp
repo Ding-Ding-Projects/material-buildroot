@@ -16,6 +16,7 @@
 #include <memory>
 #include "qpdf-json.hpp"
 #include "zip-store.hpp"
+#include "zip-directory.hpp"
 
 // Host-only protocol. No renderer command line is accepted by this executable.
 // argv: operation, input, new output, private payload root, executable basename, input identity, output-parent identity.
@@ -157,6 +158,9 @@ std::wstring arguments(const std::wstring& operation) {
   if (operation == L"ffmpeg-webm") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 -row-mt 0 -c:a libopus -f webm pipe:1";
   if (operation == L"qpdf-extract" || operation == L"qpdf-reorder" || operation == L"qpdf-merge" || operation == L"qpdf-rotate" || operation == L"qpdf-metadata") return L"";
   if (operation == L"zipstore-zip") return L" --zip-worker";
+  if (operation == L"pandoc-html") return L" --sandbox --fail-if-warnings --from=markdown_strict-raw_html --to=html5 --standalone --metadata=title:Converted --metadata=lang:und --output=-";
+  if (operation == L"pandoc-docx") return L" --sandbox --fail-if-warnings --from=markdown_strict-raw_html --to=docx --standalone --metadata=title:Converted --metadata=lang:und --output=-";
+  if (operation == L"pandoc-epub") return L" --sandbox --fail-if-warnings --from=markdown_strict-raw_html --to=epub3 --standalone --metadata=title:Converted --metadata=lang:und --output=-";
   stop();
 }
 }
@@ -204,6 +208,8 @@ void signature(HANDLE handle, const std::wstring& operation) {
   }
   else if (operation.rfind(L"qpdf-", 0) == 0) matches = std::memcmp(bytes, "%PDF-", 5) == 0;
   else if (operation == L"zipstore-zip") { const BYTE magic[] = {0x50,0x4b,0x03,0x04}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0; }
+  else if (operation == L"pandoc-html") matches = read >= 15 && std::memcmp(bytes, "<!DOCTYPE html>", 15) == 0;
+  else if (operation == L"pandoc-docx" || operation == L"pandoc-epub") { const BYTE magic[] = {0x50,0x4b,0x03,0x04}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0; }
   require(matches); rewindFile(handle);
 }
 std::wstring validationArguments(const std::wstring& operation) {
@@ -212,6 +218,7 @@ std::wstring validationArguments(const std::wstring& operation) {
     require(format == L"png" || format == L"jpg" || format == L"webp");
     return L" -regard-warnings -limit width 16384 -limit height 16384 -limit list-length 256 -limit memory 128MiB -limit map 0 -limit disk 0 " + format + L":- null:";
   }
+  if (operation == L"pandoc-html") return L" --sandbox --fail-if-warnings --from=html --to=json --output=-";
   require(operation == L"ffmpeg-wav" || operation == L"ffmpeg-mp3" || operation == L"ffmpeg-flac" || operation == L"ffmpeg-mp4" || operation == L"ffmpeg-webm");
   const std::wstring demuxer = operation == L"ffmpeg-mp4" ? L"mov" : operation == L"ffmpeg-webm" ? L"matroska" : operation.substr(7);
   const std::wstring streams = operation == L"ffmpeg-mp4" || operation == L"ffmpeg-webm" ? L" -map 0:v:0 -map 0:a:0? -sn -dn" : L" -map 0:a:0 -vn -sn -dn";
@@ -374,6 +381,24 @@ void isolatedWorkerAdmission() {
   require(reinterpret_cast<TOKEN_GROUPS*>(groups.data())->GroupCount == 0);
   BOOL inJob = FALSE; require(IsProcessInJob(GetCurrentProcess(), nullptr, &inJob) && inJob);
 }
+void validMarkdownUtf8(HANDLE source) {
+  rewindFile(source); BYTE buffer[65536]; DWORD read = 0; unsigned remaining = 0, point = 0, minimum = 0;
+  while (true) {
+    require(ReadFile(source, buffer, sizeof(buffer), &read, nullptr) != 0); if (!read) break;
+    for (DWORD index = 0; index < read; ++index) {
+      const unsigned byte = buffer[index];
+      if (remaining) {
+        require(byte >= 0x80 && byte <= 0xbf); point = (point << 6) | (byte & 63); --remaining;
+        if (!remaining) require(point >= minimum && point <= 0x10ffff && !(point >= 0xd800 && point <= 0xdfff));
+      } else if (byte < 0x80) require(byte >= 32 || byte == 9 || byte == 10 || byte == 13);
+      else if (byte >= 0xc2 && byte <= 0xdf) { remaining = 1; point = byte & 31; minimum = 0x80; }
+      else if (byte >= 0xe0 && byte <= 0xef) { remaining = 2; point = byte & 15; minimum = 0x800; }
+      else if (byte >= 0xf0 && byte <= 0xf4) { remaining = 3; point = byte & 7; minimum = 0x10000; }
+      else require(false);
+    }
+  }
+  require(!remaining); rewindFile(source);
+}
 }
 int wmain(int argc, wchar_t** argv) {
   std::wstring temporaryName;
@@ -389,6 +414,8 @@ int wmain(int argc, wchar_t** argv) {
     std::wstring operation(argv[1]); const auto args = arguments(operation);
     const bool pdf = operation.rfind(L"qpdf-", 0) == 0;
     const bool zip = operation == L"zipstore-zip";
+    const bool document = operation.rfind(L"pandoc-", 0) == 0;
+    const bool documentZip = operation == L"pandoc-docx" || operation == L"pandoc-epub";
     const bool merge = operation == L"qpdf-merge", rotate = operation == L"qpdf-rotate", metadata = operation == L"qpdf-metadata";
     require(pdf ? (merge ? argc >= 9 && (argc - 9) % 2 == 0 : rotate ? argc == 10 : argc == 9) : argc == 8);
     if (merge) require(std::wstring(argv[8]) == L"merge");
@@ -420,6 +447,7 @@ int wmain(int argc, wchar_t** argv) {
     require(std::to_wstring(sourceIdentity.dwVolumeSerialNumber) + L":" + std::to_wstring(fileIndex) == argv[6]);
     LARGE_INTEGER size{}; require(GetFileSizeEx(source.value, &size) && size.QuadPart <= 64ll * 1024 * 1024);
     const std::string inputDigest = sha256(source.value);
+    if (document) validMarkdownUtf8(source.value);
     std::vector<std::unique_ptr<ParentLocks>> additionalParents;
     std::vector<std::unique_ptr<Handle>> additionalSources;
     std::vector<HANDLE> sources{source.value};
@@ -463,7 +491,7 @@ int wmain(int argc, wchar_t** argv) {
     limits.ProcessMemoryLimit = 256ull * 1024 * 1024; limits.JobMemoryLimit = limits.ProcessMemoryLimit;
     require(SetInformationJobObject(job.value, JobObjectExtendedLimitInformation, &limits, sizeof(limits)) != 0);
     const ULONGLONG deadline = GetTickCount64() + 30000;
-    unsigned inputPages = 0, outputPages = 0, expectedPages = 0;
+    unsigned inputPages = 0, outputPages = 0, expectedPages = 0, documentMembers = 0;
     std::vector<unsigned> inputPageCounts;
     bool rotationVerified = false, metadataVerified = false;
     if (pdf) {
@@ -542,7 +570,16 @@ int wmain(int argc, wchar_t** argv) {
     }
     require(GetFileSizeEx(destination.value, &size) && size.QuadPart > 0 && size.QuadPart <= 128ll * 1024 * 1024);
     require(FlushFileBuffers(destination.value) != 0); signature(destination.value, operation);
-    if (!pdf) decoder(executable, zip ? L" --zip-validate " + std::wstring(inputDigest.begin(), inputDigest.end()) : validationArguments(operation), root, profile.sid, job.value, destination.value, errors.value, destination.value, errors.value, deadline);
+    if (documentZip) {
+      const std::wstring format = operation.substr(7);
+      documentMembers = zip_directory::validate(destination.value, format);
+      const std::wstring data = root + L"-data"; require(CreateDirectoryW(data.c_str(), nullptr) != 0); acl(data, profile.sid, true);
+      ParentLocks dataParents(data + L"\\entry");
+      const std::wstring validationPath = data + L"\\validation." + format;
+      Handle stagedDocument(stageReadOnly(destination.value, validationPath, profile.sid, sha256(destination.value)));
+      decoder(executable, L" --sandbox --fail-if-warnings --from=" + format + L" --to=json --output=- " + quote(validationPath), root, profile.sid, job.value,
+        source.value, errors.value, destination.value, errors.value, deadline);
+    } else if (!pdf) decoder(executable, zip ? L" --zip-validate " + std::wstring(inputDigest.begin(), inputDigest.end()) : validationArguments(operation), root, profile.sid, job.value, destination.value, errors.value, destination.value, errors.value, deadline);
     const std::string outputDigest = sha256(destination.value);
     DWORD available = 0;
     require(PeekNamedPipe(GetStdHandle(STD_INPUT_HANDLE), nullptr, 0, nullptr, &available, nullptr) && !available && GetTickCount64() < deadline);
@@ -561,9 +598,11 @@ int wmain(int argc, wchar_t** argv) {
     if (rotate) pdfFields += ",\"degrees\":" + std::to_string(degrees) + ",\"rotationVerified\":" + (rotationVerified ? "true" : "false");
     if (metadata) pdfFields += ",\"metadataMode\":\"remove\",\"metadataAbsent\":" + std::string(metadataVerified ? "true" : "false");
     if (zip) pdfFields += ",\"memberCount\":1,\"memberName\":\"input.bin\"";
+    if (document) pdfFields += ",\"sourceFormat\":\"markdown-strict\",\"readerAccepted\":true";
+    if (documentZip) pdfFields += ",\"memberCount\":" + std::to_string(documentMembers);
     std::printf("{\"protocol\":1,\"state\":\"completed\",\"operation\":\"%s\",\"mechanism\":\"appcontainer-handle-job\",\"sourceSha256\":\"%s\",\"outputBytes\":%llu,\"outputSha256\":\"%s\",\"validation\":\"%s\",\"admission\":{\"appContainer\":true,\"lpac\":true,\"capabilityCount\":0,\"jobAssigned\":true,\"handleList\":true},\"publication\":\"atomic-no-replace\"%s}\n",
       operationText.c_str(), inputDigest.c_str(), static_cast<unsigned long long>(size.QuadPart), outputDigest.c_str(),
-      zip ? "zip-stored-member-crc-and-source-hash" : rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
+      documentZip ? "pandoc-reader-and-safe-zip-directory" : document ? "pandoc-html-reader" : zip ? "zip-stored-member-crc-and-source-hash" : rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
     return 0;
   } catch (...) {
     // Preserve the exact partial output under its explicit incomplete name. Never
