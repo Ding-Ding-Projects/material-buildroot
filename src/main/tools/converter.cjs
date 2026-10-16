@@ -8,7 +8,7 @@ const {
   digest,
 } = require("./runtime.cjs");
 const { isNativeFileBroker } = require("../security/native-file-broker.cjs");
-const isolatedFormats = {images:["png","jpg","webp"],audio:["wav","mp3","flac"]};
+const isolatedFormats = {images:["png","jpg","webp"],audio:["wav","mp3","flac"],video:["mp4","webm"]};
 const formats = {
   images: { png: "imagemagick", jpg: "imagemagick", webp: "imagemagick" },
   audio: { mp3: "ffmpeg", wav: "ffmpeg", flac: "ffmpeg" },
@@ -97,7 +97,10 @@ function createConverter(options) {
             } catch (error) { reason = /^[A-Z_]+$/.test(error.code || "") ? error.code : "BUNDLED_ADAPTER_REQUIRED"; }
           }
           entries.push({format, adapter, available, attemptAvailable, runtimeVerified:false, reason,
-            disclosure: category === "binary" ? "Encodes every input byte as text."
+            disclosure: category === "video" ? (format === "mp4"
+              ? "Lossy fragmented MP4: H.264/yuv420p and optional first AAC audio. First video only; subtitles, data, metadata and chapters omitted. Pipe-seeking requirements or resource limits may reject the input."
+              : "Lossy WebM: VP9 and optional first Opus audio. First video only; subtitles, data, metadata and chapters omitted. Pipe-seeking requirements or resource limits may reject the input.")
+              : category === "binary" ? "Encodes every input byte as text."
               : category === "structured" ? "JSON and CSV tables only. CSV loses value types. Nested values and spreadsheet formulas are rejected."
               : category === "text" ? "Strict UTF-8 only. Line endings are preserved."
               : "The target may omit metadata, fonts, layers, animation, transparency or precision."});

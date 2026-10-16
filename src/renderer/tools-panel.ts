@@ -248,6 +248,10 @@ export class ToolsPanel extends LitElement {
   }
   disconnectedCallback() { clearInterval(this.queuePoll); super.disconnectedCallback(); }
   private disclosure(category:string) {
+    if(category==="video")return this.format==="mp4"
+      ? this.l("Lossy fragmented MP4 uses H.264/yuv420p with optional first AAC audio. Only the first video and first audio stream are kept. Subtitles, data, metadata and chapters are omitted. Seek-dependent sources, unavailable codecs or resource limits may stop the attempt without publishing a final output. Keep the original.","有損分段 MP4 使用 H.264/yuv420p，並可將第一條音訊轉成 AAC。只保留第一條影片同音訊串流，字幕、資料、中繼資料同章節會略過。需要搜尋位置嘅來源、缺少編解碼器或資源限制可能令嘗試停止而唔發佈最終輸出，請保留原檔。",true)
+      : this.l("Lossy WebM uses VP9 with optional first Opus audio. Only the first video and first audio stream are kept. Subtitles, data, metadata and chapters are omitted. Seek-dependent sources, unavailable codecs or resource limits may stop the attempt without publishing a final output. Keep the original.","有損 WebM 使用 VP9，並可將第一條音訊轉成 Opus。只保留第一條影片同音訊串流，字幕、資料、中繼資料同章節會略過。需要搜尋位置嘅來源、缺少編解碼器或資源限制可能令嘗試停止而唔發佈最終輸出，請保留原檔。",true);
+
     if(category==="binary")return this.l("Every input byte is encoded as text. This operation does not decode encoded text.","所有輸入位元組會編碼成文字，此操作唔會解碼已編碼文字。",true);
     if(category==="structured")return this.l("JSON and CSV tables only. CSV loses value types; nested values and spreadsheet formulas are rejected.","只支援 JSON 同 CSV 表格。CSV 唔會保留數值類型，巢狀值同試算表公式唔獲接受。",true);
     if(category==="text")return this.l("Strict UTF-8 only. Original line endings are preserved.","只支援有效 UTF-8，原有換行符號會保留。",true);
