@@ -23,13 +23,13 @@ Compressed TAR streams, general filesystem browsing inside disk images, PDF grap
 
 ## Export workflow
 
-The existing guest disk conversion controls offer raw, VMDK, VDI, QCOW2, ISO and OVA output choices. Select the source, provide a new basename with the selected extension, preview, then confirm. Previews bind the source SHA-256 and expire after two minutes. No output is overwritten.
+The output inspector summary and existing guest disk conversion controls offer raw, VMDK, VDI, QCOW2, ISO and OVA output choices. Navigate to a source file in the inspector, provide a new basename with the selected extension, preview, then confirm. The renderer sends only its host-issued file identity; the host resolves the source. Previews bind the source SHA-256 and expire after two minutes. No output is overwritten.
 
 Disk parsing and conversion require an admitted native `qemu-img` through the host's executable resolver. A basename on PATH is not trusted admission. Missing native admission remains an operation error; this feature does not download or execute a converter silently.
 
 Inputs are limited to 16 GiB and virtual capacity to 64 GiB. QCOW2 backing files, snapshots, encryption and unsupported incompatible features are rejected before parsing. Differencing VDI files are rejected. VMDK input requires an unchanged disk produced by this running host's conversion service, rather than accepting arbitrary external extent references.
 
-Execution copies the admitted input into a private directory and rechecks its digest. QEMU receives an explicit input format and bounded host-owned arguments. Generated disk metadata must match the selected format and expected virtual capacity. `qemu-img compare` must report equal logical contents before publication. The final copy is exclusive and its SHA-256 is read back. The original remains untouched.
+Both preview and execution copy the admitted input into a private directory and recheck its digest before native parsing. External-reference admission is repeated on the snapshot. QEMU receives an explicit input format and bounded host-owned arguments, never renderer-provided CLI options. Generated disk metadata must match the selected format and expected virtual capacity. `qemu-img compare` must report equal logical contents before publication. The final copy is exclusive and its SHA-256 is read back. The original remains untouched.
 
 ISO export is explicitly a byte-identical copy of an existing detected ISO9660 image. It does not author a bootable ISO from a root filesystem. OVA export converts to a stream-optimized VMDK and packages a fixed OVF descriptor, SHA-256 manifest and disk as USTAR. The descriptor declares one CPU, 1024 MiB RAM, SATA storage and no network adapter. Individual USTAR entries must fit the octal size limit. Appliance import and boot compatibility are not asserted.
 

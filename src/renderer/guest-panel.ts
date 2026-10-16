@@ -187,12 +187,13 @@ export class GuestPanel extends LitElement {
     const targetWorkspace = this.workspaceId;
     try {
       const reply = await api({
-        action: "artifacts.list",
+        action: "outputs.browse",
         workspaceId: targetWorkspace,
+        directoryId: "root",
       });
       if (targetWorkspace !== this.workspaceId) return;
-      if (reply.ok && Array.isArray(reply.result))
-        this.files = reply.result.filter((item: any) => item.kind === "file");
+      if (reply.ok && Array.isArray((reply.result as any)?.rows))
+        this.files = (reply.result as any).rows.filter((item: any) => item.kind === "file").map((item:any) => ({...item,path:item.name}));
       else
         this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "Output files could not be loaded.",
@@ -265,8 +266,10 @@ export class GuestPanel extends LitElement {
   }
   private async previewConversion() {
     if (!this.disk || !this.outputName) return;
+    const fileId = this.files.find(item => item.path === this.disk)?.id;
+    if (!fileId) return;
     const result = await this.run("conversion.preview", {
-      artifact: this.disk,
+      fileId,
       format: this.format,
       outputName: this.outputName,
     });

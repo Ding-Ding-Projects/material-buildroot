@@ -1635,9 +1635,13 @@ function createOperationsService({
       case "guest.refresh":
         return deployment(request.workspaceId).refreshGuest(request.request);
       case "conversion.preview":
-        return deployment(request.workspaceId).previewConversion(
-          request.request,
-        );
+        exact(request.request, ["fileId", "format", "outputName"]);
+        if (typeof request.request.fileId !== "string" || request.request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return deployment(request.workspaceId).previewConversion({
+          artifact: outputViewer(request.workspaceId).resolve(request.request.fileId, "file").grant.relative,
+          format: request.request.format,
+          outputName: request.request.outputName,
+        });
       case "conversion.execute":
         return changeConfig(projectPaths(request.workspaceId), () =>
           deployment(request.workspaceId).executeConversion(request.request),

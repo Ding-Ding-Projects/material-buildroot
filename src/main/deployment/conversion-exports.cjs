@@ -15,7 +15,14 @@ async function previewConversion({artifact,format,outputName}) {
   let virtualBytes=stat.size;
   if(format!=="iso"){
     admitImageHeader(file,inputFormat,this.convertedDisks.get(file)===info.sha256);
-    virtualBytes=metadata(await this.run("qemu",["info","--output=json","-f",inputFormat,file]),inputFormat)["virtual-size"];
+    const temporary=fs.mkdtempSync(path.join(this.managedDirectory,"preview-"));
+    try {
+      const snapshot=path.join(temporary,"input");
+      fs.copyFileSync(file,snapshot,fs.constants.COPYFILE_EXCL);
+      if(await hashFile(snapshot)!==info.sha256)throw new Error("conversion-source-changed");
+      admitImageHeader(snapshot,inputFormat,this.convertedDisks.get(file)===info.sha256);
+      virtualBytes=metadata(await this.run("qemu",["info","--output=json","-f",inputFormat,snapshot]),inputFormat)["virtual-size"];
+    } finally {fs.rmSync(temporary,{recursive:true,force:true});}
   }
   if(await hashFile(file)!==info.sha256)throw new Error("conversion-source-changed");
   const id=crypto.randomUUID(),expiresAt=Date.now()+120000;
