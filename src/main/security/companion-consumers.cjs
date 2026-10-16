@@ -16,6 +16,10 @@ const actionContracts=Object.freeze({
  'config.apply':contract('configuration:write',['workspaceId','domain','revision','symbol','change'],a=>project(a)&&domain(a.domain)&&hash(a.revision)&&symbol(a.symbol)&&change(a.change)),
  'config.undo':contract('configuration:write',['workspaceId','domain','revision'],a=>project(a)&&domain(a.domain)&&hash(a.revision)),
  'defconfig.apply':contract('configuration:write',['workspaceId','revision','id'],a=>project(a)&&hash(a.revision)&&hash(a.id)),
+ 'cloud.list':contract('deployment:read',['workspaceId'],project),
+ 'cloud.preview':contract('deployment:write',['workspaceId','fileId','destinationId'],a=>project(a)&&id(a.fileId)&&id(a.destinationId)),
+ 'models.status':contract('tools:read',[]),
+ 'models.list':contract('tools:read',[]),
  'workspace.read':contract('workspace:read',[]),
  'projects.list':contract('projects:read',[]),
  'jobs.list':contract('jobs:read',[]),
@@ -35,7 +39,7 @@ const summary=job=>({id:job.id,kind:job.kind,state:job.state,sequence:job.sequen
 function createCompanionConsumers(host){
  const sessions=new Map();
  function admitted(context,scope){if(!context||typeof context.isAuthorized!=='function'||!context.isAuthorized()||!context.scopes.includes(scope))fail('UNAUTHORIZED');}
- function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
+ function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
  function file(state,args,kind){const entry=state.files.get(args.fileId||args.directoryId);if(!entry||entry.workspaceId!==args.workspaceId||entry.kind!==kind)fail('FILE_NOT_ADMITTED');return entry.id;}
  return Object.freeze({actionContracts,async dispatch(request,context){
   const definition=actionContracts[request.action];if(!definition)fail('ACTION_NOT_ADMITTED');definition.validate(request.args);admitted(context,definition.scope);const owned=state(context),a=request.args;
@@ -53,6 +57,10 @@ function createCompanionConsumers(host){
     else await host.applyDefconfig(a);
     result={state:'completed',configuration:configProjection(await host.inspectConfiguration({workspaceId:a.workspaceId,domain:a.domain||'buildroot'}))};break;
    }
+   case 'models.status':{const value=await host.modelStatus();if(value.ok===false)fail('MODEL_SERVICE_UNAVAILABLE');result={version:typeof value.version==='string'?value.version:'unavailable'};break;}
+   case 'models.list':{const value=await host.modelList();if(value.ok===false||!Array.isArray(value.models))fail('MODEL_SERVICE_UNAVAILABLE');result={models:value.models.slice(0,100).map(item=>({name:item.name,size:item.size,digest:item.digest,modifiedAt:item.modified_at}))};break;}
+   case 'cloud.list':{const value=host.cloudList(a.workspaceId);owned.destinations.set(a.workspaceId,new Set(value.profiles.map(item=>item.id)));result={credentialStorage:value.credentialStorage,profiles:value.profiles.map(({id,label,provider})=>({id,label,provider})),jobs:value.jobs.slice(0,100).map(({id,state,sequence,createdAt,updatedAt,sha256,size})=>({id,state,sequence,createdAt,updatedAt,sha256,size}))};break;}
+   case 'cloud.preview':{if(!owned.destinations.get(a.workspaceId)?.has(a.destinationId))fail('DESTINATION_NOT_ADMITTED');const value=await host.previewCloud(a.workspaceId,viewer(),file(owned,a,'file'),a.destinationId);owned.cloudPreviews.set(value.id,{workspaceId:a.workspaceId,expiresAt:value.expiresAt});result={id:value.id,sha256:value.sha256,size:value.size,expiresAt:value.expiresAt,destination:{provider:value.destination.provider,label:value.destination.label},networkState:value.networkState,overwrite:value.overwrite};break;}
    case 'workspace.read':result=host.readWorkspace();break;
    case 'projects.list':result={projects:host.listProjects()};break;
    case 'jobs.list':{const jobs=host.listJobs();for(const job of jobs)owned.jobs.add(job.id);result={jobs:jobs.map(summary)};break;}
@@ -72,6 +80,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 

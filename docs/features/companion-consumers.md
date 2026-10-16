@@ -8,6 +8,10 @@ The typed host adapter admits these exact actions, subject to the current sessio
 
 | Action | Scope | Consumer |
 | --- | --- | --- |
+| cloud.list | deployment:read | Enrolled destination labels and transfer state without credentials |
+| cloud.preview | deployment:write | Hash and preview the session-selected output for an enrolled destination |
+| models.status | tools:read | Actual local model-service version |
+| models.list | tools:read | Installed model names, sizes and digests |
 | workspace.read | workspace:read | Workspace summary |
 | projects.list | projects:read | Select a currently adopted project |
 | project.options | projects:read | Runtime kind, revision and external-tree authorization summary |
@@ -41,14 +45,15 @@ This increment does not complete PH09-T03 or all C identities. The following are
 - Destructive build submission and job retry remain incomplete companion workflows. Non-destructive named builds now recheck the live session at their final enqueue boundary, use the desktop-adopted runtime and source grant, and enter the existing durable scheduler.
 - Configuration string/credential editing, complete paged semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Source clone/adopt/ref acquisition/upgrade/rollback need native selection and revision-bound approval bridges; this browser cannot manufacture that approval.
-- Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud destinations need their own narrowly admitted consumers.
-- Converter, server manager, model management/chat, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
+- Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload execution/retry need their own narrowly admitted consumers. Enrolled destination listing and exact selected-output preview are now implemented; a preview does not upload or grant publication authority.
+- Converter, server manager, model pulls/chat, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
 - Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
 
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
