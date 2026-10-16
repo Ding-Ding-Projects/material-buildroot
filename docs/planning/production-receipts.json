@@ -289,6 +289,54 @@
       "exitCodeEvidence": "Direct numeric zero exit reported by the owning producer.",
       "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
       "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH09-T01",
+      "sourceCommit": "f1ee6423ecd827bf5e5f491f45a9b1a0ae9b7311",
+      "receiptSha256": "637c102ae950865186a22e9ff7fe8440978db6c00913030c2ae6da429775dc0e",
+      "target": "documentation",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by owning producer.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH10-T09-C01",
+      "sourceCommit": "c952cdf5f1afeaf90a5f2bc9b7e1111a35ea14cf",
+      "receiptSha256": "bd38ad87bebf14f1f5729f37d4fde4cab93d9115252d02b66d73d2d3db30b546",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by owning producer.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH09-T04",
+      "sourceCommit": "cf590128682e0e6e15756000a66f16f4ce5482f7",
+      "receiptSha256": "3c540c3dd92a2df8d33bb8234944abe21e5e9a49eb53c1937d04ab0b80d17ff1",
+      "target": "documentation",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by owning producer.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH09-T03",
+      "sourceCommit": "e1b3918cd1d27c7fe24a4e36ae2f63edcac18dcc",
+      "receiptSha256": "44f72e4bd8b7a129b8912295db3210672a7397a829fe69432ace42a9bd29304c",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric exit receipt independently read back by integration owner.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
     }
   ]
 }
