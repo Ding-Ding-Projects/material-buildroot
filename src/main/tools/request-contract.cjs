@@ -253,6 +253,8 @@ function admit(request, nested = false) {
           "directoryId",
           "acceptPluginCode",
           "acceptLicense",
+          "gameVersion",
+          "loader",
         ]);
         token(request.versionId);
         token(request.gameVersion);

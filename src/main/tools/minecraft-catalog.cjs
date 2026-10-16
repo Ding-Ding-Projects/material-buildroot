@@ -40,8 +40,8 @@ async function catalog(options, request, context) {
         ? "/versions/" + encodeURIComponent(token(request.version)) + "/builds"
         : "";
       const data = await fetchBounded(
-        "https://api.papermc.io/v2/projects/paper" + suffix,
-        common,
+        "https://fill.papermc.io/v3/projects/paper" + suffix,
+        { ...common, fetchImpl: paperFetch },
       );
       return {
         flavour: "paper",
