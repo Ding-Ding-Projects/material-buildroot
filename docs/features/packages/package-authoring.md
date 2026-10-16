@@ -1,5 +1,7 @@
 # Package authoring and source-editor handoff
 
+[香港粵語](package-authoring.zh-HK.md)
+
 ## Start a package draft
 
 Open **Package authoring** for an adopted project. Choose a prepared, authorized

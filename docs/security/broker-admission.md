@@ -1,5 +1,7 @@
 # Durable settings broker admission
 
+[香港粵語](broker-admission.zh-HK.md)
+
 Status: implemented data-only core for `settings.setLanguage`, with focused behavioral evidence. This is not production IPC, filesystem capability admission, project creation, Buildroot execution, a GUI or complete feature delivery.
 
 ## Trusted host boundary

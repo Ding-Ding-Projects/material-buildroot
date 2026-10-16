@@ -1,5 +1,7 @@
 # Local scheduled-preference draft recovery
 
+[香港粵語](schedule-draft-recovery.zh-HK.md)
+
 The host provides a separate append-only history for validated local schedule drafts. Recording a draft does not save it as the active schedule, evaluate it, contact a provider or apply its values. The editor integration remains a separate acceptance surface.
 
 ## Host actions

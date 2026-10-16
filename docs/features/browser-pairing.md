@@ -1,5 +1,7 @@
 # Browser pairing and private network grants
 
+[香港粵語](browser-pairing.zh-HK.md)
+
 The desktop owner explicitly selects a private listener address, trusted HTTPS certificate and matching key. Starting the listener requires a native confirmation. There is no public-address listener, automatic enrollment, certificate exception, firewall change or host-security change.
 
 ## Pair Edge or Chrome

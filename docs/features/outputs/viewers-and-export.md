@@ -1,5 +1,7 @@
 # Output viewers and validated export
 
+[香港粵語](viewers-and-export.zh-HK.md)
+
 ## Workflow
 
 Open an adopted project's **Artifacts** destination, choose **Output root**, and navigate directory entries. The host issues opaque entry identities. The renderer cannot submit an absolute filesystem path to these new viewer operations. Entry identities expire after fifteen minutes and are invalidated by root refresh; refresh after a build changes output bytes.

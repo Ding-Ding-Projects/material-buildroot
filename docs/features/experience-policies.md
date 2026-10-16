@@ -1,5 +1,7 @@
 # Experience preferences
 
+[香港粵語](experience-policies.zh-HK.md)
+
 The desktop exposes reversible per-element locks through the context-action provider and a Settings panel. These are self-imposed interaction preferences, not security, encryption, or operation authorization. The operation broker retains its independent capability checks. Window exit and recovery controls are excluded.
 
 ## Enrollment and unlocking

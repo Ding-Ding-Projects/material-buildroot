@@ -1,5 +1,7 @@
 # Native file capabilities
 
+[香港粵語](file-capabilities.zh-HK.md)
+
 Native dialogs establish session-only file authority. Renderer-supplied paths never establish grants. Project grants are owner-bound random identifiers, expire after five minutes and carry read or read/write access. Trusted host import adapters can issue read-only single-file grants with `importFile`; this method is not exposed to the renderer. Existing project folder selection and tool input/output dialogs remain the native acquisition routes.
 
 Every grant acquisition and resolution inspects the volume root and each existing component, records device/inode/birth identity and compares the exact native real path. Symbolic links, junctions that resolve elsewhere, hardlinked files, special files, case aliases, network/device paths and Windows reserved names or trailing-dot/space aliases are rejected. Replacing a parent or selected object invalidates the grant. A changed project grant is revoked. New outputs require an existing inspected parent and cannot overwrite an existing file.

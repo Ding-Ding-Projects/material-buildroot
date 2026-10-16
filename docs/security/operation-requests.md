@@ -1,5 +1,7 @@
 # Serialized operation requests
 
+[香港粵語](operation-requests.zh-HK.md)
+
 `src/main/security/operation-request.cjs` implements the first versioned request admission boundary. It accepts serialized JSON text or UTF-8 bytes and returns an immutable validated request with an internal canonical digest. It does not execute an action, resolve a filesystem path, authenticate a caller or grant a capability.
 
 The executable schema is `src/shared/operation-request.schema.json`. The earlier planning schema remains a historical admission design; production code loads only the executable schema. `src/shared/api.ts` now describes an action-discriminated request union instead of a string dispatcher returning `any`. A production preload and broker still need to implement that contract.

@@ -1,3 +1,4 @@
+import {bindDurableConverter} from './browser-native-queue-bindings.js';
 import {mountBrowserBinary} from './browser-native-binary.js';
 import {mountBrowserTable} from './browser-native-table.js';
 import {mountBrowserMedia} from './browser-native-media.js';
@@ -137,7 +138,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   } catch { report('Recovery storage is unavailable. Current-plan exports still work.', '復原儲存無法使用，目前計劃仍可匯出。'); }
 
   node('h3', 'Local text conversion', '本機文字轉換');
-  node('p', 'Choose one UTF-8 .txt or .md file up to 1 MiB. Text stays in memory until this page closes or you clear it. JSON, executables and binary formats are not accepted. PDF, office, audio, video, image and archive conversion are unavailable in this visitor tool.', '選擇一份最大 1 MiB 嘅 UTF-8 .txt 或 .md 檔案。文字只保留喺記憶體，直到關閉此頁或清除。唔接受 JSON、可執行檔或二進位格式。此訪客工具唔支援 PDF、辦公室文件、音訊、影片、圖片同封存轉換。');
+  node('p', 'Choose one UTF-8 .txt or .md file up to 1 MiB. Text is memory-only before conversion. Conversion retains its input and output in the shared queue. Clearing the editor does not remove queued copies. JSON, executables and binary formats are not accepted. PDF, office, audio, video, image and archive conversion are unavailable in this visitor tool.', '選擇一份最大 1 MiB 嘅 UTF-8 .txt 或 .md 檔案。轉換前文字只留喺記憶體，轉換會將輸入同輸出保留喺共用佇列。清除編輯器唔會移除佇列副本。唔接受 JSON、可執行檔或二進位格式。此訪客工具唔支援 PDF、辦公室文件、音訊、影片、圖片同封存轉換。');
   const picker = node('input'); picker.type = 'file'; picker.accept = '.txt,.md,text/plain,text/markdown'; picker.style.maxWidth = '100%';
   localized.push(() => picker.setAttribute('aria-label', text('Select a local text file, maximum 1 MiB', '選擇本機文字檔案，最大 1 MiB')));
   const editor = field(root, 'Text to convert (UTF-8, maximum 1 MiB)', '要轉換嘅文字（UTF-8，最大 1 MiB）', MAX_TEXT_BYTES); editor.type = 'textarea'; editor.rows = 6; editor.id='browser-native-text-editor';
@@ -152,16 +153,23 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
       if (current !== generation) return;
       const content = new TextDecoder('utf-8', {fatal:true}).decode(bytes);
       if (content.includes('\0')) throw new Error('Binary text');
-      editor.value = content; report('Local text loaded. Nothing was uploaded or saved to browser storage.', '已載入本機文字，並無上載或寫入瀏覽器儲存。');
+      editor.value = content; editor.dispatchEvent(new Event('change',{bubbles:true})); report('Local text loaded. Nothing was uploaded or saved to browser storage.', '已載入本機文字，並無上載或寫入瀏覽器儲存。');
     } catch { if(current === generation) report('This file is not supported UTF-8 text. Current text is unchanged.', '此檔案唔係支援嘅 UTF-8 文字，現有文字不變。'); }
     finally { if(current === generation) picker.value = ''; }
   });
   editor.addEventListener('input', () => { generation++; });
   const content = () => { if (encode(editor.value).byteLength > MAX_TEXT_BYTES) throw new Error('Too large'); return editor.value.replace(/\r\n?/g, '\n'); };
-  button(fileRow, 'Download UTF-8 text', '下載 UTF-8 文字', () => downloadSafe(content, 'converted.txt', 'text/plain'));
-  button(fileRow, 'Download Markdown source', '下載 Markdown 原文', () => downloadSafe(content, 'converted.md', 'text/markdown'));
-  button(fileRow, 'Download JSON text envelope', '下載 JSON 文字封裝', () => downloadSafe(() => JSON.stringify({version:1,encoding:'UTF-8',lineEndings:'LF',text:content()}, null, 2), 'converted-text.json', 'application/json'));
-  button(fileRow, 'Clear selected text', '清除已選文字', () => { generation++; editor.value = ''; picker.value = ''; event('cleared'); report('Selected text cleared from this tool. The source file is unchanged.', '已清除此工具內嘅文字，來源檔案不變。'); });
+  let retainedText;
+  const textPreview=node('pre');textPreview.style.whiteSpace='pre-wrap';textPreview.style.overflowWrap='anywhere';
+  const retainedDownload=button(fileRow,'Download retained text output','下載保留文字輸出',()=>{if(!retainedText)return;const url=URL.createObjectURL(retainedText.output);const link=node('a');link.href=url;link.download=retainedText.outputName;link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);report('Retained output download requested. Confirm the final save in browser downloads.','已要求下載保留輸出，請喺瀏覽器下載記錄確認最後儲存。');});retainedDownload.disabled=true;
+  for(const [format,en,zh]of[['txt','Queue UTF-8 text conversion','將 UTF-8 文字轉換排入佇列'],['md','Queue Markdown-source conversion','將 Markdown 原文轉換排入佇列'],['json','Queue JSON text envelope','將 JSON 文字封裝排入佇列']]){
+    const run=button(fileRow,en,zh,()=>{});
+    bindDurableConverter({category:'text',run,inputs:[editor,picker],report,acceptResult:item=>item.options.format===format,
+      request:()=>({category:'text',name:'Local text draft',sources:[new Blob([editor.value],{type:'text/plain'})],options:{format}}),
+      async onResult(item,isCurrent){const value=await item.output.text();if(!isCurrent())return;retainedText=item;retainedDownload.disabled=false;textPreview.textContent=text('Preview of the first 2,000 characters; the retained download contains all output.','預覽首 2,000 字元，保留下載包含完整輸出。')+'\n'+value.slice(0,2000);}
+    });
+  }
+  button(fileRow, 'Clear selected text', '清除已選文字', () => { generation++; editor.value = ''; picker.value = ''; event('cleared'); report('Editor cleared. The source file and retained queued copies are unchanged.', '已清除編輯器，來源檔案同保留佇列副本不變。'); });
   node('p', 'Markdown output preserves source text; it does not render or sanitize embedded markup. The JSON text envelope preserves the entire normalized text as one string, and is not a visitor-plan backup. Line endings normalize to LF. Downloads do not overwrite the source file. Editor discovery and opening a native editor require the installed app; this public page cannot confirm an editor installation.', 'Markdown 輸出保留原文，唔會顯示或淨化內嵌標記。JSON 文字封裝會將全部已統一換行嘅文字保留為一個字串，唔係訪客計劃備份。換行會統一為 LF。下載唔會覆寫來源檔案。偵測同開啟原生編輯器需要已安裝程式，此公開頁無法確認編輯器安裝狀態。');
   visitor.querySelector('#companion-title')?.closest('section')?.before(root);
   if (!root.isConnected) visitor.append(root);
@@ -187,6 +195,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   document.querySelector('#language')?.addEventListener('change', () => localized.forEach(update => update()));
   document.addEventListener('browser-native-copy-change', () => localized.forEach(update => update()));
 }
+
 
 
 

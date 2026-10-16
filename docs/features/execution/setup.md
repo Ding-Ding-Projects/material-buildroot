@@ -1,5 +1,7 @@
 # GitHub execution setup
 
+[香港粵語](setup.zh-HK.md)
+
 The runtime workspace includes a guided selection panel for an existing source repository and either that same repository or an existing dedicated execution repository. Enter explicit owner/name pairs. Checking access uses the GitHub CLI account signed in on the host. Separate explicit controls acquire the pinned CLI, select a trusted existing executable, and start device sign-in. Setup never creates repositories, provisions runners or starts builds automatically.
 
 The host reads the authenticated account and repository access through fixed `gh api` calls. Renderer inputs cannot supply CLI arguments, executable paths, API hosts, credentials or arbitrary endpoints. Credential environment overrides are removed so the CLI uses its configured authentication store. Errors are bounded and raw CLI diagnostics are never returned to the renderer.

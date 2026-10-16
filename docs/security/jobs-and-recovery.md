@@ -1,5 +1,7 @@
 # Durable jobs and local safety services
 
+[香港粵語](jobs-and-recovery.zh-HK.md)
+
 The host-only `src/main/jobs/manager.cjs` accepts an explicit registry of adapter functions. A renderer cannot supply an executable, command, PID, or adapter implementation. The host must validate each adapter payload against its operation schema before enqueueing it. The manager itself accepts bounded JSON payloads; this is not a substitute for adapter admission or file capabilities.
 
 `createJobManager({ directory, adapters })` returns `enqueue`, `get`, `list`, `run`, `cancel`, `retry`, and `page`. The host retains exactly one manager per owned directory. Enqueue requires `kind`, `payload`, and `ownerId`; an optional `operationId` makes identical requests idempotent and conflicting reuse fails. `run(id, ownerId, expectedSequence)`, `cancel`, and `retry` enforce exact ownership and observed sequence. Retry creates a new job linked by `retryOf`, preserving the original record and partial outcomes.

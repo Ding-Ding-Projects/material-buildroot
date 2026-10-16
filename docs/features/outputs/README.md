@@ -1,5 +1,7 @@
 # Output inspection and export
 
+[香港粵語](README.zh-HK.md)
+
 - [SDK export and Linux environment handoff](sdk-export.md) · [香港粵語](sdk-export.zh-HK.md)
 - [Reproducibility records and compliance evidence](../reproducibility.md) · [香港粵語](../reproducibility.zh-HK.md)
 

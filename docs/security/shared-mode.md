@@ -1,5 +1,7 @@
 # Shared experience mode host protocol candidate
 
+[香港粵語](shared-mode.zh-HK.md)
+
 `src/main/privacy/shared-mode-service.cjs` implements an explicit shared local host record, live observation, exact display rename, and locally verified exit. This is a reusable protocol candidate. No existing universal filesystem path or cross-application credential interchange was discovered in the canonical requirements. The caller must supply one admitted absolute `sharedDirectory` and a compatible shared protected vault to every participating application. A per-application Electron `userData` directory or browser-origin local storage cannot establish universal state.
 
 Existing sibling browser preference code uses its own origin-local storage and broadcast channel. This candidate neither overwrites that format nor claims compatibility with it. Shared filenames alone also do not prove cross-product vault decryption; protected storage providers must use compatible account/provider identity, and actual supported-host interoperability remains unverified.

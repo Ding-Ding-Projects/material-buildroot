@@ -1,3 +1,4 @@
+import {browserWorkerURL} from './browser-native-worker-url.js';
 import {localizedCopy} from './browser-native-copy';
 import {captureOwnedStatus,displayOwnedStatus} from "./browser-native-copy";
 import {actionIcon} from "./browser-native-copy";
@@ -175,7 +176,7 @@ export class RegexWorkbench extends LitElement {
     this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     this.result = undefined;
     try {
-      this.worker = new Worker(new URL("./browser-native-regex-worker.js", import.meta.url), {
+      this.worker = new Worker(browserWorkerURL("browser-native-regex-worker"), {
         type: "module",
       });
       this.timer = setTimeout(() => {
@@ -800,6 +801,7 @@ export class RegexWorkbench extends LitElement {
   }
 }
 customElements.define("browser-native-regex-workbench", RegexWorkbench);
+
 
 
 

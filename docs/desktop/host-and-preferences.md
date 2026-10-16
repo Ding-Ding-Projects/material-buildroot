@@ -1,5 +1,7 @@
 # Host admission and preferences
 
+[香港粵語](host-and-preferences.zh-HK.md)
+
 The production entry is `src/main/index.cjs`. It opens only the packaged `dist/index.html`, with context isolation, renderer sandboxing and Node integration disabled. New windows, permissions, webviews and off-target navigation are denied. CSP disables network connections, frames, objects and external scripts. The preload exposes only bootstrap, typed requests, fixed window controls and validated operation-event subscription with idempotent listener removal. IPC admission requires the exact owned web contents, its top-level frame and the exact packaged URL.
 
 The host owns the `desktop-owner` principal, `desktop-settings` namespace and settings database under the normal application-data profile. It grants only `settings.setLanguage`; callers cannot select another principal, directory or scope. Reload, renderer termination and window destruction revoke grants. Grants expire after one hour. Saving after expiry refreshes host bootstrap once and retries the same request only when the stored revision is unchanged. A stale revision retains the pending choice, reloads current settings and requires another explicit Save. A failed or unavailable save never reports success.

@@ -1,5 +1,7 @@
 # Build and dependency acquisition
 
+[香港粵語](README.zh-HK.md)
+
 - [Windows entrypoints and source-bound outputs](windows-entrypoints.md)
 - [Unsigned Windows releases](releases.md)
 
