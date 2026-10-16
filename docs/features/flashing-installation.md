@@ -32,6 +32,8 @@ The function returns `Directory`, `Executable`, `Manifest`, `Sha256` and `Runtim
 
 The produced `manifest.json` includes protocol, executable SHA-256, SDK/runtime versions, runtime identifier, self-contained/unsigned declarations, source-file hashes, build-input hash and an explicitly unverified runtime-acceptance field. Manifest creation follows successful [`dotnet publish`](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish). It never executes the helper, discovers disks, obtains administrator consent, writes media, publishes a release or claims runtime acceptance.
 
+Both the helper project and its publish invocation explicitly set `DebugType=None` and `DebugSymbols=false`. The manifest records these settings as `debugType` and `debugSymbols`. This suppresses generated helper debug-symbol payloads; packaging separately rejects `.pdb` or `.mdb` files in the published resource tree. Source settings alone do not establish the contents of an unbuilt package.
+
 ## Delivery and verification state
 
 Source authored only. Native compilation, helper resource inclusion, package production, administrator consent, disk discovery, physical writes, cancellation, readback, ISO preparation, guest installation, boot and UI acceptance were not executed in this pass. Until packaging supplies the executable and matching manifest, physical operations fail closed with `FLASH_HELPER_UNAVAILABLE`. This document does not claim PH07-T07 runtime acceptance or a usable packaged physical-writing route before that integration.

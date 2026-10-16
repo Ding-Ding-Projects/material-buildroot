@@ -87,7 +87,7 @@ function Invoke-FlashingBuild {
         $publish = Join-Path $work 'publish'
         Push-Location $work
         try {
-            & (Join-Path $sdk 'dotnet.exe') publish (Join-Path $work 'MaterialBuildroot.Flash.csproj') --configuration Release --runtime win-x64 --self-contained true --output $publish --disable-build-servers --nologo '-p:PublishSingleFile=true' '-p:IncludeNativeLibrariesForSelfExtract=true' '-p:PublishTrimmed=false' '-p:TargetLatestRuntimePatch=false' (('-p:RuntimeFrameworkVersion={0}' -f $inputs.runtime.version)) '--source' 'https://api.nuget.org/v3/index.json' '--packages' (Join-Path $work 'packages')
+            & (Join-Path $sdk 'dotnet.exe') publish (Join-Path $work 'MaterialBuildroot.Flash.csproj') --configuration Release --runtime win-x64 --self-contained true --output $publish --disable-build-servers --nologo '-p:PublishSingleFile=true' '-p:IncludeNativeLibrariesForSelfExtract=true' '-p:PublishTrimmed=false' '-p:DebugType=None' '-p:DebugSymbols=false' '-p:TargetLatestRuntimePatch=false' (('-p:RuntimeFrameworkVersion={0}' -f $inputs.runtime.version)) '--source' 'https://api.nuget.org/v3/index.json' '--packages' (Join-Path $work 'packages')
             if ($LASTEXITCODE -ne 0) { throw ('Flashing helper compilation failed with exit code ' + $LASTEXITCODE) }
         } finally { Pop-Location }
         $executable = Join-Path $publish 'MaterialBuildroot.Flash.exe'
@@ -100,7 +100,7 @@ function Invoke-FlashingBuild {
         }
         $sources = @{}
         foreach ($name in @('Program.cs','app.manifest','MaterialBuildroot.Flash.csproj','build-inputs.json')) { $sources[$name] = Get-Sha256 (Join-Path $root ('native/flashing/' + $name)) }
-        $manifest = @{protocol=1;sha256=(Get-Sha256 $executable);sdkVersion=$inputs.sdk.version;runtimeVersion=$inputs.runtime.version;runtimeIdentifier='win-x64';selfContained=$true;unsigned=$true;sourceHashes=$sources;buildInputsSha256=(Get-Sha256 $inputsPath);runtimeAcceptance='unverified'}
+        $manifest = @{protocol=1;sha256=(Get-Sha256 $executable);sdkVersion=$inputs.sdk.version;runtimeVersion=$inputs.runtime.version;runtimeIdentifier='win-x64';selfContained=$true;unsigned=$true;debugType='None';debugSymbols=$false;sourceHashes=$sources;buildInputsSha256=(Get-Sha256 $inputsPath);runtimeAcceptance='unverified'}
         Write-AtomicJson (Join-Path $publish 'manifest.json') $manifest
         [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($output)) | Out-Null
         [IO.Directory]::Move($publish, $output)
