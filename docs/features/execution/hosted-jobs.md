@@ -8,7 +8,7 @@ Restart history stores metadata only. It stores no credential or authorization g
 
 ## Download and extraction
 
-Only a successful bound run's unexpired `buildroot-output` artifact with an API-provided SHA-256 digest is eligible. Downloads use the trusted GitHub CLI actor, a native directory picker and a fresh output subdirectory, never a renderer-supplied path. Compressed downloads are bounded to 64 MiB. Larger output is unsupported by this transport.
+Only a successful bound run's unexpired `buildroot-output` artifact with an API-provided SHA-256 digest is eligible. Downloads use the trusted GitHub CLI actor, a native directory picker and a fresh output subdirectory, never a renderer-supplied path. Compressed downloads stream to an exclusive partial file and are bounded to 1 GiB and ten minutes. The trusted CLI actor verifies the expected size and SHA-256 before publishing the archive. Cancel active download aborts the owned transfer or extraction. Larger output is unsupported by this transport.
 
 The archive digest and exact byte length must match before its ZIP inventory is read. Its `manifest.json` binds the operation UUID, workflow commit and source commit. Every regular file requires an exact length and SHA-256 manifest entry. Extraction rejects traversal, symbolic links, duplicate names, unsupported methods and ZIP64; it bounds expansion to 8 GiB and 10,000 entries. Existing files are not overwritten. Extracted files are never executed. The digest proves integrity against the service metadata, not publisher authenticity or safety of the resulting firmware.
 
@@ -17,3 +17,4 @@ An interrupted or rejected extraction may leave a new partial output folder for 
 ## Verification state
 
 Implemented in source under the scoped release mode. No hosted run was dispatched, no external repository was created, and no tests, runtime inspection or screenshots were performed in this task. Actual dispatch, cancellation, restart recovery, download and extraction acceptance remain unverified.
+

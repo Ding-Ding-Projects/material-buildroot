@@ -55,6 +55,7 @@ const fields = {
   "execution.jobs.cancel": ["id", "consent"],
   "execution.jobs.outputs": ["id"],
   "execution.jobs.download": ["id", "artifactId", "consent"],
+  "execution.jobs.cancelDownload": ["id"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -1923,6 +1924,7 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      executionJobs?.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
