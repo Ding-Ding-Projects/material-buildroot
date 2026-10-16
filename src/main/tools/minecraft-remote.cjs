@@ -45,7 +45,8 @@ async function sourceInventory(options, request, signal) {
     return { root, files: content.files.map(file => ({ ...file, source: path.join(root, file.path) })), bytes: content.bytes };
   }
   const receipt = JSON.parse((await readFile(path.join(root, "material-server-distribution.json"), 65536)).toString("utf8"));
-  const server = path.join(root, "server.jar");
+  const entryPoint = receipt.entryPoint === "fabric-server-launch.jar" ? "fabric-server-launch.jar" : "server.jar";
+  const server = path.join(root, entryPoint);
   inspectCanonicalPath(server);
   const stat = await fsp.lstat(server);
   if (!stat.isFile() || stat.size < 1 || stat.size > 256 * 1024 * 1024 || receipt.schema !== 1 || receipt.edition !== "java" || receipt.version !== request.version || receipt.flavour !== request.flavour || !/^[a-f0-9]{64}$/.test(receipt.sha256 || "") || await digest(server) !== receipt.sha256) fail("REMOTE_DISTRIBUTION_IDENTITY_MISMATCH");
@@ -59,18 +60,30 @@ async function sourceInventory(options, request, signal) {
     values[match[1]] = ["server-port", "max-players"].includes(match[1]) ? Number(match[2]) : match[1] === "white-list" ? match[2] === "true" : match[2];
   }
   const properties = require("./minecraft-managed.cjs").configuration(values, "java");
-  const safeReceipt = { schema: 1, edition: "java", version: request.version, flavour: request.flavour, sha256: receipt.sha256 };
+  const safeReceipt = { schema: 1, edition: "java", version: request.version, flavour: request.flavour, sha256: receipt.sha256, entryPoint };
   const generated = {
     "server.properties": Object.entries(properties).map(([key, value]) => key + "=" + value).join("\n") + "\n",
     "eula.txt": "eula=true\n",
     "material-server-distribution.json": JSON.stringify(safeReceipt) + "\n",
   };
-  const files = [{ path: "server.jar", source: server, bytes: stat.size, sha256: receipt.sha256 }];
+  const files = [{ path: entryPoint, source: server, bytes: stat.size, sha256: receipt.sha256 }];
+  if (entryPoint === "fabric-server-launch.jar") {
+    if (!/^[a-f0-9]{40}$/.test(receipt.vanillaSha1 || "") || !Array.isArray(receipt.libraries) || receipt.libraries.length > 200) fail("FABRIC_LIBRARY_INVENTORY_UNAVAILABLE");
+    const required = [{ path: "server.jar", sha1: receipt.vanillaSha1 }, ...receipt.libraries];
+    for (const item of required) {
+      if (typeof item.path !== "string" || !require("./zip-payload.cjs").safeName(item.path) || (item.path !== "server.jar" && !item.path.startsWith("libraries/")) || !/^[a-f0-9]{40}$/.test(item.sha1 || "")) fail("FABRIC_LIBRARY_IDENTITY_UNAVAILABLE");
+      const file = path.join(root, item.path); inspectCanonicalPath(file); const itemStat = await fs.lstat(file);
+      if (!itemStat.isFile() || itemStat.size > 256 * 1024 ** 2 || await digest(file, "sha1") !== item.sha1) fail("FABRIC_LIBRARY_HASH_MISMATCH");
+      files.push({ path: item.path, source: file, bytes: itemStat.size, sha256: await digest(file) });
+    }
+  }
   for (const [name, text] of Object.entries(generated)) {
     const content = Buffer.from(text, "utf8");
     files.push({ path: name, content, bytes: content.length, sha256: hash(content) });
   }
-  return { root, files, bytes: files.reduce((total, file) => total + file.bytes, 0) };
+  const total = files.reduce((sum, file) => sum + file.bytes, 0);
+  if (total > 2 * 1024 ** 3 || new Set(files.map(file => file.path.toLowerCase())).size !== files.length) fail("REMOTE_TRANSFER_LIMIT");
+  return { root, files, bytes: total };
 }
 async function ssh(options, host, script, { input, signal, timeout = 120000, maxBytes = 65536 } = {}) {
   const command = await executable(options, "ssh");
