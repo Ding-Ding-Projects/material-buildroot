@@ -9,6 +9,7 @@ const { createBuildConfirmation } = require("./security/build-confirmation.cjs")
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
+const { createJobRecovery } = require("./jobs/recovery.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
 const { createAccountProvisioning } = require("./configuration/account-provisioning.cjs");
 const { createImagePresets } = require("./configuration/image-presets.cjs");
@@ -95,6 +96,10 @@ const fields = {
   "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
   "build.confirmation.cancel": ["id"],
   "jobs.list": [],
+  "jobs.recovery": [],
+  "jobs.items": ["id", "after", "limit"],
+  "jobs.bulk": ["kind", "items"],
+  "jobs.bulkStop": ["id"],
   "scheduler.status": [],
   "scheduler.configure": ["limits"],
   "jobs.project": ["workspaceId"],
@@ -1274,6 +1279,7 @@ function createOperationsService({
       release();
     }
   }
+  const jobRecovery = createJobRecovery({ directory: path.join(directory, "job-recovery"), jobs, owner, perform });
   async function perform(request) {
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
@@ -1642,6 +1648,14 @@ function createOperationsService({
         void scheduler.pump().catch(() => {});
         return { reconciled: true, jobId: job.id };
       }
+      case "jobs.recovery":
+        return jobRecovery.snapshot();
+      case "jobs.items":
+        return jobs.page(request.id, "item", { after: request.after, limit: request.limit }, owner);
+      case "jobs.bulk":
+        return jobRecovery.bulk(request);
+      case "jobs.bulkStop":
+        return jobRecovery.cancelBatch(request.id);
       case "jobs.list":
         return jobs.list().filter((job) => job.ownerId === owner);
       case "jobs.page":
@@ -1660,6 +1674,7 @@ function createOperationsService({
       case "jobs.retry": {
         const previous = ownJob(request.id);
         if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
+        if (recoveryUnavailable || unknownRecovery().some(record => record.jobId === previous.id || record.workspaceId === previous.payload.workspaceId)) reject("RECOVERY_UNVERIFIED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
