@@ -270,7 +270,25 @@ function createOperationsService({
       })
     : null;
   let remoteRuntime;
-  function remoteService() { return remoteRuntime ??= createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileGrants,run:boundedProcess}); }
+  function remoteService() { return remoteRuntime ??= createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileGrants,run:boundedProcess,scheduler,
+    async sourceForTransfer(workspaceId, makeArchive) {
+      const item=project(workspaceId);const external=authorizedExternalPaths(workspaceId,item);
+      if(item.storage||external.length)reject("REMOTE_SOURCE_SHAPE_UNSUPPORTED");
+      const release=acquirePathLeases([item.source,item.output]);
+      try {
+        const before=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+        const archive=makeArchive({source:item.source,output:item.output,revalidate:()=>project(workspaceId)});
+        const after=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+        if(before.sourceRevision!==after.sourceRevision||before.configRevision!==after.configRevision)reject("REMOTE_SOURCE_CHANGED");
+        return {...archive,source:item.source,output:item.output,intent:{sourceRevision:before.sourceRevision,configRevision:before.configRevision}};
+      } finally {release();}
+    },
+    async revalidateSource(workspaceId,intent) {
+      const item=project(workspaceId);if(item.storage||authorizedExternalPaths(workspaceId,item).length)reject("REMOTE_SOURCE_SHAPE_UNSUPPORTED");
+      const current=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+      if(current.sourceRevision!==intent.sourceRevision||current.configRevision!==intent.configRevision)reject("REMOTE_SOURCE_CHANGED");
+    }
+  }); }
   let executionJobs;
   function hostedJobs() {
     return executionJobs ??= createExecutionJobs({
@@ -2074,6 +2092,7 @@ function createOperationsService({
         reject("INVALID_ACTION");
     }
   }
+  remoteService();
   return {
     async request(serialized) {
       activeRequests++;
@@ -2129,5 +2148,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
 
 

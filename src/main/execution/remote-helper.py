@@ -1,6 +1,7 @@
 """Fixed remote build protocol. All caller data arrives on standard input."""
 import base64, hashlib, io, json, os, pathlib, re, shutil, signal, stat, subprocess, sys, time, uuid, zipfile
-LIMIT = 32 * 1024 * 1024
+LIMIT = 1107296256
+CHUNK = 1024 * 1024
 
 def fail(code):
     raise ValueError(code)
@@ -41,7 +42,9 @@ def uuid_path(root, category, value):
     parent = root / category
     if not parent.exists(): parent.mkdir(mode=0o700)
     if parent.is_symlink() or parent.resolve() != parent: fail('REMOTE_PATH_UNSAFE')
-    return parent / value
+    child = parent / value
+    if child.exists() and (child.is_symlink() or child.resolve() != child or not child.is_dir()): fail('REMOTE_PATH_UNSAFE')
+    return child
 
 def inventory(source):
     values = []
@@ -73,7 +76,7 @@ def worker(file):
     shutil.copyfile(config, out / '.config')
     if row['kind'].endswith('docker'):
         name = 'material-buildroot-' + row['id']
-        command = ['docker', 'run', '--pull=never', '--rm', '--name', name, '--label', 'io.material-buildroot.job=' + row['id'], '--user', str(row['uid']) + ':' + str(row['gid']), '--cap-drop=ALL', '--security-opt=no-new-privileges', '--mount', 'type=bind,source=' + str(source) + ',target=/source,readonly', '--mount', 'type=bind,source=' + str(out) + ',target=/output', '--workdir', '/source', row['image'], 'make', 'O=/output', '-j' + str(row['parallelism']), row['target']]
+        command = ['docker', 'run', '--pull=never', '--rm', '--name', name, '--label', 'io.material-buildroot.job=' + row['id'], '--user', str(row['uid']) + ':' + str(row['gid']), '--cpus', str(row['parallelism']), '--memory', '4294967296', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--mount', 'type=bind,source=' + str(source) + ',target=/source,readonly', '--mount', 'type=bind,source=' + str(out) + ',target=/output', '--workdir', '/source', row['image'], 'make', 'O=/output', '-j' + str(row['parallelism']), row['target']]
     else:
         if os.name == 'nt' or os.getuid() == 0: fail('REMOTE_NONROOT_REQUIRED')
         command = ['make', '-C', str(source), 'O=' + str(out), '-j' + str(row['parallelism']), row['target']]
@@ -107,18 +110,43 @@ def protocol(q):
     if q['kind'] != 'windows-docker' and (os.name == 'nt' or os.getuid() == 0): fail('REMOTE_NONROOT_REQUIRED')
     if q['kind'] == 'windows-docker' and os.name != 'nt': fail('REMOTE_PLATFORM_MISMATCH')
     key = identity(root)
+    if q['action'] == 'resources':
+        if q['rootIdentity'] != key: fail('REMOTE_IDENTITY_CHANGED')
+        if os.name == 'nt':
+            import ctypes
+            class Memory(ctypes.Structure):
+                _fields_ = [('length', ctypes.c_ulong), ('load', ctypes.c_ulong)] + [(n, ctypes.c_ulonglong) for n in ('total', 'available', 'page_total', 'page_available', 'virtual_total', 'virtual_available', 'extended')]
+            memory = Memory(); memory.length = ctypes.sizeof(memory)
+            if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(memory)): fail('REMOTE_RESOURCE_UNKNOWN')
+            available = memory.available
+        else: available = os.sysconf('SC_AVPHYS_PAGES') * os.sysconf('SC_PAGE_SIZE')
+        return {'cpuSlots': os.cpu_count(), 'memoryAvailableBytes': available, 'storageAvailableBytes': shutil.disk_usage(root).free}
     if q['action'] == 'inspect':
         return {'state': 'enrolled', 'rootIdentity': key, 'protocol': 1, 'kind': q['kind']}
     if q['rootIdentity'] != key: fail('REMOTE_IDENTITY_CHANGED')
-    if q['action'] == 'transfer':
-        folder = uuid_path(root, 'transfers', q['id']); folder.mkdir(mode=0o700)
-        atomic(folder / 'receipt.json', {'state': 'incomplete', 'sha256': q['sha256']})
-        raw = base64.b64decode(q['archive'], validate=True)
-        if len(raw) > LIMIT or hashlib.sha256(raw).hexdigest() != q['sha256']: fail('REMOTE_TRANSFER_DIGEST')
+    if q['action'] in ('transfer-begin', 'transfer-chunk', 'transfer-finish'):
+        folder = uuid_path(root, 'transfers', q['id'])
+        archive_file = folder / 'source.zip'
+        receipt_file = folder / 'receipt.json'
+        if q['action'] == 'transfer-begin':
+            if not isinstance(q['bytes'], int) or not 0 < q['bytes'] <= LIMIT or not re.fullmatch('[a-f0-9]{64}', q['sha256']): fail('REMOTE_TRANSFER_LIMIT')
+            folder.mkdir(mode=0o700)
+            with archive_file.open('xb'): pass
+            atomic(receipt_file, {'state': 'incomplete', 'sha256': q['sha256'], 'bytes': q['bytes'], 'offset': 0})
+            return {'id': q['id'], 'offset': 0}
+        receipt = read(receipt_file)
+        if receipt['state'] != 'incomplete' or receipt['sha256'] != q['sha256']: fail('REMOTE_TRANSFER_BINDING')
+        if q['action'] == 'transfer-chunk':
+            raw = base64.b64decode(q['chunk'], validate=True)
+            if not 0 < len(raw) <= CHUNK or q['offset'] != receipt['offset'] or q['offset'] + len(raw) > receipt['bytes'] or regular(archive_file).st_size != q['offset']: fail('REMOTE_TRANSFER_SEQUENCE')
+            with archive_file.open('ab') as out: out.write(raw); out.flush(); os.fsync(out.fileno())
+            receipt['offset'] += len(raw); atomic(receipt_file, receipt)
+            return {'id': q['id'], 'offset': receipt['offset']}
+        if receipt['offset'] != receipt['bytes'] or regular(archive_file).st_size != receipt['bytes'] or digest(archive_file) != receipt['sha256']: fail('REMOTE_TRANSFER_DIGEST')
         source = folder / 'source'; source.mkdir(mode=0o700)
-        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        with zipfile.ZipFile(archive_file) as archive:
             members = archive.infolist()
-            if len(members) > 100000 or sum(x.file_size for x in members) > 1024 ** 3: fail('REMOTE_EXPANSION_LIMIT')
+            if len(members) > 100000 or sum(x.file_size for x in members) > LIMIT: fail('REMOTE_EXPANSION_LIMIT')
             seen = set()
             for item in members:
                 name = item.filename.rstrip('/')
@@ -176,14 +204,30 @@ def protocol(q):
             values.append({'name': item.name, 'bytes': s.st_size, 'sha256': digest(item)})
             if len(values) > 1000: fail('REMOTE_OUTPUT_LIMIT')
         return {'files': values, 'sourceDigest': row['sourceDigest']}
-    if q['action'] == 'download':
+    if q['action'] == 'logs':
+        file = folder / 'build.log'
+        info = regular(file)
+        log_identity = str(info.st_dev) + ':' + str(info.st_ino)
+        if not isinstance(q['offset'], int) or q['offset'] < 0 or q['offset'] > min(info.st_size, 1024 * 1024): fail('REMOTE_LOG_SEQUENCE')
+        if q['offset'] and q['logIdentity'] != log_identity: fail('REMOTE_LOG_IDENTITY')
+        with file.open('rb') as inp:
+            inp.seek(q['offset']); raw = inp.read(min(65536, 1024 * 1024 - q['offset']))
+        return {'id': q['id'], 'offset': q['offset'], 'next': q['offset'] + len(raw), 'logIdentity': log_identity, 'chunk': base64.b64encode(raw).decode(), 'truncated': info.st_size > 1024 * 1024}
+    if q['action'] == 'download-chunk':
         if row['state'] != 'succeeded' or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+-]{0,199}', q['name']): fail('REMOTE_OUTPUT_NOT_READY')
         file = folder / 'output' / 'images' / q['name']
-        if file.resolve() != file or regular(file).st_size > LIMIT: fail('REMOTE_DOWNLOAD_LIMIT')
-        raw = file.read_bytes()
-        actual = hashlib.sha256(raw).hexdigest()
-        if actual != q['sha256']: fail('REMOTE_OUTPUT_CHANGED')
-        return {'archive': base64.b64encode(raw).decode(), 'sha256': actual, 'bytes': len(raw)}
+        info = regular(file)
+        if file.resolve() != file or info.st_size > LIMIT: fail('REMOTE_DOWNLOAD_LIMIT')
+        file_identity = ':'.join(str(x) for x in (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns))
+        if not isinstance(q['offset'], int) or not 0 <= q['offset'] <= info.st_size: fail('REMOTE_DOWNLOAD_SEQUENCE')
+        if q['offset'] == 0:
+            if digest(file) != q['sha256']: fail('REMOTE_OUTPUT_CHANGED')
+        elif q['fileIdentity'] != file_identity: fail('REMOTE_OUTPUT_CHANGED')
+        with file.open('rb') as inp:
+            inp.seek(q['offset']); raw = inp.read(CHUNK)
+        after = regular(file)
+        if file_identity != ':'.join(str(x) for x in (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns)): fail('REMOTE_OUTPUT_CHANGED')
+        return {'offset': q['offset'], 'next': q['offset'] + len(raw), 'fileIdentity': file_identity, 'bytes': info.st_size, 'chunk': base64.b64encode(raw).decode()}
     fail('REMOTE_ACTION_INVALID')
 
 try:
@@ -196,5 +240,8 @@ except Exception:
     # Never reflect remote exception text, paths, environment or credential material.
     print(json.dumps({'state': 'unknown', 'code': 'REMOTE_OPERATION_INCOMPLETE'}))
     sys.exit(1)
+
+
+
 
 

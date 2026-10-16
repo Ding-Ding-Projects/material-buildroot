@@ -661,7 +661,7 @@ export class OperationsPanel extends LitElement {
           if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
         }}></project-workflow-panel>
       <section class="panel stack">
-        <remote-runtime-panel .language=${this.language}></remote-runtime-panel>
+        <remote-runtime-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""}></remote-runtime-panel>
         <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { if(!this.dispatchEvent(new CustomEvent("workspace-adopted",{detail:event.detail,bubbles:true,composed:true,cancelable:true})))return; this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; }}></wsl-runtime-panel>
         <execution-setup-panel .language=${this.language}></execution-setup-panel>
         <h2>${this.l("Runtime discovery","探索執行環境",true)}</h2>
@@ -1129,4 +1129,5 @@ export class OperationsPanel extends LitElement {
   }
 }
 customElements.define("operations-panel", OperationsPanel);
+
 
