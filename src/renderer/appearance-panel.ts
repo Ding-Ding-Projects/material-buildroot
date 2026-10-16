@@ -26,7 +26,24 @@ const roots=new Map<ShadowRoot|DocumentFragment,HTMLStyleElement>();
 const sessionRecords=new Map<string,Values>();
 let observer:MutationObserver|undefined;let scheduled=false;let rainbowSyncPending=false;let previewBefore:HTMLElement|undefined;
 function parent(el:Element):Element|null{return el.parentElement||(el.getRootNode() instanceof ShadowRoot?(el.getRootNode() as ShadowRoot).host:null);}
+function identityHash(parts:readonly string[]){let a=2166136261,b=5381;for(const char of JSON.stringify(parts)){a=Math.imul(a^char.charCodeAt(0),16777619);b=Math.imul(b,33)^char.charCodeAt(0);}return 'e'+(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
+/** Presentation identity only. The marker never grants an action or changes a permission. */
+function workspaceTabIdentity(target:HTMLElement):{key:string;durable:boolean}|null{
+ const suffix:string[]=[];const WorkspaceTabs=customElements.get('workspace-tabs');if(!WorkspaceTabs)return null;
+ for(let element:Element|null=target;element&&element!==app();element=parent(element)){
+  const key=element.getAttribute('data-appearance-key');
+  if(element.getAttribute('data-appearance-owner')==='workspace-tabs'&&key&&/^[a-zA-Z0-9:._-]{1,320}$/.test(key)&&/^(?:tab:(?:workspace|utility):|group:)/.test(key)){
+   let owner:Element|null=element;while(owner&&!(owner instanceof WorkspaceTabs))owner=parent(owner);
+   if(owner){let scope:Element|null=owner;while(scope&&scope!==app())scope=parent(scope);if(scope===app())return {key:identityHash(['owned-presentation-v1','workspace-tabs',key,...suffix]),durable:true};}
+  }
+  const localKey=element.getAttribute('data-appearance-key')||element.getAttribute('data-id')||element.id;
+  const siblings=element.parentElement?Array.from(element.parentElement.children).filter(sibling=>sibling.localName===element!.localName):[];
+  suffix.unshift(element.localName+':'+(localKey?'key:'+localKey:'position:'+siblings.indexOf(element))+':'+(element.getAttribute('type')||''));
+ }
+ return null;
+}
 function stableKey(target:HTMLElement):{key:string;durable:boolean}{
+ const ownedIdentity=workspaceTabIdentity(target);if(ownedIdentity)return ownedIdentity;
  const chain:string[]=[];let durable=true;
  for(let el:Element|null=target;el&&el!==app();el=parent(el)){
   const explicit=el.getAttribute('data-appearance-key')||el.getAttribute('data-id')||el.id;
@@ -36,7 +53,7 @@ function stableKey(target:HTMLElement):{key:string;durable:boolean}{
  }
  chain.unshift(app()?.route||'global');let a=2166136261,b=5381;for(const char of chain.join('/')){a=Math.imul(a^char.charCodeAt(0),16777619);b=Math.imul(b,33)^char.charCodeAt(0);}return {key:'e'+(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0'),durable};
 }
-function attach(root:ShadowRoot){if(roots.has(root))return;const style=document.createElement('style');style.dataset.appearanceStyles='true';root.append(style);roots.set(root,style);observer?.observe(root,{childList:true,subtree:true});}
+function attach(root:ShadowRoot){if(roots.has(root))return;const style=document.createElement('style');style.dataset.appearanceStyles='true';root.append(style);roots.set(root,style);observer?.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['data-appearance-owner','data-appearance-key','data-id','id']});}
 function scan(root:ShadowRoot){attach(root);for(const el of root.querySelectorAll<HTMLElement>('*')){
  if(el.matches('style,script,link'))continue;
  const identity=stableKey(el);const owner=el.closest('[data-experience-id]');if(owner&&!el.hasAttribute('data-experience-id')&&el.localName.startsWith('md-'))el.setAttribute('data-experience-id',owner.getAttribute('data-experience-id')!);if(el!==previewBefore&&el.dataset.appearanceTarget!==identity.key)el.dataset.appearanceTarget=identity.key;bindAppearanceMotion(el,identity.key);
