@@ -37,6 +37,7 @@ const TOOLS = Object.freeze({
     args: ["--version"],
     version: /qpdf version\s+([^\s]+)/i,
   },
+  ssh: { names: ["ssh"], args: ["-V"], version: /(OpenSSH[^\s,]*)/i },
   java: {
     names: ["java"],
     args: ["-version"],

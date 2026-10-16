@@ -51,6 +51,7 @@ function properties(input) {
   );
 }
 function createMinecraft(options) {
+  const managed = require("./minecraft-managed.cjs").createManagedMinecraft(options);
   const running = new Map();
   const starting = new Set();
   let disposed = false;
@@ -60,6 +61,8 @@ function createMinecraft(options) {
   }
   const execute = async (request, context = {}) => {
     if (disposed) fail("SERVICE_DISPOSED");
+    if (require("./minecraft-workflow-contract.cjs").actions.includes(request.action) || request.action.startsWith("minecraft.managed.") || request.action.startsWith("minecraft.configuration.")) return managed(request, context);
+    if (["minecraft.paper.builds", "minecraft.paper.install"].includes(request.action)) return require("./minecraft-paper.cjs").paper(options, request, context);
     switch (request.action) {
       case "minecraft.flavours":
         return require("./minecraft-catalog.cjs").catalog(
@@ -90,13 +93,15 @@ function createMinecraft(options) {
         const manifest = await versions(context.signal);
         const entry = manifest.versions?.find((item) => item.id === version);
         if (!entry) fail("VERSION_NOT_FOUND");
-        const metadata = await fetchBounded(
-          official(entry.url, [
-            "piston-meta.mojang.com",
-            "launchermeta.mojang.com",
-          ]),
-          { signal: context.signal, fetchImpl },
-        );
+        if (!/^[0-9a-f]{40}$/.test(entry.sha1 || "")) fail("VERSION_METADATA_DIGEST_REQUIRED");
+        const metadataSignal = context.signal ? AbortSignal.any([context.signal, AbortSignal.timeout(120000)]) : AbortSignal.timeout(120000);
+        const metadataResponse = await fetchImpl(official(entry.url, ["piston-meta.mojang.com", "launchermeta.mojang.com"]), { signal: metadataSignal, redirect: "error" });
+        if (!metadataResponse.ok) fail("HTTP_FAILURE");
+        const metadataChunks = []; let metadataBytes = 0;
+        for await (const chunk of metadataResponse.body) { metadataBytes += chunk.length; if (metadataBytes > 4194304) fail("RESPONSE_LIMIT"); metadataChunks.push(Buffer.from(chunk)); }
+        const metadataBuffer = Buffer.concat(metadataChunks);
+        if (createHash("sha1").update(metadataBuffer).digest("hex") !== entry.sha1) fail("VERSION_METADATA_HASH_MISMATCH");
+        const metadata = JSON.parse(metadataBuffer.toString("utf8"));
         const server = metadata.downloads?.server;
         if (
           !server ||
@@ -139,7 +144,8 @@ function createMinecraft(options) {
           if (bytes !== server.size || hash.digest("hex") !== server.sha1)
             fail("PAYLOAD_HASH_MISMATCH");
           await fs.link(temporary, destination);
-          return { installed: true, version, bytes, sha1: server.sha1 };
+          await fs.writeFile(path.join(directory, "material-server-distribution.json"), JSON.stringify({ schema: 1, edition: "java", flavour: "vanilla", version, sha256: await require("./runtime.cjs").digest(temporary), requiredJavaMajorVersion: metadata.javaVersion?.majorVersion ?? null }), { flag: "wx", mode: 0o600 });
+          return { installed: true, version, bytes, sha1: server.sha1, requiredJavaMajorVersion: metadata.javaVersion?.majorVersion ?? null, runtimeVerified: false };
         } finally {
           await fs.rm(temporary, { force: true });
         }
@@ -280,6 +286,8 @@ function createMinecraft(options) {
   };
   execute.dispose = async () => {
     disposed = true;
+    let managedFailure;
+    try { await managed.dispose(); } catch (error) { managedFailure = error; }
     const results = await Promise.allSettled(
       [...running.values()].map(async (record) => {
         let containerError;
@@ -320,7 +328,7 @@ function createMinecraft(options) {
         if (alive() || containerError) fail("PROCESS_STOP_UNVERIFIED");
       }),
     );
-    if (results.some((result) => result.status === "rejected"))
+    if (managedFailure || results.some((result) => result.status === "rejected"))
       fail("PROCESS_STOP_UNVERIFIED");
     running.clear();
   };
