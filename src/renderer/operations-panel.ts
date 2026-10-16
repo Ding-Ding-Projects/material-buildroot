@@ -1,3 +1,4 @@
+import "./wsl-runtime-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./build-queue-panel";
@@ -632,6 +633,7 @@ export class OperationsPanel extends LitElement {
   private runtimeView() {
     return html`<div class="split">
       <section class="panel stack">
+        <wsl-runtime-panel .language=${this.language}></wsl-runtime-panel>
         <h2>${this.l("Runtime discovery", "探索執行環境")}</h2>
         <p>
           ${this.l(
@@ -1435,3 +1437,4 @@ export class OperationsPanel extends LitElement {
   }
 }
 customElements.define("operations-panel", OperationsPanel);
+

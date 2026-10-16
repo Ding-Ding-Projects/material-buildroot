@@ -40,6 +40,7 @@ const {
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 
+const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const owner = "desktop-owner";
 const fields = {
   "documentation.list": [],
@@ -47,6 +48,7 @@ const fields = {
   "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
   "runtime.discover": [],
+  "runtime.wsl": ["kind", "distribution"],
   "runtime.docker.prepare": ["workspaceId", "runtime"],
   "runtime.python.choose": [],
   "project.list": [],
@@ -181,6 +183,7 @@ function createOperationsService({
   source,
   documentationDirectory,
   openDocumentationExternal,
+  openWslPath,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -191,6 +194,7 @@ function createOperationsService({
   },
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
@@ -1166,6 +1170,9 @@ function createOperationsService({
       case "documentation.open":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
+      case "runtime.wsl":
+        if (!["discover", "inspect", "import", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
+        return wslRuntime.perform(request.kind, request.distribution);
       case "runtime.discover":
         return execution.discover();
       case "runtime.docker.prepare": {
@@ -1728,3 +1735,4 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
