@@ -43,10 +43,18 @@ const {
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
+const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const owner = "desktop-owner";
 const fields = {
+  "execution.jobs.list": [],
+  "execution.jobs.dispatch": ["selectionId", "consent"],
+  "execution.jobs.observe": ["id"],
+  "execution.jobs.reconnect": ["id", "selectionId", "consent"],
+  "execution.jobs.cancel": ["id", "consent"],
+  "execution.jobs.outputs": ["id"],
+  "execution.jobs.download": ["id", "artifactId", "consent"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -223,6 +231,23 @@ function createOperationsService({
         openExternal: openDocumentationExternal,
       })
     : null;
+  let executionJobs;
+  function hostedJobs() {
+    return executionJobs ??= createExecutionJobs({
+      setup: executionSetup, workflows: executionWorkflows, directory,
+      chooseDirectory: async () => {
+        if (choosing) reject("PICKER_BUSY");
+        choosing = true;
+        try {
+          const selected = await dialog.showOpenDialog(parentWindow, {
+            title: "Choose folder for verified Buildroot outputs",
+            properties: ["openDirectory", "dontAddToRecent"],
+          });
+          return selected.canceled ? null : selected.filePaths[0] || null;
+        } finally { choosing = false; }
+      },
+    });
+  }
   const selections = new Map(),
     portableImports = new Map(),
     projects = new Map(),
@@ -1205,6 +1230,11 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("execution.jobs.")) {
+      const method = action.slice("execution.jobs.".length);
+      const { action: _action, ...args } = request;
+      return hostedJobs()[method](args);
+    }
     const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
