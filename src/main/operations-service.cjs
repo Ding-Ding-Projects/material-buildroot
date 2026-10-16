@@ -55,6 +55,8 @@ const { createWorkflowService } = require('./execution/workflow-service.cjs');
 const { createAssistantActions } = require("./assistant/actions.cjs");
 const owner = "desktop-owner";
 const fields = {
+  "assistant.catalog": ["workspaceId"],
+  "assistant.propose": ["workspaceId", "expectedRevision", "document"],
   "assistant.list": ["workspaceId"],
   "assistant.create": ["workspaceId", "expectedRevision", "profiles"],
   "assistant.preview": ["workspaceId", "planId", "index", "expectedRevision"],
@@ -1293,9 +1295,27 @@ function createOperationsService({
       project(workspaceId);
       return { ...snapshot, grantBinding: createHash("sha256").update(JSON.stringify([item.grantId, item.identities, item.runtime])).digest("hex") };
     },
-    execute: async (profile, workspaceId, signal, binding) => {
+    catalog: async workspaceId => {
+      const result = await defconfigWorkflows.catalog({workspaceId});
+      return { revision: result.revision, entries: result.entries.map(({id,name,origin}) => ({id,name,origin})) };
+    },
+    prepare: async (profile, workspaceId, selection) => {
+      project(workspaceId);
+      if (profile !== "apply-defconfig") return null;
+      const result = await defconfigWorkflows.catalog({workspaceId});
+      if (result.revision !== selection.revision) reject("DEFCONFIG_CATALOG_CHANGED");
+      const selected = result.entries.find(item => item.id === selection.id);
+      if (!selected) reject("INVALID_DEFCONFIG");
+      return { name: selected.name, origin: selected.origin, sha256: selected.sha256 };
+    },
+    execute: async (profile, workspaceId, signal, binding, selection) => {
       project(workspaceId);
       if (signal.aborted) reject("ACTION_CANCELLED");
+      if (profile === "apply-defconfig") {
+        // Existing runtime trust, catalogue revision, configuration transaction and rollback stay authoritative.
+        await changeConfig(projectPaths(workspaceId), () => defconfigWorkflows.apply({workspaceId, ...selection}));
+        return { count: 1 };
+      }
       if (profile === "source-summary") return { count: binding.snapshot.entries };
       if (profile === "build-status") return { count: jobs.list(owner).filter(job => job.payload.workspaceId === workspaceId).length };
       if (profile === "output-inventory") {
@@ -2137,4 +2157,5 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
