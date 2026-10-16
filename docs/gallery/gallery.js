@@ -160,6 +160,10 @@ function createCard(capture) {
   kicker.className = 'card-kicker';
   kicker.append(pair(capture.categoryEn, capture.categoryZh));
   body.append(kicker);
+  const historical = document.createElement('p');
+  historical.className = 'card-boundary';
+  historical.append(pair('Historical capture. Current build appearance and interaction remain unverified.', '歷史截圖。現行版本外觀及互動仍未驗證。'));
+  body.append(historical);
   const heading = document.createElement('h2');
   heading.append(pair(capture.titleEn, capture.titleZh));
   body.append(heading);

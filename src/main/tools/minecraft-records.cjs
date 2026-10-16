@@ -6,8 +6,9 @@ const { fail, grant } = require("./runtime.cjs");
 const ID = /^[A-Za-z0-9_-]{1,64}$/;
 function profile(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) fail("INVALID_SERVER_PROFILE");
-  const keys = ["id", "edition", "version", "flavour", "target", "memoryMiB", "port"];
+  const keys = ["id", "edition", "version", "flavour", "target", "memoryMiB", "port", "entryPoint"];
   if (Object.keys(input).some(key => !keys.includes(key)) || !ID.test(input.id || "") || !["java", "bedrock"].includes(input.edition) || !["vanilla", "paper", "fabric"].includes(input.flavour) || !["local-process", "local-container", "ssh-process", "ssh-container"].includes(input.target) || typeof input.version !== "string" || !/^[A-Za-z0-9_.+-]{1,80}$/.test(input.version) || !Number.isInteger(input.memoryMiB) || input.memoryMiB < 512 || input.memoryMiB > 32768 || !Number.isInteger(input.port) || input.port < 1024 || input.port > 65535) fail("INVALID_SERVER_PROFILE");
+  if (input.entryPoint !== undefined && (input.edition !== "java" || !["server.jar", "fabric-server-launch.jar"].includes(input.entryPoint))) fail("INVALID_SERVER_PROFILE");
   if (input.edition === "bedrock" && input.flavour !== "vanilla") fail("INVALID_SERVER_PROFILE");
   return structuredClone(input);
 }
@@ -49,7 +50,7 @@ function createRecords(options) {
     return update(data => {
       data.ownership = data.ownership.filter(row => row.serverId !== serverId);
       if (data.ownership.length >= 100) fail("SERVER_RECORD_LIMIT");
-      data.ownership.push({ serverId, target: record.target, edition: record.edition, version: record.version, flavour: record.flavour, containerName: record.containerName, host: record.host || null, directory: record.directory, sourceDigest: record.sourceDigest, image: record.image || null, state: record.state, updatedAt: new Date().toISOString() });
+      data.ownership.push({ serverId, instanceId: record.instanceId || null, target: record.target, edition: record.edition, version: record.version, flavour: record.flavour, containerName: record.containerName, host: record.host || null, directory: record.directory, sourceDigest: record.sourceDigest, image: record.image || null, state: record.state, updatedAt: new Date().toISOString() });
       event(data, serverId, "lifecycle", record.state);
     });
   }

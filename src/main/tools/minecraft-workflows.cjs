@@ -5,6 +5,8 @@ function createWorkflows(options, owner) {
   const store = require("./minecraft-records.cjs").createRecords(options);
   const worlds = require("./minecraft-worlds.cjs").createWorlds(options, owner.assertStopped, store.log);
   const remote = require("./minecraft-remote.cjs").createRemote(options, owner.assertStopped, store);
+  const extensions = require("./minecraft-extensions.cjs").createExtensions(options, owner.assertStopped, store.log);
+  const fabricSetup = require("./minecraft-fabric-setup.cjs").createFabricSetup(options, owner.assertStopped, store.log);
   const players = require("./minecraft-admin.cjs").createPlayers(options, owner.assertStopped, store.log);
   let initialized, disposed = false, timer, ticking = false;
   async function initialize() {
@@ -23,9 +25,9 @@ function createWorkflows(options, owner) {
         let claimed = false;
         await store.update(current => { const row = current.schedules.find(item => item.id === schedule.id); if (row?.state === "scheduled") { row.state = "running"; claimed = true; } });
         if (!claimed) continue;
-        let state = "stop-requested";
-        try { await owner.stop(schedule.serverId); } catch { state = "failed"; }
-        await store.update(current => { const row = current.schedules.find(item => item.id === schedule.id); if (row) row.state = state; store.event(current, schedule.serverId, "scheduled-stop", state); });
+        let state = "stop-requested", replacement;
+        try { if (!schedule.instanceId || owner.records.get(schedule.serverId)?.instanceId !== schedule.instanceId) fail("SERVER_INSTANCE_CHANGED"); if (schedule.operation === "restart") { replacement = await owner.restart(schedule.serverId, schedule.instanceId); state = replacement.state; } else await owner.stop(schedule.serverId, schedule.instanceId); } catch { state = "failed"; }
+        await store.update(current => { const row = current.schedules.find(item => item.id === schedule.id); if (row) { row.state = state; row.remaining = Math.max(0, (row.remaining || 1) - 1); if (replacement?.instanceId && row.remaining > 0) { row.instanceId = replacement.instanceId; row.at = new Date(Date.now() + row.repeatMinutes * 60000).toISOString(); row.state = "scheduled"; } } store.event(current, schedule.serverId, "scheduled-" + schedule.operation, state); });
       }
     } finally { ticking = false; }
   }
@@ -58,6 +60,8 @@ function createWorkflows(options, owner) {
     if (request.action.startsWith("minecraft.records.")) return store.execute(request);
     if (request.action.startsWith("minecraft.world.")) return worlds(request, context);
     if (request.action.startsWith("minecraft.players.")) return players(request);
+    if (request.action.startsWith("minecraft.extensions.")) return extensions.execute(request, context);
+    if (["minecraft.fabric.complete", "minecraft.fabric.setup.status", "minecraft.fabric.setup.cancel"].includes(request.action)) return fabricSetup.execute(request, context);
     if (request.action.startsWith("minecraft.fabric.")) return require("./minecraft-fabric.cjs").fabric(options, request, context);
     if (request.action === "minecraft.managed.reconnect") return reconnect(request.serverId);
     if (request.action === "minecraft.command") {
@@ -72,12 +76,14 @@ function createWorkflows(options, owner) {
     if (request.action === "minecraft.schedule.add") {
       const record = owner.records.get(request.serverId);
       if (!record || !["process-started", "ready", "owned-container-running"].includes(record.state)) fail("SERVER_NOT_RUNNING");
+      if (!record.instanceId || (request.operation === "restart" && !record.launchRequest)) fail("SERVER_RESTART_AUTHORITY_UNAVAILABLE");
+      record.authorizeExecution?.();
       const id = randomUUID();
-      return store.update(data => { if (data.schedules.length >= 100) fail("SCHEDULE_LIMIT"); data.schedules.push({ id, serverId: request.serverId, operation: "stop", at: new Date(request.at).toISOString(), timeZone: request.timeZone, state: "scheduled" }); store.event(data, request.serverId, "schedule-stop", "scheduled"); return { scheduled: true, id, requiresApplicationRunning: true }; });
+      return store.update(data => { if (data.schedules.length >= 100) fail("SCHEDULE_LIMIT"); data.schedules.push({ id, serverId: request.serverId, operation: request.operation, instanceId: record.instanceId, at: new Date(request.at).toISOString(), timeZone: request.timeZone, repeatMinutes: request.repeatMinutes || null, remaining: request.occurrences || 1, state: "scheduled" }); store.event(data, request.serverId, "schedule-" + request.operation, "scheduled"); return { scheduled: true, id, requiresApplicationRunning: true }; });
     }
-    if (request.action === "minecraft.schedule.cancel") return store.update(data => { const row = data.schedules.find(item => item.id === request.id); if (!row || row.state !== "scheduled") fail("SCHEDULE_NOT_CANCELLABLE"); row.state = "cancelled"; store.event(data, row.serverId, "schedule-stop", "cancelled"); return { cancelled: true }; });
+    if (request.action === "minecraft.schedule.cancel") return store.update(data => { const row = data.schedules.find(item => item.id === request.id); if (!row || row.state !== "scheduled") fail("SCHEDULE_NOT_CANCELLABLE"); row.state = "cancelled"; store.event(data, row.serverId, "schedule-" + row.operation, "cancelled"); return { cancelled: true }; });
     fail("INVALID_REQUEST");
   }
-  return { execute, store, worlds, busy: directory => worlds.busy(directory) || players.busy(directory) || remote.busy(directory), initialize, dispose() { disposed = true; clearInterval(timer); remote.dispose(); } };
+  return { execute, store, worlds, busy: directory => worlds.busy(directory) || players.busy(directory) || remote.busy(directory) || extensions.busy(directory) || fabricSetup.busy(directory), initialize, dispose() { disposed = true; clearInterval(timer); remote.dispose(); fabricSetup.dispose(); } };
 }
 module.exports = { createWorkflows };
