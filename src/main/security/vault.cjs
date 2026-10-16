@@ -107,6 +107,43 @@ function createVault({ safeStorage, directory }) {
   }
   const service = {
     availability,
+    /** Trusted host enrollment only. Never pass the root service to renderer code. */
+    forOwner(owner, permissions) {
+      if (!ownerValid(owner) || !Array.isArray(permissions) ||
+          permissions.length < 1 || permissions.length > 3 ||
+          new Set(permissions).size !== permissions.length ||
+          permissions.some((value) => !["read", "write", "remove"].includes(value)))
+        fail("INVALID_REQUEST");
+      const allowed = new Set(permissions);
+      const records = [];
+      let sequence = 0;
+      let revoked = false;
+      function invoke(operation, value) {
+        let outcome = "rejected";
+        try {
+          if (revoked || !allowed.has(operation)) fail("NOT_AUTHORIZED");
+          const result = operation === "write"
+            ? service.write(owner, value)
+            : service[operation](value, owner);
+          outcome = "succeeded";
+          return result;
+        } catch {
+          // Neither platform exceptions nor submitted data cross this boundary.
+          fail("VAULT_OPERATION_UNAVAILABLE");
+        } finally {
+          records.push(Object.freeze({ sequence: ++sequence, operation, outcome }));
+          if (records.length > 256) records.shift();
+        }
+      }
+      return Object.freeze({
+        availability,
+        read: (reference) => invoke("read", reference),
+        write: (secret) => invoke("write", secret),
+        remove: (reference) => invoke("remove", reference),
+        revoke: () => { revoked = true; },
+        records: () => Object.freeze(records.map((record) => Object.freeze({ ...record }))),
+      });
+    },
     write(owner, secret) {
       ready();
       if (

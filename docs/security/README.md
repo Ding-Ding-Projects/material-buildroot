@@ -1,5 +1,7 @@
 # Security boundaries
 
+- [Host vault ownership and privilege boundaries](vault-boundaries.md)
+
 - [Serialized operation requests](operation-requests.md)
 - [Durable settings broker admission](broker-admission.md)
 - [Scheduled-preference core and host service](scheduled-settings.md)

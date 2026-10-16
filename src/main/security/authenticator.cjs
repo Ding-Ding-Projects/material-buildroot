@@ -71,13 +71,17 @@ function createAuthenticator({ vault, now = Date.now }) {
   return {
     async enroll({ id, secret }) {
       decodeBase32(secret);
-      const reference = await vault.write(id, secret);
+      const reference = typeof vault.forOwner === "function"
+        ? await vault.forOwner(id, ["write"]).write(secret)
+        : await vault.write(id, secret);
       if (typeof reference !== "string" || !reference)
         throw Error("Invalid vault reference");
       return { id, secretReference: reference };
     },
     async verify(record, code) {
-      const secret = await vault.read(record.secretReference);
+      const secret = typeof vault.forOwner === "function"
+        ? await vault.forOwner(record.id, ["read"]).read(record.secretReference)
+        : await vault.read(record.secretReference, record.id);
       return verifyTotp(secret, code, { time: now() });
     },
   };
