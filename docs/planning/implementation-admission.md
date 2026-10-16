@@ -18,6 +18,10 @@ The existing validator, scripts/evidence/admit-implementation.cjs, validates pha
 
 The validator cannot establish that a command executed, that a build hash corresponds to an executable, or that captures demonstrate requested behavior. Synthetic fixtures remain validator checks, never application evidence. Windows acceptance remains unverified. Planning forms, empty adapters, documentation and registry entries never establish build execution, conversion or authenticated companion delivery.
 
-## Mapping inventory status
+## Complete record processing and remaining admission
 
-This pass maps 45 of 436 surface records (A: 14, D: 16, C: 4, R: 11). The remaining 391 records are uninspected/pending, not known missing. A shared file binding names only the bounded behavior described in that record, never full implementation or independent surface parity. PH01-T02-C02 remains incomplete until the remaining source mapping and independent admission are finished. No test execution, review, audit, static analysis or capture was performed.
+All 109 identities and 436 surface records have now been processed against the existing feature-specific source records under docs/evidence/tasks/feature-delivery/. Each surface names its historical article, original source revision, reported historical status and existing referenced files with current-byte hashes. Historical repeated references stay explicitly qualified; they are not automatically copied into admitted production consumers. No historical gap is relabelled as a current absence finding.
+
+The inventory contains 45 bounded current mappings (A: 14, D: 16, C: 4, R: 11), 109 records with historical candidates awaiting current admission, 94 historical gap records awaiting current binding, 187 outside-catalogue runtime records and 1 conditional/inapplicable records retaining ledger scope. Zero records remain unprocessed against the historical inventory. This is not exhaustive current consumer discovery: all records still require independent admission, and historical candidates require current feature/surface tracing.
+
+The historical record revision is e722cf1b91ccc46465eb449df4abd84d9d6df2a1. Current binding bytes come from baseline cb88af0c006b62f5ab300630d4093f63ec8714d7. Later implemented behavior can supersede historical gaps, so neither historical status nor a current file hash proves semantic currency. PH01-T02-C02 remains incomplete. No test execution, review, audit, static analysis or capture was performed during this authoring pass.
