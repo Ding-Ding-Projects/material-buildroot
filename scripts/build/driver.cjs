@@ -195,7 +195,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',complete:false}, nativeBroker = {status:'not-produced',runtimeVerified:false};
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',complete:false}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null;
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -241,7 +241,21 @@ async function main() {
       const brokerHash=sha256(fs.readFileSync(nonempty(brokerOutput,'material-file-broker.exe')));
       if(brokerManifest.schemaVersion!==1||brokerManifest.file!=='material-file-broker.exe'||brokerManifest.sha256!==brokerHash||brokerManifest.mechanism!=='appcontainer-handle-job'||brokerManifest.runtimeVerified!==false) throw Error('Compiled native broker manifest does not match the produced executable.');
       nativeBroker={status:'compiled',sha256:brokerHash,mechanism:brokerManifest.mechanism,toolchain,runtimeVerified:false};
-      const configuration = {...JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build,extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']}]};
+      const helperOutput=contained(root,`.cache/squirrel-writezip/${generation}`);
+      execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(root,'scripts/build/squirrel-writezip.ps1'),'-OutputDirectory',helperOutput]);
+      const helperManifest=JSON.parse(fs.readFileSync(nonempty(helperOutput,'helper-manifest.json'),'utf8'));
+      if(helperManifest.architecture!=='x64'||helperManifest.source!=='eef37460aef77b2f9de8cd2237c1e55b344a6554'||helperManifest.sha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.exe')))) throw Error('Genuine x64 Squirrel helper identity is inconsistent.');
+      const vendor=path.join(staging,'squirrel-vendor');
+      fs.cpSync(path.join(path.dirname(require.resolve('electron-winstaller/package.json')),'vendor'),vendor,{recursive:true});
+      // These are the same immutable vendor coordinates used by the pinned target.
+      const pinnedVendor=await require('app-builder-lib/out/binDownload').getBinFromUrl('squirrel.windows@1.0.0','squirrel.windows-2.0.1-patched.7z','76851f0c192eaf9bc6f8f3eecdfe325857ebe70d7833ec62ed846a1acd50c846');
+      fs.cpSync(path.join(pinnedVendor,'electron-winstaller/vendor'),vendor,{recursive:true});
+      fs.copyFileSync(path.join(helperOutput,'WriteZipToSetup.exe'),path.join(vendor,'WriteZipToSetup.exe'));
+      genuineUpdater=path.join(vendor,'Squirrel.exe');
+      nonempty(vendor,'Squirrel.exe');nonempty(vendor,'Setup.exe');
+      squirrelHelper={source:helperManifest.source,architecture:'x64',sha256:helperManifest.sha256,genuineUpdaterSha256:sha256(fs.readFileSync(genuineUpdater)),runtimeVerified:false};
+      const baseConfiguration=JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build;
+      const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']}]};
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
       command.push(`--config=${configurationPath}`);
@@ -264,6 +278,7 @@ async function main() {
       if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/material-file-broker.exe')))!==nativeBroker.sha256) throw Error('Packaged native broker differs from its compiled executable.');
       const bundledBroker=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/broker-manifest.json'),'utf8'));
       if(bundledBroker.sha256!==nativeBroker.sha256||bundledBroker.runtimeVerified!==false) throw Error('Packaged native broker manifest differs from its compiled identity.');
+      setupPayload=await require('./squirrel-setup.cjs').verifySetupPayload(nonempty(output,'squirrel-windows/Setup.exe'),{packageFile:nonempty(output,`squirrel-windows/MaterialBuildroot-${packageVersion}-full.nupkg`),packageName:`MaterialBuildroot-${packageVersion}-full.nupkg`,updateFile:genuineUpdater});
     }
   }
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
@@ -289,7 +304,7 @@ async function main() {
     }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupPayload, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);
