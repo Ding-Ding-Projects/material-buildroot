@@ -1,5 +1,7 @@
 # Workspace history and scoped exports
 
+[香港粵語](workspace-history.zh-HK.md)
+
 The workspace backup controls in Settings record applied project plans, their notes,
 the workspace theme, and setup progress. They do not snapshot source checkouts,
 build output or protected credential stores. Native project catalogue/options history

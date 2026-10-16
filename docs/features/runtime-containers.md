@@ -1,5 +1,7 @@
 # Managed container runtime
 
+[香港粵語](runtime-containers.zh-HK.md)
+
 The runtime workspace discovers the Docker Linux engine without starting it or installing software. Discovery distinguishes a missing client, unavailable daemon, denied access and a non-Linux engine. It lists locally installed image references with SHA-256 digests. Tags alone are not executable build inputs, and preparation never pulls an image.
 
 ## Prepare and build

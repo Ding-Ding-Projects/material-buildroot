@@ -5,3 +5,12 @@ Start with the [current workspace guide](modern-workspace.md) or [香港粵語](
 See [Defconfig workflows](defconfig-workflows.md) for source-aware selection and minimal-save provenance.
 
 See [Server management](minecraft-manager.md) for typed targets, acquisition and documented provisioning limits.
+
+## Configuration references
+
+- [Component domains and source trust](configuration-domains.md)
+- [Typed controls and undo](typed-configuration-controls.md) · [香港粵語](typed-configuration-controls.zh-HK.md)
+- [Defconfig workflows](defconfig-workflows.md) · [香港粵語](defconfig-workflows.zh-HK.md)
+- [Kconfig evaluation and runtime transport](kconfig-semantics.md)
+
+The [task-oriented catalog](../features/README.md) connects project, build, output and preference workflows. Desktop operations use IPC, not HTTP; no Postman collection applies to this category. Source translation and runtime acceptance remain separate.

@@ -1,5 +1,7 @@
 # SDK and toolchain export
 
+[香港粵語](sdk-export.zh-HK.md)
+
 The output inspector contains an SDK export consumer. First produce Buildroot's
 `sdk` target using the named-target queue, then browse the adopted output directory
 and select the generated `.tar.gz` archive. Inspection returns a two-minute preview,

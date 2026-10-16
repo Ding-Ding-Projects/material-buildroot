@@ -1,5 +1,7 @@
 # Exact-destination clean confirmation
 
+[香港粵語](destructive-confirmation.zh-HK.md)
+
 The build workspace exposes the fixed Buildroot `clean` target. Selecting it does
 not run it. Submitting requests a short-lived host challenge for the exact adopted
 output directory and the complete build request, including runtime and resource
