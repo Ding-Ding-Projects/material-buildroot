@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "catalogue": "docs/planning/feature-coverage.md",
-  "catalogueSha256": "3c9c552e5bf9c144efabaa95c82a7cf066f64ac0a40beab2e89ffacad8cc4031",
+  "catalogueSha256": "7cf1e2512352546d35e6da226ab4cb5f7475545c1be1b8e1adbe77e6192e2af9",
   "baselineRevision": "9c8fe848ff7abb1c11fd3d5014fc0ebfa8c60f1a",
   "status": "admission-only-pending-detailed-reconciliation",
   "identities": [
@@ -38421,7 +38421,7 @@
       "subrequirements": [
         {
           "id": "landing-site-REQ-01",
-          "text": "Every public repository application ships a Material Design 3 GitHub Pages; private repositories are exempt from mandatory creation.",
+          "text": "Every public repository application ships a Material Design 3 documentation website. Private repositories instead deliver their reviewed documentation as a dedicated offline package under the private-delivery condition.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -38433,7 +38433,7 @@
         },
         {
           "id": "landing-site-REQ-03",
-          "text": "It strictly carries every user-facing feature in this catalogue as a GitHub Pages equivalent operating on its own content and per-visitor local storage, guarded by a hand-written enumeration that fails the docs build when one is missing, and it is as customizable and tabbed as the application.",
+          "text": "Every documentation visitor surface carries each feature whose own contract applies to that surface, with independent visitor-owned state, customization and navigation; an explicitly application-only identity is not silently reintroduced as a website requirement.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -39157,7 +39157,7 @@
         },
         {
           "id": "installer-download-button-REQ-02",
-          "text": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL.",
+          "text": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL. An applicable private documentation package uses only its verified private release asset.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -41850,7 +41850,7 @@
       "subrequirements": [
         {
           "id": "homepage-link-REQ-01",
-          "text": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home-page URL; private repositories are exempt from this mandatory field, and optional private GitHub Pages sites remain allowed.",
+          "text": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home URL. Private documentation packages require no hosted homepage and remain linked to a verified private release inside their private boundary.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -54614,7 +54614,7 @@
         },
         {
           "id": "wiki-site-sync-REQ-02",
-          "text": "Public repository applications create the mandatory GitHub Pages when the host supports it; private repositories are exempt from mandatory GitHub Pages creation and may retain an optional private surface.",
+          "text": "Public repository applications maintain hosted documentation. Private repositories maintain the same complete reviewed documentation as a dedicated offline package rather than treating privacy as an exemption from documentation delivery.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -58435,13 +58435,801 @@
           "Independently review detailed applicability and action/state/capability inventories."
         ]
       }
+    },
+    {
+      "id": "vocabulary-drop-apply",
+      "requirement": "Whole-window local personal-wording JSON drop with atomic immediate application, accessible nonblocking celebration and retained Settings fallback",
+      "catalogueSurface": "A+C",
+      "disposition": "applicable",
+      "reason": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity.",
+      "reconciliation": "pending-detailed-review",
+      "surfaces": {
+        "A": {
+          "workId": "PH01-T02-vocabulary-drop-apply-A",
+          "applicability": "required",
+          "reason": "Independent applicable application-surface delivery; implementation and runtime evidence remain unadmitted.",
+          "state": "unimplemented",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "planned-unimplemented",
+            "consumer": {
+              "id": "A.vocabulary-drop-apply.controller",
+              "path": "src/renderer/features/vocabulary-drop-apply",
+              "operation": "A.vocabulary-drop-apply.apply",
+              "authority": "validated typed IPC and bounded capabilities",
+              "behavior": "Whole-window local personal-wording JSON drop with atomic immediate application, accessible nonblocking celebration and retained Settings fallback",
+              "requestContract": "docs/planning/operation-request.schema.json"
+            },
+            "articles": [
+              {
+                "id": "article.A.vocabulary-drop-apply.en",
+                "path": "docs/features/vocabulary-drop-apply/A.en.md",
+                "state": "planned"
+              },
+              {
+                "id": "article.A.vocabulary-drop-apply.zh-HK",
+                "path": "docs/features/vocabulary-drop-apply/A.zh-HK.md",
+                "state": "planned"
+              }
+            ],
+            "copy": [
+              {
+                "id": "copy.A.vocabulary-drop-apply.en",
+                "path": "src/renderer/features/vocabulary-drop-apply/locales/en.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.A.vocabulary-drop-apply.zh-HK",
+                "path": "src/renderer/features/vocabulary-drop-apply/locales/zh-HK.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.A.vocabulary-drop-apply.bilingual",
+                "path": "src/renderer/features/vocabulary-drop-apply/locales/bilingual.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              }
+            ],
+            "persistence": {
+              "id": "state.A.vocabulary-drop-apply",
+              "store": "application-data/features/vocabulary-drop-apply.json",
+              "version": 1,
+              "states": [
+                "initial",
+                "changed",
+                "reload",
+                "reset",
+                "corrupt",
+                "migration"
+              ],
+              "sensitiveData": "Validated personal-wording cache only; exclude payload, source metadata and mappings from exports/history/logs.",
+              "state": "planned-review-per-property"
+            },
+            "tests": [
+              {
+                "id": "test.A.vocabulary-drop-apply.interaction",
+                "path": "tests/features/vocabulary-drop-apply/A.interaction.test.cjs"
+              },
+              {
+                "id": "test.A.vocabulary-drop-apply.negative",
+                "path": "tests/features/vocabulary-drop-apply/A.negative.test.cjs"
+              }
+            ],
+            "runtime": {
+              "id": "runtime.A.vocabulary-drop-apply",
+              "tupleIdTemplate": "A.vocabulary-drop-apply.{state}.{language}.{theme}.{scale}.{viewport}",
+              "states": [
+                "empty",
+                "valid-drop",
+                "invalid-drop",
+                "non-json",
+                "oversized",
+                "settings-fallback",
+                "celebration",
+                "reduced-motion",
+                "announcement",
+                "shared-restricted",
+                "reload",
+                "clear"
+              ],
+              "languages": [
+                "en",
+                "zh-HK",
+                "bilingual"
+              ],
+              "themes": [
+                "light",
+                "dark"
+              ],
+              "scales": [
+                100,
+                125,
+                150,
+                200
+              ],
+              "viewports": [
+                "minimum-960x640",
+                "normal-1440x960"
+              ],
+              "sourceRevision": null,
+              "builtHash": null,
+              "capture": {
+                "id": "capture.A.vocabulary-drop-apply",
+                "path": "docs/evidence/features/vocabulary-drop-apply/A/{tupleId}.png",
+                "state": "pending-genuine-capture"
+              },
+              "state": "pending"
+            },
+            "requirementIds": [
+              "vocabulary-drop-apply-REQ-01",
+              "vocabulary-drop-apply-REQ-02",
+              "vocabulary-drop-apply-REQ-03",
+              "vocabulary-drop-apply-REQ-04",
+              "vocabulary-drop-apply-REQ-05",
+              "vocabulary-drop-apply-REQ-06",
+              "vocabulary-drop-apply-REQ-07",
+              "vocabulary-drop-apply-REQ-08"
+            ]
+          }
+        },
+        "D": {
+          "workId": "PH01-T02-vocabulary-drop-apply-D",
+          "applicability": "outside-catalogue-scope",
+          "reason": "The contract explicitly excludes documentation visitor surfaces from drop-to-apply. The existing Settings upload identity remains independently required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "The contract explicitly excludes documentation visitor surfaces from drop-to-apply. The existing Settings upload identity remains independently required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "The contract explicitly excludes documentation visitor surfaces from drop-to-apply. The existing Settings upload identity remains independently required."
+            },
+            "requirementIds": [
+              "vocabulary-drop-apply-REQ-01",
+              "vocabulary-drop-apply-REQ-02",
+              "vocabulary-drop-apply-REQ-03",
+              "vocabulary-drop-apply-REQ-04",
+              "vocabulary-drop-apply-REQ-05",
+              "vocabulary-drop-apply-REQ-06",
+              "vocabulary-drop-apply-REQ-07",
+              "vocabulary-drop-apply-REQ-08"
+            ]
+          }
+        },
+        "C": {
+          "workId": "PH01-T02-vocabulary-drop-apply-C",
+          "applicability": "required",
+          "reason": "Independent applicable application-surface delivery; implementation and runtime evidence remain unadmitted.",
+          "state": "unimplemented",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "planned-unimplemented",
+            "consumer": {
+              "id": "C.vocabulary-drop-apply.controller",
+              "path": "src/companion/features/vocabulary-drop-apply",
+              "operation": "C.vocabulary-drop-apply.apply",
+              "authority": "paired scoped broker capability; revocation applies",
+              "behavior": "Whole-window local personal-wording JSON drop with atomic immediate application, accessible nonblocking celebration and retained Settings fallback",
+              "requestContract": "docs/planning/operation-request.schema.json"
+            },
+            "articles": [
+              {
+                "id": "article.C.vocabulary-drop-apply.en",
+                "path": "docs/features/vocabulary-drop-apply/C.en.md",
+                "state": "planned"
+              },
+              {
+                "id": "article.C.vocabulary-drop-apply.zh-HK",
+                "path": "docs/features/vocabulary-drop-apply/C.zh-HK.md",
+                "state": "planned"
+              }
+            ],
+            "copy": [
+              {
+                "id": "copy.C.vocabulary-drop-apply.en",
+                "path": "src/companion/features/vocabulary-drop-apply/locales/en.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.C.vocabulary-drop-apply.zh-HK",
+                "path": "src/companion/features/vocabulary-drop-apply/locales/zh-HK.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              },
+              {
+                "id": "copy.C.vocabulary-drop-apply.bilingual",
+                "path": "src/companion/features/vocabulary-drop-apply/locales/bilingual.json",
+                "keys": [
+                  "title",
+                  "help",
+                  "empty",
+                  "loading",
+                  "ready",
+                  "invalid",
+                  "unavailable",
+                  "failed",
+                  "cancelled",
+                  "recovery"
+                ],
+                "humorLevels": [
+                  1,
+                  5
+                ],
+                "state": "planned"
+              }
+            ],
+            "persistence": {
+              "id": "state.C.vocabulary-drop-apply",
+              "store": "browser-local:C:feature:vocabulary-drop-apply",
+              "version": 1,
+              "states": [
+                "initial",
+                "changed",
+                "reload",
+                "reset",
+                "corrupt",
+                "migration"
+              ],
+              "sensitiveData": "Validated personal-wording cache only; exclude payload, source metadata and mappings from exports/history/logs.",
+              "state": "planned-review-per-property"
+            },
+            "tests": [
+              {
+                "id": "test.C.vocabulary-drop-apply.interaction",
+                "path": "tests/features/vocabulary-drop-apply/C.interaction.test.cjs"
+              },
+              {
+                "id": "test.C.vocabulary-drop-apply.negative",
+                "path": "tests/features/vocabulary-drop-apply/C.negative.test.cjs"
+              }
+            ],
+            "runtime": {
+              "id": "runtime.C.vocabulary-drop-apply",
+              "tupleIdTemplate": "C.vocabulary-drop-apply.{state}.{language}.{theme}.{scale}.{viewport}",
+              "states": [
+                "empty",
+                "valid-drop",
+                "invalid-drop",
+                "non-json",
+                "oversized",
+                "settings-fallback",
+                "celebration",
+                "reduced-motion",
+                "announcement",
+                "shared-restricted",
+                "reload",
+                "clear"
+              ],
+              "languages": [
+                "en",
+                "zh-HK",
+                "bilingual"
+              ],
+              "themes": [
+                "light",
+                "dark"
+              ],
+              "scales": [
+                100,
+                125,
+                150,
+                200
+              ],
+              "viewports": [
+                "minimum-320px",
+                "normal-1280px"
+              ],
+              "sourceRevision": null,
+              "builtHash": null,
+              "capture": {
+                "id": "capture.C.vocabulary-drop-apply",
+                "path": "docs/evidence/features/vocabulary-drop-apply/C/{tupleId}.png",
+                "state": "pending-genuine-capture"
+              },
+              "state": "pending"
+            },
+            "requirementIds": [
+              "vocabulary-drop-apply-REQ-01",
+              "vocabulary-drop-apply-REQ-02",
+              "vocabulary-drop-apply-REQ-03",
+              "vocabulary-drop-apply-REQ-04",
+              "vocabulary-drop-apply-REQ-05",
+              "vocabulary-drop-apply-REQ-06",
+              "vocabulary-drop-apply-REQ-07",
+              "vocabulary-drop-apply-REQ-08"
+            ]
+          }
+        },
+        "R": {
+          "workId": "PH01-T02-vocabulary-drop-apply-R",
+          "applicability": "outside-catalogue-scope",
+          "reason": "This identity concerns application interaction, not repository operations.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "This identity concerns application interaction, not repository operations."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "This identity concerns application interaction, not repository operations."
+            },
+            "requirementIds": [
+              "vocabulary-drop-apply-REQ-01",
+              "vocabulary-drop-apply-REQ-02",
+              "vocabulary-drop-apply-REQ-03",
+              "vocabulary-drop-apply-REQ-04",
+              "vocabulary-drop-apply-REQ-05",
+              "vocabulary-drop-apply-REQ-06",
+              "vocabulary-drop-apply-REQ-07",
+              "vocabulary-drop-apply-REQ-08"
+            ]
+          }
+        }
+      },
+      "subrequirements": [
+        {
+          "id": "vocabulary-drop-apply-REQ-01",
+          "text": "Accept a personal-wording JSON file dropped anywhere within each application-owned window or authenticated companion surface, through the identical bounded validator used by the retained Settings upload; this identity expressly excludes the public documentation visitor surface.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-02",
+          "text": "Apply a fully valid drop atomically and immediately without restart, persist only its validated local private cache, and preserve the Settings upload as an independently working fallback.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-03",
+          "text": "Reject malformed, oversized and non-JSON drops with a clear localized message and no partial application, persistence change or loss of the previously valid wording.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-04",
+          "text": "After successful application, show a nonblocking full-window celebration whose headline enters, holds for approximately three seconds and exits without trapping focus or intercepting input.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-05",
+          "text": "Derive the sole displayed headline from the imported file mapping for the ordinary phrase private vocabulary, or use the localized neutral Personal wording applied fallback; never bundle a private mapping or display other payload content.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-06",
+          "text": "Honor reduced motion with a fade or static notice for the same hold interval and announce the result through a polite screen-reader live region, preserving keyboard focus and continued work.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-07",
+          "text": "Retain shared-mode suppression, local-only/no-network handling, strict exclusion of payload and source metadata from logs, exports, history, telemetry and prompts, cache revalidation, and original wording on clear or reset.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-08",
+          "text": "Independently verify valid and invalid drops, the Settings fallback, reduced motion, polite announcement, restart persistence and clear/reset in each actual built applicable surface; omission regressions and genuine source-bound evidence remain required.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        }
+      ],
+      "canonicalReview": {
+        "state": "pending-full-section-review",
+        "catalogueEntryMatched": true,
+        "subrequirementSource": "sanitized-catalogue-expansion",
+        "remaining": [
+          "Reconcile complete linked canonical sections and referenced contracts.",
+          "Independently review detailed applicability and action/state/capability inventories."
+        ]
+      }
+    },
+    {
+      "id": "private-documentation-package",
+      "requirement": "Conditional private-repository offline documentation package; not applicable to this public product",
+      "catalogueSurface": "Private documentation only",
+      "disposition": "not-applicable",
+      "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+      "reconciliation": "pending-detailed-review",
+      "surfaces": {
+        "A": {
+          "workId": "PH01-T02-private-documentation-package-A",
+          "applicability": "outside-catalogue-scope",
+          "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "requirementIds": [
+              "private-documentation-package-REQ-01",
+              "private-documentation-package-REQ-02",
+              "private-documentation-package-REQ-03",
+              "private-documentation-package-REQ-04",
+              "private-documentation-package-REQ-05",
+              "private-documentation-package-REQ-06"
+            ]
+          }
+        },
+        "D": {
+          "workId": "PH01-T02-private-documentation-package-D",
+          "applicability": "outside-catalogue-scope",
+          "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "requirementIds": [
+              "private-documentation-package-REQ-01",
+              "private-documentation-package-REQ-02",
+              "private-documentation-package-REQ-03",
+              "private-documentation-package-REQ-04",
+              "private-documentation-package-REQ-05",
+              "private-documentation-package-REQ-06"
+            ]
+          }
+        },
+        "C": {
+          "workId": "PH01-T02-private-documentation-package-C",
+          "applicability": "outside-catalogue-scope",
+          "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "requirementIds": [
+              "private-documentation-package-REQ-01",
+              "private-documentation-package-REQ-02",
+              "private-documentation-package-REQ-03",
+              "private-documentation-package-REQ-04",
+              "private-documentation-package-REQ-05",
+              "private-documentation-package-REQ-06"
+            ]
+          }
+        },
+        "R": {
+          "workId": "PH01-T02-private-documentation-package-R",
+          "applicability": "outside-catalogue-scope",
+          "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+          "state": "not-applicable",
+          "sourceRevision": null,
+          "builtHash": null,
+          "implementationConsumers": [],
+          "articles": [],
+          "localizedCopy": [],
+          "persistence": {
+            "state": "pending",
+            "paths": []
+          },
+          "focusedTests": [],
+          "negativeTests": [],
+          "proof": {
+            "source": null,
+            "runtime": null,
+            "capture": null,
+            "parity": null
+          },
+          "plannedAdmission": {
+            "state": "excluded-pending-canonical-review",
+            "consumer": null,
+            "articles": [],
+            "copy": [],
+            "persistence": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "tests": [],
+            "runtime": {
+              "state": "not-applicable",
+              "reason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+            },
+            "requirementIds": [
+              "private-documentation-package-REQ-01",
+              "private-documentation-package-REQ-02",
+              "private-documentation-package-REQ-03",
+              "private-documentation-package-REQ-04",
+              "private-documentation-package-REQ-05",
+              "private-documentation-package-REQ-06"
+            ]
+          }
+        }
+      },
+      "subrequirements": [
+        {
+          "id": "private-documentation-package-REQ-01",
+          "text": "Apply packaged documentation delivery only to private repositories; this public product retains hosted documentation and its exact verified repository homepage. Record the private condition explicitly without creating a current runtime consumer.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "private-documentation-package-REQ-02",
+          "text": "For an applicable private product, bundle the complete home/download presentation, documentation articles, wiki content, category indexes and working internal routes offline, with all assets local and no CDN or network requirement.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "private-documentation-package-REQ-03",
+          "text": "Limit the delivery exception to a dedicated packaged documentation viewer carrying reviewed static content; it does not authorize changing the primary application runtime or a public repository delivery format.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "private-documentation-package-REQ-04",
+          "text": "When the private condition is active, build and package through the existing root build.bat and build-installer.bat, use genuine Squirrel.Windows conventions, and publish a normal verified documentation-package release asset alongside the primary application.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "private-documentation-package-REQ-05",
+          "text": "Verify an applicable built package through real installation or launch on the approved hidden desktop, exercise home/article/wiki routes, check complete inventories and no-network behavior, and retain genuine source/build-bound captures and release readback.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "private-documentation-package-REQ-06",
+          "text": "Keep private packaged content current with project changes and link its verified private release within the private boundary; no hosted homepage is required and no private source, content, credentials or operational details may be published to evade hosting limits.",
+          "state": "planned",
+          "review": "canonical-detail-review-pending"
+        }
+      ],
+      "canonicalReview": {
+        "state": "pending-full-section-review",
+        "catalogueEntryMatched": true,
+        "subrequirementSource": "sanitized-catalogue-expansion",
+        "remaining": [
+          "Reconcile complete linked canonical sections and referenced contracts.",
+          "Independently review detailed applicability and action/state/capability inventories."
+        ]
+      }
     }
   ],
   "contractExpansion": {
     "state": "planned-catalogue-detail-expansion",
-    "identities": 105,
-    "subrequirements": 386,
-    "surfaces": 420,
+    "identities": 109,
+    "subrequirements": 412,
+    "surfaces": 436,
     "fullCanonicalReconciliation": "pending",
     "plannedPathsAreNotEvidence": true
   }

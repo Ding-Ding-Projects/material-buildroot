@@ -1,6 +1,6 @@
 # Canonical section reconciliation
 
-The [reconciliation index](canonical-reconciliation.json) maps all 107 stable public identities and all 398 existing planned requirement IDs to their canonical obligations and concrete missing details. It preserves the 428 surface records, existing work IDs, conditional dispositions and narrower canonical/owner-memory/product-inapplicable reasons. The feature ledger is unchanged. These are source and scope mappings, not independently reviewed canonical acceptance or product delivery.
+The [reconciliation index](canonical-reconciliation.json) maps all 109 stable public identities and all 412 existing planned requirement IDs to their canonical obligations and concrete missing details. It preserves the 436 surface records, existing work IDs, conditional dispositions and narrower canonical/owner-memory/product-inapplicable reasons. The feature ledger is unchanged. These are source and scope mappings, not independently reviewed canonical acceptance or product delivery.
 
 ## Source bindings and privacy
 
@@ -10,7 +10,7 @@ A reviewer with the canonical source resolves each catalogue link privately. Non
 
 ## Direct requirement mappings
 
-All 107 identities now have direct feature-clause mappings. Each of the 398 existing requirement IDs retains its original public obligation and an additional specific missing-detail or evidence field. The first seven identities were mapped in [batch 01](../evidence/tasks/PH01-canonical-batch-01.md); subsequent stable batches cover language/settings, appearance/motion, controls/navigation/locks, tools/website, build/release and repository records. See [the consolidated mapping record](../evidence/tasks/PH01-canonical-batch-02.md).
+All 109 identities now have direct feature-clause mappings. Each of the 412 existing requirement IDs retains its original public obligation and an additional specific missing-detail or evidence field. The first seven identities were mapped in [batch 01](../evidence/tasks/PH01-canonical-batch-01.md); subsequent stable batches cover language/settings, appearance/motion, controls/navigation/locks, tools/website, build/release and repository records. See [the consolidated mapping record](../evidence/tasks/PH01-canonical-batch-02.md).
 
 The mapping explicitly includes late per-language voice enumeration; scheduled-setting timezone/DST, precedence and stale-response guards; shared mode/watch/rename/credential behavior; full per-element layer/state/motion consumers; advanced per-field regex workbenches; six lock policies and all input-route interception; real version-bound tool and host adapters; exhaustive model/tag discovery and conservative measured fit; offline packaged dependency discovery; and exact installer/release source bindings. Existing summary paragraphs are never treated as complete implementation or proof.
 
@@ -39,4 +39,10 @@ The canonical offline-documentation and external-editor sections describe instal
 
 The direct mappings and dependency graph are complete as planning records. Transitive referenced material is not exhaustively reconciled: detailed version-specific source/protocol research, full control/action/state/capability inventories, actual consumer/test/article/copy/persistence bindings and independent review remain open. The graph identifies obligations and conflicts; it does not mechanically prove they have been implemented or fully audited.
 
-No identity was newly marked canonically accepted, no roadmap parent was completed and no product surface or native proof was promoted. Complete source/consumer reconciliation, independent review and genuine source/build-bound runtime evidence are still required before PH01-T01-C02 or any full feature acceptance can close. Windows/native testing remains deferred under the current task instruction; account-dependent evidence remains unavailable until real authorized access exists.
+No identity was newly marked canonically accepted, no roadmap parent was completed and no product surface or native proof was promoted. Complete source/consumer reconciliation, independent review and genuine source/build-bound runtime evidence are still required before PH01-T01-C02 or any full feature acceptance can close. Native acceptance remains separate from this planning delta; inherited receipts are not upgraded by this inventory update, and account-dependent evidence still requires actual authorized access.
+
+## 2026-10-16 bounded catalogue delta
+
+The current owner-contract revision is `13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb`. Two new identities and fourteen reviewed child requirements extend the inventory to 109 identities, 436 surface records and 412 requirements. The existing 398 requirement IDs remain stable. Existing source references retain their previously declared revision; the new records and explicit delivery-condition amendments carry their own current binding. Opaque locators identify owner-managed source correspondence without publishing private source paths, headings or identifiers.
+
+`vocabulary-drop-apply` requires A and C, expressly excludes D, and retains the independent Settings upload. `private-documentation-package` is inactive on all four records because the current repository is public; hosted documentation and its exact About homepage remain required. See [the clause and scope review](catalogue-delta-2026-10-16.md). No implementation, runtime, capture or full feature acceptance is established.

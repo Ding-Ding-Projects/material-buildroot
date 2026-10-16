@@ -4,7 +4,7 @@ Status: every production feature below is planned and unverified. This hand-writ
 
 Surfaces: **A** Windows application; **D** public documentation visitor surface; **C** authenticated browser companion; **R** repository/build/release/operating process. A+D+C means separate delivery records and proof for all three surfaces. Shared implementation libraries are permitted; a sibling surface, redirect or shared state claim never substitutes for coverage. See [surface boundaries](surfaces.md). Platform capability limitations need exact documented reasons and tested alternative behavior; they never become silent omissions.
 
-Before implementation, the next session must reread the current owner-managed canonical contracts and reconcile this planning inventory. The [direct contract reconciliation and dependency map](canonical-reconciliation.md) records all 107 identities, their concrete detail gaps and bounded independent review. The canonical contracts control detailed behavior. Public documentation uses neutral identifiers and never includes private vocabulary values or operational machine details.
+Before implementation, the next session must reread the current owner-managed canonical contracts and reconcile this planning inventory. The [direct contract reconciliation and dependency map](canonical-reconciliation.md) records all 109 identities, their concrete detail gaps and bounded independent review. The canonical contracts control detailed behavior. Public documentation uses neutral identifiers and never includes private vocabulary values or operational machine details.
 
 ## Language, voice and personalization
 
@@ -13,6 +13,7 @@ Before implementation, the next session must reread the current owner-managed ca
 | language | Persisted English/Cantonese/bilingual and complete localization | A+D+C |
 | funny-emoji | Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference | A+D+C |
 | personal-vocabulary | Visible local-only bounded JSON upload, atomic validation, replace/clear/corrupt states and leak exclusions | A+D+C |
+| vocabulary-drop-apply | Whole-window local personal-wording JSON drop with atomic immediate application, accessible nonblocking celebration and retained Settings fallback | A+C |
 | school-mode | Shared renamed mode, live propagation, protected exit, complete suppression/restoration | A+D+C |
 | narration | Real per-language voice discovery, serialized speech, rate/pitch, screen-reader coexistence | A+D+C |
 | scheduled-settings | Timezone/DST/precedence/base restoration and protected external sources for settings | A+D+C |
@@ -113,6 +114,7 @@ Before implementation, the next session must reread the current owner-managed ca
 | shared-link-embed | Genuine current safe image and metadata for shared links | D+C+R |
 | homepage-link | Verified GitHub Pages URL stored in repository About homepage | D+C+R |
 | vocabulary-unlock-boundary | Private local language mapping only after the correct authenticated/local opt-in boundary | A+D+C |
+| private-documentation-package | Conditional private-repository offline documentation package; not applicable to this public product | Private documentation only |
 
 ## Status integration
 
@@ -182,4 +184,8 @@ Before implementation, the next session must reread the current owner-managed ca
 
 Every applicable A/D/C row expands into distinct A, D and C records naming implementation paths, detailed/localized articles, copy resources, persistence, focused tests, red-then-green negative checks, exact built interaction receipts and genuine captures. Record unsupported capabilities with their actual limits; never mark a family complete from registry presence.
 
-Application implementation is authorized and underway. The initial PH00 documentation checkpoint is separate from full production A/D/C acceptance; source preservation and an initial site do not establish delivered product releases. See the [phased roadmap](../../ROADMAP.md) for stable task IDs and explicit primary-phase ownership of all 107 identities.
+Application implementation is authorized and underway. The initial PH00 documentation checkpoint is separate from full production A/D/C acceptance; source preservation and an initial site do not establish delivered product releases. See the [phased roadmap](../../ROADMAP.md) for stable task IDs and explicit primary-phase ownership of all 109 identities.
+
+## Current catalogue delta
+
+The owner contract revision `13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb` adds two independently tracked identities. The inventory now contains 109 identities and 436 explicit A/D/C/R records. The 398 existing requirement IDs are retained and 14 reviewed child requirements are added, giving 412. All new records are planned or explicitly inapplicable to this public product; no implementation or runtime acceptance is implied. See [the bounded reconciliation](catalogue-delta-2026-10-16.md).

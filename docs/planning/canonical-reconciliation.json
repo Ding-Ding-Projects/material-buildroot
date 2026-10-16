@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
-  "canonicalCatalogueSha256": "954dbb054a57bad6f70f9351bee8f5171cce7fa41df9def4f1b751418fe48bdf",
-  "publicCatalogueSha256": "3c9c552e5bf9c144efabaa95c82a7cf066f64ac0a40beab2e89ffacad8cc4031",
-  "identityCount": 107,
-  "surfaceRecordCount": 428,
-  "plannedRequirementCount": 398,
+  "canonicalRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+  "canonicalCatalogueSha256": "06c596e8136362f3c60acedec3aa7efcbb6a16c22065b371aae253f107358333",
+  "publicCatalogueSha256": "7cf1e2512352546d35e6da226ab4cb5f7475545c1be1b8e1adbe77e6192e2af9",
+  "identityCount": 109,
+  "surfaceRecordCount": 436,
+  "plannedRequirementCount": 412,
   "referencePolicy": "Exact source document, canonical revision and opaque link locator identify canonical sections without publishing private headings or vocabulary. Non-restricted feature sections also carry content hashes. Restricted private instruction content digests are deliberately omitted. Reference indexing is not independent review, implementation or runtime acceptance.",
   "identities": [
     {
@@ -355,7 +355,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "funny-emoji",
@@ -704,7 +705,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "personal-vocabulary",
@@ -1057,7 +1059,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "school-mode",
@@ -1440,7 +1443,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "narration",
@@ -1775,7 +1779,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "scheduled-settings",
@@ -2124,7 +2129,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "display-name",
@@ -2493,7 +2499,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "adhd-modes",
@@ -2828,7 +2835,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "dim-sum",
@@ -3204,7 +3212,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "dim-sum-photo-source",
@@ -3573,7 +3582,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "material-design",
@@ -3930,7 +3940,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "workflow-navigation",
@@ -4299,7 +4310,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "motion",
@@ -4688,7 +4700,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "appearance-editor",
@@ -5063,7 +5076,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "color-picker",
@@ -5412,7 +5426,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "logo-customization",
@@ -5788,7 +5803,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "overlay-panels",
@@ -6137,7 +6153,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "collapse-filters",
@@ -6465,7 +6482,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "accessibility-sizing",
@@ -6842,7 +6860,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "functional-ui",
@@ -7220,7 +7239,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "tabs",
@@ -7571,7 +7591,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "regex-search",
@@ -7905,7 +7926,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "command-palette",
@@ -8254,7 +8276,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "context-menus",
@@ -8608,7 +8631,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "menu-shortcuts",
@@ -8936,7 +8960,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "rich-controls",
@@ -9287,7 +9312,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "guided-forms",
@@ -9666,7 +9692,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "settings-explanations",
@@ -10031,7 +10058,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "blank-editors",
@@ -10373,7 +10401,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "super-confirmation",
@@ -10736,7 +10765,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "element-locks",
@@ -11113,7 +11143,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "support-tickets",
@@ -11490,7 +11521,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "unlock-ladder",
@@ -11853,7 +11885,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "authenticator",
@@ -12236,7 +12269,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "qr-pairing",
@@ -12599,7 +12633,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "honest-monetization",
@@ -12948,7 +12983,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "local-history",
@@ -13317,7 +13353,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "exports",
@@ -13665,7 +13702,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "bulk-actions",
@@ -13994,7 +14032,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "changelog",
@@ -14358,7 +14397,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "offline-docs",
@@ -14713,7 +14753,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "rendered-provider-text",
@@ -15083,7 +15124,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "notifications",
@@ -15438,7 +15480,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "file-converter",
@@ -15817,7 +15860,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "minecraft-server-manager",
@@ -16236,7 +16280,8 @@
           "reviewedObligation": "Each descriptor binds source/version/type/default/units/bounds/live-restart/help/permission/persistence/consumer; four target identities and source/install/runtime/UI verdicts are independent.",
           "documentSha256": "244c78dfc93bc3a2e8eb9fc45ed423e2384e71ac79839cfd71256cefde743d40"
         }
-      ]
+      ],
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "ollama-suite",
@@ -16637,7 +16682,8 @@
           "reviewedObligation": "Only the selected runtime has the explicit fallback acquisition exception; per-product pinned/versioned bytes, complete member checks, preserved previous installation and separately owned start/health/stop/descendant settlement remain required.",
           "documentSha256": "aa9fb15804c120d44da3a5772d04424615fd1b5e73845de997510a27b3299d80"
         }
-      ]
+      ],
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "external-editor",
@@ -16980,7 +17026,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "download-handoff",
@@ -17323,7 +17370,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "forge-publishing",
@@ -17685,7 +17733,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "progress-recovery",
@@ -18053,7 +18102,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "completeness-parity",
@@ -18421,7 +18471,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "front-provenance",
@@ -18764,7 +18815,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "product-evidence",
@@ -19144,7 +19196,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "screen-recording",
@@ -19492,7 +19545,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "design-reference-parity",
@@ -19854,7 +19908,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "design-folder",
@@ -20006,7 +20061,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "layout-matrix",
@@ -20368,7 +20424,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "public-screenshot-gallery",
@@ -20528,7 +20585,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "landing-site",
@@ -20559,9 +20617,9 @@
         "requirements": [
           {
             "requirementId": "landing-site-REQ-01",
-            "canonicalObligation": "Every public repository application ships a Material Design 3 GitHub Pages; private repositories are exempt from mandatory creation.",
-            "missingDetailOrEvidence": "Public product requires actual GitHub Pages home with exact About URL readback; private-source exemption never authorizes public private content.",
-            "publicRequirementText": "Every public repository application ships a Material Design 3 GitHub Pages; private repositories are exempt from mandatory creation."
+            "canonicalObligation": "Every public repository application ships a Material Design 3 documentation website. Private repositories instead deliver their reviewed documentation as a dedicated offline package under the private-delivery condition.",
+            "missingDetailOrEvidence": "Retain the public hosted delivery boundary; private package delivery is conditional and inactive for this public source.",
+            "publicRequirementText": "Every public repository application ships a Material Design 3 documentation website. Private repositories instead deliver their reviewed documentation as a dedicated offline package under the private-delivery condition."
           },
           {
             "requirementId": "landing-site-REQ-02",
@@ -20571,9 +20629,9 @@
           },
           {
             "requirementId": "landing-site-REQ-03",
-            "canonicalObligation": "It strictly carries every user-facing feature in this catalogue as a GitHub Pages equivalent operating on its own content and per-visitor local storage, guarded by a hand-written enumeration that fails the docs build when one is missing, and it is as customizable and tabbed as the application.",
-            "missingDetailOrEvidence": "All required visitor controls operate on own visitor state and closest truthful documented browser equivalents; no sibling-feature delegation.",
-            "publicRequirementText": "It strictly carries every user-facing feature in this catalogue as a GitHub Pages equivalent operating on its own content and per-visitor local storage, guarded by a hand-written enumeration that fails the docs build when one is missing, and it is as customizable and tabbed as the application."
+            "canonicalObligation": "Every documentation visitor surface carries each feature whose own contract applies to that surface, with independent visitor-owned state, customization and navigation; an explicitly application-only identity is not silently reintroduced as a website requirement.",
+            "missingDetailOrEvidence": "Preserve the expressly excluded documentation surface for drop-to-apply while keeping its independent Settings upload obligation.",
+            "publicRequirementText": "Every documentation visitor surface carries each feature whose own contract applies to that surface, with independent visitor-owned state, customization and navigation; an explicitly application-only identity is not silently reintroduced as a website requirement."
           },
           {
             "requirementId": "landing-site-REQ-04",
@@ -20923,6 +20981,19 @@
         ],
         "appliesTo": "Independent D product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
+      "catalogueDelta": {
+        "revision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+        "reference": {
+          "document": "owner-managed-feature-contract",
+          "locatorSha256": "59543d1982f4f8930c329e78ead662a836313047ad156c8e4ec2bf063947a564"
+        },
+        "requirementIds": [
+          "landing-site-REQ-01",
+          "landing-site-REQ-03"
+        ],
+        "state": "delta-mapped-independent-review-pending"
       }
     },
     {
@@ -21301,7 +21372,8 @@
         ],
         "appliesTo": "Independent D product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "installer-download-button",
@@ -21336,9 +21408,9 @@
           },
           {
             "requirementId": "installer-download-button-REQ-02",
-            "canonicalObligation": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL.",
-            "missingDetailOrEvidence": "Immutable release manifest binds URL, exact version and Windows platform; external click/readback verifies actual bytes.",
-            "publicRequirementText": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL."
+            "canonicalObligation": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL. An applicable private documentation package uses only its verified private release asset.",
+            "missingDetailOrEvidence": "Retain the public hosted delivery boundary; private package delivery is conditional and inactive for this public source.",
+            "publicRequirementText": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL. An applicable private documentation package uses only its verified private release asset."
           },
           {
             "requirementId": "installer-download-button-REQ-03",
@@ -21673,6 +21745,18 @@
         ],
         "appliesTo": "Independent D product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
+      "catalogueDelta": {
+        "revision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+        "reference": {
+          "document": "owner-managed-feature-contract",
+          "locatorSha256": "59543d1982f4f8930c329e78ead662a836313047ad156c8e4ec2bf063947a564"
+        },
+        "requirementIds": [
+          "installer-download-button-REQ-02"
+        ],
+        "state": "delta-mapped-independent-review-pending"
       }
     },
     {
@@ -22061,7 +22145,8 @@
         ],
         "appliesTo": "Independent D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "vendored-fonts",
@@ -22404,7 +22489,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "shared-link-embed",
@@ -22774,7 +22860,8 @@
         ],
         "appliesTo": "Independent D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "homepage-link",
@@ -22804,9 +22891,9 @@
         "requirements": [
           {
             "requirementId": "homepage-link-REQ-01",
-            "canonicalObligation": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home-page URL; private repositories are exempt from this mandatory field, and optional private GitHub Pages sites remain allowed.",
-            "missingDetailOrEvidence": "Exact deployed home URL stored in repository About homepage and near README top, no raw/branch/docs candidate URL.",
-            "publicRequirementText": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home-page URL; private repositories are exempt from this mandatory field, and optional private GitHub Pages sites remain allowed."
+            "canonicalObligation": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home URL. Private documentation packages require no hosted homepage and remain linked to a verified private release inside their private boundary.",
+            "missingDetailOrEvidence": "Retain the public hosted delivery boundary; private package delivery is conditional and inactive for this public source.",
+            "publicRequirementText": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home URL. Private documentation packages require no hosted homepage and remain linked to a verified private release inside their private boundary."
           },
           {
             "requirementId": "homepage-link-REQ-02",
@@ -23150,6 +23237,18 @@
         ],
         "appliesTo": "Independent D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
+      "catalogueDelta": {
+        "revision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+        "reference": {
+          "document": "owner-managed-feature-contract",
+          "locatorSha256": "59543d1982f4f8930c329e78ead662a836313047ad156c8e4ec2bf063947a564"
+        },
+        "requirementIds": [
+          "homepage-link-REQ-01"
+        ],
+        "state": "delta-mapped-independent-review-pending"
       }
     },
     {
@@ -23518,7 +23617,8 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "status-hub",
@@ -23895,7 +23995,8 @@
         ],
         "appliesTo": "Independent A+D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "discord-status-bridge",
@@ -24055,7 +24156,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "panic-webhooks",
@@ -24229,7 +24331,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "tidbyt-displays",
@@ -24389,7 +24492,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "build-entrypoints",
@@ -24587,7 +24691,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "fresh-build-run-command",
@@ -24733,7 +24838,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "dependency-fetcher",
@@ -24905,7 +25011,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "bundled-dependencies",
@@ -25287,7 +25394,8 @@
         ],
         "appliesTo": "Independent A+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "squirrel-installer",
@@ -25685,7 +25793,8 @@
         ],
         "appliesTo": "Independent A+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "self-signing",
@@ -26048,7 +26157,8 @@
         ],
         "appliesTo": "Independent A+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "auto-updates",
@@ -26411,7 +26521,8 @@
         ],
         "appliesTo": "Independent A+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "app-icon",
@@ -26789,7 +26900,8 @@
           "reviewedObligation": "Original master/platform icon and real reproducible repository operating procedure are explicit release prerequisites. Scope and verification remain separate from catalogue presence.",
           "documentSha256": "049705164fa37d321c4be8d91803d1b320000e66b2d719402bfed1c38fd51d8b"
         }
-      ]
+      ],
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "release-workflow",
@@ -27009,7 +27121,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "release-timing",
@@ -27163,7 +27276,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "release-line-counts",
@@ -27336,7 +27450,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "release-dim-sum-photo",
@@ -27509,7 +27624,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "dim-sum-code-names",
@@ -27695,7 +27811,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "ci-bootstrap",
@@ -27870,7 +27987,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "runner-selection",
@@ -28030,7 +28148,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "encrypted-public-builder",
@@ -28204,7 +28323,8 @@
         ],
         "appliesTo": "Independent R, conditional by privacy product records; preserve conditional disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "tabbed-readme",
@@ -28372,7 +28492,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "human-time-estimate",
@@ -28530,7 +28651,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "sanitized-instruction-copy",
@@ -28660,7 +28782,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "agents-md-vocabulary-block",
@@ -28798,7 +28921,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "vocabulary-hash-lock",
@@ -28943,7 +29067,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "roadmap-checklist",
@@ -29073,7 +29198,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "feature-docs",
@@ -29223,7 +29349,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "postman-collections",
@@ -29360,7 +29487,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "wiki-site-sync",
@@ -29402,9 +29530,9 @@
           },
           {
             "requirementId": "wiki-site-sync-REQ-02",
-            "canonicalObligation": "Public repository applications create the mandatory GitHub Pages when the host supports it; private repositories are exempt from mandatory GitHub Pages creation and may retain an optional private surface.",
-            "missingDetailOrEvidence": "Full wiki/article content renders directly inside deployed website with category/article/anchor/assets/related navigation, external source links only optional.",
-            "publicRequirementText": "Public repository applications create the mandatory GitHub Pages when the host supports it; private repositories are exempt from mandatory GitHub Pages creation and may retain an optional private surface."
+            "canonicalObligation": "Public repository applications maintain hosted documentation. Private repositories maintain the same complete reviewed documentation as a dedicated offline package rather than treating privacy as an exemption from documentation delivery.",
+            "missingDetailOrEvidence": "Retain the public hosted delivery boundary; private package delivery is conditional and inactive for this public source.",
+            "publicRequirementText": "Public repository applications maintain hosted documentation. Private repositories maintain the same complete reviewed documentation as a dedicated offline package rather than treating privacy as an exemption from documentation delivery."
           },
           {
             "requirementId": "wiki-site-sync-REQ-03",
@@ -29749,6 +29877,18 @@
         ],
         "appliesTo": "Independent D+C+R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
+      "catalogueDelta": {
+        "revision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+        "reference": {
+          "document": "owner-managed-feature-contract",
+          "locatorSha256": "59543d1982f4f8930c329e78ead662a836313047ad156c8e4ec2bf063947a564"
+        },
+        "requirementIds": [
+          "wiki-site-sync-REQ-02"
+        ],
+        "state": "delta-mapped-independent-review-pending"
       }
     },
     {
@@ -29887,7 +30027,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "closeout-prompt",
@@ -30032,7 +30173,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "discussion-records",
@@ -30184,7 +30326,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "project-board",
@@ -30321,7 +30464,8 @@
         ],
         "appliesTo": "Independent R product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "operational-skill",
@@ -30476,7 +30620,8 @@
           "reviewedObligation": "Original master/platform icon and real reproducible repository operating procedure are explicit release prerequisites. Scope and verification remain separate from catalogue presence.",
           "documentSha256": "049705164fa37d321c4be8d91803d1b320000e66b2d719402bfed1c38fd51d8b"
         }
-      ]
+      ],
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "readme-prompt-banner",
@@ -30597,7 +30742,8 @@
         ],
         "appliesTo": "Independent Canonical source only product records; preserve canonical-only disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "single-file-instruction-editions",
@@ -30729,7 +30875,8 @@
         ],
         "appliesTo": "Independent Canonical source only product records; preserve canonical-only disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "project-profile",
@@ -30859,7 +31006,8 @@
           "reviewedObligation": "Durable project rules only; current repository instructions/manifests own live values, no host topology/credentials/private snapshots in synchronized mirrors, and changed profile requires source comparison/privacy review.",
           "documentSha256": "b336ee015d860f7276859c0b7b89120a02d242ce963635fc65787ffd9db627a3"
         }
-      ]
+      ],
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "roblox-model-catalogue",
@@ -30981,7 +31129,8 @@
         ],
         "appliesTo": "Independent Not applicable to current product product records; preserve not-applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "roblox-visual-realism",
@@ -31103,7 +31252,8 @@
         ],
         "appliesTo": "Independent Not applicable to current product product records; preserve not-applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "onboarding-wizard",
@@ -31478,7 +31628,8 @@
         ],
         "appliesTo": "Independent A product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
-      }
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
     },
     {
       "id": "info-icon-guidance",
@@ -31848,6 +31999,388 @@
         ],
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
+      },
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
+    },
+    {
+      "id": "vocabulary-drop-apply",
+      "state": "direct-delta-mapped-independent-review-pending",
+      "canonicalRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+      "publicRequirement": "Whole-window local personal-wording JSON drop with atomic immediate application, accessible nonblocking celebration and retained Settings fallback",
+      "requirementIds": [
+        "vocabulary-drop-apply-REQ-01",
+        "vocabulary-drop-apply-REQ-02",
+        "vocabulary-drop-apply-REQ-03",
+        "vocabulary-drop-apply-REQ-04",
+        "vocabulary-drop-apply-REQ-05",
+        "vocabulary-drop-apply-REQ-06",
+        "vocabulary-drop-apply-REQ-07",
+        "vocabulary-drop-apply-REQ-08"
+      ],
+      "catalogueSurface": "A+C",
+      "disposition": "applicable",
+      "dispositionReason": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity.",
+      "canonicalReferences": [
+        {
+          "document": "owner-managed-feature-contract",
+          "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+        }
+      ],
+      "detailMapping": {
+        "publicSectionLabel": "vocabulary-drop-apply",
+        "reviewBoundary": "Only this reviewed catalogue delta is mapped here. Independent review and implementation/runtime acceptance remain open.",
+        "surfaceReview": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity.",
+        "requirements": [
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-01",
+            "canonicalObligation": "Accept a personal-wording JSON file dropped anywhere within each application-owned window or authenticated companion surface, through the identical bounded validator used by the retained Settings upload; this identity expressly excludes the public documentation visitor surface.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Accept a personal-wording JSON file dropped anywhere within each application-owned window or authenticated companion surface, through the identical bounded validator used by the retained Settings upload; this identity expressly excludes the public documentation visitor surface."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-02",
+            "canonicalObligation": "Apply a fully valid drop atomically and immediately without restart, persist only its validated local private cache, and preserve the Settings upload as an independently working fallback.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Apply a fully valid drop atomically and immediately without restart, persist only its validated local private cache, and preserve the Settings upload as an independently working fallback."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-03",
+            "canonicalObligation": "Reject malformed, oversized and non-JSON drops with a clear localized message and no partial application, persistence change or loss of the previously valid wording.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Reject malformed, oversized and non-JSON drops with a clear localized message and no partial application, persistence change or loss of the previously valid wording."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-04",
+            "canonicalObligation": "After successful application, show a nonblocking full-window celebration whose headline enters, holds for approximately three seconds and exits without trapping focus or intercepting input.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "After successful application, show a nonblocking full-window celebration whose headline enters, holds for approximately three seconds and exits without trapping focus or intercepting input."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-05",
+            "canonicalObligation": "Derive the sole displayed headline from the imported file mapping for the ordinary phrase private vocabulary, or use the localized neutral Personal wording applied fallback; never bundle a private mapping or display other payload content.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Derive the sole displayed headline from the imported file mapping for the ordinary phrase private vocabulary, or use the localized neutral Personal wording applied fallback; never bundle a private mapping or display other payload content."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-06",
+            "canonicalObligation": "Honor reduced motion with a fade or static notice for the same hold interval and announce the result through a polite screen-reader live region, preserving keyboard focus and continued work.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Honor reduced motion with a fade or static notice for the same hold interval and announce the result through a polite screen-reader live region, preserving keyboard focus and continued work."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-07",
+            "canonicalObligation": "Retain shared-mode suppression, local-only/no-network handling, strict exclusion of payload and source metadata from logs, exports, history, telemetry and prompts, cache revalidation, and original wording on clear or reset.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Retain shared-mode suppression, local-only/no-network handling, strict exclusion of payload and source metadata from logs, exports, history, telemetry and prompts, cache revalidation, and original wording on clear or reset."
+          },
+          {
+            "requirementId": "vocabulary-drop-apply-REQ-08",
+            "canonicalObligation": "Independently verify valid and invalid drops, the Settings fallback, reduced motion, polite announcement, restart persistence and clear/reset in each actual built applicable surface; omission regressions and genuine source-bound evidence remain required.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Independently verify valid and invalid drops, the Settings fallback, reduced motion, polite announcement, restart persistence and clear/reset in each actual built applicable surface; omission regressions and genuine source-bound evidence remain required."
+          }
+        ],
+        "remaining": [
+          "Independent source and applicability review.",
+          "No implementation, runtime, capture or complete feature acceptance is established."
+        ]
+      },
+      "acceptance": "unverified",
+      "crossContractReview": {
+        "state": "dependency-and-scope-mapped-independent-review-pending",
+        "dependencies": [
+          {
+            "id": "personal-vocabulary",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "personal-vocabulary-REQ-01",
+              "personal-vocabulary-REQ-02",
+              "personal-vocabulary-REQ-03",
+              "personal-vocabulary-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          },
+          {
+            "id": "notifications",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "notifications-REQ-01",
+              "notifications-REQ-02",
+              "notifications-REQ-03",
+              "notifications-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          },
+          {
+            "id": "motion",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "motion-REQ-01",
+              "motion-REQ-02",
+              "motion-REQ-03",
+              "motion-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          },
+          {
+            "id": "accessibility-sizing",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "accessibility-sizing-REQ-01",
+              "accessibility-sizing-REQ-02",
+              "accessibility-sizing-REQ-03",
+              "accessibility-sizing-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          },
+          {
+            "id": "school-mode",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "school-mode-REQ-01",
+              "school-mode-REQ-02",
+              "school-mode-REQ-03",
+              "school-mode-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          },
+          {
+            "id": "exports",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "exports-REQ-01",
+              "exports-REQ-02",
+              "exports-REQ-03",
+              "exports-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          },
+          {
+            "id": "local-history",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "local-history-REQ-01",
+              "local-history-REQ-02",
+              "local-history-REQ-03",
+              "local-history-REQ-04"
+            ],
+            "specificDetail": "The drop route must reuse validated local wording state and preserve accessible nonblocking feedback and privacy exclusions.",
+            "scopeBoundary": "The installed application and authenticated companion are application surfaces. The public documentation visitor surface is expressly excluded from this drop identity."
+          }
+        ],
+        "appliesTo": "A+C",
+        "acceptanceGap": "Planned mapping only; applicable source consumers and genuine built evidence remain absent."
+      }
+    },
+    {
+      "id": "private-documentation-package",
+      "state": "direct-delta-mapped-independent-review-pending",
+      "canonicalRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+      "publicRequirement": "Conditional private-repository offline documentation package; not applicable to this public product",
+      "requirementIds": [
+        "private-documentation-package-REQ-01",
+        "private-documentation-package-REQ-02",
+        "private-documentation-package-REQ-03",
+        "private-documentation-package-REQ-04",
+        "private-documentation-package-REQ-05",
+        "private-documentation-package-REQ-06"
+      ],
+      "catalogueSurface": "Private documentation only",
+      "disposition": "not-applicable",
+      "dispositionReason": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+      "canonicalReferences": [
+        {
+          "document": "owner-managed-feature-contract",
+          "locatorSha256": "59543d1982f4f8930c329e78ead662a836313047ad156c8e4ec2bf063947a564"
+        }
+      ],
+      "detailMapping": {
+        "publicSectionLabel": "private-documentation-package",
+        "reviewBoundary": "Only this reviewed catalogue delta is mapped here. Independent review and implementation/runtime acceptance remain open.",
+        "surfaceReview": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required.",
+        "requirements": [
+          {
+            "requirementId": "private-documentation-package-REQ-01",
+            "canonicalObligation": "Apply packaged documentation delivery only to private repositories; this public product retains hosted documentation and its exact verified repository homepage. Record the private condition explicitly without creating a current runtime consumer.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Apply packaged documentation delivery only to private repositories; this public product retains hosted documentation and its exact verified repository homepage. Record the private condition explicitly without creating a current runtime consumer."
+          },
+          {
+            "requirementId": "private-documentation-package-REQ-02",
+            "canonicalObligation": "For an applicable private product, bundle the complete home/download presentation, documentation articles, wiki content, category indexes and working internal routes offline, with all assets local and no CDN or network requirement.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "For an applicable private product, bundle the complete home/download presentation, documentation articles, wiki content, category indexes and working internal routes offline, with all assets local and no CDN or network requirement."
+          },
+          {
+            "requirementId": "private-documentation-package-REQ-03",
+            "canonicalObligation": "Limit the delivery exception to a dedicated packaged documentation viewer carrying reviewed static content; it does not authorize changing the primary application runtime or a public repository delivery format.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Limit the delivery exception to a dedicated packaged documentation viewer carrying reviewed static content; it does not authorize changing the primary application runtime or a public repository delivery format."
+          },
+          {
+            "requirementId": "private-documentation-package-REQ-04",
+            "canonicalObligation": "When the private condition is active, build and package through the existing root build.bat and build-installer.bat, use genuine Squirrel.Windows conventions, and publish a normal verified documentation-package release asset alongside the primary application.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "When the private condition is active, build and package through the existing root build.bat and build-installer.bat, use genuine Squirrel.Windows conventions, and publish a normal verified documentation-package release asset alongside the primary application."
+          },
+          {
+            "requirementId": "private-documentation-package-REQ-05",
+            "canonicalObligation": "Verify an applicable built package through real installation or launch on the approved hidden desktop, exercise home/article/wiki routes, check complete inventories and no-network behavior, and retain genuine source/build-bound captures and release readback.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Verify an applicable built package through real installation or launch on the approved hidden desktop, exercise home/article/wiki routes, check complete inventories and no-network behavior, and retain genuine source/build-bound captures and release readback."
+          },
+          {
+            "requirementId": "private-documentation-package-REQ-06",
+            "canonicalObligation": "Keep private packaged content current with project changes and link its verified private release within the private boundary; no hosted homepage is required and no private source, content, credentials or operational details may be published to evade hosting limits.",
+            "missingDetailOrEvidence": "Concrete per-surface consumers, localized copy/articles, persistence and independent runtime proof remain unadmitted.",
+            "publicRequirementText": "Keep private packaged content current with project changes and link its verified private release within the private boundary; no hosted homepage is required and no private source, content, credentials or operational details may be published to evade hosting limits."
+          }
+        ],
+        "remaining": [
+          "Independent source and applicability review.",
+          "No implementation, runtime, capture or complete feature acceptance is established."
+        ]
+      },
+      "acceptance": "unverified",
+      "crossContractReview": {
+        "state": "dependency-and-scope-mapped-independent-review-pending",
+        "dependencies": [
+          {
+            "id": "landing-site",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "landing-site-REQ-01",
+              "landing-site-REQ-02",
+              "landing-site-REQ-03",
+              "landing-site-REQ-04",
+              "landing-site-REQ-05"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "homepage-link",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "homepage-link-REQ-01",
+              "homepage-link-REQ-02",
+              "homepage-link-REQ-03",
+              "homepage-link-REQ-04"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "feature-articles",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "feature-articles-REQ-01",
+              "feature-articles-REQ-02",
+              "feature-articles-REQ-03"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "wiki-site-sync",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "wiki-site-sync-REQ-01",
+              "wiki-site-sync-REQ-02",
+              "wiki-site-sync-REQ-03",
+              "wiki-site-sync-REQ-04",
+              "wiki-site-sync-REQ-05"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "offline-docs",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "offline-docs-REQ-01",
+              "offline-docs-REQ-02",
+              "offline-docs-REQ-03"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "build-entrypoints",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "build-entrypoints-REQ-01",
+              "build-entrypoints-REQ-02",
+              "build-entrypoints-REQ-03",
+              "build-entrypoints-REQ-04"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "squirrel-installer",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "squirrel-installer-REQ-01",
+              "squirrel-installer-REQ-02",
+              "squirrel-installer-REQ-03",
+              "squirrel-installer-REQ-04"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          },
+          {
+            "id": "release-workflow",
+            "basis": "reviewed-delta-reference",
+            "obligation": "Retain the related identity at its own exact surface and privacy boundary; this link never establishes implementation.",
+            "state": "mapped-not-accepted",
+            "requiredMappings": [
+              "release-workflow-REQ-01",
+              "release-workflow-REQ-02",
+              "release-workflow-REQ-03",
+              "release-workflow-REQ-04",
+              "release-workflow-REQ-05"
+            ],
+            "specificDetail": "Private delivery stays inactive for this public product; existing public hosting, publication and complete documentation obligations remain.",
+            "scopeBoundary": "This repository is public. Private documentation packaging is not activated; the hosted public documentation and exact verified homepage remain required."
+          }
+        ],
+        "appliesTo": "Private documentation only",
+        "acceptanceGap": "Planned mapping only; applicable source consumers and genuine built evidence remain absent."
       }
     }
   ],
@@ -31950,12 +32483,25 @@
     }
   ],
   "reviewSummary": {
-    "directIdentitiesMapped": 107,
-    "plannedRequirementsMapped": 398,
-    "crossContractIdentityGraphsMapped": 107,
+    "directIdentitiesMapped": 109,
+    "plannedRequirementsMapped": 412,
+    "crossContractIdentityGraphsMapped": 109,
     "independentlyReviewedIdentities": 0,
     "newAcceptedFeatures": 0,
-    "nativeAcceptance": "deferred",
-    "remaining": "Independent canonical/source-link review; actual A/D/C/R consumer and detailed capability inventories; versioned runtime/platform/credential/installer proof. Transitive source/capability research is not fully exhausted by the graph."
+    "nativeAcceptance": "not-claimed-by-this-planning-delta",
+    "remaining": "Independent canonical/source-link review; actual A/D/C/R consumer and detailed capability inventories; versioned runtime/platform/credential/installer proof. Transitive source/capability research is not fully exhausted by the graph.",
+    "inheritedNativeAcceptance": "deferred"
+  },
+  "inheritedReferenceRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
+  "deltaReview": {
+    "revision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+    "newIdentities": [
+      "vocabulary-drop-apply",
+      "private-documentation-package"
+    ],
+    "newRequirementCount": 14,
+    "preservedRequirementCount": 398,
+    "state": "source-delta-mapped-independent-review-pending",
+    "inheritedReferenceBoundary": "Existing identity references retain their previously declared source revision. Only the new identities and explicit delivery-condition amendments are bound to this delta. No global source-reference refresh or runtime acceptance is claimed."
   }
 }

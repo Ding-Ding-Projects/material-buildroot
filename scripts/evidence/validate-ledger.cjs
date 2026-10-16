@@ -16,10 +16,10 @@ function validate(ledger, { root = path.resolve(__dirname, '../..') } = {}) {
   const catalogue = fs.readFileSync(path.join(root, 'docs/planning/feature-coverage.md'));
   const rows = catalogueRows(catalogue.toString());
   if (ledger.schemaVersion !== 1) fail('Unsupported schemaVersion');
-  if (rows.length !== 107 || new Set(rows.map(r => r.id)).size !== 107) fail('Catalogue must contain exactly 107 unique identities');
+  if (rows.length !== 109 || new Set(rows.map(r => r.id)).size !== 109) fail('Catalogue must contain exactly 109 unique identities');
   if (ledger.catalogueSha256 !== hash(catalogue)) fail('Stale catalogue hash');
   const records = Array.isArray(ledger.identities) ? ledger.identities : [];
-  if (records.length !== 107) fail('Ledger must contain exactly 107 identities');
+  if (records.length !== 109) fail('Ledger must contain exactly 109 identities');
   const seen = new Set();
   const realRoot = fs.realpathSync(root);
   const within = (base, target) => {
@@ -54,6 +54,8 @@ function validate(ledger, { root = path.resolve(__dirname, '../..') } = {}) {
     if (!row) { fail(`Unknown identity: ${record.id}`); continue; }
     if (record.requirement !== row.requirement || record.catalogueSurface !== row.surface) fail(`${record.id}: stale catalogue record`);
     if (!['applicable', 'conditional', 'canonical-only', 'owner-memory', 'not-applicable'].includes(record.disposition) || !record.reason) fail(`${record.id}: missing disposition/reason`);
+    if(record.id === 'private-documentation-package' && (record.disposition !== 'not-applicable' || ['A','D','C','R'].some(surface=>record.surfaces?.[surface]?.state !== 'not-applicable'))) fail('private-documentation-package: private delivery must remain inactive for this public product');
+    if(record.id === 'vocabulary-drop-apply' && (record.disposition !== 'applicable' || ['D','R'].some(surface=>record.surfaces?.[surface]?.state !== 'not-applicable'))) fail('vocabulary-drop-apply: documentation and operating-process surfaces are expressly excluded');
     const requirements = record.subrequirements;
     const expectedRecord = expectedRequirements.identities.find(item => item.id === record.id);
     if (!expectedRecord || !Array.isArray(requirements) || JSON.stringify(requirements.map(item => item && ({id:item.id,text:item.text}))) !== JSON.stringify(expectedRecord.subrequirements)) fail(`${record.id}: planned subrequirements differ from independent expected inventory`);
@@ -136,6 +138,6 @@ if (require.main === module) {
   const ledger = JSON.parse(fs.readFileSync(path.join(root, 'docs/planning/feature-evidence.json'), 'utf8'));
   const errors = validate(ledger, { root });
   if (errors.length) { process.stderr.write(errors.join('\n') + '\n'); process.exitCode = 1; }
-  else console.log('PASS: 107 identities, 428 surface records; admission integrity only, product completion unverified.');
+  else console.log('PASS: 109 identities, 436 surface records; admission integrity only, product completion unverified.');
 }
 module.exports = { validate, catalogueRows, hash };

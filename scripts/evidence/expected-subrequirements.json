@@ -1213,7 +1213,7 @@
       "subrequirements": [
         {
           "id": "landing-site-REQ-01",
-          "text": "Every public repository application ships a Material Design 3 GitHub Pages; private repositories are exempt from mandatory creation."
+          "text": "Every public repository application ships a Material Design 3 documentation website. Private repositories instead deliver their reviewed documentation as a dedicated offline package under the private-delivery condition."
         },
         {
           "id": "landing-site-REQ-02",
@@ -1221,7 +1221,7 @@
         },
         {
           "id": "landing-site-REQ-03",
-          "text": "It strictly carries every user-facing feature in this catalogue as a GitHub Pages equivalent operating on its own content and per-visitor local storage, guarded by a hand-written enumeration that fails the docs build when one is missing, and it is as customizable and tabbed as the application."
+          "text": "Every documentation visitor surface carries each feature whose own contract applies to that surface, with independent visitor-owned state, customization and navigation; an explicitly application-only identity is not silently reintroduced as a website requirement."
         },
         {
           "id": "landing-site-REQ-04",
@@ -1263,7 +1263,7 @@
         },
         {
           "id": "installer-download-button-REQ-02",
-          "text": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL."
+          "text": "Until publication is verified the button is absent, never pointing at a candidate or guessed URL. An applicable private documentation package uses only its verified private release asset."
         },
         {
           "id": "installer-download-button-REQ-03",
@@ -1327,7 +1327,7 @@
       "subrequirements": [
         {
           "id": "homepage-link-REQ-01",
-          "text": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home-page URL; private repositories are exempt from this mandatory field, and optional private GitHub Pages sites remain allowed."
+          "text": "Every public repository application sets its GitHub About website field (`homepage`) to the exact verified deployed GitHub Pages home URL. Private documentation packages require no hosted homepage and remain linked to a verified private release inside their private boundary."
         },
         {
           "id": "homepage-link-REQ-02",
@@ -1917,7 +1917,7 @@
         },
         {
           "id": "wiki-site-sync-REQ-02",
-          "text": "Public repository applications create the mandatory GitHub Pages when the host supports it; private repositories are exempt from mandatory GitHub Pages creation and may retain an optional private surface."
+          "text": "Public repository applications maintain hosted documentation. Private repositories maintain the same complete reviewed documentation as a dedicated offline package rather than treating privacy as an exemption from documentation delivery."
         },
         {
           "id": "wiki-site-sync-REQ-03",
@@ -2126,6 +2126,72 @@
         {
           "id": "info-icon-guidance-REQ-07",
           "text": "Independently remove the required icon, target binding, keyboard action or contextual panel and replace specific help with repeated generic text to obtain failing regressions; restore real behavior to pass and retain per-control localized documentation, persistence or explicit non-persistence, real built interactions and genuine captures."
+        }
+      ]
+    },
+    {
+      "id": "vocabulary-drop-apply",
+      "subrequirements": [
+        {
+          "id": "vocabulary-drop-apply-REQ-01",
+          "text": "Accept a personal-wording JSON file dropped anywhere within each application-owned window or authenticated companion surface, through the identical bounded validator used by the retained Settings upload; this identity expressly excludes the public documentation visitor surface."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-02",
+          "text": "Apply a fully valid drop atomically and immediately without restart, persist only its validated local private cache, and preserve the Settings upload as an independently working fallback."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-03",
+          "text": "Reject malformed, oversized and non-JSON drops with a clear localized message and no partial application, persistence change or loss of the previously valid wording."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-04",
+          "text": "After successful application, show a nonblocking full-window celebration whose headline enters, holds for approximately three seconds and exits without trapping focus or intercepting input."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-05",
+          "text": "Derive the sole displayed headline from the imported file mapping for the ordinary phrase private vocabulary, or use the localized neutral Personal wording applied fallback; never bundle a private mapping or display other payload content."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-06",
+          "text": "Honor reduced motion with a fade or static notice for the same hold interval and announce the result through a polite screen-reader live region, preserving keyboard focus and continued work."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-07",
+          "text": "Retain shared-mode suppression, local-only/no-network handling, strict exclusion of payload and source metadata from logs, exports, history, telemetry and prompts, cache revalidation, and original wording on clear or reset."
+        },
+        {
+          "id": "vocabulary-drop-apply-REQ-08",
+          "text": "Independently verify valid and invalid drops, the Settings fallback, reduced motion, polite announcement, restart persistence and clear/reset in each actual built applicable surface; omission regressions and genuine source-bound evidence remain required."
+        }
+      ]
+    },
+    {
+      "id": "private-documentation-package",
+      "subrequirements": [
+        {
+          "id": "private-documentation-package-REQ-01",
+          "text": "Apply packaged documentation delivery only to private repositories; this public product retains hosted documentation and its exact verified repository homepage. Record the private condition explicitly without creating a current runtime consumer."
+        },
+        {
+          "id": "private-documentation-package-REQ-02",
+          "text": "For an applicable private product, bundle the complete home/download presentation, documentation articles, wiki content, category indexes and working internal routes offline, with all assets local and no CDN or network requirement."
+        },
+        {
+          "id": "private-documentation-package-REQ-03",
+          "text": "Limit the delivery exception to a dedicated packaged documentation viewer carrying reviewed static content; it does not authorize changing the primary application runtime or a public repository delivery format."
+        },
+        {
+          "id": "private-documentation-package-REQ-04",
+          "text": "When the private condition is active, build and package through the existing root build.bat and build-installer.bat, use genuine Squirrel.Windows conventions, and publish a normal verified documentation-package release asset alongside the primary application."
+        },
+        {
+          "id": "private-documentation-package-REQ-05",
+          "text": "Verify an applicable built package through real installation or launch on the approved hidden desktop, exercise home/article/wiki routes, check complete inventories and no-network behavior, and retain genuine source/build-bound captures and release readback."
+        },
+        {
+          "id": "private-documentation-package-REQ-06",
+          "text": "Keep private packaged content current with project changes and link its verified private release within the private boundary; no hosted homepage is required and no private source, content, credentials or operational details may be published to evade hosting limits."
         }
       ]
     }

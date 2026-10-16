@@ -9,7 +9,7 @@ const baseline = JSON.parse(fs.readFileSync(path.join(root,'docs/planning/featur
 const copy = () => structuredClone(baseline);
 test('admission ledger is valid without pretending product completion', () => {
   assert.deepEqual(validate(baseline), []);
-  assert.equal(baseline.identities.length,107);
+  assert.equal(baseline.identities.length,109);
   assert.equal(baseline.identities.flatMap(r => Object.values(r.surfaces)).filter(s => s.state==='complete').length,0);
 });
 test('missing identity fails and restoration passes', () => {
@@ -196,4 +196,20 @@ test('new onboarding and contextual guidance identities have independent surface
   for(const surface of ['A','D','C']) assert.equal(guidance.surfaces[surface].applicability,'required');
   const ledger=copy();ledger.identities=ledger.identities.filter(r=>r.id!=='info-icon-guidance');
   assert(validate(ledger).some(e=>e==='Missing identity: info-icon-guidance'));
+});
+
+
+test('new drop and private documentation identities retain exact independent boundaries',()=>{
+ const drop=baseline.identities.find(x=>x.id==='vocabulary-drop-apply'),pack=baseline.identities.find(x=>x.id==='private-documentation-package');
+ assert(drop&&pack);
+ for(const s of ['A','C'])assert.equal(drop.surfaces[s].applicability,'required');
+ for(const s of ['D','R'])assert.equal(drop.surfaces[s].state,'not-applicable');
+ assert.equal(pack.disposition,'not-applicable');
+ for(const s of ['A','D','C','R'])assert.equal(pack.surfaces[s].state,'not-applicable');
+ assert.equal(baseline.identities.reduce((n,r)=>n+r.subrequirements.length,0),412);
+ for(const id of ['vocabulary-drop-apply','private-documentation-package']){const ledger=copy();ledger.identities=ledger.identities.filter(x=>x.id!==id);assert(validate(ledger).includes('Missing identity: '+id));}
+ const activation=copy();activation.identities.find(x=>x.id==='private-documentation-package').surfaces.D.state='unimplemented';assert(validate(activation).some(x=>x.includes('private delivery must remain inactive')));
+ const waiver=copy();waiver.identities.find(x=>x.id==='vocabulary-drop-apply').surfaces.C.state='not-applicable';assert(validate(waiver).some(x=>x.includes('required surface cannot be waived')));
+ const visitor=copy();visitor.identities.find(x=>x.id==='vocabulary-drop-apply').surfaces.D.state='unimplemented';assert(validate(visitor).some(x=>x.includes('expressly excluded')));
+ assert.deepEqual(validate(baseline),[]);
 });
