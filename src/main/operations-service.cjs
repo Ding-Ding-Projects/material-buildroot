@@ -9,6 +9,7 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { createImagePresets } = require("./configuration/image-presets.cjs");
 const { createDefconfigWorkflows } = require("./configuration/defconfig-workflows.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
 const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
@@ -80,6 +81,9 @@ const fields = {
   "config.trustPreview": ["workspaceId"],
   "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
   "config.trustRevoke": ["workspaceId"],
+  "imagePreset.catalog": ["workspaceId"],
+  "imagePreset.plan": ["workspaceId", "revision", "preset", "desktop", "ssh"],
+  "imagePreset.apply": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "defconfig.catalog": ["workspaceId"],
   "defconfig.apply": ["workspaceId", "revision", "id"],
   "defconfig.save": ["workspaceId", "revision"],
@@ -945,6 +949,7 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const imagePresets = createImagePresets({ configuration: config });
   const defconfigWorkflows = createDefconfigWorkflows({
     resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; },
     authorize: id => configurationConsent.requireTrust(id),
@@ -1548,6 +1553,12 @@ function createOperationsService({
       case "config.trustRevoke":
         project(request.workspaceId);
         return configurationConsent.revoke(request);
+      case "imagePreset.catalog":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.catalog(request));
+      case "imagePreset.plan":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.plan(request));
+      case "imagePreset.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.apply(request));
       case "defconfig.catalog":
         return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.catalog(request));
       case "defconfig.apply":
@@ -1883,6 +1894,3 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
-
-
-
