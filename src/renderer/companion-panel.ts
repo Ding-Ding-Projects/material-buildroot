@@ -12,6 +12,9 @@ import { workspaceStyles } from "./workspace-styles";
 type Session = {
   id: string;
   origin: string;
+  browser: string;
+  deviceName: string;
+  clientId: string;
   scopes: string[];
   expiresAt: number;
   status: string;
@@ -34,6 +37,8 @@ export class CompanionPanel extends LitElement {
   private host = "127.0.0.1";
   private port = "0";
   private origin = "";
+  private browser = "edge";
+  private deviceName = "";
   private scopes: string[] = ["workspace:read"];
   private pairing?: { challenge: string; expiresAt: number; origin: string };
   private reveal = false;
@@ -255,6 +260,12 @@ export class CompanionPanel extends LitElement {
                 </p>`
               : nothing}
             <h3>${this.l("Pair a browser","配對瀏覽器",true)}</h3>
+            <md-outlined-select .label=${this.l("Browser", "瀏覽器")} .value=${this.browser} ?disabled=${this.pending} @change=${(e: Event) => { this.browser=(e.target as HTMLSelectElement).value; this.pairing=undefined; this.reveal=false; this.revision++; }}>
+              <md-select-option value="edge"><div slot="headline">Microsoft Edge</div></md-select-option>
+              <md-select-option value="chrome"><div slot="headline">Google Chrome</div></md-select-option>
+            </md-outlined-select>
+            <md-outlined-text-field .label=${this.l("Device label (for your approval)","裝置名稱（供你審批）")} .value=${this.deviceName} maxlength="80" ?disabled=${this.pending} @input=${(e: Event) => {this.deviceName=(e.target as HTMLInputElement).value;this.pairing=undefined;this.reveal=false;this.revision++;}}></md-outlined-text-field>
+            <p class="note">${this.l("Compare the browser instance shown on both devices before native approval. Browser names and device labels are not hardware identity proof. Revocation stops new authority; existing jobs retain their actual settlement state.","原生批准前，請比對兩部裝置顯示嘅瀏覽器實例。瀏覽器同裝置名稱唔係硬件身分證明。撤銷會停止新授權；現有工作保留實際結算狀態。")}</p>
             <md-outlined-text-field
               type="url"
               .label=${this.l("Browser origin (HTTPS)","瀏覽器來源（HTTPS）",true)}
@@ -298,9 +309,11 @@ export class CompanionPanel extends LitElement {
                 this.pairing = await this.request("companion.createPairing", {
                   origin: this.origin.trim(),
                   scopes: this.scopes,
+                  browser: this.browser,
+                  deviceName: this.deviceName.trim(),
                 });
               },
-              !this.state.enabled || !this.origin.trim() || !this.scopes.length,
+              !this.state.enabled || !this.origin.trim() || !this.deviceName.trim() || !this.scopes.length,
             )}
             ${this.pairing
               ? html`<p>
@@ -344,7 +357,7 @@ export class CompanionPanel extends LitElement {
               : this.state.sessions.map(
                   (s) =>
                     html`<div class="record stack">
-                      <strong>${s.origin}</strong
+                      <strong>${s.origin} · ${s.browser} · ${s.deviceName}</strong
                       ><span>${s.status} · ${s.scopes.join(", ")}</span
                       ><span
                         >${this.l("Expires","到期",true)}:

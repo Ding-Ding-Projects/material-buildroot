@@ -22,9 +22,10 @@
     {
       "id": "PH01-T03",
       "description": "[R (A/D/C admission only)] Admit genuine registered Material Design 3 components and every native/browser/tool adapter: pin provenance, compatibility, licenses, redistributability, offline payloads and full installer size.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "source-ready-production-consumer-pending",
+      "owner": "task/adapter-admission",
+      "verification": "deferred",
+      "sourceCommit": "050130bd1e80cab270c500f220c7649bd2e3b27d"
     },
     {
       "id": "PH01-T04",
@@ -82,9 +83,10 @@
     {
       "id": "PH10-T09-C01",
       "description": "Guided/generated and reviewed expert YAML for source or dedicated execution repositories, selecting compatible hosted/self-hosted Windows runners for product builds and packaging.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/product-workflows",
-      "verification": "deferred"
+      "verification": "deferred",
+      "sourceCommit": "c952cdf5f1afeaf90a5f2bc9b7e1111a35ea14cf"
     },
     {
       "id": "PH10-T09-C02",
@@ -502,7 +504,7 @@
     {
       "id": "PH09-T01",
       "description": "[A+D+C+R (through-PH09 scope)] Complete D browser-native implementations for every applicable identity, with local visitor state, reset/export explanations and truthful unavailable/offline behavior.",
-      "state": "preserved-source-integration-pending",
+      "state": "integrated-partial-source-implementation-continues",
       "owner": "task/browser-native",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
       "sourceCommit": "f1ee6423ecd827bf5e5f491f45a9b1a0ae9b7311"
@@ -518,17 +520,18 @@
     {
       "id": "PH09-T03",
       "description": "[A+D+C+R (through-PH09 scope)] Complete C typed broker consumers and independent client state for every applicable identity; revocation stops new authority and settles owned jobs truthfully.",
-      "state": "preserved-source-integration-pending",
+      "state": "owned-combined-production-in-progress",
       "owner": "task/companion-consumers",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
-      "sourceCommit": "80529d3628f7c51692563c40141a0cfb1430464c"
+      "sourceCommit": "e1b3918cd1d27c7fe24a4e36ae2f63edcac18dcc"
     },
     {
       "id": "PH09-T04",
       "description": "[A+D+C+R (through-PH09 scope)] Complete detailed categorized feature articles and Cantonese twins, rendered source wiki, search/offline navigation and actual API Postman category/master collections; distinguish non-HTTP IPC.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-partial-source-implementation-continues",
       "owner": "task/complete-articles",
-      "verification": "deferred"
+      "verification": "deferred",
+      "sourceCommit": "cf590128682e0e6e15756000a66f16f4ce5482f7"
     },
     {
       "id": "PH09-T05",
@@ -621,5 +624,5 @@
     }
   ],
   "updatedAt": "2026-10-16T18:35:07.7280332Z",
-  "integrationCommit": "ba486005c2c91f0e216b695610ab764570bac29d"
+  "integrationCommit": "de833ef29f68ba80c017af1018e7e90bbe0a026e"
 }
