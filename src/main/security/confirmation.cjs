@@ -3,6 +3,11 @@ const crypto = require("node:crypto");
 function createConfirmationService({ now = Date.now, ttlMs = 120000 } = {}) {
   const pending = new Map(),
     tokens = new Map();
+  const prune = () => {
+    for (const collection of [pending, tokens])
+      for (const [id, value] of collection)
+        if (value.expires <= now()) collection.delete(id);
+  };
   const binding = (operation, destination) => {
     if (
       typeof operation !== "string" ||
@@ -18,6 +23,8 @@ function createConfirmationService({ now = Date.now, ttlMs = 120000 } = {}) {
   };
   return {
     challenge({ operation, destination }) {
+      prune();
+      if (pending.size + tokens.size >= 128) throw Error("Confirmation capacity reached");
       const id = crypto.randomUUID(),
         keys = [
           crypto.randomBytes(4).toString("hex"),
@@ -31,6 +38,7 @@ function createConfirmationService({ now = Date.now, ttlMs = 120000 } = {}) {
       return { id, operation, destination, keys, expires: now() + ttlMs };
     },
     confirm({ id, operation, destination, firstKey, secondKey, slider }) {
+      prune();
       const c = pending.get(id);
       pending.delete(id);
       if (
@@ -47,6 +55,7 @@ function createConfirmationService({ now = Date.now, ttlMs = 120000 } = {}) {
       return token;
     },
     consume({ token, operation, destination }) {
+      prune();
       const c = tokens.get(token);
       tokens.delete(token);
       if (
@@ -60,6 +69,7 @@ function createConfirmationService({ now = Date.now, ttlMs = 120000 } = {}) {
     cancel(id) {
       pending.delete(id);
     },
+    clear() { pending.clear(); tokens.clear(); },
   };
 }
 module.exports = { createConfirmationService };
