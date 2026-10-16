@@ -16,6 +16,7 @@ const actionContracts=Object.freeze({
  'config.apply':contract('configuration:write',['workspaceId','domain','revision','symbol','change'],a=>project(a)&&domain(a.domain)&&hash(a.revision)&&symbol(a.symbol)&&change(a.change)),
  'config.undo':contract('configuration:write',['workspaceId','domain','revision'],a=>project(a)&&domain(a.domain)&&hash(a.revision)),
  'defconfig.apply':contract('configuration:write',['workspaceId','revision','id'],a=>project(a)&&hash(a.revision)&&hash(a.id)),
+ 'cloud.start':contract('deployment:write',['workspaceId','id'],a=>project(a)&&id(a.id)),
  'cloud.list':contract('deployment:read',['workspaceId'],project),
  'cloud.preview':contract('deployment:write',['workspaceId','fileId','destinationId'],a=>project(a)&&id(a.fileId)&&id(a.destinationId)),
  'models.status':contract('tools:read',[]),
@@ -59,6 +60,7 @@ function createCompanionConsumers(host){
    }
    case 'models.status':{const value=await host.modelStatus();if(value.ok===false)fail('MODEL_SERVICE_UNAVAILABLE');result={version:typeof value.version==='string'?value.version:'unavailable'};break;}
    case 'models.list':{const value=await host.modelList();if(value.ok===false||!Array.isArray(value.models))fail('MODEL_SERVICE_UNAVAILABLE');result={models:value.models.slice(0,100).map(item=>({name:item.name,size:item.size,digest:item.digest,modifiedAt:item.modified_at}))};break;}
+   case 'cloud.start':{const preview=owned.cloudPreviews.get(a.id);if(!preview||preview.workspaceId!==a.workspaceId||preview.expiresAt<=Date.now())fail('PREVIEW_NOT_ADMITTED');owned.cloudPreviews.delete(a.id);result=await host.startCloud(a.workspaceId,a.id,()=>{admitted(context,definition.scope);host.authorizeProject(a.workspaceId);});break;}
    case 'cloud.list':{const value=host.cloudList(a.workspaceId);owned.destinations.set(a.workspaceId,new Set(value.profiles.map(item=>item.id)));result={credentialStorage:value.credentialStorage,profiles:value.profiles.map(({id,label,provider})=>({id,label,provider})),jobs:value.jobs.slice(0,100).map(({id,state,sequence,createdAt,updatedAt,sha256,size})=>({id,state,sequence,createdAt,updatedAt,sha256,size}))};break;}
    case 'cloud.preview':{if(!owned.destinations.get(a.workspaceId)?.has(a.destinationId))fail('DESTINATION_NOT_ADMITTED');const value=await host.previewCloud(a.workspaceId,viewer(),file(owned,a,'file'),a.destinationId);owned.cloudPreviews.set(value.id,{workspaceId:a.workspaceId,expiresAt:value.expiresAt});result={id:value.id,sha256:value.sha256,size:value.size,expiresAt:value.expiresAt,destination:{provider:value.destination.provider,label:value.destination.label},networkState:value.networkState,overwrite:value.overwrite};break;}
    case 'workspace.read':result=host.readWorkspace();break;
@@ -80,6 +82,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 

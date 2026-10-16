@@ -1141,6 +1141,7 @@ function createOperationsService({
     modelStatus: () => tools.execute({action:'ollama.status'}),
     modelList: () => tools.execute({action:'ollama.tags'}),
     cloudList: workspaceId => cloudDestination(workspaceId).list(),
+    startCloud: (workspaceId,id,authorize) => cloudDestination(workspaceId).start({id,consent:true},authorize),
     previewCloud: (workspaceId,viewer,fileId,destinationId) => {const selected=viewer.resolve(fileId,'file');const admitted=outputViewer(workspaceId).admit(selected.grant.relative,'file');return cloudDestination(workspaceId).preview({fileId:admitted,destinationId});},
     confirmMutation: async (request,authorize) => {
       authorize();project(request.args.workspaceId);
@@ -2153,6 +2154,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
