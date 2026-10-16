@@ -195,7 +195,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',complete:false};
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',complete:false}, nativeBroker = {status:'not-produced',runtimeVerified:false};
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -230,7 +230,18 @@ async function main() {
       if(assembled.manifest.complete!==true) throw Error('Normal installer production requires the complete offline payload inventory.');
       const longest = Math.max(...assembled.manifest.tools.flatMap(tool=>tool.files.map(file=>file.path.length)));
       if(path.join(output,'win-unpacked/resources/offline-payloads').length+1+longest>=240) throw Error('Exclusive producer staging is still too long for the genuine package toolchain. Outputs retained.');
-      const configuration = {...JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build,extraResources:[assembled.extraResources]};
+      if(!process.env.MATERIAL_BUILD_NATIVE_TOOLCHAIN) throw Error('Native broker production requires root-initialized installed compiler discovery.');
+      const toolchain = JSON.parse(process.env.MATERIAL_BUILD_NATIVE_TOOLCHAIN);
+      if(toolchain.origin!=='installed'||!/^\d+(?:\.\d+){1,3}$/.test(toolchain.installationVersion||'')||!/^\d+(?:\.\d+){1,3}$/.test(toolchain.sdkVersion||'')) throw Error('Native toolchain version metadata is unavailable.');
+      const brokerOutput=contained(root,`.cache/native-broker/${generation}`);
+      const systemRoot=process.env.SystemRoot;
+      if(!systemRoot||!path.isAbsolute(systemRoot)) throw Error('System PowerShell location unavailable.');
+      execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(root,'scripts/build/native-file-broker.ps1'),'-OutputDirectory',brokerOutput]);
+      const brokerManifest=JSON.parse(fs.readFileSync(nonempty(brokerOutput,'broker-manifest.json'),'utf8'));
+      const brokerHash=sha256(fs.readFileSync(nonempty(brokerOutput,'material-file-broker.exe')));
+      if(brokerManifest.schemaVersion!==1||brokerManifest.file!=='material-file-broker.exe'||brokerManifest.sha256!==brokerHash||brokerManifest.mechanism!=='appcontainer-handle-job'||brokerManifest.runtimeVerified!==false) throw Error('Compiled native broker manifest does not match the produced executable.');
+      nativeBroker={status:'compiled',sha256:brokerHash,mechanism:brokerManifest.mechanism,toolchain,runtimeVerified:false};
+      const configuration = {...JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build,extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']}]};
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
       command.push(`--config=${configurationPath}`);
@@ -250,6 +261,9 @@ async function main() {
       const bundled=nonempty(output,'win-unpacked/resources/offline-payloads/manifest.json');
       if(sha256(fs.readFileSync(bundled))!==payloads.manifestSha256) throw Error('Packaged offline payload manifest differs from the complete assembled inventory.');
       nonempty(output,'win-unpacked/resources/offline-payloads/THIRD-PARTY-NOTICES.txt');
+      if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/material-file-broker.exe')))!==nativeBroker.sha256) throw Error('Packaged native broker differs from its compiled executable.');
+      const bundledBroker=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/broker-manifest.json'),'utf8'));
+      if(bundledBroker.sha256!==nativeBroker.sha256||bundledBroker.runtimeVerified!==false) throw Error('Packaged native broker manifest differs from its compiled identity.');
     }
   }
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
@@ -275,7 +289,7 @@ async function main() {
     }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);

@@ -24,6 +24,11 @@ try {
     Assert-NoReparse $producerLockPath
     try { $producerLock = [IO.File]::Open($producerLockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None) }
     catch [IO.IOException] { throw 'Another build or dependency operation owns this checkout. Retry after that operation finishes.' }
+    if ($parsed.installer -and $parsed.target -eq 'desktop' -and !$parsed.dependenciesOnly) {
+        . (Join-Path $PSScriptRoot 'native-toolchain.ps1')
+        $native = Initialize-NativeToolchain
+        $env:MATERIAL_BUILD_NATIVE_TOOLCHAIN = @{installationVersion=$native.installationVersion; sdkVersion=$native.sdkVersion; origin=$native.origin} | ConvertTo-Json -Compress
+    }
     $toolsRoot = Join-Path $root '.cache/toolchains'
     $nodeRoot = Install-PinnedTool ($manifest.toolchains | Where-Object id -eq 'node') $toolsRoot
     $gitRoot = Install-PinnedTool ($manifest.toolchains | Where-Object id -eq 'git') $toolsRoot
