@@ -144,6 +144,79 @@ function createWorkspaceStore({ filePath }) {
         events.length === limit ? events[events.length - 1].revision : null,
     };
   }
+  // Isolated immutable records, never a directory inside the user's project.
+  function revisionRoot() {
+    const directory = `${filePath}.revisions`;
+    fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+    const info = fs.lstatSync(directory);
+    if (!info.isDirectory() || info.isSymbolicLink() || fs.realpathSync.native(directory) !== directory)
+      throw new Error("Invalid revision storage");
+    return directory;
+  }
+  function preserveRevision(state) {
+    const destination = path.join(revisionRoot(), `${state.revision}.json`);
+    const serialized = JSON.stringify(contract.state(clone(state)));
+    const temporary = `${destination}.${randomUUID()}.tmp`;
+    let descriptor;
+    try {
+      descriptor = fs.openSync(temporary, "wx", 0o600);
+      fs.writeFileSync(descriptor, serialized);
+      fs.fsyncSync(descriptor);
+      fs.closeSync(descriptor);
+      descriptor = undefined;
+      try { fs.linkSync(temporary, destination); }
+      catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        const info = fs.lstatSync(destination);
+        if (!info.isFile() || info.isSymbolicLink() || info.size > contract.MAX_BYTES ||
+            fs.readFileSync(destination, "utf8") !== serialized)
+          throw new Error("Conflicting revision record");
+      }
+    } finally {
+      if (descriptor !== undefined) fs.closeSync(descriptor);
+      fs.rmSync(temporary, { force: true });
+    }
+  }
+  function readRevision(revision) {
+    if (!Number.isSafeInteger(revision) || revision < 0 || revision > read().revision)
+      throw Object.assign(new Error("Revision not found"), { code: "NOT_FOUND" });
+    const location = path.join(revisionRoot(), `${revision}.json`);
+    try {
+      const info = fs.lstatSync(location);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > contract.MAX_BYTES)
+        throw new Error("Invalid revision record");
+      const state = contract.state(contract.parse(fs.readFileSync(location, "utf8")));
+      if (state.revision !== revision) throw new Error("Invalid revision identity");
+      return state;
+    } catch (error) {
+      if (error.code === "ENOENT") error.code = "NOT_FOUND";
+      throw error;
+    }
+  }
+  function revisions(beforeRevision, limit = 25) {
+    const current = read();
+    const before = beforeRevision ?? current.revision + 1;
+    const selected = [];
+    const iterator = fs.opendirSync(revisionRoot());
+    try {
+      let entry;
+      while ((entry = iterator.readSync()) !== null) {
+        if (!/^(0|[1-9][0-9]*)\.json$/.test(entry.name)) continue;
+        const revision = Number(entry.name.slice(0, -5));
+        if (Number.isSafeInteger(revision) && revision < before && revision <= current.revision) {
+          selected.push(revision);
+          selected.sort((a, b) => b - a);
+          if (selected.length > limit + 1) selected.pop();
+        }
+      }
+    } finally { iterator.closeSync(); }
+    const records = selected.slice(0, limit).map(revision => {
+      const state = readRevision(revision);
+      const event = state.activity.at(-1);
+      return { revision, action: event?.action ?? "baseline", timestamp: event?.timestamp ?? null, plans: state.plans.length };
+    });
+    return { records, nextBeforeRevision: selected.length > limit ? records.at(-1).revision : null };
+  }
   function transact(expectedRevision, change) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
     let lock;
@@ -163,8 +236,11 @@ function createWorkspaceStore({ filePath }) {
         throw error;
       }
       const next = change(clone(current));
+      if (JSON.stringify(next) === JSON.stringify(current)) return clone(current);
       next.revision = current.revision + 1;
       contract.state(next);
+      let historyWarning = false;
+      try { preserveRevision(current); } catch { historyWarning = true; }
       for (const event of current.activity) journalEvent(event, true);
       const latest = next.activity.at(-1);
       if (latest && latest.revision === next.revision)
@@ -179,13 +255,14 @@ function createWorkspaceStore({ filePath }) {
       }
       fs.renameSync(temporary, filePath);
       temporary = undefined;
-      return clone(next);
+      try { preserveRevision(next); } catch { historyWarning = true; }
+      return { ...clone(next), ...(historyWarning ? { historyWarning: true } : {}) };
     } finally {
       if (temporary) fs.rmSync(temporary, { force: true });
       fs.closeSync(lock);
       fs.rmSync(`${filePath}.lock`, { force: true });
     }
   }
-  return { read, transact, activityPage };
+  return { read, transact, activityPage, readRevision, revisions };
 }
 module.exports = { createWorkspaceStore };

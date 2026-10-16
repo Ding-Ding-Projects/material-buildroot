@@ -39,6 +39,29 @@ function createWorkspaceService(options) {
     return result(() => {
       contract.request(input);
       const request = clone(input);
+      if (request.action === "history.read") return { state: store.read(), history: store.revisions(request.beforeRevision) };
+      if (request.action === "document.export") {
+        const state = store.read();
+        if (state.revision !== request.expectedRevision) reject("REVISION_CONFLICT");
+        const exclusions = ["credentials", "personal vocabulary and source metadata", "custom image bytes", "external service enrollments", "project paths", "build output"];
+        let content;
+        if (request.scope === "workspace") content = { format: "material-buildroot-workspace-export", version: 1, ...payload(state) };
+        else if (request.scope === "plans") {
+          if (request.ids.some(id => !state.plans.some(plan => plan.id === id))) reject("NOT_FOUND");
+          content = { format: "material-buildroot-plans-export", version: 1, scope: "selected-plans", sourceRevision: state.revision,
+            plans: state.plans.filter(plan => request.ids.includes(plan.id)), exclusions };
+        } else {
+          const records = [];
+          let before;
+          do {
+            const page = store.activityPage({ ...(before === undefined ? {} : { beforeRevision: before }), limit: 100 });
+            records.push(...page.events);
+            before = page.nextBeforeRevision;
+          } while (before !== null);
+          content = { format: "material-buildroot-history-export", version: 1, scope: "complete-workspace-activity", sourceRevision: state.revision, records, exclusions };
+        }
+        return { state, document: JSON.stringify(content, null, 2) };
+      }
       const state = store.transact(request.expectedRevision, (current) => {
         const timestamp = new Date().toISOString();
         switch (request.action) {
@@ -107,6 +130,11 @@ function createWorkspaceService(options) {
               payload: payload(current),
             });
             break;
+          case "revision.restore": {
+            const previous = store.readRevision(request.revision);
+            Object.assign(current, payload(previous));
+            break;
+          }
           case "snapshot.restore": {
             const snapshot = current.snapshots.find((s) => s.id === request.id);
             if (!snapshot) reject("NOT_FOUND");

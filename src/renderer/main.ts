@@ -625,7 +625,7 @@ class MaterialBuildroot extends LitElement {
   private async restoreSnapshot() {
     if (!this.restoreId || this.dirty) return;
     if (
-      await this.mutateWorkspace("snapshot.restore", { id: this.restoreId })
+      await this.mutateWorkspace(this.restoreId.startsWith("revision:") ? "revision.restore" : "snapshot.restore", this.restoreId.startsWith("revision:") ? { revision: Number(this.restoreId.slice(9)) } : { id: this.restoreId })
     ) {
       this.selectedId = this.plans[0]?.id ?? "";
       this.edit = this.selected ? { ...this.selected } : undefined;
@@ -690,13 +690,31 @@ class MaterialBuildroot extends LitElement {
       );
     }
   }
+  private revisionRows: Array<{revision:number;action:string;timestamp:string|null;plans:number}> = [];
+  private revisionCursor: number | null = null;
+  private historyBusy = false;
+  private historyLoaded = false;
+  private exportScope: "workspace" | "plans" | "history" = "workspace";
+  private exportPlanIds = new Set<string>();
+  private async readRevisions(more = false) {
+    if (this.historyBusy || !this.workspaceAPI?.workspaceMutate) return;
+    this.historyBusy = true; this.requestUpdate();
+    try {
+      const reply = await this.workspaceAPI.workspaceMutate({action:"history.read",expectedRevision:this.workspaceRevision,
+        ...(more && this.revisionCursor !== null ? {beforeRevision:this.revisionCursor} : {})});
+      if (!reply.ok || !reply.history) throw new Error("unavailable");
+      this.revisionRows = more ? [...this.revisionRows,...reply.history.records] : reply.history.records;
+      this.revisionCursor = reply.history.nextBeforeRevision; this.historyLoaded = true;
+    } catch {this.notice=this.noticeText("Revision history unavailable. Current workspace is retained.","版本歷史未能使用，目前工作區仍然保留。");}
+    finally {this.historyBusy=false;this.requestUpdate();}
+  }
   private historyPanel() {
     return html`<section class="panel stack">
       <h2>${this.l("Workspace backups", "工作區備份")}</h2>
       <p>
         ${this.l(
-          "Snapshots preserve applied plans and preferences on this device. Restore or import replaces the current workspace; create a snapshot first if you need a recovery copy.",
-          "快照會喺呢部電腦保留已套用嘅計劃同偏好設定。還原或匯入會取代目前工作區，如需復原副本，請先建立快照。",
+          "Snapshots preserve applied plans and preferences. Restore and import create new revisions, retaining recorded earlier revisions. Full history starts with the first save in this version.",
+          "快照保留已套用計劃同偏好。還原同匯入會建立新版本，保留已有版本。完整歷史由此版本首次儲存開始。",
         )}
       </p>
       ${this.workspaceMode === "durable"
@@ -743,6 +761,20 @@ class MaterialBuildroot extends LitElement {
               ?disabled=${!this.canEditWorkspace || this.dirty}
               @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#workspace-import-file")?.click()}
             >${materialIcon("upload", "icon")}${this.l("Import workspace JSON (maximum 1 MiB)", "匯入工作區 JSON（最大 1 MiB）")}</md-outlined-button>
+            <h3>${this.l("Recorded revisions", "已記錄版本")}</h3>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions()}>${materialIcon("history","icon")}${this.l("Read revisions","讀取版本")}</md-outlined-button>
+            ${this.historyLoaded&&!this.revisionRows.length?html`<p>${this.l("No complete revision records yet. Older activity has no restorable state.","暫時未有完整版本記錄。較舊活動冇可還原狀態。")}</p>`:nothing}
+            ${this.revisionRows.map(row=>html`<div class="row"><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")}</span><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
+            ${this.revisionCursor!==null?html`<md-text-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions(true)}>${this.l("More revisions","更多版本")}</md-text-button>`:nothing}
+            <h3>${this.l("Export scope","匯出範圍")}</h3>
+            <md-outlined-select .label=${this.l("Include","包含")} .value=${this.exportScope} @change=${(e:Event)=>{this.exportScope=(e.target as HTMLSelectElement).value as typeof this.exportScope;this.requestUpdate();}}>
+              <md-select-option value="workspace"><div slot="headline">${this.l("Current workspace, re-importable","目前工作區，可重新匯入")}</div></md-select-option>
+              <md-select-option value="plans"><div slot="headline">${this.l("Selected saved plans","已選儲存計劃")}</div></md-select-option>
+              <md-select-option value="history"><div slot="headline">${this.l("Complete recorded activity","全部已記錄活動")}</div></md-select-option>
+            </md-outlined-select>
+            ${this.exportScope==="plans"?html`<md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.map(p=>p.id));this.requestUpdate();}}>${this.l("Select all saved plans","選擇全部儲存計劃")}</md-text-button><md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.filter(p=>!this.exportPlanIds.has(p.id)).map(p=>p.id));this.requestUpdate();}}>${this.l("Invert selection","反轉選擇")}</md-text-button>${this.plans.map(p=>html`<md-outlined-button aria-pressed=${this.exportPlanIds.has(p.id)} @click=${()=>{this.exportPlanIds.has(p.id)?this.exportPlanIds.delete(p.id):this.exportPlanIds.add(p.id);this.requestUpdate();}}>${this.exportPlanIds.has(p.id)?"✓ ":""}${p.name}</md-outlined-button>`)}`:nothing}
+            <p>${this.l("Exports exclude protected credentials, personal wording data and file metadata, custom images, service enrollments, project paths and build output. Plan names and notes are included: review for sensitive text. Only workspace JSON supports import. Encoding: UTF-8, LF line endings.","匯出唔包括受保護憑證、個人用字資料同檔案資料、自訂圖片、服務登記、專案路徑同建置輸出。計劃名稱同備註會包含在內，請檢查敏感文字。只有工作區 JSON 支援匯入，使用 UTF-8 同 LF 換行。")}</p>
+            <md-filled-tonal-button ?disabled=${!this.canEditWorkspace||this.dirty||(this.exportScope==="plans"&&!this.plans.some(p=>this.exportPlanIds.has(p.id)))} @click=${this.exportPlans}>${materialIcon("download","icon")}${this.l("Export chosen scope","匯出所選範圍")}</md-filled-tonal-button>
             <input id="workspace-import-file" hidden style="display:none" type="file"
               accept="application/json,.json" tabindex="-1"
               ?disabled=${!this.canEditWorkspace || this.dirty}
@@ -1043,7 +1075,7 @@ class MaterialBuildroot extends LitElement {
           );
   }
   private async exportPlans() {
-    if (!this.plans.length || !this.canEditWorkspace) return;
+    if (!this.canEditWorkspace) return;
     if (this.dirty) {
       this.pendingDestination = "export";
       this.openDialog("leave-dialog");
@@ -1060,7 +1092,7 @@ class MaterialBuildroot extends LitElement {
     );
     if (this.workspaceMode === "durable") {
       try {
-        const reply = await this.workspaceAPI.workspaceExport!();
+        const reply = await this.workspaceAPI.workspaceMutate!({action:"document.export",expectedRevision:this.workspaceRevision,scope:this.exportScope,ids:this.exportScope==="plans"?this.plans.filter(p=>this.exportPlanIds.has(p.id)).map(p=>p.id):[]});
         if (!reply.ok) throw new Error("unavailable");
         document = reply.document;
       } catch {
@@ -1075,7 +1107,7 @@ class MaterialBuildroot extends LitElement {
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement("a");
     a.href = url;
-    a.download = "material-buildroot-plans.json";
+    a.download = `material-buildroot-${this.workspaceMode==="durable"?this.exportScope:"session-plans"}.json`;
     try {
       a.click();
       this.record("Plan download requested", "已要求下載計劃");
@@ -1863,10 +1895,10 @@ class MaterialBuildroot extends LitElement {
       ${this.dialog(
         "restore-dialog",
         this.l("Restore workspace snapshot?", "還原工作區快照？"),
-        html`<p>${this.snapshots.find((s) => s.id === this.restoreId)?.name}</p>
+        html`<p>${this.restoreId.startsWith("revision:")?this.restoreId:this.snapshots.find((s) => s.id === this.restoreId)?.name}</p>
           <p>
             ${this.l(
-              "This replaces current plans, theme and setup completion with the snapshot. Language settings are unchanged.",
+              "This creates a new revision with the selected plans, theme and setup completion. Recorded earlier revisions remain available. Language settings are unchanged.",
               "呢個操作會以快照取代目前計劃、主題同設定完成狀態，語言設定維持不變。",
             )}
           </p>`,

@@ -220,6 +220,7 @@ const ACTIONS = [
   "snapshot.create",
   "snapshot.restore",
   "document.import",
+  "revision.restore",
 ];
 function request(value) {
   object(
@@ -234,10 +235,27 @@ function request(value) {
       "name",
       "document",
       "onboarding",
+      "revision",
+      "beforeRevision",
+      "scope",
+      "ids",
     ],
     ["expectedRevision", "action"],
   );
   revision(value.expectedRevision);
+  if (value.action === "history.read") {
+    object(value, ["expectedRevision", "action", "beforeRevision"], ["expectedRevision", "action"]);
+    if (value.beforeRevision !== undefined) revision(value.beforeRevision);
+    return value;
+  }
+  if (value.action === "document.export") {
+    object(value, ["expectedRevision", "action", "scope", "ids"]);
+    one(value.scope, ["workspace", "plans", "history"]);
+    if (!Array.isArray(value.ids) || value.ids.length > 100 || new Set(value.ids).size !== value.ids.length) fail();
+    if (value.scope === "plans") value.ids.forEach(id);
+    else if (value.ids.length) fail();
+    return value;
+  }
   one(value.action, ACTIONS);
   const fields = {
     "plan.create": ["plan"],
@@ -250,6 +268,7 @@ function request(value) {
     "snapshot.create": ["name"],
     "snapshot.restore": ["id"],
     "document.import": ["document"],
+    "revision.restore": ["revision"],
   }[value.action];
   object(value, ["expectedRevision", "action", ...fields]);
   if (["plan.create", "onboarding.createPlan"].includes(value.action))
@@ -263,6 +282,7 @@ function request(value) {
   if (value.action === "onboarding.update") onboarding(value.onboarding);
   if (value.action === "snapshot.create") string(value.name, 80, 1);
   if (value.action === "document.import") parseExport(value.document);
+  if (value.action === "revision.restore") revision(value.revision);
   bounded(value);
   return value;
 }

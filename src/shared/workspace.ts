@@ -55,9 +55,12 @@ export type WorkspaceMutation = { expectedRevision: number } & (
   | { action: "snapshot.create"; name: string }
   | { action: "snapshot.restore"; id: string }
   | { action: "document.import"; document: string }
+  | { action: "revision.restore"; revision: number }
+  | { action: "history.read"; beforeRevision?: number }
+  | { action: "document.export"; scope: "workspace" | "plans" | "history"; ids: string[] }
 );
 export type WorkspaceReply =
-  | { ok: true; state: WorkspaceState; document?: string }
+  | { ok: true; state: WorkspaceState & { historyWarning?: boolean }; document?: string; history?: { records: Array<{ revision: number; action: string; timestamp: string | null; plans: number }>; nextBeforeRevision: number | null } }
   | {
       ok: false;
       code:
