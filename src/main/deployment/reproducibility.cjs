@@ -55,7 +55,7 @@ function readManifest(file) {
   validateRecord(value);
   return value;
 }
-function compareRecords(before, after) {
+function compareRecords(before, after, bindings = []) {
   const left = validateRecord(before), right = validateRecord(after);
   const a = new Map(left.entries.map(entry => [entry.path, entry]));
   const b = new Map(right.entries.map(entry => [entry.path, entry]));
@@ -66,8 +66,11 @@ function compareRecords(before, after) {
   }
   const lockDifferences = LOCK_KEYS.filter(key => left.locks[key] !== right.locks[key]).map(key => ({ key, before: left.locks[key] || null, after: right.locks[key] || null }));
   const missingLocks = ["sourceRevision", "configurationSha256"].filter(key => !left.locks[key] || !right.locks[key]);
-  const reproducible = !differences.length && !lockDifferences.length && !missingLocks.length;
-  return { reproducible, status: differences.length ? "nonreproducible" : lockDifferences.length ? "input-locks-differ" : missingLocks.length ? "insufficient-input-locks" : "selected-outputs-match", differences, locksChanged: lockDifferences.length > 0, lockDifferences, missingLocks, interpretation: reproducible ? "Selected output bytes and recorded input locks match. This does not prove build-time provenance, unselected outputs or runtime behavior." : "Comparison is not reproducibility proof. Reported byte differences, changed locks and missing input locks require investigation; timestamps and randomness are possible causes, not diagnosed causes." };
+  const buildTimeBinding = bindings.length === 2 && bindings.every(binding => binding?.buildTimeBinding === true);
+  const distinctBuilds = buildTimeBinding && bindings[0].jobId !== bindings[1].jobId;
+  const runtimeChanged = buildTimeBinding && bindings[0].runtimeDigest !== bindings[1].runtimeDigest;
+  const reproducible = !differences.length && !lockDifferences.length && !missingLocks.length && distinctBuilds && !runtimeChanged;
+  return { reproducible, status: differences.length ? "nonreproducible" : lockDifferences.length ? "input-locks-differ" : missingLocks.length ? "insufficient-input-locks" : !buildTimeBinding ? "unbound-build-lineage" : !distinctBuilds ? "same-build-observation" : runtimeChanged ? "runtime-locks-differ" : "selected-outputs-match", differences, locksChanged: lockDifferences.length > 0, lockDifferences, missingLocks, buildTimeBinding, distinctBuilds, runtimeChanged, bindings, interpretation: reproducible ? "Selected bytes and input locks match distinct verified local successful-job output receipts. Incremental builds may reuse outputs. Toolchain/environment contents, unselected outputs and runtime behavior remain unverified." : "Comparison is not reproducibility proof. Byte differences, changed or missing locks, same-job observations and unavailable successful-job output lineage require investigation; timestamps and randomness are possible causes, not diagnosed causes." };
 }
 // Parse complete bounded RFC 4180-style rows, never a truncated preview.
 function parseLegalManifest(text) {

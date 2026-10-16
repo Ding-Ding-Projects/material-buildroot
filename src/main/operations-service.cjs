@@ -32,6 +32,7 @@ const {
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
 const { createSourceOperations } = require("./source-operations.cjs");
+const { createBuildProvenance } = require("./deployment/build-provenance.cjs");
 const {
   createPackageAuthoringService,
 } = require("./configuration/package-authoring.cjs");
@@ -353,6 +354,11 @@ function createOperationsService({
       signal?.removeEventListener("abort", cancel);
     }
   }
+  const provenance = createBuildProvenance({
+    directory: path.join(directory, "reproducibility"),
+    getJob: id => jobs.get(id, owner),
+    listJobs: () => jobs.list(owner),
+  });
   const jobs = createJobManager({
     directory: path.join(directory, "jobs"),
     adapters: {
@@ -374,6 +380,7 @@ function createOperationsService({
           });
           throw error;
         }
+        const buildLineage = provenance.begin(project(payload.workspaceId), payload);
         quarantine.begin({
           jobId: context.jobId,
           workspaceId: payload.workspaceId,
@@ -426,7 +433,14 @@ function createOperationsService({
         context.item({ state: result.state, code: result.code });
         if (result.state !== "succeeded")
           reject("BUILD_" + result.state.toUpperCase().replaceAll("-", "_"));
-        return { state: result.state, code: result.code };
+        let reproducibility;
+        try {
+          reproducibility = await provenance.complete({ item: project(payload.workspaceId), payload, jobId: context.jobId, signal: context.signal, lineage: buildLineage });
+        } catch (error) {
+          reproducibility = { state: "unbound", reason: typeof error.code === "string" && /^(?:PROVENANCE|BLOCKED)_[A-Z_]+$/.test(error.code) ? error.code : "PROVENANCE_UNAVAILABLE" };
+        }
+        context.item({ kind: "reproducibility", ...reproducibility });
+        return { state: result.state, code: result.code, reproducibility };
       },
     },
   });
@@ -1475,10 +1489,10 @@ function createOperationsService({
         });
         const after = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
         if (hasConfiguration !== fs.existsSync(path.join(item.output, ".config")) || before.sourceRevision !== after.sourceRevision || before.configRevision !== after.configRevision) reject("REPRODUCIBILITY_INPUTS_CHANGED");
-        return { ...manifest, provenance: { kind: "current-input-observation", buildTimeBinding: false, limitations: before.snapshot.limitations } };
+        return { ...manifest, provenance: { ...provenance.bind(manifest, item, request.workspaceId), limitations: before.snapshot.limitations } };
       }
       case "artifacts.compare":
-        return deployment(request.workspaceId).compareManifestFiles(request.beforePath, request.afterPath);
+        return deployment(request.workspaceId).compareManifestFiles(request.beforePath, request.afterPath, manifest => provenance.bind(manifest, project(request.workspaceId), request.workspaceId, manifest.provenance?.buildTimeBinding ? manifest.provenance : null));
       case "artifacts.compliance":
         return deployment(request.workspaceId).collectCompliance();
       case "guest.discover":

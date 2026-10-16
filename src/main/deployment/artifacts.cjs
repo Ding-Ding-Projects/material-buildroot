@@ -212,10 +212,10 @@ class ArtifactStore {
     };
     return createRecord(payload);
   }
-  async compareManifestFiles(beforePath, afterPath) {
+  async compareManifestFiles(beforePath, afterPath, bind = null) {
     const before = readManifest(safePath(this.root, beforePath));
     const after = readManifest(safePath(this.root, afterPath));
-    return compareRecords(before, after);
+    return compareRecords(before, after, bind ? [bind(before), bind(after)] : []);
   }
   async collectCompliance(directory = "legal-info") {
     const records = [],
