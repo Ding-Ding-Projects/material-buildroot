@@ -150,6 +150,8 @@ std::wstring arguments(const std::wstring& operation) {
   if (operation == L"ffmpeg-wav") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f wav pipe:1";
   if (operation == L"ffmpeg-mp3") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f mp3 pipe:1";
   if (operation == L"ffmpeg-flac") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f flac pipe:1";
+  if (operation == L"ffmpeg-mp4") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -movflags +frag_keyframe+empty_moov+default_base_moof -f mp4 pipe:1";
+  if (operation == L"ffmpeg-webm") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 -row-mt 0 -c:a libopus -f webm pipe:1";
   stop();
 }
 }
@@ -191,6 +193,10 @@ void signature(HANDLE handle, const std::wstring& operation) {
   else if (operation == L"ffmpeg-wav") matches = std::memcmp(bytes, "RIFF", 4) == 0 && std::memcmp(bytes + 8, "WAVE", 4) == 0;
   else if (operation == L"ffmpeg-flac") matches = std::memcmp(bytes, "fLaC", 4) == 0;
   else if (operation == L"ffmpeg-mp3") matches = std::memcmp(bytes, "ID3", 3) == 0 || (bytes[0] == 255 && (bytes[1] & 224) == 224);
+  else if (operation == L"ffmpeg-mp4") matches = std::memcmp(bytes + 4, "ftyp", 4) == 0;
+  else if (operation == L"ffmpeg-webm") {
+    const BYTE magic[] = {0x1a,0x45,0xdf,0xa3}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0;
+  }
   require(matches); rewindFile(handle);
 }
 std::wstring validationArguments(const std::wstring& operation) {
@@ -199,8 +205,10 @@ std::wstring validationArguments(const std::wstring& operation) {
     require(format == L"png" || format == L"jpg" || format == L"webp");
     return L" -regard-warnings -limit width 16384 -limit height 16384 -limit list-length 256 -limit memory 128MiB -limit map 0 -limit disk 0 " + format + L":- null:";
   }
-  require(operation == L"ffmpeg-wav" || operation == L"ffmpeg-mp3" || operation == L"ffmpeg-flac");
-  return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -f null pipe:1";
+  require(operation == L"ffmpeg-wav" || operation == L"ffmpeg-mp3" || operation == L"ffmpeg-flac" || operation == L"ffmpeg-mp4" || operation == L"ffmpeg-webm");
+  const std::wstring demuxer = operation == L"ffmpeg-mp4" ? L"mov" : operation == L"ffmpeg-webm" ? L"matroska" : operation.substr(7);
+  const std::wstring streams = operation == L"ffmpeg-mp4" || operation == L"ffmpeg-webm" ? L" -map 0:v:0 -map 0:a:0? -sn -dn" : L" -map 0:a:0 -vn -sn -dn";
+  return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -f " + demuxer + L" -i pipe:0" + streams + L" -f null pipe:1";
 }
 void tokenAdmission(HANDLE process, PSID expectedSid, HANDLE job) {
   HANDLE raw = nullptr; require(OpenProcessToken(process, TOKEN_QUERY, &raw) != 0); Handle token(raw);

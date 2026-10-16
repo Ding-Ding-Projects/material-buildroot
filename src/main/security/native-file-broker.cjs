@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { inspectCanonicalPath } = require("./file-grants.cjs");
 const capabilities = new WeakSet();
-const supported = Object.freeze({ imagemagick: ["png", "jpg", "webp"], ffmpeg: ["wav", "mp3", "flac"] });
+const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]) });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function hash(bytes) { return crypto.createHash("sha256").update(bytes).digest("hex"); }
 function relative(value) {
@@ -69,7 +69,7 @@ function execute(file, args, signal) {
             !admission || admission.appContainer !== true || admission.lpac !== true || admission.capabilityCount !== 0 || admission.jobAssigned !== true || admission.handleList !== true ||
             Object.keys(admission).length !== 5 || Object.keys(receipt).length !== 10) fail("INVALID_BROKER_RECEIPT");
         resolve(receipt);
-      } catch { reject(Object.assign(new Error("INVALID_BROKER_RECEIPT"), { code: "INVALID_BROKER_RECEIPT" })); }
+      } catch { reject(Object.assign(new Error("INVALID_BROKER_RECEIPT"), { code: "INVALID_BROKER_RECEIPT", incompleteOutput: { state: "unknown", publication: "unconfirmed" } })); }
     });
   });
 }
