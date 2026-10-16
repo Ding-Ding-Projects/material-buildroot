@@ -1,6 +1,7 @@
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./build-queue-panel";
+import { requestDestructiveConfirmation } from "./destructive-confirmation";
 import "./ollama-catalogue-panel";
 import "./documentation-panel";
 import {materialIcon, actionIcon} from "./material-icons";
@@ -101,6 +102,7 @@ export class OperationsPanel extends LitElement {
   dockOpen = true;
   private logCursor = 0;
   private logMore = false;
+  private confirmingClean = false;
   static styles = [
     workspaceStyles,
     css`
@@ -368,19 +370,41 @@ export class OperationsPanel extends LitElement {
       ));
   }
   private validResources(){return !this.customResources||(Number.isSafeInteger(this.cpuSlots)&&this.cpuSlots>=(this.runtimeKind==="docker"?2:this.parallelism)&&this.cpuSlots<=64&&Number.isSafeInteger(this.memoryMiB)&&this.memoryMiB>=(this.runtimeKind==="docker"?4096:256)&&this.memoryMiB<=262144&&Number.isSafeInteger(this.storageGiB)&&this.storageGiB>=0&&this.storageGiB<=1024);}
-  private async submit() {
-    if (!this.workspace || !this.validResources()) return;
+  private async submit(event?:Event) {
+    if (!this.workspace || !this.validResources() || this.pending || this.confirmingClean) return;
+    const origin=event?.currentTarget instanceof HTMLElement?event.currentTarget:undefined;
     const runtime =
       this.runtimeKind === "wsl"
         ? { kind: "wsl", distribution: this.distribution }
         : { kind: "docker", image: this.image, uid: 1000, gid: 1000 };
-    const result = await this.run("build.submit", {
+    const input = {
       workspaceId: this.workspace.workspaceId,
       target: this.target,
       runtime,
       jobs: this.parallelism,
       ...(this.customResources?{resources:{cpuSlots:this.cpuSlots,memoryBytes:this.memoryMiB*1024**2,storageBytes:this.storageGiB*1024**3}}:{}),
-    });
+    };
+    let confirmationToken: string | undefined;
+    if(input.target === "clean") {
+      this.confirmingClean=true;
+      let challenge;
+      try {
+        challenge=await this.run("build.confirmation.challenge",{request:{action:"build.submit",...input}});
+        if(!challenge)return;
+        const proof=await requestDestructiveConfirmation(this,this.language,challenge,origin);
+        if(!proof)return;
+        if(this.workspace?.workspaceId!==input.workspaceId)return;
+        const granted=await this.run("build.confirmation.confirm",proof);
+        if(!granted)return;
+        confirmationToken=granted.token;
+      } finally {
+        if(challenge)await this.api?.({action:"build.confirmation.cancel",id:challenge.id}).catch(()=>undefined);
+        this.confirmingClean=false;
+        await this.updateComplete;
+        if(origin?.isConnected)origin.focus();
+      }
+    }
+    const result = await this.run("build.submit", {...input,...(confirmationToken?{confirmationToken}:{})});
     if (result !== undefined) {
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Build request accepted. Job records determine its outcome.",
@@ -388,6 +412,8 @@ export class OperationsPanel extends LitElement {
       ));
       await this.refreshJobs();
     }
+    await this.updateComplete;
+    if(origin?.isConnected)origin.focus();
   }
   private async jobAction(action: string, job: Job) {
     const result = await this.run("jobs." + action, {
@@ -698,6 +724,7 @@ export class OperationsPanel extends LitElement {
                 >${this.options(
                   [
                     "all",
+                    "clean",
                     "olddefconfig",
                     "savedefconfig",
                     "legal-info",
