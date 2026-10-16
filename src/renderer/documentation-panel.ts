@@ -354,6 +354,15 @@ export class DocumentationPanel extends LitElement {
       const index = await this.call<Index>("documentation.list");
       if (token !== this.serial) return;
       this.index = index;
+      if (!this.document && this.history.length === 1) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('documentation-last-location') || 'null');
+          if (saved && typeof saved.id === 'string' && typeof saved.anchor === 'string' && saved.anchor.length <= 512 && index.articles.some(a => a.id === saved.id)) {
+            this.loading = false;
+            void this.open(saved.id, saved.anchor);
+          }
+        } catch { /* A missing local preference never prevents reading. */ }
+      }
       this.bodies = undefined;
       this.bodyState = "idle";
       this.search();
@@ -377,6 +386,7 @@ export class DocumentationPanel extends LitElement {
       const document = await this.call<Document>("documentation.read", { id });
       if (token !== this.serial) return;
       this.document = document;
+      try { localStorage.setItem('documentation-last-location', JSON.stringify({id,anchor})); } catch { /* Reading remains available without preference storage. */ }
       if (historyIndex === undefined) {
         this.history = this.history.slice(0, this.cursor + 1);
         this.history.push({ id, anchor });
@@ -419,6 +429,7 @@ export class DocumentationPanel extends LitElement {
     }
   }
   private followAnchor(anchor: string) {
+    try { if(this.document) localStorage.setItem('documentation-last-location',JSON.stringify({id:this.document.article.id,anchor})); } catch {}
     if (this.document) {
       this.history = this.history.slice(0, this.cursor + 1);
       this.history.push({ id: this.document.article.id, anchor });
@@ -431,6 +442,7 @@ export class DocumentationPanel extends LitElement {
     this.serial++;
     this.loading = false;
     this.document = undefined;
+    try { localStorage.removeItem('documentation-last-location'); } catch {}
     if (record) {
       this.history = this.history.slice(0, this.cursor + 1);
       this.history.push({ id: "", anchor: "" });

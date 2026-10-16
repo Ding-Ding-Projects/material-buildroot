@@ -50,6 +50,7 @@ function validate(data) {
 function createJobManager({
   directory,
   adapters = {},
+  onTransition = () => {},
   now = () => new Date().toISOString(),
 }) {
   directory = storage.directory(directory);
@@ -87,6 +88,7 @@ function createJobManager({
     return j;
   };
   const update = (id, mutate) => {
+    const previousState = find(id).state;
     const next = copy(data),
       j = find(id, next);
     mutate(j);
@@ -95,6 +97,7 @@ function createJobManager({
     validate(next);
     storage.atomic(file, next);
     data = next;
+    if (j.state !== previousState) { try { onTransition({id:j.id,kind:j.kind,state:j.state}); } catch {} }
     return j;
   };
   const append = (id, channel, value) => {

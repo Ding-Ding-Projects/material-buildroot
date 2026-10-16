@@ -1,3 +1,4 @@
+import './notification-centre';
 import {registerCommandActionProvider} from './command-surfaces';
 import "./experience-policies";
 import "./experience-policy-panel";
@@ -1817,7 +1818,7 @@ class MaterialBuildroot extends LitElement {
             ${this.l("Actions", "操作")} · Ctrl+Shift+F</span
           ></md-text-button
         >
-        <div class="window">
+        <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
           ${(["minimize", "maximize-restore", "close"] as const).map(
             (command, index) =>
               html`<md-text-button
