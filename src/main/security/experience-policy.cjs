@@ -48,7 +48,7 @@ function createExperiencePolicyService({
     throw Error("Invalid experience policy configuration");
   directory = storage.directory(directory);
   const file = path.join(directory, "experience-policies.json");
-  let data = { version: 1, lastNow: 0, locks: [], tickets: [], skips: [] };
+  let data = { version: 1, configurationRevision: 0, configurationUpdatedAt: 0, lastNow: 0, locks: [], tickets: [], skips: [] };
   const unlocked = new Map(),
     challenges = new Map(),
     verifying = new Set();
@@ -64,6 +64,10 @@ function createExperiencePolicyService({
       data.skips.some((x) => !finite(x))
     )
       throw Error("Invalid experience policy storage");
+    if (data.configurationRevision === undefined) data.configurationRevision = 0;
+    if (data.configurationUpdatedAt === undefined) data.configurationUpdatedAt = 0;
+    if (!finite(data.configurationUpdatedAt)) throw Error("Invalid configuration timestamp");
+    if (!finite(data.configurationRevision)) throw Error("Invalid configuration revision");
     const targets = new Set();
     for (const l of data.locks) {
       if (
@@ -136,6 +140,7 @@ function createExperiencePolicyService({
     escalation: l.escalation,
     rung: l.rung,
     locked: !unlocked.has(l.targetId) || unlocked.get(l.targetId) <= clock(),
+    unlockedUntil: unlocked.get(l.targetId) || 0,
     disclosure:
       "This is a reversible experience preference, not security or encryption.",
   });
@@ -153,6 +158,9 @@ function createExperiencePolicyService({
   };
   return {
     policies: Object.keys(policies),
+    configuration() {
+      return { revision: data.configurationRevision, timestamp: data.configurationUpdatedAt, locks: data.locks.map(({targetId,policy,duration}) => ({targetId,policy,duration:clone(duration)})) };
+    },
     async enroll({
       targetId,
       policy,
@@ -171,6 +179,7 @@ function createExperiencePolicyService({
         (duration.mode === "minutes" && duration.minutes < 1)
       )
         throw Error("Invalid policy enrollment");
+      if (!data.locks.some(lock => lock.targetId === targetId) && data.locks.length >= 500) throw Error("Lock limit reached");
       const stored = {};
       for (const factor of policies[policy]) {
         const value = credentials?.[factor];
@@ -199,6 +208,8 @@ function createExperiencePolicyService({
       );
       if (!id(reference)) throw Error("Invalid vault reference");
       write((d) => {
+        d.configurationRevision++;
+        d.configurationUpdatedAt = d.lastNow;
         d.locks = d.locks.filter((x) => x.targetId !== targetId);
         d.locks.push({
           targetId,
@@ -239,6 +250,8 @@ function createExperiencePolicyService({
     remove(target) {
       find(target);
       write((d) => {
+        d.configurationRevision++;
+        d.configurationUpdatedAt = d.lastNow;
         d.locks = d.locks.filter((l) => l.targetId !== target);
       });
       unlocked.delete(target);
@@ -317,6 +330,8 @@ function createExperiencePolicyService({
         });
         l = find(target);
       }
+      for (const [key, challenge] of challenges) if (challenge.target === target || challenge.expires <= clock()) challenges.delete(key);
+      if (challenges.size >= 256) throw Error("Too many active challenges");
       const nonce = crypto.randomUUID(),
         start = clock(),
         c = {
@@ -433,8 +448,13 @@ function createExperiencePolicyService({
         status: "open",
         createdAt: clock(),
       };
+      if (data.tickets.length >= 500) throw Error("Ticket limit reached");
       write((d) => d.tickets.push(ticket));
       return clone(ticket);
+    },
+    deleteTickets(ids) {
+      if (!Array.isArray(ids) || ids.length > 500 || ids.some(x => !id(x))) throw Error("Invalid ticket selection");
+      write(d => { d.tickets = d.tickets.filter(t => !ids.includes(t.id)); });
     },
     tickets() {
       return clone(data.tickets);
