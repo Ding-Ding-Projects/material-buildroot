@@ -50,6 +50,7 @@ const fields = {
   "runtime.docker.prepare": ["workspaceId", "runtime"],
   "runtime.python.choose": [],
   "project.list": [],
+  "project.open": ["workspaceId"],
   "project.choose": [],
   "project.adopt": ["selectionId", "trust"],
   "project.runtime": ["workspaceId", "runtime"],
@@ -1218,6 +1219,12 @@ function createOperationsService({
         return projectStore
           .list()
           .map((item) => ({ ...item, authorized: projects.has(item.id) }));
+      case "project.open": {
+        // Metadata is not authority. Only a live, identity-checked grant opens directly.
+        const item = project(request.workspaceId);
+        const options = projectOptions.get({ workspaceId: request.workspaceId });
+        return { workspaceId: request.workspaceId, name: item.name, runtime: options.runtime };
+      }
       case "project.choose":
         return choose();
       case "project.adopt": {

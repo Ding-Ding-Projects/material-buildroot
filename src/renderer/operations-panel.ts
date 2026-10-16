@@ -16,6 +16,7 @@ import "./guest-panel";
 import "./tools-panel";
 import "./companion-panel";
 import "./source-panel";
+import "./project-workflow-panel";
 import "./package-panel";
 import "./managed-ollama-panel";
 import { workspaceStyles } from "./workspace-styles";
@@ -631,6 +632,16 @@ export class OperationsPanel extends LitElement {
   }
   private runtimeView() {
     return html`<div class="split">
+      <project-workflow-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId || ""}
+        @project-opened=${(event: CustomEvent) => {
+          this.workspace = event.detail;
+          this.config = undefined; this.artifacts = []; this.artifact = undefined; this.changes = {};
+          this.configTrustPreview = undefined; this.configTrustAccepted = false;
+          const runtime = event.detail.runtime;
+          if (runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = runtime.distribution; }
+          if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
+          this.dispatchEvent(new CustomEvent("source-adopted", { bubbles: true, composed: true, detail: event.detail }));
+        }}></project-workflow-panel>
       <section class="panel stack">
         <h2>${this.l("Runtime discovery", "探索執行環境")}</h2>
         <p>
