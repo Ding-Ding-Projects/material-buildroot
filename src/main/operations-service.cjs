@@ -22,6 +22,7 @@ const { OutputViewers } = require("./deployment/output-viewers.cjs");
 const { SdkExport } = require("./deployment/sdk-export.cjs");
 const { FlashingRoutes } = require("./deployment/flashing-routes.cjs");
 const { FlashingNative } = require("./deployment/flashing-native.cjs");
+const { CloudDestinations } = require("./deployment/cloud-destinations.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -143,6 +144,13 @@ const fields = {
   "flashing.execute": ["workspaceId", "id", "reviewedIdentity"],
   "flashing.cancel": ["workspaceId", "id"],
   "sdk.export": ["workspaceId", "id"],
+  "cloud.list": ["workspaceId"],
+  "cloud.import": ["workspaceId"],
+  "cloud.remove": ["workspaceId", "id"],
+  "cloud.preview": ["workspaceId", "fileId", "destinationId"],
+  "cloud.start": ["workspaceId", "id", "consent"],
+  "cloud.cancel": ["workspaceId", "id"],
+  "cloud.retry": ["workspaceId", "id", "consent"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
   "artifacts.compliance": ["workspaceId"],
@@ -257,6 +265,7 @@ function createOperationsService({
   openDocumentationExternal,
   updateHostFactory,
   openWslPath,
+  cloudVault,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -1241,6 +1250,16 @@ function createOperationsService({
     }));
     return flashingRoutes.get(id);
   }
+  const cloudDestinations = new Map();
+  function cloudDestination(id) {
+    project(id);
+    if (!cloudDestinations.has(id)) cloudDestinations.set(id, new CloudDestinations({
+      directory: path.join(directory, "cloud-destinations", id), vault: cloudVault,
+      viewer: outputViewer(id), dialog, parentWindow,
+      resolveGh: () => executionSetup.host.executable(),
+    }));
+    return cloudDestinations.get(id);
+  }
   function sdkExport(id) {
     project(id);
     if (!sdkExports.has(id)) sdkExports.set(id, new SdkExport({ viewer: outputViewer(id), manifest: relative => perform({ action: "artifacts.manifest", workspaceId: id, paths: [relative] }) }));
@@ -1342,6 +1361,18 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("cloud.")) {
+      const cloud = cloudDestination(request.workspaceId);
+      switch (action) {
+        case "cloud.list": return cloud.list();
+        case "cloud.import": return cloud.importProfile();
+        case "cloud.remove": return cloud.remove(request.id);
+        case "cloud.preview": return cloud.preview(request);
+        case "cloud.start": return cloud.start(request);
+        case "cloud.cancel": return cloud.cancel(request.id);
+        case "cloud.retry": return cloud.retry(request);
+      }
+    }
     if (action.startsWith("execution.jobs.")) {
       const method = action.slice("execution.jobs.".length);
       const { action: _action, ...args } = request;
@@ -2149,6 +2180,7 @@ function createOperationsService({
       executionSetup.dispose();
       executionJobs?.dispose();
       remoteRuntime?.dispose();
+      for (const cloud of cloudDestinations.values()) cloud.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
@@ -2177,6 +2209,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
