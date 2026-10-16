@@ -64,6 +64,7 @@ function createJobManager({
     for (const j of next.jobs)
       if (["running", "cancelling"].includes(j.state)) {
         j.state = "interrupted";
+        j.error = { code: "OUTCOME_UNKNOWN_AFTER_RESTART", message: "Execution was interrupted. Inspect recorded outcomes and reconcile the owned runtime before an explicit retry." };
         j.sequence++;
         j.updatedAt = now();
       }
@@ -207,16 +208,24 @@ function createJobManager({
       const j = owned(id, owner, seq);
       if (!["failed", "cancelled", "interrupted"].includes(j.state))
         throw Error("Job cannot be retried");
-      const next = api.enqueue({
-        kind: j.kind,
-        payload: j.payload,
-        ownerId: owner,
-      });
-      return copy(
-        update(next.id, (created) => {
-          created.retryOf = j.id;
-        }),
-      );
+      if (typeof adapters[j.kind] !== "function") throw Error("Job adapter unavailable");
+      const next = copy(data), original = find(id, next), timestamp = now();
+      const created = {
+        id: crypto.randomUUID(), operationId: crypto.randomUUID(),
+        ownerId: owner, kind: j.kind, payload: copy(j.payload),
+        state: "queued", sequence: 1, logCount: 0, itemCount: 0,
+        createdAt: timestamp, updatedAt: timestamp, retryOf: j.id,
+      };
+      // Consume the original sequence in the same durable write as the new job.
+      // Re-entry with the old sequence cannot create another retry.
+      original.sequence++;
+      original.updatedAt = timestamp;
+      original.lastRetryId = created.id;
+      next.jobs.push(created);
+      validate(next);
+      storage.atomic(file, next);
+      data = next;
+      return copy(created);
     },
     async run(id, owner, seq) {
       const j = owned(id, owner, seq);
