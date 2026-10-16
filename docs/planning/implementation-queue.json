@@ -44,23 +44,26 @@
     {
       "id": "PH05-T11-C01",
       "description": "Guided setup for source or dedicated execution repositories, scoped credentials and compatible hosted/self-hosted Linux runner discovery.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/execution-setup",
-      "verification": "deferred"
+      "verification": "deferred",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd"
     },
     {
       "id": "PH05-T11-C02",
       "description": "Generate workflows and validate reviewed expert YAML through the same admitted action model.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/execution-workflows",
-      "verification": "deferred"
+      "verification": "deferred",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd"
     },
     {
       "id": "PH05-T11-C03",
       "description": "Queue, observe, cancel, reconnect and download verified outputs from standard public hosted Linux builds.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/execution-jobs",
-      "verification": "deferred"
+      "verification": "deferred",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd"
     },
     {
       "id": "PH05-T11-C04",
@@ -155,8 +158,8 @@
     {
       "id": "PH03-T02",
       "description": "[A+D-native+R] Implement complete English/Cantonese/bilingual copy, persisted fresh bilingual/system-theme defaults, independent humor levels, bounded local vocabulary import and display rename.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/language-wording",
       "verification": "deferred"
     },
     {
@@ -165,7 +168,7 @@
       "state": "integrated-source-acceptance-deferred",
       "owner": "task/shared-modes",
       "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
-      "sourceCommit": "6febdda98b43d6c2e03c2fbe1675e647c9c14886",
+      "sourceCommit": "7984d5428f60820526a43dd1f23d5d173b153161",
       "productionReceiptSha256": "b5accc47fc01740d7817420068d2f603b4d9b62e0c84d2eed3e74931b3fbb4fb"
     },
     {
@@ -235,15 +238,15 @@
     {
       "id": "PH04-T05",
       "description": "[A+D-native+R] Implement durable jobs, crash/re-entry recovery, progress at initiator, per-item bulk outcomes, cancel/retry and contextual recovery routes.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/durable-jobs",
       "verification": "deferred"
     },
     {
       "id": "PH04-T06",
       "description": "[A+D-native+R] Implement factual changelog, safe upstream-markup rendering, complete offline documentation and accessible persistent notification/review centre.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/documentation-notifications",
       "verification": "deferred"
     },
     {
@@ -348,8 +351,8 @@
     {
       "id": "PH06-T06",
       "description": "[A+R] Implement named build/package/clean targets, truthful streaming logs/history/progress and explicit invalidation/rebuild explanations.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/named-targets",
       "verification": "deferred"
     },
     {
@@ -405,8 +408,8 @@
     {
       "id": "PH07-T06",
       "description": "[A+R] Implement real SDK/toolchain export with consumer smoke-build verification and environment instructions.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/sdk-export",
       "verification": "deferred"
     },
     {
@@ -443,7 +446,7 @@
       "state": "integrated-source-acceptance-deferred",
       "owner": "task/minecraft-manager",
       "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
-      "sourceCommit": "7218f688219c909a46223778d7b51b66315962b5",
+      "sourceCommit": "078b592119f9d233c6c7b40f20c1f4a42f514090",
       "productionReceiptSha256": "6ce85d8ee83a00a8d099000f1c26a01f2cb5ac6d17bd6dd1d5a31130c96ae5bf"
     },
     {
@@ -458,8 +461,8 @@
     {
       "id": "PH08-T04",
       "description": "[A+D-native+R] Implement local assistant plans/checkpoints/reviewed actions and harness recovery with no silent privilege escalation; verify failure and cancellation phases.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/assistant-actions",
       "verification": "deferred"
     },
     {
@@ -572,9 +575,10 @@
     {
       "id": "PH10-T05",
       "description": "[A+D+C+R (final applicable acceptance)] Implement CI bootstrap inventories, compatible accessible runner selection/cloud fallback and defensive evidence collection; use encrypted public builder transport only if private source is introduced.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/ci-inventory",
+      "verification": "deferred",
+      "sourceCommit": "7d7e4bcd7adb3c31482f686ca4306fe8ca98348f"
     },
     {
       "id": "PH10-T06",
@@ -599,5 +603,5 @@
     }
   ],
   "updatedAt": "2026-10-16T18:35:07.7280332Z",
-  "integrationCommit": "63ab3d4a81b24b2880b28d1eda9c6c29133c72c9"
+  "integrationCommit": "6003e6f9b27b57b760c895282f6d595956028abb"
 }
