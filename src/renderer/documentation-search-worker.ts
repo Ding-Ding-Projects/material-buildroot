@@ -8,7 +8,7 @@ context.onmessage = (event: MessageEvent) => {
       typeof pattern !== "string" ||
       pattern.length > 2000 ||
       typeof flags !== "string" ||
-      !/^[imsu]*$/.test(flags) ||
+      !/^[dgimsuvy]*$/.test(flags) ||
       new Set(flags).size !== flags.length ||
       !Array.isArray(articles) ||
       articles.length > 1000
@@ -23,7 +23,7 @@ context.onmessage = (event: MessageEvent) => {
           a.text.length > 70000
         )
           throw Error("INVALID_SEARCH");
-        return expression.test(a.text);
+        expression.lastIndex = 0; return expression.test(a.text);
       })
       .map((a) => a.id);
     context.postMessage({ ok: true, ids });
@@ -31,3 +31,4 @@ context.onmessage = (event: MessageEvent) => {
     context.postMessage({ ok: false, code: "INVALID_EXPRESSION" });
   }
 };
+
