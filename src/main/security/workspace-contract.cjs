@@ -160,6 +160,7 @@ function state(value) {
       "snapshots",
       "activity",
       "preferenceProvenance",
+      "packageDraft",
     ],
     [
       "format",
@@ -177,6 +178,7 @@ function state(value) {
   if (value.format !== "material-buildroot-workspace" || value.version !== 1)
     fail();
   revision(value.revision);
+  if (Object.hasOwn(value, "packageDraft")) require("./package-draft-contract.cjs").packageDraft(value.packageDraft);
   // Absence on older files is unknown, never inferred from the value or revision.
   if (Object.hasOwn(value, "preferenceProvenance")) {
     object(value.preferenceProvenance, ["theme"]);
@@ -213,7 +215,7 @@ function state(value) {
   for (const a of value.activity) {
     object(a, ["id", "action", "timestamp", "revision"]);
     id(a.id);
-    one(a.action, ACTIONS);
+    one(a.action, [...ACTIONS, "package.draft.save"]);
     timestamp(a.timestamp);
     revision(a.revision);
     if (a.revision > value.revision) fail();

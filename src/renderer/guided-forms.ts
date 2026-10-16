@@ -34,5 +34,8 @@ export class DraftHistory<T> {
   constructor(initial:T){this.current=structuredClone(initial);}
   record(value:T){if(JSON.stringify(value)===JSON.stringify(this.current))return;this.previous=[...this.previous.slice(-49),this.current];this.current=structuredClone(value);this.next=[];}
   get canUndo(){return this.previous.length>0;} get canRedo(){return this.next.length>0;}
+  snapshot(){return structuredClone({model:this.current,undo:this.previous.slice(-10),redo:this.next.slice(-10)});}
+  recover(snapshot:{model:T;undo:T[];redo:T[]}){this.current=structuredClone(snapshot.model);this.previous=structuredClone(snapshot.undo.slice(-10));this.next=structuredClone(snapshot.redo.slice(-10));return structuredClone(this.current);}
+  preserveBeforeRestore(value:T){this.previous=[...this.previous.slice(-49),structuredClone(value)];}
   restore(redo=false):T|undefined{const source=redo?this.next:this.previous,target=redo?this.previous:this.next;const value=source.pop();if(value===undefined)return;target.push(this.current);this.current=structuredClone(value);return structuredClone(value);}
 }
