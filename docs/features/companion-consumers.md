@@ -29,7 +29,8 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | servers.choose | servers:write | Native directory selection with native server execution consent |
 | servers.configuration.read / servers.configuration.save | servers:read / servers:write | Typed properties and separately native-approved, stopped-server configuration |
 | servers.install / servers.paper.install / servers.fabric.install / servers.plugin.install | servers:write | Native-confirmed durable installation jobs for admitted catalogue choices |
-| servers.start | servers:write | Native-confirmed owned local process/container lifecycle |
+| servers.start | servers:write | Native-confirmed owned local/SSH process/container lifecycle |
+| servers.remote.preview / servers.remote.execute / servers.remote.status | servers:write / servers:read | Native-reviewed exact SSH destination, hash-bound durable transfer and truthful progress |
 | servers.list | servers:read | Saved managed-server ownership summaries without host paths |
 | servers.status | servers:read | Current managed state for a server disclosed to this session |
 | servers.stop | servers:write | Existing manager stop after separate native confirmation |
@@ -69,7 +70,7 @@ The authenticated workspace keeps its own English/Cantonese/bilingual language, 
 
 ## Existing managed servers
 
-The companion lists sanitized ownership records, refreshes the existing manager state and requests native-confirmed stopping of a disclosed server. It does not infer ownership or readiness from persisted metadata. Native directory selection, typed configuration, actual version/flavour/plugin discovery and native-approved vanilla/Paper/Fabric/plugin installation now use the existing services and durable queue. Bedrock discovery explicitly reports missing checksum admission rather than pretending installation is available. Fabric retains its bootstrap-only and unpublished-digest limitations. Local process and pinned local-container creation use native confirmation and existing ownership checks; revocation requests stopping only the started server. SSH target enrollment/creation remains a separate gap.
+The companion lists sanitized ownership records, refreshes the existing manager state and requests native-confirmed stopping of a disclosed server. It does not infer ownership or readiness from persisted metadata. Native directory selection, typed configuration, actual version/flavour/plugin discovery and native-approved vanilla/Paper/Fabric/plugin installation now use the existing services and durable queue. Bedrock discovery explicitly reports missing checksum admission rather than pretending installation is available. Fabric retains its bootstrap-only and unpublished-digest limitations. All four process/container targets now use exact native confirmation and existing ownership checks; SSH retains existing strict known-host and authentication handling. A native-reviewed source distribution preview binds its hash and exact destination to the session before entering the durable transfer queue. Cancellation retains remote-state-unknown/partial-destination facts and never pretends rollback. Revocation requests stopping only the started server. Target/runtime/distribution availability remains enforced by the existing adapters.
 
 ## Native file conversion
 
@@ -93,13 +94,14 @@ This increment does not complete PH09-T03 or all C identities. The following are
 - Configuration string/credential editing, complete semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal rows now support bounded symbol filtering and 100-row pagination, semantic type/assignability metadata and revision-bound symbol help. Their edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Custom source clone, existing-source adopt/ref acquisition and historical rollback discovery need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean. Source upgrade now retains its immutable preview in the session and requires native review of the actual patch before the existing revision-bound apply. Rollback previews and apply are also bound to rollback records created by this session, with the same native review and current-revision checks. Patches above 16,000 characters require the full native workflow instead of a truncated approval.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
-- SSH server enrollment/creation and full version-specific descriptors, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
+- Full version-specific descriptors and native SSH authentication enrollment, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
 - Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
 
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
