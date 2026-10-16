@@ -196,7 +196,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, setupEmbedding = null;
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, setupEmbedding = null, flashingHelper = {status:'not-produced',runtimeVerified:false};
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -258,8 +258,19 @@ async function main() {
       squirrelHelper={source:helperManifest.source,architecture:'x64',role:helperManifest.role,sha256:helperManifest.sha256,genuineHelperSha256:helperManifest.genuineSha256,proxySourceSha256:helperManifest.proxySourceSha256,genuineUpdaterSha256:sha256(fs.readFileSync(genuineUpdater)),runtimeVerified:false};
       squirrelTrace=path.join(staging,'squirrel-invocation');fs.mkdirSync(squirrelTrace);
       childEnv.MATERIAL_BUILD_SQUIRREL_TRACE=squirrelTrace;childEnv.MATERIAL_BUILD_SOURCE_SHA=before.commit;
+      const flashingOutput=path.join(staging,'native-flashing');
+      const flashingCommand="$ErrorActionPreference='Stop'; . (Join-Path $env:MATERIAL_FLASH_SOURCE_ROOT 'scripts/build/flashing.ps1'); $null=Invoke-FlashingBuild -RepositoryRoot $env:MATERIAL_FLASH_SOURCE_ROOT -ToolsRoot $env:MATERIAL_FLASH_TOOLS_ROOT -OutputDirectory $env:MATERIAL_FLASH_OUTPUT_DIRECTORY";
+      execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-Command',flashingCommand],{env:{...childEnv,MATERIAL_FLASH_SOURCE_ROOT:root,MATERIAL_FLASH_TOOLS_ROOT:contained(root,'.cache/flashing-tools'),MATERIAL_FLASH_OUTPUT_DIRECTORY:flashingOutput}});
+      const flashingManifest=JSON.parse(fs.readFileSync(nonempty(flashingOutput,'manifest.json'),'utf8'));
+      const flashingHash=sha256(fs.readFileSync(nonempty(flashingOutput,'MaterialBuildroot.Flash.exe')));
+      const flashingInputs=JSON.parse(fs.readFileSync(path.join(root,'native/flashing/build-inputs.json'),'utf8'));
+      if(flashingManifest.protocol!==1||flashingManifest.sha256!==flashingHash||flashingManifest.sdkVersion!==flashingInputs.sdk.version||flashingManifest.runtimeVersion!==flashingInputs.runtime.version||flashingManifest.runtimeIdentifier!=='win-x64'||flashingManifest.selfContained!==true||flashingManifest.unsigned!==true||flashingManifest.debugType!=='None'||flashingManifest.debugSymbols!==false||flashingManifest.runtimeAcceptance!=='unverified') throw Error('Flashing helper production manifest differs from the pinned source and output.');
+      for(const name of ['Program.cs','app.manifest','MaterialBuildroot.Flash.csproj','build-inputs.json'])if(flashingManifest.sourceHashes?.[name]!==sha256(fs.readFileSync(path.join(root,'native/flashing',name))))throw Error('Flashing helper source changed during production.');
+      for(const name of ['dotnet-sdk-LICENSE.txt','dotnet-sdk-ThirdPartyNotices.txt','dotnet-runtime-LICENSE.txt','dotnet-runtime-ThirdPartyNotices.txt'])nonempty(flashingOutput,`notices/${name}`);
+      if(inventory(flashingOutput).some(file=>/\.(pdb|mdb)$/i.test(file.path)))throw Error('Flashing output contains debug symbols; retained without packaging private source-path metadata.');
+      flashingHelper={status:'produced-self-contained',protocol:1,sha256:flashingHash,sdkVersion:flashingManifest.sdkVersion,runtimeVersion:flashingManifest.runtimeVersion,runtimeIdentifier:'win-x64',debugType:'None',debugSymbols:false,sourceHashes:flashingManifest.sourceHashes,buildInputsSha256:flashingManifest.buildInputsSha256,runtimeVerified:false};
       const baseConfiguration=JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build;
-      const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']}]};
+      const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']},{from:flashingOutput,to:'native/flashing',filter:['**/*']}]};
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
       command.push(`--config=${configurationPath}`);
@@ -300,6 +311,10 @@ async function main() {
       if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/material-file-broker.exe')))!==nativeBroker.sha256) throw Error('Packaged native broker differs from its compiled executable.');
       const bundledBroker=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/broker-manifest.json'),'utf8'));
       if(bundledBroker.sha256!==nativeBroker.sha256||bundledBroker.runtimeVerified!==false) throw Error('Packaged native broker manifest differs from its compiled identity.');
+      if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native/flashing/MaterialBuildroot.Flash.exe')))!==flashingHelper.sha256)throw Error('Packaged flashing helper differs from its produced executable.');
+      const bundledFlash=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native/flashing/manifest.json'),'utf8'));
+      if(bundledFlash.protocol!==1||bundledFlash.sha256!==flashingHelper.sha256||bundledFlash.runtimeAcceptance!=='unverified')throw Error('Packaged flashing helper manifest differs from its produced identity.');
+      for(const name of ['dotnet-sdk-LICENSE.txt','dotnet-sdk-ThirdPartyNotices.txt','dotnet-runtime-LICENSE.txt','dotnet-runtime-ThirdPartyNotices.txt'])nonempty(output,`win-unpacked/resources/native/flashing/notices/${name}`);
       const setupFile=nonempty(output,'squirrel-windows/Setup.exe'),setupAdmission=require('./squirrel-setup.cjs');
       let description={status:'format-unavailable'};
       try {
@@ -341,7 +356,7 @@ async function main() {
     }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupEmbedding, setupPayload, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupEmbedding, setupPayload, flashingHelper, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);
