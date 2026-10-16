@@ -115,6 +115,9 @@ class MaterialBuildroot extends LitElement {
     ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
     ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
     ...this.settingsEntries().map(e=>({id:`setting:${e.id}`,en:e.text,zh:e.text,icon:'settings'})),
+    {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
+    {id:'export-plans',en:'Export plans',zh:'匯出計劃',icon:'download'},
+    ...(!this.restricted?[{id:'wording:upload',en:'Import personal vocabulary',zh:'匯入個人詞彙',icon:'upload'},{id:'wording:status',en:'Personal vocabulary status',zh:'個人詞彙狀態',icon:'info'},{id:'wording:clear',en:'Clear personal vocabulary',zh:'清除個人詞彙',icon:'delete'}]:[]),
     {id:'setup',en:'First-run setup',zh:'首次設定',icon:'tune'}
   ];}
   private async workspaceDestination(event:CustomEvent){
@@ -133,6 +136,9 @@ class MaterialBuildroot extends LitElement {
       this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';this.tabsHost()?.acknowledge(destination);return;
     }
     if(destination==='setup'){this.openDialog('setup-dialog');return;}
+    if(destination==='new-plan'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.beginNew();}return;}
+    if(destination==='export-plans'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.exportPlans();}return;}
+    if(destination.startsWith('wording:')){if(this.restricted)return;await this.navigate('settings');if(this.route!=='settings')return;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(destination.slice(8) as 'upload'|'status'|'clear');this.tabsHost()?.acknowledge('setting:vocabulary');return;}
     if(destination.startsWith('tool:')){
       await this.navigate('operations');if(this.route!=='operations')return;const panel=this.activeOperations();if(panel){panel.tab='tools';await panel.updateComplete;const tools=panel.shadowRoot?.querySelector('tools-panel') as import('lit').LitElement|null;await tools?.updateComplete;const section=tools?.shadowRoot?.querySelector<HTMLElement>(`[data-destination="${destination.slice(5)}"]`);section?.scrollIntoView({block:'start'});section?.focus();}
     }else if(destination.startsWith('operation:')){
