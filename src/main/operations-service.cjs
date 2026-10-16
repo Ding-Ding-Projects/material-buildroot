@@ -18,6 +18,7 @@ const { createConfigurationConsent } = require("./configuration/runtime-consent.
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { OutputViewers } = require("./deployment/output-viewers.cjs");
+const { SdkExport } = require("./deployment/sdk-export.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -129,6 +130,8 @@ const fields = {
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
+  "sdk.preview": ["workspaceId", "fileId"],
+  "sdk.export": ["workspaceId", "id"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
   "artifacts.compliance": ["workspaceId"],
@@ -1187,6 +1190,12 @@ function createOperationsService({
   });
   const deployments = new Map();
   const outputViewers = new Map();
+  const sdkExports = new Map();
+  function sdkExport(id) {
+    project(id);
+    if (!sdkExports.has(id)) sdkExports.set(id, new SdkExport({ viewer: outputViewer(id), manifest: relative => perform({ action: "artifacts.manifest", workspaceId: id, paths: [relative] }) }));
+    return sdkExports.get(id);
+  }
   function outputViewer(id) {
     const item = project(id);
     if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
@@ -1708,6 +1717,12 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "sdk.preview":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).preview(request.fileId));
+      case "sdk.export":
+        if (typeof request.id !== "string" || request.id.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).execute(request.id));
       case "outputs.browse":
         if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
         return outputViewer(request.workspaceId).browse(request.directoryId);
@@ -2097,3 +2112,4 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
