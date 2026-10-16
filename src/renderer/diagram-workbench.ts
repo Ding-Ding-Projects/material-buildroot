@@ -1,4 +1,6 @@
 import {localizedCopy} from './language-wording';
+import './guided-forms';
+import '@material/web/textfield/outlined-text-field.js';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon} from "./material-icons";
 import { LitElement, html, svg, css, nothing, type PropertyValues } from "lit";
@@ -22,6 +24,7 @@ export class DiagramWorkbench extends LitElement {
     :host{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;color:var(--md-sys-color-on-surface);font:13px Roboto,Arial,sans-serif}
     .tools{flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container)}
     .tools:first-child{gap:0;padding:0 2px}.tools:first-child strong{flex-basis:100%;padding:4px 6px}.tools:last-of-type span{flex:1;min-width:100px}
+    .tools md-outlined-text-field{flex:1;min-width:80px;max-width:160px}
     .tools strong{margin-right:auto;font-size:12px}.tools span{font-variant-numeric:tabular-nums;font-size:11px}
     md-icon-button{--md-icon-button-state-layer-height:40px;--md-icon-button-state-layer-width:40px;width:48px;height:48px}
     .viewport{position:relative;flex:1;min-height:60px;overflow:hidden;touch-action:none;background-color:var(--md-sys-color-surface);background-image:radial-gradient(var(--md-sys-color-outline-variant) 1px,transparent 1px);background-size:20px 20px;cursor:grab}
@@ -67,8 +70,21 @@ export class DiagramWorkbench extends LitElement {
   }
   private history(redo=false){const from=redo?this.redoStack:this.undoStack,to=redo?this.undoStack:this.redoStack;const previous=from.pop();if(!previous)return;to.push(structuredClone(this.layout));this.layout=previous;this.emit();}
   private keys(e:KeyboardEvent,id:string){const vectors:Record<string,Point>={ArrowLeft:{x:-10,y:0},ArrowRight:{x:10,y:0},ArrowUp:{x:0,y:-10},ArrowDown:{x:0,y:10}};
-    if(vectors[e.key]){e.preventDefault();e.stopPropagation();const v=vectors[e.key];this.adjust(()=>{const p=this.point(id);this.layout.positions[id]={x:p.x+v.x,y:p.y+v.y};});}
-    if(e.key==="Delete"&&this.nodes.find(n=>n.id===id)?.removable){e.preventDefault();this.removeSelected();}
+    if(vectors[e.key]){e.preventDefault();e.stopPropagation();const v=vectors[e.key];this.adjust(()=>{const p=this.point(id);this.layout.positions[id]={x:Math.max(-10000,Math.min(10000,p.x+v.x)),y:Math.max(-10000,Math.min(10000,p.y+v.y))};});}
+    if(e.key==="Delete"&&this.nodes.find(n=>n.id===id)?.removable){e.preventDefault();e.stopPropagation();this.select(id);this.removeSelected();}
+  }
+  private coordinate(axis:"x"|"y",event:Event){
+    const input=event.target as HTMLInputElement,value=Number(input.value);
+    if(!this.selected||!input.value.trim()||!Number.isFinite(value)||Math.abs(value)>10000){input.value=String(this.point(this.selected)[axis]);return;}
+    this.adjust(()=>this.layout.positions[this.selected]={...this.point(this.selected),[axis]:value});
+  }
+  private viewportKeys(e:KeyboardEvent){
+    if(e.target!==e.currentTarget)return;
+    const delta:Record<string,Point>={ArrowLeft:{x:-40,y:0},ArrowRight:{x:40,y:0},ArrowUp:{x:0,y:-40},ArrowDown:{x:0,y:40}};
+    if(delta[e.key]){e.preventDefault();this.adjust(()=>{this.layout.x+=delta[e.key].x;this.layout.y+=delta[e.key].y;});}
+    else if(e.key==='+'||e.key==='='){e.preventDefault();this.zoom(.1);}
+    else if(e.key==='-'){e.preventDefault();this.zoom(-.1);}
+    else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();this.history(e.shiftKey);}
   }
   private removeSelected(){this.dispatchEvent(new CustomEvent("diagram-remove",{bubbles:true,composed:true,detail:{id:this.selected}}));}
   private async persist(write=false){
@@ -85,6 +101,10 @@ export class DiagramWorkbench extends LitElement {
     }catch(error){if(key===this.layoutKey){this.savedRevision=undefined;this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>l("Layout not confirmed. Reload before saving again.","未能確認佈局，請重新載入再儲存。")+" "+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:""));}}finally{this.saving=false;this.revision++;}
   }
   private icon(label:string,icon:string,action:()=>void,disabled=false){return html`<md-icon-button aria-label=${label} title=${label} ?disabled=${disabled} @click=${action}>${materialIcon(icon)}</md-icon-button>`;}
+  private coordinateField(axis:"x"|"y"){
+    const title=axis==='x'?this.l("Selected node X","所選節點 X",true):this.l("Selected node Y","所選節點 Y",true);
+    return html`<div style="flex:1;min-width:100px"><guided-forms .language=${this.language} .guide=${{title,purpose:axis==='x'?this.l("Set the selected node's horizontal layout position. Positive values move right. This does not change dependencies or write a package file.","設定所選節點水平位置，正數向右移動。唔會改變相依項目或寫入套件檔案。",true):this.l("Set the selected node's vertical layout position. Positive values move down. Layout Undo restores the previous position.","設定所選節點垂直位置，正數向下移動。復原佈局可還原之前位置。",true),steps:[this.l("Try a coordinate from -10000 to 10000, then enter it in the real field below. Save diagram layout is a separate action.","試用 -10000 至 10000 之間嘅座標，再輸入下方真實欄位。儲存畫布佈局係獨立操作。",true)],example:"120",expected:this.l("Only the synthetic coordinate is validated.","只會驗證模擬座標。",true),validate:(value:string)=>value.trim()&&Number.isFinite(Number(value))&&Math.abs(Number(value))<=10000?"":this.l("Enter a finite number from -10000 to 10000.","請輸入 -10000 至 10000 之間嘅有限數字。",true)}}></guided-forms><md-outlined-text-field type="number" min="-10000" max="10000" .label=${title} .value=${String(this.point(this.selected)[axis])} @change=${(e:Event)=>this.coordinate(axis,e)}></md-outlined-text-field></div>`;
+  }
   render(){const selected=this.nodes.find(n=>n.id===this.selected);return html`
     <div class="tools" role="toolbar" aria-label=${this.l("Canvas tools","畫布工具",true)}><strong>${this.title}</strong>
       ${this.icon(this.l("Undo layout","復原佈局",true),"undo",()=>this.history(),!this.undoStack.length)}${this.icon(this.l("Redo layout","重做佈局",true),"redo",()=>this.history(true),!this.redoStack.length)}
@@ -92,7 +112,7 @@ export class DiagramWorkbench extends LitElement {
       ${this.icon(this.l("Fit diagram","符合畫布",true),"crop_square",()=>this.fit(),!this.nodes.length)}
       ${this.icon(this.l("Pan left","向左平移",true),"arrow_back",()=>this.adjust(()=>this.layout.x-=40))}${this.icon(this.l("Pan right","向右平移",true),"arrow_forward",()=>this.adjust(()=>this.layout.x+=40))}
     </div>
-    <div class="viewport" role="region" aria-label=${this.title} @pointerdown=${(e:PointerEvent)=>this.start(e)} @pointermove=${this.move} @pointerup=${this.end} @pointercancel=${this.end}>
+    <div class="viewport" tabindex="0" @keydown=${this.viewportKeys} role="region" aria-label=${this.title} @pointerdown=${(e:PointerEvent)=>this.start(e)} @pointermove=${this.move} @pointerup=${this.end} @pointercancel=${this.end}>
       ${!this.nodes.length?html`<p class="empty">${this.l("Add records in the inspector to populate this canvas.","喺檢視器加入記錄以填入畫布。",true)}</p>`:nothing}
       <div class="world" style=${`transform:translate(${this.layout.x}px,${this.layout.y}px) scale(${this.layout.scale})`}>
         <svg aria-hidden="true">${this.edges.map(edge=>{const a=this.point(edge.from),b=this.point(edge.to);return svg`<line x1=${a.x+180} y1=${a.y+33} x2=${b.x} y2=${b.y+33}></line>`;})}</svg>
@@ -101,7 +121,8 @@ export class DiagramWorkbench extends LitElement {
     </div>
     <div class="footer"><md-outlined-select .label=${this.l("Selected node","已選節點",true)} .value=${this.selected} .displayText=${selected?.label||this.l("Select a node","選擇節點",true)} @change=${(e:Event)=>this.select((e.target as HTMLSelectElement).value)}>${this.nodes.map(node=>html`<md-select-option .value=${node.id}><div slot="headline">${node.label}</div></md-select-option>`)}</md-outlined-select>${this.icon(this.l("Remove selected dependency","移除所選相依項目",true),"delete",()=>this.removeSelected(),!selected?.removable)}</div>
     <div class="tools">${this.icon(this.l("Load saved layout","載入儲存佈局",true),"download",()=>this.persist(),this.saving||!this.workspaceId)}${this.icon(this.l("Save diagram layout","儲存畫布佈局",true),"save",()=>this.persist(true),this.saving||this.savedRevision===undefined||this.nodes.length>128)}<span role="status">${displayOwnedStatus(this,"saveMessage",this.saveMessage,this.language)||this.l("Load before saving. Layout is separate from semantic Apply.","儲存前請先載入，佈局同語意套用分開。",true)}</span></div>
-    <p class="hint">${this.l("Drag to arrange, background to pan. Arrow keys move a focused node by 10 units. Undo/redo changes layout only.","拖曳排列，拖曳背景平移。方向鍵每次移動已聚焦節點 10 單位，復原／重做只會改變佈局。",true)}</p>
+    ${selected?html`<details><summary>${this.l("Edit selected node coordinates","編輯所選節點座標",true)}</summary><div class="tools">${this.coordinateField('x')}${this.coordinateField('y')}</div></details>`:nothing}
+    <p class="hint">${this.l("Drag to arrange. Arrow keys move a focused node by 10 units. Focus the background to pan with arrows or zoom with + and -. Ctrl/Cmd+Z undoes layout; Shift redoes. Coordinates accept -10000 to 10000. Layout history never changes semantic data.","拖曳排列，方向鍵移動已聚焦節點 10 單位。聚焦背景後用方向鍵平移、+ 同 - 縮放。Ctrl/Cmd+Z 復原佈局，加 Shift 重做。座標接受 -10000 至 10000，佈局歷史唔會改變語意資料。",true)}</p>
   `;}
 }
 customElements.define("diagram-workbench",DiagramWorkbench);

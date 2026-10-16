@@ -186,6 +186,9 @@ const fields = {
     "previewHash",
   ],
   "package.preview": ["workspaceId", "externalTreeId", "model"],
+  "package.draft.history": ["workspaceId", "externalTreeId"],
+  "package.draft.save": ["workspaceId", "externalTreeId", "expectedRevision", "draft"],
+  "package.draft.restore": ["workspaceId", "externalTreeId", "expectedRevision", "revision"],
   "package.discover": ["workspaceId", "query", "offset", "limit"],
   "package.import": ["workspaceId", "packageId", "revision"],
   "package.editors": ["workspaceId"],
@@ -1076,6 +1079,18 @@ function createOperationsService({
     purpose: "external-tree",
   });
   const externalWorkspaces = new Map();
+  const packageDrafts = require("./configuration/package-drafts.cjs").createPackageDrafts({
+    directory: path.join(directory, "package-drafts"),
+    resolveIdentity: (workspaceId, externalTreeId) => {
+      const item = project(workspaceId);
+      if (externalWorkspaces.get(externalTreeId) !== workspaceId) reject("EXTERNAL_TREE_NOT_GRANTED");
+      const root = externalFiles.resolve(externalTreeId, "write");
+      const stat = fs.lstatSync(root, {bigint:true});
+      externalFiles.resolve(externalTreeId, "write");
+      return {workspaceId,root:item.root,source:item.source,output:item.output,identities:item.identities,
+        externalRoot:root,externalIdentity:{dev:String(stat.dev),ino:String(stat.ino)}};
+    },
+  });
   const packageDiscovery = createPackageDiscoveryService({
     resolveRoots: (workspaceId) => {
       const item = project(workspaceId);
@@ -2183,6 +2198,12 @@ function createOperationsService({
       }
       case "package.preview":
         return packageAuthoring.preview(request);
+      case "package.draft.history":
+        return packageDrafts.history(request);
+      case "package.draft.save":
+        return packageDrafts.save(request);
+      case "package.draft.restore":
+        return packageDrafts.restore(request);
       case "package.editors":
         return require("./configuration/package-editor.cjs").discoverEditors();
       case "package.editor.open":

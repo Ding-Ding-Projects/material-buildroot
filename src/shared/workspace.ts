@@ -21,6 +21,7 @@ export interface WorkspacePayload {
   };
 }
 export interface WorkspaceState extends WorkspacePayload {
+  preferenceProvenance?: { theme: { origin: "default" | "saved" | "restored" | "imported"; revision: number } };
   format: "material-buildroot-workspace";
   version: 1;
   revision: number;
