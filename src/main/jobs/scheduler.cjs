@@ -89,6 +89,7 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
         if (closed) { release(); externalRelease?.(); break; }
         const latest = jobs.get(job.id, ownerId);
         if (latest.state !== "queued" || latest.sequence !== job.sequence) { release(); externalRelease?.(); continue; }
+        if (admittedBudgetRevision !== budgetRevision) fail("BLOCKED_BUDGET_CHANGED");
         blocked.delete(job.id);
         const item = { admission, promise: null }; running.set(job.id, item);
         const releaseLocal = release, releaseExternal = externalRelease; release = null; externalRelease = null;
