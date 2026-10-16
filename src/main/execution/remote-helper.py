@@ -34,7 +34,7 @@ def regular(file):
     return s
 
 def read(file):
-    if regular(file).st_size > LIMIT: fail('REMOTE_RECORD_LIMIT')
+    if regular(file).st_size > 1024 * 1024: fail('REMOTE_RECORD_LIMIT')
     return json.loads(file.read_text(encoding='utf-8'))
 
 def uuid_path(root, category, value):
@@ -240,6 +240,7 @@ except Exception:
     # Never reflect remote exception text, paths, environment or credential material.
     print(json.dumps({'state': 'unknown', 'code': 'REMOTE_OPERATION_INCOMPLETE'}))
     sys.exit(1)
+
 
 
 

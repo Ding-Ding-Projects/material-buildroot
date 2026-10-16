@@ -51,7 +51,7 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
   }
   function reason(admission, observed) {
     if (!observed || observed.resourceDomain !== admission.resourceDomain || observed.storageDomain !== admission.storageDomain || !safeInteger(observed.cpuSlots) || !safeInteger(observed.memoryAvailableBytes) || !safeInteger(observed.storageAvailableBytes)) return "BLOCKED_RESOURCE_UNKNOWN";
-    if ([...leases].some(lease => conflicts(lease, admission))) return "BLOCKED_SOURCE_BUSY";
+    if ([...leases].some(lease => conflicts(lease, admission)) || [...externalReservations.values()].some(item => conflicts(item.admission, admission))) return "BLOCKED_SOURCE_BUSY";
     if (running.size + externalReservations.size >= limits.maxConcurrent) return "BLOCKED_CONCURRENCY_LIMIT";
     const global = usage(), domain = usage(item => item.admission.resourceDomain === admission.resourceDomain), storage = usage(item => item.admission.storageDomain === admission.storageDomain);
     if (global.cpuSlots + admission.cpuSlots > limits.cpuSlots || domain.cpuSlots + admission.cpuSlots > observed.cpuSlots) return "BLOCKED_CPU_LIMIT";
@@ -146,5 +146,6 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
   };
 }
 module.exports = { createBuildScheduler };
+
 
 
