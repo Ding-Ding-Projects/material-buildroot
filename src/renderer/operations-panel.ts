@@ -6,6 +6,7 @@ import "./configuration-panel";
 import "./defconfig-panel";
 import "./update-panel";
 import "./wsl-runtime-panel";
+import "./remote-runtime-panel";
 import "./execution-setup-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
@@ -660,8 +661,10 @@ export class OperationsPanel extends LitElement {
           if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
         }}></project-workflow-panel>
       <section class="panel stack">
+        <remote-runtime-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""}></remote-runtime-panel>
         <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { if(!this.dispatchEvent(new CustomEvent("workspace-adopted",{detail:event.detail,bubbles:true,composed:true,cancelable:true})))return; this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; }}></wsl-runtime-panel>
         <execution-setup-panel .language=${this.language}></execution-setup-panel>
+        <execution-setup-panel .product=${true} .language=${this.language}></execution-setup-panel>
         <h2>${this.l("Runtime discovery","探索執行環境",true)}</h2>
         <p>
           ${this.l("Inspect installed WSL distributions and Docker availability. Discovery does not install or start a runtime.","檢視已安裝嘅 WSL 發行版同 Docker 可用狀態，探索唔會安裝或啟動執行環境。",true)}
@@ -1127,3 +1130,5 @@ export class OperationsPanel extends LitElement {
   }
 }
 customElements.define("operations-panel", OperationsPanel);
+
+

@@ -27,7 +27,7 @@ function profile(input) {
 class CloudDestinations {
   constructor({directory,vault,viewer,dialog,parentWindow,resolveGh}) {
     this.root=storage.directory(directory);this.vault=vault;this.viewer=viewer;this.dialog=dialog;this.parentWindow=parentWindow;this.resolveGh=resolveGh;
-    this.profileFile=path.join(this.root,"destinations.json");this.profiles=[];this.previews=new Map();this.active=new Set();this.closed=false;this.importing=false;
+    this.profileFile=path.join(this.root,"destinations.json");this.profiles=[];this.previews=new Map();this.active=new Set();this.authorities=new Map();this.closed=false;this.importing=false;
     if(fs.existsSync(this.profileFile)) {const data=storage.read(this.profileFile);if(data.version!==1||!Array.isArray(data.profiles)||data.profiles.length>32)fail("CLOUD_STORAGE_INVALID");this.profiles=data.profiles.map(p=>{if(!uuid.test(p.id)||!/^vault:[0-9a-f-]{36}$/.test(p.credentialRef))fail("CLOUD_STORAGE_INVALID");const {id,credentialRef,...publicProfile}=p;return {...profile(publicProfile),id,credentialRef};});}
     this.jobs=createJobManager({directory:path.join(this.root,"jobs"),adapters:{"cloud-upload":(payload,context)=>this.transfer(payload,context)}});
   }
@@ -67,13 +67,15 @@ class CloudDestinations {
     if(this.previews.size>=32)fail("CLOUD_PREVIEW_LIMIT");this.previews.set(id,record);
     return {...record,fileId:undefined,destination:{provider:p.provider,label:p.label,scope:p.endpoint||p.account||p.repository||"storage.googleapis.com",bucket:p.bucket||p.container||p.tag,visibility:"private-required"},overwrite:false,networkState:"not-contacted"};
   }
-  async start(request) {if(this.starting)fail("CLOUD_BUSY");this.starting=true;try{return await this.startUpload(request);}finally{this.starting=false;}}
-  async startUpload({id,consent}) {
+  async start(request,authority=null) {if(authority!==null&&typeof authority!=='function')fail('CLOUD_AUTHORITY_INVALID');if(this.starting)fail("CLOUD_BUSY");this.starting=true;try{return await this.startUpload(request,authority);}finally{this.starting=false;}}
+  async startUpload({id,consent},authority=null) {
+    authority?.();
     if(consent!==true)fail("CLOUD_CONSENT_REQUIRED");if(this.closed||this.active.size)fail("CLOUD_BUSY");
     const preview=this.previews.get(id);if(!preview||preview.expiresAt<Date.now())fail("CLOUD_PREVIEW_EXPIRED");this.previews.delete(id);
     const p=this.destination(preview.destinationId),{file,current}=this.viewer.resolve(preview.fileId,"file");
     const answer=await this.dialog.showMessageBox(this.parentWindow,{type:"warning",buttons:["Cancel","Upload exact file"],defaultId:0,cancelId:0,title:"Confirm external upload",message:`${preview.relative}\n${preview.size} bytes\nSHA-256: ${preview.sha256}`,detail:`Destination: ${p.label} (${p.provider})\nScope: ${p.endpoint||p.account||p.repository||p.bucket}\nContainer: ${p.bucket||p.container||p.tag}\nObject: ${preview.object}\nPrivate access must be verified. No existing object is replaced. Network transfer and provider charges may apply.`});
     if(answer.response!==1)return {state:"cancelled"};
+    authority?.();
     if(preview.expiresAt<Date.now()||this.active.size)fail("CLOUD_PREVIEW_EXPIRED");
     const folder=storage.directory(path.join(this.root,"transfers",crypto.randomUUID())),snapshot=path.join(folder,p.provider==="github"?preview.object:path.basename(file));
     const fd=fs.openSync(file,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW||0));
@@ -83,24 +85,30 @@ class CloudDestinations {
       await pipeline(fs.createReadStream(file,{fd,autoClose:false}),meter,fs.createWriteStream(snapshot,{flags:"wx",mode:0o600}));
       if(bytes!==preview.size||hash.digest("hex")!==preview.sha256||!same(current,fs.fstatSync(fd)))fail("CLOUD_FILE_CHANGED");
     }finally{fs.closeSync(fd);}
-    const job=this.jobs.enqueue({kind:"cloud-upload",ownerId:"cloud",payload:{destinationId:p.id,object:preview.object,sha256:preview.sha256,size:preview.size,snapshot,folder}});this.launch(job);return {id:job.id,state:"queued"};
+    authority?.();
+    const job=this.jobs.enqueue({kind:"cloud-upload",ownerId:"cloud",payload:{destinationId:p.id,object:preview.object,sha256:preview.sha256,size:preview.size,snapshot,folder}});if(authority)this.authorities.set(job.id,authority);this.launch(job);return {id:job.id,state:"queued"};
   }
-  launch(job){this.active.add(job.id);void this.jobs.run(job.id,"cloud",job.sequence).catch(()=>{}).finally(()=>this.active.delete(job.id));}
+  launch(job){this.active.add(job.id);void this.jobs.run(job.id,"cloud",job.sequence).catch(()=>{}).finally(()=>{this.active.delete(job.id);this.authorities.delete(job.id);});}
   cancel(id){const job=this.jobs.get(id,"cloud"),result=this.jobs.cancel(id,"cloud",job.sequence);return {id:result.id,state:result.state};}
-  async retry({id,consent}){if(consent!==true)fail("CLOUD_CONSENT_REQUIRED");if(this.closed||this.active.size)fail("CLOUD_BUSY");const job=this.jobs.get(id,"cloud");this.destination(job.payload.destinationId);const answer=await this.dialog.showMessageBox(this.parentWindow,{type:"warning",buttons:["Cancel","Verify retained object"],defaultId:0,cancelId:0,title:"Retry cloud readback",message:job.payload.object,detail:"This retry reads the exact retained object and compares its bytes. It never uploads again or replaces an object. For a missing object, create a new upload preview."});if(answer.response!==1)return {state:"cancelled"};const next=this.jobs.retry(id,"cloud",job.sequence);this.launch(next);return {id:next.id,state:"queued"};}
+  async retry({id,consent},authority=null){if(authority!==null&&typeof authority!=='function')fail('CLOUD_AUTHORITY_INVALID');authority?.();if(consent!==true)fail("CLOUD_CONSENT_REQUIRED");if(this.closed||this.active.size)fail("CLOUD_BUSY");const job=this.jobs.get(id,"cloud");this.destination(job.payload.destinationId);const answer=await this.dialog.showMessageBox(this.parentWindow,{type:"warning",buttons:["Cancel","Verify retained object"],defaultId:0,cancelId:0,title:"Retry cloud readback",message:job.payload.object,detail:"This retry reads the exact retained object and compares its bytes. It never uploads again or replaces an object. For a missing object, create a new upload preview."});if(answer.response!==1)return {state:"cancelled"};authority?.();const next=this.jobs.retry(id,"cloud",job.sequence);if(authority)this.authorities.set(next.id,authority);this.launch(next);return {id:next.id,state:"queued"};}
   async transfer(payload,context){
-    const signal=AbortSignal.any([context.signal,AbortSignal.timeout(600000)]);let stage="admission";
+    const authority=this.authorities.get(context.jobId),revoked=new AbortController();
+    const check=()=>{try{authority?.();}catch{revoked.abort();try{const job=this.jobs.get(context.jobId,'cloud');if(['queued','running'].includes(job.state))this.jobs.cancel(job.id,'cloud',job.sequence);}catch{}fail('CLOUD_AUTHORITY_REVOKED');}};
+    const observer=authority?setInterval(()=>{try{check();}catch{}},250):null;observer?.unref?.();
+    const signal=AbortSignal.any([context.signal,revoked.signal,AbortSignal.timeout(600000)]);let stage="admission";
     try {
-      const p=this.destination(payload.destinationId),secret=credentials(p,this.vault);
+      check();const p=this.destination(payload.destinationId),secret=credentials(p,this.vault);
       const adapter=p.provider==="github"?github(p,secret,signal,await this.resolveGh(),payload.folder):provider(p,secret,signal);
-      context.checkpoint({stage,state:"checking-private-scope",partial:"retained-if-created"});await adapter.privateScope();signal.throwIfAborted();
+      context.checkpoint({stage,state:"checking-private-scope",partial:"retained-if-created"});check();await adapter.privateScope();signal.throwIfAborted();
       const job=this.jobs.get(context.jobId,"cloud");
-      if(!job.retryOf){storage.assertSafe(payload.snapshot);if(fs.statSync(payload.snapshot).size!==payload.size||await hashFile(payload.snapshot)!==payload.sha256)fail("CLOUD_SNAPSHOT_CHANGED");stage="upload";context.checkpoint({stage,state:"uploading",partial:"retained-if-created"});await adapter.put(payload.object,payload.snapshot,payload.sha256,payload.size);}
+      if(!job.retryOf){storage.assertSafe(payload.snapshot);if(fs.statSync(payload.snapshot).size!==payload.size||await hashFile(payload.snapshot)!==payload.sha256)fail("CLOUD_SNAPSHOT_CHANGED");stage="upload";context.checkpoint({stage,state:"uploading",partial:"retained-if-created"});check();await adapter.put(payload.object,payload.snapshot,payload.sha256,payload.size);}
       stage="readback";context.checkpoint({stage,state:"verifying",partial:"retained"});
-      const verified=await adapter.readback(payload.object,payload.sha256,payload.size);await adapter.privateScope();signal.throwIfAborted();
+      check();const verified=await adapter.readback(payload.object,payload.sha256,payload.size);check();await adapter.privateScope();signal.throwIfAborted();
       context.checkpoint({stage:"complete",state:"verified",partial:"none"});return {state:"verified",object:payload.object,...verified,verifiedAt:new Date().toISOString()};
-    }catch(error){context.checkpoint({stage,state:context.signal.aborted?"cancelled":signal.aborted?"timeout":"unverified",partial:"retained-if-created",code:/^CLOUD_[A-Z_]+$/.test(error.code||"")?error.code:"CLOUD_TRANSFER_UNVERIFIED"});throw new Error("Cloud transfer remains unverified.");}
+    }catch(error){context.checkpoint({stage,state:context.signal.aborted?"cancelled":signal.aborted?"timeout":"unverified",partial:"retained-if-created",code:/^CLOUD_[A-Z_]+$/.test(error.code||"")?error.code:"CLOUD_TRANSFER_UNVERIFIED"});throw new Error("Cloud transfer remains unverified.");}finally{if(observer)clearInterval(observer);}
   }
   dispose(){this.closed=true;this.previews.clear();for(const id of this.active){const job=this.jobs.get(id,"cloud");if(job.state==="running")this.jobs.cancel(id,"cloud",job.sequence);}}
 }
 module.exports={CloudDestinations};
+
+

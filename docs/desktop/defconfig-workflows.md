@@ -1,5 +1,7 @@
 # Defconfig workflows
 
+[香港粵語](defconfig-workflows.zh-HK.md)
+
 The Configuration workspace includes a Buildroot defconfig browser. Grant configuration execution trust first, then refresh the catalog. It enumerates the source `configs/` directory followed by each currently authorized external tree in saved order. Duplicate names remain separate entries with source identity and content hashes. Filtering narrows the displayed catalog to 250 entries at a time.
 
 Applying a selection requires explicit replacement acknowledgement. The host refreshes the catalog, checks its revision and selected content, and passes host-read bytes to the configuration service. The service preserves its revision, trust, reconciliation and rollback behavior. No renderer-supplied shell command or filesystem path is executed.

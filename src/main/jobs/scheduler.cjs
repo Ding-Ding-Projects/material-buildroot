@@ -15,6 +15,7 @@ function conflicts(a, b) {
 function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResources, limits, acquireLease = null, maxScan = 100, callbackTimeoutMs = 15000 } = {}) {
   if (!jobs || !text(ownerId) || typeof resolveAdmission !== "function" || typeof observeResources !== "function" || !limits || !["maxConcurrent", "cpuSlots", "memoryBytes"].every(key => safeInteger(limits[key], 1)) || !safeInteger(limits.storageBytes) || !safeInteger(maxScan, 1) || maxScan > 1000 || !safeInteger(callbackTimeoutMs, 1) || callbackTimeoutMs > 60000) fail("INVALID_SCHEDULER_OPTIONS");
   limits = { ...limits };
+  const externalReservations = new Map();
   const running = new Map(), leases = new Set(), blocked = new Map(), faulted = new Set();
   let pumping = null, requested = false, closed = false, scanOffset = 0, budgetRevision = 0;
   async function boundedCallback(work, releaseLate = false) {
@@ -38,7 +39,7 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
     return () => { if (!released) { released = true; leases.delete(descriptor); if (notify && !closed) pump(); } };
   }
   function usage(filter = () => true) {
-    return [...running.values()].filter(filter).reduce((sum, item) => ({ cpuSlots: sum.cpuSlots + item.admission.cpuSlots, memoryBytes: sum.memoryBytes + item.admission.memoryBytes, storageBytes: sum.storageBytes + item.admission.storageBytes }), { cpuSlots: 0, memoryBytes: 0, storageBytes: 0 });
+    return [...running.values(), ...externalReservations.values()].filter(filter).reduce((sum, item) => ({ cpuSlots: sum.cpuSlots + item.admission.cpuSlots, memoryBytes: sum.memoryBytes + item.admission.memoryBytes, storageBytes: sum.storageBytes + item.admission.storageBytes }), { cpuSlots: 0, memoryBytes: 0, storageBytes: 0 });
   }
   function intent(job, admission) {
     const expected = job.payload?.intent;
@@ -50,8 +51,8 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
   }
   function reason(admission, observed) {
     if (!observed || observed.resourceDomain !== admission.resourceDomain || observed.storageDomain !== admission.storageDomain || !safeInteger(observed.cpuSlots) || !safeInteger(observed.memoryAvailableBytes) || !safeInteger(observed.storageAvailableBytes)) return "BLOCKED_RESOURCE_UNKNOWN";
-    if ([...leases].some(lease => conflicts(lease, admission))) return "BLOCKED_SOURCE_BUSY";
-    if (running.size >= limits.maxConcurrent) return "BLOCKED_CONCURRENCY_LIMIT";
+    if ([...leases].some(lease => conflicts(lease, admission)) || [...externalReservations.values()].some(item => conflicts(item.admission, admission))) return "BLOCKED_SOURCE_BUSY";
+    if (running.size + externalReservations.size >= limits.maxConcurrent) return "BLOCKED_CONCURRENCY_LIMIT";
     const global = usage(), domain = usage(item => item.admission.resourceDomain === admission.resourceDomain), storage = usage(item => item.admission.storageDomain === admission.storageDomain);
     if (global.cpuSlots + admission.cpuSlots > limits.cpuSlots || domain.cpuSlots + admission.cpuSlots > observed.cpuSlots) return "BLOCKED_CPU_LIMIT";
     if (global.memoryBytes + admission.memoryBytes > limits.memoryBytes || domain.memoryBytes + admission.memoryBytes > observed.memoryAvailableBytes) return "BLOCKED_MEMORY_LIMIT";
@@ -111,6 +112,27 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
     return pumping;
   }
   return {
+    reserveExternal({id, admission, observed}) {
+      if (closed || !text(id) || externalReservations.has(id)) fail("BLOCKED_EXTERNAL_RESERVATION_CONFLICT");
+      const admitted = structuredClone(admission);
+      intent({payload:{intent:{...admitted.intent,projectId:admitted.projectId}}}, admitted);
+      const why = reason(admitted, observed); if (why) fail(why);
+      const release = acquireMutationLease(admitted, false);
+      externalReservations.set(id,{admission:admitted,release,state:"reserved",budgetRevision});
+      return {id,budgetRevision,state:"reserved"};
+    },
+    restoreExternal({id, admission}) {
+      if (closed || !text(id) || externalReservations.has(id) || !admission || !text(admission.resourceDomain) || !text(admission.storageDomain) || !safeInteger(admission.cpuSlots,1) || !safeInteger(admission.memoryBytes,1) || !safeInteger(admission.storageBytes)) fail("BLOCKED_EXTERNAL_RESERVATION_INVALID");
+      // Unknown remote work still consumes budget after restart. No path access is renewed.
+      externalReservations.set(id,{admission:structuredClone(admission),release:null,state:"unknown",budgetRevision});
+    },
+    releaseExternal(id, terminalState) {
+      if (!["succeeded","failed","cancelled"].includes(terminalState)) fail("BLOCKED_EXTERNAL_TERMINAL_REQUIRED");
+      const held=externalReservations.get(id); if(!held) fail("BLOCKED_EXTERNAL_RESERVATION_UNKNOWN");
+      held.release?.();externalReservations.delete(id);if(!closed)pump();
+      return {id,state:"released"};
+    },
+    externalStatus(){return [...externalReservations].map(([id,item])=>({id,state:item.state,budgetRevision:item.budgetRevision,resourceDomain:item.admission.resourceDomain,cpuSlots:item.admission.cpuSlots,memoryBytes:item.admission.memoryBytes,storageBytes:item.admission.storageBytes}));},
     pump,
     setLimits(next) {
       if (!next || Object.keys(next).length !== 4 || !["maxConcurrent", "cpuSlots", "memoryBytes"].every(key => safeInteger(next[key], 1)) || !safeInteger(next.storageBytes)) fail("INVALID_SCHEDULER_LIMITS");
@@ -118,9 +140,12 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
       budgetRevision++;
     },
     acquireMutationLease,
-    status() { return { closed, running: [...running].map(([jobId, item]) => ({ jobId, projectId: item.admission.projectId, cpuSlots: item.admission.cpuSlots, memoryBytes: item.admission.memoryBytes, storageBytes: item.admission.storageBytes })), blocked: [...blocked].map(([jobId, reason]) => ({ jobId, reason })), reservations: usage() }; },
+    status() { return { closed, external: this.externalStatus(), running: [...running].map(([jobId, item]) => ({ jobId, projectId: item.admission.projectId, cpuSlots: item.admission.cpuSlots, memoryBytes: item.admission.memoryBytes, storageBytes: item.admission.storageBytes })), blocked: [...blocked].map(([jobId, reason]) => ({ jobId, reason })), reservations: usage() }; },
     async awaitIdle() { for (;;) { await pumping; const active = [...running.values()].map(item => item.promise); if (!active.length && !pumping) return; await Promise.allSettled(active); } },
     close() { closed = true; requested = false; },
   };
 }
 module.exports = { createBuildScheduler };
+
+
+

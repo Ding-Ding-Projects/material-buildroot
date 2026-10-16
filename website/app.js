@@ -1,3 +1,5 @@
+import { mountCompanionConsumers } from './companion-consumers.js';
+import {createPairingIdentity, pairingHeaders} from './pairing-client.js';
 import {mountBrowserNative} from './browser-native.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/outlined-button.js';
@@ -14,7 +16,7 @@ import '@material/web/list/list.js';
 import '@material/web/list/list-item.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import '@fontsource-variable/roboto';
+import './fonts.css';
 import './style.css';
 
 const read = (key, fallback) => { try { return localStorage.getItem(key) || fallback; } catch { return fallback; } };
@@ -416,10 +418,31 @@ if (visitor) {
   const companionMessage = visitor.querySelector('#companion-message');
   const sessionPanel = visitor.querySelector('#companion-connected');
   const endpointStorageKey = 'mb-companion-endpoint-v1';
-  const readOnlyScopes = new Set(['workspace:read','projects:read','jobs:read']);
+  const supportedCompanionScopes = new Set(['workspace:read','projects:read','jobs:read','source:read','outputs:read','outputs:write','jobs:cancel','configuration:read','configuration:write','builds:submit','deployment:read','deployment:write','tools:read','tools:write','source:write','servers:read','servers:write','packages:read','packages:write','guests:read','guests:write']);
   const actionScope = {'workspace.read':'workspace:read','projects.list':'projects:read','jobs.list':'jobs:read'};
   let companion = null; // Session, CSRF token and sequence intentionally stay in page memory.
   let lastCompanionResult = null;
+  let consumerBusy=false;
+  const consumerWorkspace=mountCompanionConsumers({container:sessionPanel,copy,
+    session:()=>companion?.session||null,
+    request:async(action,args)=>{
+      const active=companion;
+      if(!active||active.sequenceUnknown||consumerBusy)throw Error('SESSION_UNAVAILABLE');
+      consumerBusy=true;
+      const sequence=active.nextSequence;
+      try {
+        const {response,payload}=await companionFetch('/actions',{action,args,sequence,nonce:makeUUID()},active.csrfToken);
+        if(companion!==active)throw Error('SESSION_CHANGED');
+        if(Number.isSafeInteger(payload.nextSequence)&&payload.nextSequence>sequence)active.nextSequence=payload.nextSequence;
+        else active.sequenceUnknown=true;
+        if(!response.ok){if(response.status===401)clearCompanionMemory();throw Error('ACTION_UNAVAILABLE');}
+        if(payload.operation?.action!==action||payload.operation?.sessionId!==active.session.id||payload.operation?.authorityRevoked||payload.operation?.state!=='succeeded'||!Object.hasOwn(payload,'result'))throw Error('INVALID_RESULT');
+        return payload.result;
+      } catch(error){active.sequenceUnknown=true;throw error;}
+      finally{consumerBusy=false;}
+    }});
+  let pairingIdentity = null;
+  let pairingPending = false;
 
   function parseIPv6(value) {
     if (!/^[0-9a-f:]+$/i.test(value) || value.includes(':::')) return null;
@@ -447,12 +470,12 @@ if (visitor) {
       const loopback = words.slice(0,7).every(part=>part===0) && words[7]===1;
       const local = (words[0] & 0xfe00)===0xfc00 || (words[0] & 0xffc0)===0xfe80;
       const mappedV4 = words.slice(0,5).every(part=>part===0) && words[5]===0xffff;
-      if ((!loopback && !local) || mappedV4) throw new Error('endpoint');
+      if (!loopback || mappedV4) throw new Error('endpoint');
     } else {
       const octets=hostText.split('.').map(Number);
       if (octets.some(part=>part>255)) throw new Error('endpoint');
       const [a,b]=octets;
-      if (!(a===127 || a===10 || (a===172&&b>=16&&b<=31) || (a===192&&b===168) || (a===169&&b===254))) throw new Error('endpoint');
+      if (!(a===127 || a===10 || (a===172&&b>=16&&b<=31) || (a===192&&b===168))) throw new Error('endpoint');
     }
     const parsed = new URL(value);
     if (parsed.protocol!=='https:' || parsed.username || parsed.password || parsed.pathname!=='/' || parsed.search || parsed.hash || !parsed.port) throw new Error('endpoint');
@@ -488,10 +511,10 @@ if (visitor) {
     const endpoint = path === '/pair' ? endpointForRequest() : companion?.endpoint;
     if (!endpoint) throw new Error('endpoint-changed');
     const headers = {'Content-Type':'application/json'};
-    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+    if (csrfToken) { headers['X-CSRF-Token'] = csrfToken; Object.assign(headers,pairingHeaders(companion?.session.clientId)); }
     const response = await fetch(new URL(path,endpoint+'/'), {
       method:'POST', mode:'cors', credentials:'include', redirect:'error', cache:'no-store', referrerPolicy:'no-referrer',
-      headers, body:JSON.stringify(body)
+      headers, body:JSON.stringify(body), signal:AbortSignal.timeout(path === '/pair' ? 120000 : 30000)
     });
     let payload;
     try { payload = await response.json(); } catch { throw new Error('response-invalid'); }
@@ -501,6 +524,7 @@ if (visitor) {
   function makeUUID() { return crypto.randomUUID(); }
   function clearCompanionMemory() {
     companion = null;
+    consumerWorkspace.clear();
     lastCompanionResult = null;
     sessionPanel.hidden = true;
     visitor.querySelector('#companion-refresh').hidden = true;
@@ -511,6 +535,7 @@ if (visitor) {
     challengeField.value = '';
   }
   function showCompanionSession(session) {
+    consumerWorkspace.update();
     sessionPanel.hidden = false;
     visitor.querySelector('#companion-pair').hidden = true;
     visitor.querySelector('#companion-refresh').hidden = false;
@@ -518,14 +543,17 @@ if (visitor) {
     const title=visitor.querySelector('#companion-session-state');
     title.textContent=copy(`Paired · expires ${new Date(session.expiresAt).toLocaleString()}`,`已配對 · 到期時間 ${new Date(session.expiresAt).toLocaleString()}`);
     const details=visitor.querySelector('#companion-session-details');details.replaceChildren();
-    const rows=[[copy('Website origin','網站來源'),session.origin],[copy('Granted read access','已授予讀取權限'),session.scopes.join(', ')]];
+
+    const rows=[[copy('Approved device','已批准裝置'),session.deviceName],[copy('Browser','瀏覽器'),session.browser],[copy('Website origin','網站來源'),session.origin],[copy('Granted capabilities','已授予權限'),session.scopes.join(', ')]];
     for(const [labelText,value] of rows){const term=document.createElement('dt');term.textContent=labelText;const description=document.createElement('dd');description.textContent=value;details.append(term,description);}
     for(const button of visitor.querySelectorAll('[data-companion-action]')) button.disabled=!session.scopes.includes(actionScope[button.dataset.companionAction]);
   }
   function validSession(session) {
     return session && Object.getPrototypeOf(session)===Object.prototype
-      && Object.keys(session).sort().join(',')==='expiresAt,id,origin,scopes,status'
+      && Object.keys(session).sort().join(',')==='browser,clientId,deviceName,expiresAt,id,origin,scopes,status'
       && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(session.id)
+      && ['edge','chrome'].includes(session.browser) && typeof session.deviceName==='string' && session.deviceName.length<=80
+      && session.clientId===pairingIdentity?.clientNonce && session.browser===pairingIdentity?.browser
       && session.origin===location.origin && Array.isArray(session.scopes) && session.scopes.length>0
       && session.scopes.every(scope=>typeof scope==='string') && Number.isSafeInteger(session.expiresAt)
       && session.status==='active';
@@ -539,33 +567,38 @@ if (visitor) {
     } catch { companionMessage.textContent=copy('Enter an HTTPS loopback or private IP address with a port. Public hosts and hostnames are not allowed.','請輸入含連接埠嘅 HTTPS 本機或私人 IP 位址。唔允許公用主機或主機名稱。'); }
   });
   visitor.querySelector('#companion-pair').addEventListener('click', async () => {
+    if(pairingPending || companion)return;
     let endpoint;
     try { endpoint=endpointForRequest(); } catch { companionMessage.textContent=copy('Enter a valid HTTPS private IP endpoint first.','請先輸入有效嘅 HTTPS 私人 IP 位址。');return; }
     const challenge=challengeField.value.trim();
     if(!/^[A-Za-z0-9_-]{43}$/.test(challenge)){companionMessage.textContent=copy('Paste the current one-time challenge from the desktop app.','請貼上桌面程式提供嘅有效一次性挑戰碼。');return;}
     save(endpointStorageKey,endpoint);
     companionMessage.textContent=copy('Pairing request sent. Review and approve it on the desktop. Do not submit it again while approval is pending.','配對要求已送出。請喺桌面查看同批准。等待批准時請勿重複提交。');
-    const clientNonce=makeUUID();
+    pairingPending=true;visitor.querySelector('#companion-pair').disabled=true;
     try {
-      const {response,payload}=await companionFetch('/pair',{challenge,clientNonce});
+      pairingIdentity=createPairingIdentity();
+      const {clientNonce,browser}=pairingIdentity;
+      companionMessage.textContent=copy(`Compare browser instance ${clientNonce} with the native desktop approval before accepting.`,`批准前，請比對原生桌面顯示嘅瀏覽器實例 ${clientNonce}。`);
+      challengeField.value='';
+      const {response,payload}=await companionFetch('/pair',{challenge,clientNonce,browser});
       if(!response.ok){companionMessage.textContent=companionError(payload.code);return;}
       if(Object.keys(payload).sort().join(',')!=='csrfToken,nextSequence,session'||typeof payload.csrfToken!=='string'||!payload.csrfToken||!Number.isSafeInteger(payload.nextSequence)||payload.nextSequence<1||!validSession(payload.session))throw new Error('response-invalid');
-      const broader=payload.session.scopes.some(scope=>!readOnlyScopes.has(scope));
+      const broader=payload.session.scopes.some(scope=>!supportedCompanionScopes.has(scope));
       companion={endpoint,session:payload.session,csrfToken:payload.csrfToken,nextSequence:payload.nextSequence,sequenceUnknown:false};
       if(broader){
         let revoked=false;
         try {const closed=await companionFetch('/disconnect',{},companion.csrfToken);revoked=closed.response.ok&&closed.payload?.revoked===true&&closed.payload?.session?.id===payload.session.id&&closed.payload?.session?.status==='revoked';} catch {}
         clearCompanionMemory();
         companionMessage.textContent=revoked
-          ? copy('This challenge granted access beyond the read-only scope. The page immediately asked the desktop to revoke it and received confirmation.','此挑戰碼授予超出唯讀範圍嘅權限。頁面已立即要求桌面撤銷，並收到確認。')
-          : copy('This challenge granted access beyond the read-only scope. The page will not use it; the desktop did not confirm revocation. Revoke it from the desktop.','此挑戰碼授予超出唯讀範圍嘅權限。頁面不會使用該權限；桌面未確認撤銷。請喺桌面撤銷連線。');
+          ? copy('This challenge granted a capability this client does not recognize. The page immediately asked the desktop to revoke it and received confirmation.','此挑戰碼授予此客戶端未識別嘅權限。頁面已立即要求桌面撤銷，並收到確認。')
+          : copy('This challenge granted a capability this client does not recognize. The page will not use it; the desktop did not confirm revocation. Revoke it from the desktop.','此挑戰碼授予此客戶端未識別嘅權限。頁面不會使用該權限；桌面未確認撤銷。請喺桌面撤銷連線。');
         return;
       }
       challengeField.value='';showCompanionSession(payload.session);
-      companionMessage.textContent=copy('Paired. The desktop approved this read-only browser session.','配對成功。桌面已批准此唯讀瀏覽器連線。');
+      companionMessage.textContent=copy('Paired. The desktop approved the listed capabilities for this browser session.','配對成功。桌面已批准此瀏覽器連線列出嘅權限。');
     } catch {
       companionMessage.textContent=copy('The browser could not complete pairing. Check the trusted TLS certificate, exact website origin, CORS/private-network permission and local network policy. No certificate bypass or automatic retry was used.','瀏覽器未能完成配對。請檢查受信任嘅 TLS 憑證、網站來源、CORS／私人網絡權限同本機網絡政策。頁面無繞過憑證檢查，亦無自動重試。');
-    }
+    } finally {pairingPending=false;visitor.querySelector('#companion-pair').disabled=false;}
   });
   visitor.querySelector('#companion-refresh').addEventListener('click', async () => {
     if(!companion)return;
@@ -596,10 +629,12 @@ if (visitor) {
     }
   });
   visitor.querySelectorAll('[data-companion-action]').forEach(button=>button.addEventListener('click',async()=>{
-    if(!companion)return;
+    if(!companion||consumerBusy)return;
     const action=button.dataset.companionAction;
     if(!actionScope[action]||!companion.session.scopes.includes(actionScope[action])){companionMessage.textContent=companionError('SCOPE_REJECTED');return;}
     if(companion.sequenceUnknown){companionMessage.textContent=copy('Refresh the session sequence before another action.','請先更新連線序號，然後再進行操作。');return;}
+    if(consumerBusy)return;
+    consumerBusy=true;
     const sequence=companion.nextSequence;
     const actionButtons=[...visitor.querySelectorAll('[data-companion-action]')];
     actionButtons.forEach(item=>item.disabled=true);
@@ -619,7 +654,7 @@ if (visitor) {
       companion.sequenceUnknown=true;
       renderCompanionData(action,null,'INVALID_RESULT');
       companionMessage.textContent=copy('The request may have reached the desktop, but its reply was lost. No automatic retry was sent. Refresh the session before another request; this page cannot infer whether host work stopped.','要求可能已送達桌面，但回覆遺失。頁面無自動重試。請更新連線狀態後再要求資料；此頁無法推斷主機工作是否停止。');
-    } finally {actionButtons.forEach(item=>item.disabled=!companion||!companion.session.scopes.includes(actionScope[item.dataset.companionAction]));}
+    } finally {consumerBusy=false;actionButtons.forEach(item=>item.disabled=!companion||!companion.session.scopes.includes(actionScope[item.dataset.companionAction]));}
   }));
 
   function renderCompanionData(action,result,errorCode) {
@@ -702,5 +737,3 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
-
-

@@ -1,5 +1,7 @@
 # Typed configuration controls
 
+[香港粵語](typed-configuration-controls.zh-HK.md)
+
 The configuration workspace uses real Kconfig symbol types from the admitted parser. Boolean switches, assignable tristate selections, decimal integers, hexadecimal values and strings send completed edits to a serial reconciliation queue. Numeric and string controls submit on change rather than on every keystroke.
 
 The queue takes the latest returned revision for each operation. Undo enters the same queue after earlier edits. A rejected or uncertain request stops automatic draining and retains the pending edits. The user can inspect and explicitly retry that queue or discard it. Source execution permission remains mandatory and may require renewal when configuration changes invalidate the admitted scope.
