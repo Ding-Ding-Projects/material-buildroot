@@ -37,4 +37,4 @@
 
 ## 產生及驗收
 
-既有根目錄文件建置負責產生文章及 wiki 路由。集合由 `node scripts/api/generate-postman.cjs` 產生，現有 `--check` 可報告過期檔案。[協定文章](../security/companion.md#postman-collections)描述既有測試，但此文件變更冇執行產生器、測試、Postman、TLS、瀏覽器配對、LAN 或實際操作。來源清單、產生後發佈及安裝用戶端驗收保持分開。
+既有根目錄文件建置負責產生文章及 wiki 路由。集合由 `node scripts/api/generate-postman.cjs` 產生，現有 `--check` 可報告過期檔案。此變更只重新產生基礎集合快照，擴充版仍需已整合處理端模組。[協定文章](../security/companion.md#postman-collections)描述既有測試，但本輪冇執行測試、Postman、TLS、瀏覽器配對、LAN 或實際操作。來源清單、產生後發佈及安裝用戶端驗收保持分開。
