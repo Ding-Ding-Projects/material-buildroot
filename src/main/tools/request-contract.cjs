@@ -38,6 +38,7 @@ function admit(request, nested = false) {
   object(request);
   string(request.action, 80);
   const action = request.action;
+  if (action.startsWith("minecraft.managed.") || action.startsWith("minecraft.configuration.")) { require("./minecraft-managed.cjs").validate(request); return structuredClone(request); }
   const simple = [
     "ollama.status",
     "ollama.hardware",
@@ -183,6 +184,12 @@ function admit(request, nested = false) {
         else if (request.mode !== undefined) fail("INVALID_REQUEST");
         break;
       }
+      case "minecraft.paper.builds":
+        keys(request, ["action", "version"]); token(request.version); break;
+      case "minecraft.paper.install":
+        keys(request, ["action", "version", "build", "directoryId", "acceptLicense"]);
+        token(request.version); string(request.directoryId);
+        if (!integer(request.build, 1, 10000000) || request.acceptLicense !== true) fail("INVALID_REQUEST"); break;
       case "minecraft.versions":
         keys(request, ["action"], ["edition"]);
         if (request.edition !== undefined)
@@ -248,6 +255,8 @@ function admit(request, nested = false) {
           "acceptLicense",
         ]);
         token(request.versionId);
+        token(request.gameVersion);
+        one(request.loader, ["paper", "fabric"]);
         string(request.directoryId);
         if (request.acceptPluginCode !== true || request.acceptLicense !== true)
           fail("PLUGIN_CONSENT_REQUIRED");
