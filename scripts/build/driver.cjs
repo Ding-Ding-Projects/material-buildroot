@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
 const {packageIdentity,stageBaseline} = require('./squirrel.cjs');
+const {acquireHostedBaseline} = require('./squirrel-baseline.cjs');
 const root = path.resolve(__dirname, '../..');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -177,7 +178,6 @@ async function main() {
   const template = installer ? target.installerCommand : target.command;
   if (!Array.isArray(template) || !template.length) throw new Error('Canonical package command is missing.');
   if (target.rendererCommand) execute(node,target.rendererCommand);
-  if (target.kind === 'desktop') fs.writeFileSync(path.join(root,'dist/build-info.json'),JSON.stringify({source:before.commit,updatedAt:new Date().toISOString()})+'\n');
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
   let packageVersion = null, packageVersionSource = null, delta = null;
@@ -186,9 +186,15 @@ async function main() {
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
     packageVersion = identity.version;
     packageVersionSource = identity.source;
+    fs.writeFileSync(path.join(root,'dist/build-info.json'),JSON.stringify({version:packageVersion,source:before.commit,updatedAt:new Date().toISOString()})+'\n');
     command.push(`--config.extraMetadata.version=${packageVersion}`);
     command.push(`--config.electronDist=${process.env.MATERIAL_BUILD_ELECTRON_DIST}`);
-    if (installer) delta = stageBaseline(process.env.MATERIAL_BUILD_SQUIRREL_BASELINE,output,packageVersion);
+    if (installer) {
+      const baseline = acquireHostedBaseline(root,packageVersion);
+      delta = stageBaseline(baseline.directory,output,packageVersion);
+      if (!baseline.directory) delta.reason = baseline.reason;
+      if (baseline.releaseTag) delta = {...delta,releaseTag:baseline.releaseTag,source:baseline.source,provenanceSha256:baseline.provenanceSha256};
+    }
   }
   execute(node,command,{env:childEnv});
   if (target.kind === 'desktop') {
@@ -209,7 +215,10 @@ async function main() {
     if (!expectedFull) throw new Error('Squirrel full package identity differs from the requested installed version.');
     const generatedDelta = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-delta.nupkg`);
     if (delta.status === 'staged' && !generatedDelta) throw new Error('Squirrel did not produce a delta from the supplied baseline.');
-    if (generatedDelta) delta = {...delta,status:'produced',package:path.basename(generatedDelta.path),sha256:generatedDelta.sha256};
+    if (generatedDelta) {
+      const baseline = {...delta};delete baseline.status;
+      delta = {status:'produced',baseline,package:path.basename(generatedDelta.path),sha256:generatedDelta.sha256};
+    }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
   const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
