@@ -9,6 +9,7 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | Action | Scope | Consumer |
 | --- | --- | --- |
 | cloud.list | deployment:read | Enrolled destination labels and transfer state without credentials |
+| cloud.cancel | deployment:write | Request cancellation only for an upload started by this session/project |
 | cloud.start | deployment:write | Start the session preview after native exact-file approval |
 | cloud.preview | deployment:write | Hash and preview the session-selected output for an enrolled destination |
 | models.chat.start | tools:write | Start an ephemeral response using a model disclosed to this session |
@@ -78,6 +79,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
