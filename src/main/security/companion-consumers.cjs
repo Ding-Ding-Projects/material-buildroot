@@ -30,6 +30,7 @@ const actionContracts=Object.freeze({
  'models.list':contract('tools:read',[]),
  'workspace.read':contract('workspace:read',[]),
  'projects.list':contract('projects:read',[]),
+ 'jobs.owned':contract('jobs:read',[]),
  'jobs.list':contract('jobs:read',[]),
  'jobs.get':contract('jobs:read',['jobId'],a=>id(a.jobId)),
  'jobs.cancel':contract('jobs:cancel',['jobId','expectedSequence'],a=>id(a.jobId)&&Number.isSafeInteger(a.expectedSequence)&&a.expectedSequence>=0),
@@ -53,7 +54,7 @@ const summary=job=>({id:job.id,kind:job.kind,state:job.state,sequence:job.sequen
 function createCompanionConsumers(host){
  const sessions=new Map();
  function admitted(context,scope){if(!context||typeof context.isAuthorized!=='function'||!context.isAuthorized()||!context.scopes.includes(scope))fail('UNAUTHORIZED');}
- function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),cloudJobs:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),sourceRollbacks:new Map(),models:new Set(),chats:new Set(),toolFiles:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
+ function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),ownedJobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),cloudJobs:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),sourceRollbacks:new Map(),models:new Set(),chats:new Set(),toolFiles:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
  function file(state,args,kind){const entry=state.files.get(args.fileId||args.directoryId);if(!entry||entry.workspaceId!==args.workspaceId||entry.kind!==kind)fail('FILE_NOT_ADMITTED');return entry.id;}
  return Object.freeze({actionContracts,async dispatch(request,context){
   const definition=actionContracts[request.action];if(!definition)fail('ACTION_NOT_ADMITTED');definition.validate(request.args);admitted(context,definition.scope);const owned=state(context),a=request.args;
@@ -84,9 +85,10 @@ function createCompanionConsumers(host){
    case 'cloud.preview':{if(!owned.destinations.get(a.workspaceId)?.has(a.destinationId))fail('DESTINATION_NOT_ADMITTED');const value=await host.previewCloud(a.workspaceId,viewer(),file(owned,a,'file'),a.destinationId);owned.cloudPreviews.set(value.id,{workspaceId:a.workspaceId,expiresAt:value.expiresAt});result={id:value.id,sha256:value.sha256,size:value.size,expiresAt:value.expiresAt,destination:{provider:value.destination.provider,label:value.destination.label},networkState:value.networkState,overwrite:value.overwrite};break;}
    case 'workspace.read':result=host.readWorkspace();break;
    case 'projects.list':result={projects:host.listProjects()};break;
+   case 'jobs.owned':result={jobs:[...owned.ownedJobs].map(id=>summary(host.getJob(id)))};break;
    case 'jobs.list':{const jobs=host.listJobs();for(const job of jobs)owned.jobs.add(job.id);result={jobs:jobs.map(summary)};break;}
    case 'jobs.get':if(!owned.jobs.has(a.jobId))fail('JOB_NOT_ADMITTED');result={job:summary(host.getJob(a.jobId))};break;
-   case 'jobs.cancel':{if(!owned.jobs.has(a.jobId))fail('JOB_NOT_ADMITTED');const job=host.getJob(a.jobId);if(job.payload?.workspaceId)host.authorizeProject(job.payload.workspaceId);admitted(context,definition.scope);host.cancelJob(a.jobId,a.expectedSequence);result={job:summary(host.getJob(a.jobId)),cancellation:'requested-not-confirmed'};break;}
+   case 'jobs.cancel':{if(!owned.ownedJobs.has(a.jobId))fail('JOB_NOT_ADMITTED');const job=host.getJob(a.jobId);if(job.payload?.workspaceId)host.authorizeProject(job.payload.workspaceId);admitted(context,definition.scope);host.cancelJob(a.jobId,a.expectedSequence);result={job:summary(host.getJob(a.jobId)),cancellation:'requested-not-confirmed'};break;}
    case 'source.rollback.preview':case 'source.upgrade.preview':{const rollback=request.action==='source.rollback.preview';if(rollback&&owned.sourceRollbacks.get(a.rollbackId)!==a.workspaceId)fail('ROLLBACK_NOT_ADMITTED');const value=rollback?await host.previewRollback(a):await host.previewSource(a);if(value.ok===false)fail('SOURCE_PREVIEW_UNAVAILABLE');if(owned.sourcePreviews.size>=32)fail('PREVIEW_LIMIT');owned.sourcePreviews.set(value.previewId,{workspaceId:a.workspaceId,preview:value,rollback,expiresAt:Date.now()+300000});result={rollback,previewId:value.previewId,fromRevision:value.fromRevision,toRevision:value.toRevision,dirty:value.dirty,changedFileCount:value.changedFiles?.length||0};break;}
    case 'source.rollback.apply':case 'source.upgrade.apply':{const selected=owned.sourcePreviews.get(a.previewId);if(!selected||selected.workspaceId!==a.workspaceId||selected.expiresAt<=Date.now()||selected.rollback!==(request.action==='source.rollback.apply'))fail('PREVIEW_NOT_ADMITTED');const approved=await host.confirmSourceUpgrade(selected.preview,context,()=>admitted(context,definition.scope));admitted(context,definition.scope);host.authorizeProject(a.workspaceId);if(!approved){result={state:'cancelled'};break;}owned.sourcePreviews.delete(a.previewId);const input={workspaceId:a.workspaceId,previewId:a.previewId,expectedRevision:selected.preview.fromRevision};const value=selected.rollback?await host.applySourceRollback(input):await host.applySourceUpgrade(input);if(value.ok===false)fail('SOURCE_APPLY_UNAVAILABLE');owned.sourceRollbacks.set(value.rollbackId,a.workspaceId);result={state:'completed',revision:value.revision||selected.preview.toRevision,rollbackId:value.rollbackId};break;}
    case 'source.choose':{const value=await host.chooseSource();if(value.ok===false)fail('SOURCE_SELECTION_UNAVAILABLE');if(value.cancelled){result={cancelled:true};break;}owned.sourceSelections.add(value.selectionId);result={cancelled:false,selectionId:value.selectionId,name:value.name};break;}
@@ -94,7 +96,7 @@ function createCompanionConsumers(host){
    case 'source.status':{const value=await host.sourceStatus(a.workspaceId);if(value.ok===false)fail('SOURCE_UNAVAILABLE');result={revision:value.revision,branch:value.branch,dirty:value.dirty,snapshotCount:value.snapshots?.length||0};break;}
    case 'project.options':{const value=host.projectOptions(a.workspaceId);result={revision:value.revision,runtime:value.runtime?.kind||'unconfigured',externalTreesAuthorized:value.externalTreesAuthorized,externalTreeCount:value.availableTrees?.length||0};break;}
    case 'defconfig.catalog':{const value=await host.defconfigCatalog(a.workspaceId);result={revision:value.revision,entries:value.entries.slice(0,200).map(({id,name,origin,order,sha256})=>({id,name,origin,order,sha256})),truncated:value.entries.length>200,apply:'native-only'};break;}
-   case 'builds.submit':{const job=await host.submitBuild(a,()=>admitted(context,definition.scope));owned.jobs.add(job.id);result={job:summary(job)};break;}
+   case 'builds.submit':{const job=await host.submitBuild(a,()=>admitted(context,definition.scope));owned.jobs.add(job.id);owned.ownedJobs.add(job.id);result={job:summary(job)};break;}
    case 'build.targets':{const value=host.buildTargets(a.workspaceId);result={targets:value.targets.filter(target=>target!=='clean'),packages:value.packages.slice(0,200),packageActions:value.packageActions.filter(action=>action!=='dirclean'),packageAvailability:value.packageAvailability,submission:'approved-scope-required'};break;}
    case 'outputs.browse':{const directory=a.directoryId==='root'?'root':file(owned,a,'directory');const value=viewer().browse(directory);if(a.directoryId==='root')for(const [key,item]of owned.files)if(item.workspaceId===a.workspaceId)owned.files.delete(key);if(owned.files.size+value.rows.length>4000)fail('FILE_LIMIT');result={truncated:value.truncated,rows:value.rows.map(item=>{const handle=randomUUID();owned.files.set(handle,{workspaceId:a.workspaceId,kind:item.kind,id:item.id});return {id:handle,name:item.name,kind:item.kind,size:item.size};})};break;}
    case 'outputs.inspect':{const value=await viewer().inspect(file(owned,a,'file'));result={fileId:a.fileId,name:value.name,size:value.size,format:value.format,sectorBytes:value.sectorBytes,checksumState:value.checksumState,truncated:value.truncated,preview:'native-only'};break;}
@@ -105,6 +107,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 
