@@ -20,6 +20,8 @@ The current implementation pass uses isolated task ownership and normal release 
 
 Recent source additions include [versioned project storage](docs/workspace/project-model.md), [file capabilities](docs/security/file-capabilities.md), [owner-scoped vault access](docs/security/vault-boundaries.md), [container preparation](docs/features/runtime-containers.md), [guest controls](docs/deployment/hypervisor-controls.md), [search and command consumers](docs/features/navigation/search-commands.md), [component configuration](docs/desktop/configuration-domains.md) and [explicit clean-build confirmation](docs/features/destructive-confirmation.md). Their articles retain implementation limits and deferred proof.
 
+See [presentation provenance](docs/features/presentation-provenance.md) for source-update and build clocks, local font byte inventories, share metadata and the separate current-capture gap.
+
 ## Source-bound historical interface captures
 
 The [feature delivery source audit](docs/evidence/tasks/PH01-delivery-audit.md) accounts for all 109 required identities and 436 surface rows, with one [audit article per identity](docs/evidence/tasks/feature-delivery/README.md). It finds no whole feature with complete current acceptance. The overview retains seven unresolved applicability records, shared-trace limits and the gap between 427 public requirement IDs and 1,908 detailed audit rows. It is a source inventory, not an implementation-completeness claim.
