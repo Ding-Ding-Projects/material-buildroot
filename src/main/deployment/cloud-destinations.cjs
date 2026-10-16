@@ -90,7 +90,7 @@ class CloudDestinations {
   }
   launch(job){this.active.add(job.id);void this.jobs.run(job.id,"cloud",job.sequence).catch(()=>{}).finally(()=>{this.active.delete(job.id);this.authorities.delete(job.id);});}
   cancel(id){const job=this.jobs.get(id,"cloud"),result=this.jobs.cancel(id,"cloud",job.sequence);return {id:result.id,state:result.state};}
-  async retry({id,consent}){if(consent!==true)fail("CLOUD_CONSENT_REQUIRED");if(this.closed||this.active.size)fail("CLOUD_BUSY");const job=this.jobs.get(id,"cloud");this.destination(job.payload.destinationId);const answer=await this.dialog.showMessageBox(this.parentWindow,{type:"warning",buttons:["Cancel","Verify retained object"],defaultId:0,cancelId:0,title:"Retry cloud readback",message:job.payload.object,detail:"This retry reads the exact retained object and compares its bytes. It never uploads again or replaces an object. For a missing object, create a new upload preview."});if(answer.response!==1)return {state:"cancelled"};const next=this.jobs.retry(id,"cloud",job.sequence);this.launch(next);return {id:next.id,state:"queued"};}
+  async retry({id,consent},authority=null){if(authority!==null&&typeof authority!=='function')fail('CLOUD_AUTHORITY_INVALID');authority?.();if(consent!==true)fail("CLOUD_CONSENT_REQUIRED");if(this.closed||this.active.size)fail("CLOUD_BUSY");const job=this.jobs.get(id,"cloud");this.destination(job.payload.destinationId);const answer=await this.dialog.showMessageBox(this.parentWindow,{type:"warning",buttons:["Cancel","Verify retained object"],defaultId:0,cancelId:0,title:"Retry cloud readback",message:job.payload.object,detail:"This retry reads the exact retained object and compares its bytes. It never uploads again or replaces an object. For a missing object, create a new upload preview."});if(answer.response!==1)return {state:"cancelled"};authority?.();const next=this.jobs.retry(id,"cloud",job.sequence);if(authority)this.authorities.set(next.id,authority);this.launch(next);return {id:next.id,state:"queued"};}
   async transfer(payload,context){
     const authority=this.authorities.get(context.jobId),revoked=new AbortController();
     const check=()=>{try{authority?.();}catch{revoked.abort();try{const job=this.jobs.get(context.jobId,'cloud');if(['queued','running'].includes(job.state))this.jobs.cancel(job.id,'cloud',job.sequence);}catch{}fail('CLOUD_AUTHORITY_REVOKED');}};
@@ -110,4 +110,5 @@ class CloudDestinations {
   dispose(){this.closed=true;this.previews.clear();for(const id of this.active){const job=this.jobs.get(id,"cloud");if(job.state==="running")this.jobs.cancel(id,"cloud",job.sequence);}}
 }
 module.exports={CloudDestinations};
+
 

@@ -1204,6 +1204,7 @@ function createOperationsService({
     modelList: () => tools.execute({action:'ollama.tags'}),
     cloudList: workspaceId => cloudDestination(workspaceId).list(),
     cancelCloud: (workspaceId,id) => cloudDestination(workspaceId).cancel(id),
+    retryCloud: (workspaceId,id,authorize) => cloudDestination(workspaceId).retry({id,consent:true},authorize),
     startCloud: (workspaceId,id,authorize) => cloudDestination(workspaceId).start({id,consent:true},authorize),
     previewCloud: (workspaceId,viewer,fileId,destinationId) => {const selected=viewer.resolve(fileId,'file');const admitted=outputViewer(workspaceId).admit(selected.grant.relative,'file');return cloudDestination(workspaceId).preview({fileId:admitted,destinationId});},
     confirmMutation: async (request,authorize) => {
@@ -2234,6 +2235,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
