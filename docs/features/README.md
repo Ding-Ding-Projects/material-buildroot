@@ -14,3 +14,4 @@ a category Postman collection is not applicable.
 - [Appearance editor](appearance-editor.md): typed properties, motion, local history and scheduling.
 - [Workspace tabs](workspace-tabs.md): retained project panels and explicit destination selection.
 - [Background updates](../desktop/updates.md): verified downloads, explicit installation consent and recovery state.
+- [Authenticated status integration](status-hub.md): trusted client lifecycle, admitted typed projection and explicit unavailable states.

@@ -156,6 +156,7 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    statusHub: (action) => ["read", "refresh"].includes(action) ? ipcRenderer.invoke("studio:status-hub", action) : Promise.resolve({ ok: false, code: "INVALID_REQUEST" }),
     appearanceHistory: (request) => { let data; try { data=JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); } if(data.length>650000)return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); return ipcRenderer.invoke('studio:appearance-history',JSON.parse(data)); },
     appearanceFonts: () => ipcRenderer.invoke('studio:appearance-fonts'),
     experiencePolicies: (request) => {
@@ -273,5 +274,6 @@ contextBridge.exposeInMainWorld(
     },
   }),
 );
+
 
 

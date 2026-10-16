@@ -43,6 +43,7 @@ if (verification.length) {
 }
 let store, window, desktop, operations, sharedModeIPC, unsubscribeSharedMode;
 let scheduleIPC, unsubscribeSchedule;
+let statusService;
 let quitting = false;
 const capabilities = createCapabilityRegistry();
 if (require("electron-squirrel-startup")) app.quit();
@@ -122,6 +123,16 @@ else {
         broker,
         metadata,
         storageReady: !!store,
+      });
+      statusService = require("./status-hub/service.cjs").createStatusService({
+        documentsDirectory: app.getPath("documents"),
+        repositoryDirectory: app.getAppPath(),
+      });
+      ipcMain.handle("studio:status-hub", (event, action) => {
+        if (!desktop.admitted(event)) return { ok: false, code: "UNAUTHORIZED" };
+        if (action === "read") return { ok: true, result: statusService.snapshot() };
+        if (action === "refresh") return statusService.refresh().then(result => ({ ok: true, result }));
+        return { ok: false, code: "INVALID_REQUEST" };
       });
       let sharedModeService;
       try {
@@ -308,10 +319,11 @@ else {
     unsubscribeSharedMode?.();
     sharedModeIPC?.close();
     unsubscribeSchedule?.();
-    if ((operations || scheduleIPC) && !quitting) {
+    if ((operations || scheduleIPC || statusService) && !quitting) {
       event.preventDefault();
       quitting = true;
       void Promise.allSettled([
+        statusService?.close(),
         operations?.dispose(),
         scheduleIPC?.close(),
       ]).then(() => app.quit());
@@ -322,5 +334,6 @@ else {
     store?.close();
   });
 }
+
 
 
