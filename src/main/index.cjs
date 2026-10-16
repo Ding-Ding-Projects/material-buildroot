@@ -284,6 +284,7 @@ else {
       try {
         operations = createOperationsService({
           directory: path.join(app.getPath("userData"), "operations"),
+          cloudVault: createVault({ safeStorage, directory: path.join(app.getPath("userData"), "cloud-credentials") }),
           dialog,
           parentWindow: window,
           version: metadata.version,
