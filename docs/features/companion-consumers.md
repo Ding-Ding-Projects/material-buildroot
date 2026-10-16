@@ -42,6 +42,10 @@ The typed host adapter admits these exact actions, subject to the current sessio
 
 The server validates the argument schema and scope before dispatch. The consumer rechecks authorization before each call and after awaited reads. Project actions revalidate the adopted root identity. Output identifiers are opaque handles scoped to one session and project; each session has its own output viewer. Browser callers cannot submit a host path, invoke a generic IPC operation, create a grant, select an executable or assert native consent.
 
+## Independent companion preferences
+
+The authenticated workspace keeps its own English/Cantonese/bilingual language, light/dark/system theme and 100/125/150/200 percent text-size preferences under a separate bounded browser key. They do not alter visitor settings or host authority. Static controls relabel immediately; existing host-result text retains its original rendering until explicitly refreshed. This source increment is not full localization, layout or accessibility proof.
+
 ## Local model workflow
 
 Refresh installed models, select one, enter a prompt and explicitly send it through the approved tools scope. Prompts and replies remain ephemeral; neither the local draft nor request history records their content. Read successive bounded chunks and cancel only the chat admitted to the current session. Revocation requests cancellation through the host observer. Cancellation remains requested until the service reports its actual state. This does not implement model acquisition or persistent conversation management.
@@ -67,6 +71,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
