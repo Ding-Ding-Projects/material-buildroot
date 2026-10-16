@@ -43,3 +43,13 @@ The command-card size control had a missing template-expression delimiter, which
 ## Destination and nested-picker continuation
 
 The palette includes explicit destinations for language, theme, scheduled preferences, schedule history, external source enrollment, shared preference and personal vocabulary controls even when Settings is not mounted. It also reads the admitted offline article index and opens selected articles through the existing documentation consumer. Restricted mode omits personal vocabulary and documentation discovery. Per-target picker dialogs now cover nested workbench selects without replacing the parent command card or its draft. Appearance and authentication-backed lock providers remain dependent on PH03-T05 and PH04-T02.
+
+## Context provider API
+
+Trusted renderer modules register through `registerContextActionProvider(providerId, provider)` from `command-surfaces.ts`. Registration returns a disposer. The provider receives `{target: HTMLElement, language: string}` and returns localized actions with `{id, label, context?, disabled?, run}`. Provider and action identifiers are stable lowercase identifiers, never user-visible labels. The provider resolves its own persisted element identity from its explicit attribute or established identity resolver; transient palette indexes are not persistence keys. The registry is limited to 16 providers and 32 actions per provider. Invalid contributions are omitted with an availability notice, without disabling unrelated providers.
+
+The menu closes before an editor callback runs. Provider management actions deliberately have no original-action target field, so an editor can manage a disabled or locked element without executing that element. Registration does not grant host capabilities, remove restrictions or execute arbitrary commands. Provider editor validation and emergency exclusions remain authoritative.
+
+A separate synchronous `registerCommandAccessProvider(providerId, target => boolean)` protects original command activation, inline writes and picker selection. Every registered provider must return `true`; false, an exception or a non-boolean result blocks the original consumer. Its disposer removes only that same registered function. Management actions remain separate. The experience-policy provider must preserve its native event protection and emergency routes outside this command surface as well.
+
+Appearance and experience-policy modules register their own concrete editors. This file does not import a sibling implementation before that implementation is integrated, and the provider registry alone is not evidence that either editor is installed or verified.
