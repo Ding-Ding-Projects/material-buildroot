@@ -1,4 +1,5 @@
 import {localizedCopy} from './language-wording';
+import "./named-targets-panel";
 import "./account-provisioning-panel";
 import "./image-presets-panel";
 import "./configuration-panel";
@@ -426,7 +427,7 @@ export class OperationsPanel extends LitElement {
       ...(this.customResources?{resources:{cpuSlots:this.cpuSlots,memoryBytes:this.memoryMiB*1024**2,storageBytes:this.storageGiB*1024**3}}:{}),
     };
     let confirmationToken: string | undefined;
-    if(input.target === "clean") {
+    if(input.target === "clean" || input.target.endsWith("-dirclean")) {
       this.confirmingClean=true;
       let challenge;
       try {
@@ -774,26 +775,7 @@ export class OperationsPanel extends LitElement {
                     .value=${this.image}
                     @input=${(e: Event) =>
                       { this.image = (e.composedPath()[0] as HTMLInputElement).value; this.containerStorage = undefined; }}
-                  ></md-outlined-text-field>`}<md-outlined-select
-                label=${this.l("Build target","建置目標",true)}
-                id="build-target"
-                .value=${this.target}
-                .displayText=${this.target}
-                @change=${(e: Event) =>
-                  (this.target = (e.target as HTMLSelectElement).value)}
-                >${this.options(
-                  [
-                    "all",
-                    "clean",
-                    "olddefconfig",
-                    "savedefconfig",
-                    "legal-info",
-                    "source",
-                    "show-info",
-                    "graph-depends",
-                  ].map((target) => [target, target]),
-                )}</md-outlined-select
-              ><md-outlined-text-field
+                  ></md-outlined-text-field>`}<named-targets-panel .language=${this.language} .workspaceId=${this.workspace.workspaceId} .target=${this.target} @named-target-change=${(e:CustomEvent)=>{this.target=e.detail.target;}}></named-targets-panel><md-outlined-text-field
                 type="number"
                 min="1"
                 max="32"

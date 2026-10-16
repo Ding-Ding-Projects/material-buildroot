@@ -169,6 +169,42 @@
       "exitCodeEvidence": "Numeric exit reported by the owning producer.",
       "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
       "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH05-T11-C01/PH05-T11-C02/PH05-T11-C03",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd",
+      "receiptSha256": "ee3d213388b243a87a20af9703105ad61ea694d7b55185cca779994fb69313a7",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Numeric exit reported by the owning producer.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH03-T03",
+      "sourceCommit": "7984d5428f60820526a43dd1f23d5d173b153161",
+      "receiptSha256": "adaa11f89b19fbff6fd06207342f41d56d46ee238d0bfff46075200958a2792c",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Numeric exit reported by the owning producer.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH08-T02",
+      "sourceCommit": "078b592119f9d233c6c7b40f20c1f4a42f514090",
+      "receiptSha256": "962857d4a31bddd023721ffbcf2ba3f070ba8e81bbb3f5d91012034b75ad33f2",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Numeric exit reported by the owning producer.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
     }
   ]
 }
