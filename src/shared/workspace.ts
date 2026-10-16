@@ -57,10 +57,13 @@ export type WorkspaceMutation = { expectedRevision: number } & (
   | { action: "document.import"; document: string }
   | { action: "revision.restore"; revision: number }
   | { action: "history.read"; beforeRevision?: number }
-  | { action: "document.export"; scope: "workspace" | "plans" | "history"; ids: string[] }
+  | { action: "history.compare"; revision: number }
+  | { action: "history.label"; revision: number; label: string }
+  | { action: "history.retain"; keep: 25 | 100 | 500 }
+  | { action: "document.export"; scope: "workspace" | "plans" | "history" | "revisions"; ids: string[] }
 );
 export type WorkspaceReply =
-  | { ok: true; state: WorkspaceState & { historyWarning?: boolean }; document?: string; history?: { records: Array<{ revision: number; action: string; timestamp: string | null; plans: number }>; nextBeforeRevision: number | null } }
+  | { ok: true; state: WorkspaceState & { historyWarning?: boolean }; document?: string; history?: { records: Array<{ revision: number; action: string; timestamp: string | null; plans: number; labels: string[] }>; nextBeforeRevision: number | null }; removed?: number; comparison?: { fromRevision: number; toRevision: number; changes: Array<{ kind: string; id?: string; before: unknown; after: unknown }> } }
   | {
       ok: false;
       code:

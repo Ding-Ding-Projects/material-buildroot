@@ -39,6 +39,22 @@ function createWorkspaceService(options) {
     return result(() => {
       contract.request(input);
       const request = clone(input);
+      if (["history.compare", "history.label", "history.retain"].includes(request.action)) {
+        const state = store.read();
+        if (state.revision !== request.expectedRevision) reject("REVISION_CONFLICT");
+        if (request.action === "history.label") { store.labelRevision(request.revision, request.label); return { state }; }
+        if (request.action === "history.retain") return { state, removed: store.retainCache(request.keep) };
+        const previous = store.readRevision(request.revision);
+        const changes = [];
+        const ids = new Set([...previous.plans.map(p=>p.id), ...state.plans.map(p=>p.id)]);
+        for (const id of ids) {
+          const before = previous.plans.find(p=>p.id===id), after = state.plans.find(p=>p.id===id);
+          if (JSON.stringify(before) !== JSON.stringify(after)) changes.push({kind:"plan", id, before:before??null, after:after??null});
+        }
+        for (const key of ["preferences", "onboarding", "onboardingCompleted"])
+          if (JSON.stringify(previous[key]) !== JSON.stringify(state[key])) changes.push({kind:key,before:previous[key],after:state[key]});
+        return { state, comparison: { fromRevision: request.revision, toRevision: state.revision, changes } };
+      }
       if (request.action === "history.read") return { state: store.read(), history: store.revisions(request.beforeRevision) };
       if (request.action === "document.export") {
         const state = store.read();
@@ -50,6 +66,22 @@ function createWorkspaceService(options) {
           if (request.ids.some(id => !state.plans.some(plan => plan.id === id))) reject("NOT_FOUND");
           content = { format: "material-buildroot-plans-export", version: 1, scope: "selected-plans", sourceRevision: state.revision,
             plans: state.plans.filter(plan => request.ids.includes(plan.id)), exclusions };
+        } else if (request.scope === "revisions") {
+          const records = [];
+          let before;
+          let bytes = 0;
+          do {
+            const page = store.revisions(before, 25);
+            for (const record of page.records) {
+              const saved = store.readRevision(record.revision);
+              const entry = { ...record, state: saved };
+              bytes += Buffer.byteLength(JSON.stringify(entry), "utf8");
+              if (bytes > 32 * 1024 * 1024) reject("LIMIT_REACHED");
+              records.push(entry);
+            }
+            before = page.nextBeforeRevision;
+          } while (before !== null);
+          content = { format: "material-buildroot-revisions-export", version: 1, scope: "complete-recorded-workspace-revisions", sourceRevision: state.revision, records, exclusions };
         } else {
           const records = [];
           let before;
@@ -63,6 +95,7 @@ function createWorkspaceService(options) {
         return { state, document: JSON.stringify(content, null, 2) };
       }
       const state = store.transact(request.expectedRevision, (current) => {
+        const beforePayload = JSON.stringify(payload(current));
         const timestamp = new Date().toISOString();
         switch (request.action) {
           case "plan.create":
@@ -77,6 +110,7 @@ function createWorkspaceService(options) {
           case "plan.update": {
             const plan = current.plans.find((p) => p.id === request.id);
             if (!plan) reject("NOT_FOUND");
+            if (Object.entries(request.changes).every(([key,value])=>plan[key]===value)) return current;
             Object.assign(plan, request.changes, { updatedAt: timestamp });
             break;
           }
@@ -149,6 +183,7 @@ function createWorkspaceService(options) {
           default:
             reject("INVALID_REQUEST");
         }
+        if (beforePayload === JSON.stringify(payload(current)) && !["snapshot.create","snapshot.restore","revision.restore","document.import"].includes(request.action)) return current;
         current.activity.push({
           id: randomUUID(),
           action: request.action,

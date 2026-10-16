@@ -239,10 +239,20 @@ function request(value) {
       "beforeRevision",
       "scope",
       "ids",
+      "label",
+      "keep",
     ],
     ["expectedRevision", "action"],
   );
   revision(value.expectedRevision);
+  if (["history.compare", "history.label", "history.retain"].includes(value.action)) {
+    const keys = value.action === "history.label" ? ["revision", "label"] : value.action === "history.retain" ? ["keep"] : ["revision"];
+    object(value, ["expectedRevision", "action", ...keys]);
+    if (value.action === "history.retain") one(value.keep, [25, 100, 500]);
+    else revision(value.revision);
+    if (value.action === "history.label") { string(value.label, 80, 1); if (!value.label.trim()) fail(); }
+    return value;
+  }
   if (value.action === "history.read") {
     object(value, ["expectedRevision", "action", "beforeRevision"], ["expectedRevision", "action"]);
     if (value.beforeRevision !== undefined) revision(value.beforeRevision);
@@ -250,7 +260,7 @@ function request(value) {
   }
   if (value.action === "document.export") {
     object(value, ["expectedRevision", "action", "scope", "ids"]);
-    one(value.scope, ["workspace", "plans", "history"]);
+    one(value.scope, ["workspace", "plans", "history", "revisions"]);
     if (!Array.isArray(value.ids) || value.ids.length > 100 || new Set(value.ids).size !== value.ids.length) fail();
     if (value.scope === "plans") value.ids.forEach(id);
     else if (value.ids.length) fail();

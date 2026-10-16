@@ -456,6 +456,7 @@ class MaterialBuildroot extends LitElement {
   }
   private hydrateWorkspace(state: any) {
     this.workspaceRevision = state.revision;
+    this.historyWarning = state.historyWarning === true;
     this.snapshots = state.snapshots;
     this.plans = state.plans;
     this.theme = state.preferences.theme;
@@ -690,11 +691,29 @@ class MaterialBuildroot extends LitElement {
       );
     }
   }
-  private revisionRows: Array<{revision:number;action:string;timestamp:string|null;plans:number}> = [];
+  private revisionRows: Array<{revision:number;action:string;timestamp:string|null;plans:number;labels:string[]}> = [];
   private revisionCursor: number | null = null;
   private historyBusy = false;
+  private historyWarning = false;
+  private revisionLabel = "";
+  private revisionComparison = "";
+  private retentionKeep: 25 | 100 | 500 = 100;
+  private async historyAction(action: "history.compare" | "history.label" | "history.retain", revision = 0) {
+    if (this.historyBusy || !this.workspaceAPI?.workspaceMutate) return;
+    this.historyBusy = true; this.requestUpdate();
+    try {
+      const extra = action === "history.retain" ? {keep:this.retentionKeep} : action === "history.label" ? {revision,label:this.revisionLabel.trim()} : {revision};
+      const reply = await this.workspaceAPI.workspaceMutate({action,expectedRevision:this.workspaceRevision,...extra});
+      if (!reply.ok) throw new Error("unavailable");
+      if (action === "history.compare") this.revisionComparison=JSON.stringify(reply.comparison,null,2);
+      if (action === "history.label") {this.revisionLabel="";this.historyLoaded=false;this.revisionRows=[];}
+      if (action === "history.retain") this.closeDialog("history-retention-dialog");
+      this.notice=this.noticeText(action==="history.retain"?`${reply.removed} redundant cached copies removed. Recorded history remains available.`:"History action completed.",action==="history.retain"?`已移除 ${reply.removed} 個重複快取副本，已記錄歷史仍可使用。`:"歷史動作已完成。");
+    } catch {this.notice=this.noticeText("History action unavailable. Refresh the workspace revision and retry. Existing history is retained.","歷史動作未能使用，請更新工作區版本再試，已有歷史仍然保留。");}
+    finally {this.historyBusy=false;this.requestUpdate();}
+  }
   private historyLoaded = false;
-  private exportScope: "workspace" | "plans" | "history" = "workspace";
+  private exportScope: "workspace" | "plans" | "history" | "revisions" = "workspace";
   private exportPlanIds = new Set<string>();
   private async readRevisions(more = false) {
     if (this.historyBusy || !this.workspaceAPI?.workspaceMutate) return;
@@ -762,14 +781,24 @@ class MaterialBuildroot extends LitElement {
               @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#workspace-import-file")?.click()}
             >${materialIcon("upload", "icon")}${this.l("Import workspace JSON (maximum 1 MiB)", "匯入工作區 JSON（最大 1 MiB）")}</md-outlined-button>
             <h3>${this.l("Recorded revisions", "已記錄版本")}</h3>
+            ${this.historyWarning?html`<p role="alert">${this.l("The workspace was saved but complete local history could not be recorded. Git must be available to the host; inspect storage access before relying on recovery.","工作區已儲存，但未能記錄完整本機歷史。主機需要可用 Git，依賴復原前請檢查儲存存取。")}</p>`:nothing}
+            <md-outlined-text-field .label=${this.l("Label for a revision","版本標籤")} maxlength="80" .value=${this.revisionLabel} @input=${(e:Event)=>{this.revisionLabel=(e.target as HTMLInputElement).value;this.requestUpdate();}}></md-outlined-text-field>
+            <md-text-button @click=${()=>{this.revisionLabel="";this.requestUpdate();}}>${this.l("Clear label draft","清除標籤草稿")}</md-text-button>
             <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions()}>${materialIcon("history","icon")}${this.l("Read revisions","讀取版本")}</md-outlined-button>
             ${this.historyLoaded&&!this.revisionRows.length?html`<p>${this.l("No complete revision records yet. Older activity has no restorable state.","暫時未有完整版本記錄。較舊活動冇可還原狀態。")}</p>`:nothing}
-            ${this.revisionRows.map(row=>html`<div class="row"><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")}</span><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
+            ${this.revisionRows.map(row=>html`<div class="row"><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")} · ${row.labels.join(" · ")}</span><md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.compare",row.revision)}>${this.l("Compare with current","比較目前版本")}</md-outlined-button><md-outlined-button ?disabled=${this.historyBusy||!this.revisionLabel.trim()} @click=${()=>this.historyAction("history.label",row.revision)}>${this.l("Append label","新增標籤")}</md-outlined-button><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
             ${this.revisionCursor!==null?html`<md-text-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions(true)}>${this.l("More revisions","更多版本")}</md-text-button>`:nothing}
+            ${this.revisionComparison?html`<h4>${this.l("Selected revision versus current workspace","所選版本與目前工作區比較")}</h4><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${this.revisionComparison}</pre><md-text-button @click=${()=>{this.revisionComparison="";this.requestUpdate();}}>${this.l("Close comparison","關閉比較")}</md-text-button>`:nothing}
+            <h3>${this.l("Revision cache retention","版本快取保留")}</h3>
+            <p>${this.l("History stays local in an isolated repository beside application data. No automatic pruning or synchronization runs. This action only removes redundant cached copies after byte-for-byte comparison with preserved history; all recorded revisions remain restorable. Protected stores are excluded.","歷史保留喺應用程式資料旁嘅獨立本機儲存庫，唔會自動刪減或同步。呢個動作只會喺逐位元組核對已保留歷史之後移除重複快取，全部已記錄版本仍可還原。受保護儲存資料不包含在內。")}</p>
+            <md-outlined-select .label=${this.l("Recent cached copies to keep","保留最近快取數目")} .value=${String(this.retentionKeep)} @change=${(e:Event)=>{this.retentionKeep=Number((e.target as HTMLSelectElement).value) as 25|100|500;this.requestUpdate();}}>${[25,100,500].map(count=>html`<md-select-option .value=${String(count)}><div slot="headline">${count}</div></md-select-option>`)}</md-outlined-select>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>this.openDialog("history-retention-dialog",e)}>${this.l("Review cache pruning","檢視快取刪減")}</md-outlined-button>
+            <md-dialog id="history-retention-dialog"><div slot="headline">${this.l("Remove redundant revision caches?","移除重複版本快取？")}</div><div slot="content">${this.l(`Keep the newest ${this.retentionKeep} recorded revisions cached. Older cache files are deleted only when identical bytes exist in local history. History commits and restore access are preserved.`, `保留最近 ${this.retentionKeep} 個已記錄版本快取。只有本機歷史保留完全相同內容時，先會刪除較舊快取。歷史提交同還原存取保持不變。`)}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("history-retention-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.retain")}>${this.l("Remove redundant caches","移除重複快取")}</md-filled-button></div></md-dialog>
             <h3>${this.l("Export scope","匯出範圍")}</h3>
             <md-outlined-select .label=${this.l("Include","包含")} .value=${this.exportScope} @change=${(e:Event)=>{this.exportScope=(e.target as HTMLSelectElement).value as typeof this.exportScope;this.requestUpdate();}}>
               <md-select-option value="workspace"><div slot="headline">${this.l("Current workspace, re-importable","目前工作區，可重新匯入")}</div></md-select-option>
               <md-select-option value="plans"><div slot="headline">${this.l("Selected saved plans","已選儲存計劃")}</div></md-select-option>
+              <md-select-option value="revisions"><div slot="headline">${this.l("All complete recorded revisions (maximum 32 MiB)","全部完整已記錄版本（最大 32 MiB）")}</div></md-select-option>
               <md-select-option value="history"><div slot="headline">${this.l("Complete recorded activity","全部已記錄活動")}</div></md-select-option>
             </md-outlined-select>
             ${this.exportScope==="plans"?html`<md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.map(p=>p.id));this.requestUpdate();}}>${this.l("Select all saved plans","選擇全部儲存計劃")}</md-text-button><md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.filter(p=>!this.exportPlanIds.has(p.id)).map(p=>p.id));this.requestUpdate();}}>${this.l("Invert selection","反轉選擇")}</md-text-button>${this.plans.map(p=>html`<md-outlined-button aria-pressed=${this.exportPlanIds.has(p.id)} @click=${()=>{this.exportPlanIds.has(p.id)?this.exportPlanIds.delete(p.id):this.exportPlanIds.add(p.id);this.requestUpdate();}}>${this.exportPlanIds.has(p.id)?"✓ ":""}${p.name}</md-outlined-button>`)}`:nothing}
@@ -1093,11 +1122,11 @@ class MaterialBuildroot extends LitElement {
     if (this.workspaceMode === "durable") {
       try {
         const reply = await this.workspaceAPI.workspaceMutate!({action:"document.export",expectedRevision:this.workspaceRevision,scope:this.exportScope,ids:this.exportScope==="plans"?this.plans.filter(p=>this.exportPlanIds.has(p.id)).map(p=>p.id):[]});
-        if (!reply.ok) throw new Error("unavailable");
+        if (!reply.ok || typeof reply.document !== "string") throw new Error("unavailable");
         document = reply.document;
       } catch {
         this.notice = this.noticeText(
-          "Workspace export unavailable. Your plans are retained.",
+          "Workspace export unavailable or exceeds its size bound. No partial export was produced; your plans are retained.",
           "未能匯出工作區，計劃仍然保留。",
         );
         return;
