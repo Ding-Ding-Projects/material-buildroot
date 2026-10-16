@@ -302,6 +302,8 @@ export class ToolsPanel extends LitElement {
       l("Completed", "已完成"),
       result.bytes !== undefined ? `${result.bytes} bytes` : "",
       result.validation === "signature-and-decoder-roundtrip" ? l("This output passed signature and decoder round-trip checks", "此輸出已通過格式簽章同解碼往返檢查") : "",
+      result.validation === "qpdf-structure-page-count-and-rotation" ? l("PDF structure, page count and effective rotations checked; visual equivalence is unverified", "已檢查 PDF 結構、頁數同實際旋轉角度，視覺等同性未經驗證") : "",
+      result.validation === "qpdf-structure-page-count-and-metadata" ? l("PDF structure, page count and Info/XMP absence checked; other content is not sanitized", "已檢查 PDF 結構、頁數同 Info/XMP 不存在，其他內容未被清除") : "",
       result.validation === "qpdf-structure-and-page-count" ? l("PDF structure and page count checked; visual equivalence and page-order equivalence are unverified", "已檢查 PDF 結構同頁數，視覺等同性同頁序等同性未經驗證") : "",
       result.pageCounts
         ? `${l("Pages", "頁數")}: ${result.pageCounts.join(", ")}`
@@ -312,6 +314,12 @@ export class ToolsPanel extends LitElement {
     ]
       .filter(Boolean)
       .join(" · "));
+  }
+  private pdfDisclosure(){
+    if(this.pdfOperation==="merge")return this.l("Merge accepts 1–8 PDFs in the displayed order, at most 64 MiB of original bytes and 10,000 total pages. Each source digest and page count is bound to that order. Structure and total page count are checked; visual and page-order equivalence remain unverified.","合併按顯示次序接受 1 至 8 份 PDF，原始位元組總共最多 64 MiB，同最多 10,000 頁。每份來源嘅摘要同頁數會按此順序記錄。會檢查結構同總頁數，但視覺及頁序等同性仍未驗證。",true);
+    if(this.pdfOperation==="rotate")return this.l("Rotate accepts one PDF and up to 1,000 distinct page numbers. Choose 90, 180 or 270 clockwise degrees. The broker compares every page's effective inherited rotation with the requested change and checks unchanged pages too. Visual equivalence remains unverified.","旋轉接受一份 PDF 同最多 1,000 個不重複頁碼，可選順時針 90、180 或 270 度。隔離程序會逐頁比較實際繼承旋轉角度同所選改動，亦會檢查冇改動嘅頁面。視覺等同性仍未驗證。",true);
+    if(this.pdfOperation==="metadata")return this.l("Metadata removal accepts one PDF. The broker checks that trailer Info and catalog XMP Metadata are absent and that the page count is unchanged. Other metadata, document text, embedded files and active content are not sanitized. Visual equivalence remains unverified.","中繼資料移除接受一份 PDF。隔離程序會檢查 trailer Info 同 catalog XMP Metadata 已不存在，並確認頁數冇改變。其他中繼資料、文件文字、內嵌檔案同主動內容唔會被清除。視覺等同性仍未驗證。",true);
+    return this.l("Extract and reorder accept one PDF and 1–1,000 explicit page numbers between 1 and 10,000. The broker checks source structure and resulting page count. Visual and page-order equivalence remain unverified. Encrypted or unsupported documents can fail; sources remain unchanged.","擷取同重排接受一份 PDF，同 1 至 1,000 個介乎 1 至 10,000 嘅明確頁碼。隔離程序會檢查來源結構同結果頁數，視覺及頁序等同性仍未驗證。加密或不支援文件可能失敗，來源保持不變。",true);
   }
   private pdfOperationName(operation:string){
     const names:Record<string,[string,string]>={inspect:["Inspect","檢視"],split:["Split","分割"],merge:["Merge","合併"],extract:["Extract selected pages","擷取所選頁面"],reorder:["Reorder pages","重排頁面"],rotate:["Rotate","旋轉"],metadata:["Metadata","中繼資料"]};
@@ -333,6 +341,7 @@ export class ToolsPanel extends LitElement {
     if (requiresPages && !/^\s*[1-9]\d*(\s*,\s*[1-9]\d*)*\s*$/.test(this.pages))
       throw new Error("INVALID_PAGE_SELECTION");
     if(requiresPages&&(this.pages.split(",").length>1000||this.pages.split(",").some(p=>Number(p)>10000)))throw new Error("INVALID_PAGE_SELECTION");
+    if(this.pdfOperation==="rotate"&&new Set(this.pages.split(",").map(Number)).size!==this.pages.split(",").length)throw new Error("INVALID_ROTATION");
     const request = {
       action: "pdf.execute",
       operation: this.pdfOperation,
@@ -505,19 +514,22 @@ export class ToolsPanel extends LitElement {
             <span>${this.unavailable(o.reason)}</span>
           </div>`)}
           <p>${this.pdfOperationName(this.pdfOperation)}</p>
-          <p class="note">${this.l("Extract and reorder accept one PDF and 1–1,000 explicit page numbers, each between 1 and 10,000. The broker checks source structure and the resulting page count. This does not prove visual equivalence, signatures or page-order equivalence. Encrypted or unsupported documents can fail; the source remains unchanged.","擷取同重排接受一份 PDF，同 1 至 1,000 個明確頁碼，每個頁碼介乎 1 至 10,000。隔離程序會檢查來源結構同結果頁數，但唔代表已證明視覺等同性、簽署或頁序等同性。加密或不支援文件可能失敗，來源保持不變。",true)}</p>
+          <p class="note">${this.pdfDisclosure()}</p>
           ${this.button(
             "Add PDF source",
             "加入 PDF 來源",
             async () => {
               this.pdfSources = [...this.pdfSources, await this.choose("read")];
             },
-            this.pdfSources.length >= 1,
+            this.pdfSources.length >= (this.pdfOperation==="merge"?8:1),
           )}
           ${this.pdfSources.map(
             (s, i) =>
               html`<div class="row">
-                <span>${i + 1}. ${s.name}</span>${this.button(
+                <span>${i + 1}. ${s.name}</span>${this.pdfOperation==="merge"?html`
+                  ${this.button("Move PDF earlier","將 PDF 移前",async()=>{const next=[...this.pdfSources];[next[i-1],next[i]]=[next[i],next[i-1]];this.pdfSources=next;},i===0)}
+                  ${this.button("Move PDF later","將 PDF 移後",async()=>{const next=[...this.pdfSources];[next[i],next[i+1]]=[next[i+1],next[i]];this.pdfSources=next;},i===this.pdfSources.length-1)}
+                `:nothing}${this.button(
                   "Remove",
                   "移除",
                   async () => {
@@ -544,7 +556,7 @@ export class ToolsPanel extends LitElement {
             : nothing}
           ${this.pdfOperation === "metadata"
             ? html`<p>
-                ${this.l("Removes document information and metadata.","移除文件資訊同中繼資料。",true)}
+                ${this.l("Removes trailer Info and catalog XMP Metadata only. This is not complete sanitization of document content, embedded files or active content.","只移除 trailer Info 同 catalog XMP Metadata，唔代表已全面清除文件內容、內嵌檔案或主動內容。",true)}
               </p>`
             : nothing}
           ${this.pdfOperation !== "inspect"

@@ -190,7 +190,7 @@ function admit(request, nested = false) {
           if (
             !Array.isArray(request.sourceIds) ||
             !request.sourceIds.length ||
-            request.sourceIds.length > 100
+            request.sourceIds.length > (request.operation === "merge" ? 8 : 1)
           )
             fail("INPUT_LIMIT");
           request.sourceIds.forEach((id) => string(id));

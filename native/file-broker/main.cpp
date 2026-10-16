@@ -13,6 +13,8 @@
 #include <bcrypt.h>
 #include <cstring>
 #include <cstddef>
+#include <memory>
+#include "qpdf-json.hpp"
 
 // Host-only protocol. No renderer command line is accepted by this executable.
 // argv: operation, input, new output, private payload root, executable basename, input identity, output-parent identity.
@@ -152,7 +154,7 @@ std::wstring arguments(const std::wstring& operation) {
   if (operation == L"ffmpeg-flac") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f flac pipe:1";
   if (operation == L"ffmpeg-mp4") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -movflags +frag_keyframe+empty_moov+default_base_moof -f mp4 pipe:1";
   if (operation == L"ffmpeg-webm") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 -row-mt 0 -c:a libopus -f webm pipe:1";
-  if (operation == L"qpdf-extract" || operation == L"qpdf-reorder") return L"";
+  if (operation == L"qpdf-extract" || operation == L"qpdf-reorder" || operation == L"qpdf-merge" || operation == L"qpdf-rotate" || operation == L"qpdf-metadata") return L"";
   stop();
 }
 }
@@ -198,7 +200,7 @@ void signature(HANDLE handle, const std::wstring& operation) {
   else if (operation == L"ffmpeg-webm") {
     const BYTE magic[] = {0x1a,0x45,0xdf,0xa3}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0;
   }
-  else if (operation == L"qpdf-extract" || operation == L"qpdf-reorder") matches = std::memcmp(bytes, "%PDF-", 5) == 0;
+  else if (operation.rfind(L"qpdf-", 0) == 0) matches = std::memcmp(bytes, "%PDF-", 5) == 0;
   require(matches); rewindFile(handle);
 }
 std::wstring validationArguments(const std::wstring& operation) {
@@ -348,17 +350,36 @@ unsigned readPageCount(HANDLE handle) {
   }
   require(digits > 0 && result > 0 && result <= 10000); return result;
 }
+std::string boundedReport(HANDLE handle) {
+  LARGE_INTEGER size{}; require(GetFileSizeEx(handle, &size) && size.QuadPart > 0 && size.QuadPart <= 1024 * 1024);
+  rewindFile(handle); std::string result(static_cast<size_t>(size.QuadPart), '\0'); DWORD read = 0;
+  require(ReadFile(handle, result.data(), static_cast<DWORD>(result.size()), &read, nullptr) && read == result.size());
+  return result;
+}
+std::string fileIdentity(HANDLE handle) {
+  BY_HANDLE_FILE_INFORMATION identity{}; require(GetFileInformationByHandle(handle, &identity) != 0);
+  const ULONGLONG index = (ULONGLONG(identity.nFileIndexHigh) << 32) | identity.nFileIndexLow;
+  return std::to_string(identity.dwVolumeSerialNumber) + ":" + std::to_string(index);
+}
 }
 int wmain(int argc, wchar_t** argv) {
   std::wstring temporaryName;
   bool published = false;
   try {
-    require(argc == 8 || argc == 9);
+    require(argc >= 8 && argc <= 23);
     std::wstring operation(argv[1]); const auto args = arguments(operation);
-    const bool pdf = operation == L"qpdf-extract" || operation == L"qpdf-reorder";
-    require(pdf ? argc == 9 : argc == 8);
-    const std::wstring selection = pdf ? argv[8] : L"";
-    const auto pages = pdf ? selectedPages(selection) : std::vector<unsigned>{};
+    const bool pdf = operation.rfind(L"qpdf-", 0) == 0;
+    const bool merge = operation == L"qpdf-merge", rotate = operation == L"qpdf-rotate", metadata = operation == L"qpdf-metadata";
+    require(pdf ? (merge ? argc >= 9 && (argc - 9) % 2 == 0 : rotate ? argc == 10 : argc == 9) : argc == 8);
+    if (merge) require(std::wstring(argv[8]) == L"merge");
+    if (metadata) require(std::wstring(argv[8]) == L"remove");
+    const std::wstring selection = pdf && !merge && !metadata ? argv[8] : L"";
+    const auto pages = !selection.empty() ? selectedPages(selection) : std::vector<unsigned>{};
+    unsigned degrees = 0;
+    if (rotate) {
+      const std::wstring value(argv[9]); require(value == L"90" || value == L"180" || value == L"270");
+      degrees = static_cast<unsigned>(std::stoul(value)); require(std::set<unsigned>(pages.begin(), pages.end()).size() == pages.size());
+    }
     const std::wstring input = full(argv[2]), output = full(argv[3]);
     const std::wstring root = full(argv[4]), executableName(argv[5]); safeName(executableName);
     require(input != output && input.rfind(root + L"\\", 0) != 0 && output.rfind(root + L"\\", 0) != 0);
@@ -379,6 +400,21 @@ int wmain(int argc, wchar_t** argv) {
     require(std::to_wstring(sourceIdentity.dwVolumeSerialNumber) + L":" + std::to_wstring(fileIndex) == argv[6]);
     LARGE_INTEGER size{}; require(GetFileSizeEx(source.value, &size) && size.QuadPart <= 64ll * 1024 * 1024);
     const std::string inputDigest = sha256(source.value);
+    std::vector<std::unique_ptr<ParentLocks>> additionalParents;
+    std::vector<std::unique_ptr<Handle>> additionalSources;
+    std::vector<HANDLE> sources{source.value};
+    std::vector<std::string> inputDigests{inputDigest};
+    LONGLONG totalInputBytes = size.QuadPart;
+    if (merge) for (int index = 9; index < argc; index += 2) {
+      const auto selected = full(argv[index]); require(selected != output && selected.rfind(root + L"\\", 0) != 0);
+      additionalParents.push_back(std::make_unique<ParentLocks>(selected));
+      auto handle = std::make_unique<Handle>(CreateFileW(selected.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+        OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(handle->value != INVALID_HANDLE_VALUE);
+      inspect(handle->value, selected, false); require(fileIdentity(handle->value) == ascii(argv[index + 1]));
+      require(GetFileSizeEx(handle->value, &size) && size.QuadPart >= 0 && size.QuadPart <= 64ll * 1024 * 1024);
+      totalInputBytes += size.QuadPart; require(totalInputBytes <= 64ll * 1024 * 1024);
+      inputDigests.push_back(sha256(handle->value)); sources.push_back(handle->value); additionalSources.push_back(std::move(handle));
+    }
     GUID temporaryId{}; require(CoCreateGuid(&temporaryId) == S_OK);
     wchar_t guid[40]; require(StringFromGUID2(temporaryId, guid, 40) > 0);
     const std::wstring candidate = L".material-incomplete-" + std::wstring(guid + 1, 36) + L".tmp";
@@ -407,31 +443,80 @@ int wmain(int argc, wchar_t** argv) {
     limits.ProcessMemoryLimit = 256ull * 1024 * 1024; limits.JobMemoryLimit = limits.ProcessMemoryLimit;
     require(SetInformationJobObject(job.value, JobObjectExtendedLimitInformation, &limits, sizeof(limits)) != 0);
     const ULONGLONG deadline = GetTickCount64() + 30000;
-    unsigned inputPages = 0, outputPages = 0;
+    unsigned inputPages = 0, outputPages = 0, expectedPages = 0;
+    std::vector<unsigned> inputPageCounts;
+    bool rotationVerified = false, metadataVerified = false;
     if (pdf) {
-      signature(source.value, operation);
       const std::wstring data = root + L"-data";
       require(CreateDirectoryW(data.c_str(), nullptr) != 0); acl(data, profile.sid, true);
       ParentLocks dataParents(data + L"\\entry");
-      const std::wstring sourcePath = data + L"\\source.pdf";
-      Handle stagedSource(stageReadOnly(source.value, sourcePath, profile.sid, inputDigest));
       Handle counter(CreateFileW((data + L"\\page-count.bin").c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
         CREATE_NEW, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(counter.value != INVALID_HANDLE_VALUE);
-      decoder(executable, L" --check " + quote(sourcePath), root, profile.sid, job.value, source.value, errors.value, destination.value, errors.value, deadline);
-      decoder(executable, L" --show-npages " + quote(sourcePath), root, profile.sid, job.value, source.value, counter.value, counter.value, errors.value, deadline, 32);
-      inputPages = readPageCount(counter.value);
+      Handle report(CreateFileW((data + L"\\inspection.json").c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+        CREATE_NEW, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(report.value != INVALID_HANDLE_VALUE);
+      std::vector<std::wstring> sourcePaths;
+      std::vector<std::unique_ptr<Handle>> stagedSources;
+      auto pageCount = [&](const std::wstring& file) {
+        rewindFile(counter.value); require(SetEndOfFile(counter.value) != 0);
+        decoder(executable, L" --show-npages " + quote(file), root, profile.sid, job.value, source.value,
+          counter.value, counter.value, errors.value, deadline, 32);
+        return readPageCount(counter.value);
+      };
+      auto inspectReport = [&](const std::wstring& file) {
+        rewindFile(report.value); require(SetEndOfFile(report.value) != 0);
+        decoder(executable, L" --json=2 --json-key=qpdf --json-key=pages --json-stream-data=none " + quote(file),
+          root, profile.sid, job.value, source.value, report.value, report.value, errors.value, deadline, 1024 * 1024);
+        return qpdf_json::Report(boundedReport(report.value));
+      };
+      for (size_t index = 0; index < sources.size(); ++index) {
+        signature(sources[index], operation);
+        const std::wstring staged = data + L"\\source-" + std::to_wstring(index) + L".pdf";
+        auto reader = std::make_unique<Handle>(stageReadOnly(sources[index], staged, profile.sid, inputDigests[index]));
+        decoder(executable, L" --check " + quote(staged), root, profile.sid, job.value, source.value, errors.value, destination.value, errors.value, deadline);
+        const unsigned count = pageCount(staged);
+        inputPageCounts.push_back(count); inputPages += count; require(inputPages <= 10000);
+        sourcePaths.push_back(staged); stagedSources.push_back(std::move(reader));
+      }
       for (unsigned page : pages) require(page <= inputPages);
-      decoder(executable, L" " + quote(sourcePath) + L" --pages . " + selection + L" -- -", root, profile.sid, job.value,
-        source.value, destination.value, destination.value, errors.value, deadline);
+      expectedPages = merge || rotate || metadata ? inputPages : static_cast<unsigned>(pages.size());
+      std::vector<int> beforeRotations;
+      if (rotate) { beforeRotations = inspectReport(sourcePaths[0]).rotations(); require(beforeRotations.size() == inputPages); }
+      std::wstring metadataPath;
+      std::unique_ptr<Handle> metadataUpdate;
+      if (metadata) {
+        const std::string patch = inspectReport(sourcePaths[0]).withoutInfoUpdate();
+        rewindFile(counter.value); require(SetEndOfFile(counter.value) != 0);
+        DWORD written = 0; require(WriteFile(counter.value, patch.data(), static_cast<DWORD>(patch.size()), &written, nullptr) && written == patch.size());
+        metadataPath = data + L"\\metadata-update.json";
+        metadataUpdate = std::make_unique<Handle>(stageReadOnly(counter.value, metadataPath, profile.sid, sha256(counter.value)));
+      }
+      std::wstring command;
+      if (merge) {
+        command = L" --empty --pages";
+        for (const auto& file : sourcePaths) command += L" " + quote(file) + L" 1-z";
+        command += L" -- -";
+      } else if (rotate) command = L" " + quote(sourcePaths[0]) + L" --rotate=+" + std::to_wstring(degrees) + L":" + selection + L" -";
+      else if (metadata) command = L" " + quote(sourcePaths[0]) + L" --update-from-json=" + quote(metadataPath) + L" --remove-metadata -";
+      else command = L" " + quote(sourcePaths[0]) + L" --pages . " + selection + L" -- -";
+      require(command.size() + executable.size() + 3 < 24000);
+      decoder(executable, command, root, profile.sid, job.value, source.value, destination.value, destination.value, errors.value, deadline);
       require(FlushFileBuffers(destination.value) != 0); signature(destination.value, operation);
       const std::string expectedOutputHash = sha256(destination.value);
       const std::wstring validationPath = data + L"\\validation.pdf";
       Handle stagedOutput(stageReadOnly(destination.value, validationPath, profile.sid, expectedOutputHash));
       decoder(executable, L" --check " + quote(validationPath), root, profile.sid, job.value, source.value, errors.value, destination.value, errors.value, deadline);
-      rewindFile(counter.value); require(SetEndOfFile(counter.value) != 0);
-      decoder(executable, L" --show-npages " + quote(validationPath), root, profile.sid, job.value, source.value, counter.value, counter.value, errors.value, deadline, 32);
-      outputPages = readPageCount(counter.value);
-      require(outputPages == pages.size() && sha256(destination.value) == expectedOutputHash);
+      outputPages = pageCount(validationPath);
+      require(outputPages == expectedPages && sha256(destination.value) == expectedOutputHash);
+      if (rotate) {
+        const auto afterRotations = inspectReport(validationPath).rotations(); require(afterRotations.size() == beforeRotations.size());
+        const std::set<unsigned> selected(pages.begin(), pages.end());
+        for (size_t index = 0; index < afterRotations.size(); ++index) {
+          const int expected = (beforeRotations[index] + (selected.count(static_cast<unsigned>(index + 1)) ? static_cast<int>(degrees) : 0)) % 360;
+          require(afterRotations[index] == expected);
+        }
+        rotationVerified = true;
+      }
+      if (metadata) { metadataVerified = inspectReport(validationPath).metadataAbsent(); require(metadataVerified); }
     } else {
       decoder(executable, args, root, profile.sid, job.value, source.value, destination.value, destination.value, errors.value, deadline);
     }
@@ -443,10 +528,21 @@ int wmain(int argc, wchar_t** argv) {
     require(PeekNamedPipe(GetStdHandle(STD_INPUT_HANDLE), nullptr, 0, nullptr, &available, nullptr) && !available && GetTickCount64() < deadline);
     publish(destination.value, parent.value, output.substr(output.find_last_of(L'\\') + 1)); published = true;
     const std::string operationText = ascii(operation);
-    const std::string pdfFields = pdf ? ",\"inputPages\":" + std::to_string(inputPages) + ",\"expectedPages\":" + std::to_string(pages.size()) + ",\"outputPages\":" + std::to_string(outputPages) : "";
+    std::string pdfFields = pdf ? ",\"inputPages\":" + std::to_string(inputPages) + ",\"expectedPages\":" + std::to_string(expectedPages) + ",\"outputPages\":" + std::to_string(outputPages) : "";
+    if (merge) {
+      pdfFields += ",\"sourceSha256s\":[";
+      for (size_t index = 0; index < inputDigests.size(); ++index) {
+        if (index) pdfFields += ","; pdfFields += "\"" + inputDigests[index] + "\"";
+      }
+      pdfFields += "],\"inputPageCounts\":[";
+      for (size_t index = 0; index < inputPageCounts.size(); ++index) { if (index) pdfFields += ","; pdfFields += std::to_string(inputPageCounts[index]); }
+      pdfFields += "]";
+    }
+    if (rotate) pdfFields += ",\"degrees\":" + std::to_string(degrees) + ",\"rotationVerified\":" + (rotationVerified ? "true" : "false");
+    if (metadata) pdfFields += ",\"metadataMode\":\"remove\",\"metadataAbsent\":" + std::string(metadataVerified ? "true" : "false");
     std::printf("{\"protocol\":1,\"state\":\"completed\",\"operation\":\"%s\",\"mechanism\":\"appcontainer-handle-job\",\"sourceSha256\":\"%s\",\"outputBytes\":%llu,\"outputSha256\":\"%s\",\"validation\":\"%s\",\"admission\":{\"appContainer\":true,\"lpac\":true,\"capabilityCount\":0,\"jobAssigned\":true,\"handleList\":true},\"publication\":\"atomic-no-replace\"%s}\n",
       operationText.c_str(), inputDigest.c_str(), static_cast<unsigned long long>(size.QuadPart), outputDigest.c_str(),
-      pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
+      rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
     return 0;
   } catch (...) {
     // Preserve the exact partial output under its explicit incomplete name. Never

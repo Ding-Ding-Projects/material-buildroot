@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { inspectCanonicalPath } = require("./file-grants.cjs");
 const capabilities = new WeakSet();
-const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder"]) });
+const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder", "merge", "rotate", "metadata"]) });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function hash(bytes) { return crypto.createHash("sha256").update(bytes).digest("hex"); }
 function relative(value) {
@@ -62,16 +62,25 @@ function execute(file, args, signal) {
         const receipt = JSON.parse(stdout);
         const operation = args[0];
         const admission = receipt.admission;
-        const pdf = operation === "qpdf-extract" || operation === "qpdf-reorder";
-        const selection = pdf ? args[7].split(",").map(Number) : [];
+        const pdf = operation.startsWith("qpdf-");
+        const merge = operation === "qpdf-merge", rotate = operation === "qpdf-rotate", metadata = operation === "qpdf-metadata";
+        const selection = pdf && !merge && !metadata ? args[7].split(",").map(Number) : [];
+        const validation = rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip";
         if (receipt.protocol !== 1 || receipt.state !== "completed" || receipt.operation !== operation || receipt.mechanism !== "appcontainer-handle-job" ||
             !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes < 1 || receipt.outputBytes > 128 * 1024 * 1024 ||
             !/^[a-f0-9]{64}$/.test(receipt.sourceSha256 || "") || !/^[a-f0-9]{64}$/.test(receipt.outputSha256 || "") ||
-            receipt.validation !== (pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip") || receipt.publication !== "atomic-no-replace" ||
+            receipt.validation !== validation || receipt.publication !== "atomic-no-replace" ||
             !admission || admission.appContainer !== true || admission.lpac !== true || admission.capabilityCount !== 0 || admission.jobAssigned !== true || admission.handleList !== true ||
-            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (pdf ? 13 : 10)) fail("INVALID_BROKER_RECEIPT");
+            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (merge || rotate || metadata ? 15 : pdf ? 13 : 10)) fail("INVALID_BROKER_RECEIPT");
         if (pdf && (!Number.isSafeInteger(receipt.inputPages) || receipt.inputPages < 1 || receipt.inputPages > 10000 ||
-            receipt.expectedPages !== selection.length || receipt.outputPages !== selection.length || selection.some(page => page > receipt.inputPages))) fail("INVALID_BROKER_RECEIPT");
+            receipt.expectedPages !== (merge || rotate || metadata ? receipt.inputPages : selection.length) || receipt.outputPages !== receipt.expectedPages || selection.some(page => page > receipt.inputPages))) fail("INVALID_BROKER_RECEIPT");
+        if (merge) {
+          const count = (args.length - 8) / 2 + 1;
+          if (!Array.isArray(receipt.sourceSha256s) || receipt.sourceSha256s.length !== count || receipt.sourceSha256s[0] !== receipt.sourceSha256 || receipt.sourceSha256s.some(value => !/^[a-f0-9]{64}$/.test(value || "")) ||
+              !Array.isArray(receipt.inputPageCounts) || receipt.inputPageCounts.length !== count || receipt.inputPageCounts.some(value => !Number.isSafeInteger(value) || value < 1 || value > 10000) || receipt.inputPageCounts.reduce((sum, value) => sum + value, 0) !== receipt.inputPages) fail("INVALID_BROKER_RECEIPT");
+        }
+        if (rotate && (receipt.degrees !== Number(args[8]) || receipt.rotationVerified !== true)) fail("INVALID_BROKER_RECEIPT");
+        if (metadata && (receipt.metadataMode !== "remove" || receipt.metadataAbsent !== true)) fail("INVALID_BROKER_RECEIPT");
         resolve(receipt);
       } catch { reject(Object.assign(new Error("INVALID_BROKER_RECEIPT"), { code: "INVALID_BROKER_RECEIPT", incompleteOutput: { state: "unknown", publication: "unconfirmed" } })); }
     });
@@ -111,10 +120,17 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
       const { adapterId, sourceId, destinationId, format } = request;
       if (!supported[adapterId]?.includes(format)) fail("BROKER_FORMAT_UNAVAILABLE");
       const pdf = adapterId === "qpdf";
-      if (pdf && (!Array.isArray(request.pages) || !request.pages.length || request.pages.length > 1000 || request.pages.some(page => !Number.isInteger(page) || page < 1 || page > 10000))) fail("INVALID_PAGE_SELECTION");
-      const source = await resolveNativeGrant(sourceId, "read");
+      const merge = pdf && format === "merge", rotate = pdf && format === "rotate", metadata = pdf && format === "metadata";
+      if (pdf && !merge && !metadata && (!Array.isArray(request.pages) || !request.pages.length || request.pages.length > 1000 || request.pages.some(page => !Number.isInteger(page) || page < 1 || page > 10000))) fail("INVALID_PAGE_SELECTION");
+      if (rotate && (![90, 180, 270].includes(request.degrees) || new Set(request.pages).size !== request.pages.length)) fail("INVALID_ROTATION");
+      if (metadata && request.mode !== "remove") fail("UNSUPPORTED_METADATA_MODE");
+      const ids = merge ? request.sourceIds : [sourceId];
+      if (!Array.isArray(ids) || !ids.length || ids.length > 8 || ids.some(id => typeof id !== "string")) fail("INPUT_LIMIT");
+      const sources = await Promise.all(ids.map(id => resolveNativeGrant(id, "read")));
+      const source = sources[0];
       const output = await resolveNativeGrant(destinationId, "write");
       if (source.kind !== "file" || source.newOutput || !/^[0-9]+:[0-9]+$/.test(source.identity || "") || output.kind !== "file" || !output.newOutput || !/^[0-9]+:[0-9]+$/.test(output.identity || "") || source.path === output.path) fail("NATIVE_FILE_GRANT_REQUIRED");
+      if (sources.some(item => item.kind !== "file" || item.newOutput || !/^[0-9]+:[0-9]+$/.test(item.identity || "") || item.path === output.path)) fail("NATIVE_FILE_GRANT_REQUIRED");
       const manifest = payloads?.[adapterId];
       if (!manifest || !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 4096 || typeof manifest.root !== "string") fail("MISSING_VERIFIED_PAYLOAD");
       const executable = relative(manifest.executable);
@@ -143,10 +159,13 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
         }
         if (!seen.has(executable.toLowerCase())) fail("MISSING_VERIFIED_PAYLOAD");
         // Revalidate host grants immediately before crossing into the native broker.
-        const currentSource = await resolveNativeGrant(sourceId, "read"), currentOutput = await resolveNativeGrant(destinationId, "write");
-        if (JSON.stringify(currentSource) !== JSON.stringify(source) || JSON.stringify(currentOutput) !== JSON.stringify(output)) fail("GRANT_CHANGED");
+        const currentSources = await Promise.all(ids.map(id => resolveNativeGrant(id, "read"))), currentOutput = await resolveNativeGrant(destinationId, "write");
+        if (JSON.stringify(currentSources) !== JSON.stringify(sources) || JSON.stringify(currentOutput) !== JSON.stringify(output)) fail("GRANT_CHANGED");
         const args = [adapterId + "-" + format, source.path, output.path, runtime, executable, source.identity, output.identity];
-        if (pdf) args.push(request.pages.join(","));
+        if (pdf) args.push(merge ? "merge" : metadata ? "remove" : request.pages.join(","));
+        if (rotate) args.push(String(request.degrees));
+        if (merge) for (const item of sources.slice(1)) args.push(item.path, item.identity);
+        if (args.reduce((total, value) => total + value.length + 3, localBroker.length) > 24000) fail("BROKER_ARGUMENT_LIMIT");
         const receipt = await execute(localBroker, args, context.signal);
         return { ...receipt, destinationId, outputCreated: true };
       } finally {
