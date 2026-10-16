@@ -33,6 +33,18 @@ Both preview and execution copy the admitted input into a private directory and 
 
 ISO export is explicitly a byte-identical copy of an existing detected ISO9660 image. It does not author a bootable ISO from a root filesystem. OVA export converts to a stream-optimized VMDK and packages a fixed OVF descriptor, SHA-256 manifest and disk as USTAR. The descriptor declares one CPU, 1024 MiB RAM, SATA storage and no network adapter. Individual USTAR entries must fit the octal size limit. Appliance import and boot compatibility are not asserted.
 
+## Manifest, compliance and repeat-build controls
+
+Select output files with the browser checkboxes and choose **Create and save manifest**. The existing host manifest service captures input locks and hashes the selected output bytes. A narrow opaque-identity adapter saves the result exclusively as a host-named `manifest-<uuid>.json` in the adopted output root while holding the existing mutation lease. No renderer-supplied destination or replacement is accepted.
+
+The manifest panel displays the digest, selected file hashes and actual provenance state. **Current-input observation only** means there is no matching successful-job output receipt. **Bound to a successful local job output receipt** displays the job identity, receipt digest, recorded time and runtime-selection digest supplied by the host. These are separate states rather than interchangeable success labels.
+
+Choose the newly saved record as the before or after manifest, or inspect an existing manifest JSON file in the browser and assign it. **Compare host-validated manifests** delegates to the existing file-based comparison service. The view exposes its exact status, both bindings, whether the jobs are distinct, runtime-selection differences, missing locks, changed locks and changed output paths. A repeated observation of one successful job is not evidence of two builds.
+
+Matching bytes and locks do not establish a fresh rebuild, whole-output completeness, installed toolchain/environment content, importer compatibility or bootability. Incremental builds can reuse existing files. Root refresh or entry expiry requires selecting manifest files again; the host never accepts stale entry identities silently.
+
+**Collect legal-info records** calls the existing compliance collection service. The resulting table shows source package names, versions, declared licenses and manifest paths, plus parsing failures and collected file hashes. Its collection state and source-declaration-only limitation remain visible. No SPDX-expression validation, legal compatibility determination or obligation assessment is inferred by the renderer.
+
 ## Verification state
 
 This source was implemented under a mode that excludes tests, reviews, static analysis, runtime interaction, actual conversions and screenshots. A future production build receipt must name its exact source. No conversion, archive parsing, filesystem inspection, keyboard interaction, localization layout, importer compatibility or boot result has been established by this implementation task. Keep runtime acceptance open.

@@ -95,6 +95,8 @@ const fields = {
   "outputs.browse": ["workspaceId", "directoryId"],
   "outputs.inspect": ["workspaceId", "fileId"],
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
+  "outputs.manifest": ["workspaceId", "fileIds"],
+  "outputs.compare": ["workspaceId", "beforeId", "afterId"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
   "artifacts.compliance": ["workspaceId"],
@@ -1610,6 +1612,26 @@ function createOperationsService({
         return outputViewer(request.workspaceId).checksum(request.fileId, request.expected);
       case "artifacts.inspect":
         return deployment(request.workspaceId).inspectArtifact(request.path);
+      case "outputs.manifest": {
+        if (!Array.isArray(request.fileIds) || !request.fileIds.length || request.fileIds.length > 1000 || new Set(request.fileIds).size !== request.fileIds.length || request.fileIds.some(id => typeof id !== "string" || id.length !== 36)) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), async () => {
+          const viewer = outputViewer(request.workspaceId);
+          const paths = request.fileIds.map(id => viewer.resolve(id, "file").grant.relative.split(path.sep).join("/"));
+          const manifest = await perform({ action: "artifacts.manifest", workspaceId: request.workspaceId, paths });
+          const content = JSON.stringify(manifest, null, 2) + "\n";
+          if (Buffer.byteLength(content) > 4 * 1024 * 1024) reject("MANIFEST_SIZE_LIMIT");
+          const name = `manifest-${randomUUID()}.json`;
+          fs.writeFileSync(path.join(project(request.workspaceId).output, name), content, {flag:"wx", mode:0o600});
+          return {manifest, name, fileId:viewer.admit(name,"file")};
+        });
+      }
+      case "outputs.compare": {
+        if (typeof request.beforeId !== "string" || typeof request.afterId !== "string" || request.beforeId.length !== 36 || request.afterId.length !== 36) reject("INVALID_REQUEST");
+        const viewer = outputViewer(request.workspaceId);
+        return perform({ action:"artifacts.compare", workspaceId:request.workspaceId,
+          beforePath:viewer.resolve(request.beforeId,"file").grant.relative,
+          afterPath:viewer.resolve(request.afterId,"file").grant.relative });
+      }
       case "artifacts.manifest": {
         const item = project(request.workspaceId);
         const hasConfiguration = fs.existsSync(path.join(item.output, ".config"));
