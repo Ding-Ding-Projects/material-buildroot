@@ -21,6 +21,8 @@ The fresh complete Node baseline discovered **444 tests: 361 passed, 74 failed, 
 
 A later focused discovery/TLS/Kconfig run discovered **47 tests: 44 passed, zero failed, three skipped**. It used a real discovered Python interpreter and OpenSSL executable. The skips are one pre-existing opt-in downloaded-source case and two explicitly separated file-symbolic-link cases unavailable under the current native privilege. Parent assertions for malformed descriptors, corrupted metadata and oversized files still run. This focused result does not replace the failing complete baseline.
 
+A separate complete `tests/tools.test.cjs` run passed **16 tests, zero failed and zero skipped**. Its Windows fixtures are genuine test-owned PE executables compiled with the installed Framework64 compiler. They launch the pinned Node executable directly with quoted arguments and use an unnamed native job with kill-on-close behavior. Consent, grants, actual child existence/disappearance, PDF output, page selection and queue assertions remain. Independent correctness/security review found no actionable defect in that batch. The helper assumes the selected x64 host and does not establish 32-bit support or production admission of arbitrary fixture sidecars.
+
 ## Exact-byte vendor repair
 
 The committed `scripts/configuration/vendor/kconfiglib.py` and `LICENSE.txt` blobs matched their existing SHA-256 provenance. Native checkout text conversion changed their working bytes to CRLF, correctly triggering `KCONFIG_INTEGRITY_FAILED` before interpreter execution.
@@ -36,6 +38,8 @@ The actual workspace rendered and the **Discover runtimes** control invoked the 
 Original captures and private process receipts are retained locally pending sanitized evidence promotion. The initial capture SHA-256 is `791f489957b7ece238d006d4cc7f09f1b4a33009b930a5f2f8ecfcb260c6a775`; runtime discovery is `22c07c6e5deda59ffb4db729a06ad94b3f4a7245a41f07274531fe289b9a4784`. They bind to the baseline source above, not later scheduling or test changes.
 
 A later ownership query timed out at its bounded listener-query stage before attachment. That attempt proves no onboarding interaction or capture. No timeout was relabelled as a successful operation.
+
+A bounded retry independently passed ownership proof, opened the real setup dialog and captured its first step. The capture SHA-256 is `8297e58c353390fad2a3af038d7270cf3ef0ae50fca10a19be63a57870b198f0`. Its recorded observation interval also had zero console, exception and page errors. This proves setup opening and displayed controls, not save/resume or completion. A native HWND-targeted PrintWindow capture was separately retained. Owned teardown remains pending until its final absence proof.
 
 ## Open acceptance
 
