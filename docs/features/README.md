@@ -1,5 +1,7 @@
 # Workspace features
 
+- [Source acquisition and revision lifecycle](source-lifecycle.md): official HTTPS acquisition, retained revision snapshots, explicit preview/Apply and typed WSL authority.
+
 - [Scheduled language and appearance preferences](scheduled-preferences.md): local
   rules, effective values, protected source enrollment and explicit draft recovery.
 

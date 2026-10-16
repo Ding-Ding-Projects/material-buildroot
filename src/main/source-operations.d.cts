@@ -1,6 +1,7 @@
 import type { SourceService } from "./execution/source.cjs";
 export type SourceOperation =
   | { action: "source.choose" }
+  | { action: "source.clone.official"; selectionId: string; directory: string; ref: string; trust: true }
   | {
       action: "source.clone";
       selectionId: string;
@@ -92,6 +93,7 @@ export function createSourceOperations(options: {
   acquireSourceLock?(canonicalSource: string): Promise<() => void>;
   sourceOptions?: { git?: string; allowLocalFixture?: boolean };
   sourceService?: SourceService;
+  sourceServiceForWorkspace?(workspace: {source: string}): SourceService | undefined;
 }): {
   handle(
     request: SourceOperation,

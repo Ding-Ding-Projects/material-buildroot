@@ -5,6 +5,7 @@ const { SourceService } = require("./execution/source.cjs");
 const fields = {
   "source.choose": [],
   "source.clone": ["selectionId", "directory", "url", "ref", "trust"],
+  "source.clone.official": ["selectionId", "directory", "ref", "trust"],
   "source.status": ["workspaceId"],
   "source.snapshot": ["workspaceId", "expectedRevision", "consent"],
   "source.ref": ["workspaceId", "ref"],
@@ -67,6 +68,7 @@ function createSourceOperations({
   acquireSourceLock,
   sourceOptions = {},
   sourceService,
+  sourceServiceForWorkspace,
 } = {}) {
   const service =
     sourceService || new SourceService({ ...sourceOptions, acquireSourceLock });
@@ -75,6 +77,7 @@ function createSourceOperations({
     previews = new Map(),
     rollbacks = new Map(),
     adopting = new Map();
+  const ownedServices = new Set();
   let disposed = false;
   async function project(workspaceId) {
     if (!id(workspaceId)) fail("INVALID_REQUEST");
@@ -93,14 +96,16 @@ function createSourceOperations({
     }
     if (adopting.has(workspaceId)) return adopting.get(workspaceId);
     const pending = (async () => {
-      const grant = service.grantRoot(path.dirname(workspace.source));
-      const adopted = await service.adopt({
+      const selectedService = sourceServiceForWorkspace?.(workspace) || service;
+      if (selectedService !== service) ownedServices.add(selectedService);
+      const grant = selectedService.adoptWorkspace ? null : selectedService.grantRoot(path.dirname(workspace.source));
+      const adopted = selectedService.adoptWorkspace ? await selectedService.adoptWorkspace(workspace) : await selectedService.adopt({
         grantId: grant.grantId,
         directory: path.basename(workspace.source),
         trustedSource: true,
       });
       // Existing workspace trust must have been admitted by the host's resolveWorkspace callback.
-      const item = { projectId: adopted.projectId, source: adopted.source };
+      const item = { projectId: adopted.projectId, source: adopted.source, service: selectedService };
       projects.set(workspaceId, item);
       return item;
     })();
@@ -127,12 +132,13 @@ function createSourceOperations({
         selections.set(selectionId, grant.grantId);
         return { ok: true, selectionId, name: path.basename(grant.root) };
       }
-      if (request.action === "source.clone") {
+      if (request.action === "source.clone" || request.action === "source.clone.official") {
+        const url = request.action === "source.clone.official" ? "https://gitlab.com/buildroot.org/buildroot.git" : request.url;
         if (request.trust !== true) fail("SOURCE_TRUST_REQUIRED");
         if (
           !id(request.selectionId) ||
           typeof request.directory !== "string" ||
-          typeof request.url !== "string" ||
+          typeof url !== "string" ||
           typeof request.ref !== "string"
         )
           fail("INVALID_REQUEST");
@@ -143,7 +149,7 @@ function createSourceOperations({
         const cloned = await service.clone({
           grantId,
           directory: request.directory,
-          url: request.url,
+          url,
           ref: request.ref,
           trustedSource: true,
         });
@@ -170,23 +176,24 @@ function createSourceOperations({
         };
       }
       const item = await project(request.workspaceId);
+      const activeService = item.service || service;
       if (request.action === "source.status")
-        return { ok: true, ...(await service.status(item.projectId)) };
+        return { ok: true, ...(await activeService.status(item.projectId)) };
       if (request.action === "source.snapshot") {
         if (request.consent !== true) fail("SOURCE_APPLY_CONSENT_REQUIRED");
         if (!revision(request.expectedRevision)) fail("INVALID_REVISION");
-        return { ok: true, ...(await service.snapshot({projectId:item.projectId, expectedRevision:request.expectedRevision})) };
+        return { ok: true, ...(await activeService.snapshot({projectId:item.projectId, expectedRevision:request.expectedRevision})) };
       }
       if (request.action === "source.ref") {
         if (typeof request.ref !== "string") fail("INVALID_REQUEST");
         if (
           typeof acquireSourceLock !== "function" &&
-          !service.acquireSourceLock
+          !activeService.acquireSourceLock
         )
           fail("SOURCE_LOCK_UNAVAILABLE");
         return {
           ok: true,
-          ...(await service.acquireRef({
+          ...(await activeService.acquireRef({
             projectId: item.projectId,
             ref: request.ref,
           })),
@@ -198,11 +205,11 @@ function createSourceOperations({
         if (request.action === "source.rollback.preview") {
           const rollback = rollbacks.get(request.rollbackId);
           if (rollback && rollback.workspaceId === request.workspaceId) target = rollback.revision;
-          else target = await service.snapshotRevision(item.projectId, request.rollbackId);
+          else target = await activeService.snapshotRevision(item.projectId, request.rollbackId);
           kind = "rollback";
         }
         if (!revision(target)) fail("INVALID_REVISION");
-        const preview = await service.previewUpgrade({
+        const preview = await activeService.previewUpgrade({
           projectId: item.projectId,
           revision: target,
         });
@@ -227,7 +234,7 @@ function createSourceOperations({
         fail("PREVIEW_UNAVAILABLE");
       if (preview.fromRevision !== request.expectedRevision)
         fail("REVISION_CONFLICT");
-      const applied = await service.applyUpgrade({
+      const applied = await activeService.applyUpgrade({
         previewId: request.previewId,
         expectedRevision: request.expectedRevision,
         consent: true,
@@ -275,6 +282,8 @@ function createSourceOperations({
       projects.clear();
       previews.clear();
       rollbacks.clear();
+      for (const selectedService of ownedServices) selectedService.dispose();
+      ownedServices.clear();
       if (!sourceService) service.dispose();
     },
   };

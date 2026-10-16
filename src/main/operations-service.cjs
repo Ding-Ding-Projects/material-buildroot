@@ -32,6 +32,7 @@ const {
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
 const { createSourceOperations } = require("./source-operations.cjs");
+const { WslSourceService } = require("./execution/wsl-source.cjs");
 const {
   createPackageAuthoringService,
 } = require("./configuration/package-authoring.cjs");
@@ -291,6 +292,20 @@ function createOperationsService({
       }
     },
     resolveWorkspace: (id) => project(id),
+    sourceServiceForWorkspace: (workspace) => {
+      if (!workspace.storage) return undefined;
+      const grant = execution.grants.get(workspace.grantId);
+      if (!grant?.wslReceipt || grant.wslReceipt !== workspace.receipt) reject("WSL_SOURCE_OPERATION_UNAVAILABLE");
+      return new WslSourceService({
+        receipt: grant.wslReceipt,
+        run: (args) => boundedProcess(execution.executables.wsl, args, {timeoutMs:600000,maxBytes:4*1024*1024}).completion,
+        acquireSourceLock: () => {
+          if (disposed) reject("SOURCE_BUSY");
+          project([...projects].find(([,item])=>item===workspace)?.[0]);
+          return acquirePathLeases([workspace.source,workspace.output]);
+        },
+      });
+    },
     acquireSourceLock: (sourceRoot) => {
       if (disposed) reject("SOURCE_BUSY");
       let existing = sourceRoot;
@@ -1678,7 +1693,7 @@ function createOperationsService({
       case "package.apply":
         return packageAuthoring.apply(request);
       case "source":
-        if (requestedProject?.storage) reject("WSL_SOURCE_OPERATION_UNAVAILABLE"); {
+        {
         const result = await sources.handle(request.request);
         if (!result.ok) reject(result.code);
         return result;

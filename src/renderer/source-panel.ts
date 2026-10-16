@@ -29,6 +29,7 @@ export class SourcePanel extends LitElement {
   private preview?: Preview;
   private selection?: { selectionId: string; name: string };
   private url = "https://gitlab.com/buildroot.org/buildroot.git";
+  private officialSource = true;
   private directory = "buildroot";
   private cloneRef = "HEAD";
   private trust = false;
@@ -140,7 +141,8 @@ export class SourcePanel extends LitElement {
   }
   private async clone(current: () => boolean) {
     if (!this.selection || !this.trust) return;
-    const result = await this.request({action:"source.clone",selectionId:this.selection.selectionId,directory:this.directory,url:this.url,ref:this.cloneRef,trust:true});
+    const common = {selectionId:this.selection.selectionId,directory:this.directory,ref:this.cloneRef,trust:true as const};
+    const result = await this.request(this.officialSource ? {action:"source.clone.official",...common} : {action:"source.clone",...common,url:this.url});
     if (!current()) return;
     if (!result.workspaceId) throw new Error("WORKSPACE_REGISTRATION_FAILED");
     this.selection = undefined;
@@ -193,7 +195,8 @@ export class SourcePanel extends LitElement {
           <p class="note">${this.l("Choose a parent folder and a new child folder name. The source is cloned from HTTPS; a separate output folder is created beside it. Existing directories are preserved.","選擇上層資料夾同新子資料夾名稱。來源會從 HTTPS 複製，並喺旁邊建立獨立輸出資料夾，保留現有目錄。")}</p>
           ${this.button("Choose parent folder","選擇上層資料夾",async current=>{const result=await this.request({action:"source.choose"});if(current()){this.selection={selectionId:result.selectionId!,name:result.name!};this.trust=false;}})}
           ${this.selection ? html`<p>${this.l("Selected folder","已選資料夾")}: ${this.selection.name}</p>` : nothing}
-          ${this.field(this.l("HTTPS repository URL","HTTPS 儲存庫網址"),this.url,v=>{this.url=v;this.trust=false;},"url")}
+          <label class="row consent"><md-checkbox aria-label=${this.l("Use the fixed official Buildroot origin","使用固定官方 Buildroot 來源")} ?checked=${this.officialSource} ?disabled=${this.pending} @change=${(event:Event)=>{this.officialSource=(event.target as HTMLInputElement).checked;this.trust=false;this.changed();}}></md-checkbox><span>${this.l("Use the fixed official Buildroot origin","使用固定官方 Buildroot 來源")}</span></label>
+          ${this.officialSource?html`<p class="hash">https://gitlab.com/buildroot.org/buildroot.git</p><p class="note">${this.l("HTTPS authenticates the source endpoint. Signed-commit verification and release archive extraction are not provided.","HTTPS 驗證來源端點，未提供簽署提交驗證或發行封存檔解壓。")}</p>`:this.field(this.l("Custom HTTPS repository URL","自訂 HTTPS 儲存庫網址"),this.url,v=>{this.url=v;this.trust=false;},"url")}
           ${this.field(this.l("New source folder name","新來源資料夾名稱"),this.directory,v=>{this.directory=v;this.trust=false;})}
           ${this.field(this.l("Initial branch or tag","初始分支或標籤"),this.cloneRef,v=>{this.cloneRef=v;this.trust=false;})}
           <label class="row consent"><md-checkbox aria-label=${this.l("I trust this source. Its build scripts may execute with my selected runtime permissions.","我信任呢個來源，其建置指令碼可能會以所選執行環境權限執行。")} ?checked=${this.trust} ?disabled=${this.pending} @change=${(e:Event)=>{this.trust=(e.target as HTMLInputElement).checked;this.changed();}}></md-checkbox><span>${this.l("I trust this source. Its build scripts may execute with my selected runtime permissions.","我信任呢個來源，其建置指令碼可能會以所選執行環境權限執行。")}</span></label>
@@ -202,7 +205,7 @@ export class SourcePanel extends LitElement {
         <section class="panel stack"><h2>${this.l("Active source revision","目前來源修訂版本")}</h2>
           ${!this.workspaceId ? html`<p>${this.l("Adopt an existing project in Projects & runtime, or clone a source here to inspect revisions.","請喺專案同執行環境接入現有專案，或喺呢度複製來源以檢視修訂版本。")}</p>` : html`
             ${this.button("Refresh source status","重新整理來源狀態",current=>this.refresh(current))}
-            <p class="note">${this.l("This workflow manages native local Git source trees. WSL Linux projects use their separate acquisition route; revision upgrades for those projects are not available here.","此流程管理原生本機 Git 來源樹。WSL Linux 專案使用獨立取得流程，呢度未提供該類專案嘅修訂升級。")}</p>
+            <p class="note">${this.l("Native source trees and currently adopted WSL Git projects use separate host authority. WSL acquisition remains in Projects & runtime; source inspection and revision changes require its current non-root distribution identity.","原生來源樹同目前已接入嘅 WSL Git 專案使用獨立主機權限。WSL 取得流程仍喺專案同執行環境，來源檢視同修訂變更需要有效嘅非 root 發行版身分。")}</p>
             ${this.status ? html`<dl><dt>${this.l("Revision","修訂版本")}</dt><dd class="hash">${this.status.revision}</dd><dt>${this.l("Branch","分支")}</dt><dd>${this.status.branch || this.l("Detached revision","獨立修訂版本")}</dd><dt>${this.l("Working tree","工作樹")}</dt><dd>${this.status.dirty?this.l("Local changes present","有本機變更"):this.l("Clean","乾淨")}</dd></dl>${this.status.changes?html`<pre class="diff" tabindex="0" role="region" aria-label=${this.l("Working tree changes","工作樹變更")}>${this.status.changes}</pre>`:nothing}` : html`<p>${this.l("Refresh to inspect the current source before changing revisions.","更改修訂版本前，請先重新整理以檢視目前來源。")}</p>`}
             <h3>${this.l("Acquire and review a revision","取得並審核修訂版本")}</h3>
             <h3>${this.l("Retained revision snapshots","已保留修訂快照")}</h3>
