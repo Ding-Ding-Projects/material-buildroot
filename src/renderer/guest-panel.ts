@@ -409,7 +409,7 @@ export class GuestPanel extends LitElement {
               >${this.options([
                 ["nat", "NAT"],
                 ["none", this.l("None", "無")],
-                ...(this.editing ? [["hostonly", this.l("Host only", "僅主機")] as [string,string][] : []),
+                ...(this.editing ? [["hostonly", this.l("Host only", "僅主機")]] as [string,string][] : []),
               ])}</md-outlined-select
             >
           </div>
