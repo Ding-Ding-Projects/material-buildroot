@@ -243,6 +243,17 @@ function interpretRecipe(name, files) {
     return text;
   };
   try {
+    const metadata = byName.get("material-package.json");
+    if (metadata) {
+      const saved = JSON.parse(decode(metadata));
+      if(saved.schemaVersion !== 1 || !/^[A-Za-z0-9_]+$/.test(saved.externalName) || saved.model?.name !== name) throw new Error("Invalid structured recipe metadata.");
+      validateAuthoringModel(saved.model);
+      const generated = renderPackage(saved.model, saved.externalName).files;
+      const expected = new Set(Object.keys(generated).map(p=>p.split('/').at(-1)));
+      if(files.some(f=>!expected.has(f.path))) throw new Error("Additional package files require preserving manual editing.");
+      for(const [relative,text] of Object.entries(generated)) if(decode(byName.get(relative.split('/').at(-1))) !== text) throw new Error("Recipe has changed outside the structured editor.");
+      return {draft:saved.model, roundTripAllowed:true, unsupportedReasons:[]};
+    }
     const mk = decode(mkFile),
       config = decode(configFile),
       hashText = decode(hashFile),
@@ -741,6 +752,19 @@ function createPackageDiscoveryService({ resolveRoots, withLock }) {
           },
         };
       }),
+    openEditor: (input) => context(input, async roots => {
+      if(!/^[a-f0-9]{64}$/.test(input.packageId || "") || !/^[a-f0-9]{64}$/.test(input.revision || "") || !/^[a-f0-9]{64}$/.test(input.fileHash || "") || typeof input.file !== "string" || typeof input.editorId !== "string") fail("INVALID_EDITOR_REQUEST");
+      const catalogue = await scan(roots);
+      const item = catalogue.packages.find(item=>item.id===input.packageId);
+      if(!item) fail("PACKAGE_NOT_FOUND");
+      const tree = roots.find(tree=>tree.id===item.treeId);
+      const files = await snapshotPackage(tree.root,item.path);
+      if(hash(JSON.stringify(files)) !== input.revision) fail("REVISION_CONFLICT");
+      const file = files.find(file=>file.path===input.file && file.sha256===input.fileHash);
+      if(!file || !/\.(mk|in|hash|patch|json|txt|sh|conf)$/i.test(file.path)) fail("EDITOR_FILE_NOT_ADMITTED");
+      await readSafe(tree.root,item.path+"/"+file.path);
+      return require("./package-editor.cjs").openEditor(input.editorId,path.join(tree.root,item.path,file.path));
+    }),
     importPackage: (input) =>
       context(input, async (roots) => {
         if (
