@@ -1,3 +1,4 @@
+import './appearance-panel';
 import {LitElement,html,css,nothing,type PropertyValues} from 'lit';
 import {materialIcon} from './material-icons';
 import type {SharedModeSnapshot,SharedModeRequest,SharedModeRecovery} from '../shared/shared-mode';
@@ -29,3 +30,4 @@ export class SharedModePanel extends LitElement{
  ${this.recovery?html`<section><h3>${this.l('Manual local recovery','手動本機復原')}</h3><p>${this.recovery.disclosure}</p><p><code>${this.recovery.directory}</code></p><p><code>${this.recovery.record}</code></p><p>${this.l('After following these instructions, refresh the shared preference. No files are deleted by this screen.','按指引完成後，請重新整理共用偏好。呢個畫面唔會刪除檔案。')}</p></section>`:nothing}`;}
 }
 customElements.define('shared-mode-panel',SharedModePanel);
+

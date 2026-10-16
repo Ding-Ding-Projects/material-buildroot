@@ -14,11 +14,17 @@ The local assistant exposes managed Ollama controls, actual installed-model meta
 
 The host provides [separate local schedule draft recovery](docs/security/schedule-draft-recovery.md), with append-only bounded storage and explicit restoration that does not activate settings. The [schedule editor](docs/features/scheduled-preferences.md) now includes local rules, effective preferences, protected source enrollment and explicit recovery. All 20 current browser cases passed against the real SQLite service and typed bridge. Current packaged Windows interaction and the complete UI matrix remain pending.
 
-## Interface captures
+## Current delivery boundary
+
+The current implementation pass uses isolated task ownership and normal release delivery. Tests, reviews, audits, static analysis and new screenshots are deliberately deferred, including VM and Docker tests. Successful builds and available installers do not establish runtime acceptance. Follow the [finite implementation queue](docs/planning/implementation-queue.json), [roadmap](ROADMAP.md) and [handoff](HANDOFF.md) for the separate source, build, release and acceptance states.
+
+Recent source additions include [versioned project storage](docs/workspace/project-model.md), [file capabilities](docs/security/file-capabilities.md), [owner-scoped vault access](docs/security/vault-boundaries.md), [container preparation](docs/features/runtime-containers.md), [guest controls](docs/deployment/hypervisor-controls.md), [search and command consumers](docs/features/navigation/search-commands.md), [component configuration](docs/desktop/configuration-domains.md) and [explicit clean-build confirmation](docs/features/destructive-confirmation.md). Their articles retain implementation limits and deferred proof.
+
+## Source-bound historical interface captures
 
 The [feature delivery source audit](docs/evidence/tasks/PH01-delivery-audit.md) accounts for all 109 required identities and 436 surface rows, with one [audit article per identity](docs/evidence/tasks/feature-delivery/README.md). It finds no whole feature with complete current acceptance. The overview retains seven unresolved applicability records, shared-trace limits and the gap between 427 public requirement IDs and 1,908 detailed audit rows. It is a source inventory, not an implementation-completeness claim.
 
-### Current native dialog evidence
+### Earlier native dialog evidence
 
 The Windows build at `e722cf1b91ccc46465eb449df4abd84d9d6df2a1` shows the settled unsaved-preference dialog with all three bilingual actions contained and the final action wrapped onto a second row. This is one light-theme state at 1280×752 logical pixels and observed 150% scale, not full product acceptance. The [native receipt and limits](docs/evidence/native-windows-20261016/README.md#settled-dialog-actions-at-e722cf1) retain source, executable and capture hashes, measured geometry and bounded observation.
 

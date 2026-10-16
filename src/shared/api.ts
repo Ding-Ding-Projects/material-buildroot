@@ -82,6 +82,9 @@ export interface StudioBootstrap {
 }
 /** Only host-admitted documents receive this bridge. */
 export interface StudioAPI {
+  appearanceHistory?(request:{action:string;[key:string]:unknown}):Promise<{ok:boolean;revision?:number;snapshot?:any;records?:Array<{revision:number;timestamp:string;elementCount:number;trackTargetCount:number}>;hasMore?:boolean;code?:string}>;
+  appearanceFonts?(): Promise<{ok:true;fonts:string[];variableAxesAvailable:false}|{ok:false;code:string}>;
+  experiencePolicies?(request: import("./experience-policies").ExperienceRequest): Promise<import("./experience-policies").ExperienceReply>;
   scheduledPreferences?(
     request: import("./scheduled-preferences").ScheduledPreferencesRequest,
   ): Promise<import("./scheduled-preferences").ScheduledPreferencesReply>;
@@ -119,3 +122,5 @@ declare global {
     studio: StudioAPI;
   }
 }
+
+

@@ -1,3 +1,8 @@
+import "./experience-policies";
+import "./experience-policy-panel";
+import "./update-panel";
+import {repeat} from "lit/directives/repeat.js";
+import {WorkspaceTabs, type WorkspaceDestination} from "./workspace-tabs";
 import "./command-surfaces";
 import "./shared-mode-panel";
 import "./scheduled-preferences-panel";
@@ -7,6 +12,7 @@ import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
 import "./personal-vocabulary-drop";
 import "./settings-search";
+import "./regex-workbench";
 import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing } from "lit";
@@ -84,6 +90,8 @@ class MaterialBuildroot extends LitElement {
     restoreId: { state: true },
     importText: { state: true },
     importSummary: { state: true },
+    projectSessions: { state: true },
+    activeProject: { state: true },
   };
   declare state: StudioBootstrap | undefined;
   route = window.studio?.operations ? "operations" : "projects";
@@ -100,6 +108,65 @@ class MaterialBuildroot extends LitElement {
   restoreId = "";
   importText = "";
   importSummary = "";
+  private projectSessions: {workspaceId:string;name:string}[]=[];
+  private activeProject='';
+  private tabsHost(){return this.renderRoot.querySelector('workspace-tabs') as WorkspaceTabs|null;}
+  private activeOperations(){return Array.from(this.renderRoot.querySelectorAll<import('./operations-panel').OperationsPanel>('operations-panel')).find(panel=>panel.dataset.projectId===this.activeProject)??null;}
+  private workspaceDestinations():WorkspaceDestination[]{return [
+    {id:'open-project',en:'Open or adopt project',zh:'開啟或接入專案',icon:'folder_open'},
+    ...this.projectSessions.map(p=>({id:`project:${p.workspaceId}`,en:p.name,zh:p.name,icon:'folder_open'})),
+    ...[['projects','Plans','計劃','dashboard'],['activity','Activity','活動','history'],['settings','Settings','設定','settings'],['about','About','關於','info']].map(([id,en,zh,icon])=>({id,en,zh,icon})),
+    ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
+    ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
+    ...this.settingsEntries().map(e=>({id:`setting:${e.id}`,en:e.text,zh:e.text,icon:'settings'})),
+    {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
+    {id:'export-plans',en:'Export plans',zh:'匯出計劃',icon:'download'},
+    ...(!this.restricted?[{id:'wording:upload',en:'Import personal vocabulary',zh:'匯入個人詞彙',icon:'upload'},{id:'wording:status',en:'Personal vocabulary status',zh:'個人詞彙狀態',icon:'info'},{id:'wording:clear',en:'Clear personal vocabulary',zh:'清除個人詞彙',icon:'delete'}]:[]),
+    {id:'setup',en:'First-run setup',zh:'首次設定',icon:'tune'}
+  ];}
+  private async workspaceDestination(event:CustomEvent){
+    const destination=event.detail.destination as string;
+    if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before switching tabs.','切換分頁前請先儲存或捨棄目前草稿。');return;}
+    const owner=event.detail.projectContext;
+    if(typeof owner==='string'&&owner){if(!this.projectSessions.some(p=>p.workspaceId===owner)){this.notice=this.noticeText('Reopen the owning project before using its saved utility tab.','使用已儲存工具分頁前，請重新開啟所屬專案。');return;}this.activeProject=owner;}
+    if(destination.startsWith('project:')){
+      const id=destination.slice(8),project=this.projectSessions.find(p=>p.workspaceId===id);
+      if(!project){await this.navigate('operations');if(this.route==='operations'){this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';}this.notice=this.noticeText('Reopen this project through the folder picker to renew access.','請透過資料夾選擇器重新開啟專案，以更新存取權。');return;}
+      await this.navigate('operations');if(this.route!=='operations')return;
+      this.activeProject=id;this.tabsHost()?.acknowledge(destination,project.name,id);return;
+    }
+    if(destination==='open-project'){
+      await this.navigate('operations');if(this.route!=='operations')return;
+      this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';this.tabsHost()?.acknowledge(destination);return;
+    }
+    if(destination==='setup'){this.openDialog('setup-dialog');return;}
+    if(destination==='new-plan'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.beginNew();}return;}
+    if(destination==='export-plans'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.exportPlans();}return;}
+    if(destination.startsWith('wording:')){if(this.restricted)return;await this.navigate('settings');if(this.route!=='settings')return;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(destination.slice(8) as 'upload'|'status'|'clear');this.tabsHost()?.acknowledge('setting:vocabulary');return;}
+    if(destination.startsWith('tool:')){
+      await this.navigate('operations');if(this.route!=='operations')return;const panel=this.activeOperations();if(panel){panel.tab='tools';await panel.updateComplete;const tools=panel.shadowRoot?.querySelector('tools-panel') as import('lit').LitElement|null;await tools?.updateComplete;const section=tools?.shadowRoot?.querySelector<HTMLElement>(`[data-destination="${destination.slice(5)}"]`);section?.scrollIntoView({block:'start'});section?.focus();}
+    }else if(destination.startsWith('operation:')){
+      await this.navigate('operations');if(this.route!=='operations')return;
+      const panel=this.activeOperations();if(panel)panel.tab=destination.slice(10);
+    }else if(destination.startsWith('setting:')){
+      await this.navigate('settings');if(this.route!=='settings')return;
+      const id=destination.slice(8);const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;const entry=this.settingsEntries().find(e=>e.id===id);if(search&&entry){search.regex=false;search.query=entry.text;search.focusQuery();}
+    }else{await this.navigate(destination);if(this.route!==destination)return;}
+    this.tabsHost()?.acknowledge(destination,'','',destination.startsWith('operation:')||destination.startsWith('tool:')?this.activeProject:'');
+  }
+  private async adoptedProject(event:CustomEvent){
+    event.preventDefault();event.stopPropagation();
+    const workspace=event.detail;if(!workspace||typeof workspace.workspaceId!=='string'||typeof workspace.name!=='string')return;
+    if(!this.projectSessions.some(p=>p.workspaceId===workspace.workspaceId))this.projectSessions=[...this.projectSessions,{workspaceId:workspace.workspaceId,name:workspace.name}];
+    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;
+    this.tabsHost()?.acknowledge(`project:${workspace.workspaceId}`,workspace.name,workspace.workspaceId);
+  }
+  protected firstUpdated(){this.tabsHost()?.acknowledge(window.studio?.operations?'open-project':'projects');}
+  private async closeWorkspaceTab(event:CustomEvent){
+    // Keep mounted instances so closing navigation never discards pending drafts or job output.
+    if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before closing a tab.','關閉分頁前請先儲存或捨棄目前草稿。');return;}
+    event.detail.complete();
+  }
   private workspaceRevision = 0;
   plans: Plan[] = [];
   selectedId = "";
@@ -164,13 +231,14 @@ class MaterialBuildroot extends LitElement {
     if(panel.hasPendingDraft&&!this.settingIds.includes('schedules')){this.settingIds=[...this.settingIds,'schedules'];this.requestUpdate();await this.updateComplete;}
     return panel.confirmLeave();
   }
-  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
+  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
   private applySharedSnapshot(snapshot:SharedModeSnapshot|null){this.sharedSnapshot=snapshot;void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');this.syncDocumentLanguage();this.requestUpdate();}
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
-  private settingIds=['language','appearance','backups','vocabulary','shared','schedules'];
+  private settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];
   private settingsEntries(){return [
     ...(!this.restricted?[{id:'language',text:this.l('Language Interface language','語言 介面語言')}]:[]),
     {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記')},
+    {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰')},
     {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原')},
     {id:'appearance',text:this.l('Appearance Theme','外觀 主題')},
     {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入')},
@@ -185,7 +253,7 @@ class MaterialBuildroot extends LitElement {
   }
   private async sharedPreferenceAction(){
     const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;
-    this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;
+    this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;
     const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('shared-mode-panel') as import('./shared-mode-panel').SharedModePanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#shared-heading') as HTMLElement|null)?.focus();
   }
@@ -193,7 +261,7 @@ class MaterialBuildroot extends LitElement {
     if(vocabulary.school()!=='inactive')return;
     const dialog=this.renderRoot.querySelector('#actions-dialog');
     const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));
-    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;
+    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;
     const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
     panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
@@ -457,6 +525,7 @@ class MaterialBuildroot extends LitElement {
   }
   private hydrateWorkspace(state: any) {
     this.workspaceRevision = state.revision;
+    this.historyWarning = state.historyWarning === true;
     this.snapshots = state.snapshots;
     this.plans = state.plans;
     this.theme = state.preferences.theme;
@@ -626,7 +695,7 @@ class MaterialBuildroot extends LitElement {
   private async restoreSnapshot() {
     if (!this.restoreId || this.dirty) return;
     if (
-      await this.mutateWorkspace("snapshot.restore", { id: this.restoreId })
+      await this.mutateWorkspace(this.restoreId.startsWith("revision:") ? "revision.restore" : "snapshot.restore", this.restoreId.startsWith("revision:") ? { revision: Number(this.restoreId.slice(9)) } : { id: this.restoreId })
     ) {
       this.selectedId = this.plans[0]?.id ?? "";
       this.edit = this.selected ? { ...this.selected } : undefined;
@@ -691,13 +760,113 @@ class MaterialBuildroot extends LitElement {
       );
     }
   }
+  private revisionRows: Array<{revision:number;action:string;timestamp:string|null;plans:number;labels:string[]}> = [];
+  private revisionCursor: number | null = null;
+  private historyBusy = false;
+  private historyWarning = false;
+  private revisionLabel = "";
+  private revisionQuery = "";
+  private revisionFrom = "";
+  private revisionTo = "";
+  private revisionActions = new Set<string>();
+  private revisionRegex = false;
+  private revisionPattern = "";
+  private revisionFlags = "i";
+  private revisionMatches: string[] | null = null;
+  private revisionFilterError = "";
+  private revisionFilterGeneration = 0;
+  private get filteredRevisionRows() {
+    const datesValid=(!this.revisionFrom||/^\d{4}-\d{2}-\d{2}$/.test(this.revisionFrom))&&(!this.revisionTo||/^\d{4}-\d{2}-\d{2}$/.test(this.revisionTo))&&(!this.revisionFrom||!this.revisionTo||this.revisionFrom<=this.revisionTo);
+    if(!datesValid)return [];
+    return this.revisionRows.filter(row=>{
+      const date=row.timestamp?.slice(0,10)??"";
+      const text=JSON.stringify(row).toLocaleLowerCase();
+      return (!this.revisionFrom||(date&&date>=this.revisionFrom))&&(!this.revisionTo||(date&&date<=this.revisionTo))&&
+        (!this.revisionActions.size||this.revisionActions.has(row.action))&&
+        (this.revisionRegex?this.revisionMatches?.includes(String(row.revision)):text.includes(this.revisionQuery.toLocaleLowerCase()));
+    });
+  }
+  private async filterRevisionRegex() {
+    const generation=++this.revisionFilterGeneration;
+    this.revisionMatches=null;this.revisionFilterError="";this.requestUpdate();
+    if(!this.revisionRegex)return;
+    const matches:string[]=[];
+    try {
+      for(let start=0;start<this.revisionRows.length;start+=1000){
+        const articles=this.revisionRows.slice(start,start+1000).map(row=>({id:String(row.revision),text:JSON.stringify(row)}));
+        const ids=await new Promise<string[]>((resolve,reject)=>{
+          const worker=new Worker(new URL('./documentation-search-worker.ts',import.meta.url),{type:'module'});
+          const timer=setTimeout(()=>{worker.terminate();reject(new Error('timeout'));},600);
+          worker.onerror=()=>{clearTimeout(timer);worker.terminate();reject(new Error('unavailable'));};
+          worker.onmessage=e=>{clearTimeout(timer);worker.terminate();e.data.ok?resolve(e.data.ids):reject(new Error('invalid'));};
+          worker.postMessage({pattern:this.revisionPattern,flags:this.revisionFlags,articles});
+        });
+        if(generation!==this.revisionFilterGeneration)return;
+        matches.push(...ids);
+      }
+      if(generation===this.revisionFilterGeneration)this.revisionMatches=matches;
+    }catch{if(generation===this.revisionFilterGeneration)this.revisionFilterError=this.l("Invalid, unsupported or timed-out expression. Filtering accepts i, m, s and u flags only. No filtered results are shown.","表達式無效或逾時，暫時唔顯示篩選結果。");}
+    this.requestUpdate();
+  }
+  private nativeHistory: any = null;
+  private nativeKind: "catalogue" | "options" = "catalogue";
+  private nativeProjectId = "";
+  private nativeRestoreRevision: number | null = null;
+  private async nativeHistoryAction(action: "native.history" | "native.restore" | "native.export") {
+    if(this.historyBusy||!this.workspaceAPI?.workspaceMutate)return;
+    this.historyBusy=true;this.requestUpdate();
+    try {
+      const reply=await this.workspaceAPI.workspaceMutate({action,expectedRevision:this.workspaceRevision,kind:this.nativeKind,
+        ...(this.nativeKind==="options"?{workspaceId:this.nativeProjectId}:{}),
+        ...(action==="native.restore"?{revision:this.nativeRestoreRevision,expectedNativeRevision:this.nativeHistory?.revision}:{} )});
+      if(!reply.ok)throw new Error("unavailable");
+      if(action==="native.history")this.nativeHistory=reply.nativeHistory;
+      if(action==="native.restore"){this.nativeHistory=null;this.closeDialog("native-history-restore-dialog");this.notice=this.noticeText("Metadata restored as a new revision. Reopen the project through its picker before use; existing running operations are unchanged.","資料已還原為新版本，使用前請經選擇器重新開啟專案，現有執行中工作保持不變。");}
+      if(action==="native.export"&&typeof reply.document==="string"){
+        const url=URL.createObjectURL(new Blob([reply.document],{type:"application/json"}));
+        const link=document.createElement("a");link.href=url;link.download=`material-buildroot-${this.nativeKind}-history.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }
+    }catch{this.notice=this.noticeText("Native metadata history is unavailable or changed. Read it again before restoring.","原生資料歷史未能使用或已變更，還原前請重新讀取。");}
+    finally{this.historyBusy=false;this.requestUpdate();}
+  }
+  private revisionComparison = "";
+  private retentionKeep: 25 | 100 | 500 = 100;
+  private async historyAction(action: "history.compare" | "history.label" | "history.retain", revision = 0) {
+    if (this.historyBusy || !this.workspaceAPI?.workspaceMutate) return;
+    this.historyBusy = true; this.requestUpdate();
+    try {
+      const extra = action === "history.retain" ? {keep:this.retentionKeep} : action === "history.label" ? {revision,label:this.revisionLabel.trim()} : {revision};
+      const reply = await this.workspaceAPI.workspaceMutate({action,expectedRevision:this.workspaceRevision,...extra});
+      if (!reply.ok) throw new Error("unavailable");
+      if (action === "history.compare") this.revisionComparison=JSON.stringify(reply.comparison,null,2);
+      if (action === "history.label") {this.revisionLabel="";this.historyLoaded=false;this.revisionRows=[];}
+      if (action === "history.retain") this.closeDialog("history-retention-dialog");
+      this.notice=this.noticeText(action==="history.retain"?`${reply.removed} redundant cached copies removed. Recorded history remains available.`:"History action completed.",action==="history.retain"?`已移除 ${reply.removed} 個重複快取副本，已記錄歷史仍可使用。`:"歷史動作已完成。");
+    } catch {this.notice=this.noticeText("History action unavailable. Refresh the workspace revision and retry. Existing history is retained.","歷史動作未能使用，請更新工作區版本再試，已有歷史仍然保留。");}
+    finally {this.historyBusy=false;this.requestUpdate();}
+  }
+  private historyLoaded = false;
+  private exportScope: "workspace" | "plans" | "history" | "revisions" | "revision-page" = "workspace";
+  private exportPlanIds = new Set<string>();
+  private async readRevisions(more = false) {
+    if (this.historyBusy || !this.workspaceAPI?.workspaceMutate) return;
+    this.historyBusy = true; this.requestUpdate();
+    try {
+      const reply = await this.workspaceAPI.workspaceMutate({action:"history.read",expectedRevision:this.workspaceRevision,
+        ...(more && this.revisionCursor !== null ? {beforeRevision:this.revisionCursor} : {})});
+      if (!reply.ok || !reply.history) throw new Error("unavailable");
+      this.revisionRows = more ? [...this.revisionRows,...reply.history.records] : reply.history.records;
+      this.revisionCursor = reply.history.nextBeforeRevision; this.historyLoaded = true;void this.filterRevisionRegex();
+    } catch {this.notice=this.noticeText("Revision history unavailable. Current workspace is retained.","版本歷史未能使用，目前工作區仍然保留。");}
+    finally {this.historyBusy=false;this.requestUpdate();}
+  }
   private historyPanel() {
     return html`<section class="panel stack">
       <h2>${this.l("Workspace backups", "工作區備份")}</h2>
       <p>
         ${this.l(
-          "Snapshots preserve applied plans and preferences on this device. Restore or import replaces the current workspace; create a snapshot first if you need a recovery copy.",
-          "快照會喺呢部電腦保留已套用嘅計劃同偏好設定。還原或匯入會取代目前工作區，如需復原副本，請先建立快照。",
+          "Snapshots preserve applied plans and preferences. Restore and import create new revisions, retaining recorded earlier revisions. Full history starts with the first save in this version.",
+          "快照保留已套用計劃同偏好。還原同匯入會建立新版本，保留已有版本。完整歷史由此版本首次儲存開始。",
         )}
       </p>
       ${this.workspaceMode === "durable"
@@ -726,7 +895,7 @@ class MaterialBuildroot extends LitElement {
             </p>
             ${this.snapshots.map(
               (snapshot) =>
-                html`<div class="row">
+                html`<div class="row" data-appearance-key=${"snapshot:"+snapshot.id}>
                   <div class="heading">
                     <strong>${snapshot.name}</strong>
                     <p class="muted">${this.date(snapshot.createdAt)}</p>
@@ -744,6 +913,44 @@ class MaterialBuildroot extends LitElement {
               ?disabled=${!this.canEditWorkspace || this.dirty}
               @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#workspace-import-file")?.click()}
             >${materialIcon("upload", "icon")}${this.l("Import workspace JSON (maximum 1 MiB)", "匯入工作區 JSON（最大 1 MiB）")}</md-outlined-button>
+            <h3>${this.l("Recorded revisions", "已記錄版本")}</h3>
+            ${this.historyWarning?html`<p role="alert">${this.l("The workspace was saved but complete local history could not be recorded. Git must be available to the host; inspect storage access before relying on recovery.","工作區已儲存，但未能記錄完整本機歷史。主機需要可用 Git，依賴復原前請檢查儲存存取。")}</p>`:nothing}
+            <md-outlined-text-field .label=${this.l("Label for a revision","版本標籤")} maxlength="80" .value=${this.revisionLabel} @input=${(e:Event)=>{this.revisionLabel=(e.target as HTMLInputElement).value;this.requestUpdate();}}></md-outlined-text-field>
+            <md-text-button @click=${()=>{this.revisionLabel="";this.requestUpdate();}}>${this.l("Clear label draft","清除標籤草稿")}</md-text-button>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions()}>${materialIcon("history","icon")}${this.l("Read revisions","讀取版本")}</md-outlined-button>
+            ${this.historyLoaded&&!this.revisionRows.length?html`<p>${this.l("No complete revision records yet. Older activity has no restorable state.","暫時未有完整版本記錄。較舊活動冇可還原狀態。")}</p>`:nothing}
+            <p>${this.l("Filters apply to loaded revision pages only. Dates use UTC calendar days; load older pages to expand the scope.","篩選只適用於已載入版本頁，日期使用 UTC 日曆日，載入較舊頁面可擴大範圍。")}</p>
+            <div class="row"><md-outlined-text-field .label=${this.l("Search loaded revisions","搜尋已載入版本")} .value=${this.revisionQuery} @input=${(e:Event)=>{this.revisionQuery=(e.target as HTMLInputElement).value;this.revisionPattern=this.revisionQuery;if(this.revisionRegex)void this.filterRevisionRegex();this.requestUpdate();}}></md-outlined-text-field><md-text-button @click=${()=>{this.revisionQuery=this.revisionPattern="";void this.filterRevisionRegex();}}>${this.l("Clear search","清除搜尋")}</md-text-button><md-outlined-button aria-pressed=${this.revisionRegex} @click=${()=>{this.revisionRegex=!this.revisionRegex;void this.filterRevisionRegex();}}>${this.l("Regex builder","正規表達式建構器")}</md-outlined-button></div>
+            ${this.revisionRegex?html`<regex-workbench .language=${this.effectiveLanguage} .pattern=${this.revisionPattern} .flags=${this.revisionFlags} @pattern-change=${(e:CustomEvent)=>{this.revisionPattern=e.detail.pattern;this.revisionQuery=e.detail.pattern;this.revisionFlags=e.detail.flags;void this.filterRevisionRegex();}}></regex-workbench>`:nothing}
+            <div class="row"><label>${this.l("From date (UTC)","開始日期（UTC）")}<input type="date" .value=${this.revisionFrom} @input=${(e:Event)=>{this.revisionFrom=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><label>${this.l("Through date (UTC)","結束日期（UTC）")}<input type="date" .value=${this.revisionTo} @input=${(e:Event)=>{this.revisionTo=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><md-text-button @click=${()=>{this.revisionFrom=this.revisionTo="";this.requestUpdate();}}>${this.l("Clear dates","清除日期")}</md-text-button></div>
+            ${this.revisionFrom&&this.revisionTo&&this.revisionFrom>this.revisionTo?html`<p role="alert">${this.l("End date must not precede start date.","結束日期唔可以早過開始日期。")}</p>`:nothing}
+            <div class="row">${[...new Set(this.revisionRows.map(row=>row.action))].map(action=>html`<md-outlined-button aria-pressed=${this.revisionActions.has(action)} @click=${()=>{this.revisionActions.has(action)?this.revisionActions.delete(action):this.revisionActions.add(action);this.requestUpdate();}}>${this.activityName(action,this.effectiveLanguage==="zh-HK")} (${this.revisionRows.filter(row=>row.action===action).length})</md-outlined-button>`)}</div>
+            ${this.revisionFilterError?html`<p role="alert">${this.revisionFilterError}</p>`:nothing}<p>${this.filteredRevisionRows.length} / ${this.revisionRows.length} ${this.l("loaded revisions match","個已載入版本符合篩選")}</p>
+            ${this.filteredRevisionRows.map(row=>html`<div class="row" data-appearance-key=${"history:"+row.revision}><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")} · ${row.labels.join(" · ")}</span><md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.compare",row.revision)}>${this.l("Compare with current","比較目前版本")}</md-outlined-button><md-outlined-button ?disabled=${this.historyBusy||!this.revisionLabel.trim()} @click=${()=>this.historyAction("history.label",row.revision)}>${this.l("Append label","新增標籤")}</md-outlined-button><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
+            ${this.revisionCursor!==null?html`<md-text-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions(true)}>${this.l("More revisions","更多版本")}</md-text-button>`:nothing}
+            ${this.revisionComparison?html`<h4>${this.l("Selected revision versus current workspace","所選版本與目前工作區比較")}</h4><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${this.revisionComparison}</pre><md-text-button @click=${()=>{this.revisionComparison="";this.requestUpdate();}}>${this.l("Close comparison","關閉比較")}</md-text-button>`:nothing}
+            <h3>${this.l("Revision cache retention","版本快取保留")}</h3>
+            <p>${this.l("History stays local in an isolated repository beside application data. No automatic pruning or synchronization runs. This action only removes redundant cached copies after byte-for-byte comparison with preserved history; all recorded revisions remain restorable. Protected stores are excluded.","歷史保留喺應用程式資料旁嘅獨立本機儲存庫，唔會自動刪減或同步。呢個動作只會喺逐位元組核對已保留歷史之後移除重複快取，全部已記錄版本仍可還原。受保護儲存資料不包含在內。")}</p>
+            <md-outlined-select .label=${this.l("Recent cached copies to keep","保留最近快取數目")} .value=${String(this.retentionKeep)} @change=${(e:Event)=>{this.retentionKeep=Number((e.target as HTMLSelectElement).value) as 25|100|500;this.requestUpdate();}}>${[25,100,500].map(count=>html`<md-select-option .value=${String(count)}><div slot="headline">${count}</div></md-select-option>`)}</md-outlined-select>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>this.openDialog("history-retention-dialog",e)}>${this.l("Review cache pruning","檢視快取刪減")}</md-outlined-button>
+            <md-dialog id="history-retention-dialog"><div slot="headline">${this.l("Remove redundant revision caches?","移除重複版本快取？")}</div><div slot="content">${this.l(`Keep the newest ${this.retentionKeep} recorded revisions cached. Older cache files are deleted only when identical bytes exist in local history. History commits and restore access are preserved.`, `保留最近 ${this.retentionKeep} 個已記錄版本快取。只有本機歷史保留完全相同內容時，先會刪除較舊快取。歷史提交同還原存取保持不變。`)}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("history-retention-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.retain")}>${this.l("Remove redundant caches","移除重複快取")}</md-filled-button></div></md-dialog>
+            <h3>${this.l("Native project history","原生專案歷史")}</h3>
+            <p>${this.l("Project catalogue and options have independent revisions. Paths are retained only in local recovery records and omitted from these views and exports. Restoring metadata grants no filesystem authority; reopen through the project picker.","專案目錄同選項有獨立版本。路徑只保留喺本機復原記錄，唔會顯示或匯出。還原資料唔會授予檔案權限，請經專案選擇器重新開啟。")}</p>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="catalogue";this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read catalogue history","讀取目錄歷史")}</md-outlined-button>
+            ${this.nativeHistory?.projects?.map((project:any)=>html`<md-outlined-button data-appearance-key=${"native-project:"+project.id} ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="options";this.nativeProjectId=project.id;this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read options history","讀取選項歷史")}: ${project.name}</md-outlined-button>`)}
+            ${this.nativeHistory?html`<p>${this.l("Current metadata revision","目前資料版本")}: ${this.nativeHistory.revision}</p>${this.nativeHistory.records.map((record:any)=>html`<section data-appearance-key=${"native-history:"+this.nativeKind+":"+this.nativeProjectId+":"+record.revision}><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(record,null,2)}</pre><md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>{this.nativeRestoreRevision=record.revision;this.openDialog("native-history-restore-dialog",e);}}>${this.l("Restore metadata as new revision","還原資料為新版本")}</md-outlined-button></section>`)}<md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.export")}>${this.l("Export this metadata history without paths","匯出此資料歷史，不含路徑")}</md-outlined-button>`:nothing}
+            <md-dialog id="native-history-restore-dialog"><div slot="headline">${this.l("Restore native metadata?","還原原生資料？")}</div><div slot="content">${this.l("Replace the current metadata with the selected historical state as a new revision. This may remove later catalogue entries or change saved runtime and external-tree choices. Source and output files are not changed. Reopen affected projects after restoration.","將目前資料取代為所選歷史狀態並建立新版本，可能移除較後目錄項目或變更執行環境同外部樹選擇。來源同輸出檔案保持不變，還原後請重新開啟受影響專案。")} ${this.nativeRestoreRevision}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("native-history-restore-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.restore")}>${this.l("Restore metadata","還原資料")}</md-filled-button></div></md-dialog>
+            <h3>${this.l("Export scope","匯出範圍")}</h3>
+            <md-outlined-select .label=${this.l("Include","包含")} .value=${this.exportScope} @change=${(e:Event)=>{this.exportScope=(e.target as HTMLSelectElement).value as typeof this.exportScope;this.requestUpdate();}}>
+              <md-select-option value="workspace"><div slot="headline">${this.l("Current workspace, re-importable","目前工作區，可重新匯入")}</div></md-select-option>
+              <md-select-option value="plans"><div slot="headline">${this.l("Selected saved plans","已選儲存計劃")}</div></md-select-option>
+              <md-select-option value="revision-page"><div slot="headline">${this.l("Last 25 matching loaded revisions","最後 25 個符合篩選嘅已載入版本")}</div></md-select-option>
+              <md-select-option value="revisions"><div slot="headline">${this.l("All complete recorded revisions (maximum 32 MiB)","全部完整已記錄版本（最大 32 MiB）")}</div></md-select-option>
+              <md-select-option value="history"><div slot="headline">${this.l("Complete recorded activity","全部已記錄活動")}</div></md-select-option>
+            </md-outlined-select>
+            ${this.exportScope==="plans"?html`<md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.map(p=>p.id));this.requestUpdate();}}>${this.l("Select all saved plans","選擇全部儲存計劃")}</md-text-button><md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.filter(p=>!this.exportPlanIds.has(p.id)).map(p=>p.id));this.requestUpdate();}}>${this.l("Invert selection","反轉選擇")}</md-text-button>${this.plans.map(p=>html`<md-outlined-button data-appearance-key=${"export-plan:"+p.id} aria-pressed=${this.exportPlanIds.has(p.id)} @click=${()=>{this.exportPlanIds.has(p.id)?this.exportPlanIds.delete(p.id):this.exportPlanIds.add(p.id);this.requestUpdate();}}>${this.exportPlanIds.has(p.id)?"✓ ":""}${p.name}</md-outlined-button>`)}`:nothing}
+            <p>${this.l("Exports exclude protected credentials, personal wording data and file metadata, custom images, service enrollments, project paths and build output. Plan names and notes are included: review for sensitive text. Only workspace JSON supports import. Encoding: UTF-8, LF line endings.","匯出唔包括受保護憑證、個人用字資料同檔案資料、自訂圖片、服務登記、專案路徑同建置輸出。計劃名稱同備註會包含在內，請檢查敏感文字。只有工作區 JSON 支援匯入，使用 UTF-8 同 LF 換行。")}</p>
+            <md-filled-tonal-button ?disabled=${!this.canEditWorkspace||this.dirty||(this.exportScope==="plans"&&!this.plans.some(p=>this.exportPlanIds.has(p.id)))} @click=${this.exportPlans}>${materialIcon("download","icon")}${this.l("Export chosen scope","匯出所選範圍")}</md-filled-tonal-button>
             <input id="workspace-import-file" hidden style="display:none" type="file"
               accept="application/json,.json" tabindex="-1"
               ?disabled=${!this.canEditWorkspace || this.dirty}
@@ -759,6 +966,14 @@ class MaterialBuildroot extends LitElement {
   }
   private get selected() {
     return this.plans.find((p) => p.id === this.selectedId);
+  }
+  private updateWorkSaved() {
+    if (!this.state || this.dirty || this.workspaceBusy || this.draft !== this.state.language || this.saveState === "saving" || this.schedulePanel()?.hasPendingDraft) return false;
+    const panel = this.renderRoot.querySelector('operations-panel') as any;
+    if (panel && (panel.pending || Object.keys(panel.changes || {}).length || panel.jobs?.some((job:any) => ['queued','running','cancelling'].includes(job.state)))) return false;
+    // Unknown nested editors cannot silently claim that their drafts are saved.
+    if (panel?.shadowRoot?.querySelector('source-panel,package-panel,tools-panel,guest-panel,companion-panel')) return false;
+    return true;
   }
   private get dirty() {
     return (
@@ -1044,7 +1259,7 @@ class MaterialBuildroot extends LitElement {
           );
   }
   private async exportPlans() {
-    if (!this.plans.length || !this.canEditWorkspace) return;
+    if (!this.canEditWorkspace) return;
     if (this.dirty) {
       this.pendingDestination = "export";
       this.openDialog("leave-dialog");
@@ -1061,12 +1276,12 @@ class MaterialBuildroot extends LitElement {
     );
     if (this.workspaceMode === "durable") {
       try {
-        const reply = await this.workspaceAPI.workspaceExport!();
-        if (!reply.ok) throw new Error("unavailable");
+        const reply = await this.workspaceAPI.workspaceMutate!({action:"document.export",expectedRevision:this.workspaceRevision,scope:this.exportScope,ids:this.exportScope==="plans"?this.plans.filter(p=>this.exportPlanIds.has(p.id)).map(p=>p.id):this.exportScope==="revision-page"?this.filteredRevisionRows.slice(-25).map(row=>String(row.revision)):[]});
+        if (!reply.ok || typeof reply.document !== "string") throw new Error("unavailable");
         document = reply.document;
       } catch {
         this.notice = this.noticeText(
-          "Workspace export unavailable. Your plans are retained.",
+          "Workspace export unavailable or exceeds its size bound. No partial export was produced; your plans are retained.",
           "未能匯出工作區，計劃仍然保留。",
         );
         return;
@@ -1076,7 +1291,7 @@ class MaterialBuildroot extends LitElement {
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement("a");
     a.href = url;
-    a.download = "material-buildroot-plans.json";
+    a.download = `material-buildroot-${this.workspaceMode==="durable"?this.exportScope:"session-plans"}.json`;
     try {
       a.click();
       this.record("Plan download requested", "已要求下載計劃");
@@ -1118,7 +1333,7 @@ class MaterialBuildroot extends LitElement {
     ].map(
       (route, index) =>
         html`<md-text-button
-          title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
+          data-experience-id=${"navigation:"+route} title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
           aria-label=${this.route === route
             ? `${this.routeLabel(route,"accessible-name")}, ${this.owned("current workspace", "目前工作區","accessible-name")}`
             : this.routeLabel(route,"accessible-name")}
@@ -1285,7 +1500,7 @@ class MaterialBuildroot extends LitElement {
         ${this.plans.length
           ? this.plans.map(
               (plan) =>
-                html`<md-text-button
+                html`<md-text-button data-appearance-key=${"plan:"+plan.id}
                   class=${plan.id === this.selectedId ? "selected" : ""}
                   aria-label=${plan.name}
                   aria-pressed=${plan.id === this.selectedId}
@@ -1347,7 +1562,7 @@ class MaterialBuildroot extends LitElement {
           )}
         </p>
         ${this.confirmedPreference()}<md-outlined-select
-          id="language-select"
+          id="language-select" data-experience-id="settings:language"
           .label=${this.l("Interface language", "介面語言")}
           .value=${this.draft}
           .displayText=${this.languageName(this.draft)}
@@ -1421,6 +1636,7 @@ class MaterialBuildroot extends LitElement {
               )}
         </p>
       </section>
+      <section class="panel stack" ?hidden=${!this.settingIds.includes('experience')}><experience-policy-panel .language=${this.effectiveLanguage}></experience-policy-panel></section>
       <section class="panel stack" ?hidden=${!this.settingIds.includes('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
       <section class="panel stack" ?hidden=${!this.settingIds.includes('schedules')}><scheduled-preferences-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .snapshot=${this.scheduleSnapshot} .baseLanguage=${this.state?.language||"bilingual"} .baseTheme=${this.theme} @scheduled-snapshot=${(e:CustomEvent<ScheduledPreferencesSnapshot|null>)=>this.applyScheduledSnapshot(e.detail)}></scheduled-preferences-panel></section>
       <div ?hidden=${!this.settingIds.includes('backups')}>${this.historyPanel()}</div>
@@ -1447,7 +1663,7 @@ class MaterialBuildroot extends LitElement {
                 "Buildroot 需要 Linux。記錄你打算使用嘅環境，選填檢查會檢視已安裝執行環境，唔會安裝。",
               )}
             </p>
-            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
+            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
             <md-outlined-select
               label=${this.l("Intended runtime", "預定執行環境")}
               .value=${this.newRuntime}
@@ -1623,7 +1839,9 @@ class MaterialBuildroot extends LitElement {
             ></md-text-button
           >
         </nav>
+        <workspace-tabs .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
         <main>
+          <update-panel compact .language=${this.state?.language || "bilingual"} .canRestart=${() => this.updateWorkSaved()}></update-panel>
           <div class="toolbar">
             <div class="heading">
               <h1 id="workspace-heading" tabindex="-1">
@@ -1711,7 +1929,7 @@ class MaterialBuildroot extends LitElement {
                         ? html`<ul class="activity">
                             ${this.events.map(
                               (event) =>
-                                html`<li>
+                                html`<li data-appearance-key=${"activity:"+event.id}>
                                   ${this.l(event.en, event.zh)}<time
                                     datetime=${event.at}
                                     >${this.date(event.at)}</time
@@ -1751,15 +1969,16 @@ class MaterialBuildroot extends LitElement {
                         " " +
                         this.scope()}
                       </p>
-                    </section>`}<operations-panel
-            class="operations-host"
-            ?hidden=${this.route !== "operations"}
+                    </section>`}${repeat([{workspaceId:'',name:''},...this.projectSessions],project=>project.workspaceId,project=>html`<operations-panel
+            class="operations-host" data-project-id=${project.workspaceId}
+            ?hidden=${this.route !== "operations"||this.activeProject!==project.workspaceId}
+            .workspace=${project.workspaceId?project:undefined}
             .language=${this.effectiveLanguage} .restricted=${this.restricted}
-          ></operations-panel
-          >${this.notice
+            @workspace-adopted=${this.adoptedProject}
+          ></operations-panel>`)}${this.notice
             ? html`<p class="notice" role="status">${this.restricted?this.noticeEnglish:this.notice}</p>`
             : nothing}
-        </main>
+        </main></workspace-tabs>
       </div>
       <div class="status" role="status" aria-live="polite">
         ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
@@ -1864,10 +2083,10 @@ class MaterialBuildroot extends LitElement {
       ${this.dialog(
         "restore-dialog",
         this.l("Restore workspace snapshot?", "還原工作區快照？"),
-        html`<p>${this.snapshots.find((s) => s.id === this.restoreId)?.name}</p>
+        html`<p>${this.restoreId.startsWith("revision:")?this.restoreId:this.snapshots.find((s) => s.id === this.restoreId)?.name}</p>
           <p>
             ${this.l(
-              "This replaces current plans, theme and setup completion with the snapshot. Language settings are unchanged.",
+              "This creates a new revision with the selected plans, theme and setup completion. Recorded earlier revisions remain available. Language settings are unchanged.",
               "呢個操作會以快照取代目前計劃、主題同設定完成狀態，語言設定維持不變。",
             )}
           </p>`,
@@ -1914,7 +2133,7 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
+            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.activeOperations() as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");
@@ -1942,4 +2161,3 @@ class MaterialBuildroot extends LitElement {
   }
 }
 customElements.define("material-buildroot", MaterialBuildroot);
-

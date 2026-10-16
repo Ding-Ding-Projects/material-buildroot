@@ -1,6 +1,6 @@
 # Project wiki
 
-Material Buildroot is a Windows desktop workspace in development. A bounded packaged shell now provides a genuine empty-project workspace and durable language preferences; Buildroot execution through WSL/Docker and the authenticated companion remain unimplemented. Read the [desktop article](../desktop/host-and-preferences.md) and [runtime evidence](../evidence/desktop-shell/README.md) before inferring broader completion.
+Material Buildroot is a Windows desktop workspace in development. The source contains project and configuration workflows, execution adapters, a typed companion, history and personalization consumers. Their implementation and evidence are tracked independently. Normal downloadable installers exist, but source and package availability do not establish runtime acceptance. The current owner-selected pass deliberately defers tests, reviews, audits, static analysis and screenshots, including VM and Docker tests. Read the [current handoff](../../HANDOFF.md), [assignment queue](../planning/implementation-queue.json) and [source-bound runtime evidence](../evidence/desktop-shell/README.md) before inferring broader completion.
 
 - [Getting started with the plan](Getting-started.md)
 - [Common questions](FAQ.md)

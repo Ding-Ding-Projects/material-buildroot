@@ -18,6 +18,7 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 function createWorkspaceStore({ filePath }) {
   if (typeof filePath !== "string" || !path.isAbsolute(filePath))
     throw new TypeError("An absolute host-owned storage path is required.");
+  const history = require("./workspace-history.cjs").createWorkspaceHistory(filePath);
   function read() {
     try {
       const info = fs.lstatSync(filePath);
@@ -119,7 +120,7 @@ function createWorkspaceStore({ filePath }) {
           revision <= current.revision &&
           revision < beforeRevision
         ) {
-          selected.push(revision);
+          if (!selected.includes(revision)) selected.push(revision);
           selected.sort((a, b) => b - a);
           if (selected.length > limit) selected.pop();
         }
@@ -144,6 +145,104 @@ function createWorkspaceStore({ filePath }) {
         events.length === limit ? events[events.length - 1].revision : null,
     };
   }
+  // Isolated immutable records, never a directory inside the user's project.
+  function revisionRoot() {
+    const directory = `${filePath}.revisions`;
+    fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+    const info = fs.lstatSync(directory);
+    if (!info.isDirectory() || info.isSymbolicLink() || fs.realpathSync.native(directory) !== directory)
+      throw new Error("Invalid revision storage");
+    return directory;
+  }
+  function preserveRevision(state) {
+    const destination = path.join(revisionRoot(), `${state.revision}.json`);
+    const serialized = JSON.stringify(contract.state(clone(state)));
+    const temporary = `${destination}.${randomUUID()}.tmp`;
+    let descriptor;
+    try {
+      descriptor = fs.openSync(temporary, "wx", 0o600);
+      fs.writeFileSync(descriptor, serialized);
+      fs.fsyncSync(descriptor);
+      fs.closeSync(descriptor);
+      descriptor = undefined;
+      try { fs.linkSync(temporary, destination); }
+      catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        const info = fs.lstatSync(destination);
+        if (!info.isFile() || info.isSymbolicLink() || info.size > contract.MAX_BYTES ||
+            fs.readFileSync(destination, "utf8") !== serialized)
+          throw new Error("Conflicting revision record");
+      }
+      history.preserve(state);
+    } finally {
+      if (descriptor !== undefined) fs.closeSync(descriptor);
+      fs.rmSync(temporary, { force: true });
+    }
+  }
+  function readRevision(revision) {
+    if (!Number.isSafeInteger(revision) || revision < 0 || revision > read().revision)
+      throw Object.assign(new Error("Revision not found"), { code: "NOT_FOUND" });
+    const location = path.join(revisionRoot(), `${revision}.json`);
+    try {
+      const info = fs.lstatSync(location);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > contract.MAX_BYTES)
+        throw new Error("Invalid revision record");
+      const state = contract.state(contract.parse(fs.readFileSync(location, "utf8")));
+      if (state.revision !== revision) throw new Error("Invalid revision identity");
+      return state;
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        const state = contract.state(contract.parse(history.read(revision)));
+        if (state.revision !== revision) throw new Error("Invalid revision identity");
+        return state;
+      }
+      throw error;
+    }
+  }
+  function revisions(beforeRevision, limit = 25) {
+    const current = read();
+    const before = beforeRevision ?? current.revision + 1;
+    const selected = history.revisions().filter(revision => revision < before && revision <= current.revision)
+      .sort((a,b)=>b-a).slice(0, limit + 1);
+    const iterator = fs.opendirSync(revisionRoot());
+    try {
+      let entry;
+      while ((entry = iterator.readSync()) !== null) {
+        if (!/^(0|[1-9][0-9]*)\.json$/.test(entry.name)) continue;
+        const revision = Number(entry.name.slice(0, -5));
+        if (Number.isSafeInteger(revision) && revision < before && revision <= current.revision) {
+          if (!selected.includes(revision)) selected.push(revision);
+          selected.sort((a, b) => b - a);
+          if (selected.length > limit + 1) selected.pop();
+        }
+      }
+    } finally { iterator.closeSync(); }
+    const labels = history.labels();
+    const records = selected.slice(0, limit).map(revision => {
+      const state = readRevision(revision);
+      const event = state.activity.at(-1);
+      return { revision, action: event?.action ?? "baseline", timestamp: event?.timestamp ?? null, plans: state.plans.length, labels: labels.filter(label => label.revision === revision).map(label => label.label) };
+    });
+    return { records, nextBeforeRevision: selected.length > limit ? records.at(-1).revision : null };
+  }
+  function labelRevision(revision, label) {
+    readRevision(revision);
+    history.label(revision, label);
+  }
+  function retainCache(keep) {
+    const current = read();
+    const recorded = history.revisions().filter(revision => revision <= current.revision).sort((a,b)=>b-a);
+    let removed = 0;
+    for (const revision of recorded.slice(keep)) {
+      const location = path.join(revisionRoot(), `${revision}.json`);
+      if (!fs.existsSync(location)) continue;
+      const info = fs.lstatSync(location);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > contract.MAX_BYTES) throw new Error("Invalid revision cache");
+      if (fs.readFileSync(location,"utf8") !== history.read(revision)) throw new Error("Unarchived revision cache");
+      fs.unlinkSync(location); removed++;
+    }
+    return removed;
+  }
   function transact(expectedRevision, change) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
     let lock;
@@ -163,12 +262,16 @@ function createWorkspaceStore({ filePath }) {
         throw error;
       }
       const next = change(clone(current));
+      if (JSON.stringify(next) === JSON.stringify(current)) return clone(current);
       next.revision = current.revision + 1;
       contract.state(next);
-      for (const event of current.activity) journalEvent(event, true);
-      const latest = next.activity.at(-1);
-      if (latest && latest.revision === next.revision)
-        journalEvent(latest, false);
+      let historyWarning = false;
+      try { preserveRevision(current); } catch { historyWarning = true; }
+      try {
+        for (const event of current.activity) journalEvent(event, true);
+        const latest = next.activity.at(-1);
+        if (latest && latest.revision === next.revision) journalEvent(latest, false);
+      } catch { historyWarning = true; }
       temporary = `${filePath}.${randomUUID()}.tmp`;
       const descriptor = fs.openSync(temporary, "wx", 0o600);
       try {
@@ -179,13 +282,14 @@ function createWorkspaceStore({ filePath }) {
       }
       fs.renameSync(temporary, filePath);
       temporary = undefined;
-      return clone(next);
+      try { preserveRevision(next); } catch { historyWarning = true; }
+      return { ...clone(next), ...(historyWarning ? { historyWarning: true } : {}) };
     } finally {
       if (temporary) fs.rmSync(temporary, { force: true });
       fs.closeSync(lock);
       fs.rmSync(`${filePath}.lock`, { force: true });
     }
   }
-  return { read, transact, activityPage };
+  return { read, transact, activityPage, readRevision, revisions, labelRevision, retainCache };
 }
 module.exports = { createWorkspaceStore };

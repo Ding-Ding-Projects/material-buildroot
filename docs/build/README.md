@@ -1,6 +1,7 @@
 # Build and dependency acquisition
 
 - [Windows entrypoints and source-bound outputs](windows-entrypoints.md)
+- [Native compiler discovery and explicit acquisition](native-toolchain.md)
 - [Unsigned Windows releases](releases.md)
 - [Squirrel package and installed-version identity](squirrel-packaging.md)
 

@@ -14,6 +14,7 @@ import { createSqliteScheduleAdapter, createSqliteScheduleDiscardStore } from ".
 import { createScheduleSourceProvider } from "./schedule-provider.mjs";
 export const CURRENT_SCHEDULE_REGISTRY = Object.freeze({
   language: (value) => ["en", "zh-HK", "bilingual"].includes(value),
+  "appearance.profile": (value) => value === null || typeof value === "string" && /^p[a-f0-9-]{36}$/.test(value),
   "appearance.theme": (value) => ["system", "light", "dark"].includes(value),
 });
 export class SchedulePreferencesError extends Error {
@@ -174,9 +175,10 @@ export function createSchedulePreferencesService({
       fail("SCHEDULE_EVALUATION_SUPERSEDED");
     if (
       !base ||
-      Object.keys(base).length !== 2 ||
+      Object.keys(base).length !== 3 ||
       !Object.hasOwn(base, "language") ||
       !Object.hasOwn(base, "appearance.theme") ||
+      !CURRENT_SCHEDULE_REGISTRY["appearance.profile"](base["appearance.profile"]) ||
       !CURRENT_SCHEDULE_REGISTRY.language(base.language) ||
       !CURRENT_SCHEDULE_REGISTRY["appearance.theme"](base["appearance.theme"])
     )
@@ -191,7 +193,7 @@ export function createSchedulePreferencesService({
         })
       : {
           values: copy(base),
-          provenance: { language: null, "appearance.theme": null },
+          provenance: { language: null, "appearance.theme": null, "appearance.profile": null },
           appliedRuleIds: [],
           issues: [],
         };
@@ -516,6 +518,13 @@ export function createSchedulePreferencesService({
       pausedUntil = 0;
       void cycle();
       return copy(saved);
+    },
+    async historyRead({revision,authorize=()=>true}) {
+      ready();
+      if(authorize()!==true)fail("UNAUTHORIZED");
+      const record=await adapter.historyRead({revision});
+      if(authorize()!==true)fail("UNAUTHORIZED");
+      return record;
     },
     async history(page) {
       ready();

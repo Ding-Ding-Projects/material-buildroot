@@ -290,6 +290,9 @@ function createProjectOptionsStore({ directory }) {
         fail("REVISION_CONFLICT");
       if (current.revision === Number.MAX_SAFE_INTEGER)
         fail("STORAGE_UNAVAILABLE");
+      const history=require("./workspace-history.cjs").createWorkspaceHistory(file);
+      let historyWarning=false;
+      try {history.preserve({...current,workspaceId:request.workspaceId});} catch {historyWarning=true;}
       const next = { revision: current.revision + 1, ...selected };
       const serialized = JSON.stringify({
         format: "material-buildroot-project-options",
@@ -319,16 +322,35 @@ function createProjectOptionsStore({ directory }) {
         fail("REVISION_CONFLICT");
       fs.renameSync(temporary, file);
       temporary = undefined;
-      return clone(next);
+      try {history.preserve({...next,workspaceId:request.workspaceId});} catch {historyWarning=true;}
+      return {...clone(next),historyWarning};
     } finally {
       if (temporary) fs.rmSync(temporary, { force: true });
       fs.closeSync(lock);
       fs.rmSync(`${file}.lock`, { force: true });
     }
   }
+  function historyRead(request) {
+    exact(request,["workspaceId"]);identity(request);
+    const current=read(request),history=require("./workspace-history.cjs").createWorkspaceHistory(location(request,true));
+    return {revision:current.revision,records:history.revisions().filter(n=>n<=current.revision).sort((a,b)=>b-a).map(revision=>{
+      const saved=JSON.parse(history.read(revision));
+      if(saved.workspaceId!==request.workspaceId||saved.revision!==revision)fail("STORAGE_UNAVAILABLE");
+      const checked=options(saved);
+      return {revision,runtime:checked.runtime,externalTrees:checked.externalTrees.map(({name})=>({name}))};
+    })};
+  }
+  function restore(request) {
+    exact(request,["workspaceId","revision","expectedRevision"]);identity(request);revision(request.revision);revision(request.expectedRevision);
+    const current=read(request);
+    if(request.revision>current.revision)fail("INVALID_REQUEST");
+    const saved=JSON.parse(require("./workspace-history.cjs").createWorkspaceHistory(location(request,true)).read(request.revision));
+    if(saved.workspaceId!==request.workspaceId||saved.revision!==request.revision)fail("STORAGE_UNAVAILABLE");
+    return save({workspaceId:request.workspaceId,expectedRevision:request.expectedRevision,...options(saved)});
+  }
   return Object.freeze(
     Object.fromEntries(
-      Object.entries({ get, save }).map(([name, method]) => [
+      Object.entries({ get, save, historyRead, restore }).map(([name, method]) => [
         name,
         (...args) => {
           try {

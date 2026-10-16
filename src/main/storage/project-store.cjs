@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
+const { metadataPaths } = require("../execution/wsl-project.cjs");
 const MAX_BYTES = 8 * 1024 * 1024;
 const STORAGE_IDENTITY = Object.freeze({
   applicationId: "com.dingdingprojects.materialbuildroot",
@@ -63,21 +64,21 @@ function canonical(value) {
   return value;
 }
 function descriptor(value, stored = false) {
-  exact(
-    value,
-    stored
-      ? ["id", "name", "root", "source", "output"]
-      : ["name", "root", "source", "output"],
-  );
+  const keys = stored ? ["id", "name", "root", "source", "output"] : ["name", "root", "source", "output"];
+  if (Object.hasOwn(value || {}, "storage")) keys.push("storage");
+  exact(value, keys);
+  const wslPaths = value.storage ? metadataPaths(value.storage) : null;
+  if (wslPaths && ["root", "source", "output"].some(key => value[key] !== wslPaths[key])) fail("INVALID_REQUEST");
   text(value.name, 320);
   if (value.name.length > 80 || !value.name.trim()) fail("INVALID_REQUEST");
   if (stored && (typeof value.id !== "string" || !UUID.test(value.id)))
     fail("INVALID_REQUEST");
   const normalized = {
     name: value.name,
-    root: canonical(value.root),
-    source: canonical(value.source),
-    output: canonical(value.output),
+    root: wslPaths ? wslPaths.root : canonical(value.root),
+    source: wslPaths ? wslPaths.source : canonical(value.source),
+    output: wslPaths ? wslPaths.output : canonical(value.output),
+    ...(wslPaths ? { storage: { ...value.storage } } : {}),
   };
   return stored ? { id: value.id, ...normalized } : normalized;
 }
@@ -147,6 +148,7 @@ function createProjectStore({ filePath }) {
     throw new TypeError(
       "An absolute host-owned project metadata path is required.",
     );
+  const history = require("./workspace-history.cjs").createWorkspaceHistory(filePath);
   function parent(create = false) {
     const directory = path.dirname(filePath);
     if (create) fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -215,6 +217,7 @@ function createProjectStore({ filePath }) {
       if (state.projects.length >= 1000) fail("LIMIT_REACHED");
       if (state.revision === Number.MAX_SAFE_INTEGER)
         fail("STORAGE_UNAVAILABLE");
+      try { history.preserve(state); } catch {}
       const id = randomUUID();
       state.projects.push({ id, ...candidate });
       state.revision++;
@@ -230,6 +233,7 @@ function createProjectStore({ filePath }) {
       }
       fs.renameSync(temporary, filePath);
       temporary = undefined;
+      try { history.preserve(state); } catch {}
       return id;
     } finally {
       if (temporary) fs.rmSync(temporary, { force: true });
@@ -237,7 +241,33 @@ function createProjectStore({ filePath }) {
       fs.rmSync(`${filePath}.lock`, { force: true });
     }
   }
-  const service = { list: () => read().projects, adopt };
+  function historyRead() {
+    const current = read();
+    return { revision: current.revision, records: history.revisions().filter(n=>n<=current.revision).sort((a,b)=>b-a).map(revision=>({revision,projects:parse(history.read(revision)).projects.map(({id,name})=>({id,name}))})) };
+  }
+  function restore({revision, expectedRevision}) {
+    if (!Number.isSafeInteger(revision) || revision < 0 || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0) fail("INVALID_REQUEST");
+    const saved = parse(history.read(revision));
+    parent(true);
+    let lock, temporary;
+    try { lock = fs.openSync(`${filePath}.lock`, "wx", 0o600); } catch { fail("STORAGE_BUSY"); }
+    try {
+      const current = read();
+      if (current.revision !== expectedRevision || revision > current.revision) fail("REVISION_CONFLICT");
+      if (current.revision === Number.MAX_SAFE_INTEGER) fail("STORAGE_UNAVAILABLE");
+      const next = {...saved, revision:current.revision+1};
+      parse(JSON.stringify(next));
+      let historyWarning=false;
+      try { history.preserve(current); } catch {historyWarning=true;}
+      temporary=`${filePath}.${randomUUID()}.tmp`;
+      const fd=fs.openSync(temporary,"wx",0o600);
+      try {fs.writeFileSync(fd,JSON.stringify(next));fs.fsyncSync(fd);} finally {fs.closeSync(fd);}
+      fs.renameSync(temporary,filePath);temporary=undefined;
+      try {history.preserve(next);} catch {historyWarning=true;}
+      return {revision:next.revision,historyWarning};
+    } finally {if(temporary)fs.rmSync(temporary,{force:true});fs.closeSync(lock);fs.rmSync(`${filePath}.lock`,{force:true});}
+  }
+  const service = { list: () => read().projects, adopt, historyRead, restore };
   return Object.freeze(
     Object.fromEntries(
       Object.entries(service).map(([name, method]) => [
@@ -256,3 +286,4 @@ function createProjectStore({ filePath }) {
   );
 }
 module.exports = { createProjectStore };
+

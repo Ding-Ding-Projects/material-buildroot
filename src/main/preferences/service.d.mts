@@ -20,8 +20,9 @@ export interface ScheduleEffective {
   values: {
     language: "en" | "zh-HK" | "bilingual";
     "appearance.theme": "system" | "light" | "dark";
+  "appearance.profile": string | null;
   };
-  provenance: Record<"language" | "appearance.theme", string | null>;
+  provenance: Record<"language" | "appearance.theme" | "appearance.profile", string | null>;
   appliedRuleIds: string[];
   issues: Array<{ ruleId: string; code: string }>;
 }
@@ -75,6 +76,7 @@ export function createSchedulePreferencesService(options: {
     expectedRevision: number | null;
     authorize?: () => boolean;
   }): Promise<ScheduleDocument>;
+  historyRead(input:{revision:number;authorize?:()=>boolean}):Promise<{document:ScheduleDocument}|null>;
   history(page?: { after?: number; limit?: number }): Promise<{
     records: Array<{ sequence: number; receipt: ScheduleHistoryReceipt }>;
     next: number;

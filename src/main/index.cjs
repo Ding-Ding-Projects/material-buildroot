@@ -17,11 +17,16 @@ const { createDesktopSession } = require("./security/desktop-session.cjs");
 const { createWorkspaceService } = require("./workspace-service.cjs");
 const { createWorkspaceIPC } = require("./security/workspace-ipc.cjs");
 const { createOperationsService } = require("./operations-service.cjs");
+const { createExperienceIPC } = require("./experience-policies.cjs");
+const { createUpdateHost } = require("./updates/host.cjs");
 const { createVault } = require("./security/vault.cjs");
 const {
   createSharedModeService,
 } = require("./privacy/shared-mode-service.cjs");
 const { createSharedModeIPC } = require("./privacy/shared-mode-ipc.cjs");
+const { createAppearanceFonts } = require('./appearance-fonts.cjs');
+const appearanceFonts = createAppearanceFonts();
+const {createAppearanceHistory}=require('./appearance-history.cjs');
 const { createScheduleIPC } = require("./preferences/schedule-ipc.cjs");
 const verification = process.argv.filter((arg) =>
   arg.startsWith("--verification-user-data="),
@@ -151,6 +156,9 @@ else {
         sharedModeService?.close();
         sharedModeService = undefined;
       }
+      const appearanceHistory=createAppearanceHistory({filePath:path.join(app.getPath('userData'),'appearance-history'),fonts:appearanceFonts});
+      ipcMain.handle('studio:appearance-history',(event,value)=>desktop.admitted(event)?appearanceHistory.request(value):{ok:false,code:'UNAUTHORIZED'});
+      ipcMain.handle('studio:appearance-fonts', (event) => desktop.admitted(event) ? appearanceFonts.read() : {ok:false,code:'UNAUTHORIZED'});
       sharedModeIPC = createSharedModeIPC({
         desktop,
         service: sharedModeService,
@@ -169,6 +177,8 @@ else {
           } catch {}
         }
       });
+      const experienceIPC = createExperienceIPC({ desktop, directory: app.getPath("userData"), safeStorage, openFolder: folder => shell.openPath(folder), schoolMode: () => sharedModeService?.status()?.active !== false });
+      ipcMain.handle("studio:experience-policies", (event, value) => experienceIPC.request(event, value));
       const workspaceService = createWorkspaceService({
         filePath: path.join(app.getPath("userData"), "workspace.json"),
       });
@@ -199,6 +209,7 @@ else {
             return {
               language,
               "appearance.theme": workspace.state.preferences.theme,
+              "appearance.profile": null,
             };
           },
           vault: createVault({
@@ -247,11 +258,13 @@ else {
           parentWindow: window,
           version: metadata.version,
           source: metadata.source,
+          updateHostFactory: ({ canInstall }) => createUpdateHost({ app, window, dialog, shell, currentSource: metadata.source, canInstall }),
           documentationDirectory: path.join(
             app.getAppPath(),
             "dist/documentation",
           ),
           openDocumentationExternal: (url) => shell.openExternal(url),
+          openWslPath: (folder) => shell.openPath(folder),
           workspaceRead: () => workspaceService.get(),
         });
       } catch {
@@ -310,3 +323,5 @@ else {
     store?.close();
   });
 }
+
+
