@@ -1,3 +1,4 @@
+import {mountBrowserNative} from './browser-native.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
@@ -394,6 +395,16 @@ if (visitor) {
     }
   });
 
+  mountBrowserNative(visitor, {
+    readPlan: () => structuredClone(visitorState),
+    restorePlan: plan => {
+      const next = {...plan, updatedAt:new Date().toISOString()};
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      visitorState = next; goalField.value = next.goal; notesField.value = next.notes;
+      visitor.querySelectorAll('[data-check]').forEach(box => { box.checked = next.checks[box.dataset.check] === true; });
+      saved.textContent = copy('Recovery copy restored on this device.', '復原副本已喺此裝置還原。');
+    }
+  });
   const endpointField = visitor.querySelector('#companion-endpoint');
   const challengeField = visitor.querySelector('#companion-challenge');
   const companionMessage = visitor.querySelector('#companion-message');
@@ -685,3 +696,4 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
