@@ -1,5 +1,7 @@
 # Concurrent project build queues
 
+[香港粵語](build-queues.zh-HK.md)
+
 The build workspace provides host-authorized project queues and a read-only job terminal. Inspect queue status to view global CPU, RAM, storage and concurrency reservations, then edit and save the global admission budgets. Budgets persist in local profile storage. They constrain admission, not operating-system execution, and reducing them does not terminate active jobs. New work waits until existing reservations fit the new budget.
 
 Each project retains FIFO order. Canonical source, output and external-tree paths share mutation leases, so overlapping projects cannot concurrently write the same output tree. Independent projects may run concurrently when global budgets and fresh runtime resource observations admit them. Source or configuration changes block the original intent rather than silently changing a queued request.

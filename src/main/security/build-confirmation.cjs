@@ -2,6 +2,7 @@
 const { createHash } = require("node:crypto");
 const { createConfirmationService } = require("./confirmation.cjs");
 
+const { isDestructiveTarget } = require("../build/target-actions.cjs");
 const OPERATIONS = new Set(["build.submit"]);
 const fail = () => { throw Object.assign(new Error("Confirmation required"), {code:"CONFIRMATION_REQUIRED"}); };
 /** Host-resolved, single-use consent. Renderer paths never establish authority. */
@@ -16,7 +17,7 @@ function createBuildConfirmation({ resolveWorkspace, now = Date.now }) {
     return createHash("sha256").update(JSON.stringify(stable(action))).digest("hex");
   };
   function binding(request) {
-    if (!request || !OPERATIONS.has(request.action) || request.target !== "clean" || typeof request.workspaceId !== "string") fail();
+    if (!request || !OPERATIONS.has(request.action) || !isDestructiveTarget(request.target) || typeof request.workspaceId !== "string") fail();
     const project = resolveWorkspace(request.workspaceId);
     return { operation:request.target, destination:project.output, digest:digest(request),
       identity:JSON.stringify(project.identities), workspaceId:request.workspaceId };
@@ -60,3 +61,4 @@ function createBuildConfirmation({ resolveWorkspace, now = Date.now }) {
   };
 }
 module.exports = { createBuildConfirmation };
+

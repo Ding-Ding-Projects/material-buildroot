@@ -1,4 +1,44 @@
-# Workspace features
+# Task-oriented feature articles
+
+Choose a task below and read its permission, recovery and verification boundaries before acting. These articles describe source behavior; documentation, compilation and runtime acceptance are separate outcomes. Complete Cantonese twins are explicitly linked. Short Cantonese summaries inside older articles do not count as full twins.
+
+## Project and source workflows
+
+- [Create, adopt, open and import projects](projects/project-workflows.md) · [建立及開啟專案](projects/project-workflows.zh-HK.md)
+- [Preserve, preview and apply source revisions](source-lifecycle.md) · [來源修訂](source-lifecycle.zh-HK.md)
+- [Workspace plans, history and scoped exports](workspace-history.md) · [工作區歷史](workspace-history.zh-HK.md)
+- [Retained project and utility tabs](workspace-tabs.md) · [工作區分頁](workspace-tabs.zh-HK.md)
+
+## Configure, build and recover
+
+- [Typed configuration and undo](../desktop/typed-configuration-controls.md) · [有型別控制](../desktop/typed-configuration-controls.zh-HK.md)
+- [Defconfig discovery and minimal save](../desktop/defconfig-workflows.md) · [defconfig 流程](../desktop/defconfig-workflows.zh-HK.md)
+- [Component configuration domains](../desktop/configuration-domains.md)
+- [Kconfig evaluation and source trust](../desktop/kconfig-semantics.md)
+- [Build targets](build-targets.md) · [建置目標](build-targets.zh-HK.md)
+- [Concurrent queues and job terminals](build-queues.md) · [建置佇列](build-queues.zh-HK.md)
+- [Exact-destination clean confirmation](destructive-confirmation.md) · [清理確認](destructive-confirmation.zh-HK.md)
+- [Pinned local container runtime](runtime-containers.md) · [Container 執行環境](runtime-containers.zh-HK.md)
+- [WSL and Linux storage](wsl-runtime.md), [remote runtimes](remote-runtimes.md), [execution setup](execution/setup.md), [hosted jobs](execution/hosted-jobs.md) and [managed workflow authoring](execution-workflows.md)
+- [Jobs and interruption recovery](../security/jobs-and-recovery.md)
+
+## Inspect and deliver outputs
+
+- [Viewers and validated conversion](outputs/viewers-and-export.md)
+- [SDK export](outputs/sdk-export.md) · [SDK 匯出](outputs/sdk-export.zh-HK.md)
+- [Reproducibility and compliance](reproducibility.md) · [可重現及授權證據](reproducibility.zh-HK.md)
+- [Private cloud destinations](cloud-destinations.md), [physical media and installation](flashing-installation.md), and [guest hardware controls](../deployment/hypervisor-controls.md)
+
+## Personalize and inspect application state
+
+- [Language, tone and personal wording](preferences/language-wording.md) · [語言及用詞](preferences/language-wording.zh-HK.md)
+- [Search, regex, commands and context actions](navigation/search-commands.md)
+- [Appearance and motion](appearance-editor.md), [scheduled preferences](scheduled-preferences.md), [shared attention and narration](preferences/shared-modes.md), [experience policies](experience-policies.md) and [authenticator](authenticator.md)
+- [Offline help, notifications and release history](documentation-notifications.md) · [文件及通知](documentation-notifications.zh-HK.md)
+- [Source wiki](../wiki/Home.md) · [香港粵語 wiki](../wiki/Home.zh-HK.md)
+- [HTTP collection workflow](../postman/api-workflow.md) · [HTTP 集合流程](../postman/api-workflow.zh-HK.md)
+
+## Existing reference inventory
 
 - [Source acquisition and revision lifecycle](source-lifecycle.md): official HTTPS acquisition, retained revision snapshots, explicit preview/Apply and typed WSL authority.
 
@@ -24,3 +64,9 @@ a category Postman collection is not applicable.
 - [Image presets](image-presets/README.md): source-aware configuration and account provisioning.
 - [Package editors](packages/README.md): typed package inputs and retained drafts.
 - [Shared attention and narration](preferences/shared-modes.md): modes and documented gaps.
+- [Authenticated status integration](status-hub.md): trusted client lifecycle, admitted typed projection and explicit unavailable states.
+- [Documentation and notification review](documentation-notifications.md): offline articles, captured release history and durable review decisions.
+
+## Translation and delivery boundaries
+
+Legacy reference articles without a linked Cantonese twin remain untranslated gaps. This index does not imply complete translation of every document or implementation of every required feature. Keep PH09-T04 unchecked until its full inventory and production acceptance are established. The existing documentation producer renders admitted tracked Markdown and source wiki, then bundles indexed content for offline help. Authoring, generation, deployment, search, route completeness, offline resource completeness, persistence and runtime acceptance remain separate. No production build, test, review, static analysis, runtime interaction or screenshot was performed for this article change.

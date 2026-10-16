@@ -7,6 +7,7 @@ const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
+const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
@@ -18,6 +19,10 @@ const { createConfigurationConsent } = require("./configuration/runtime-consent.
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { OutputViewers } = require("./deployment/output-viewers.cjs");
+const { SdkExport } = require("./deployment/sdk-export.cjs");
+const { FlashingRoutes } = require("./deployment/flashing-routes.cjs");
+const { FlashingNative } = require("./deployment/flashing-native.cjs");
+const { CloudDestinations } = require("./deployment/cloud-destinations.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -49,11 +54,20 @@ const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
 const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 
+const { createRemoteRuntime } = require("./execution/remote-runtime.cjs");
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const { createExecutionSetup } = require('./execution/setup.cjs');
 const { createWorkflowService } = require('./execution/workflow-service.cjs');
+const {createProductWorkflows}=require('./execution/product-workflows.cjs');
 const owner = "desktop-owner";
 const fields = {
+ 'product.inspect':['sourceRepository','executionRepository','mode'],
+ 'product.discover':['selectionId'],
+ 'product.selectRunner':['selectionId','kind','runnerId','billingConsent'],
+ 'product.revoke':['selectionId'],
+ 'product.preview':['selectionId','model','text'],
+ 'product.publish':['previewId','sha256','consent'],
+ 'product.export':['previewId','sha256','consent'],
   'execution.cli': ['kind'],
   'execution.inspect': ['sourceRepository','executionRepository','mode'],
   'execution.discover': ['selectionId'],
@@ -74,6 +88,7 @@ const fields = {
   "documentation.read": ["id"],
   "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
+  "runtime.remote": ["request"],
   "runtime.discover": [],
   "runtime.wsl": ["kind", "distribution"],
   "runtime.docker.prepare": ["workspaceId", "runtime"],
@@ -90,6 +105,7 @@ const fields = {
   "project.options": ["workspaceId"],
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
+  "build.targets": ["workspaceId"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
   "build.confirmation.challenge": ["request"],
   "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
@@ -129,6 +145,20 @@ const fields = {
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
+  "sdk.preview": ["workspaceId", "fileId"],
+  "flashing.state": ["workspaceId"],
+  "flashing.discover": ["workspaceId"],
+  "flashing.preview": ["workspaceId", "fileId", "route", "destinationId"],
+  "flashing.execute": ["workspaceId", "id", "reviewedIdentity"],
+  "flashing.cancel": ["workspaceId", "id"],
+  "sdk.export": ["workspaceId", "id"],
+  "cloud.list": ["workspaceId"],
+  "cloud.import": ["workspaceId"],
+  "cloud.remove": ["workspaceId", "id"],
+  "cloud.preview": ["workspaceId", "fileId", "destinationId"],
+  "cloud.start": ["workspaceId", "id", "consent"],
+  "cloud.cancel": ["workspaceId", "id"],
+  "cloud.retry": ["workspaceId", "id", "consent"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
   "artifacts.compliance": ["workspaceId"],
@@ -238,10 +268,12 @@ function createOperationsService({
   parentWindow,
   version,
   source,
+  notificationTransition = () => {},
   documentationDirectory,
   openDocumentationExternal,
   updateHostFactory,
   openWslPath,
+  cloudVault,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -254,6 +286,8 @@ function createOperationsService({
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
   const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
+  const productSetup=createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal,platform:'windows'});
+  const productWorkflows=createProductWorkflows({setup:productSetup,dialog,parentWindow});
   const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
@@ -261,6 +295,26 @@ function createOperationsService({
         openExternal: openDocumentationExternal,
       })
     : null;
+  let remoteRuntime;
+  function remoteService() { return remoteRuntime ??= createRemoteRuntime({directory,dialog,parentWindow,payloadManager,fileGrants,run:boundedProcess,scheduler,
+    async sourceForTransfer(workspaceId, makeArchive) {
+      const item=project(workspaceId);const external=authorizedExternalPaths(workspaceId,item);
+      if(item.storage||external.length)reject("REMOTE_SOURCE_SHAPE_UNSUPPORTED");
+      const release=acquirePathLeases([item.source,item.output]);
+      try {
+        const before=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+        const archive=makeArchive({source:item.source,output:item.output,revalidate:()=>project(workspaceId)});
+        const after=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+        if(before.sourceRevision!==after.sourceRevision||before.configRevision!==after.configRevision)reject("REMOTE_SOURCE_CHANGED");
+        return {...archive,source:item.source,output:item.output,intent:{sourceRevision:before.sourceRevision,configRevision:before.configRevision}};
+      } finally {release();}
+    },
+    async revalidateSource(workspaceId,intent) {
+      const item=project(workspaceId);if(item.storage||authorizedExternalPaths(workspaceId,item).length)reject("REMOTE_SOURCE_SHAPE_UNSUPPORTED");
+      const current=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+      if(current.sourceRevision!==intent.sourceRevision||current.configRevision!==intent.configRevision)reject("REMOTE_SOURCE_CHANGED");
+    }
+  }); }
   let executionJobs;
   function hostedJobs() {
     return executionJobs ??= createExecutionJobs({
@@ -445,6 +499,7 @@ function createOperationsService({
     listJobs: () => jobs.list(owner),
   });
   const jobs = createJobManager({
+    onTransition: notificationTransition,
     directory: path.join(directory, "jobs"),
     adapters: {
       build: async (payload, context) => {
@@ -837,7 +892,7 @@ function createOperationsService({
     if (
       typeof payload.workspaceId !== "string" ||
       !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
-      !TARGETS.includes(payload.target) ||
+      !targetActions.isBuildTarget(payload.target, TARGETS) ||
       !Number.isSafeInteger(payload.jobs) ||
       payload.jobs < 1 ||
       payload.jobs > 32
@@ -1119,66 +1174,146 @@ function createOperationsService({
     resolveGrant: (id, mode) => toolFiles.resolve(id, mode),
     authorizeServerExecution: (id) => toolFiles.serverAuthorized(id),
   });
-  // Companion reads deliberately omit local paths, logs, notes, payloads and credentials.
-  const companion =
-    typeof dialog.showMessageBox === "function"
-      ? createCompanionController({
-          dialog,
-          parentWindow,
-          onAction: async (request, context) => {
-            if (disposed || !context.isAuthorized()) reject("UNAUTHORIZED");
-            const summarizeJob = (job) => ({
-              id: job.id,
-              kind: job.kind,
-              state: job.state,
-              sequence: job.sequence,
-              createdAt: job.createdAt,
-              updatedAt: job.updatedAt,
-              logCount: job.logCount,
-              itemCount: job.itemCount,
-            });
-            switch (request.action) {
-              case "workspace.read": {
-                const result = workspaceRead?.();
-                if (!result?.ok) reject("WORKSPACE_UNAVAILABLE");
-                return {
-                  revision: result.state.revision,
-                  onboardingCompleted: result.state.onboardingCompleted,
-                  plans: result.state.plans.map(
-                    ({ id, name, runtime, target, status, updatedAt }) => ({
-                      id,
-                      name,
-                      runtime,
-                      target,
-                      status,
-                      updatedAt,
-                    }),
-                  ),
-                };
-              }
-              case "projects.list":
-                return {
-                  projects: projectStore.list().map(({ id, name }) => ({
-                    id,
-                    name,
-                    authorized: projects.has(id),
-                  })),
-                };
-              case "jobs.list":
-                return {
-                  jobs: jobs
-                    .list()
-                    .filter((job) => job.ownerId === owner)
-                    .map(summarizeJob),
-                };
-              case "jobs.get":
-                return { job: summarizeJob(ownJob(request.args.jobId)) };
-              default:
-                reject("ACTION_NOT_ADMITTED");
-            }
-          },
-        })
-      : null;
+  const companionQueueAuthorities=new Map();let companionQueueRunning=false;
+  function companionServerInstallRequest(payload){switch(payload.distribution){case 'paper':return {action:'minecraft.paper.install',directoryId:payload.directoryId,version:payload.version,build:payload.build,acceptLicense:true};case 'fabric':return {action:'minecraft.fabric.install',directoryId:payload.directoryId,version:payload.version,loader:payload.loader,installer:payload.installer,acceptLicense:true,acceptRuntimeDownloads:true};case 'plugin':return {action:'minecraft.plugin.install',directoryId:payload.directoryId,versionId:payload.versionId,gameVersion:payload.gameVersion,loader:payload.loader,acceptPluginCode:true,acceptLicense:true};case 'vanilla':return {action:'minecraft.install',edition:'java',version:payload.version,directoryId:payload.directoryId};default:reject('SERVER_INSTALL_NOT_ADMITTED');}}
+  function companionToolGrants(kind,payload){if(kind.startsWith('model-'))return;if(['server-install','server-transfer'].includes(kind)){toolFiles.resolve(payload.directoryId,'write');if(!toolFiles.serverAuthorized(payload.directoryId))reject('SERVER_EXECUTION_CONSENT_REQUIRED');}else{for(const id of payload.sourceIds||[payload.sourceId])toolFiles.resolve(id,'read');if(payload.destinationId)toolFiles.resolve(payload.destinationId,'write');}}
+  async function executeCompanionTool(kind,payload,context){const authorize=companionQueueAuthorities.get(context.jobId);if(!authorize)reject('CURRENT_NATIVE_GRANTS_REQUIRED');authorize();companionToolGrants(kind,payload);const observer=setInterval(()=>{try{authorize();if(disposed)throw Error('closed');}catch{try{const current=companionToolQueue.get(context.jobId);if(['queued','running'].includes(current.state))companionToolQueue.cancel(current.id,current.ownerId,current.sequence);}catch{}}},250);observer.unref?.();try{const result=await tools.execute(kind==='model-pull'?{action:'ollama.pull',model:payload.model}:kind==='model-install'?{action:'ollama.install',acquire:true,repair:false}:kind==='model-catalogue'?{action:'ollama.catalogue.refresh'}:kind==='server-transfer'?{action:'minecraft.remote.execute',previewId:payload.previewId,confirmSha256:payload.confirmSha256}:kind==='server-install'?companionServerInstallRequest(payload):{action:kind==='conversion'?'converter.convert':'pdf.execute',...payload},{signal:context.signal});if(result.ok===false){context.checkpoint({state:'failed',code:result.code||'TOOL_UNAVAILABLE'});reject('TOOL_UNAVAILABLE');}const projection=kind.startsWith('model-')?{completed:result.completed===true,installed:result.installed===true,cancelled:result.cancelled===true,modelsPreserved:result.modelsPreserved===true,revision:result.revision||null,available:result.available===true}:kind==='server-transfer'?{state:result.state||'unknown',completed:result.completed||0,total:result.total||0,bytesCompleted:result.bytesCompleted||0,bytesTotal:result.bytesTotal||0,hostIdentityVerified:result.hostIdentityVerified===true,remoteDestinationMayExist:result.remoteDestinationMayExist===true}:kind==='server-install'?{installed:result.installed===true,version:result.version||payload.version||payload.gameVersion||null,bytes:result.bytes||0,sha1:result.sha1||null,sha256:result.sha256||null,sha512:result.sha512||null,runtimeVerified:result.runtimeVerified===true,bootstrapOnly:result.bootstrapOnly===true,completeRuntimeInstalled:result.completeRuntimeInstalled===true,publishedDigestVerified:result.publishedDigestVerified===true}:kind==='conversion'?{bytes:result.bytes,sha256:result.sha256,format:result.format}:payload.operation==='inspect'?{pageCounts:result.pageCounts,encryptedOrInvalid:result.encryptedOrInvalid}:{pages:result.pages,bytes:result.bytes,sha256:result.sha256,operation:result.operation};if(result.cancelled===true){const current=companionToolQueue.get(context.jobId);if(current.state==='running')companionToolQueue.cancel(current.id,current.ownerId,current.sequence);}context.item({state:result.cancelled===true?'cancelled':'completed',result:projection});return projection;}finally{clearInterval(observer);}}
+  const companionToolQueue=createJobManager({directory:path.join(directory,'companion-tools'),adapters:{'model-pull':(payload,context)=>executeCompanionTool('model-pull',payload,context),'model-install':(payload,context)=>executeCompanionTool('model-install',payload,context),'model-catalogue':(payload,context)=>executeCompanionTool('model-catalogue',payload,context),'server-transfer':(payload,context)=>executeCompanionTool('server-transfer',payload,context),'server-install':(payload,context)=>executeCompanionTool('server-install',payload,context),conversion:(payload,context)=>executeCompanionTool('conversion',payload,context),pdf:(payload,context)=>executeCompanionTool('pdf',payload,context)}});
+  async function pumpCompanionTools(){if(companionQueueRunning||disposed)return;companionQueueRunning=true;try{for(;;){const next=companionToolQueue.list().find(job=>job.state==='queued'&&companionQueueAuthorities.has(job.id));if(!next||disposed)break;try{await companionToolQueue.run(next.id,next.ownerId,next.sequence);}catch{}finally{companionQueueAuthorities.delete(next.id);}}}finally{companionQueueRunning=false;}}
+  function enqueueCompanionTool(kind,payload,sessionId,operationId,authorize){authorize();companionToolGrants(kind,payload);const job=companionToolQueue.enqueue({kind,payload,ownerId:sessionId,operationId});companionQueueAuthorities.set(job.id,authorize);void pumpCompanionTools();return job;}
+  const {createCompanionConsumers, actionContracts} = require('./security/companion-consumers.cjs');
+  const consumers = createCompanionConsumers({
+    authorizeProject: id => project(id),
+    chooseSource: () => sources.handle({action:'source.choose'}),
+    previewSource: request => sources.handle({action:'source.upgrade.preview',...request}),
+    previewRollback: request => sources.handle({action:'source.rollback.preview',...request}),
+    applySourceRollback: request => sources.handle({action:'source.rollback.apply',...request,consent:true}),
+    applySourceUpgrade: request => sources.handle({action:'source.upgrade.apply',...request,consent:true}),
+    confirmSourceUpgrade: async (preview,context,authorize) => {authorize();if(typeof preview.patch!=='string'||preview.patch.length>16000)reject('NATIVE_SOURCE_REVIEW_REQUIRED');const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review source revision change',message:`Apply source revision ${preview.toRevision}?`,detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nCurrent revision: ${preview.fromRevision}\nDirty source: ${preview.dirty}\n\n${preview.patch}\n\nThe existing source workflow creates its rollback snapshot and rejects changed or dirty source.`,buttons:['Cancel','Apply reviewed source'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
+    cloneOfficial: request => sources.handle({action:'source.clone.official',...request,trust:true}),
+    confirmSource: async (request,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve source clone',message:'Clone official Buildroot source into the selected folder?',detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nDirectory: ${request.directory}\nRef: ${request.ref}\nSource: https://gitlab.com/buildroot.org/buildroot.git\n\nThis approves source trust and project adoption for this one clone. Existing directories are preserved.`,buttons:['Cancel','Approve clone'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
+    modelStatus: () => tools.execute({action:'ollama.status'}),
+    modelCataloguePage: request => tools.execute({action:'ollama.catalogue.page',offset:request.offset,limit:50,...request.query?{query:request.query}:{}}),
+    managedModelStatus: () => tools.execute({action:'ollama.managed.status'}),
+    queueModelPull: (request,context,authorize) => enqueueCompanionTool('model-pull',{model:request.model},context.sessionId,context.operationId,authorize),
+    queueModelInstall: (context,authorize) => enqueueCompanionTool('model-install',{},context.sessionId,context.operationId,authorize),
+    queueModelCatalogue: (context,authorize) => enqueueCompanionTool('model-catalogue',{},context.sessionId,context.operationId,authorize),
+    confirmModelOperation: async (action,request,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve local model operation',message:`Approve ${action}?`,detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nModel: ${request.model||'managed runtime or official catalogue'}\n\nDownloads use the existing admitted sources and can consume storage and bandwidth. Review the selected model license before downloading. Existing installations and models are preserved. No administrator credential or arbitrary executable is accepted from the browser.`,buttons:['Cancel','Approve exact operation'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
+    startModelRuntime: async authorize => {authorize();const controller=new AbortController();const observer=setInterval(()=>{try{authorize();if(disposed)throw Error('closed');}catch{controller.abort();}},250);observer.unref?.();try{return await tools.execute({action:'ollama.managed.start'},{signal:controller.signal});}finally{clearInterval(observer);}},
+    stopModelRuntime: () => tools.execute({action:'ollama.managed.stop'}),
+    listServers: () => tools.execute({action:'minecraft.records.list'}),
+    serverVersions: edition => tools.execute({action:edition==='java'?'minecraft.versions':'minecraft.bedrock.discovery',...edition==='java'?{edition}:{}}),
+    serverFlavours: flavour => tools.execute({action:'minecraft.flavours',flavour}),
+    paperBuilds: version => tools.execute({action:'minecraft.paper.builds',version}),
+    previewRemoteServer: request => tools.execute({action:'minecraft.remote.preview',kind:'server',...request,confirmStopped:true,acceptEula:true}),
+    queueRemoteServer: (request,context,authorize) => enqueueCompanionTool('server-transfer',request,context.sessionId,context.operationId,authorize),
+    remoteServerStatus: previewId => tools.execute({action:'minecraft.remote.status',previewId}),
+    fabricOptions: version => tools.execute({action:'minecraft.fabric.options',version}),
+    installPaper: (request,context,authorize) => enqueueCompanionTool('server-install',{distribution:'paper',...request},context.sessionId,context.operationId,authorize),
+    installFabric: (request,context,authorize) => enqueueCompanionTool('server-install',{distribution:'fabric',...request},context.sessionId,context.operationId,authorize),
+    installPlugin: (request,context,authorize) => enqueueCompanionTool('server-install',{distribution:'plugin',...request},context.sessionId,context.operationId,authorize),
+    serverPlugins: projectId => tools.execute({action:'minecraft.plugins',projectId}),
+    chooseServerDirectory: () => toolFiles.choose({access:'write',kind:'directory'}),
+    readServerConfiguration: request => tools.execute({action:'minecraft.configuration.read',...request}),
+    saveServerConfiguration: request => tools.execute({action:'minecraft.configuration.save',...request,acceptEula:true}),
+    installVanillaServer: (request,context,authorize) => enqueueCompanionTool('server-install',{distribution:'vanilla',directoryId:request.directoryId,version:request.version},context.sessionId,context.operationId,authorize),
+    confirmServerMutation: async (action,request,context,authorize) => {authorize();const selected=toolFiles.resolve(request.directoryId,'write');const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve exact server operation',message:`Approve ${action}?`,detail:`Directory: ${selected}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n${JSON.stringify(request,null,2)}\n\nReview the Minecraft EULA at https://www.minecraft.net/eula and the selected distribution or plugin license. Plugin installation approves downloaded code execution; Fabric may provide a bootstrap launcher with later runtime downloads, not a complete verified runtime. Approval accepts the EULA for this operation, allows the shown configuration or download, and for start authorizes execution of server code with your account. For SSH operations, review the exact host alias and destination above. The source must be stopped before transfer. Existing SSH authentication and strict known-host checks are retained; no credentials or automatic host-key acceptance are supplied. No other directory or server is approved.`,buttons:['Cancel','Approve exact operation'],defaultId:0,cancelId:0,noLink:true});authorize();toolFiles.resolve(request.directoryId,'write');return answer.response===1;},
+    startManagedServer: async (request,authorize) => {authorize();const value=await tools.execute({action:'minecraft.managed.start',...request,acceptExecution:true,acceptEula:true});if(value.ok===false)return value;let checking=false;const observer=setInterval(async()=>{if(checking)return;checking=true;try{try{authorize();if(disposed)throw Error('closed');}catch{await tools.execute({action:'minecraft.managed.stop',serverId:request.serverId});clearInterval(observer);return;}const current=await tools.execute({action:'minecraft.managed.status',serverId:request.serverId});if(current.ok===false||['stopped','exited','start-failed','not-managed','ownership-unverified','connection-lost'].includes(current.state))clearInterval(observer);}finally{checking=false;}},500);observer.unref?.();return value;},
+    serverStatus: serverId => tools.execute({action:'minecraft.managed.status',serverId}),
+    stopServer: serverId => tools.execute({action:'minecraft.managed.stop',serverId}),
+    confirmServerStop: async (serverId,target,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review managed server stop',message:`Stop managed server ${serverId}?`,detail:`Target: ${target}\nBrowser origin: ${context.origin}\nDevice: ${context.deviceName}\n\nOnly the existing server manager can determine ownership and whether the process actually stopped. Saved metadata does not grant execution authority.`,buttons:['Cancel','Request server stop'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
+    chooseConversionFile: access => toolFiles.choose({access,kind:'file'}),
+    conversionCatalog: () => tools.execute({action:'converter.catalog'}),
+    queueConversion: (request,context,authorize) => enqueueCompanionTool('conversion',request,context.sessionId,context.operationId,authorize),
+    queuePdf: (request,context,authorize) => enqueueCompanionTool('pdf',request,context.sessionId,context.operationId,authorize),
+    toolQueuePage: (sessionId,after) => {const jobs=companionToolQueue.list(sessionId).sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));const start=after?jobs.findIndex(item=>item.id===after)+1:0;if(after&&start===0)reject('INVALID_CURSOR');const page=jobs.slice(start,start+50);return {jobs:page,next:start+50<jobs.length?page.at(-1).id:null};},
+    toolQueueGet: (sessionId,id) => companionToolQueue.get(id,sessionId),
+    toolQueueCancel: (sessionId,id,sequence) => companionToolQueue.cancel(id,sessionId,sequence),
+    toolQueueHistory: after => {const jobs=companionToolQueue.list().sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));const start=after?jobs.findIndex(item=>item.id===after)+1:0;if(after&&start===0)reject('INVALID_CURSOR');const page=jobs.slice(start,start+50);return {jobs:page,next:start+50<jobs.length?page.at(-1).id:null};},
+    runConversion: async (request,authorize) => {authorize();toolFiles.resolve(request.sourceId,'read');toolFiles.resolve(request.destinationId,'write');const controller=new AbortController();const observer=setInterval(()=>{try{authorize();if(disposed)throw Error('closed');}catch{controller.abort();}},250);observer.unref?.();try{return await tools.execute({action:'converter.convert',...request},{signal:controller.signal});}finally{clearInterval(observer);}},
+    startModelChat: async (request,authorize) => {
+      authorize();const value=await tools.execute({action:'ollama.chat.start',model:request.model,messages:[{role:'user',content:request.prompt}]});
+      if(value.ok===false)return value;
+      let checking=false;
+      const observer=setInterval(async()=>{if(checking)return;checking=true;try{try{authorize();if(disposed)throw Error('closed');}catch{await tools.execute({action:'ollama.chat.cancel',id:value.id});clearInterval(observer);return;}const current=await tools.execute({action:'ollama.chat.read',id:value.id,offset:0});if(current.ok===false||current.state!=='running')clearInterval(observer);}finally{checking=false;}},500);observer.unref?.();
+      try{authorize();}catch{await tools.execute({action:'ollama.chat.cancel',id:value.id});clearInterval(observer);throw Object.assign(Error('Chat authority expired.'),{code:'UNAUTHORIZED'});}return value;
+    },
+    readModelChat: (id,offset) => tools.execute({action:'ollama.chat.read',id,offset}),
+    cancelModelChat: id => tools.execute({action:'ollama.chat.cancel',id}),
+    modelList: () => tools.execute({action:'ollama.tags'}),
+    cloudList: workspaceId => cloudDestination(workspaceId).list(),
+    cancelCloud: (workspaceId,id) => cloudDestination(workspaceId).cancel(id),
+    retryCloud: (workspaceId,id,authorize) => cloudDestination(workspaceId).retry({id,consent:true},authorize),
+    startCloud: (workspaceId,id,authorize) => cloudDestination(workspaceId).start({id,consent:true},authorize),
+    previewCloud: (workspaceId,viewer,fileId,destinationId) => {const selected=viewer.resolve(fileId,'file');const admitted=outputViewer(workspaceId).admit(selected.grant.relative,'file');return cloudDestination(workspaceId).preview({fileId:admitted,destinationId});},
+    confirmMutation: async (request,authorize) => {
+      authorize();project(request.args.workspaceId);
+      const result=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Review companion change',
+        message:`Approve ${request.action} for the selected project?`,
+        detail:`Browser origin: ${request.origin}\nDevice: ${request.deviceName}\nProject: ${request.args.workspaceId}\nRevision: ${request.args.revision}\n${request.args.symbol ? `Symbol: ${request.args.symbol}\nRequested value: ${String(request.args.change.value)}` : `Configuration: ${request.args.id||request.args.domain}`}\n\nThis uses the existing project trust and configuration transaction. No new filesystem or execution grant is created.`,
+        buttons:['Cancel','Approve this change'],defaultId:0,cancelId:0,noLink:true});
+      authorize();project(request.args.workspaceId);return result.response===1;
+    },
+    inspectConfiguration: request => changeConfig(projectPaths(request.workspaceId),()=>config.inspect(request)),
+    applyConfiguration: request => changeConfig(projectPaths(request.workspaceId),()=>config.apply({workspaceId:request.workspaceId,domain:request.domain,revision:request.revision,changes:{[request.symbol]:request.change}})),
+    undoConfiguration: request => changeConfig(projectPaths(request.workspaceId),()=>config.undo(request)),
+    applyDefconfig: request => changeConfig(projectPaths(request.workspaceId),()=>defconfigWorkflows.apply(request)),
+    readWorkspace: () => {
+      const result=workspaceRead?.();
+      if(!result?.ok) reject('WORKSPACE_UNAVAILABLE');
+      return {revision:result.state.revision,onboardingCompleted:result.state.onboardingCompleted,
+        plans:result.state.plans.map(({id,name,runtime,target,status,updatedAt})=>({id,name,runtime,target,status,updatedAt}))};
+    },
+    listProjects: () => projectStore.list().map(({id,name})=>({id,name,authorized:projects.has(id)})),
+    listJobs: () => jobs.list().filter(job=>job.ownerId===owner),
+    getJob: id => ownJob(id),
+    cancelJob: (id,sequence) => {ownJob(id);const result=jobs.cancel(id,owner,sequence);void scheduler.pump().catch(()=>{});return result;},
+    sourceStatus: workspaceId => sources.handle({action:'source.status',workspaceId}),
+    projectOptions: workspaceId => {const item=project(workspaceId);return {...projectOptions.get({workspaceId}),runtime:item.runtime,externalTreesAuthorized:item.externalStateVerified,availableTrees:[...externalWorkspaces.entries()].filter(([,id])=>id===workspaceId)};},
+    defconfigCatalog: workspaceId => changeConfig(projectPaths(workspaceId),()=>defconfigWorkflows.catalog({workspaceId})),
+    submitBuild: async (request,authorize) => {
+      authorize();
+      const item=project(request.workspaceId);
+      if(disposed||updateInstalling)reject('UNAVAILABLE');
+      if(!item.externalStateVerified)reject('EXTERNAL_TREES_NOT_AUTHORIZED');
+      const selectedRuntime=runtime(item.runtime);
+      const resources=reservations(undefined,selectedRuntime,request.jobs);
+      const captured=await captureBuildIntent({source:item.source,output:item.output,externalTrees:authorizedExternalPaths(request.workspaceId,item)});
+      // Recheck at the enqueue boundary after every asynchronous preparation step.
+      authorize();project(request.workspaceId);
+      if(disposed||updateInstalling)reject('UNAVAILABLE');
+      const job=jobs.enqueue({kind:'build',ownerId:owner,payload:{workspaceId:request.workspaceId,target:request.target,runtime:selectedRuntime,jobs:request.jobs,resources,
+        intent:{projectId:request.workspaceId,sourceRevision:captured.sourceRevision,configRevision:captured.configRevision},
+        snapshot:{version:captured.snapshot.version,entries:captured.snapshot.entries,bytes:captured.snapshot.bytes,excludesGitObjectHistory:true,symlinkPolicy:captured.snapshot.symlinkPolicy,symlinks:captured.snapshot.symlinks,limitations:[...captured.snapshot.limitations]}}});
+      const observer=setInterval(()=>{try{const current=ownJob(job.id);if(!['queued','running','dispatching','cancelling'].includes(current.state)){clearInterval(observer);return;}try{authorize();if(disposed)throw Error('closed');}catch{if(current.state!=='cancelling')jobs.cancel(current.id,owner,current.sequence);void scheduler.pump().catch(()=>{});clearInterval(observer);}}catch{clearInterval(observer);}},250);observer.unref?.();
+      void scheduler.pump().catch(()=>{});return job;
+    },
+    buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
+    openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+    discoverGuests: workspaceId => deployment(workspaceId).discoverHypervisors(),
+    listGuests: workspaceId => deployment(workspaceId).listGuests(),
+    refreshGuest: (workspaceId,id) => deployment(workspaceId).refreshGuest({id}),
+    launchGuest: (workspaceId,id,expectedRevision) => changeConfig(projectPaths(workspaceId),()=>deployment(workspaceId).launchGuest({id,expectedRevision})),
+    stopGuest: (workspaceId,id,expectedRevision) => changeConfig(projectPaths(workspaceId),()=>deployment(workspaceId).stopGuest({id,expectedRevision})),
+    createGuestDisk: request => changeConfig(projectPaths(request.workspaceId),()=>deployment(request.workspaceId).createDiskArtifact({outputName:request.outputName,format:request.format,capacityMiB:request.capacityMiB})),
+    createCompanionGuest: async (request,viewer,fileId,context,authorize) => {authorize();const selected=viewer.resolve(fileId,'file');const hashFile=require('./deployment/artifacts.cjs').hashFile;const sha256=await hashFile(selected.file);authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve exact guest creation',message:`Create a ${request.provider} guest using this ${request.kind}?`,detail:`Source: ${selected.file}\nSHA-256: ${sha256}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\nHardware: ${JSON.stringify(request.hardware)}\n\nThe existing guest manager copies owned media into a new guest. Creation is not boot verification. Launch remains a separate visible action.`,buttons:['Cancel','Create reviewed guest'],defaultId:0,cancelId:0,noLink:true});authorize();if(answer.response!==1)return {cancelled:true};return changeConfig(projectPaths(request.workspaceId),async()=>{authorize();const current=viewer.resolve(fileId,'file');if(await hashFile(current.file)!==sha256)reject('OUTPUT_CHANGED_REFRESH');authorize();return deployment(request.workspaceId).createGuest({provider:request.provider,hardware:request.hardware,storage:[{slot:0,kind:request.kind,artifact:current.grant.relative}]});});},
+    listPackages: request => packageDiscovery.discover({...request,limit:25}),
+    packageFiles: request => packageDiscovery.importPackage(request),
+    packageEditors: () => require('./configuration/package-editor.cjs').discoverEditors(),
+    openPackageEditor: request => packageDiscovery.openEditor(request),
+    confirmEditor: async (request,context,authorize) => {authorize();project(request.workspaceId);const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve visible editor handoff',message:`Open ${request.file} in ${request.editorId}?`,detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nProject: ${request.workspaceId}\nPackage: ${request.packageId}\nRevision: ${request.revision}\nFile SHA-256: ${request.fileHash}\n\nThis opens a visible native editor. Editing there can modify the selected package. The file and editor are revalidated by the host; no browser command or executable path is accepted.`,buttons:['Cancel','Open reviewed file'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
+    previewSdk: (workspaceId,viewer,fileId) => {const selected=viewer.resolve(fileId,'file');const admitted=outputViewer(workspaceId).admit(selected.grant.relative,'file');return changeConfig(projectPaths(workspaceId),()=>sdkExport(workspaceId).preview(admitted));},
+    exportSdk: (workspaceId,id) => changeConfig(projectPaths(workspaceId),()=>sdkExport(workspaceId).execute(id)),
+    createOutputManifest: (workspaceId,viewer,fileIds) => {const localIds=fileIds.map(id=>outputViewer(workspaceId).admit(viewer.resolve(id,'file').grant.relative,'file'));return perform({action:'outputs.manifest',workspaceId,fileIds:localIds});},
+    confirmOutputMutation: async (operation,workspaceId,details,context,authorize) => {authorize();const item=project(workspaceId);const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve output operation',message:`Approve ${operation}?`,detail:`Project output: ${item.output}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n${JSON.stringify(details,null,2)}\n\nNew output is retained if interrupted. Existing files are never silently replaced. SDK export does not run the toolchain or prove a consumer build.`,buttons:['Cancel','Approve exact output'],defaultId:0,cancelId:0,noLink:true});authorize();project(workspaceId);return answer.response===1;},
+
+
+  });
+  const companion = typeof dialog.showMessageBox === 'function'
+    ? createCompanionController({dialog,parentWindow,actionContracts,
+        allowedScopes:[...new Set(Object.values(actionContracts).map(value=>value.scope))],
+        onAction:(request,context)=>{if(disposed)reject('UNAUTHORIZED');return consumers.dispatch(request,context);}})
+    : null;
   let updateInstalling = false, activeRequests = 0;
   const updates = updateHostFactory ? updateHostFactory({ canInstall: () => !disposed && activeRequests <= 1 && running.size === 0 && !jobs.list(owner).some(job => ["queued", "running", "cancelling", "dispatching"].includes(job.state)) }) : createUpdateService({
     userData: directory,
@@ -1187,6 +1322,39 @@ function createOperationsService({
   });
   const deployments = new Map();
   const outputViewers = new Map();
+  const sdkExports = new Map();
+  const flashingRoutes = new Map();
+  function flashing(id) {
+    project(id);
+    if (!flashingRoutes.has(id)) flashingRoutes.set(id, new FlashingRoutes({
+      viewer: outputViewer(id), guests: deployment(id),
+      native: new FlashingNative(process.resourcesPath || path.join(__dirname, "../../resources"), path.join(directory, "flashing", id)),
+      confirm: async plan => {
+        if(typeof dialog.showMessageBox !== "function") return false;
+        const answer = await dialog.showMessageBox(parentWindow, {type:"warning",buttons:["Cancel / 取消", "Continue / 繼續"],defaultId:0,cancelId:0,noLink:true,
+          title:"Review installation destination / 檢查安裝目的地",
+          message:plan.route === "physical" ? "All data on the exact selected disk will become unusable. / 所選磁碟全部資料將無法使用。" : "Create an owned guest with installation media. No operating system installation is claimed. / 建立附有安裝媒體嘅受管理虛擬機，並不代表完成安裝。",
+          detail:`${plan.destination.name}\n${plan.destination.identity || plan.destination.id}\n${plan.source.name}\nSHA-256: ${plan.source.sha256}\nBytes: ${plan.source.bytes}`});
+        return answer.response === 1;
+      },
+    }));
+    return flashingRoutes.get(id);
+  }
+  const cloudDestinations = new Map();
+  function cloudDestination(id) {
+    project(id);
+    if (!cloudDestinations.has(id)) cloudDestinations.set(id, new CloudDestinations({
+      directory: path.join(directory, "cloud-destinations", id), vault: cloudVault,
+      viewer: outputViewer(id), dialog, parentWindow,
+      resolveGh: () => executionSetup.host.executable(),
+    }));
+    return cloudDestinations.get(id);
+  }
+  function sdkExport(id) {
+    project(id);
+    if (!sdkExports.has(id)) sdkExports.set(id, new SdkExport({ viewer: outputViewer(id), manifest: relative => perform({ action: "artifacts.manifest", workspaceId: id, paths: [relative] }) }));
+    return sdkExports.get(id);
+  }
   function outputViewer(id) {
     const item = project(id);
     if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
@@ -1283,6 +1451,18 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("cloud.")) {
+      const cloud = cloudDestination(request.workspaceId);
+      switch (action) {
+        case "cloud.list": return cloud.list();
+        case "cloud.import": return cloud.importProfile();
+        case "cloud.remove": return cloud.remove(request.id);
+        case "cloud.preview": return cloud.preview(request);
+        case "cloud.start": return cloud.start(request);
+        case "cloud.cancel": return cloud.cancel(request.id);
+        case "cloud.retry": return cloud.retry(request);
+      }
+    }
     if (action.startsWith("execution.jobs.")) {
       const method = action.slice("execution.jobs.".length);
       const { action: _action, ...args } = request;
@@ -1296,6 +1476,13 @@ function createOperationsService({
         if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
         return executionSetup.host[request.kind]();
       }
+      case 'product.inspect': return productSetup.inspect(request);
+      case 'product.discover': return productSetup.discover(request.selectionId);
+      case 'product.selectRunner': return productSetup.selectRunner(request);
+      case 'product.revoke': return {revoked:productSetup.revoke(request.selectionId)};
+      case 'product.preview': return productWorkflows.preview(request);
+      case 'product.publish': return productWorkflows.publish(request);
+      case 'product.export': return productWorkflows.exportYaml(request);
       case 'execution.inspect': return executionSetup.inspect(request);
       case 'execution.discover': return executionSetup.discover(request.selectionId);
       case 'execution.selectRunner': return executionSetup.selectRunner(request);
@@ -1315,6 +1502,7 @@ function createOperationsService({
       case "documentation.open":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
+      case "runtime.remote": return remoteService().perform(request.request);
       case "runtime.wsl":
         if (!["discover", "inspect", "import", "install", "cloneSource", "chooseProject", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
         if (request.kind === "chooseProject") {
@@ -1469,7 +1657,7 @@ function createOperationsService({
       case "project.runtime":
         return changeConfig(projectPaths(request.workspaceId), () => {
           const item = project(request.workspaceId);
-          const selectedRuntime = runtime(request.runtime);
+        const selectedRuntime = runtime(request.runtime);
           const previous = projectOptions.get({
             workspaceId: request.workspaceId,
           });
@@ -1512,10 +1700,11 @@ function createOperationsService({
           expectedRevision: request.expectedRevision,
           layout: request.layout,
         });
+      case "build.targets": return targetActions.catalog(project(request.workspaceId));
       case "build.confirmation.challenge": {
         const candidate=request.request;
         exact(candidate,["action",...fields["build.submit"],...(Object.hasOwn(candidate||{},"resources")?["resources"]:[])]);
-        if(candidate.action!=="build.submit"||candidate.target!=="clean"||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
+        if(candidate.action!=="build.submit"||!targetActions.isDestructiveTarget(candidate.target)||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
         reservations(candidate.resources,runtime(candidate.runtime),candidate.jobs);
         return buildConfirmation.challenge(candidate);
       }
@@ -1529,12 +1718,13 @@ function createOperationsService({
         if (!item.externalStateVerified)
           reject("EXTERNAL_TREES_NOT_AUTHORIZED");
         if (
-          !TARGETS.includes(request.target) ||
+          !targetActions.isBuildTarget(request.target, TARGETS) ||
           !Number.isSafeInteger(request.jobs) ||
           request.jobs < 1 ||
           request.jobs > 32
         )
           reject("INVALID_TARGET");
+        targetActions.assertPackage(item, request.target);
         const selectedRuntime = runtime(request.runtime);
         item.runtime = selectedRuntime;
         const resources = reservations(
@@ -1550,7 +1740,7 @@ function createOperationsService({
         project(request.workspaceId);
         if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
-        if (request.target === "clean") buildConfirmation.consume(request);
+        if (targetActions.isDestructiveTarget(request.target)) buildConfirmation.consume(request);
         else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
         const job = jobs.enqueue({
           kind: "build",
@@ -1659,7 +1849,7 @@ function createOperationsService({
         }
       case "jobs.retry": {
         const previous = ownJob(request.id);
-        if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
+        if(targetActions.isDestructiveTarget(previous.payload.target)) reject("CONFIRMATION_REQUIRED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
@@ -1708,6 +1898,17 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "sdk.preview":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).preview(request.fileId));
+      case "flashing.state": return flashing(request.workspaceId).state();
+      case "flashing.discover": return flashing(request.workspaceId).discover();
+      case "flashing.preview": return flashing(request.workspaceId).preview(request);
+      case "flashing.execute": return changeConfig(projectPaths(request.workspaceId), () => flashing(request.workspaceId).execute(request));
+      case "flashing.cancel": return flashing(request.workspaceId).cancel(request.id);
+      case "sdk.export":
+        if (typeof request.id !== "string" || request.id.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).execute(request.id));
       case "outputs.browse":
         if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
         return outputViewer(request.workspaceId).browse(request.directoryId);
@@ -2048,6 +2249,7 @@ function createOperationsService({
         reject("INVALID_ACTION");
     }
   }
+  remoteService();
   return {
     async request(serialized) {
       activeRequests++;
@@ -2073,7 +2275,10 @@ function createOperationsService({
       if (disposal) return disposal;
       disposed = true;
       executionSetup.dispose();
+      productSetup.dispose();
       executionJobs?.dispose();
+      remoteRuntime?.dispose();
+      for (const cloud of cloudDestinations.values()) cloud.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))

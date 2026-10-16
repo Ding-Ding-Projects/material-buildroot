@@ -1,22 +1,52 @@
-# Current isolated implementation pass, 2026-10-16
+# Implementation continuation, 2026-10-16
 
-The finite roadmap pass uses one implementation worker per leaf. All tests, reviews, audits, static analysis, runtime exercises and screenshots remain deferred, including VM and Docker tests. Build production and release metadata readback are separate from acceptance.
+## Current request and boundary
 
-Verified remote main before this record: 63ab3d4a81b24b2880b28d1eda9c6c29133c72c9. Integrated source now includes project round trips, WSL source lifecycle, queues and budgets, typed configuration and defconfig controls, package editors, authenticator/experience controls, Ollama workflows, executable admission, output viewers and reproducibility records, image/account presets, bounded server management, shared attention/narration, and publication eligibility. Feature articles retain remaining implementation gaps. No whole-product completion is claimed.
+Implement the finite proposed roadmap, one implementation worker per leaf. The selected strict release pass defers all tests, reviews, audits, static analysis, runtime exercises and screenshots, including VM and Docker tests. Source, production, publication and runtime acceptance remain distinct. No complete-product claim is made.
 
-The production receipt inventory contains 14 exact source/hash records. Thirteen have a reported numeric zero exit; the preset record has completed output but no retained numeric exit. All runtimeVerified fields remain false. Earlier historical evidence below remains bound to its original source and does not establish current acceptance.
+## Preserved integration
 
-Execution setup, workflow authoring and remote jobs are combined for one serialized desktop producer after incorporating current main. Their transport contract uses a direct manifest.json plus images/ archive, a 1107296256-byte transport ceiling and explicit retained incomplete output. No remote workflow, authentication or runtime operation was executed.
+Remote main before this record is de833ef29f68ba80c017af1018e7e90bbe0a026e. Browser source f1ee6423ecd827bf5e5f491f45a9b1a0ae9b7311, product workflow authoring c952cdf5f1afeaf90a5f2bc9b7e1111a35ea14cf and article unit cf590128682e0e6e15756000a66f16f4ce5482f7 are integrated with original histories. Each originating push has its verified shared-instructions preservation operation.
 
-Complete offline assembly contains 10 tools, 30,972 files, 3,760,387,226 raw bytes. The latest full installer producer at bd0a4fce58cc69cd9ec19b30ba86a9ec7d166720 ended with exit 1. Its full package is 1,450,598,556 bytes, above the configured 1,400,000,000-byte limit. Its Setup.exe is 228,864 bytes and embeds only the bootstrap template, not the full package. These outputs are retained and are not a complete offline installer. Native broker and supported embedding-helper integration are source-only; actual compiler/packaging proof remains pending. Never publish local production version 0.1.1000.
+The production inventory now contains 28 source-bound receipts, 27 with numeric zero exits and one historical exit unavailable. Latest article production contains 301 HTML pages and 7250 internal references, at exact source cf590128682e0e6e15756000a66f16f4ce5482f7. Fourteen complete workflow twins and three wiki twins are integrated. Long-reference translations continue. API collections describe six baseline actions; expanded companion action collections remain in progress. These are production and source facts, not runtime acceptance.
 
-Current source-only work includes the six-format native conversion consumer, native file broker, compiler bootstrap, Status Hub adapter and complete offline/native packaging. Missing authenticated Status Hub enrollment remains distinct from service health. No authenticated delivery is claimed. Preserve original histories, incomplete output and all private ignored announcement variants. No cleanup has occurred.
+## Active implementation and producer ownership
 
-Normal release v0.1.0-build.132.1 was read back with draft=false, prerelease=false, exact tag/source 617db048533e477273bf7dfa3e7be4c4bde03b46 and five nonempty uploaded assets. Setup is 163,670,016 bytes and the full package is 162,976,213 bytes. This is the earlier core package, not the complete offline engine assembly or latest integrated source.
+Companion candidate e1b3918cd1d27c7fe24a4e36ae2f63edcac18dcc completed the serialized desktop producer with direct numeric exit 0. It retains correction history for intermediate merge ca555a095cdaec0c21e84169434cccff4f4fcf53; unresolved markers were corrected before production. Do not integrate that intermediate commit alone. Browser durable category queues, full article translations, native seekable PDF operations and converter consumers continue in their existing isolated branches. Adapter admission source 050130bd1e80cab270c500f220c7649bd2e3b27d awaits the packaging owner's actual consumer.
 
-A historical packaging merge d29a4ce6c9d49131a802593988e2c88d2676a42f had incomplete message metadata; retain the actual original history and do not rewrite it. The exact recorded merge identity in earlier evidence is authoritative.
+Combined editor/durable/assistant/guided/forge source dbfeb8fcf1a54ea95d256748881d57459d85c4a6 remains preserved outside main because its original history contains incomplete installer changes. Converter successors include native video and seekable PDF source; their new production remains unverified. Future flashing packaging source d84a9470fa1a1ca2c7fccbd283202ab1773bd28f remains separate from the queued diagnostic.
 
-See [assignment inventory](docs/planning/implementation-queue.json) and [production receipts](docs/planning/production-receipts.json). Update shared records as integration advances. Remaining queued implementation must continue; keep acceptance checkboxes open.
+## Installer evidence and remaining work
+
+Run 38972521474 failed actual setup-resource admission: full package 1,375,477,453 bytes and delta 1,316,896,276 bytes meet the unchanged 1,400,000,000-byte cap, but Setup.exe 193,024 bytes has no DATA resource. Native broker and genuine helper compiled, with no installer launch. Instrumented source 714cd3d2ca7d5857b1cc5cfbe84658db25c48666 remains queued in run 38979123512 as of 23:22:11Z. Its observation deadline is 2026-10-17T00:01:19Z. Observe that existing operation, do not duplicate dispatch or replace its source. The older running installer 38976198284 is retained.
+
+Finish concrete remaining source, preserve coherent branches, integrate independently ready units, produce the final exact candidate, and publish/read back a normal unique release. Keep all acceptance-dependent checkboxes open. Do not publish local version 0.1.1000. Preserve all owned work and ignored private announcement variants before any cleanup; no cleanup has occurred.
+
+## External state
+
+Status Hub health responds but enrollment configuration is absent and SSH enrollment is unavailable. No authenticated session/display delivery is claimed. Latest account reading is 31 percent remaining; battery 100 percent and charging. Goal remains active. No fixed token budget was requested.
+
+See [assignment inventory](docs/planning/implementation-queue.json) and [production receipts](docs/planning/production-receipts.json).
+
+---
+
+# Earlier isolated implementation snapshot, 2026-10-16
+
+The finite roadmap pass uses one implementation worker per leaf. All tests, reviews, audits, static analysis, runtime exercises and screenshots remain deferred, including VM and Docker tests. Production and release metadata readback remain enabled. No whole-product completion is claimed.
+
+Verified remote main before this record: ba486005c2c91f0e216b695610ab764570bac29d. Recent integration adds named targets/SDK export, language and notifications, typed status availability, cloud destinations, remote execution and destination-bound flashing source. Native flashing compilation/packaging remains separate.
+
+The production inventory contains 24 source/hash records, including seven newly recorded exact-source desktop/documentation outputs. Twenty-three records have reported numeric zero exits; the historical preset record has no retained numeric exit. Every runtime acceptance remains unverified. Documentation receipt be354a11fe88f8cd43a33e66ce1c2eec7ec7c8cf predates later browser changes.
+
+Combined editor/durable/assistant/guided/forge/converter candidate dbfeb8fcf1a54ea95d256748881d57459d85c4a6 completed desktop production with exit 0. Its original history contains pending installer changes, so it remains preserved outside main until those changes have genuine production proof. Browser f1ee6423ecd827bf5e5f491f45a9b1a0ae9b7311 is assigned the next isolated documentation producer. Companion source 80529d3628f7c51692563c40141a0cfb1430464c is preserved and its owner continues remaining typed consumers. Complete articles and product-workflow authoring have separate active owners.
+
+Full installer run 38972521474 at 1271e06b139875442f3a5850cfd2cacae2c8cfcb failed actual setup-resource admission. Its full package is 1,375,477,453 bytes and delta 1,316,896,276 bytes, both below the unchanged 1,400,000,000-byte cap. Actual Setup.exe is 193,024 bytes and has FLAGS but no DATA resource. Native broker and genuine x64 helper compilation succeeded; no installer launch or runtime acceptance ran. The diagnostic metadata is retained; full/delta binary retention is separate from the bounded diagnostic download. Never publish local version 0.1.1000.
+
+Instrumented candidate 714cd3d2ca7d5857b1cc5cfbe84658db25c48666 is preserved. Automatic run 38979123512 is pending as of 23:07:45Z, with no job yet. It observes the actual genuine helper exit, input ZIP and pre/post DATA identities without replacing the installer format or weakening admission. The responsible resource-loss boundary is unresolved until actual evidence arrives.
+
+Status Hub health is reachable but enrollment configuration is absent and the supported SSH enrollment route is unavailable. No authenticated session or display delivery is claimed. Latest verified allowance is 36 percent remaining. All linked workspaces, source histories, incomplete outputs and ignored private announcement variants are retained. No cleanup occurred.
+
+See [assignment inventory](docs/planning/implementation-queue.json) and [source-bound production receipts](docs/planning/production-receipts.json). Continue remaining implementation, preserve each coherent unit, integrate only ready source, then produce and publish the final exact candidate. Deferred acceptance checkboxes remain open.
 
 # Latest implementation continuation, 2026-10-16
 

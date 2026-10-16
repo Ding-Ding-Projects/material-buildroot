@@ -1,5 +1,7 @@
 # Project workspace tabs
 
+[香港粵語](workspace-tabs.zh-HK.md)
+
 The desktop shell retains one operations-panel instance for each adopted project. Its key is the stable workspace ID returned by the trusted project-registration service. Selecting the same project again focuses that instance. Different projects retain separate configuration edits, source state, output and tool forms. Closing navigation does not destroy the instance or delete project data. Native title-bar controls are unchanged.
 
 Use **New tab** to choose a destination. The catalog contains the existing root pages, each operations workspace, each settings category, each tool section and setup. Utility tabs retain the project that opened them; returning to a utility selects that retained project before its destination. Regular navigation changes the current working surface without automatically creating utility tabs. Catalog search defaults to literal matching and uses the existing adjacent regex workbench with worker timeout and expression validation.

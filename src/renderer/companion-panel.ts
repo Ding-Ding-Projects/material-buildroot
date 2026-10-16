@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
@@ -11,6 +12,9 @@ import { workspaceStyles } from "./workspace-styles";
 type Session = {
   id: string;
   origin: string;
+  browser: string;
+  deviceName: string;
+  clientId: string;
   scopes: string[];
   expiresAt: number;
   status: string;
@@ -33,6 +37,8 @@ export class CompanionPanel extends LitElement {
   private host = "127.0.0.1";
   private port = "0";
   private origin = "";
+  private browser = "edge";
+  private deviceName = "";
   private scopes: string[] = ["workspace:read"];
   private pairing?: { challenge: string; expiresAt: number; origin: string };
   private reveal = false;
@@ -105,13 +111,7 @@ export class CompanionPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private async request(action: string, args: Record<string, unknown> = {}) {
     if (!window.studio?.operations) throw new Error("DESKTOP_REQUIRED");
     const reply: { ok: boolean; code?: string; result?: any } =
@@ -166,17 +166,14 @@ export class CompanionPanel extends LitElement {
   }
   render() {
     return html`<section class="panel stack" aria-busy=${this.pending}>
-      <h2>${this.l("Browser companion", "瀏覽器配對")}</h2>
+      <h2>${this.l("Browser companion","瀏覽器配對",true)}</h2>
       <p class="note">
-        ${this.l(
-          "Read workspace, project and job status from an approved browser. Configure HTTPS certificates on this desktop, choose a local binding, then start explicitly. Pairing requires native desktop approval.",
-          "透過獲批准瀏覽器讀取工作區、專案同工作狀態。請喺呢部桌面設定 HTTPS 憑證、選擇本機綁定位址，再明確啟動。配對需要原生桌面批准。",
-        )}
+        ${this.l("Read workspace, project and job status from an approved browser. Configure HTTPS certificates on this desktop, choose a local binding, then start explicitly. Pairing requires native desktop approval.","透過獲批准瀏覽器讀取工作區、專案同工作狀態。請喺呢部桌面設定 HTTPS 憑證、選擇本機綁定位址，再明確啟動。配對需要原生桌面批准。",true)}
       </p>
       ${this.pending
         ? html`<md-linear-progress
             indeterminate
-            aria-label=${this.l("Operation in progress", "操作進行中")}
+            aria-label=${this.l("Operation in progress","操作進行中",true)}
           ></md-linear-progress>`
         : nothing}
       <div role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
@@ -197,17 +194,14 @@ export class CompanionPanel extends LitElement {
       ${this.state
         ? html`<p>
               ${this.state.enabled
-                ? this.l("Listener running", "監聽服務執行中")
+                ? this.l("Listener running","監聽服務執行中",true)
                 : this.state.configured
-                  ? this.l(
-                      "TLS configured; listener stopped",
-                      "TLS 已設定，監聽服務已停止",
-                    )
-                  : this.l("TLS not configured", "未設定 TLS")}
+                  ? this.l("TLS configured; listener stopped","TLS 已設定，監聽服務已停止",true)
+                  : this.l("TLS not configured","未設定 TLS",true)}
             </p>
             <div class="columns">
               <md-outlined-select
-                .label=${this.l("Local binding", "本機綁定位址")}
+                .label=${this.l("Local binding","本機綁定位址",true)}
                 .value=${this.host}
                 .displayText=${this.host}
                 ?disabled=${this.pending || this.state.enabled}
@@ -226,10 +220,7 @@ export class CompanionPanel extends LitElement {
                 type="number"
                 min="0"
                 max="65535"
-                .label=${this.l(
-                  "Port (0 selects an available port)",
-                  "連接埠（0 會選擇可用連接埠）",
-                )}
+                .label=${this.l("Port (0 selects an available port)","連接埠（0 會選擇可用連接埠）",true)}
                 .value=${this.port}
                 ?disabled=${this.pending || this.state.enabled}
                 @input=${(e: Event) => {
@@ -264,14 +255,20 @@ export class CompanionPanel extends LitElement {
             </div>
             ${this.state.binding
               ? html`<p>
-                  ${this.l("HTTPS endpoint", "HTTPS 端點")}:
+                  ${this.l("HTTPS endpoint","HTTPS 端點",true)}:
                   ${this.state.binding.origin}
                 </p>`
               : nothing}
-            <h3>${this.l("Pair a browser", "配對瀏覽器")}</h3>
+            <h3>${this.l("Pair a browser","配對瀏覽器",true)}</h3>
+            <md-outlined-select .label=${this.l("Browser", "瀏覽器")} .value=${this.browser} ?disabled=${this.pending} @change=${(e: Event) => { this.browser=(e.target as HTMLSelectElement).value; this.pairing=undefined; this.reveal=false; this.revision++; }}>
+              <md-select-option value="edge"><div slot="headline">Microsoft Edge</div></md-select-option>
+              <md-select-option value="chrome"><div slot="headline">Google Chrome</div></md-select-option>
+            </md-outlined-select>
+            <md-outlined-text-field .label=${this.l("Device label (for your approval)","裝置名稱（供你審批）")} .value=${this.deviceName} maxlength="80" ?disabled=${this.pending} @input=${(e: Event) => {this.deviceName=(e.target as HTMLInputElement).value;this.pairing=undefined;this.reveal=false;this.revision++;}}></md-outlined-text-field>
+            <p class="note">${this.l("Compare the browser instance shown on both devices before native approval. Browser names and device labels are not hardware identity proof. Revocation stops new authority; existing jobs retain their actual settlement state.","原生批准前，請比對兩部裝置顯示嘅瀏覽器實例。瀏覽器同裝置名稱唔係硬件身分證明。撤銷會停止新授權；現有工作保留實際結算狀態。")}</p>
             <md-outlined-text-field
               type="url"
-              .label=${this.l("Browser origin (HTTPS)", "瀏覽器來源（HTTPS）")}
+              .label=${this.l("Browser origin (HTTPS)","瀏覽器來源（HTTPS）",true)}
               placeholder="https://example.com"
               .value=${this.origin}
               ?disabled=${this.pending}
@@ -312,20 +309,22 @@ export class CompanionPanel extends LitElement {
                 this.pairing = await this.request("companion.createPairing", {
                   origin: this.origin.trim(),
                   scopes: this.scopes,
+                  browser: this.browser,
+                  deviceName: this.deviceName.trim(),
                 });
               },
-              !this.state.enabled || !this.origin.trim() || !this.scopes.length,
+              !this.state.enabled || !this.origin.trim() || !this.deviceName.trim() || !this.scopes.length,
             )}
             ${this.pairing
               ? html`<p>
-                    ${this.l("For browser", "指定瀏覽器")}:
-                    ${this.pairing.origin} · ${this.l("Expires", "到期")}:
+                    ${this.l("For browser","指定瀏覽器",true)}:
+                    ${this.pairing.origin} · ${this.l("Expires","到期",true)}:
                     ${new Date(this.pairing.expiresAt).toLocaleTimeString()}
                   </p>
                   <md-outlined-text-field
                     readonly
                     .type=${this.reveal ? "text" : "password"}
-                    .label=${this.l("Pairing code", "配對碼")}
+                    .label=${this.l("Pairing code","配對碼",true)}
                     .value=${this.pairing.challenge}
                   ></md-outlined-text-field>
                   <div class="row">
@@ -335,44 +334,33 @@ export class CompanionPanel extends LitElement {
                         this.revision++;
                       }}
                       >${this.reveal
-                        ? this.l("Hide code", "隱藏配對碼")
-                        : this.l(
-                            "Reveal code",
-                            "顯示配對碼",
-                          )}</md-outlined-button
+                        ? this.l("Hide code","隱藏配對碼",true)
+                        : this.l("Reveal code","顯示配對碼",true)}</md-outlined-button
                     ><md-outlined-button
                       @click=${() => {
                         this.pairing = undefined;
                         this.reveal = false;
                         this.revision++;
                       }}
-                      >${actionIcon('Dismiss code')}${this.l("Dismiss code",
-                        "關閉配對碼",
-                      )}</md-outlined-button
+                      >${actionIcon('Dismiss code')}${this.l("Dismiss code","關閉配對碼",true)}</md-outlined-button
                     >
                   </div>
                   <p class="note">
-                    ${this.l(
-                      "Enter this code only in the intended browser. Review its origin and permissions in the desktop approval dialog. Dismissing hides the code; stopping the service invalidates pending codes.",
-                      "只喺指定瀏覽器輸入配對碼，並喺桌面批准對話框檢查來源同權限。關閉只會隱藏配對碼，停止服務先會令待用配對碼失效。",
-                    )}
+                    ${this.l("Enter this code only in the intended browser. Review its origin and permissions in the desktop approval dialog. Dismissing hides the code; stopping the service invalidates pending codes.","只喺指定瀏覽器輸入配對碼，並喺桌面批准對話框檢查來源同權限。關閉只會隱藏配對碼，停止服務先會令待用配對碼失效。",true)}
                   </p>`
               : nothing}
-            <h3>${this.l("Browser sessions", "瀏覽器工作階段")}</h3>
+            <h3>${this.l("Browser sessions","瀏覽器工作階段",true)}</h3>
             ${!this.state.sessions.length
               ? html`<p>
-                  ${this.l(
-                    "No paired browser sessions.",
-                    "暫無已配對瀏覽器工作階段。",
-                  )}
+                  ${this.l("No paired browser sessions.","暫無已配對瀏覽器工作階段。",true)}
                 </p>`
               : this.state.sessions.map(
                   (s) =>
                     html`<div class="record stack">
-                      <strong>${s.origin}</strong
+                      <strong>${s.origin} · ${s.browser} · ${s.deviceName}</strong
                       ><span>${s.status} · ${s.scopes.join(", ")}</span
                       ><span
-                        >${this.l("Expires", "到期")}:
+                        >${this.l("Expires","到期",true)}:
                         ${new Date(s.expiresAt).toLocaleString()}</span
                       >${this.button(
                         "Revoke session",

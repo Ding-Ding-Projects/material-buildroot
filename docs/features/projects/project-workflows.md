@@ -1,5 +1,7 @@
 # Project creation and opening
 
+[香港粵語](project-workflows.zh-HK.md)
+
 Projects & runtime contains explicit Open, Create, Adopt, Import descriptor, Import extracted source and Clone actions. Create starts with the official Buildroot HTTPS repository and the dated maintained-LTS recommendation. Clone accepts another validated HTTPS source and branch or tag. Both use the existing host source service, a native parent-folder picker, explicit source trust and an unused child name. Existing destinations are not replaced. A separate output directory is created beside the source. Failed registration can leave a retained clone that can subsequently be adopted.
 
 Adopt selects an existing workspace, Buildroot source and separate output directory using native pickers. Import extracted source uses this same non-destructive registration for an already extracted source tree. It does not extract archives or copy source files. These actions preserve existing configuration and output contents.
