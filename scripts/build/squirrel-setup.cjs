@@ -52,7 +52,7 @@ function embeddedZip(setup) {
     for(let i=tail.length-22;i>=0;i--)if(tail.readUInt32LE(i)===0x06054b50&&i+22+tail.readUInt16LE(i+20)===tail.length){end=i;break;}
     if(end<0||tail.readUInt16LE(end+4)||tail.readUInt16LE(end+6))throw Error('Setup embedded ZIP footer is invalid.');
     const n=tail.readUInt16LE(end+10),centralBytes=tail.readUInt32LE(end+12),centralOffset=tail.readUInt32LE(end+16);
-    if(n<3||n>32||tail.readUInt16LE(end+8)!==n||centralBytes>1024*1024||centralOffset+centralBytes>zip.bytes)throw Error('Setup embedded ZIP inventory is incomplete or oversized.');
+    if(n<1||n>32||tail.readUInt16LE(end+8)!==n||centralBytes>1024*1024||centralOffset+centralBytes>zip.bytes)throw Error('Setup embedded ZIP inventory is incomplete or oversized.');
     const central=read(zip.offset+centralOffset,centralBytes),entries=[];let p=0;
     for(let i=0;i<n;i++) {
       if(p+46>central.length||central.readUInt32LE(p)!==0x02014b50)throw Error('Setup embedded ZIP record is invalid.');

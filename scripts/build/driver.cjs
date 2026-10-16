@@ -184,7 +184,8 @@ async function main() {
     staging=fs.mkdtempSync(path.join(temporary,'mbr-'));
     contained(temporary,path.basename(staging));
     fs.writeFileSync(path.join(staging,'producer-owner.json'),JSON.stringify({schemaVersion:1,source:before.commit,root,createdAt:new Date().toISOString(),purpose:'Squirrel installer production'}));
-    console.log(`Private retained producer staging: ${staging}`);
+    fs.writeFileSync(contained(root,'.cache/installer-producer.json'),JSON.stringify({schemaVersion:1,source:before.commit,generation,staging}));
+    console.log('Installer staging uses an exclusive short temporary directory with a retained ownership receipt.');
   } else {
     staging = contained(root,`.cache/builds/${generation}`);
     fs.mkdirSync(staging,{recursive:true});
@@ -278,7 +279,16 @@ async function main() {
       if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/material-file-broker.exe')))!==nativeBroker.sha256) throw Error('Packaged native broker differs from its compiled executable.');
       const bundledBroker=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/broker-manifest.json'),'utf8'));
       if(bundledBroker.sha256!==nativeBroker.sha256||bundledBroker.runtimeVerified!==false) throw Error('Packaged native broker manifest differs from its compiled identity.');
-      setupPayload=await require('./squirrel-setup.cjs').verifySetupPayload(nonempty(output,'squirrel-windows/Setup.exe'),{packageFile:nonempty(output,`squirrel-windows/MaterialBuildroot-${packageVersion}-full.nupkg`),packageName:`MaterialBuildroot-${packageVersion}-full.nupkg`,updateFile:genuineUpdater});
+      const setupFile=nonempty(output,'squirrel-windows/Setup.exe'),setupAdmission=require('./squirrel-setup.cjs');
+      let description={status:'format-unavailable'};
+      try {
+        const inspected=setupAdmission.embeddedZip(setupFile);
+        description={status:'inventory-only',bytes:inspected.bytes,resourceBytes:inspected.resourceBytes,members:inspected.entries.map(entry=>({name:entry.name,bytes:entry.bytes,compressed:entry.compressed,method:entry.method}))};
+      } catch {}
+      const describe=()=>fs.writeFileSync(path.join(output,'setup-format.json'),JSON.stringify({schemaVersion:1,source:before.commit,packageVersion,runtimeVerified:false,...description},null,2)+'\n');
+      describe();
+      setupPayload=await setupAdmission.verifySetupPayload(setupFile,{packageFile:nonempty(output,`squirrel-windows/MaterialBuildroot-${packageVersion}-full.nupkg`),packageName:`MaterialBuildroot-${packageVersion}-full.nupkg`,updateFile:genuineUpdater});
+      description={status:'embedded-identity-verified',...setupPayload};describe();
     }
   }
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
