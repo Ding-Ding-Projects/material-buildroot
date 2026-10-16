@@ -47,6 +47,9 @@ const portableProject = require("./storage/portable-project.cjs");
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const owner = "desktop-owner";
 const fields = {
+  "execution.workflowPreview": ["selectionId", "model", "text"],
+  "execution.workflowPublish": ["previewId", "sha256", "consent"],
+  "execution.workflowAdmission": ["selectionId"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -1209,6 +1212,9 @@ function createOperationsService({
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
+      case "execution.workflowPreview": return executionWorkflows.preview(request);
+      case "execution.workflowPublish": return executionWorkflows.publish(request);
+      case "execution.workflowAdmission": return executionWorkflows.admission(request);
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
