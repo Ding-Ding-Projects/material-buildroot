@@ -2,6 +2,7 @@
 const path = require('node:path');
 const {createExperiencePolicyService} = require('./security/experience-policy.cjs');
 const {parse} = require('./security/workspace-contract.cjs');
+const {createWorkspaceHistory} = require('./storage/workspace-history.cjs');
 const {createVault} = require('./security/vault.cjs');
 const fields={status:[],enroll:['targetId','policy','credentials','confirmation','duration','disclosureAccepted'],unlock:['targetId','credentials'],relock:['targetId'],leave:['targetId'],remove:['targetId'],challenge:['targetId'],hit:['nonce','cell'],answer:['nonce','answer'],ticket:['targetId','category','description','severity'],advanceTicket:['ticketId'],deleteTickets:['ids'],openRecovery:[]};
 function createExperienceIPC({desktop,directory,safeStorage,openFolder,schoolMode=()=>true}) {
@@ -9,7 +10,21 @@ function createExperienceIPC({desktop,directory,safeStorage,openFolder,schoolMod
   let service;
   try { service=createExperiencePolicyService({directory,vault:{write:(_owner,value)=>protectedVault.write(JSON.stringify(value)),read:reference=>JSON.parse(protectedVault.read(reference))},openFolder}); } catch {}
   let queue=Promise.resolve();
-  const state=()=>({locks:service.list(),tickets:service.tickets(),recovery:service.recovery(),available:protectedVault.availability().available});
+  const history=createWorkspaceHistory(path.join(directory,'experience-configuration.json'));
+  let historyWarning=false, historyRevision=-1, historyRetryAt=0, configurationHistory=[];
+  function preserveConfiguration(){
+    const configuration=service.configuration();
+    if(configuration.revision===historyRevision || Date.now()<historyRetryAt)return;
+    try {
+      history.preserve(configuration);
+      configurationHistory=history.revisions().sort((a,b)=>b-a).slice(0,25).map(revision=>JSON.parse(history.read(revision)));
+      historyRevision=configuration.revision;historyWarning=false;
+    } catch { historyWarning=true;historyRetryAt=Date.now()+30000; }
+  }
+  const state=()=>{
+    preserveConfiguration();
+    return {locks:service.list(),tickets:service.tickets(),recovery:service.recovery(),available:protectedVault.availability().available,configurationHistory,historyWarning};
+  };
   return {request(event,serialized){
     if(!desktop.admitted(event))return Promise.resolve({ok:false,code:'UNAUTHORIZED'});
     let input;
@@ -34,11 +49,11 @@ function createExperienceIPC({desktop,directory,safeStorage,openFolder,schoolMod
         else if(action==='enroll'){
           if(!protectedVault.availability().available)return {ok:false,code:'VAULT_UNAVAILABLE'};
           if(service.isLocked(targetId))return {ok:false,code:'UNLOCK_REQUIRED'};
-          const {action,...enrollment}=input;result=await service.enroll(enrollment);
+          const {action,...enrollment}=input;result=await service.enroll(enrollment);preserveConfiguration();
         }else if(action==='unlock')result=await service.unlock(targetId,input.credentials);
         else if(action==='relock'){service.relock(targetId);result=state();}
         else if(action==='leave'){service.leaveSurface(targetId);result=state();}
-        else if(action==='remove'){service.requireUnlocked(targetId);service.remove(targetId);result=state();}
+        else if(action==='remove'){service.requireUnlocked(targetId);service.remove(targetId);preserveConfiguration();result=state();}
         else if(action==='challenge')result=service.challenge(targetId,{schoolMode:schoolMode()!==false});
         else if(action==='hit')result={accepted:service.hit(input.nonce,input.cell)};
         else if(action==='answer')result=service.answer(input.nonce,input.answer);

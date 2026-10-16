@@ -6,6 +6,9 @@ const values=new WeakMap<HTMLElement,{value?:string;checked?:boolean;selected?:b
 const ancestor=(el:Element):Element|null=>el.parentElement||(el.getRootNode() instanceof ShadowRoot?(el.getRootNode() as ShadowRoot).host:null);
 export function resolveExperienceTarget(target:HTMLElement):string|null {
   if(target.matches("material-buildroot,.shell,header,.caption-controls,.window-actions,[data-experience-exempt]"))return null;
+  for(let el:Element|null=target;el;el=ancestor(el))if(el.matches('experience-policy-panel,command-surfaces,shared-mode-panel,header,.window,[data-experience-exempt],[role=alert]'))return null;
+  const registered=target.getAttribute('data-experience-id');
+  if(registered&&/^[A-Za-z0-9_.:-]{1,220}$/.test(registered))return 'element:'+registered;
   const parts:string[]=[];
   for(let el:Element|null=target;el;el=ancestor(el)){
     if(el.matches('experience-policy-panel,command-surfaces,[data-experience-exempt],header,.window,.titlebar,.window-controls,[role=alert]')||el.localName==='shared-mode-panel')return null;
@@ -24,12 +27,28 @@ export function resolveExperienceTarget(target:HTMLElement):string|null {
   return null;
 }
 function targetLock(target:HTMLElement){for(let el:Element|null=target;el;el=ancestor(el))if(el.matches("experience-policy-panel,command-surfaces,shared-mode-panel,header,.window,[data-experience-exempt],[role=alert]"))return null;for(let el:Element|null=target;el;el=ancestor(el)){const id=resolveExperienceTarget(el as HTMLElement);const lock=id&&locks.get(id);if(lock&&(lock.locked||(lock.unlockedUntil!==undefined&&lock.unlockedUntil<=Date.now())))return lock;}return null;}
+export function experienceIdLocked(id:string){const lock=locks.get(id);return !!lock&&(lock.locked||(lock.unlockedUntil!==undefined&&lock.unlockedUntil<=Date.now()));}
+export function experienceTargets(){
+  const targets=new Map<string,{id:string;label:string;target:HTMLElement}>();
+  function visit(root:ParentNode){for(const target of root.querySelectorAll<HTMLElement>('*')){
+    if(target.matches('experience-policy-panel,command-surfaces,shared-mode-panel'))continue;
+    if(target.matches('[data-experience-id],[id],md-text-button,md-outlined-button,md-filled-button,md-outlined-text-field,md-outlined-select,md-switch,md-checkbox,md-primary-tab,md-secondary-tab')){
+      const id=resolveExperienceTarget(target);
+      if(id&&!targets.has(id)&&target.getAttribute('type')!=='password')targets.set(id,{id,label:(target.getAttribute('aria-label')||(target as any).label||target.textContent||id).replace(/\s+/g,' ').trim().slice(0,160),target});
+    }
+    if(target.shadowRoot&&!target.localName.startsWith('md-'))visit(target.shadowRoot);
+  }}visit(document);return Array.from(targets.values());
+}
 export function experienceLocked(target:HTMLElement){return !!targetLock(target);}
 export async function experienceRequest(request:ExperienceRequest){
   if(!window.studio?.experiencePolicies)return {ok:false as const,code:'UNAVAILABLE'};
   try{return await window.studio.experiencePolicies(request);}catch{return {ok:false as const,code:'UNAVAILABLE'};}
 }
-export async function refreshExperience(){
+let refreshInFlight:Promise<any>|null=null;
+export function refreshExperience():Promise<any>{
+  if(refreshInFlight)return refreshInFlight;refreshInFlight=performRefresh().finally(()=>{refreshInFlight=null;});return refreshInFlight;
+}
+async function performRefresh(){
   const reply=await experienceRequest({action:'status'});
 
   if(reply.ok){locks.clear();for(const lock of (reply.result as ExperienceState).locks)locks.set(lock.targetId,lock);}
