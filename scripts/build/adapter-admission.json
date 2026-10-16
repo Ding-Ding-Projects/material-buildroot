@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "maximumInstallerBytes": 1400000000,
+  "materialComponents": {
+    "package": "@material/web",
+    "upstream": "https://github.com/material-components/material-web",
+    "source": "src/renderer/main.ts",
+    "imports": [
+      "button/filled-button.js",
+      "button/outlined-button.js",
+      "button/text-button.js",
+      "button/filled-tonal-button.js",
+      "select/outlined-select.js",
+      "select/select-option.js",
+      "dialog/dialog.js",
+      "icon/icon.js",
+      "textfield/outlined-text-field.js"
+    ],
+    "registration": "unverified",
+    "note": "Source imports identify genuine upstream components. Runtime custom-element registration, accessibility and component anatomy remain unverified. Other renderer modules may register additional components."
+  },
+  "adapters": [
+    {
+      "id": "native-file-broker",
+      "kind": "first-party-native",
+      "version": null,
+      "provenance": {
+        "source": "src/main/security/broker-contract.cjs"
+      },
+      "license": {
+        "declared": "GPL-3.0-or-later",
+        "redistribution": "unreviewed"
+      },
+      "offline": {
+        "mode": "packaged-helper-required",
+        "completePayload": "unverified"
+      }
+    },
+    {
+      "id": "native-flashing",
+      "kind": "first-party-native",
+      "version": null,
+      "provenance": {
+        "source": "native/flashing/MaterialBuildroot.Flash.csproj"
+      },
+      "license": {
+        "declared": "GPL-3.0-or-later",
+        "redistribution": "unreviewed"
+      },
+      "offline": {
+        "mode": "self-contained-helper-required",
+        "completePayload": "unverified"
+      }
+    },
+    {
+      "id": "wsl",
+      "kind": "external-platform",
+      "version": null,
+      "provenance": {
+        "url": "https://learn.microsoft.com/windows/wsl/"
+      },
+      "license": {
+        "declared": null,
+        "redistribution": "not-bundled"
+      },
+      "offline": {
+        "mode": "installed-runtime-required",
+        "completePayload": "unverified"
+      }
+    },
+    {
+      "id": "ffmpeg-wasm",
+      "kind": "browser-adapter",
+      "version": null,
+      "provenance": null,
+      "license": {
+        "declared": null,
+        "redistribution": "not-admitted"
+      },
+      "offline": {
+        "mode": "not-admitted",
+        "completePayload": "unverified"
+      }
+    }
+  ]
+}
