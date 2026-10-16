@@ -61,7 +61,7 @@ Refresh installed models, select one, enter a prompt and explicitly send it thro
 
 ## Cancellation and recovery
 
-Cancellation is a request, not a completed outcome. It checks the job sequence, originating companion session and existing host ownership, then uses the established queue cancellation method. Refresh the job until the host reports its actual terminal state. A lost response is unknown, not success, and is never automatically retried. An unavailable session stops new calls. Already accepted queue work retains the host's durable lifecycle; disconnect does not claim it was cancelled.
+Cancellation is a request, not a completed outcome. It checks the job sequence, originating companion session and existing host ownership, then uses the established queue cancellation method. Refresh the job until the host reports its actual terminal state. A lost response is unknown, not success, and is never automatically retried. An unavailable session stops new calls. For builds started by a companion session, the host authority observer requests cancellation when the session expires or is revoked. Already accepted queue work retains the host's durable lifecycle and observed terminal state; disconnect does not claim cancellation completed.
 
 Source/output reads that finish after revocation do not disclose their newly obtained result. Source working-tree paths, raw logs, snapshots, output content previews and credentials are excluded from these projections. The client renders text nodes and accepts only known fields for each view.
 
@@ -80,6 +80,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 

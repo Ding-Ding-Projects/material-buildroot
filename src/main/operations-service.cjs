@@ -1203,6 +1203,7 @@ function createOperationsService({
       const job=jobs.enqueue({kind:'build',ownerId:owner,payload:{workspaceId:request.workspaceId,target:request.target,runtime:selectedRuntime,jobs:request.jobs,resources,
         intent:{projectId:request.workspaceId,sourceRevision:captured.sourceRevision,configRevision:captured.configRevision},
         snapshot:{version:captured.snapshot.version,entries:captured.snapshot.entries,bytes:captured.snapshot.bytes,excludesGitObjectHistory:true,symlinkPolicy:captured.snapshot.symlinkPolicy,symlinks:captured.snapshot.symlinks,limitations:[...captured.snapshot.limitations]}}});
+      const observer=setInterval(()=>{try{const current=ownJob(job.id);if(!['queued','running','dispatching','cancelling'].includes(current.state)){clearInterval(observer);return;}try{authorize();if(disposed)throw Error('closed');}catch{if(current.state!=='cancelling')jobs.cancel(current.id,owner,current.sequence);void scheduler.pump().catch(()=>{});clearInterval(observer);}}catch{clearInterval(observer);}},250);observer.unref?.();
       void scheduler.pump().catch(()=>{});return job;
     },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
@@ -2175,6 +2176,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
