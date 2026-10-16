@@ -1,5 +1,9 @@
 # Active implementation and verification handoff, 2026-10-16
 
+## Feature audit checkpoint
+
+The source audit is retained as a provisional snapshot at e722cf1, with 109 exact identities, 436 surface records and one public audit article per identity. No whole feature is verified complete. Independent review confirmed source/identity integrity; seven applicability questions remain partial, repeated traces are explicitly shared context, and 1,908 detailed rows are not independently admitted public clause projections. The 427 existing public requirement IDs remain linked. Counts: 71 partial, 21 missing, six implemented-unverified, 11 scoped conditional exclusions. Current browser/markup deltas and unrun acceptance remain separate. Continue actual implementation rather than treating this inventory as delivery.
+
 ## Latest built-browser boundary
 
 The built `bb34a7efc011c2c5450616197ffa7cf9ef0701b3` guide opened all 17 supporting articles and retained visitor/guide/language/theme state. Three measured tuples and isolated production-shaped companion summaries passed within their limits. All owned processes/endpoints/desktop are absent, but retained profiles keep the strict cleanup validator incomplete. No actual paired-host or full matrix claim. Its observed malformed accessibility attributes now have a reviewed source correction with twelve focused passes; exact rebuilt pixels are next. Release 49.1 timing was separately corrected from terminal job/step API records to 10:17:41Z through 10:21:23Z, duration 00:03:42, with exact notes and unchanged assets read back. A future timing automation proposal remains unapplied.

@@ -1,0 +1,87 @@
+# changelog delivery source audit
+
+Source snapshot: e722cf1b91ccc46465eb449df4abd84d9d6df2a1. This is a provisional source record; no current complete-feature acceptance is claimed.
+
+
+Factual dates/releases/source links, filters/search and export
+
+Overall: **missing**. This label remains provisional.
+
+Public ledger requirements: `changelog-REQ-01`, `changelog-REQ-02`, `changelog-REQ-03`, `changelog-REQ-04`. See `docs/planning/feature-evidence.json` at the source revision above.
+
+| Surface | Status |
+|---|---|
+| A | missing |
+| D | missing |
+| C | missing |
+| R | partial |
+
+### A
+
+Shared feature-level source observations may be repeated across surfaces. These references do not establish independent per-surface interaction, persistence or runtime proof.
+
+Source references: `src/main/jobs/notifications.cjs`, `src/renderer/main.ts`, `src/renderer/operations-panel.ts`, `website/app.js`
+
+createNotificationStore.changelog can append records but no source consumer constructs the store; no A/D/C release viewer.
+
+Advanced calendar, typed date validation and retained partial input absent.
+
+No changelog search/date composition or no-match consumer.
+
+No filtered changelog copy/export carrying range and commit SHA.
+
+Record has sourceUrl, not required full commit identity with build-time existence validation.
+
+Release records exist separately; they do not provide a current three-mode viewer covering every release.
+
+Missing behavior: createNotificationStore.changelog can append records but no source consumer constructs the store; no A/D/C release viewer. Advanced calendar, typed date validation and retained partial input absent. No changelog search/date composition or no-match consumer. No filtered changelog copy/export carrying range and commit SHA. Record has sourceUrl, not required full commit identity with build-time existence validation. Release records exist separately; they do not provide a current three-mode viewer covering every release.
+
+Missing proof: Current source/hash-bound real interaction, persistence/reload, language/funny-level matrix, accessibility and genuine screenshots are unverified.
+
+Next action: Implement the named missing consumer and then verify the exact built effect and persistence.
+
+### D
+
+Shared feature-level source observations may be repeated across surfaces. These references do not establish independent per-surface interaction, persistence or runtime proof.
+
+Source references: `src/main/jobs/notifications.cjs`, `src/renderer/main.ts`, `src/renderer/operations-panel.ts`, `website/app.js`
+
+D visitor state supports local goal/notes/checks, JSON backup/import, guides and read-only companion presentation; no independent complete consumer for this clause.
+
+Missing behavior: D visitor state supports local goal/notes/checks, JSON backup/import, guides and read-only companion presentation; no independent complete consumer for this clause.
+
+Missing proof: Current source/hash-bound real interaction, persistence/reload, language/funny-level matrix, accessibility and genuine screenshots are unverified.
+
+Next action: Implement the named missing consumer and then verify the exact built effect and persistence.
+
+### C
+
+Shared feature-level source observations may be repeated across surfaces. These references do not establish independent per-surface interaction, persistence or runtime proof.
+
+Source references: `src/main/jobs/notifications.cjs`, `src/renderer/main.ts`, `src/renderer/operations-panel.ts`, `website/app.js`
+
+C host admission is limited to workspace/project/job reads, job cancellation and build submission; no assigned feature consumer beyond the narrow browser read/recovery paths exists.
+
+Missing behavior: C host admission is limited to workspace/project/job reads, job cancellation and build submission; no assigned feature consumer beyond the narrow browser read/recovery paths exists.
+
+Missing proof: Current source/hash-bound real interaction, persistence/reload, language/funny-level matrix, accessibility and genuine screenshots are unverified.
+
+Next action: Implement the named missing consumer and then verify the exact built effect and persistence.
+
+### R
+
+Shared feature-level source observations may be repeated across surfaces. These references do not establish independent per-surface interaction, persistence or runtime proof.
+
+Source references: `src/main/jobs/notifications.cjs`, `src/renderer/main.ts`, `src/renderer/operations-panel.ts`, `website/app.js`
+
+Pinned source and some articles/fixtures describe this behavior; current clause-specific built/source/hash proof and complete localized article inventory are absent or unverified.
+
+Missing behavior: Pinned source and some articles/fixtures describe this behavior; current clause-specific built/source/hash proof and complete localized article inventory are absent or unverified.
+
+Missing proof: Current source/hash-bound real interaction, persistence/reload, language/funny-level matrix, accessibility and genuine screenshots are unverified.
+
+Next action: Implement the named missing consumer and then verify the exact built effect and persistence.
+
+Applicability AP-038: R records supporting documentation, implementation and verification obligations for this feature. It is not a fourth independent runtime consumer. The formal ledger excluded the runtime surface; supporting record incompleteness remains assessed without changing that exclusion.
+
+[Return to the delivery index](README.md). [Read the snapshot and admission limits](../PH01-delivery-audit.md).

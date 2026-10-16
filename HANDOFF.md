@@ -1,5 +1,9 @@
 # Latest evidence continuation, 2026-10-16
 
+## Complete identity source inventory, incomplete delivery
+
+The preserved source audit at `e722cf1b91ccc46465eb449df4abd84d9d6df2a1` accounts for all 109 public identities exactly once and 436 surface rows. Independent review confirmed the identifier/source hashes and found 62 applicability differences: 55 have explicit scope interpretations, seven remain partial applicable obligations. Shared feature traces are not independent surface proof. The public overview links all 427 ledger requirement IDs and 109 individual source-audit articles; all 1,908 detailed private audit rows remain outside independent public clause admission. Provisional counts are 71 partial, 21 missing, six implemented-unverified and 11 scoped conditional exclusions, with no whole-feature verified-complete result. Later browser and markup repairs retain separate delta evidence. See the [audit and limits](docs/evidence/tasks/PH01-delivery-audit.md).
+
 ## Built browser observations and markup correction
 
 The exact documentation build from `bb34a7efc011c2c5450616197ffa7cf9ef0701b3` passed 110-page/2757-link admission. Its hidden-desktop Edge run drove 17 supporting article routes, guide and visitor persistence, three viewport/language/theme tuples and isolated production-shaped companion response fixtures. All 17 owned processes, ports and desktop are absent; retained task profiles keep strict cleanup validation incomplete. Actual host pairing and the full matrix remain unverified. Pixels also exposed span markup inside two accessibility attributes. The current narrow correction escapes plain attribute text and updates names in all three language modes; twelve focused checks and two-lens source review passed. A fresh identical-tuple build/capture remains pending.

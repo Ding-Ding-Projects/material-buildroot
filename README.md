@@ -16,6 +16,8 @@ The host provides [separate local schedule draft recovery](docs/security/schedul
 
 ## Interface captures
 
+The [feature delivery source audit](docs/evidence/tasks/PH01-delivery-audit.md) accounts for all 109 required identities and 436 surface rows, with one [audit article per identity](docs/evidence/tasks/feature-delivery/README.md). It finds no whole feature with complete current acceptance. The overview retains seven unresolved applicability records, shared-trace limits and the gap between 427 public requirement IDs and 1,908 detailed audit rows. It is a source inventory, not an implementation-completeness claim.
+
 ### Current native dialog evidence
 
 The Windows build at `e722cf1b91ccc46465eb449df4abd84d9d6df2a1` shows the settled unsaved-preference dialog with all three bilingual actions contained and the final action wrapped onto a second row. This is one light-theme state at 1280×752 logical pixels and observed 150% scale, not full product acceptance. The [native receipt and limits](docs/evidence/native-windows-20261016/README.md#settled-dialog-actions-at-e722cf1) retain source, executable and capture hashes, measured geometry and bounded observation.
