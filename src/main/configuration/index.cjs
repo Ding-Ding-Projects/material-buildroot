@@ -302,6 +302,7 @@ function createConfigurationService({
       reconcile({ ...input, _undo: false }, (text) =>
         patchConfig(text, input.changes),
       ),
+    applySnapshot: (input, text) => reconcile({ ...input, _undo: false }, () => text),
     listDefconfigs,
     applyDefconfig,
     undo,

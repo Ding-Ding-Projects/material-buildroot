@@ -9,6 +9,7 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { createDefconfigWorkflows } = require("./configuration/defconfig-workflows.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
 const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
@@ -70,6 +71,9 @@ const fields = {
   "config.trustPreview": ["workspaceId"],
   "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
   "config.trustRevoke": ["workspaceId"],
+  "defconfig.catalog": ["workspaceId"],
+  "defconfig.apply": ["workspaceId", "revision", "id"],
+  "defconfig.save": ["workspaceId", "revision"],
   "config.inspect": ["workspaceId"],
   "config.defconfigs": ["workspaceId"],
   "config.apply": ["workspaceId", "revision", "changes"],
@@ -912,6 +916,12 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const defconfigWorkflows = createDefconfigWorkflows({
+    resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; },
+    authorize: id => configurationConsent.requireTrust(id),
+    configuration: config,
+    execute: id => { const item = project(id); return executeProject({ workspaceId: id, runtime: item.runtime, target: "material-save-defconfig", jobs: 1 }); },
+  });
   const payloadManager = createPayloadManager({
     directory: path.join(directory, "payloads"),
     dialog,
@@ -1425,6 +1435,12 @@ function createOperationsService({
       case "config.trustRevoke":
         project(request.workspaceId);
         return configurationConsent.revoke(request);
+      case "defconfig.catalog":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.catalog(request));
+      case "defconfig.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.apply(request));
+      case "defconfig.save":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.save(request));
       case "config.inspect":
         return changeConfig(projectPaths(request.workspaceId), () => config.inspect(request));
       case "config.defconfigs":
