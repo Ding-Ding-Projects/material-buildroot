@@ -156,9 +156,12 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    notifications: request => {let value;try{value=JSON.stringify(request);}catch{return Promise.resolve({ok:false,code:'INVALID_REQUEST'});}return typeof value==='string'&&value.length<=16384?ipcRenderer.invoke('studio:notifications',value):Promise.resolve({ok:false,code:'INVALID_REQUEST'});},
+    onNotificationsChanged: listener => {if(typeof listener!=='function')return ()=>{};const handler=()=>listener();ipcRenderer.on('studio:notifications:changed',handler);return ()=>ipcRenderer.removeListener('studio:notifications:changed',handler);},
     workspaceTabs: (request) => {let value;try{value=JSON.stringify(request);}catch{return Promise.resolve({ok:false,code:'INVALID_REQUEST'});}if(typeof value!=='string'||value.length>262144)return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:workspace-tabs',value);},
     onWorkspaceTabActivate: (listener) => {if(typeof listener!=='function')return ()=>{};const handler=(_event,value)=>{if(value&&typeof value.tabId==='string'&&value.tabId.length<=256)listener(value.tabId);};ipcRenderer.on('studio:workspace-tabs:activate',handler);return ()=>ipcRenderer.removeListener('studio:workspace-tabs:activate',handler);},
     onWorkspaceTabsChanged: (listener) => {if(typeof listener!=='function')return ()=>{};const handler=()=>listener();ipcRenderer.on('studio:workspace-tabs:changed',handler);return ()=>ipcRenderer.removeListener('studio:workspace-tabs:changed',handler);},
+    statusHub: (action) => ["read", "refresh"].includes(action) ? ipcRenderer.invoke("studio:status-hub", action) : Promise.resolve({ ok: false, code: "INVALID_REQUEST" }),
     appearanceHistory: (request) => { let data; try { data=JSON.stringify(request); } catch { return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); } if(data.length>650000)return Promise.resolve({ok:false,code:'INVALID_REQUEST'}); return ipcRenderer.invoke('studio:appearance-history',JSON.parse(data)); },
     attentionHistory: (request) => { let serialized;try {serialized=JSON.stringify(request);}catch{return Promise.resolve({ok:false,code:'INVALID_REQUEST'});}if(typeof serialized!=='string'||serialized.length>2048)return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:attention-history',JSON.parse(serialized)); },
     dimSum: (value) => { if(!value||!['catalog','photo','surprise'].includes(value.action)||Object.keys(value).some(k=>!['action','id'].includes(k))||value.id!==undefined&&(typeof value.id!=='string'||!/^hk-dish-\d{4}$/.test(value.id)))return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:dim-sum',{action:value.action,...(value.id?{id:value.id}:{})}); },
@@ -283,5 +286,6 @@ contextBridge.exposeInMainWorld(
     },
   }),
 );
+
 
 

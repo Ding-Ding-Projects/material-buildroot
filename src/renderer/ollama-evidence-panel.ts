@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { materialIcon } from "./material-icons";
@@ -144,24 +145,18 @@ export class OllamaEvidencePanel extends LitElement {
       this.revision++;
     }
   }
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private bytes(value?: number) {
     return typeof value === "number" && Number.isFinite(value)
       ? `${(value / 1024 ** 3).toFixed(2)} GiB`
-      : this.l("Unknown", "未知");
+      : this.l("Unknown","未知",true);
   }
   private evidence(value: boolean | null) {
     return value === null
-      ? this.l("Unknown", "未知")
+      ? this.l("Unknown","未知",true)
       : value
-        ? this.l("Reported supported", "報告支援")
-        : this.l("Reported unsupported", "報告唔支援");
+        ? this.l("Reported supported","報告支援",true)
+        : this.l("Reported unsupported","報告唔支援",true);
   }
   private async inspect(action: string) {
     if (this.pending) return;
@@ -216,22 +211,16 @@ export class OllamaEvidencePanel extends LitElement {
       c = this.capabilities;
     return html`<details class="evidence">
       <summary>
-        ${this.l(
-          "Hardware, model fit and capabilities",
-          "硬件、模型適用程度同能力",
-        )}
+        ${this.l("Hardware, model fit and capabilities","硬件、模型適用程度同能力",true)}
       </summary>
       <div class="stack">
         <p>
-          ${this.l(
-            "These are current host measurements and local model metadata. A fit estimate is not a benchmark or successful model-load proof. Unknown remains unknown.",
-            "呢啲係目前主機量度同本機模型中繼資料，適用估算唔係效能測試或成功載入模型證明，未知狀態仍然係未知。",
-          )}
+          ${this.l("These are current host measurements and local model metadata. A fit estimate is not a benchmark or successful model-load proof. Unknown remains unknown.","呢啲係目前主機量度同本機模型中繼資料，適用估算唔係效能測試或成功載入模型證明，未知狀態仍然係未知。",true)}
         </p>
         <div class="row">
           <md-icon-button
-            aria-label=${this.l("Measure local hardware", "量度本機硬件")}
-            title=${this.l("Measure local hardware", "量度本機硬件")}
+            aria-label=${this.l("Measure local hardware","量度本機硬件",true)}
+            title=${this.l("Measure local hardware","量度本機硬件",true)}
             ?disabled=${this.pending}
             @click=${() => this.inspect("ollama.hardware")}
             >${materialIcon("memory")}</md-icon-button
@@ -239,12 +228,9 @@ export class OllamaEvidencePanel extends LitElement {
             type="number"
             min="128"
             max="1048576"
-            .label=${this.l("Planning context tokens", "規劃上下文詞元")}
+            .label=${this.l("Planning context tokens","規劃上下文詞元",true)}
             .value=${this.context}
-            .supportingText=${this.l(
-              "128–1048576; example: 4096. Planning only; does not change chat settings.",
-              "128 至 1048576，例如 4096，只供規劃，唔會更改聊天設定。",
-            )}
+            .supportingText=${this.l("128–1048576; example: 4096. Planning only; does not change chat settings.","128 至 1048576，例如 4096，只供規劃，唔會更改聊天設定。",true)}
             ?disabled=${this.pending}
             @input=${(e: Event) => {
               this.context = (e.target as HTMLInputElement).value;
@@ -259,41 +245,29 @@ export class OllamaEvidencePanel extends LitElement {
             Number(this.context) < 128 ||
             Number(this.context) > 1048576}
             @click=${() => this.inspect("ollama.fit")}
-            >${materialIcon("preview", "icon")}${this.l(
-              "Estimate selected model fit",
-              "估算所選模型適用程度",
-            )}</md-outlined-button
+            >${materialIcon("preview", "icon")}${this.l("Estimate selected model fit","估算所選模型適用程度",true)}</md-outlined-button
           ><md-outlined-button
             ?disabled=${this.pending || !this.model}
             @click=${() => this.inspect("ollama.capabilities")}
-            >${materialIcon("info", "icon")}${this.l(
-              "Inspect model capabilities",
-              "檢視模型能力",
-            )}</md-outlined-button
+            >${materialIcon("info", "icon")}${this.l("Inspect model capabilities","檢視模型能力",true)}</md-outlined-button
           >
         </div>
         ${!this.model
           ? html`<p>
-              ${this.l(
-                "Load installed models and select one first.",
-                "請先載入已安裝模型並選擇一個。",
-              )}
+              ${this.l("Load installed models and select one first.","請先載入已安裝模型並選擇一個。",true)}
             </p>`
           : nothing}
         <p role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</p>
         ${this.pending
           ? html`<md-linear-progress
               indeterminate
-              aria-label=${this.l(
-                "Inspecting local model evidence",
-                "檢視本機模型證據",
-              )}
+              aria-label=${this.l("Inspecting local model evidence","檢視本機模型證據",true)}
             ></md-linear-progress>`
           : nothing}${h
-          ? html`<h3>${this.l("Measured hardware", "已量度硬件")}</h3>
+          ? html`<h3>${this.l("Measured hardware","已量度硬件",true)}</h3>
               <p>${h.observedAt}</p>
               <dl>
-                <dt>${this.l("Available / total RAM", "可用／總記憶體")}</dt>
+                <dt>${this.l("Available / total RAM","可用／總記憶體",true)}</dt>
                 <dd>
                   ${this.bytes(h.ram.availableBytes)} /
                   ${this.bytes(h.ram.totalBytes)}
@@ -301,21 +275,21 @@ export class OllamaEvidencePanel extends LitElement {
                 <dt>CPU</dt>
                 <dd>
                   ${h.cpu.architecture} · ${h.cpu.logicalCores}
-                  ${this.l("logical cores", "邏輯核心")} ·
+                  ${this.l("logical cores","邏輯核心",true)} ·
                   ${this.evidence(h.cpu.backendSupported)}
                 </dd>
-                <dt>${this.l("Reported graphics adapters", "報告嘅顯示卡")}</dt>
+                <dt>${this.l("Reported graphics adapters","報告嘅顯示卡",true)}</dt>
                 <dd>
-                  ${h.adapterInventory?.state === "observed" ? this.l("Operating-system inventory observed", "已觀察作業系統清單") : this.l("Inventory unavailable", "未能取得清單")}
+                  ${h.adapterInventory?.state === "observed" ? this.l("Operating-system inventory observed","已觀察作業系統清單",true) : this.l("Inventory unavailable","未能取得清單",true)}
                   ${h.adapterInventory?.observedAt || ""} ${h.adapterInventory?.reason || ""}
-                  ${(h.adapterInventory?.adapters || []).map(adapter=>html`<p>${adapter.name || this.l("Unknown adapter", "未知顯示卡")} · ${adapter.vendor || this.l("Unknown vendor", "未知廠商")} · ${adapter.driverVersion || this.l("Unknown driver", "未知驅動程式")}<br>${this.l("Raw 32-bit AdapterRAM report", "原始 32 位元 AdapterRAM 報告")}: ${adapter.reportedAdapterRamBytes === null ? this.l("Unknown", "未知") : adapter.reportedAdapterRamBytes} ${this.l("bytes", "位元組")}</p>`)}
-                  <p>${this.l("AdapterRAM is a 32-bit report, not verified total or usable VRAM. Detected hardware does not prove an Ollama backend, free accelerator memory or a working driver. CPU-only runtime packages remain CPU-only; this inventory never enables GPU execution or installs drivers.", "AdapterRAM 係 32 位元報告，唔代表已驗證總顯示記憶體或可用顯示記憶體。偵測硬件唔代表 Ollama 後端、可用加速器記憶體或驅動程式正常。純 CPU 執行環境仍然只用 CPU，呢個清單唔會啟用 GPU 或安裝驅動程式。")}</p>
+                  ${(h.adapterInventory?.adapters || []).map(adapter=>html`<p>${adapter.name || this.l("Unknown adapter","未知顯示卡",true)} · ${adapter.vendor || this.l("Unknown vendor","未知廠商",true)} · ${adapter.driverVersion || this.l("Unknown driver","未知驅動程式",true)}<br>${this.l("Raw 32-bit AdapterRAM report","原始 32 位元 AdapterRAM 報告",true)}: ${adapter.reportedAdapterRamBytes === null ? this.l("Unknown","未知",true) : adapter.reportedAdapterRamBytes} ${this.l("bytes","位元組",true)}</p>`)}
+                  <p>${this.l("AdapterRAM is a 32-bit report, not verified total or usable VRAM. Detected hardware does not prove an Ollama backend, free accelerator memory or a working driver. CPU-only runtime packages remain CPU-only; this inventory never enables GPU execution or installs drivers.","AdapterRAM 係 32 位元報告，唔代表已驗證總顯示記憶體或可用顯示記憶體。偵測硬件唔代表 Ollama 後端、可用加速器記憶體或驅動程式正常。純 CPU 執行環境仍然只用 CPU，呢個清單唔會啟用 GPU 或安裝驅動程式。",true)}</p>
                 </dd>
                 <dt>GPU</dt>
                 <dd>
                   ${h.gpu.state === "verified"
-                    ? this.l("Verified probe", "已驗證探測")
-                    : this.l("Unknown", "未知")}
+                    ? this.l("Verified probe","已驗證探測",true)
+                    : this.l("Unknown","未知",true)}
                   ${h.gpu.reason || ""}${h.gpu.devices.map(
                     (d) =>
                       html`<p>
@@ -326,12 +300,12 @@ export class OllamaEvidencePanel extends LitElement {
                   )}
                 </dd>
                 <dt>
-                  ${this.l("Available model storage", "可用模型儲存空間")}
+                  ${this.l("Available model storage","可用模型儲存空間",true)}
                 </dt>
                 <dd>
                   ${h.storage.state === "verified"
                     ? this.bytes(h.storage.availableBytes)
-                    : this.l("Unknown", "未知")}
+                    : this.l("Unknown","未知",true)}
                   ${h.storage.reason || ""}
                 </dd>
               </dl>`
@@ -340,7 +314,7 @@ export class OllamaEvidencePanel extends LitElement {
               <p>
                 ${f.model.name} ·
                 ${f.model.quantization ||
-                this.l("Unknown quantization", "量化未知")}
+                this.l("Unknown quantization","量化未知",true)}
                 · ${f.observedAt}
               </p>
               <div class="digest">${f.model.digest}</div>
@@ -350,14 +324,11 @@ export class OllamaEvidencePanel extends LitElement {
               ${f.estimate
                 ? html`<dl>
                     <dt>
-                      ${this.l("Required memory estimate", "所需記憶體估算")}
+                      ${this.l("Required memory estimate","所需記憶體估算",true)}
                     </dt>
                     <dd>${this.bytes(f.estimate.requiredMemoryBytes)}</dd>
                     <dt>
-                      ${this.l(
-                        "Weights / KV cache / overhead",
-                        "權重／KV 快取／額外用量",
-                      )}
+                      ${this.l("Weights / KV cache / overhead","權重／KV 快取／額外用量",true)}
                     </dt>
                     <dd>
                       ${this.bytes(f.estimate.weightsBytes)} /
@@ -365,7 +336,7 @@ export class OllamaEvidencePanel extends LitElement {
                       ${this.bytes(f.estimate.runtimeOverheadBytes)}
                     </dd>
                     <dt>
-                      ${this.l("Context / safety factor", "上下文／安全系數")}
+                      ${this.l("Context / safety factor","上下文／安全系數",true)}
                     </dt>
                     <dd>
                       ${f.estimate.contextTokens} / ${f.estimate.safetyFactor}
@@ -377,21 +348,18 @@ export class OllamaEvidencePanel extends LitElement {
               </ul>`
           : nothing}${c
           ? html`<h3>
-                ${this.l("Reported model capabilities", "模型報告能力")}
+                ${this.l("Reported model capabilities","模型報告能力",true)}
               </h3>
               <p>${c.model} · ${c.observedAt}</p>
-              <p>${c.capabilities?.join(", ") || this.l("Unknown", "未知")}</p>
+              <p>${c.capabilities?.join(", ") || this.l("Unknown","未知",true)}</p>
               <p>
-                ${this.l("Image capability", "圖像能力")}:
+                ${this.l("Image capability","圖像能力",true)}:
                 ${this.evidence(c.attachments.imageCapability)} ·
-                ${this.l("Tool calling", "工具呼叫")}:
+                ${this.l("Tool calling","工具呼叫",true)}:
                 ${this.evidence(c.toolCalling)}
               </p>
               <p>
-                ${this.l(
-                  "Attachment transfer is not implemented. Reported vision support does not enable file or image upload.",
-                  "未實作附件傳輸，模型報告支援視覺唔代表已啟用檔案或圖像上載。",
-                )}
+                ${this.l("Attachment transfer is not implemented. Reported vision support does not enable file or image upload.","未實作附件傳輸，模型報告支援視覺唔代表已啟用檔案或圖像上載。",true)}
               </p>
               <p>${c.attachments.reason}</p>`
           : nothing}

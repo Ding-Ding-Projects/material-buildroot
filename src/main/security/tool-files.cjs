@@ -106,6 +106,46 @@ function createToolFiles({ dialog, parentWindow, purpose = "server" }) {
         choosing = false;
       }
     },
+    release(ids) {
+      if (!Array.isArray(ids) || ids.length > 200 || ids.some(id => typeof id !== "string")) fail("INVALID_REQUEST");
+      for (const id of ids) records.delete(id);
+      return {released:ids.length};
+    },
+    async chooseBatch({format}) {
+      if (closed) fail("UNAVAILABLE");
+      if (!/^(png|jpg|webp|mp3|wav|flac|mp4|webm|pdf|docx|html|epub|zip|json|csv|txt|base64|hex)$/.test(format || "")) fail("INVALID_REQUEST");
+      if (choosing) fail("PICKER_BUSY");
+      choosing = true;
+      const added = [];
+      try {
+        const picked = await dialog.showOpenDialog(parentWindow, {title:"Choose up to 100 source files for this batch",properties:["openFile","multiSelections","dontAddToRecent"]});
+        if (picked.canceled) fail("CANCELLED");
+        if (!picked.filePaths?.length || picked.filePaths.length > 100) fail("BATCH_PAGE_LIMIT");
+        if (records.size + picked.filePaths.length * 2 > 512) fail("LIVE_GRANT_LIMIT");
+        const target = await dialog.showOpenDialog(parentWindow, {title:"Choose the output folder for new converted files",properties:["openDirectory","dontAddToRecent"]});
+        if (target.canceled || target.filePaths?.length !== 1) fail("CANCELLED");
+        const folder = target.filePaths[0], parentChain = inspect(folder);
+        if (!fs.lstatSync(folder).isDirectory()) fail("UNSAFE_PATH");
+        const names = new Set(), items = [];
+        for (const selected of picked.filePaths) {
+          const chain = inspect(selected);
+          if (!fs.lstatSync(selected).isFile()) fail("UNSAFE_PATH");
+          const name = path.basename(selected) + "." + format;
+          if (names.has(name.toLowerCase())) fail("DUPLICATE_OUTPUT_NAME");
+          names.add(name.toLowerCase());
+          const output = path.join(folder,name);
+          if (fs.existsSync(output)) fail("OUTPUT_ALREADY_EXISTS");
+          const sourceId=randomUUID(), destinationId=randomUUID();
+          records.set(sourceId,{selected,chain,access:"read",kind:"file",newOutput:false});
+          records.set(destinationId,{selected:output,chain:parentChain,access:"write",kind:"file",newOutput:true});
+          added.push(sourceId,destinationId);
+          items.push({source:{id:sourceId,name:path.basename(selected),kind:"file"},destination:{id:destinationId,name,kind:"file"}});
+        }
+        if (closed) fail("UNAVAILABLE");
+        return {items};
+      } catch(error) { for (const id of added) records.delete(id); throw error; }
+      finally {choosing=false;}
+    },
     resolve(id, mode) {
       if (closed) fail("UNAVAILABLE");
       const record = records.get(id);
@@ -130,6 +170,13 @@ function createToolFiles({ dialog, parentWindow, purpose = "server" }) {
         if (error.message === "Selected file is unavailable.") throw error;
         fail("GRANT_CHANGED");
       }
+    },
+    nativeGrant(id, mode) {
+      const selected = this.resolve(id, mode);
+      const record = records.get(id);
+      // New outputs bind the originally selected existing parent, not a later lookup.
+      const identity = record.chain.at(-1).identity.split(":").slice(0, 2).join(":");
+      return { path: selected, identity, newOutput: record.newOutput, kind: record.kind };
     },
     serverAuthorized(id) {
       const record = records.get(id);

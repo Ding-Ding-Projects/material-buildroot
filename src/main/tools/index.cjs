@@ -21,6 +21,7 @@ function createToolsService(options = {}) {
   const queue = require("./queue.cjs").createToolQueue(
     options.queueDirectory,
     (request, context) => execute(request, context),
+    options,
   );
   async function execute(request, context = {}) {
     let settled;
@@ -53,7 +54,11 @@ function createToolsService(options = {}) {
           context,
         );
       else if (request.action === "converter.catalog")
-        result = { categories: converter.catalog() };
+        result = { categories: await converter.catalog() };
+      else if (request.action === "converter.cancel")
+        result = converter.cancel();
+      else if (request.action === "converter.inspect")
+        result = await converter.inspect(request);
       else if (request.action === "converter.convert")
         result = await converter.convert(request, context);
       else if (request.action.startsWith("minecraft."))
@@ -107,7 +112,12 @@ function createToolsService(options = {}) {
       } else fail("INVALID_REQUEST");
       return { ok: true, ...result };
     } catch (error) {
+      const partial=error.incompleteOutput;
+      const incompleteOutput=partial?.state==="retained" && partial.publication==="not-published" && /^\.material-incomplete-[0-9a-fA-F-]{36}\.tmp$/.test(partial.name||"")
+        ? {state:"retained",name:partial.name,publication:"not-published"}
+        : partial?.state==="unknown"&&partial.publication==="unconfirmed" ? {state:"unknown",publication:"unconfirmed"} : undefined;
       return {
+        ...(incompleteOutput?{incompleteOutput}:{}),
         ok: false,
         code:
           error.name === "AbortError"

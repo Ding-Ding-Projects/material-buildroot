@@ -46,6 +46,7 @@ if (verification.length) {
 }
 let store, window, desktop, operations, sharedModeIPC, unsubscribeSharedMode;
 let scheduleIPC, unsubscribeSchedule;
+let statusService;
 let quitting = false;
 const capabilities = createCapabilityRegistry();
 if (require("electron-squirrel-startup")) app.quit();
@@ -128,6 +129,22 @@ else {
       });
       workspaceTabs.register(window,desktop,url);
       ipcMain.handle('studio:workspace-tabs',(event,value)=>workspaceTabs.request(event,value));
+      statusService = require("./status-hub/service.cjs").createStatusService({
+        documentsDirectory: app.getPath("documents"),
+        repositoryDirectory: app.getAppPath(),
+      });
+      ipcMain.handle("studio:status-hub", (event, action) => {
+        if (!desktop.admitted(event)) return { ok: false, code: "UNAUTHORIZED" };
+        if (action === "read") return { ok: true, result: statusService.snapshot() };
+        if (action === "refresh") return statusService.refresh().then(result => ({ ok: true, result }));
+        return { ok: false, code: "INVALID_REQUEST" };
+      });
+      let notifications;
+      try { notifications=require('./notification-host.cjs').createNotificationHost({
+        directory:path.join(app.getPath('userData'),'notifications'),admitted:event=>desktop.admitted(event),openExternal:url=>shell.openExternal(url),
+        changed:()=>{if(!window.webContents.isDestroyed()&&window.webContents.mainFrame.url===url)window.webContents.send('studio:notifications:changed');},
+      }); } catch { notifications=null; }
+      ipcMain.handle('studio:notifications',(event,value)=>notifications?notifications.request(event,value):{ok:false,code:'NOTIFICATION_UNAVAILABLE'});
       let sharedModeService;
       try {
         // Common protocol location, separate from this application's workspace/profile.
@@ -262,7 +279,7 @@ else {
         workspace.export(event),
       );
       ipcMain.handle("studio:workspace:mutate", (event, value) =>
-        workspace.mutate(event, value),
+        Promise.resolve(workspace.mutate(event,value)).then(result=>{if(result.ok)notifications?.notify('Workspace saved','A workspace change was saved locally.','success');return result;}),
       );
       try {
         operations = createOperationsService({
@@ -272,6 +289,9 @@ else {
           version: metadata.version,
           source: metadata.source,
           updateHostFactory: ({ canInstall }) => createUpdateHost({ app, window, dialog, shell, currentSource: metadata.source, canInstall }),
+          notificationTransition: ({state}) => {
+            if (['succeeded','failed','cancelled','interrupted'].includes(state)) notifications?.notify('Build job status', `A recorded build job is ${state}. Open the build queue to inspect its output.`, state==='succeeded'?'success':state==='failed'?'error':'warning');
+          },
           documentationDirectory: path.join(
             app.getAppPath(),
             "dist/documentation",
@@ -283,9 +303,9 @@ else {
       } catch {
         operations = null;
       }
-      ipcMain.handle("studio:operations", (event, value) =>
+      ipcMain.handle("studio:operations", async (event, value) =>
         desktop.admitted(event)
-          ? (operations?.request(value) ?? { ok: false, code: "UNAVAILABLE" })
+          ? await (async()=>{const result=await (operations?.request(value)??{ok:false,code:'UNAVAILABLE'});if(!result.ok)notifications?.notify('Operation did not complete','Return to the originating workspace to inspect the result. No success is inferred.','error');return result;})()
           : { ok: false, code: "UNAUTHORIZED" },
       );
       ipcMain.handle("studio:bootstrap", (event) => desktop.bootstrap(event));
@@ -322,10 +342,11 @@ else {
     unsubscribeSharedMode?.();
     sharedModeIPC?.close();
     unsubscribeSchedule?.();
-    if ((operations || scheduleIPC) && !quitting) {
+    if ((operations || scheduleIPC || statusService) && !quitting) {
       event.preventDefault();
       quitting = true;
       void Promise.allSettled([
+        statusService?.close(),
         operations?.dispose(),
         scheduleIPC?.close(),
       ]).then(() => app.quit());
@@ -336,5 +357,6 @@ else {
     store?.close();
   });
 }
+
 
 

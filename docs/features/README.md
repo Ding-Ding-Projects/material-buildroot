@@ -26,3 +26,5 @@ a category Postman collection is not applicable.
 - [Image presets](image-presets/README.md): source-aware configuration and account provisioning.
 - [Package editors](packages/README.md): typed package inputs and retained drafts.
 - [Shared attention and narration](preferences/shared-modes.md): modes and documented gaps.
+- [Authenticated status integration](status-hub.md): trusted client lifecycle, admitted typed projection and explicit unavailable states.
+- [Documentation and notification review](documentation-notifications.md): offline articles, captured release history and durable review decisions.

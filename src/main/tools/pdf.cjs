@@ -20,6 +20,8 @@ function pageSelection(value, count) {
   return value.join(",");
 }
 async function pdfService(options, request, context) {
+  const payload = await options.payloadManager?.resolve("qpdf");
+  if (!payload?.bundled) fail("BUNDLED_ADAPTER_REQUIRED");
   const command = await executable(options, "qpdf");
   if (!options.isolationVerified) fail("ISOLATED_RUNTIME_REQUIRED");
   const ids = request.sourceIds || [request.sourceId];
@@ -52,6 +54,9 @@ async function pdfService(options, request, context) {
     return { pageCounts: counts, encryptedOrInvalid: false };
   const destination = await grant(options, request.destinationId, "write");
   if (sources.includes(destination)) fail("INPUT_OVERWRITE_FORBIDDEN");
+  if (!["merge", "inspect"].includes(request.operation) && sources.length !== 1) fail("INVALID_REQUEST");
+  const capacity = await fs.statfs(path.dirname(destination));
+  if (capacity.bavail * capacity.bsize < 512 * 1024 * 1024) fail("DESTINATION_STORAGE_LIMIT");
   const temporary = path.join(
     path.dirname(destination),
     ".pdf-" + randomUUID() + ".pdf",
@@ -110,6 +115,8 @@ async function pdfService(options, request, context) {
     const stat = await fs.stat(temporary);
     if (stat.size > 256 * 1024 * 1024) fail("OUTPUT_LIMIT");
     const sha256 = await digest(temporary);
+    if (context.signal?.aborted) fail("CANCELLED");
+    await grant(options, request.destinationId, "write");
     await fs.link(temporary, destination);
     return {
       pages: expected,

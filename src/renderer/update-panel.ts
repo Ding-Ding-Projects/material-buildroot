@@ -4,7 +4,7 @@ import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import {ownedCopy} from './owned-copy';
+import {localizedCopy} from './language-wording';
 
 /** One update state shared by the persistent banner and the update workspace. */
 export class UpdatePanel extends LitElement {
@@ -13,7 +13,7 @@ export class UpdatePanel extends LitElement {
   canRestart:()=>boolean=()=>false;
   private timer?:ReturnType<typeof setTimeout>;
   static styles=css`:host{display:block;min-width:0}section{margin:8px 16px;padding:16px;border-radius:16px;background:var(--md-sys-color-secondary-container,#e8def8);color:var(--md-sys-color-on-secondary-container,#1d192b)}h2{font:500 18px/1.4 system-ui;margin:0 0 8px}p{overflow-wrap:anywhere}nav{display:flex;flex-wrap:wrap;gap:8px}label{display:flex;align-items:center}md-linear-progress{margin:12px 0} .note{font-size:13px}button{font:inherit}`;
-  private l(en:string,zh:string){return ownedCopy(en,zh,this.language as any);}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language,true);}
   connectedCallback(){super.connectedCallback();void this.refresh();}
   disconnectedCallback(){clearTimeout(this.timer);super.disconnectedCallback();}
   private async refresh(){try{const r=await window.studio?.operations?.({action:'updates.state'});if(r?.ok){this.state=r.result;}}catch{this.notice=this.l('Update status unavailable. Retry when the host is ready.','未能取得更新狀態，主程式就緒後請重試。');}finally{if(this.isConnected)this.timer=setTimeout(()=>void this.refresh(),2000);}}
