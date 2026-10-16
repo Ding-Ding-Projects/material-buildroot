@@ -1,5 +1,9 @@
 # Active implementation and verification handoff, 2026-10-16
 
+## Latest built-browser boundary
+
+The built `bb34a7efc011c2c5450616197ffa7cf9ef0701b3` guide opened all 17 supporting articles and retained visitor/guide/language/theme state. Three measured tuples and isolated production-shaped companion summaries passed within their limits. All owned processes/endpoints/desktop are absent, but retained profiles keep the strict cleanup validator incomplete. No actual paired-host or full matrix claim. Its observed malformed accessibility attributes now have a reviewed source correction with twelve focused passes; exact rebuilt pixels are next. Release 49.1 timing was separately corrected from terminal job/step API records to 10:17:41Z through 10:21:23Z, duration 00:03:42, with exact notes and unchanged assets read back. A future timing automation proposal remains unapplied.
+
 ## Current source repair and publication state
 
 Main `7a6b2b5ee5d23f9029d3128d9961cb8aef52cf79` is published. Normal release `v0.1.0-build.49.1` and both workflows succeeded; five published asset sizes/digests and the source tag match, with three small metadata files independently downloaded. Installation/update remains unverified. The live home and exact promoted PNG returned HTTP 200, the PNG hash matched and About homepage readback matched. Full generated-article completeness remains open. The newer browser response/link repair has eight focused source checks and bounded independent review; actual fresh built-browser proof and deployment are pending. Shared instruction main `70d25ec9db4c5c7e154c59de67a91dd8118b9628` and all 85 synchronized targets are current. Its catalogue summary now matches the dedicated public-reference rule; the historical full sweep remains non-green.

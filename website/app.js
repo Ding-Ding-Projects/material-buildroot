@@ -36,6 +36,9 @@ const language = document.querySelector('#language');
 const setLanguage = (mode) => {
   document.documentElement.dataset.language = mode;
   document.documentElement.lang = 'en'; // Articles retain English; translated spans declare zh-HK.
+  document.querySelectorAll('[data-aria-en][data-aria-zh]').forEach(element => {
+    element.setAttribute('aria-label', mode==='en' ? element.dataset.ariaEn : mode==='zh' ? element.dataset.ariaZh : `${element.dataset.ariaEn} · ${element.dataset.ariaZh}`);
+  });
   if (language) language.value = mode;
   save('mb-docs-language', mode);
 };

@@ -1,5 +1,9 @@
 # Latest evidence continuation, 2026-10-16
 
+## Built browser observations and markup correction
+
+The exact documentation build from `bb34a7efc011c2c5450616197ffa7cf9ef0701b3` passed 110-page/2757-link admission. Its hidden-desktop Edge run drove 17 supporting article routes, guide and visitor persistence, three viewport/language/theme tuples and isolated production-shaped companion response fixtures. All 17 owned processes, ports and desktop are absent; retained task profiles keep strict cleanup validation incomplete. Actual host pairing and the full matrix remain unverified. Pixels also exposed span markup inside two accessibility attributes. The current narrow correction escapes plain attribute text and updates names in all three language modes; twelve focused checks and two-lens source review passed. A fresh identical-tuple build/capture remains pending.
+
 ## Current browser response repair
 
 The browser source now consumes the host's actual flat workspace projection and named project/job wrappers, validates complete bounded collections before rendering, clears invalid/lost data before language rerendering and fixes dynamic supporting-article extensions. Eight focused production-source cases passed after the original six-case red baseline; independent review found no blocking regression. These are in-memory DOM checks, not built browser or actual paired-host acceptance. The exact documentation build and headless browser run are next. Main `7a6b2b5ee5d23f9029d3128d9961cb8aef52cf79` is published; its normal release 49.1 has five verified metadata/digest records. Its deployment workflow succeeded, and the home plus exact new dialog PNG returned HTTP 200 with the expected image hash and exact homepage readback. Complete article inventory and current browser repair deployment remain pending.

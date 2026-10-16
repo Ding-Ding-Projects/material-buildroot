@@ -56,6 +56,14 @@ try{
  }
  receipt.checks.push('Served HTML, JavaScript and CSS match the exact selected build output.');
  assert.equal(await page.locator('#learning-workspace').count(),1);
+ for(const mode of ['en','zh','both']){
+  await chooseLanguage(mode);
+  for(const [selector,en,zh] of [['.learning-jump','Learning activities','學習活動'],['#walkthrough-rail','Workflow steps','工作流程步驟']]){
+   assert.equal(await page.locator(selector).getAttribute('aria-label'),mode==='en'?en:mode==='zh'?zh:`${en} · ${zh}`);
+   assert.doesNotMatch(await page.locator(selector).innerText(),/">/);
+  }
+ }
+ receipt.checks.push('Learning navigation and workflow rail use plain accessible names in all three language modes without stray markup.');
  assert.equal(await page.locator('.article, .product-preview').count(),0,'The homepage is a learning workspace, not a Markdown browser or stale screenshot gallery');
  assert.match(await page.locator('main').innerText(),/package recipe|套件配方/);
  assert.match(await page.locator('main').innerText(),/never inspect your computer|不會檢查你嘅電腦/);
