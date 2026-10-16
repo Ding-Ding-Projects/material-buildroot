@@ -5,6 +5,29 @@ import '@material/web/dialog/dialog.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/switch/switch.js';
 
+/** Trusted renderer providers own persistent target identity and their editor validation. */
+export type ContextActionContext = {target:HTMLElement;language:string};
+export type ContextProviderAction = {id:string;label:string;context?:string;disabled?:boolean;run:()=>void|Promise<void>};
+export type ContextActionProvider = (context:ContextActionContext)=>readonly ContextProviderAction[];
+const contextProviders=new Map<string,ContextActionProvider>();
+const accessProviders=new Map<string,(target:HTMLElement)=>boolean>();
+const providerIdPattern=/^[a-z][a-z0-9.-]{0,63}$/;
+export function registerContextActionProvider(providerId:string,provider:ContextActionProvider):()=>void {
+  if(!providerIdPattern.test(providerId)||typeof provider!=='function'||contextProviders.has(providerId)||contextProviders.size>=16)throw new Error('INVALID_CONTEXT_PROVIDER');
+  contextProviders.set(providerId,provider);
+  return ()=>{if(contextProviders.get(providerId)===provider)contextProviders.delete(providerId);};
+}
+/** False or an unavailable policy blocks original consumers, never management actions. */
+export function registerCommandAccessProvider(providerId:string,provider:(target:HTMLElement)=>boolean):()=>void {
+  if(!providerIdPattern.test(providerId)||typeof provider!=='function'||accessProviders.has(providerId)||accessProviders.size>=16)throw new Error('INVALID_COMMAND_ACCESS_PROVIDER');
+  accessProviders.set(providerId,provider);
+  return ()=>{if(accessProviders.get(providerId)===provider)accessProviders.delete(providerId);};
+}
+function commandAccessBlocked(target:HTMLElement):boolean {
+  for(const provider of accessProviders.values()){try{if(provider(target)!==true)return true;}catch{return true;}}
+  return false;
+}
+
 type Control = HTMLElement & {label?:string; value?:string; checked?:boolean; selected?:boolean; disabled?:boolean; type?:string; min?:string; max?:string; step?:string; language?:string; updateComplete?:Promise<unknown>};
 type Action = {id:string; label:string; context:string; target?:Control; shortcut?:string; run:()=>void|Promise<void>; kind?:'field'|'toggle'|'picker'; disabled?:boolean};
 const selector='md-text-button,md-filled-button,md-outlined-button,md-filled-tonal-button,md-icon-button,md-primary-tab,md-secondary-tab,md-outlined-text-field,md-filled-text-field,md-checkbox,md-switch,md-slider,md-outlined-select,md-filled-select,button,a[href],input,textarea,select';
@@ -15,7 +38,7 @@ const toggleSelector='md-checkbox,md-switch,input[type=checkbox]';
 const bindings=[{id:'palette',shortcut:'Ctrl+Shift+F',matches:(e:KeyboardEvent)=>e.ctrlKey&&e.shiftKey&&!e.altKey&&!e.metaKey&&e.key.toLowerCase()==='f'}, {id:'context',shortcut:'Shift+F10',matches:(e:KeyboardEvent)=>!e.ctrlKey&&!e.altKey&&!e.metaKey&&e.shiftKey&&e.key==='F10'}];
 const parent=(el:Element):Element|null=>el.parentElement||(el.getRootNode() instanceof ShadowRoot?(el.getRootNode() as ShadowRoot).host:null);
 function ancestors(el:Element):Element[]{const result:Element[]=[];for(let p:Element|null=el;p;p=parent(p))result.push(p);return result;}
-function disabled(el:Control){return !!el.disabled||ancestors(el).some(p=>p.hasAttribute('inert')||p.getAttribute('aria-disabled')==='true'||p.getAttribute('data-locked')==='true'||p.hasAttribute('locked'));}
+function disabled(el:Control){return !!el.disabled||commandAccessBlocked(el)||ancestors(el).some(p=>p.hasAttribute('inert')||p.getAttribute('aria-disabled')==='true'||p.getAttribute('data-locked')==='true'||p.hasAttribute('locked'));}
 function label(el:Control){return (el.label||el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim().slice(0,240);}
 function controls(root:ParentNode):Control[]{
   const found:Control[]=[];
@@ -131,8 +154,26 @@ class CommandSurfaces extends LitElement {
     const actionTarget=ancestors(target).find(p=>p.matches(selector)) as Control|undefined;
     const actions:Action[]=[{id:'focus',label:this.l('Go to this element','前往呢個元素'),context:this.targetName,target,run:async()=>{await this.dialog().close();await this.reveal(target);}}];
     if(actionTarget)actions.push({id:'activate',label:this.l('Open or activate','開啟或啟用'),context:label(actionTarget),target:actionTarget,disabled:disabled(actionTarget),kind:actionTarget.matches(pickerSelector)?'picker':actionTarget.matches(toggleSelector)?'toggle':actionTarget.matches(fieldSelector)?'field':undefined,run:()=>this.activate(actionTarget)});
+    let providerUnavailable=false;
+    for(const [providerId,provider] of contextProviders){
+      try{
+        const contributed=provider({target,language:this.currentLanguage()});
+        if(!Array.isArray(contributed)||contributed.length>32){providerUnavailable=true;continue;}
+        const ids=new Set<string>();
+        for(const action of contributed){
+          if(!action||!providerIdPattern.test(action.id)||ids.has(action.id)||typeof action.label!=='string'||!action.label.trim()||action.label.length>240||typeof action.run!=='function'||action.context!==undefined&&(typeof action.context!=='string'||action.context.length>500)){providerUnavailable=true;continue;}
+          ids.add(action.id);
+          // No original target field: managing a restriction is not activation of that control.
+          actions.push({id:'provider-'+providerId+'-'+action.id,label:action.label,context:action.context||'',disabled:action.disabled===true,run:async()=>{
+            if(!target.isConnected)return;
+            await this.dialog().close();
+            try{await action.run();}catch{this.notice=this.l('The selected editor could not be opened. No original action was executed.','未能開啟所選編輯器，冇執行原有操作。');if(!this.dialog().open)await this.dialog().show();}
+          }});
+        }
+      }catch{providerUnavailable=true;}
+    }
     actions.push({id:'palette',label:this.l('Find commands','尋找指令'),context:'',shortcut:bindings[0].shortcut,run:()=>this.openPalette(target)});
-    await this.present(actions,'context',target);
+    await this.present(actions,'context',target);if(providerUnavailable)this.notice=this.l('Some element actions are unavailable. Existing actions remain available.','部分元素操作未能使用，現有操作仍可使用。');
   }
   async openPicker(target:Control){
     if(disabled(target))return;
