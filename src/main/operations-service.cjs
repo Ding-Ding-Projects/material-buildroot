@@ -49,6 +49,7 @@ const { createExecutionSetup } = require('./execution/setup.cjs');
 const { createWorkflowService } = require('./execution/workflow-service.cjs');
 const owner = "desktop-owner";
 const fields = {
+  'execution.cli': ['kind'],
   'execution.inspect': ['sourceRepository','executionRepository','mode'],
   'execution.discover': ['selectionId'],
   'execution.selectRunner': ['selectionId','kind','runnerId','billingConsent'],
@@ -223,7 +224,7 @@ function createOperationsService({
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
-  const executionSetup = createExecutionSetup();
+  const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
   const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
@@ -1217,6 +1218,10 @@ function createOperationsService({
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
+      case 'execution.cli': {
+        if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
+        return executionSetup.host[request.kind]();
+      }
       case 'execution.inspect': return executionSetup.inspect(request);
       case 'execution.discover': return executionSetup.discover(request.selectionId);
       case 'execution.selectRunner': return executionSetup.selectRunner(request);
@@ -1905,6 +1910,7 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      executionSetup.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
@@ -1933,6 +1939,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
