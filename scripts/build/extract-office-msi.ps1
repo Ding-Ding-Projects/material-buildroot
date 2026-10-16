@@ -32,7 +32,7 @@ $cabPath = AbsolutePath $ExtractedCab
 $destination = AbsolutePath $Output
 # Read-only MSI database access. Never invoke an install action or custom action.
 $installer = New-Object -ComObject WindowsInstaller.Installer
-$db = $installer.OpenDatabase((ExtendedPath $databasePath), 0)
+$db = $installer.OpenDatabase($databasePath, 0)
 function Rows([string]$Sql, [int]$Columns) {
   $view = $db.OpenView($Sql)
   try {
