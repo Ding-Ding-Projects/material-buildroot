@@ -1138,6 +1138,9 @@ function createOperationsService({
   const {createCompanionConsumers, actionContracts} = require('./security/companion-consumers.cjs');
   const consumers = createCompanionConsumers({
     authorizeProject: id => project(id),
+    chooseSource: () => sources.handle({action:'source.choose'}),
+    cloneOfficial: request => sources.handle({action:'source.clone.official',...request,trust:true}),
+    confirmSource: async (request,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve source clone',message:'Clone official Buildroot source into the selected folder?',detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nDirectory: ${request.directory}\nRef: ${request.ref}\nSource: https://gitlab.com/buildroot.org/buildroot.git\n\nThis approves source trust and project adoption for this one clone. Existing directories are preserved.`,buttons:['Cancel','Approve clone'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     modelStatus: () => tools.execute({action:'ollama.status'}),
     modelList: () => tools.execute({action:'ollama.tags'}),
     cloudList: workspaceId => cloudDestination(workspaceId).list(),
@@ -2154,6 +2157,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

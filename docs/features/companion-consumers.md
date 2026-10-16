@@ -2,7 +2,7 @@
 
 ## Implemented source routes
 
-The authenticated browser has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication.
+The authenticated browser has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication. A separate explicit Save/Restore/Clear local draft workflow persists only the named build target, parallelism, configuration domain and clone folder/ref draft, bounded to 1,024 characters. Restoration never submits a request and never restores session, project, file or source-selection capabilities.
 
 The typed host adapter admits these exact actions, subject to the current session scope. Non-destructive build submission uses a named target selector and bounded parallel-job control, never a command string:
 
@@ -16,6 +16,8 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | workspace.read | workspace:read | Workspace summary |
 | projects.list | projects:read | Select a currently adopted project |
 | project.options | projects:read | Runtime kind, revision and external-tree authorization summary |
+| source.choose | source:write | Open the native destination picker and retain the selection only in this session |
+| source.clone.official | source:write | Native-approved official source clone and project adoption |
 | source.status | source:read | Actual source revision, branch, dirty state and snapshot count |
 | config.inspect | configuration:read | Boolean/numeric configuration rows and observed revision |
 | config.apply | configuration:write | One typed revision-bound change after desktop approval |
@@ -45,7 +47,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 
 - Destructive build submission and job retry remain incomplete companion workflows. Non-destructive named builds now recheck the live session at their final enqueue boundary, use the desktop-adopted runtime and source grant, and enter the existing durable scheduler.
 - Configuration string/credential editing, complete paged semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
-- Source clone/adopt/ref acquisition/upgrade/rollback need native selection and revision-bound approval bridges; this browser cannot manufacture that approval.
+- Custom source clone, existing-source adopt/ref acquisition/upgrade/rollback need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
 - Converter, server manager, model pulls/chat, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
@@ -54,6 +56,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
