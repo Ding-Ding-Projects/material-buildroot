@@ -58,8 +58,16 @@ const { createRemoteRuntime } = require("./execution/remote-runtime.cjs");
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const { createExecutionSetup } = require('./execution/setup.cjs');
 const { createWorkflowService } = require('./execution/workflow-service.cjs');
+const {createProductWorkflows}=require('./execution/product-workflows.cjs');
 const owner = "desktop-owner";
 const fields = {
+ 'product.inspect':['sourceRepository','executionRepository','mode'],
+ 'product.discover':['selectionId'],
+ 'product.selectRunner':['selectionId','kind','runnerId','billingConsent'],
+ 'product.revoke':['selectionId'],
+ 'product.preview':['selectionId','model','text'],
+ 'product.publish':['previewId','sha256','consent'],
+ 'product.export':['previewId','sha256','consent'],
   'execution.cli': ['kind'],
   'execution.inspect': ['sourceRepository','executionRepository','mode'],
   'execution.discover': ['selectionId'],
@@ -278,6 +286,8 @@ function createOperationsService({
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
   const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
+  const productSetup=createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal,platform:'windows'});
+  const productWorkflows=createProductWorkflows({setup:productSetup,dialog,parentWindow});
   const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
@@ -1386,6 +1396,13 @@ function createOperationsService({
         if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
         return executionSetup.host[request.kind]();
       }
+      case 'product.inspect': return productSetup.inspect(request);
+      case 'product.discover': return productSetup.discover(request.selectionId);
+      case 'product.selectRunner': return productSetup.selectRunner(request);
+      case 'product.revoke': return {revoked:productSetup.revoke(request.selectionId)};
+      case 'product.preview': return productWorkflows.preview(request);
+      case 'product.publish': return productWorkflows.publish(request);
+      case 'product.export': return productWorkflows.exportYaml(request);
       case 'execution.inspect': return executionSetup.inspect(request);
       case 'execution.discover': return executionSetup.discover(request.selectionId);
       case 'execution.selectRunner': return executionSetup.selectRunner(request);
@@ -2178,6 +2195,7 @@ function createOperationsService({
       if (disposal) return disposal;
       disposed = true;
       executionSetup.dispose();
+      productSetup.dispose();
       executionJobs?.dispose();
       remoteRuntime?.dispose();
       for (const cloud of cloudDestinations.values()) cloud.dispose();
