@@ -111,8 +111,9 @@ export function mountCompanionConsumers({container,session,request,copy:outerCop
  }
  workflow.addEventListener('change',selectWorkflow);
  applyPreferences();selectWorkflow();
- update();return {update,clear(){generation++;currentSession='';observations=[];selectedFile=null;projects.replaceChildren();results.replaceChildren();checksum.value='';root.hidden=true;}};
+ update();return {update,clear(){generation++;currentSession='';observations=[];selectedFile=null;sourceSelection=null;modelChat=null;conversionSource=null;conversionDestination=null;modelPrompt.value='';modelChoice.replaceChildren();projects.replaceChildren();results.replaceChildren();checksum.value='';root.hidden=true;}};
 }
+
 
 
 
