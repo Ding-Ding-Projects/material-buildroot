@@ -1,3 +1,4 @@
+import {registerCommandActionProvider} from './command-surfaces';
 import "./experience-policies";
 import "./experience-policy-panel";
 import "./update-panel";
@@ -198,8 +199,10 @@ class MaterialBuildroot extends LitElement {
       this.effectiveTheme === "dark" || (this.effectiveTheme === "system" && this.media.matches);
   };
   static styles = workspaceStyles;
+  private unregisterWorkspaceCommands?:()=>void;
   connectedCallback() {
     super.connectedCallback();
+    this.unregisterWorkspaceCommands=registerCommandActionProvider('workspace',()=>this.workspaceDestinations().slice(0,256).map(destination=>({id:destination.id,label:this.l(destination.en,destination.zh).slice(0,240),context:this.l('Workspace destination','工作區目的地'),run:()=>this.workspaceDestination(new CustomEvent('workspace-destination',{detail:{destination:destination.id}}))})));
     window.addEventListener("keydown", this.shortcut);
     this.media.addEventListener("change", this.mediaChanged);
     this.mediaChanged();
@@ -209,6 +212,7 @@ class MaterialBuildroot extends LitElement {
     void this.load();
   }
   disconnectedCallback() {
+    this.unregisterWorkspaceCommands?.();
     window.removeEventListener("keydown", this.shortcut);
     this.unsubscribe?.();
     this.vocabularyUnsubscribe?.();this.modeUnsubscribe?.();this.scheduleUnsubscribe?.();
