@@ -61,7 +61,7 @@ function createMinecraft(options) {
   }
   const execute = async (request, context = {}) => {
     if (disposed) fail("SERVICE_DISPOSED");
-    if (request.action.startsWith("minecraft.managed.") || request.action.startsWith("minecraft.configuration.")) return managed(request);
+    if (require("./minecraft-workflow-contract.cjs").actions.includes(request.action) || request.action.startsWith("minecraft.managed.") || request.action.startsWith("minecraft.configuration.")) return managed(request, context);
     if (["minecraft.paper.builds", "minecraft.paper.install"].includes(request.action)) return require("./minecraft-paper.cjs").paper(options, request, context);
     switch (request.action) {
       case "minecraft.flavours":
@@ -144,6 +144,7 @@ function createMinecraft(options) {
           if (bytes !== server.size || hash.digest("hex") !== server.sha1)
             fail("PAYLOAD_HASH_MISMATCH");
           await fs.link(temporary, destination);
+          await fs.writeFile(path.join(directory, "material-server-distribution.json"), JSON.stringify({ schema: 1, edition: "java", flavour: "vanilla", version, sha256: await require("./runtime.cjs").digest(temporary), requiredJavaMajorVersion: metadata.javaVersion?.majorVersion ?? null }), { flag: "wx", mode: 0o600 });
           return { installed: true, version, bytes, sha1: server.sha1, requiredJavaMajorVersion: metadata.javaVersion?.majorVersion ?? null, runtimeVerified: false };
         } finally {
           await fs.rm(temporary, { force: true });

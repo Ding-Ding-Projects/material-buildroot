@@ -36,6 +36,7 @@ async function paper(options, request, context = {}) {
     } finally { await handle.close(); }
     if (bytes !== entry.size || hash.digest("hex") !== entry.checksums.sha256) fail("PAYLOAD_HASH_MISMATCH");
     await fs.link(temporary, path.join(directory, "server.jar"));
+    await fs.writeFile(path.join(directory, "material-server-distribution.json"), JSON.stringify({ schema: 1, edition: "java", flavour: "paper", version: request.version, build: request.build, sha256: entry.checksums.sha256 }), { flag: "wx", mode: 0o600 });
     return { installed: true, flavour: "paper", version: request.version, build: request.build, bytes, sha256: entry.checksums.sha256, source, runtimeVerified: false };
   } finally { await fs.rm(temporary, { force: true }); }
 }

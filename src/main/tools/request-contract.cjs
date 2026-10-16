@@ -38,6 +38,7 @@ function admit(request, nested = false) {
   object(request);
   string(request.action, 80);
   const action = request.action;
+  if (require("./minecraft-workflow-contract.cjs").actions.includes(action)) { require("./minecraft-workflow-contract.cjs").validate(request); return structuredClone(request); }
   if (action.startsWith("minecraft.managed.") || action.startsWith("minecraft.configuration.")) { require("./minecraft-managed.cjs").validate(request); return structuredClone(request); }
   const simple = [
     "ollama.status",

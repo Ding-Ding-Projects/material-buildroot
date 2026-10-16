@@ -1,3 +1,4 @@
+import "./minecraft-workflow-panel";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/textfield/outlined-text-field.js";
@@ -24,6 +25,11 @@ export class MinecraftPanel extends LitElement {
   private paperBuilds: string[] = [];
   private paperBuild = "";
   private flavourLicense = false;
+  private fabricLoaders: string[] = [];
+  private fabricInstallers: string[] = [];
+  private fabricLoader = "";
+  private fabricInstaller = "";
+  private fabricDownloads = false;
   private shown = 100;
   private directory?: Grant;
   private pluginDirectory?: Grant;
@@ -46,6 +52,8 @@ export class MinecraftPanel extends LitElement {
   private remoteDirectory = "";
   private image = "";
   private state = "not-managed";
+  private readiness = "unknown";
+  private onlineNames: string[] = [];
   private discoveryNote = "";
   static styles = [workspaceStyles, css`
     :host { display:block; min-width:0; } .stack { display:grid; gap:16px; }
@@ -89,7 +97,7 @@ export class MinecraftPanel extends LitElement {
     } else {
       const result = await this.tool({ action: "minecraft.flavours", flavour: this.flavour });
       this.versions = this.flavour === "fabric" ? result.gameVersions.map((v: any) => ({ id: v.version })) : (result.metadata.versions || []).map((id: string) => ({ id }));
-      this.discoveryNote = this.flavour === "paper" ? this.l("Choose an explicit stable build. Installation checks the official SHA-256 and never replaces server.jar.", "請明確選擇穩定版本，安裝會檢查官方 SHA-256，唔會取代 server.jar。") : this.l("Discovery is available; automatic flavour installation is not admitted. Install the selected official distribution in a trusted folder. Plugins and mods must match that exact version and loader.", "可探索版本，但未提供自動安裝此發行種類。請將所選官方發行檔安裝到信任資料夾，插件同模組必須配對版本同載入器。");
+      this.discoveryNote = this.flavour === "paper" ? this.l("Choose an explicit stable build. Installation checks the official SHA-256 and never replaces server.jar.", "請明確選擇穩定版本，安裝會檢查官方 SHA-256，唔會取代 server.jar。") : this.l("Discovery and official launcher acquisition are available. Runtime dependencies are obtained later by the launcher. Plugins and mods must match the exact version and loader.", "可探索版本同取得官方啟動器。啟動器之後先取得執行依賴，插件同模組必須配對確實版本同載入器。");
     }
     this.version = this.versions[0]?.id || "";
   }
@@ -109,7 +117,7 @@ export class MinecraftPanel extends LitElement {
     const compatiblePlugins = this.pluginVersions.filter(v => v.game_versions?.includes(this.version) && v.loaders?.includes(this.flavour));
     return html`<section class="panel stack" aria-label=${this.l("Minecraft server manager", "Minecraft 伺服器管理員")}>
       <h2>${this.l("Minecraft server manager", "Minecraft 伺服器管理員")}</h2>
-      <nav aria-label=${this.l("Server workflow", "伺服器流程")}>${[["distribution", "Distribution", "發行檔"], ["configuration", "Configuration", "設定"], ["extensions", "Plugins and mods", "插件同模組"], ["lifecycle", "Run and stop", "執行同停止"]].map(([id, en, zh]) => html`<md-outlined-button aria-pressed=${this.tab === id} @click=${() => { this.tab = id; this.change(); }}>${this.l(en, zh)}</md-outlined-button>`)}</nav>
+      <nav aria-label=${this.l("Server workflow", "伺服器流程")}>${[["distribution", "Distribution", "發行檔"], ["configuration", "Configuration", "設定"], ["extensions", "Plugins and mods", "插件同模組"], ["lifecycle", "Run and stop", "執行同停止"], ["worlds", "Worlds", "世界"], ["players", "Players", "玩家"], ["commands", "Console actions", "主控台操作"], ["records", "Profiles and schedules", "設定檔同排程"]].map(([id, en, zh]) => html`<md-outlined-button aria-pressed=${this.tab === id} @click=${() => { this.tab = id; this.change(); }}>${this.l(en, zh)}</md-outlined-button>`)}</nav>
       <div role="status" aria-live="polite" class="status">${this.busy ? this.l("Operation in progress", "操作進行中") : this.message || this.l("Choose a distribution and a trusted server folder to begin.", "先選擇發行檔同信任伺服器資料夾。")}</div>
       <div class="columns">${this.select("Edition", "版本類別", this.edition, ["java", "bedrock"], v => { this.edition = v; this.port = v === "java" ? "25565" : "19132"; this.versions = []; this.version = ""; this.pluginVersions = []; this.eula = false; if (v === "bedrock") this.mode = "survival"; })}${this.edition === "java" ? this.select("Flavour", "發行種類", this.flavour, ["vanilla", "paper", "fabric"], v => { this.flavour = v; this.versions = []; this.version = ""; this.pluginVersions = []; }) : nothing}</div>
       <div class="row">${this.button("Choose trusted server folder", "選擇信任伺服器資料夾", () => this.choose())}<span>${this.directory?.name || this.l("No folder selected", "未選資料夾")}</span></div>
@@ -120,8 +128,15 @@ export class MinecraftPanel extends LitElement {
         <p>${filtered.length} ${this.l("matching catalogue entries", "個相符目錄項目")}</p>
         ${filtered.length > this.shown ? this.button("Show more versions", "顯示更多版本", async () => { this.shown += 100; }) : nothing}
         <p class="note">${this.discoveryNote}</p>
+        ${this.edition === "java" && this.flavour === "fabric" ? html`<div class="stack">
+          ${this.button("Load compatible Fabric launchers", "載入相容 Fabric 啟動器", async () => { const r = await this.tool({ action: "minecraft.fabric.options", version: this.version }); this.fabricLoaders = r.loaders; this.fabricInstallers = r.installers; this.fabricLoader = r.loaders[0] || ""; this.fabricInstaller = r.installers[0] || ""; }, !this.version)}
+          ${this.select("Fabric loader", "Fabric 載入器", this.fabricLoader, this.fabricLoaders, v => this.fabricLoader = v)}${this.select("Fabric installer", "Fabric 安裝器", this.fabricInstaller, this.fabricInstallers, v => this.fabricInstaller = v)}
+          ${this.check("I accept the Fabric licence and later launcher runtime downloads", "我接受 Fabric 授權同啟動器之後下載執行檔", this.fabricDownloads, v => this.fabricDownloads = v)}
+          <p class="note">${this.l("Downloads only the official launcher. Current metadata must admit the exact combination. Its local SHA-256 is recorded; no upstream checksum is claimed. First launch may acquire additional runtime files, which are not installed by this operation.", "只下載官方啟動器，目前資料必須接納確實組合。記錄本機 SHA-256，唔聲稱上游校驗摘要已驗證。首次啟動可能再下載執行檔，今次操作唔會安裝嗰啲檔案。")}</p>
+          ${this.button("Acquire Fabric launcher", "取得 Fabric 啟動器", async () => { await this.tool({ action: "minecraft.fabric.install", version: this.version, loader: this.fabricLoader, installer: this.fabricInstaller, directoryId: this.directory?.id, acceptLicense: this.fabricDownloads, acceptRuntimeDownloads: this.fabricDownloads }); }, !this.version || !this.fabricLoader || !this.fabricInstaller || !this.directory || !this.fabricDownloads)}
+        </div>` : nothing}
         ${this.edition === "java" && this.flavour === "paper" ? html`<div class="stack">${this.button("Load stable Paper builds", "載入穩定 Paper 版本", async () => { const result = await this.tool({ action: "minecraft.paper.builds", version: this.version }); this.paperBuilds = result.builds.map((b: any) => String(b.id)); this.paperBuild = this.paperBuilds[0] || ""; }, !this.version)}${this.select("Paper build", "Paper 建置版本", this.paperBuild, this.paperBuilds, v => this.paperBuild = v)}${this.check("I accept the Paper distribution licence", "我接受 Paper 發行授權", this.flavourLicense, v => this.flavourLicense = v)}${this.button("Install selected Paper build", "安裝所選 Paper 版本", async () => { await this.tool({ action: "minecraft.paper.install", version: this.version, build: Number(this.paperBuild), directoryId: this.directory?.id, acceptLicense: this.flavourLicense }); }, !this.paperBuild || !this.directory || !this.flavourLicense)}</div>` : nothing}
-        ${this.edition === "java" && this.flavour === "vanilla" ? this.button("Install selected vanilla server", "安裝所選原版伺服器", async () => { await this.tool({ action: "minecraft.install", edition: "java", version: this.version, directoryId: this.directory?.id }); }, !this.directory || !this.version) : this.flavour !== "paper" || this.edition === "bedrock" ? html`<p class="note">${this.l("Automatic installation unavailable for this distribution. Existing files are never replaced.", "此發行檔未提供自動安裝，唔會取代現有檔案。")}</p>` : nothing}
+        ${this.edition === "java" && this.flavour === "vanilla" ? this.button("Install selected vanilla server", "安裝所選原版伺服器", async () => { await this.tool({ action: "minecraft.install", edition: "java", version: this.version, directoryId: this.directory?.id }); }, !this.directory || !this.version) : this.edition === "bedrock" ? html`<p class="note">${this.l("Automatic installation unavailable for this distribution. Existing files are never replaced.", "此發行檔未提供自動安裝，唔會取代現有檔案。")}</p>` : nothing}
       </div>` : nothing}
       ${this.tab === "configuration" ? html`<div class="stack">
         ${this.button("Read current configuration", "讀取現有設定", () => this.readConfiguration(), !this.directory)}
@@ -150,10 +165,12 @@ export class MinecraftPanel extends LitElement {
         <div class="row">${this.button("Choose Java executable", "選擇 Java 執行檔", async () => { await this.call("payload.choose", { toolId: "java" }); })}${container ? this.button("Choose Docker executable", "選擇 Docker 執行檔", async () => { await this.call("payload.choose", { toolId: "docker" }); }) : nothing}${remote ? this.button("Choose SSH executable", "選擇 SSH 執行檔", async () => { await this.call("payload.choose", { toolId: "ssh" }); }) : nothing}</div>
         ${this.check("I accept the Minecraft EULA for this server", "我接受此伺服器嘅 Minecraft EULA", this.eula, v => this.eula = v)}
         ${this.check("I authorize execution of this trusted server and extensions", "我授權執行此信任伺服器同擴充", this.execution, v => this.execution = v)}
-        <div class="row">${this.button("Start selected server", "啟動所選伺服器", async () => { const result = await this.tool({ action: "minecraft.managed.start", serverId: this.serverId, edition: this.edition, target: this.target, memoryMiB: Number(this.memory), port: Number(this.port), acceptExecution: this.execution, acceptEula: this.eula, ...(remote ? { host: this.host, remoteDirectory: this.remoteDirectory } : { directoryId: this.directory?.id }), ...(container ? { image: this.image } : {}) }); this.state = result.state; this.message = this.l("Process started; game readiness has not been verified. Refresh status and verify the server before inviting players.", "程序已啟動，但遊戲就緒狀態未經驗證。請重新整理狀態並確認伺服器先邀請玩家。"); }, !this.eula || !this.execution || (!remote && !this.directory))}${this.button("Refresh server status", "重新整理伺服器狀態", async () => { this.state = (await this.tool({ action: "minecraft.managed.status", serverId: this.serverId })).state; })}${this.button("Request graceful stop", "要求正常停止", async () => { this.state = (await this.tool({ action: "minecraft.managed.stop", serverId: this.serverId })).state; })}</div>
-        <p class="status">${this.l("Observed state", "已觀察狀態")}: ${this.state}</p>
-        <p class="note">${this.l("Management ownership lasts for this application session. Stop and confirm exit before closing. Java uses server.jar; Bedrock uses bedrock_server.exe locally on Windows and bedrock_server on Linux. No arbitrary command field, force kill, automatic world migration or host power operation is provided.", "管理權限只維持到今次應用程式工作階段結束，關閉前請停止並確認退出。Java 使用 server.jar；Bedrock 喺本機 Windows 使用 bedrock_server.exe，Linux 使用 bedrock_server。唔提供任意指令欄、強制終止、自動世界遷移或主機電源操作。")}</p>
+        <div class="row">${this.button("Start selected server", "啟動所選伺服器", async () => { const result = await this.tool({ action: "minecraft.managed.start", serverId: this.serverId, edition: this.edition, version: this.version, flavour: this.edition === "bedrock" ? "vanilla" : this.flavour, target: this.target, memoryMiB: Number(this.memory), port: Number(this.port), acceptExecution: this.execution, acceptEula: this.eula, ...(remote ? { host: this.host, remoteDirectory: this.remoteDirectory } : { directoryId: this.directory?.id }), ...(container ? { image: this.image } : {}) }); this.state = result.state; this.message = this.l("Process started; game readiness has not been verified. Refresh status and verify the server before inviting players.", "程序已啟動，但遊戲就緒狀態未經驗證。請重新整理狀態並確認伺服器先邀請玩家。"); }, !this.eula || !this.execution || !this.version || (!remote && !this.directory))}${this.button("Refresh server status", "重新整理伺服器狀態", async () => { const result = await this.tool({ action: "minecraft.managed.status", serverId: this.serverId }); this.state = result.state; this.readiness = result.readinessState || "unknown"; this.onlineNames = result.players?.names || []; })}${this.button("Request graceful stop", "要求正常停止", async () => { this.state = (await this.tool({ action: "minecraft.managed.stop", serverId: this.serverId })).state; })}</div>
+        <p class="status">${this.l("Observed state", "已觀察狀態")}: ${this.state} · ${this.readiness}</p>
+        <p>${this.l("Last observed Java players", "最後觀察到嘅 Java 玩家")}: ${this.onlineNames.join(", ") || this.l("No observation", "未有觀察記錄")}</p>
+        <p class="note">${this.l("Process handles last for this application session. Ownership records persist, but process adoption after restart is never inferred. Recorded containers require explicit reconnect and identity checks. Stop and confirm exit before closing. Java uses server.jar; Bedrock uses bedrock_server.exe locally on Windows and bedrock_server on Linux. No arbitrary command field, force kill, automatic world migration or host power operation is provided.", "程序控制代碼只維持到今次工作階段結束。擁有權記錄會保留，但重新啟動後唔會推斷程序已接管。已記錄容器需要明確重新連接及身分檢查，關閉前請停止並確認退出。Java 使用 server.jar；Bedrock 喺本機 Windows 使用 bedrock_server.exe，Linux 使用 bedrock_server。唔提供任意指令欄、強制終止、自動世界遷移或主機電源操作。")}</p>
       </div>` : nothing}
+      ${["worlds", "players", "commands", "records"].includes(this.tab) ? html`<minecraft-workflow-panel .section=${this.tab} .language=${this.language} .edition=${this.edition} .version=${this.version} .flavour=${this.flavour} .serverId=${this.serverId} .target=${this.target} .directory=${this.directory} .memoryMiB=${Number(this.memory)} .port=${Number(this.port)} @minecraft-profile=${(event: CustomEvent) => { const p = event.detail; this.serverId = p.id; this.edition = p.edition; this.version = p.version; this.flavour = p.flavour; this.target = p.target; this.memory = String(p.memoryMiB); this.port = String(p.port); this.directory = undefined; this.eula = false; this.execution = false; this.state = "not-managed"; this.change(); }}></minecraft-workflow-panel>` : nothing}
     </section>`;
   }
 }
