@@ -1,10 +1,11 @@
+import {browserCopy,browserDialogEmoji} from './browser-native-tone.js';
 import '@material/web/dialog/dialog.js';
 import '@material/web/slider/slider.js';
-const l=(en,zh)=>document.documentElement.dataset.language==='zh'?zh:document.documentElement.dataset.language==='both'?`${en} · ${zh}`:en;
+const l=(en,zh)=>browserCopy(en,zh);
 /** A fresh, single-use confirmation in the current browser surface. */
 export async function confirmBrowserMutation(origin,description) {
   const dialog=document.createElement('md-dialog');dialog.style.maxWidth='min(36rem, calc(100vw - 24px))';
-  const title=document.createElement('div');title.slot='headline';title.textContent=l('Confirm local change','確認本機變更');
+  const title=document.createElement('div');title.slot='headline';title.textContent=l('Confirm local change','確認本機變更');if(browserDialogEmoji()){const icon=document.createElement('span');icon.setAttribute('aria-hidden','true');icon.textContent='🔎 ';title.prepend(icon);}
   const content=document.createElement('div');content.slot='content';content.style.display='grid';content.style.gap='16px';
   const details=document.createElement('p');details.textContent=description;details.style.overflowWrap='anywhere';content.append(details);
   const keys=[];
@@ -27,3 +28,5 @@ export function protectBrowserMutation(control,description) {
     try{if(await confirmBrowserMutation(control,description())){accepted=true;control.click();}}finally{pending=false;}
   },true);
 }
+
+

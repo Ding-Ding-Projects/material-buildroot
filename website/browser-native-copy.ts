@@ -1,7 +1,9 @@
-import {nothing} from 'lit';
+import {browserCopy} from './browser-native-tone.js';
+import {nothing,LitElement} from 'lit';
+LitElement.addInitializer(host=>{const update=()=>host.requestUpdate();host.addController({hostConnected(){document.addEventListener('browser-native-copy-change',update);},hostDisconnected(){document.removeEventListener('browser-native-copy-change',update);}});});
 export const actionIcon=(_name:string)=>nothing;
 export const materialIcon=(_name:string)=>nothing;
-export function localizedCopy(en:string,zh:string,language:string,_authored=false){return language==='en'?en:language==='zh-HK'?zh:en+' · '+zh;}
+export function localizedCopy(en:string,zh:string,language:string,_authored=false){return browserCopy(en,zh,language,_authored);}
 type Localize=(english:string,translated:string)=>string;
 type StatusValue=string|string[];
 type Span={en:string;zh:string};
@@ -28,4 +30,6 @@ export function displayOwnedStatus<T extends StatusValue>(owner:object,field:str
  };
  return (Array.isArray(saved.templates)?saved.templates.map(format):format(saved.templates)) as T;
 }
+
+
 

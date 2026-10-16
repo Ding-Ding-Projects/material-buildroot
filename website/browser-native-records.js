@@ -1,7 +1,8 @@
+import {browserCopy} from './browser-native-tone.js';
 import {mountLocalSearch} from './browser-native-search-mount.js';
 /** Local recovery desk. Records never represent a submitted support request. */
 export function mountBrowserRecords(visitor) {
-  const l=(en,zh)=>document.documentElement.dataset.language==='zh'?zh:document.documentElement.dataset.language==='both'?`${en} · ${zh}`:en;
+  const l=(en,zh)=>browserCopy(en,zh);
   const section=document.createElement('section');section.className='visitor-card';section.id='browser-native-records';
   const localized=[];const make=(tag,en='',zh='',parent=section)=>{const item=document.createElement(tag);if(en)localized.push(()=>item.textContent=l(en,zh));parent.append(item);return item;};
   const heading=make('h2','Local recovery desk','本機復原工作台');heading.id='browser-records-title';section.setAttribute('aria-labelledby',heading.id);
@@ -66,7 +67,7 @@ export function mountBrowserRecords(visitor) {
   button('Cancel remaining bulk work','取消餘下批次操作',()=>{cancelled=true;});
   const exportData=(data,name)=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,scope:'loaded-matches',exportedAt:new Date().toISOString(),records:data},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;section.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);report('Download requested. Scope is selected loaded matches, or all loaded matches when none are selected. Confirm completion in browser downloads.','已要求下載，範圍為已選已載入符合事項；未有選取時為全部已載入符合事項。請喺瀏覽器下載記錄確認完成。');};
   button('Export matching requests','匯出符合事項',()=>exportData(selected.size?visible.filter(r=>selected.has(r.id)):visible,'visitor-requests.json'));
-  const searchHost=make('div');list.before(searchHost);search=mountLocalSearch(searchHost,'Search local requests','搜尋本機事項',[],ids=>{visible=records.filter(r=>ids.has(String(r.id)));render();});
+  const searchHost=make('div');list.before(searchHost);search=mountLocalSearch(searchHost,'Search local requests','搜尋本機事項',[],ids=>{lastIndex=-1;visible=records.filter(r=>ids.has(String(r.id)));render();});
   make('h3','Operation notices','操作通知');
   make('p','Only fixed generic browser-operation events are recorded. Request details, filenames, selected text, private mappings and companion data are excluded. These notices prove only that this page reached the named step, not successful native work or a completed download.','只記錄固定嘅一般瀏覽器操作事件，唔包含事項內容、檔名、所選文字、私人映射或配對資料。通知只表示此頁到達所列步驟，唔能證明原生工作成功或下載完成。');
   const notices=make('div');let noticeRows=[],shownNotices=[];let noticeSearch;
@@ -78,6 +79,7 @@ export function mountBrowserRecords(visitor) {
   visitor.addEventListener('browser-native-status',event=>{if(!db||!Object.hasOwn(messages,event.detail))return;operation('notices','readwrite',(object,done)=>{const request=object.add({type:event.detail,at:new Date().toISOString()});request.onsuccess=()=>done();}).then(reloadNotices).catch(()=>report('The action status could not be saved in notices. The action itself is not rolled back.','未能將操作狀態儲存至通知，操作本身不會撤回。'));});
   section.addEventListener('keydown',event=>{if(event.key==='Escape'){cancelled=true;}});
   visitor.querySelector('#browser-native-tools')?.after(section);if(!section.isConnected)visitor.append(section);
-  const relocalize=()=>{localized.forEach(update=>update());render();renderNotices();};document.querySelector('#language')?.addEventListener('change',relocalize);relocalize();setBusy(false);
+  const relocalize=()=>{localized.forEach(update=>update());render();renderNotices();};document.querySelector('#language')?.addEventListener('change',relocalize);document.addEventListener('browser-native-copy-change',relocalize);relocalize();setBusy(false);
   try{const request=indexedDB.open('material-buildroot-visitor-records-v1',1);request.onupgradeneeded=()=>{request.result.createObjectStore('tickets',{autoIncrement:true});request.result.createObjectStore('notices',{autoIncrement:true});};request.onerror=()=>report('Browser record storage is unavailable. Notes and downloads elsewhere remain separate.','瀏覽器記錄儲存無法使用，其他筆記同下載功能保持獨立。');request.onblocked=()=>report('Storage is waiting for another browser tab to close.','儲存正等待其他瀏覽器分頁關閉。');request.onsuccess=()=>{db=request.result;db.onversionchange=()=>{db.close();db=undefined;setBusy(false);report('Storage changed. Reload before editing records.','儲存已變更，編輯記錄前請重新載入。');};run(async()=>{await reload();await reloadNotices();report('Local recovery desk ready. Requests are not sent externally.','本機復原工作台已就緒，事項唔會向外傳送。');});};}catch{report('Browser record storage is unavailable.','瀏覽器記錄儲存無法使用。');}
 }
+

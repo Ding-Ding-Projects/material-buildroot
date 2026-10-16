@@ -1,7 +1,8 @@
+import {browserCopy} from './browser-native-tone.js';
 import {mountLocalSearch} from './browser-native-search-mount.js';
 import {confirmBrowserMutation} from './browser-native-confirmation.js';
 const KEY='mb-visitor-schedule-v1';
-const l=(en,zh)=>document.documentElement.dataset.language==='zh'?zh:document.documentElement.dataset.language==='both'?`${en} · ${zh}`:en;
+const l=(en,zh)=>browserCopy(en,zh);
 const defaults=()=>({version:1,enabled:false,start:'09:00',end:'17:00',days:[1,2,3,4,5],language:'en',theme:'light'});
 function valid(value){if(!value||value.version!==1||typeof value.enabled!=='boolean'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(value.start)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(value.end)||value.start===value.end||!Array.isArray(value.days)||!value.days.length||value.days.length>7||value.days.some(day=>!Number.isInteger(day)||day<0||day>6)||!['en','zh','both'].includes(value.language)||!['light','dark','system'].includes(value.theme)||Object.keys(value).some(key=>!Object.hasOwn(defaults(),key)))throw Error('Invalid schedule');return {...value,days:[...new Set(value.days)]};}
 export function mountBrowserSchedule(visitor,applyPreferences){
@@ -34,3 +35,4 @@ export function mountBrowserSchedule(visitor,applyPreferences){
   const timer=setInterval(apply,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)apply();});window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
   window.addEventListener('storage',event=>{if(event.key===KEY){try{saved=event.newValue?valid(JSON.parse(event.newValue)):defaults();origin=event.newValue?'stored':'default';signature='';populate();apply();}catch{report('Another tab supplied an invalid schedule. The current rule remains active.','另一分頁提供無效排程，目前規則保持生效。');}}else if(['mb-docs-language','mb-docs-theme'].includes(event.key)){signature='';apply();}});
 }
+

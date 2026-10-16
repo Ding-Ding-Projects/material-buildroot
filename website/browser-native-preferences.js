@@ -1,3 +1,4 @@
+import {browserCopy} from './browser-native-tone.js';
 import {protectBrowserMutation} from './browser-native-confirmation.js';
 import {mountSectionSearch,mountLocalSearch} from './browser-native-search-mount.js';
 const KEY = 'mb-visitor-preferences-v1';
@@ -15,7 +16,7 @@ export function mountBrowserPreferences(visitor) {
   let prefs = initial(); let storageState = 'default';
   try { const stored = localStorage.getItem(KEY); if(stored) { prefs = decode(JSON.parse(stored)); storageState = 'stored'; } } catch { storageState = 'unavailable'; }
   const mode = () => document.documentElement.dataset.language;
-  const l = (en,zh) => mode() === 'zh' ? zh : mode() === 'both' ? `${en} · ${zh}` : en;
+  const l=(en,zh)=>browserCopy(en,zh);
   const localized = []; const bindings = []; const originalTitle = document.title;
   const heading = visitor.querySelector('h1'); const originalHeading = heading?.cloneNode(true);
   const section = document.createElement('section'); section.className='visitor-card'; section.id='browser-native-preferences';
@@ -39,7 +40,7 @@ export function mountBrowserPreferences(visitor) {
   toggle('timeAwareness','Time awareness','時間提示','Show elapsed session and idle time near the current task. This page measures elapsed time only while open. Default: off.','喺目前工作旁顯示本次使用時間同閒置時間，只計算此頁開啟期間。預設：關閉。');
   toggle('oneThing','One thing at a time','逐項處理','Keep your chosen next action visible without hiding other tasks. The action persists in this browser. Default: off.','保持你選定嘅下一步可見，唔會隱藏其他工作。下一步會保留喺此瀏覽器。預設：關閉。');
   toggle('momentum','Momentum','繼續工作提示','After ten idle minutes, show a dismissible factual prompt. Not now suppresses it for one hour. Default: off.','閒置十分鐘後顯示可關閉嘅實際狀態提示。暫時唔需要會暫停提示一小時。預設：關閉。');
-  const input=(key,en,zh,limit)=>{const control=make('md-outlined-text-field');control.className='visitor-field';control.maxLength=limit;localized.push(()=>control.label=l(en,zh));bindings.push(()=>control.value=prefs[key]);control.addEventListener('input',()=>{prefs[key]=control.value.slice(0,limit);persist();});return control;};
+  const input=(key,en,zh,limit)=>{const control=make('md-outlined-text-field');control.id='browser-preference-'+key;control.className='visitor-field';control.maxLength=limit;localized.push(()=>control.label=l(en,zh));bindings.push(()=>control.value=prefs[key]);control.addEventListener('input',()=>{prefs[key]=control.value.slice(0,limit);persist();});return control;};
   input('nextAction','Your chosen next action','你選定嘅下一步',180);
   input('name','Workspace display name (empty uses the shipped name)','工作區顯示名稱（留空使用原有名稱）',80);
   make('p','Renaming changes this visitor page heading and title only. URLs, browser storage keys, package identity and installed application names do not change.','重新命名只會改變此訪客頁標題，網址、瀏覽器儲存鍵、套件身分同已安裝程式名稱保持不變。');
@@ -110,11 +111,13 @@ export function mountBrowserPreferences(visitor) {
   };
   visitor.querySelector('#browser-native-tools')?.before(section);if(!section.isConnected)visitor.append(section);
   const relocalize=()=>{localized.forEach(update=>update());feedback.textContent=l(...notice);render();};
-  document.querySelector('#language')?.addEventListener('change',relocalize);
+  document.querySelector('#language')?.addEventListener('change',relocalize);document.addEventListener('browser-native-copy-change',relocalize);
   window.addEventListener('storage',event=>{if(event.key===KEY){try{prefs=event.newValue?decode(JSON.parse(event.newValue)):initial();storageState=event.newValue?'stored':'default';render();}catch{report('Another tab supplied invalid preferences; current values were retained.','另一分頁提供無效偏好，已保留目前數值。');}}});
   const clock=setInterval(updateTime,30000);window.addEventListener('pagehide',()=>{clearInterval(clock);stop();},{once:true});
   relocalize();
   mountSectionSearch(section, 'Search browser preferences', '搜尋瀏覽器偏好');
 }
+
+
 
 

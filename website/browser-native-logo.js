@@ -1,8 +1,9 @@
+import {browserCopy} from './browser-native-tone.js';
 import {convertLogo,readLogo,saveLogo,applyLogo} from './browser-native-logo-core';
 import {mountLocalSearch} from './browser-native-search-mount.js';
 import {confirmBrowserMutation} from './browser-native-confirmation.js';
 export function mountBrowserLogo(visitor){
- const l=(en,zh)=>document.documentElement.dataset.language==='zh'?zh:document.documentElement.dataset.language==='both'?`${en} · ${zh}`:en;
+ const l=(en,zh)=>browserCopy(en,zh);
  const root=document.createElement('section');root.className='visitor-card';root.id='browser-native-logo';const localized=[];
  const make=(tag,en='',zh='',parent=root)=>{const element=document.createElement(tag);if(en)localized.push(()=>element.textContent=l(en,zh));parent.append(element);return element;};
  const heading=make('h2','Local workspace logo','本機工作區標誌');heading.id='browser-logo-title';root.setAttribute('aria-labelledby',heading.id);
@@ -25,3 +26,4 @@ export function mountBrowserLogo(visitor){
  document.querySelector('#language')?.addEventListener('change',()=>{localized.forEach(update=>update());report(...message);applyLogo(record);});
  const name=visitor.querySelector('#browser-native-preferences');name?.addEventListener('input',()=>applyLogo(record));name?.addEventListener('click',()=>queueMicrotask(()=>applyLogo(record)));
 }
+

@@ -1,3 +1,8 @@
+import {mountBrowserGuidance} from './browser-native-guidance.js';
+import {mountBrowserTabs} from './browser-native-tabs.js';
+import {mountBrowserTone,browserCopy} from './browser-native-tone.js';
+import {mountBrowserAuthenticator} from './browser-native-authenticator.js';
+import {mountBrowserLocks} from './browser-native-locks.js';
 import {mountBrowserLogo} from './browser-native-logo.js';
 import {mountBrowserSchedule} from './browser-native-schedule.js';
 import {mountBrowserAppearance} from './browser-native-appearance.js';
@@ -9,11 +14,12 @@ import {mountBrowserPreferences} from './browser-native-preferences.js';
 const MAX_TEXT_BYTES = 1024 * 1024;
 const CHECKS = ['read-roadmap', 'check-evidence', 'write-notes'];
 const encode = value => new TextEncoder().encode(value);
-const text = (en, zh) => document.documentElement.dataset.language === 'zh' ? zh : document.documentElement.dataset.language === 'both' ? `${en} · ${zh}` : en;
+const text = (en, zh) => browserCopy(en, zh);
 const validPlan = value => value && value.version === 1 && typeof value.goal === 'string' && value.goal.length <= 180 && typeof value.notes === 'string' && value.notes.length <= 4000 && value.checks && typeof value.checks === 'object' && CHECKS.every(key => typeof value.checks[key] === 'boolean');
 
 // Browser-owned operations never call the companion transport or grant host access.
 export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPreferences}) {
+  for(const section of visitor.querySelectorAll(':scope > section')) if(!section.id && !section.classList.contains('companion-status')) section.id='visitor-panel-'+(section.querySelector('h2')?.id || 'local');
   const root = document.createElement('section');
   root.className = 'visitor-card'; root.id = 'browser-native-tools';
   root.setAttribute('aria-labelledby', 'browser-native-title');
@@ -57,7 +63,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
 
   node('h3', 'Named recovery copies', '具名稱復原副本');
   node('p', 'Save a recovery copy before replacing your plan. Copies live in a separate browser database and survive Clear local work above. Restoring preserves the current plan as another copy first. This is browser snapshot storage, not native version control. Use browser site-data controls to remove all copies; that also removes other local site data.', '取代計劃前可儲存復原副本。副本位於獨立瀏覽器資料庫，上方清除本機資料唔會刪除佢哋。還原前會先保留目前計劃為另一副本。呢個係瀏覽器快照儲存，唔係原生版本控制。可透過瀏覽器網站資料控制刪除全部副本，同時亦會刪除其他本機網站資料。');
-  const name = field(root, 'Recovery copy label (maximum 80 characters)', '復原副本名稱（最多 80 字元）', 80);
+  const name = field(root, 'Recovery copy label (maximum 80 characters)', '復原副本名稱（最多 80 字元）', 80); name.id='browser-recovery-name';
   const historyRow = actions(root);
   const selection = node('p'); selection.tabIndex = 0; selection.style.overflowWrap = 'anywhere';
   const preview = field(root, 'Selected recovery copy', '已選復原副本', 5000); preview.type = 'textarea'; preview.rows = 5; preview.readOnly = true;
@@ -126,7 +132,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   node('p', 'Choose one UTF-8 .txt or .md file up to 1 MiB. Text stays in memory until this page closes or you clear it. JSON, executables and binary formats are not accepted. PDF, office, audio, video, image and archive conversion are unavailable in this visitor tool.', '選擇一份最大 1 MiB 嘅 UTF-8 .txt 或 .md 檔案。文字只保留喺記憶體，直到關閉此頁或清除。唔接受 JSON、可執行檔或二進位格式。此訪客工具唔支援 PDF、辦公室文件、音訊、影片、圖片同封存轉換。');
   const picker = node('input'); picker.type = 'file'; picker.accept = '.txt,.md,text/plain,text/markdown'; picker.style.maxWidth = '100%';
   localized.push(() => picker.setAttribute('aria-label', text('Select a local text file, maximum 1 MiB', '選擇本機文字檔案，最大 1 MiB')));
-  const editor = field(root, 'Text to convert (UTF-8, maximum 1 MiB)', '要轉換嘅文字（UTF-8，最大 1 MiB）', MAX_TEXT_BYTES); editor.type = 'textarea'; editor.rows = 6;
+  const editor = field(root, 'Text to convert (UTF-8, maximum 1 MiB)', '要轉換嘅文字（UTF-8，最大 1 MiB）', MAX_TEXT_BYTES); editor.type = 'textarea'; editor.rows = 6; editor.id='browser-native-text-editor';
   const fileRow = actions(root); let generation = 0;
   picker.addEventListener('change', async () => {
     const file = picker.files?.[0]; const current = ++generation;
@@ -151,17 +157,28 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   node('p', 'Markdown output preserves source text; it does not render or sanitize embedded markup. The JSON text envelope preserves the entire normalized text as one string, and is not a visitor-plan backup. Line endings normalize to LF. Downloads do not overwrite the source file. Editor discovery and opening a native editor require the installed app; this public page cannot confirm an editor installation.', 'Markdown 輸出保留原文，唔會顯示或淨化內嵌標記。JSON 文字封裝會將全部已統一換行嘅文字保留為一個字串，唔係訪客計劃備份。換行會統一為 LF。下載唔會覆寫來源檔案。偵測同開啟原生編輯器需要已安裝程式，此公開頁無法確認編輯器安裝狀態。');
   visitor.querySelector('#companion-title')?.closest('section')?.before(root);
   if (!root.isConnected) visitor.append(root);
+  mountBrowserTone(visitor);
   mountBrowserPreferences(visitor);
   mountBrowserRecords(visitor);
   mountBrowserAppearance(visitor);
   mountBrowserSchedule(visitor, applyPreferences);
   mountBrowserLogo(visitor);
+  const authenticator = mountBrowserAuthenticator(visitor);
+  mountBrowserLocks(visitor, authenticator);
   mountBrowserNavigation(visitor);
+  mountBrowserTabs(visitor);
+  mountBrowserGuidance(visitor);
   protectBrowserMutation(visitor.querySelector('#visitor-reset'),()=>text('Clear the current visitor goal, notes and checklist in this browser. Recovery copies, learning progress, preferences and companion sessions are not cleared. Export or save a recovery copy first if needed.','清除此瀏覽器目前訪客目標、筆記同清單。不會清除復原副本、學習進度、偏好或配對連線。如有需要請先匯出或儲存復原副本。'));
   protectBrowserMutation(visitor.querySelector('#visitor-import'),()=>text('Replace the current visitor goal, notes and checklist with the validated backup entered above. Invalid input changes nothing. Recovery copies and companion sessions are not replaced.','以上方輸入且通過驗證嘅備份取代目前訪客目標、筆記同清單。無效輸入不會更改資料，亦唔會取代復原副本或配對連線。'));
   localized.forEach(update => update());
   document.querySelector('#language')?.addEventListener('change', () => localized.forEach(update => update()));
+  document.addEventListener('browser-native-copy-change', () => localized.forEach(update => update()));
 }
+
+
+
+
+
 
 
 
