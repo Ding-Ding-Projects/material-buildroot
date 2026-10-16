@@ -68,8 +68,9 @@ export class ExecutionService {
   revoke(grantId: string): void;
   validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
   reconcileCleanup(receipt: unknown): Promise<CleanupVerdict>;
+  prepareDocker(request: { grantId: string; runtime: ExecutionRuntime }): Promise<{ name: string; daemonId: string; uid: number; gid: number; state: "prepared"; permissions: "unverified"; retained: true }>;
   discover(): Promise<{
-    docker: ExecutionResult & { available: boolean };
+    docker: ExecutionResult & { available: boolean; reason: string; images: string[]; imageState: string };
     wsl: Partial<ExecutionResult> & { distributions: string[] };
   }>;
   probeResources(request: { grantId: string; runtime: ExecutionRuntime }): Promise<{ cpuSlots: number | null; memoryAvailableBytes: number | null; storageAvailableBytes: number | null; observedAt: string; constraintModel: "unknown" | "cgroup-v2-and-affinity" }>;
