@@ -159,6 +159,7 @@ function state(value) {
       "onboarding",
       "snapshots",
       "activity",
+      "preferenceProvenance",
     ],
     [
       "format",
@@ -176,6 +177,17 @@ function state(value) {
   if (value.format !== "material-buildroot-workspace" || value.version !== 1)
     fail();
   revision(value.revision);
+  // Absence on older files is unknown, never inferred from the value or revision.
+  if (Object.hasOwn(value, "preferenceProvenance")) {
+    object(value.preferenceProvenance, ["theme"]);
+    const source = value.preferenceProvenance.theme;
+    object(source, ["origin", "revision"]);
+    one(source.origin, ["default", "saved", "restored", "imported"]);
+    revision(source.revision);
+    if (source.revision > value.revision) fail();
+    if (source.origin === "default" && (source.revision !== 0 || value.preferences?.theme !== "system")) fail();
+    if (source.origin !== "default" && source.revision < 1) fail();
+  }
   payload({
     plans: value.plans,
     preferences: value.preferences,

@@ -175,6 +175,7 @@ class MaterialBuildroot extends LitElement {
     event.detail.complete();
   }
   private workspaceRevision = 0;
+  private themeSource: import('../shared/workspace').WorkspaceState['preferenceProvenance'];
   plans: Plan[] = [];
   selectedId = "";
   edit: Plan | undefined;
@@ -510,6 +511,7 @@ class MaterialBuildroot extends LitElement {
     this.snapshots = state.snapshots;
     this.plans = state.plans;
     this.theme = state.preferences.theme;
+    this.themeSource = state.preferenceProvenance;
     this.mediaChanged();
     this.setupDone =
       state.onboardingCompleted || state.onboarding?.dismissed === true;
@@ -1509,6 +1511,15 @@ class MaterialBuildroot extends LitElement {
           </section>`}
     </div>`;
   }
+  private themeProvenance(){
+    if(this.workspaceMode==="loading"||this.workspaceMode==="unavailable")return this.l("Saved theme origin is unavailable while loading or disconnected.","載入中或連線中斷時，無法確認已儲存主題來源。",true);
+    if(this.workspaceMode==="session")return this.l("Session-only choice. Initial fallback: follow system. This is not a confirmed saved preference.","只限工作階段嘅選擇。初始後備值：跟隨系統。唔係已確認儲存偏好。",true);
+    const source=this.themeSource?.theme;
+    if(!source)return this.l("Legacy workspace: the theme value is loaded, but its written-versus-default origin was not recorded. A new explicit save records provenance.","舊工作區：已載入主題值，但未記錄寫入或預設來源。再次明確儲存會記錄來源。",true);
+    if(source.origin==='default')return this.l("Source: compiled initial default, follow system. No explicit theme save is recorded.","來源：內置初始預設值，跟隨系統。未記錄明確主題儲存。",true);
+    const description=source.origin==='saved'?this.l("Source: explicit preference write at local revision","來源：明確偏好寫入，本機修訂版本",true):source.origin==='restored'?this.l("Source: restored workspace at local revision","來源：已還原工作區，本機修訂版本",true):this.l("Source: imported workspace at local revision","來源：已匯入工作區，本機修訂版本",true);
+    return description+' '+source.revision;
+  }
   private settingsView() {
     return html`<div class="settings-grid view">
       <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;this.requestUpdate();}}}></settings-search>
@@ -1566,7 +1577,7 @@ class MaterialBuildroot extends LitElement {
       </section>`:nothing}
       <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
         <h2>${this.owned("Appearance", "外觀")}</h2>
-        <p class="muted">${this.workspaceMode==="durable"?this.l("Source: current local workspace document. Per-field written-versus-default origin is not recorded. Compiled initial value: follow system.","來源：目前本機工作區文件。未記錄逐欄位寫入或預設來源。內置初始值：跟隨系統。",true):this.workspaceMode==="session"?this.l("Source: session preference; initial fallback follows system and is not a confirmed saved value.","來源：工作階段偏好；初始後備值跟隨系統，唔係已確認儲存值。",true):this.l("Saved preference provenance is unavailable while loading or disconnected.","載入中或連線中斷時，無法確認已儲存偏好來源。",true)} ${this.l("Current base value:","目前基礎值：",true)} ${this.theme}</p>
+        <p class="muted">${this.themeProvenance()} ${this.l("Current base value:","目前基礎值：",true)} ${this.theme}</p>
         <guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Theme","主題",true),purpose:this.l("System follows the operating-system appearance; light and dark choose a fixed palette. This selector saves immediately when local workspace storage is available. A schedule may temporarily override the base palette.","跟隨系統會使用作業系統外觀，淺色同深色使用固定配色。本機工作區儲存可用時，此選單會即時儲存。排程可能暫時覆寫基礎配色。",true),steps:[this.l("Try a sample palette choice here; this isolated selection does not restyle or save the application.","喺呢度試用配色選項，獨立選擇唔會改變或儲存程式外觀。",true),this.l("Use the real selector below and wait for the save outcome. Choose the previous value to reverse the preference.","使用下方真實選單並等候儲存結果，選擇之前嘅值可還原偏好。",true)],example:"system",options:["system","light","dark"],expected:this.l("The practice choice is retained only while this guide is open.","練習選項只會喺此說明開啟期間保留。",true)}}></guided-forms>
         <md-outlined-select
           .label=${this.workspaceMode === "durable"

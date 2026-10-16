@@ -9,6 +9,7 @@ const fresh = () => ({
   revision: 0,
   plans: [],
   preferences: { theme: "system" },
+  preferenceProvenance: { theme: { origin: "default", revision: 0 } },
   onboardingCompleted: false,
   onboarding: { step: 0, runtime: "wsl", name: "", dismissed: false },
   snapshots: [],
