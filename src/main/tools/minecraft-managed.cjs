@@ -155,7 +155,7 @@ function createManagedMinecraft(options) {
       if (remote) {
         command = await executable(options, "ssh");
         const invocation = (container ? ["docker", ...containerArgs] : launch).map(quote).join(" ");
-        const script = "test \"$(id -u)\" -ne 0 && cd " + quote(directory) + " && test -f " + quote(entry) + (request.edition === "java" ? " && grep -qx 'eula=true' eula.txt" : "") + " && export LD_LIBRARY_PATH=. && exec " + invocation;
+        const script = "test \"$(id -u)\" -ne 0 && cd " + quote(directory) + " && test ! -e .material-transfer-incomplete && test -f " + quote(entry) + (request.edition === "java" ? " && grep -qx 'eula=true' eula.txt" : "") + " && export LD_LIBRARY_PATH=. && exec " + invocation;
         args = sshArgs(request.host, script);
       } else if (container) { command = await executable(options, "docker"); args = containerArgs; }
       else if (request.edition === "java") { command = await executable(options, "java"); args = launch.slice(1); }

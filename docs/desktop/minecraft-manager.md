@@ -30,7 +30,7 @@ The extension download requires an allowlisted HTTPS origin, declared size, SHA-
 |---|---|---|
 | Local process | Starts the selected trusted Java or Bedrock server with fixed arguments and a private console input pipe. | Java is selected through the verified executable picker. Bedrock must already be installed. Root execution is refused on platforms exposing a Unix UID. |
 | Local container | Starts a uniquely named Docker container with an ownership label, UID/GID 1000, dropped capabilities, no-new-privileges, memory/CPU bounds and loopback-only port publication. | The compatible image must already be present under its exact SHA-256 digest. No automatic image pull. The server directory must be writable by UID/GID 1000. |
-| SSH process | Uses the user-selected, hash-admitted OpenSSH executable and existing SSH configuration to start a preinstalled Linux server with a fixed command. | Existing key authentication, strict known-host checking, non-root remote identity and an explicit native launch confirmation. No password collection, host-key acceptance or remote provisioning. |
+| SSH process | Uses the user-selected, hash-admitted OpenSSH executable and existing SSH configuration to start a preinstalled Linux server with a fixed command. | Existing key authentication, strict known-host checking, non-root remote identity and an explicit native launch confirmation. No password collection or host-key acceptance. File provisioning uses the separate preview workflow below. |
 | SSH container | Uses that same SSH boundary to start the uniquely owned container on the selected host. | All SSH requirements plus an already installed Docker daemon and preloaded compatible digest-pinned image. |
 
 Container publication maps the configured port to the same port inside the container, using TCP for Java and UDP for Bedrock. The server's own properties must agree with the selected port. Bedrock IPv6 publication and additional ports are not configured automatically.
@@ -43,7 +43,7 @@ Startup reports `process-started`, never game readiness. Status reports the obse
 
 An unexpected SSH exit reports `connection-lost`, preserving uncertainty about the remote process. A disconnected process is not declared stopped, and blind replacement is refused. An SSH container can receive a subsequent targeted stop attempt. Confirm exit before closing the application. Shutdown requests graceful stop and reports an unverified result if the owned process does not settle in the bounded wait.
 
-Active native-process handles are session-local. The continuation below adds durable records and explicit container reconnection, but not durable native-process adoption, a health probe, restart scheduling, remote provisioning or world migration.
+Active native-process handles are session-local. The continuation below adds durable records and explicit container reconnection, but not durable native-process adoption, a health probe, restart scheduling, remote runtime installation or world migration.
 
 ## Delivery status
 
@@ -63,7 +63,7 @@ Current official metadata admits the selected game version, stable loader and st
 
 The Worlds view discovers local directories containing `level.dat`; Bedrock uses the server directory beneath `worlds`. A preview requires the declared edition/version/flavour, stopped-server confirmation and a native destination grant. It inventories at most 100,000 regular files, 16 GiB and 32 directory levels, rejects unsafe paths and symbolic links, and records per-file SHA-256 plus an inventory digest. Preview authority expires after ten minutes.
 
-Execution rereads the source, refuses changed content or an existing destination, copies with no-overwrite semantics and verifies copied bytes. Failed or cancelled copies retain `.material-transfer-incomplete` and are not usable worlds. Backups include only relative file names, hashes and the declared compatibility tuple. Restore requires a matching manifest and tuple. This is a byte-preserving copy, not proof of the world creator version. No original is replaced, removed, activated or migrated. Externally managed servers must be independently confirmed stopped. Remote transfer remains unavailable.
+Execution rereads the source, refuses changed content or an existing destination, copies with no-overwrite semantics and verifies copied bytes. Failed or cancelled copies retain `.material-transfer-incomplete` and are not usable worlds. Backups include only relative file names, hashes and the declared compatibility tuple. Restore requires a matching manifest and tuple. This is a byte-preserving copy, not proof of the world creator version. No original is replaced, removed, activated or migrated. Externally managed servers must be independently confirmed stopped. The later typed SSH workflow below adds transfer of a completed backup to a fresh remote directory.
 
 ### Player and permission records
 
@@ -87,4 +87,40 @@ Choose a local time with its IANA time zone, at most 30 days ahead, for a curren
 
 ### Remaining completion boundary
 
-The overall requirement remains partial. Full historical/version-bound descriptors, admitted historical Bedrock acquisition, completion of Fabric runtime provisioning, authenticated remote provisioning and world transfer, world activation/migration, extension dependency/update/remove/rollback, durable native-process adoption, complete readiness/reconnect acceptance, recurring/start/restart schedules and the full version/flavour/target acceptance matrix remain unfinished. No tests, static analysis, review pass, runtime, SSH/container execution or screenshots were run for this continuation.
+The overall requirement remains partial. Full historical/version-bound descriptors, admitted historical Bedrock acquisition, completion of Fabric runtime provisioning, remote runtime installation, world activation/migration, extension dependency/update/remove/rollback, durable native-process adoption, complete readiness/reconnect acceptance, recurring/start/restart schedules and the full version/flavour/target acceptance matrix remain unfinished. The source unit below adds typed file provisioning and world transfer. No tests, static analysis, review pass, runtime, SSH/container execution or screenshots were run for this continuation.
+
+## Typed SSH provisioning and world transfer
+
+The Remote transfer view prepares new directories for the existing SSH process and SSH container targets. This is a file-provisioning workflow, not a remote package manager: it never installs Java, pulls an image, starts a container/server, accepts a host key or collects a password.
+
+### Source and destination authority
+
+Choose the source directory through a native read grant. Java provisioning requires `server.jar` to match the selected edition/version/flavour and the manager distribution receipt SHA-256. The workflow copies that exact entry point and regenerates only the supported configuration properties, online authentication, EULA and a minimal distribution receipt. Extensions, worlds, unrecognized configuration and credential-bearing settings are excluded. Fabric remains bootstrap-only.
+
+World transfer requires a completed manager backup with the exact declared compatibility tuple and a matching inventory digest. It sends only the inventoried world files, never local machine paths. It does not activate, overwrite or migrate a world.
+
+Preview is local-only and does not contact the SSH host. It displays the host alias, target, exact destination, file names, sizes, hashes and an expiring aggregate digest. Execution requires that exact preview digest plus a native confirmation naming the host, destination and total size. Changing the source invalidates execution.
+
+### Fixed authenticated transport
+
+The host uses the previously selected and hash-admitted OpenSSH executable. Fixed arguments enforce batch authentication, strict known-host checking and bounded connection/keepalive timeouts. Existing SSH configuration supplies authentication. A successful remote preflight is required before reporting host-key verification; preview alone reports `not-contacted`.
+
+The supported destination is a Linux host with `sha256sum`, `realpath` and GNU `dd`. Its parent directory must already exist at the exact canonical absolute path without symbolic links. The operation refuses root. SSH container preparation additionally requires UID 1000, matching the existing lifecycle adapter. The runtime or compatible digest-pinned container image must already be available for the later separate start action.
+
+Commands are assembled exclusively by the host from fixed templates and strictly validated or quoted values. The renderer supplies structured fields, never shell text. Binary bytes stream through SSH standard input directly, without an external SCP executable or text/base64 conversion.
+
+### Preservation and verification
+
+The destination is created with a nonrecursive exclusive directory creation. Existing destinations are refused. A unique ownership marker identifies the in-progress transfer. Every regular file is created with exclusive-open semantics, checked remotely against its preview SHA-256, and rechecked before completion. Nested directories must resolve to their exact intended paths. The transfer writes a relative-path receipt, verifies its hash, and removes only its own incomplete marker after all checks succeed. Source files are rechecked throughout.
+
+Server start refuses a destination retaining `.material-transfer-incomplete`. No remote source, existing destination, user file or world is removed. Cancellation terminates only this owned SSH client transport; it never launches a remote deletion command. Failed or cancelled destinations remain preserved. If the connection is lost during finalization, the final remote state remains unknown rather than being described as definitely incomplete or complete. Retry requires a new preview and a fresh destination.
+
+Transfers are bounded to one active operation, 10 retained previews, 10,000 world files, 8 GiB of world data, 512-character relative paths, a ten-minute preview lifetime and a one-hour total operation timeout. Individual SSH operations also have bounded time and output. The UI offers cancellation and independent status refresh while a transfer is pending.
+
+Private local transfer records retain the destination, host, state and byte/file counts for recovery across navigation and application restart. Restart never resumes a transfer automatically. Previously active records become `interrupted-remote-state-unknown` until inspected independently. Profile export still excludes these private operational records.
+
+### Evidence and remaining scope
+
+This unit is source-only: no remote host, SSH command, server, container, runtime installer, test, review, capture or producer was invoked. The earlier build receipt for `7218f688219c909a46223778d7b51b66315962b5` does not cover this later source.
+
+Historical Bedrock acquisition, full Fabric runtime provisioning, remote runtime installation, remote Windows destinations, automatic extension provisioning, world activation/migration, recurring schedules and full runtime acceptance remain incomplete. Strict SSH transport and file hashes do not establish game readiness.
