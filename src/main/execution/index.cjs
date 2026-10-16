@@ -4,6 +4,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { createDockerRuntime } = require("./docker-runtime.cjs");
+const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs");
 const TARGETS = Object.freeze([
   "all",
   "clean",
@@ -13,6 +14,7 @@ const TARGETS = Object.freeze([
   "uboot-olddefconfig",
   "material-config-domains",
   "savedefconfig",
+  "material-save-defconfig",
   "legal-info",
   "source",
   "show-info",
@@ -172,7 +174,7 @@ function canonicalDirectory(value) {
   return real;
 }
 const LINUX_SCRIPT =
-  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; if [ "$4" = material-config-domains ]; then printf "MATERIAL_CONFIG_OUTPUT=%s\n" "$2"; exec make -s --no-print-directory -C "$1" "O=$2" "BR2_EXTERNAL=$5" printvars "VARS=LINUX_DIR BUSYBOX_DIR UBOOT_DIR"; fi; case "$4" in linux-olddefconfig) set -- "$@" "LINUX_KCONFIG_EDITORS=olddefconfig" ;; uboot-olddefconfig) set -- "$@" "UBOOT_KCONFIG_EDITORS=olddefconfig" ;; busybox-oldconfig) yes "" | make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "BUSYBOX_KCONFIG_EDITORS=oldconfig" "$4"; exit $? ;; *) set -- "$@" "MATERIAL_CONFIG_UNUSED=1" ;; esac; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "${7:-$6}" "$4"';
+  'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; if [ "$4" = material-config-domains ]; then printf "MATERIAL_CONFIG_OUTPUT=%s\n" "$2"; exec make -s --no-print-directory -C "$1" "O=$2" "BR2_EXTERNAL=$5" printvars "VARS=LINUX_DIR BUSYBOX_DIR UBOOT_DIR"; fi; if [ "$4" = material-save-defconfig ]; then test ! -e "$2/material-minimal-defconfig" && test ! -L "$2/material-minimal-defconfig" || exit 78; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "BR2_DEFCONFIG=$2/material-minimal-defconfig" savedefconfig; fi; case "$4" in linux-olddefconfig) set -- "$@" "LINUX_KCONFIG_EDITORS=olddefconfig" ;; uboot-olddefconfig) set -- "$@" "UBOOT_KCONFIG_EDITORS=olddefconfig" ;; busybox-oldconfig) yes "" | make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "BUSYBOX_KCONFIG_EDITORS=oldconfig" "$4"; exit $? ;; *) set -- "$@" "MATERIAL_CONFIG_UNUSED=1" ;; esac; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "${7:-$6}" "$4"';
 const ENVIRONMENT_SCRIPT =
   'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; gcc -dumpmachine; gcc -dumpfullversion -dumpversion';
 const RESOURCE_SCRIPT = `set -eu
@@ -284,15 +286,18 @@ class ExecutionService {
     trustedSource = false,
     externalTrees = [],
     trustedExternalTrees = false,
+    wslReceipt,
   }) {
     if (trustedSource !== true)
       throw new Error("source-execution-consent-required");
+    if (wslReceipt && (!isWslReceipt(wslReceipt) || wslReceipt.paths.root !== root || wslReceipt.paths.source !== source || wslReceipt.paths.output !== output || externalTrees.length)) throw new Error("wsl-project-authority-required");
+    if (!wslReceipt && [root, source, output].some(value => typeof value === "string" && value.startsWith("\\\\"))) throw new Error("unsupported-build-path");
     root = canonicalDirectory(root);
     source = canonicalDirectory(source);
     output = canonicalDirectory(output);
     if (
-      !/^[A-Za-z0-9_:/\\.+-]+$/.test(source) ||
-      !/^[A-Za-z0-9_:/\\.+-]+$/.test(output)
+      !wslReceipt && (!/^[A-Za-z0-9_:/\\.+-]+$/.test(source) ||
+      !/^[A-Za-z0-9_:/\\.+-]+$/.test(output))
     )
       throw new Error("unsupported-build-path");
     if (
@@ -344,6 +349,7 @@ class ExecutionService {
       throw new Error("duplicate-external-tree");
     const grantId = crypto.randomUUID();
     this.grants.set(grantId, {
+      wslReceipt,
       root,
       source,
       output,
@@ -362,6 +368,13 @@ class ExecutionService {
       output,
       externalTrees: external.map((entry) => entry.path),
     };
+  }
+  async grantWslProject(receipt) {
+    await verifyWslProject(receipt, args => boundedProcess(this.executables.wsl, args).completion);
+    return this.grantProject({ ...receipt.paths, trustedSource: true, wslReceipt: receipt });
+  }
+  async verifyWslGrant(grant, runtime) {
+    if (grant.wslReceipt) await verifyWslProject(grant.wslReceipt, args => boundedProcess(this.executables.wsl, args).completion, runtime);
   }
   validateExternal(grant) {
     try {
@@ -411,6 +424,7 @@ class ExecutionService {
   async prepareDocker({ grantId, runtime }) {
     const grant = this.grants.get(grantId);
     if (!grant) throw new Error("grant-unavailable");
+    await this.verifyWslGrant(grant, runtime);
     return this.dockerRuntime.prepare(grant, runtime);
   }
   validateOwnershipReceipt(receipt) { return validateOwnershipReceipt(receipt); }
@@ -469,6 +483,7 @@ class ExecutionService {
   async probeResources(request) {
     if (!request || typeof request !== "object" || Array.isArray(request) || Object.keys(request).length !== 2 || !Object.hasOwn(request, "grantId") || !Object.hasOwn(request, "runtime")) throw new Error("invalid-resource-probe");
     const grant = this.grants.get(request.grantId); if (!grant) throw new Error("grant-unavailable");
+    await this.verifyWslGrant(grant, request.runtime);
     const validate = () => {
       if (this.grants.get(request.grantId) !== grant) throw new Error("grant-unavailable");
       for (const key of ["root", "source", "output"]) {
@@ -488,7 +503,7 @@ class ExecutionService {
     } else if (runtime?.kind === "wsl") {
       if (this.platform !== "win32" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(runtime.distribution || "")) throw new Error("invalid-wsl-runtime");
       file = this.executables.wsl;
-      const translated = await boundedProcess(file, ["--distribution", runtime.distribution, "--exec", "wslpath", "-a", "-u", grant.output]).completion;
+      const translated = grant.wslReceipt ? {state:"succeeded",stdout:grant.wslReceipt.storage.outputLinux} : await boundedProcess(file, ["--distribution", runtime.distribution, "--exec", "wslpath", "-a", "-u", grant.output]).completion;
       const output = translated.stdout.trim(); if (translated.state !== "succeeded" || !/^\/[A-Za-z0-9_/.+-]+$/.test(output)) throw new Error("wsl-path-translation-failed");
       validate(); args = ["--distribution", runtime.distribution, "--exec", "timeout", "--signal=TERM", "--kill-after=1s", "8s", "/bin/sh", "-c", RESOURCE_SCRIPT, "resources", output, "runtime"];
     } else if (runtime?.kind === "linux-fixture" && this.linuxFixture && this.platform !== "win32") {
@@ -512,6 +527,7 @@ class ExecutionService {
       throw new Error("invalid-environment-probe");
     const grant = this.grants.get(request.grantId);
     if (!grant) throw new Error("grant-unavailable");
+    await this.verifyWslGrant(grant, request?.runtime);
     const validate = () => {
       if (this.grants.get(request.grantId) !== grant)
         throw new Error("grant-unavailable");
@@ -653,6 +669,7 @@ class ExecutionService {
       throw new Error("invalid-build-request");
     const grant = this.grants.get(grantId);
     if (!grant) throw new Error("grant-unavailable");
+    await this.verifyWslGrant(grant, request?.runtime);
     const revalidateAuthority = () => {
       if (signal?.aborted) throw new Error("execution-cancelled");
       if (this.grants.get(grantId) !== grant) throw new Error("grant-unavailable");
@@ -763,7 +780,7 @@ class ExecutionService {
         "/bin/sh",
         runtime.image,
         "-c",
-        'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; test -w /material-buildroot-cache && test -w /output || { echo container-storage-permission-denied >&2; exit 77; }; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "DL_DIR=/material-buildroot-cache" "$4"',
+        'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; test -w /material-buildroot-cache && test -w /output || { echo container-storage-permission-denied >&2; exit 77; }; if [ "$4" = material-save-defconfig ]; then test ! -e "$2/material-minimal-defconfig" && test ! -L "$2/material-minimal-defconfig" || exit 78; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "DL_DIR=/material-buildroot-cache" "BR2_DEFCONFIG=$2/material-minimal-defconfig" savedefconfig; fi; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "DL_DIR=/material-buildroot-cache" "$4"',
         "build",
         "/source",
         "/output",
@@ -791,6 +808,11 @@ class ExecutionService {
       )
         throw new Error("invalid-wsl-runtime");
       const translate = async (value) => {
+        if (grant.wslReceipt) {
+          const key = Object.keys(grant.wslReceipt.paths).find(key => grant.wslReceipt.paths[key] === value);
+          if (!key) throw new Error("wsl-project-authority-required");
+          return grant.wslReceipt.storage[`${key}Linux`];
+        }
         const result = await boundedProcess(this.executables.wsl, [
           "--distribution",
           runtime.distribution,
@@ -833,8 +855,9 @@ class ExecutionService {
         "setsid",
         "/bin/sh",
         "-c",
-        'echo MATERIAL_BUILDROOT_PID=$$ START=$(awk \'sub(/^.*[)] /, "") {print $20}\' /proc/$$/stat); read -r authorization; test "$authorization" = "$6" || exit 79; ' + LINUX_SCRIPT,
+        (grant.wslReceipt ? wrapBuild : script => script)('echo MATERIAL_BUILDROOT_PID=$$ START=$(awk \'sub(/^.*[)] /, "") {print $20}\' /proc/$$/stat); read -r authorization; test "$authorization" = "$6" || exit 79; ' + LINUX_SCRIPT),
         "build",
+        ...(grant.wslReceipt ? [grant.wslReceipt.storage.rootLinux, grant.wslReceipt.proof] : []),
         source,
         output,
         String(jobs),
@@ -944,3 +967,6 @@ class ExecutionService {
   }
 }
 module.exports = { ExecutionService, TARGETS, boundedProcess, validateOwnershipReceipt };
+
+
+

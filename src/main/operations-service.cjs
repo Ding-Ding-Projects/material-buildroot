@@ -9,6 +9,7 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { createDefconfigWorkflows } = require("./configuration/defconfig-workflows.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
 const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
@@ -40,6 +41,7 @@ const {
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 
+const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const owner = "desktop-owner";
 const fields = {
   "documentation.list": [],
@@ -47,6 +49,7 @@ const fields = {
   "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
   "runtime.discover": [],
+  "runtime.wsl": ["kind", "distribution"],
   "runtime.docker.prepare": ["workspaceId", "runtime"],
   "runtime.python.choose": [],
   "project.list": [],
@@ -70,6 +73,9 @@ const fields = {
   "config.trustPreview": ["workspaceId"],
   "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
   "config.trustRevoke": ["workspaceId"],
+  "defconfig.catalog": ["workspaceId"],
+  "defconfig.apply": ["workspaceId", "revision", "id"],
+  "defconfig.save": ["workspaceId", "revision"],
   "config.inspect": ["workspaceId"],
   "config.defconfigs": ["workspaceId"],
   "config.apply": ["workspaceId", "revision", "changes"],
@@ -102,6 +108,8 @@ const fields = {
   "package.preview": ["workspaceId", "externalTreeId", "model"],
   "package.discover": ["workspaceId", "query", "offset", "limit"],
   "package.import": ["workspaceId", "packageId", "revision"],
+  "package.editors": ["workspaceId"],
+  "package.editor.open": ["workspaceId", "packageId", "revision", "file", "fileHash", "editorId"],
   "package.apply": [
     "workspaceId",
     "externalTreeId",
@@ -185,6 +193,7 @@ function createOperationsService({
   documentationDirectory,
   openDocumentationExternal,
   updateHostFactory,
+  openWslPath,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -195,6 +204,7 @@ function createOperationsService({
   },
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
@@ -244,8 +254,8 @@ function createOperationsService({
     }
     return item;
   }
-  function registerProject(selected) {
-    const granted = execution.grantProject({
+  function registerProject(selected, wslGranted) {
+    const granted = wslGranted || execution.grantProject({
       ...selected,
       trustedSource: true,
     });
@@ -254,6 +264,7 @@ function createOperationsService({
       root: selected.root,
       source: selected.source,
       output: selected.output,
+      ...(selected.storage ? { storage: selected.storage } : {}),
     });
     const identities = Object.fromEntries(
       ["root", "source", "output"].map((key) => {
@@ -266,7 +277,7 @@ function createOperationsService({
       ...selected,
       identities,
       grantId: granted.grantId,
-      runtime: options.runtime,
+      runtime: selected.storage ? { kind: "wsl", distribution: selected.storage.distribution } : options.runtime,
       externalTrees: [],
       externalTreeIds: [],
       externalStateVerified: options.externalTrees.length === 0,
@@ -912,6 +923,12 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const defconfigWorkflows = createDefconfigWorkflows({
+    resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; },
+    authorize: id => configurationConsent.requireTrust(id),
+    configuration: config,
+    execute: id => { const item = project(id); return executeProject({ workspaceId: id, runtime: item.runtime, target: "material-save-defconfig", jobs: 1 }); },
+  });
   const payloadManager = createPayloadManager({
     directory: path.join(directory, "payloads"),
     dialog,
@@ -1159,6 +1176,9 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
+    const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
+    if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
@@ -1172,6 +1192,16 @@ function createOperationsService({
       case "documentation.open":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
+      case "runtime.wsl":
+        if (!["discover", "inspect", "import", "install", "cloneSource", "chooseProject", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
+        if (request.kind === "chooseProject") {
+          const selected = await wslRuntime.chooseProject(request.distribution);
+          if (!selected) return {state:"cancelled"};
+          const granted = await execution.grantWslProject(selected.receipt);
+          try { return { ...registerProject(selected, granted), state:"project-adopted", distribution:request.distribution }; }
+          catch (error) { execution.revoke(granted.grantId); throw error; }
+        }
+        return wslRuntime.perform(request.kind, request.distribution);
       case "runtime.discover":
         return execution.discover();
       case "runtime.docker.prepare": {
@@ -1425,6 +1455,12 @@ function createOperationsService({
       case "config.trustRevoke":
         project(request.workspaceId);
         return configurationConsent.revoke(request);
+      case "defconfig.catalog":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.catalog(request));
+      case "defconfig.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.apply(request));
+      case "defconfig.save":
+        return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.save(request));
       case "config.inspect":
         return changeConfig(projectPaths(request.workspaceId), () => config.inspect(request));
       case "config.defconfigs":
@@ -1640,6 +1676,10 @@ function createOperationsService({
       }
       case "package.preview":
         return packageAuthoring.preview(request);
+      case "package.editors":
+        return require("./configuration/package-editor.cjs").discoverEditors();
+      case "package.editor.open":
+        return packageDiscovery.openEditor(request);
       case "package.discover":
         return packageDiscovery.discover({
           workspaceId: request.workspaceId,
@@ -1659,7 +1699,8 @@ function createOperationsService({
         return packageAuthoring.applyInitialize(request);
       case "package.apply":
         return packageAuthoring.apply(request);
-      case "source": {
+      case "source":
+        if (requestedProject?.storage) reject("WSL_SOURCE_OPERATION_UNAVAILABLE"); {
         const result = await sources.handle(request.request);
         if (!result.ok) reject(result.code);
         return result;
@@ -1749,3 +1790,6 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
+

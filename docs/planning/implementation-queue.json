@@ -36,7 +36,7 @@
     {
       "id": "PH01-T05",
       "description": "[R (A/D/C admission only)] Implement evidence validation that fails red then green when individual implementation, test, article, runtime, capture or parity records are absent or stale; bind proof to source and built artifact hashes.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/evidence-admission",
       "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
       "sourceCommit": "38044fd6f3f6378e3baaf707883382fecaf8c8f8"
@@ -149,7 +149,7 @@
       "state": "integrated-source-acceptance-deferred",
       "owner": "task/workspace-tabs",
       "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "88de056deadb40858b868296af6b39c24b1d0cc6"
+      "sourceCommit": "41852953b8c49d793994e17efa36b93147be2e48"
     },
     {
       "id": "PH03-T02",
@@ -176,10 +176,10 @@
     {
       "id": "PH03-T05",
       "description": "[A+D-native+R] Implement every-element appearance editor, continuous color tools, logo derivatives, accessible sizing, motion/reduced motion and bounded overlay/collapse behavior.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/appearance",
       "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "b59992add60718e6e809ff459042abc34138613b"
+      "sourceCommit": "02acf2ad674a1bc36360677a2704d38eeb1aa93b"
     },
     {
       "id": "PH03-T06",
@@ -250,15 +250,15 @@
     {
       "id": "PH05-T01",
       "description": "[A+R] Implement create/open/adopt/import/clone projects with source/ref/branch status, maintained-LTS recommendation, actual revision provenance and per-project WSL/Docker choice.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/project-workflows",
       "verification": "deferred"
     },
     {
       "id": "PH05-T02",
       "description": "[A+R] Implement existing and dedicated managed WSL distribution discovery/provisioning, prerequisite checks and Linux-side storage with Windows browse/export.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/wsl-runtime",
       "verification": "deferred"
     },
     {
@@ -272,15 +272,15 @@
     {
       "id": "PH05-T04",
       "description": "[A+R] Implement source download/clone/ref acquisition and snapshot/diff/preview/explicit-Apply upgrades with rollback and compatibility boundaries.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/source-lifecycle",
       "verification": "deferred"
     },
     {
       "id": "PH05-T05",
       "description": "[A+R] Implement concurrent per-project queues with global CPU/RAM/storage limits, serialization per canonical output tree, safe process-group/container cancellation and scoped terminals.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/build-queues",
       "verification": "deferred"
     },
     {
@@ -301,8 +301,8 @@
     {
       "id": "PH06-T02",
       "description": "[A+R] Implement typed configuration controls and immediate queued reconciliation with requested/effective diff, atomic snapshots, undo ordering and failure restoration.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/configuration-controls",
       "verification": "deferred"
     },
     {
@@ -316,15 +316,15 @@
     {
       "id": "PH06-T04",
       "description": "[A+R] Implement real defconfig browsing/apply/minimal-save provenance, ordered external trees and separate output directories.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/defconfig-workflows",
       "verification": "deferred"
     },
     {
       "id": "PH06-T05",
       "description": "[A+R] Implement complete package source/build/hash/license/dependency editors, ordered patch/hook workflows, overlays with mappings/permissions and discovered external-editor handoff.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/package-editors",
       "verification": "deferred"
     },
     {
@@ -513,8 +513,8 @@
     {
       "id": "PH10-T01",
       "description": "[A+D+C+R (final applicable acceptance)] Assemble one complete Windows x64 installer with all required capability payloads, original installed icons, valid license disclosures and actual offline bundled-first discovery.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/offline-payloads",
       "verification": "deferred"
     },
     {
@@ -535,7 +535,7 @@
     {
       "id": "PH10-T04",
       "description": "[A+D+C+R (final applicable acceptance)] Implement background update discovery/download with an unsigned-ready banner and explicit restart; exercise real version transitions and recovery.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/updates",
       "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
       "sourceCommit": "6ae7649306ebd62f220a24326ca32259d5bfaf73"
@@ -569,5 +569,6 @@
       "verification": "deferred"
     }
   ],
-  "updatedAt": "2026-10-16T18:35:07.7280332Z"
+  "updatedAt": "2026-10-16T18:35:07.7280332Z",
+  "integrationCommit": "fb3dcdf3d782a7807d4ece621dea99d652f1f62e"
 }

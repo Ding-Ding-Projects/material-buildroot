@@ -23,6 +23,9 @@ type PackageModel = {
   homepage: string; license: string; licenseFiles: string[];
   buildSystem: BuildSystem; dependencies: string[]; configDependencies: string[];
   help: string; hashes: Hash[];
+  patches?: string[]; buildOptions?: string[];
+  hooks?: {stage:string;operation:string;source:string;destination:string;mode:string}[];
+  overlays?: {source:string;destination:string;mode:string}[];
   pythonSetupType?: "setuptools" | "pep517" | "flit" | "hatch" | "poetry" | "setuptools-rust" | "maturin";
 };
 type Preview = { revision: string; previewHash: string; files: {path:string;before:string|null;after:string;mode:number}[]; warnings: string[] };
@@ -181,6 +184,26 @@ export class PackagePanel extends LitElement {
     },true);
   }
 
+  private move<T>(list:T[], index:number, delta:number){if(index+delta<0||index+delta>=list.length)return;[list[index],list[index+delta]]=[list[index+delta],list[index]];this.edit();}
+  private renderFiles(){
+    const m=this.model, patches=m.patches||[], hooks=m.hooks||[], overlays=m.overlays||[];
+    return html`<section class="panel stack" ?hidden=${this.editorTab!=="files"}>
+      <h3>${this.l("Ordered patches","有序修補")}</h3>
+      <p>${this.l("HTTPS patch URLs are applied in the displayed order by Buildroot. No patch is downloaded or executed by this editor.","Buildroot 會按顯示次序套用 HTTPS 修補網址。編輯器唔會下載或執行修補。")}</p>
+      ${patches.map((value,i)=>html`<div class="stack hash-row">${this.field(this.l(`Patch URL ${i+1}`,`修補網址 ${i+1}`),value,v=>patches[i]=v)}<div class="row">${this.button("Move patch up","上移修補",()=>this.move(patches,i,-1),i===0)}${this.button("Move patch down","下移修補",()=>this.move(patches,i,1),i===patches.length-1)}${this.button("Remove patch","移除修補",()=>{m.patches=patches.filter((_,n)=>n!==i);this.edit();})}</div></div>`)}
+      ${this.button("Add patch","加入修補",()=>{m.patches=[...patches,""];this.edit();},patches.length>=64)}
+      <h3>${this.l("Configure options","設定選項")}</h3>
+      ${this.field(this.l("One literal option per line","每行一個字面選項"),(m.buildOptions||[]).join("\n"),v=>m.buildOptions=v.split(/\r?\n/).filter(Boolean),this.l("Autotools, CMake and Meson only. No shell expressions or spaces inside an option.","只適用於 Autotools、CMake 同 Meson。選項內唔可以有 shell 表達式或空格。"),true)}
+      <h3>${this.l("Ordered file-operation hooks","有序檔案操作掛鈎")}</h3>
+      <p>${this.l("Copy and directory operations only. Source paths are relative to the extracted package. Post-install destinations are relative to the target filesystem; other destinations are relative to the package build directory.","只提供複製同建立目錄。來源路徑相對於解壓後套件，安裝後目的地相對於目標檔案系統，其餘目的地相對於套件建置目錄。")}</p>
+      ${hooks.map((h,i)=>html`<div class="stack hash-row"><h4>${this.l(`Hook ${i+1}`,`掛鈎 ${i+1}`)}</h4>${this.select(this.l("Stage","階段"),h.stage,["PRE_CONFIGURE","POST_CONFIGURE","PRE_BUILD","POST_BUILD","POST_INSTALL_TARGET"],v=>h.stage=v)}${this.select(this.l("Operation","操作"),h.operation,["copy","mkdir"],v=>h.operation=v)}${h.operation==="copy"?this.field(this.l("Package source path","套件來源路徑"),h.source,v=>h.source=v):nothing}${this.field(this.l("Destination path","目的地路徑"),h.destination,v=>h.destination=v)}${this.field(this.l("Octal permissions","八進位權限"),h.mode,v=>h.mode=v,"000–777")}<div class="row">${this.button("Move hook up","上移掛鈎",()=>this.move(hooks,i,-1),i===0)}${this.button("Move hook down","下移掛鈎",()=>this.move(hooks,i,1),i===hooks.length-1)}${this.button("Remove hook","移除掛鈎",()=>{m.hooks=hooks.filter((_,n)=>n!==i);this.edit();})}</div></div>`)}
+      ${this.button("Add hook","加入掛鈎",()=>{m.hooks=[...hooks,{stage:"POST_BUILD",operation:"copy",source:"",destination:"",mode:"644"}];this.edit();},hooks.length>=64)}
+      <h3>${this.l("Overlay file mappings","覆蓋檔案對應")}</h3>
+      <p>${this.l("Copy existing files from the selected external tree into the target filesystem after package installation. Paths must be relative and cannot contain spaces or traversal components. Source existence is checked before preview; no host file permissions are changed.","套件安裝後，會將所選外部樹現有檔案複製到目標檔案系統。路徑必須相對，唔可以包含空格或越界部分。預覽前會檢查來源存在，唔會更改主機檔案權限。")}</p>
+      ${overlays.map((o,i)=>html`<div class="stack hash-row">${this.field(this.l("External-tree source","外部樹來源"),o.source,v=>o.source=v)}${this.field(this.l("Target destination","目標目的地"),o.destination,v=>o.destination=v)}${this.field(this.l("Octal permissions","八進位權限"),o.mode,v=>o.mode=v,"000–777")}${this.button("Remove mapping","移除對應",()=>{m.overlays=overlays.filter((_,n)=>n!==i);this.edit();})}</div>`)}
+      ${this.button("Add overlay mapping","加入覆蓋對應",()=>{m.overlays=[...overlays,{source:"",destination:"",mode:"644"}];this.edit();},overlays.length>=64)}
+    </section>`;
+  }
   render(){
     const m=this.model,file=this.preview?.files[this.selectedFile];
     return html`<div class="stack" aria-busy=${this.pending}>
@@ -195,7 +218,7 @@ export class PackagePanel extends LitElement {
         <details><summary>${this.l("Initialize folders and activate external trees","初始化資料夾同啟用外部樹")}</summary><external-tree-panel .workspaceId=${this.workspaceId} .language=${this.language} @external-selected=${(e:CustomEvent)=>{this.external=e.detail;this.edit();}}></external-tree-panel></details>
       </section>
       <div class="package-workbench"><div class="canvas-pane"><diagram-workbench .language=${this.language} .title=${this.l("Package dependencies","套件相依圖")} .workspaceId=${this.workspaceId} canvasId="package-dependencies" .layoutKey=${this.workspaceId+":package-dependencies"} .nodes=${[{id:"package",label:m.name||this.l("Package draft","套件草稿"),detail:m.buildSystem,kind:"package"},...m.dependencies.map(value=>({id:"dep:"+value,label:value,detail:this.l("Build dependency","建置相依"),kind:"dependency",removable:true})),...m.configDependencies.map(value=>({id:"config:"+value,label:value,detail:this.l("Configuration constraint","設定限制"),kind:"constraint",removable:true}))]} .edges=${[...m.dependencies.map(value=>({from:"package",to:"dep:"+value})),...m.configDependencies.map(value=>({from:"package",to:"config:"+value}))]} @diagram-select=${(e:CustomEvent)=>{this.editorTab=e.detail.id==="package"?"identity":"dependencies";}} @diagram-remove=${(e:CustomEvent)=>{const id=e.detail.id;if(id.startsWith("dep:"))m.dependencies=m.dependencies.filter(value=>"dep:"+value!==id);if(id.startsWith("config:"))m.configDependencies=m.configDependencies.filter(value=>"config:"+value!==id);this.edit();}}></diagram-workbench></div><div class="package-inspector">
-      <md-tabs .activeTabIndex=${["identity","build","dependencies","hashes","review"].indexOf(this.editorTab)} @change=${(e:Event)=>{this.editorTab=["identity","build","dependencies","hashes","review"][(e.target as any).activeTabIndex];}}>${[["identity","Identity","識別"],["build","Build","建置"],["dependencies","Dependencies","相依"],["hashes","Hashes","摘要"],["review","Review","審核"]].map(([id,en,zh])=>html`<md-secondary-tab role="tab" aria-label=${this.l(en,zh)}>${this.l(en,zh)}</md-secondary-tab>`)}</md-tabs>
+      <md-tabs .activeTabIndex=${["identity","build","dependencies","hashes","files","review"].indexOf(this.editorTab)} @change=${(e:Event)=>{this.editorTab=["identity","build","dependencies","hashes","files","review"][(e.target as any).activeTabIndex];}}>${[["identity","Identity","識別"],["build","Build","建置"],["dependencies","Dependencies","相依"],["hashes","Hashes","摘要"],["files","Patches & files","修補同檔案"],["review","Review","審核"]].map(([id,en,zh])=>html`<md-secondary-tab role="tab" aria-label=${this.l(en,zh)}>${this.l(en,zh)}</md-secondary-tab>`)}</md-tabs>
       <div class="columns"><section class="panel stack" ?hidden=${this.editorTab!=="identity"}><h3>${this.l("Package identity and source","套件識別同來源")}</h3>
         ${this.field(this.l("Package name","套件名稱"),m.name,v=>m.name=v,this.l("Lowercase letters, digits and hyphens; starts with a letter.","小寫字母、數字同連字號，以字母開頭。"))}
         ${this.field(this.l("Version","版本"),m.version,v=>m.version=v,this.l("Literal version only; no build variables or expressions.","只接受字面版本，唔可以使用建置變數或表達式。"))}
@@ -222,6 +245,7 @@ export class PackagePanel extends LitElement {
         <div class="row">${this.button("Add missing required hash rows","加入缺少嘅必要摘要列",()=>{for(const file of [m.sourceFilename,...m.licenseFiles].filter(Boolean))if(!m.hashes.some(h=>h.file===file)&&m.hashes.length<256)m.hashes.push({algorithm:"sha256",file,digest:""});this.edit();})}${this.button("Add another hash","加入另一項摘要",()=>{m.hashes.push({algorithm:"sha256",file:"",digest:""});this.edit();},m.hashes.length>=256)}</div>
         ${m.hashes.map((hash,index)=>html`<div class="hash-row stack"><div class="columns">${this.field(this.l(`Hash file ${index+1}`,`摘要檔案 ${index+1}`),hash.file,v=>hash.file=v)}${this.select(this.l(`Hash algorithm ${index+1}`,`摘要演算法 ${index+1}`),hash.algorithm,["sha256","sha512"],v=>hash.algorithm=v as Hash["algorithm"])}</div>${this.field(this.l(`Verified digest ${index+1}`,`已驗證摘要 ${index+1}`),hash.digest,v=>hash.digest=v,this.l(`${hash.algorithm==="sha256"?64:128} hexadecimal digits; verify against the actual file.`,`${hash.algorithm==="sha256"?64:128} 位十六進位數字，請對照實際檔案驗證。`))}${this.button(`Remove hash ${index+1}`,`移除摘要 ${index+1}`,()=>{m.hashes=m.hashes.filter((_,i)=>i!==index);this.edit();})}</div>`)}
       </section>
+      ${this.renderFiles()}
       ${this.validation.length?html`<section class="panel validation" role="alert"><h3>${this.l("Check the package draft","檢查套件草稿")}</h3><ul>${displayOwnedStatus(this,"validation",this.validation,this.language).map(error=>html`<li>${error}</li>`)}</ul></section>`:nothing}
       ${this.button("Preview generated files","預覽產生檔案",()=>this.createPreview(),!this.workspaceId||!this.external)}
       ${this.preview&&file?html`<section class="panel stack" ?hidden=${this.editorTab!=="review"}><h2>${this.l("Review package files","審核套件檔案")}</h2><p>${this.l("Edits invalidate this preview. Applying checks both the current external-tree revision and the generated content hash.","編輯會令此預覽失效。套用時會同時檢查目前外部樹修訂版本同產生內容摘要。")}</p>
