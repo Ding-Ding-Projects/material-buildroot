@@ -155,3 +155,36 @@ The ZIP route creates archives from up to 200 explicitly selected supported loca
 PDF/ZIP inputs and outputs currently remain in page memory, separate from the durable raster queue. Cancel terminates the worker and removes offered pending output. A completed result exposes an explicit download; a download request is not final save proof. Inspection and result metadata can be exported separately. These routes do not complete the universal queue, full document format or full archive requirements.
 
 粵語文件補充：PDF 同 ZIP 解析器以確切版本隨網站打包，唔使用 CDN，執行時亦唔會取得套件。PDF 輸出會重新開啟比對頁數、幾何、旋轉同內容串流次序，但唔等於視覺呈現驗收。移除標準中繼資料唔等於遮蓋敏感內容。ZIP 支援真實壓縮建立、有限結構檢視同儲存方式成員解壓，其他格式界線會列明。兩條路線目前只喺頁面記憶體運作，尚未接入完整持久佇列。
+
+## Eight-category browser source coverage
+
+The visitor tool catalogue now reaches concrete browser consumers in each of the eight categories. This table is source routing, not a claim of complete category, offline, visual or runtime acceptance.
+
+| Category | Actual browser consumer | Explicit remaining limits |
+| --- | --- | --- |
+| Documents/PDF | Bundled PDF inspection/page operations and structural reopening | Office/EPUB conversions, rendered equivalence, full opaque-feature handling and durable queue integration |
+| Images | Durable raster queue with native PNG/JPEG/WebP output | Additional source formats, full metadata/color fidelity, all presets and runtime acceptance |
+| Audio | Local decoder graph plus bounded PCM16 stereo WAV preview | MP3/FLAC encoding, full-length jobs, exact source fidelity and durable queue integration |
+| Video | Browser-supported WebM preview encoder and bounded canvas frames | MP4 output, arbitrary codecs, lossless remuxing, exact container timing and durable queue integration |
+| Archives | ZIP creation, structural inspection and stored-member extraction | External Deflate extraction, encryption, ZIP64, 7z and full archive settings |
+| Structured Data/Spreadsheets | Bounded CSV/TSV parser, exact-string structured result, CSV/TSV and coding-format exports | Native spreadsheet workbooks, formulas, formatting, richer typing and durable queue integration |
+| Code/Text | Actual local UTF-8 text/Markdown input and normalized output envelopes | Rich encoding/code adapters and full file queue integration |
+| Binary Encodings | Dedicated Base64/HEX encode/decode worker for recognized binary formats | Arbitrary opaque formats and full encoding inventory |
+
+## Native browser audio/video previews
+
+The media surfaces use the browser's own decoder graph, AudioWorklet and supported MediaRecorder capabilities. They do not capture a microphone, camera, screen or desktop, and do not call a server or native executable. Audio from the selected media element is rerouted into an AudioContext graph; only silence reaches the output destination for the PCM path, while video recording uses a media-stream destination. The submitted media bytes are the only source. API references: [media element routing](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaElementSource), [worklet processing](https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor/process), and [encoder capability reporting](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported_static).
+
+Inputs are bounded to 32 MiB and recording to 1–60 requested media seconds. The selected duration intentionally trims longer content. WAV output uses observed PCM samples, the actual context sample rate, two channels and 16-bit samples; header/data sizes and sample counts are checked. WebM output uses an available declared MIME type, scales frames within 1280×720 and requests 24 frames per second. Its EBML signature is checked, but exact final duration, frame cadence and visual equivalence are not established. Metadata, chapters, subtitles, additional tracks and original channel layout may be lost, with disclosure before conversion. Progress announcements are throttled rather than spoken every frame. Page hiding or cancellation stops the local operation and offers no partial output.
+
+The optional `@ffmpeg/core` package was not added to the manifest or output. Registry metadata identifies 0.12.10 as GPL-2.0-or-later, while its package omits a license file. The official `v12.15` source tag resolves to `71aa99d37c02a7b4c435275ca9ef50e612f6efa1` and declares that core version, but the root license covers the MIT wrapper. Complete binary/source/license composition was not established, so that heavier alternative remains unadmitted. Native browser consumers do not depend on it.
+
+## Structured table and binary inputs
+
+The table worker admits UTF-8 CSV/TSV up to 1 MiB, at most 5,000 data rows, 100 columns and 65,536 characters per field. It parses escaped quotes and embedded newlines, rejects inconsistent column counts and duplicate/empty headers, and performs no numeric/date inference. Only the first 20 rows appear in the preview; exports use the full parsed result. CSV/TSV downloads disclose and default to a spreadsheet-safety apostrophe prefix for formula-like values. The separate structured exports retain exact parsed strings without that prefix. JSON vocabulary input and workbook formats are not accepted.
+
+The binary worker admits recognized PNG/JPEG/PDF/ZIP/WAV/FLAC/MP3/MP4/WebM signatures and performs actual Base64/HEX conversion. Binary input/output is capped at 4 MiB; encoded text at 12 MiB so the route can accept its own full-sized output. Base64 decoding checks standard padding and re-encoding, and hexadecimal checks complete byte pairs. Unknown text/JSON or unknown signatures are rejected. Recognition is not a safety scan, a full decoder validation or permission to execute the resulting file. Outputs remain local download requests.
+
+粵語媒體補充：音訊同影片使用瀏覽器原生介面，只讀取明確選取嘅檔案，唔使用咪高峰、鏡頭、桌面畫面或伺服器。預覽會按所選秒數裁短，WAV 使用實際樣本數，WebM 只按列明編碼能力輸出，完整時序同視覺等效未有驗收。
+
+粵語表格及編碼補充：表格保留字串，唔會推斷數字日期；畫面只預覽二十列，但匯出包含完整已接納結果。CSV 安全前綴會明確改變似公式嘅儲存格，其他結構匯出保留原值。二進位工具只做列明格式嘅可還原編碼，唔係加密或安全掃描。全部新增來源仍待指定建置及另行執行驗收。
