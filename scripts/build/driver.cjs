@@ -260,7 +260,7 @@ async function main() {
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
       command.push(`--config=${configurationPath}`);
-      payloads={status:'assembled',scope:assembled.manifest.scope,bundledComplete:assembled.manifest.bundledComplete,wholeToolsetOffline:assembled.manifest.wholeToolsetOffline,requiredBundledToolIds:assembled.manifest.requiredBundledToolIds,externalTools:assembled.manifest.externalTools,manifestSha256:sha256(fs.readFileSync(path.join(assembled.directory,'manifest.json'))),tools:assembled.manifest.tools.map(tool=>({id:tool.id,classification:tool.classification,version:tool.version,archive:tool.archive,license:tool.license,sourceUrl:tool.sourceUrl,runtimeVerified:false}))};
+      payloads={status:'assembled',scope:assembled.manifest.scope,bundledComplete:assembled.manifest.bundledComplete,wholeToolsetOffline:assembled.manifest.wholeToolsetOffline,requiredBundledToolIds:assembled.manifest.requiredBundledToolIds,externalTools:assembled.manifest.externalTools,manifestSha256:sha256(fs.readFileSync(path.join(assembled.directory,'manifest.json'))),tools:assembled.manifest.tools.map(tool=>({id:tool.id,classification:tool.classification,version:tool.version,archive:tool.archive,license:tool.license,sourceUrl:tool.sourceUrl,profile:tool.profile,composition:tool.composition,excludedMembers:tool.excludedMembers,sourceInventory:tool.sourceInventory,runtimeVerified:false}))};
       const baseline = acquireHostedBaseline(root,packageVersion);
       delta = stageBaseline(baseline.directory,output,packageVersion);
       if (!baseline.directory) delta.reason = baseline.reason;
