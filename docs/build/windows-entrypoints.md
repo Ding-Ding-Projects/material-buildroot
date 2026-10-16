@@ -1,5 +1,7 @@
 # Windows entrypoints and source-bound outputs
 
+[香港粵語](windows-entrypoints.zh-HK.md)
+
 The supported host is Windows x64. The three root entrypoints share `build-manifest.json` and the same acquisition implementation:
 
 ```powershell
