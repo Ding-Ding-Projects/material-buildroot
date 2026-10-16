@@ -1,3 +1,4 @@
+import {mountBrowserExport} from './browser-native-exports.js';
 import {mountBrowserGuidance} from './browser-native-guidance.js';
 import {mountBrowserTabs} from './browser-native-tabs.js';
 import {mountBrowserTone,browserCopy} from './browser-native-tone.js';
@@ -53,6 +54,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   node('h3', 'Export the current visitor plan', '匯出目前訪客計劃');
   node('p', 'JSON is the complete version 1 backup accepted by Restore above. Markdown and plain text are readable copies, not round-trip backups. All output uses UTF-8 with LF line endings. Companion data, credentials and learning progress are excluded.', 'JSON 係可由上方還原功能匯入嘅完整版本 1 備份。Markdown 同純文字只供閱讀，唔能作完整還原。全部輸出使用 UTF-8 同 LF 換行；不包含配對資料、憑證同學習進度。');
   const exportRow = actions(root);
+  mountBrowserExport(root, readPlan, 'visitor-plan', 'Current visitor goal, notes and checklist only');
   button(exportRow, 'JSON backup', 'JSON 備份', () => downloadSafe(() => JSON.stringify({...readPlan(), exportedAt:new Date().toISOString()}, null, 2), 'visitor-plan.json', 'application/json'));
   const prose = markdown => {
     const plan = readPlan();
@@ -117,6 +119,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
     restorePlan(plan); await capture(text('Restored plan', '已還原計劃')); await reload(); event('restored'); report('Plan restored; the preceding plan remains in recovery copies.', '計劃已還原，之前嘅計劃仍保留喺復原副本。');
   })));
   controls.push(button(historyRow, 'Export selected copy', '匯出已選副本', () => { if(selected) downloadSafe(() => JSON.stringify(selected.plan, null, 2), 'visitor-recovery.json', 'application/json'); }));
+  mountBrowserExport(root,()=>{if(!selected)throw Error('No selected copy');return selected.plan;},'visitor-recovery','The currently selected recovery copy only');
   const searchHost=node('div');historyRow.before(searchHost);
   search=mountLocalSearch(searchHost,'Search the latest 1,000 recovery copies','搜尋最近 1,000 份復原副本',[],ids=>{keys=allCopies.filter(copy=>ids.has(String(copy.id))).map(copy=>copy.id);position=keys.length-1;selected=allCopies.find(copy=>copy.id===keys[position]);show();});
   localized.push(show); updateControls();
@@ -174,6 +177,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   document.querySelector('#language')?.addEventListener('change', () => localized.forEach(update => update()));
   document.addEventListener('browser-native-copy-change', () => localized.forEach(update => update()));
 }
+
 
 
 

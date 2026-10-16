@@ -6,7 +6,7 @@ The visitor workspace has real local operations alongside separately labelled le
 
 | Identity | Concrete visitor consumer | Remaining identity scope |
 | --- | --- | --- |
-| `exports` | Current plan JSON, readable Markdown/text; selected recovery copy; browser preferences; filtered local requests/notices | All supported structured formats, round-trip imports for new stores, full collection export beyond loaded records |
+| `exports` | Current plan JSON, readable Markdown/text; selected recovery copy; browser preferences; filtered local requests/notices | Formats now include the explicit structured envelopes below; round-trip imports for new stores and full collection export beyond loaded records remain open |
 | `local-history` | Manual named IndexedDB plan snapshots; preserve current plan before restore; restore adds a subsequent snapshot | Automatic every-mutation history, protected access, complete date/action filtering, retention UI, native version-control backing |
 | `file-converter` | Explicit UTF-8 `.txt`/`.md` selection up to 1 MiB, in-memory editor, LF text/Markdown and versioned JSON text-envelope output | Other seven categories and full document/PDF tools, disk-backed transfer queue |
 | `download-handoff` | Local Blob download request, bounded URL lifetime, honest final-save uncertainty | Native editor discovery, verified transfer completion, paired-client transfer |
@@ -113,3 +113,13 @@ Visitor tabs reuse the actual mounted section nodes. New tab lists the concrete 
 粵語安全補充：驗證器使用本機密碼加密整個帳戶集，唔等於作業系統安全儲存，亦唔係配對驗證。代碼須明確選擇先顯示，頁面隱藏或閒置十分鐘後會鎖定。加密備份還原、QR 登記同完整秘密歷史還原仍未完成。元素鎖只係可由使用者重設嘅體驗限制，唔會授予主機權限。
 
 粵語導覽補充：分頁保留原有控制項同草稿，新增分頁會列出實際訪客工具。幽默程度各自儲存，唔會改變事實或私人詞彙界線。指定欄位同外觀屬性有獨立指引及試用區，但全體控制項覆蓋仍未完成。以上全部仍屬來源實作，未有執行或驗收證據。
+
+## Structured record export formats
+
+The current plan, selected recovery copy, loaded matching recovery requests and loaded matching operation notices now offer 17 explicit formats: JSON, JSON Lines, YAML 1.2 using JSON-compatible syntax, TOML, XML, CSV, TSV, Markdown, offline HTML, SQLite SQL, JavaScript, TypeScript, Python, Go, Rust, exact-snapshot JSON Schema and Protobuf.
+
+The serializer accepts only bounded JSON-representable data, limits nesting to 32 levels and serialized JSON to 4 MiB, and rejects unsupported or oversized values rather than silently dropping them. TOML contains a JSON string; XML contains base64-encoded UTF-8 JSON; CSV/TSV retain one full JSON cell rather than flattening nested fields; language-source formats retain the JSON payload. The Protobuf envelope is a real wire-format message with field 1 holding UTF-8 JSON bytes, with its schema disclosed beside the control. The JSON Schema format constrains the exact exported snapshot, not a generalized application schema.
+
+Exports remain local download requests and do not claim final filesystem completion. Formatting is UTF-8 with LF. Formats needing envelope decoding say so before export. Only the existing supported version 1 plan shape can be imported by the current plan importer; exporting another format does not imply a matching import workflow. Authenticator secrets are excluded from generic record exports and retain their separately encrypted-only export.
+
+The default six-digit logo background is normalized to opaque eight-digit HEX before the existing bounded decoder consumes it. This source correction follows the first documentation production and has not received runtime acceptance.
