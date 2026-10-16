@@ -1242,6 +1242,11 @@ function createOperationsService({
     },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+    listPackages: request => packageDiscovery.discover({...request,limit:25}),
+    packageFiles: request => packageDiscovery.importPackage(request),
+    packageEditors: () => require('./configuration/package-editor.cjs').discoverEditors(),
+    openPackageEditor: request => packageDiscovery.openEditor(request),
+    confirmEditor: async (request,context,authorize) => {authorize();project(request.workspaceId);const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve visible editor handoff',message:`Open ${request.file} in ${request.editorId}?`,detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nProject: ${request.workspaceId}\nPackage: ${request.packageId}\nRevision: ${request.revision}\nFile SHA-256: ${request.fileHash}\n\nThis opens a visible native editor. Editing there can modify the selected package. The file and editor are revalidated by the host; no browser command or executable path is accepted.`,buttons:['Cancel','Open reviewed file'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     previewSdk: (workspaceId,viewer,fileId) => {const selected=viewer.resolve(fileId,'file');const admitted=outputViewer(workspaceId).admit(selected.grant.relative,'file');return changeConfig(projectPaths(workspaceId),()=>sdkExport(workspaceId).preview(admitted));},
     exportSdk: (workspaceId,id) => changeConfig(projectPaths(workspaceId),()=>sdkExport(workspaceId).execute(id)),
     createOutputManifest: (workspaceId,viewer,fileIds) => {const localIds=fileIds.map(id=>outputViewer(workspaceId).admit(viewer.resolve(id,'file').grant.relative,'file'));return perform({action:'outputs.manifest',workspaceId,fileIds:localIds});},
@@ -2214,6 +2219,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
