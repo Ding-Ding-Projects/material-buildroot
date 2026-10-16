@@ -7,36 +7,11 @@ function fail(code) {
   throw Object.assign(new Error("Selected file is unavailable."), { code });
 }
 function inspect(absolute) {
-  if (
-    typeof absolute !== "string" ||
-    absolute.length > 4096 ||
-    !path.isAbsolute(absolute) ||
-    path.resolve(absolute) !== absolute ||
-    /[\x00-\x1f]/.test(absolute) ||
-    absolute.startsWith("\\\\")
-  )
+  try {
+    return require("./file-grants.cjs").inspectCanonicalPath(absolute);
+  } catch {
     fail("UNSAFE_PATH");
-  let cursor = path.parse(absolute).root;
-  const chain = [];
-  for (const part of absolute
-    .slice(cursor.length)
-    .split(path.sep)
-    .filter(Boolean)) {
-    cursor = path.join(cursor, part);
-    const stat = fs.lstatSync(cursor);
-    if (
-      stat.isSymbolicLink() ||
-      (!stat.isDirectory() && !stat.isFile()) ||
-      (stat.isFile() && stat.nlink !== 1) ||
-      fs.realpathSync.native(cursor) !== cursor
-    )
-      fail("UNSAFE_PATH");
-    chain.push({
-      path: cursor,
-      identity: `${stat.dev}:${stat.ino}:${stat.birthtimeMs}`,
-    });
   }
-  return chain;
 }
 
 /** Session authority comes only from the native picker, never renderer paths. */
@@ -96,7 +71,9 @@ function createToolFiles({ dialog, parentWindow, purpose = "server" }) {
         if (
           newOutput &&
           (!path.basename(selected) ||
-            /[<>:"|?*]/.test(path.basename(selected)))
+            /[<>:"|?*]/.test(path.basename(selected)) ||
+            /[. ]$/.test(path.basename(selected)) ||
+            /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(path.basename(selected)))
         )
           fail("UNSAFE_PATH");
         if (!newOutput) {

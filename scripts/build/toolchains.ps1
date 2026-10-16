@@ -2,8 +2,17 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
+function Get-ExtendedFilePath([string]$Path) {
+    # Extended-length paths stay inside file I/O. Executables receive ordinary
+    # paths, without changing any machine-wide long-path setting.
+    if ($Path.StartsWith('\\?\', [StringComparison]::Ordinal)) { return $Path }
+    $absolute = [IO.Path]::GetFullPath($Path)
+    if ($absolute.StartsWith('\\', [StringComparison]::Ordinal)) { return '\\?\UNC\' + $absolute.Substring(2) }
+    return '\\?\' + $absolute
+}
+
 function Get-Sha256([string]$Path) {
-    $stream = [IO.File]::OpenRead($Path)
+    $stream = [IO.File]::OpenRead((Get-ExtendedFilePath $Path))
     $sha = [Security.Cryptography.SHA256]::Create()
     try { return [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
     finally { $sha.Dispose(); $stream.Dispose() }
@@ -105,26 +114,35 @@ function Test-ExtractedTree([string]$Root, $Inventory) {
     if (!(Test-Path -LiteralPath $Root -PathType Container)) { return $false }
     try {
         Assert-NoReparse $Root
-        $observed = @(Get-ChildItem -LiteralPath $Root -Recurse -Force)
-        if (@($observed | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }).Count) { return $false }
-        $files = @($observed | Where-Object { !$_.PSIsContainer })
-        if ($files.Count -ne $Inventory.Count) { return $false }
-        foreach ($file in $files) {
-            $relative = $file.FullName.Substring($Root.TrimEnd('\').Length + 1).Replace('\', '/')
-            if (!$Inventory.ContainsKey($relative)) { return $false }
-            if ($file.Length -ne $Inventory[$relative].length -or (Get-Sha256 $file.FullName) -ne $Inventory[$relative].sha256) { return $false }
+        $extendedRoot = (Get-ExtendedFilePath $Root).TrimEnd('\')
+        $pending = [Collections.Generic.Stack[string]]::new()
+        $pending.Push($extendedRoot)
+        $fileCount = 0
+        while ($pending.Count) {
+            $directory = $pending.Pop()
+            foreach ($entry in [IO.Directory]::EnumerateFileSystemEntries($directory)) {
+                $attributes = [IO.File]::GetAttributes($entry)
+                if ($attributes -band [IO.FileAttributes]::ReparsePoint) { return $false }
+                if ($attributes -band [IO.FileAttributes]::Directory) { $pending.Push($entry); continue }
+                $relative = $entry.Substring($extendedRoot.Length + 1).Replace('\', '/')
+                if (!$Inventory.ContainsKey($relative)) { return $false }
+                $fileCount++
+                if (([IO.FileInfo]::new($entry)).Length -ne $Inventory[$relative].length -or (Get-Sha256 $entry) -ne $Inventory[$relative].sha256) { return $false }
+            }
         }
+        if ($fileCount -ne $Inventory.Count) { return $false }
         return $true
     } catch { return $false }
 }
 
 function Expand-VerifiedArchive([string]$Archive, [string]$Destination, $Inventory) {
-    [IO.Directory]::CreateDirectory($Destination) | Out-Null
+    $extendedDestination = (Get-ExtendedFilePath $Destination).TrimEnd('\')
+    [IO.Directory]::CreateDirectory($extendedDestination) | Out-Null
     $zip = [IO.Compression.ZipFile]::OpenRead($Archive)
     try {
         foreach ($name in $Inventory.Keys) {
-            $destinationFile = [IO.Path]::GetFullPath((Join-Path $Destination $name))
-            if (!$destinationFile.StartsWith($Destination.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Extraction path escaped its destination.' }
+            $destinationFile = [IO.Path]::GetFullPath($extendedDestination + '\' + $name.Replace('/', '\'))
+            if (!$destinationFile.StartsWith($extendedDestination + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Extraction path escaped its destination.' }
             [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($destinationFile)) | Out-Null
             $inputStream = $zip.GetEntry($Inventory[$name].source).Open()
             $outputStream = [IO.File]::Open($destinationFile, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
