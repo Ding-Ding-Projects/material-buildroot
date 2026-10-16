@@ -731,13 +731,13 @@ class MaterialBuildroot extends LitElement {
           const timer=setTimeout(()=>{worker.terminate();reject(new Error('timeout'));},600);
           worker.onerror=()=>{clearTimeout(timer);worker.terminate();reject(new Error('unavailable'));};
           worker.onmessage=e=>{clearTimeout(timer);worker.terminate();e.data.ok?resolve(e.data.ids):reject(new Error('invalid'));};
-          worker.postMessage({pattern:this.revisionPattern,flags:this.revisionFlags.replace(/[gy]/g,''),articles});
+          worker.postMessage({pattern:this.revisionPattern,flags:this.revisionFlags,articles});
         });
         if(generation!==this.revisionFilterGeneration)return;
         matches.push(...ids);
       }
       if(generation===this.revisionFilterGeneration)this.revisionMatches=matches;
-    }catch{if(generation===this.revisionFilterGeneration)this.revisionFilterError=this.l("Invalid or timed-out expression. No filtered results are shown.","表達式無效或逾時，暫時唔顯示篩選結果。");}
+    }catch{if(generation===this.revisionFilterGeneration)this.revisionFilterError=this.l("Invalid, unsupported or timed-out expression. Filtering accepts i, m, s and u flags only. No filtered results are shown.","表達式無效或逾時，暫時唔顯示篩選結果。");}
     this.requestUpdate();
   }
   private nativeHistory: any = null;

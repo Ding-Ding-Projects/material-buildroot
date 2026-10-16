@@ -112,7 +112,7 @@ export class ScheduledPreferencesPanel extends LitElement{
    const current=await this.call({action:'read'}) as ScheduleDocument|null;
    const record=await this.call(active?{action:'history.read',revision:sequence}:{action:'draft.read',sequence}) as {document:ScheduleDocument}|null;
    if(this.restricted)return;
-   if(!record){this.feedback=captureOwnedStatus(this,'feedback',this.l.bind(this),l=>l('That discarded draft is unavailable. The editor was not changed.','未能取得該已放棄草稿，編輯器維持不變。'));return;}
+   if(!record){this.feedback=captureOwnedStatus(this,'feedback',this.l.bind(this),l=>l('That historical local snapshot is unavailable. The editor was not changed.','未能取得該已放棄草稿，編輯器維持不變。'));return;}
    const externalIds=new Set((current?.rules??[]).filter(rule=>rule.source.type!=='local').map(rule=>rule.id));
    if(record.document.rules.some(rule=>rule.source.type!=='local'||externalIds.has(rule.id))){this.feedback=captureOwnedStatus(this,'feedback',this.l.bind(this),l=>l('Restoration cannot merge this local draft: a rule identifier conflicts with a current external rule, or the stored draft is not local-only. The editor was not changed.','未能合併此本機草稿：規則識別碼同目前外部規則衝突，或儲存草稿唔係只含本機規則。編輯器維持不變。'));return;}
    const locals=structuredClone(record.document.rules),rules:ScheduleRule[]=[];let localIndex=0;
@@ -137,7 +137,7 @@ export class ScheduledPreferencesPanel extends LitElement{
   if(this.restricted||this.pending)return;this.pending=true;this.revision++;
   try{
    const records=[];
-   const page=drafts?this.draftHistory?.records:this.history?.records;
+   const page=drafts?this.draftHistory?.records.slice(-20):this.history?.records.slice(-25);
    if(!page)throw new Error("Read history first");
    for(const record of page){
     const item=drafts?await this.call({action:'draft.read',sequence:record.sequence}):await this.call({action:'history.read',revision:(record as ScheduledHistoryPage['records'][number]).receipt.toRevision});

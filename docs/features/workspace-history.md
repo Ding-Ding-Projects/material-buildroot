@@ -97,14 +97,17 @@ local-rule merge behavior to preserve current external rules and their relative 
 Only an explicit Save schedule applies that restored draft as a new revision.
 
 Discarded-draft history keeps its existing local-only store, bounds and restore path.
-Both active history and discarded history offer export of exactly the loaded page,
+Both active history and discarded history offer export of exactly the last loaded page
+(up to 25 active records or 20 discarded records),
 including each available local snapshot and clear unavailable snapshots. These actions
 are disabled while shared restrictions apply and recheck host authorization. Credentials,
 external rule details, source enrollments and personal wording are never read or exported.
 
 ## Delivery status
 
-This change implements workspace-scoped storage and consumers. Runtime, installer,
+The exact build entrypoint produced a desktop package from source checkpoint
+`5f69b3158441a2056a872f3d213bc71cb0d5a7af`; subsequent expression-flag and page-bound
+corrections require their own candidate build. Runtime, installer,
 interruption, concurrency, accessibility, localization and visual acceptance have not
 been run in this delivery mode. Source implementation is not evidence that those
 checks passed. Encrypted credential recovery, advanced calendar presets, automatic streaming exports
