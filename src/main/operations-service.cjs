@@ -1184,6 +1184,8 @@ function createOperationsService({
   const {createCompanionConsumers, actionContracts} = require('./security/companion-consumers.cjs');
   const consumers = createCompanionConsumers({
     authorizeProject: id => project(id),
+    chooseCompanionProject: () => choose(),
+    adoptCompanionProject: async (selectionId,context,authorize) => {authorize();const selected=selections.get(selectionId);if(!selected)reject('SOURCE_SELECTION_UNAVAILABLE');for(const id of selected.capabilities)fileGrants.resolve({id,owner});const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve companion project adoption',message:`Adopt ${selected.name} for this browser session?`,detail:`Workspace: ${selected.root}\nSource: ${selected.source}\nOutput: ${selected.output}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n\nBuildroot source and package scripts can execute code when later built. Approval creates native project authority for exactly these selected folders.`,buttons:['Cancel','Trust and adopt selected project'],defaultId:0,cancelId:0,noLink:true});authorize();if(answer.response!==1)return {cancelled:true};return perform({action:'project.adopt',selectionId,trust:true});},
     chooseSource: () => sources.handle({action:'source.choose'}),
     previewSource: request => sources.handle({action:'source.upgrade.preview',...request}),
     previewRollback: request => sources.handle({action:'source.rollback.preview',...request}),
@@ -1290,6 +1292,7 @@ function createOperationsService({
     },
     buildTargets: workspaceId => targetActions.catalog(project(workspaceId)),
     openOutputs: workspaceId => new OutputViewers(project(workspaceId).output),
+    adoptRemoteJob: async (id,context,authorize) => {authorize();const current=await remoteService().perform({action:'list'},authorize);const job=current.jobs.find(item=>item.id===id);const target=current.targets.find(item=>item.id===job?.targetId);if(!job||!target?.authorized)reject('REMOTE_RECONNECT_REQUIRED');const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve remote job recovery',message:`Allow this paired session to manage recorded job ${id}?`,detail:`Target: ${target.name}\nSource digest: ${job.sourceDigest}\nBuild target: ${job.target}\nOrigin: ${context.origin}\nDevice: ${context.deviceName}\n\nThis is a new native authorization, not restored browser state. Observation is still required; a historical record does not prove completion.`,buttons:['Cancel','Authorize exact job recovery'],defaultId:0,cancelId:0,noLink:true});authorize();if(answer.response!==1)return {cancelled:true};const latest=await remoteService().perform({action:'list'},authorize);const match=latest.jobs.find(item=>item.id===id&&item.targetId===job.targetId&&item.sourceDigest===job.sourceDigest);if(!match||!latest.targets.some(item=>item.id===job.targetId&&item.authorized))reject('REMOTE_RECOVERY_CHANGED');return {id:job.id,sourceDigest:job.sourceDigest,targetId:job.targetId};},
     listRemote: authorize => remoteService().perform({action:'list'},authorize),
     enrollRemote: authorize => remoteService().perform({action:'enroll'},authorize),
     reconnectRemote: (targetId,authorize) => remoteService().perform({action:'reconnect',targetId},authorize),
@@ -2316,4 +2319,5 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
