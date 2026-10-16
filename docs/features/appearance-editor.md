@@ -75,3 +75,11 @@ Existing plan, snapshot, revision, native-history and activity rows now carry ap
 | Local history | Separate host-owned append-only history adapter | Immutable validated revisions | Unrun |
 | Unsupported portable input | Explicit local retention and unchanged export | Separate bounded local store | Unrun |
 | Custom logos | Isolated decoder, fixed PNG derivatives | Local derivative cache; excluded from history/export | Unrun |
+
+### Palette and role-color integration
+
+The shared command registry now lists every admitted appearance property with its exact current target context. Execution re-resolves that stable identity, opens the actual editor and focuses the actual control. A missing or ambiguous target shows an unavailable editor without editing another element. When no element has been selected, the workspace-surface fallback is explicitly labelled in the command entry. The provider never recursively reads the shared command inventory.
+
+Primary/on-primary/surface/on-surface/outline role colors are authored through the same continuous color tools. Their custom-property motion uses a typed color registration when the renderer supports it. Font family changes also update the Material typeface roles. Structural properties that could remove interaction or focus, arbitrary executable CSS, network references and unregistered arbitrary custom properties remain excluded from the admitted style API; the UI does not claim those values were applied.
+
+Playback controls now report automatic timing instead of inventing a numeric duration, include repeat-hold time in finite duration readouts, and provide 1/60-second stepping for document timelines. Scroll/view progress remains controlled by the actual source; millisecond seeking reports its unsupported boundary rather than writing an incompatible time value. Playback operations catch renderer capability failures and retain authored state.

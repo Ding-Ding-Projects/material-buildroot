@@ -1,7 +1,7 @@
 'use strict';
 const numeric=new Set(['size','weight','letters','words','line','padding','gap','radius','border','width','minHeight','duration','delay','baseline','outline','axisWeight','axisWidth','axisSlant','axisOptical','shadowX','shadowY','shadowBlur','opacity','rotate','scale','translateX','path']);
 const enums={style:['normal','italic','oblique'],decoration:['none','underline','line-through','overline','underline line-through'],decorationStyle:['solid','double','dotted','dashed','wavy'],case:['none','uppercase','lowercase','capitalize'],caps:['normal','small-caps','all-small-caps'],align:['start','center','end','justify'],direction:['ltr','rtl'],borderStyle:['none','solid','dashed','dotted','double'],script:['baseline','super','sub','middle'],easing:['linear','ease','ease-in','ease-out','ease-in-out','steps(4, end)'],transition:['none','color','background-color','border-color','border-radius','letter-spacing']};
-const colors=new Set(['foreground','background','borderColor','decorationColor','outlineColor']);
+const colors=new Set(['foreground','background','borderColor','decorationColor','outlineColor','tokenPrimary','tokenOnPrimary','tokenSurface','tokenOnSurface','tokenOutline']);
 const states=['normal','hover','focus','pressed','selected','disabled','dragged','validation','loading','success','warning','error'];
 function exact(value,keys){return value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).every(key=>keys.includes(key));}
 function validateSnapshot(input,fonts=[]){

@@ -20,7 +20,7 @@ export const properties:Property[]=[
  number('baseline','Baseline offset','基線位移','type','vertical-align',-24,24),number('outline','Text outline','文字描邊','type','-webkit-text-stroke-width',0,3),
  choice('script','Superscript / subscript','上標／下標','type','vertical-align',['baseline','super','sub','middle']),
  number('letters','Character spacing','字距','type','letter-spacing',-2,12),number('words','Word spacing','詞距','type','word-spacing',-4,24),number('line','Line height','行距','type','line-height',1,3,''),
- ...[['foreground','Text color','文字顏色','color'],['background','Background','背景','background-color'],['borderColor','Border color','邊框顏色','border-color'],['decorationColor','Decoration color','裝飾線顏色','text-decoration-color'],['outlineColor','Text outline color','文字描邊顏色','-webkit-text-stroke-color']].map(([id,en,zh,css])=>({id,en,zh,css,section:'color',kind:'color'} as Property)),
+ ...[['foreground','Text color','文字顏色','color'],['background','Background','背景','background-color'],['borderColor','Border color','邊框顏色','border-color'],['decorationColor','Decoration color','裝飾線顏色','text-decoration-color'],['outlineColor','Text outline color','文字描邊顏色','-webkit-text-stroke-color'],['tokenPrimary','Primary accent','主要強調色','--md-sys-color-primary'],['tokenOnPrimary','On primary','主要色上文字','--md-sys-color-on-primary'],['tokenSurface','Surface role','表面色','--md-sys-color-surface'],['tokenOnSurface','On surface','表面上文字','--md-sys-color-on-surface'],['tokenOutline','Outline role','輪廓色','--md-sys-color-outline']].map(([id,en,zh,css])=>({id,en,zh,css,section:'color',kind:'color'} as Property)),
  number('padding','Padding','內距','geometry','padding',0,48),number('gap','Gap','間距','geometry','gap',0,48),number('radius','Corner radius','圓角','geometry','border-radius',0,64),number('border','Border width','邊框粗細','geometry','border-width',0,8),
  choice('borderStyle','Border style','邊框款式','geometry','border-style',['none','solid','dashed','dotted','double']),
  number('opacity','Opacity','不透明度','geometry','opacity',.6,1,''),number('rotate','Rotation','旋轉','geometry','rotate',-15,15,'deg'),number('scale','Scale','縮放','geometry','scale',.8,1.2,''),number('translateX','Horizontal translation','水平位移','geometry','translate',-24,24),
@@ -57,6 +57,7 @@ export function declarations(values:Values):string{
   const v=values[p.id];if(v==='rainbow')return 'background-color:#6750a4;animation:appearance-rainbow var(--appearance-rainbow-duration,18s) linear infinite';
   const cssValue=p.kind==='number'?`${Number(v)}${p.unit}`:p.id==='family'?`"${v}","Microsoft JhengHei",sans-serif`:v;
   let rule=`${p.css}:${cssValue}!important`;
+  if(p.id==='family')rule+=';--md-ref-typeface-plain:'+cssValue+';--md-ref-typeface-brand:'+cssValue;
   if(p.id==='foreground')for(const token of ['--md-sys-color-on-surface','--md-outlined-button-label-text-color','--md-text-button-label-text-color','--md-filled-button-label-text-color','--md-outlined-text-field-input-text-color'])rule+=`;${token}:${cssValue}`;
   if(p.id==='size')rule+=`;--md-outlined-button-label-text-size:${cssValue};--md-text-button-label-text-size:${cssValue};--md-outlined-text-field-input-text-size:${cssValue}`;
   return rule;
