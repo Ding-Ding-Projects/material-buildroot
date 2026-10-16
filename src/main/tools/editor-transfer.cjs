@@ -15,7 +15,7 @@ function release(version) {
 }
 function validate(request) {
   const fields = {
-    "editor.choose": [], "editor.status": [], "editor.handoffs": [],
+    "editor.choose": [], "editor.discover": [], "editor.chooseDetected": ["candidateId"], "editor.status": [], "editor.handoffs": [],
     "editor.rebind": ["id", "sourceId"],
     "editor.open": ["sourceId", "accepted", "visibility"],
     "editor.reconcile": ["id"], "editor.acknowledge": ["id", "sha256"],
@@ -25,7 +25,7 @@ function validate(request) {
     "transfer.visibility": ["alwaysOnTop", "accepted"],
   }[request.action];
   if (!fields || Object.keys(request).some(k => !["action", ...fields].includes(k)) || fields.some(k => !Object.hasOwn(request, k))) fail("INVALID_REQUEST");
-  for (const key of ["sourceId", "destinationId", "id"]) if (fields.includes(key) && (typeof request[key] !== "string" || !/^[0-9a-f-]{36}$/.test(request[key]))) fail("INVALID_REQUEST");
+  for (const key of ["sourceId", "destinationId", "id", "candidateId"]) if (fields.includes(key) && (typeof request[key] !== "string" || !/^[0-9a-f-]{36}$/.test(request[key]))) fail("INVALID_REQUEST");
   if (fields.includes("sha256") && (typeof request.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(request.sha256))) fail("INVALID_HASH");
   if (fields.includes("version")) release(request.version);
   if (fields.includes("accepted") && request.accepted !== true) fail("CONSENT_REQUIRED");
@@ -75,6 +75,7 @@ async function fingerprint(file) {
 }
 function createEditorTransfer(options) {
   const sessions = new Map();
+  const candidates = new Map();
   let loaded = false;
   let selecting = false;
   const admissionFile = options.editorTransferDirectory && path.join(options.editorTransferDirectory, "editor.json");
@@ -194,6 +195,21 @@ function createEditorTransfer(options) {
       return { alwaysOnTop: window.isAlwaysOnTop() };
     }
     if (request.action.startsWith("editor.")) await loadHistory();
+    if (request.action === "editor.discover") {
+      candidates.clear();
+      const roots = [process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, "Programs"), process.env.ProgramFiles, process.env["ProgramFiles(x86)"]].filter(Boolean);
+      const files = roots.flatMap(root => [path.join(root, "Microsoft VS Code", "Code.exe"), path.join(root, "Microsoft VS Code Insiders", "Code - Insiders.exe"), path.join(root, "Notepad++", "notepad++.exe")]);
+      if (process.env.SystemRoot) files.push(path.join(process.env.SystemRoot, "System32", "notepad.exe"));
+      const seen = new Set();
+      for (const file of files) {
+        if (seen.has(file.toLowerCase())) continue; seen.add(file.toLowerCase());
+        try { inspect(file); const stat = await fs.lstat(file); if (!stat.isFile()) continue;
+          const id = randomUUID(), kind = EDITORS[path.basename(file).toLowerCase()];
+          candidates.set(id, { file, kind });
+        } catch { /* An absent or unsafe fixed-root candidate is not admitted. */ }
+      }
+      return { candidates: [...candidates].map(([id, entry]) => ({ id, kind: entry.kind, name: path.basename(path.dirname(entry.file)) + "/" + path.basename(entry.file), admitted: false })) };
+    }
     if (request.action === "editor.handoffs") return { handoffs: [...sessions.values()].map(display) };
     if (request.action === "editor.rebind") {
       const record = sessions.get(request.id); if (!record || record.state === "acknowledged") fail("EDITOR_HANDOFF_EXPIRED");
@@ -202,10 +218,12 @@ function createEditorTransfer(options) {
       record.sourceId = request.sourceId;
       return { handoff: display(record) };
     }
-    if (request.action === "editor.choose") {
+    if (["editor.choose", "editor.chooseDetected"].includes(request.action)) {
       if (selecting) fail("PICKER_BUSY"); selecting = true;
       try {
-        const picked = await options.dialog.showOpenDialog(options.parentWindow, { title: "Select a trusted editor executable", properties: ["openFile", "dontAddToRecent"], filters: [{ name: "Editor executable", extensions: ["exe"] }] });
+        const candidate = request.action === "editor.chooseDetected" ? candidates.get(request.candidateId) : null;
+        if (request.action === "editor.chooseDetected" && !candidate) fail("EDITOR_CANDIDATE_EXPIRED");
+        const picked = await options.dialog.showOpenDialog(options.parentWindow, { title: "Select a trusted editor executable", ...(candidate ? { defaultPath: candidate.file } : {}), properties: ["openFile", "dontAddToRecent"], filters: [{ name: "Editor executable", extensions: ["exe"] }] });
         if (picked.canceled || picked.filePaths?.length !== 1) fail("CANCELLED");
         const file = picked.filePaths[0], kind = EDITORS[path.basename(file).toLowerCase()];
         if (!kind) fail("EDITOR_NOT_SUPPORTED"); inspect(file);
@@ -224,7 +242,8 @@ function createEditorTransfer(options) {
     if (request.action === "editor.status") { try { const e = await admitted(); return { editor: { kind: e.kind, sha256: e.sha256 } }; } catch { return { editor: null }; } }
     if (request.action === "editor.open") {
       if (sessions.size >= 100) fail("EDITOR_SESSION_LIMIT");
-      const editor = await admitted(), file = await grant(options, request.sourceId, "read");
+      const editor = await admitted(), file = context.resolveEditorSource ? await context.resolveEditorSource() : await grant(options, request.sourceId, "read");
+      if (context.requireCode && editor.kind !== "vscode") fail("CODE_ADMISSION_REQUIRED");
       const before = await fingerprint(file), id = randomUUID();
       if (before.kind === "directory" && editor.kind !== "vscode") fail("EDITOR_FOLDER_UNSUPPORTED");
       const args = editor.kind === "vscode" ? ["--new-window", "--", file] : [file];
@@ -232,6 +251,7 @@ function createEditorTransfer(options) {
       sessions.set(id, record);
       await saveHistory();
       try {
+        if (context.resolveEditorSource && await context.resolveEditorSource() !== file) fail("DOCUMENT_CHANGED");
         await new Promise((resolve, reject) => { const child = spawn(editor.path, args, { shell: false, windowsHide: false, detached: true, stdio: "ignore" }); child.once("error", () => reject(Object.assign(new Error("EDITOR_LAUNCH_FAILED"), { code: "EDITOR_LAUNCH_FAILED" }))); child.once("spawn", () => { child.unref(); resolve(); }); });
         record.state = "launched";
         await saveHistory();

@@ -19,6 +19,7 @@ export class EditorTransferPanel extends LitElement {
   private busy = false;
   private code = "";
   private editor?: { kind: string; sha256: string };
+  private candidates: { id: string; kind: string; name: string }[] = [];
   private document?: Selection;
   private destination?: Selection;
   private handoff?: { id: string; name: string; before: Fingerprint };
@@ -83,6 +84,9 @@ export class EditorTransferPanel extends LitElement {
     <p role="status" aria-live="polite">${this.code}</p>
     <h3>${this.l("External document editor", "外部文件編輯器")}</h3>
     <p>${this.l("Choose a trusted Code, Code Insiders, Notepad++ or Notepad executable. Admission retains its hash locally. Each launch needs an explicit foreground choice; the editor may modify the selected document.", "選擇可信嘅 Code、Code Insiders、Notepad++ 或 Notepad 執行檔。接納記錄會喺本機保留摘要。每次啟動都要明確選擇前景顯示，編輯器可能修改所選文件。")}</p>
+    <md-outlined-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.candidates = (await this.tool({ action: "editor.discover" })).candidates; })}>${this.l("Discover installed editors without launching", "探索已安裝編輯器，唔會啟動")}</md-outlined-button>
+    ${this.candidates.map(candidate => html`<section><p>${candidate.name}</p><md-text-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.editor = (await this.tool({ action: "editor.chooseDetected", candidateId: candidate.id })).editor; })}>${this.l("Select and review this candidate", "選擇並檢視此候選項")}</md-text-button></section>`)}
+    <p>${this.l("Discovery checks fixed per-user and machine installation folders only. A discovered name is not trust. Portable installations can be selected using the native picker. If no Code installation is available, install it before admitting it; no alternative editor is opened automatically.", "探索只會檢查固定使用者同機器安裝資料夾。發現名稱唔代表信任，便攜安裝可用原生選擇器選取。如果未有 Code 安裝，請先安裝再接納，唔會自動開啟其他編輯器。")}</p>
     <div class="row"><md-outlined-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.editor = (await this.tool({ action: "editor.choose" })).editor; })}>${this.l("Choose and trust editor", "選擇並信任編輯器")}</md-outlined-button><md-text-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.editor = (await this.tool({ action: "editor.status" })).editor; })}>${this.l("Read saved editor", "讀取已儲存編輯器")}</md-text-button><md-outlined-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.document = await this.call("file.choose", { access: "read", kind: "file" }); this.handoff = undefined; this.comparison = undefined; })}>${this.l("Select document or exported file", "選擇文件或已匯出檔案")}</md-outlined-button></div>
     <p>${this.editor?.kind || this.l("No admitted editor", "未接納編輯器")} · ${this.document?.name || this.l("No document selected", "未選擇文件")}</p>
     <div class="row"><md-outlined-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.document = await this.call("file.choose", { access: "read", kind: "directory" }); this.handoff = undefined; this.comparison = undefined; })}>${this.l("Select project folder for Code workspace", "選擇 Code 工作區專案資料夾")}</md-outlined-button><md-text-button ?disabled=${this.busy} @click=${() => this.act(async () => { this.handoffs = (await this.tool({ action: "editor.handoffs" })).handoffs; })}>${this.l("Load saved handoffs", "載入已儲存交接")}</md-text-button></div>

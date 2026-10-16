@@ -145,6 +145,7 @@ const fields = {
   "artifacts.inspect": ["workspaceId", "path"],
   "outputs.browse": ["workspaceId", "directoryId"],
   "outputs.inspect": ["workspaceId", "fileId"],
+  "outputs.editor": ["workspaceId", "entryId", "kind", "accepted", "visibility"],
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
@@ -1875,6 +1876,13 @@ function createOperationsService({
       case "outputs.browse":
         if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
         return outputViewer(request.workspaceId).browse(request.directoryId);
+      case "outputs.editor": {
+        if (typeof request.entryId !== "string" || !/^[0-9a-f-]{36}$/.test(request.entryId) || !["file", "directory"].includes(request.kind) || request.accepted !== true || request.visibility !== "foreground") reject("INVALID_REQUEST");
+        const resolveEditorSource = () => outputViewer(request.workspaceId).resolve(request.entryId, request.kind).file;
+        const result = await tools.execute({action:"editor.open",sourceId:request.entryId,accepted:true,visibility:"foreground"},{resolveEditorSource,requireCode:true});
+        if (!result.ok) reject(result.code);
+        return result;
+      }
       case "outputs.inspect":
         if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
         return outputViewer(request.workspaceId).inspect(request.fileId);
@@ -1995,7 +2003,7 @@ function createOperationsService({
             "ollama.chat.read",
             "ollama.chat.cancel",
             "ollama.chat.forget",
-            "editor.choose", "editor.status", "editor.open", "editor.reconcile", "editor.acknowledge", "editor.handoffs", "editor.rebind",
+            "editor.choose", "editor.discover", "editor.chooseDetected", "editor.status", "editor.open", "editor.reconcile", "editor.acknowledge", "editor.handoffs", "editor.rebind",
             "transfer.preview", "transfer.browser", "transfer.visibility",
             "converter.catalog",
             "minecraft.remote.list",
@@ -2274,6 +2282,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 

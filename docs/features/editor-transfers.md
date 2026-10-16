@@ -4,6 +4,8 @@ The Tools workspace contains editor admission, document handoff, a download-star
 
 ## External editor
 
+Discovery checks fixed per-user Programs, Program Files and System32 installation roots without running a candidate. It returns opaque, session-scoped candidate IDs. Selecting a candidate opens the native picker at that candidate, followed by the same hash-bound trust confirmation. Discovery alone grants no execution authority. Portable installations remain available through explicit native selection.
+
 Select an installed `Code.exe`, `Code - Insiders.exe`, `notepad++.exe` or `notepad.exe` through the native picker. The trust confirmation names the selected executable and its SHA-256. The application stores that admission locally and rechecks the executable before each launch. Executable names are a supported adapter selection, not evidence of publisher authenticity: the user must trust the selected file. No executable is probed during admission.
 
 Select a document or exported file through the native file picker, explicitly allow a foreground window, then choose **Open selected document**. The host passes fixed arguments without a shell. The editor receives the original document, so its own edits affect that document. The application records the pre-handoff hash and size. **Compare external changes** hashes the current document; **Acknowledge this exact revision** checks that hash again. This consumer never saves over the document. Changed documents must be reloaded through their owning workflow before a subsequent save.
@@ -29,6 +31,8 @@ Cancellation stops the active request. Interrupted queue records remain interrup
 - No build, tests, static analysis, editor launch, network download, browser launch, runtime exercise or screen capture was performed for this source change.
 - Installed browser-extension capture and authenticated extension-to-desktop transport are not connected.
 - Start and progress dialogs are inside the existing application window. An explicit control can keep that host window above other applications using its existing window authority, without activating or focusing it. The choice remains until disabled or the application closes; no automatic focus changes occur. Separate secondary windows remain unimplemented.
-- Automatic editor detection and one-action handoff from every export surface remain unfinished. Exported files and bounded project folders can be explicitly selected in this consumer.
+- Fixed-root discovery is connected. PATH-wide discovery is deliberately absent. Output-browser entries expose direct Code handoff using existing opaque entry grants, and SDK export returns fresh host-issued grants for direct instruction/receipt handoff. Other export surfaces still require selection in Tools. Code admission is required; these actions never silently substitute another editor.
+- The existing workspace-window registry registers full workspace windows and exposes navigation activation. It provides no read/cancel-only secondary transfer-window bridge. A separate secondary transfer surface remains unavailable; this change does not grant a second full-privilege workspace to imitate one.
 - Native adapter behavior, cancellation races, DNS/TLS behavior, retained-output recovery, accessibility, localization and display-scale acceptance remain unverified.
+
 
