@@ -4,6 +4,10 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { parse } = require("../security/workspace-contract.cjs");
 const MAX_BYTES = 256 * 1024;
+const STORAGE_IDENTITY = Object.freeze({
+  applicationId: "com.dingdingprojects.materialbuildroot",
+  surface: "desktop",
+});
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 function fail(code) {
@@ -216,7 +220,16 @@ function createProjectOptionsStore({ directory }) {
     )
       fail("STORAGE_UNAVAILABLE");
     const stored = parse(bytes.toString("utf8"));
+    // Preserve IDs, revisions, runtime selection and external-tree ordering.
+    // Known legacy records are written as v2 only by a successful save.
+    if (stored && stored.version === 1) {
+      exact(stored, ["format", "version", "workspaceId", "revision", "runtime", "externalTrees"]);
+      if (stored.format !== "material-buildroot-project-options") fail("STORAGE_UNAVAILABLE");
+      stored.version = 2;
+      stored.storage = { ...STORAGE_IDENTITY };
+    }
     exact(stored, [
+      "storage",
       "format",
       "version",
       "workspaceId",
@@ -224,9 +237,14 @@ function createProjectOptionsStore({ directory }) {
       "runtime",
       "externalTrees",
     ]);
+    exact(stored.storage, ["applicationId", "surface"]);
+    if (
+      stored.storage.applicationId !== STORAGE_IDENTITY.applicationId ||
+      stored.storage.surface !== STORAGE_IDENTITY.surface
+    ) fail("STORAGE_UNAVAILABLE");
     if (
       stored.format !== "material-buildroot-project-options" ||
-      stored.version !== 1 ||
+      stored.version !== 2 ||
       stored.workspaceId !== request.workspaceId
     )
       fail("STORAGE_UNAVAILABLE");
@@ -275,7 +293,8 @@ function createProjectOptionsStore({ directory }) {
       const next = { revision: current.revision + 1, ...selected };
       const serialized = JSON.stringify({
         format: "material-buildroot-project-options",
-        version: 1,
+        version: 2,
+        storage: { ...STORAGE_IDENTITY },
         workspaceId: request.workspaceId,
         ...next,
       });
