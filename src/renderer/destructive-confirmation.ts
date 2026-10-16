@@ -75,12 +75,12 @@ export class DestructiveConfirmation extends LitElement {
 }
 customElements.define('destructive-confirmation',DestructiveConfirmation);
 
-export async function requestDestructiveConfirmation(host:HTMLElement,language:string,challenge:DestructiveChallenge):Promise<DestructiveProof|null>{
+export async function requestDestructiveConfirmation(host:HTMLElement,language:string,challenge:DestructiveChallenge,origin?:HTMLElement):Promise<DestructiveProof|null>{
   let active:Element|null=document.activeElement;
   while(active?.shadowRoot?.activeElement)active=active.shadowRoot.activeElement;
   const dialog=document.createElement('destructive-confirmation') as DestructiveConfirmation;
   dialog.language=language;dialog.challenge=challenge;
   (host.shadowRoot??host).append(dialog);
-  try{return await dialog.request(active instanceof HTMLElement?active:undefined);}
+  try{return await dialog.request(origin??(active instanceof HTMLElement?active:undefined));}
   finally{dialog.remove();}
 }

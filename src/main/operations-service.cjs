@@ -4,6 +4,7 @@ const path = require("node:path");
 const { randomUUID, createHash } = require("node:crypto");
 const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
+const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
@@ -53,6 +54,9 @@ const fields = {
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
+  "build.confirmation.challenge": ["request"],
+  "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
+  "build.confirmation.cancel": ["id"],
   "jobs.list": [],
   "scheduler.status": [],
   "jobs.pump": [],
@@ -213,6 +217,7 @@ function createOperationsService({
     },
   });
   const activeRecovery = new Set();
+  const buildConfirmation = createBuildConfirmation({ resolveWorkspace: project });
   let recoveryUnavailable = false;
   function project(id) {
     const item = projects.get(id);
@@ -1080,10 +1085,8 @@ function createOperationsService({
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
-    const optional =
-      action === "build.submit" && Object.hasOwn(request, "resources")
-        ? ["resources"]
-        : [];
+    const optional = action === "build.submit"
+      ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : [];
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     switch (action) {
@@ -1205,6 +1208,18 @@ function createOperationsService({
           expectedRevision: request.expectedRevision,
           layout: request.layout,
         });
+      case "build.confirmation.challenge": {
+        const candidate=request.request;
+        exact(candidate,["action",...fields["build.submit"],...(Object.hasOwn(candidate||{},"resources")?["resources"]:[])]);
+        if(candidate.action!=="build.submit"||candidate.target!=="clean"||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
+        reservations(candidate.resources,runtime(candidate.runtime),candidate.jobs);
+        return buildConfirmation.challenge(candidate);
+      }
+      case "build.confirmation.confirm":
+        return buildConfirmation.confirm(request);
+      case "build.confirmation.cancel":
+        buildConfirmation.cancel(request.id);
+        return {cancelled:true};
       case "build.submit": {
         const item = project(request.workspaceId);
         if (!item.externalStateVerified)
@@ -1230,6 +1245,8 @@ function createOperationsService({
         });
         project(request.workspaceId);
         if (disposed) reject("UNAVAILABLE");
+        if (request.target === "clean") buildConfirmation.consume(request);
+        else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
         const job = jobs.enqueue({
           kind: "build",
           ownerId: owner,
@@ -1314,6 +1331,7 @@ function createOperationsService({
         }
       case "jobs.retry": {
         const previous = ownJob(request.id);
+        if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
@@ -1602,6 +1620,7 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
         if (["running", "cancelling"].includes(job.state)) {

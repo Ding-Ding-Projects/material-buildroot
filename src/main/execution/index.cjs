@@ -5,6 +5,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const TARGETS = Object.freeze([
   "all",
+  "clean",
   "olddefconfig",
   "linux-olddefconfig",
   "busybox-oldconfig",

@@ -18,7 +18,7 @@ function createBuildConfirmation({ resolveWorkspace, now = Date.now }) {
   function binding(request) {
     if (!request || !OPERATIONS.has(request.action) || request.target !== "clean" || typeof request.workspaceId !== "string") fail();
     const project = resolveWorkspace(request.workspaceId);
-    return { operation:request.action, destination:project.output, digest:digest(request),
+    return { operation:request.target, destination:project.output, digest:digest(request),
       identity:JSON.stringify(project.identities), workspaceId:request.workspaceId };
   }
   function prune() {
