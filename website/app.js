@@ -523,7 +523,7 @@ if (visitor) {
     const title=visitor.querySelector('#companion-session-state');
     title.textContent=copy(`Paired · expires ${new Date(session.expiresAt).toLocaleString()}`,`已配對 · 到期時間 ${new Date(session.expiresAt).toLocaleString()}`);
     const details=visitor.querySelector('#companion-session-details');details.replaceChildren();
-    const rows=[[copy('Website origin','網站來源'),session.origin],[copy('Granted read access','已授予讀取權限'),session.scopes.join(', ')]];
+    const rows=[[copy('Website origin','網站來源'),session.origin],[copy('Granted capabilities','已授予權限'),session.scopes.join(', ')]];
     for(const [labelText,value] of rows){const term=document.createElement('dt');term.textContent=labelText;const description=document.createElement('dd');description.textContent=value;details.append(term,description);}
     for(const button of visitor.querySelectorAll('[data-companion-action]')) button.disabled=!session.scopes.includes(actionScope[button.dataset.companionAction]);
   }
@@ -567,7 +567,7 @@ if (visitor) {
         return;
       }
       challengeField.value='';showCompanionSession(payload.session);
-      companionMessage.textContent=copy('Paired. The desktop approved this read-only browser session.','配對成功。桌面已批准此唯讀瀏覽器連線。');
+      companionMessage.textContent=copy('Paired. The desktop approved the listed capabilities for this browser session.','配對成功。桌面已批准此瀏覽器連線列出嘅權限。');
     } catch {
       companionMessage.textContent=copy('The browser could not complete pairing. Check the trusted TLS certificate, exact website origin, CORS/private-network permission and local network policy. No certificate bypass or automatic retry was used.','瀏覽器未能完成配對。請檢查受信任嘅 TLS 憑證、網站來源、CORS／私人網絡權限同本機網絡政策。頁面無繞過憑證檢查，亦無自動重試。');
     }
@@ -709,6 +709,7 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
 
 
 
