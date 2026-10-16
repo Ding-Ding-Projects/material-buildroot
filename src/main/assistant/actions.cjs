@@ -7,12 +7,13 @@ const fail = code => { throw Object.assign(new Error(code), { code }); };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const HASH = /^[a-f0-9]{64}$/;
 const PROFILES = Object.freeze([
+  { id: "build-submit", effect: "Submit the selected fixed Buildroot target to the existing owned scheduler. Source build code executes with current grants; output files may change." },
   { id: "apply-defconfig", effect: "Replace project configuration with one catalogued defconfig through existing trusted configuration reconciliation. This may execute trusted Buildroot configuration code." },
   { id: "source-summary", effect: "Read bounded source and configuration fingerprints; no process is launched." },
   { id: "output-inventory", effect: "Read the current output inventory; no files are changed." },
   { id: "build-status", effect: "Read saved build states; no job is started, retried or cancelled." },
 ]);
-const STATES = ["pending", "running", "cancelling", "succeeded", "failed", "cancelled", "unknown", "acknowledged"];
+const STATES = ["pending", "running", "cancelling", "succeeded", "failed", "cancelled", "unknown", "acknowledged", "submitted"];
 const clone = value => JSON.parse(JSON.stringify(value));
 const hash = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 function exact(value, keys) {
@@ -24,8 +25,13 @@ function revision(value) { if (!Number.isSafeInteger(value) || value < 0) fail("
 function profiles(value) {
   if (!Array.isArray(value) || !value.length || value.length > 12) fail("INVALID_PROPOSAL");
   return value.map(item => {
-    if (typeof item === "string" && PROFILES.some(profile => profile.id === item && item !== "apply-defconfig")) return { profile: item, selection: null };
+    if (typeof item === "string" && PROFILES.some(profile => profile.id === item && !["apply-defconfig", "build-submit"].includes(item))) return { profile: item, selection: null };
     exact(item, ["profile", "selection"]);
+    if (item.profile === "build-submit") {
+      exact(item.selection, ["target", "jobs"]);
+      if (!["all", "sdk", "legal-info", "source"].includes(item.selection.target) || !Number.isSafeInteger(item.selection.jobs) || item.selection.jobs < 1 || item.selection.jobs > 32) fail("INVALID_PROPOSAL");
+      return {profile:item.profile,selection:clone(item.selection)};
+    }
     if (item.profile !== "apply-defconfig") fail("INVALID_PROPOSAL");
     exact(item.selection, ["id", "revision"]);
     if (typeof item.selection.id !== "string" || !HASH.test(item.selection.id) || typeof item.selection.revision !== "string" || !HASH.test(item.selection.revision)) fail("INVALID_PROPOSAL");
@@ -40,10 +46,11 @@ function profiles(value) {
     exact(plan, ["id", "workspaceId", "createdAt", "steps", "checkpoints"]); id(plan.id); id(plan.workspaceId);
     if (ids.has(plan.id)) fail("STORAGE_UNAVAILABLE"); ids.add(plan.id);
     if (typeof plan.createdAt !== "string" || !/^\d{4}-\d\d-\d\dT[\d:.]+Z$/.test(plan.createdAt)) fail("STORAGE_UNAVAILABLE");
-    profiles(plan.steps.map(step => step.profile === "apply-defconfig" ? {profile:step.profile,selection:step.selection} : step.profile));
+    profiles(plan.steps.map(step => ["apply-defconfig", "build-submit"].includes(step.profile) ? {profile:step.profile,selection:step.selection} : step.profile));
     for (const step of plan.steps) {
-      exact(step, ["profile", "selection", "state", "attempt", "receipt"]);
-      if (step.profile !== "apply-defconfig" && step.selection !== null) fail("STORAGE_UNAVAILABLE");
+      exact(step, ["profile", "selection", "operationId", "state", "attempt", "receipt"]);
+      if (step.operationId !== null) id(step.operationId);
+      if (!["apply-defconfig", "build-submit"].includes(step.profile) && step.selection !== null) fail("STORAGE_UNAVAILABLE");
       if (!STATES.includes(step.state)) fail("STORAGE_UNAVAILABLE"); revision(step.attempt);
       if (step.receipt !== null) {
         exact(step.receipt, ["sourceRevision", "configRevision", "count"]);
@@ -59,7 +66,7 @@ function profiles(value) {
   return state;
 }
 /** Only identifiers, fixed profiles, hashes, counters and states are durable. Never prompts or permissions. */
-function createAssistantActions({ directory, bind, execute, catalog, prepare }) {
+function createAssistantActions({ directory, bind, execute, catalog, prepare, observe, cancelJob }) {
   const file = path.join(directory, "plans.json");
   let previews = new Map(), active = null, closed = false, unavailable = false;
   function safeDirectory() {
@@ -124,8 +131,17 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
     ready(); const { action } = request;
     if (action === "assistant.list") {
       exact(request, ["action", "workspaceId"]); id(request.workspaceId);
-      const state = read();
-      return { revision: state.revision, plans: state.plans.filter(plan => plan.workspaceId === request.workspaceId), profiles: PROFILES, busy: !!active };
+      let state = read(), changed = false;
+      for (const plan of state.plans.filter(item => item.workspaceId === request.workspaceId)) for (const step of plan.steps) {
+        if (step.profile !== "build-submit" || !step.operationId || !["submitted", "unknown"].includes(step.state)) continue;
+        const job = observe(plan.workspaceId, step.operationId);
+        const next = !job || job.state === "interrupted" ? "unknown" : ["succeeded", "failed", "cancelled"].includes(job.state) ? job.state : "submitted";
+        if (step.state !== next) { step.state = next; changed = true; }
+      }
+      if (changed) state = save(state, state.revision);
+      const plans = clone(state.plans.filter(plan => plan.workspaceId === request.workspaceId));
+      for (const plan of plans) for (const step of plan.steps) if (step.profile === "build-submit" && step.operationId) step.job = observe(plan.workspaceId, step.operationId);
+      return { revision: state.revision, plans, profiles: PROFILES, busy: !!active || plans.some(plan=>plan.steps.some(step=>step.job && ["queued","running","cancelling"].includes(step.job.state))) };
     }
     if (action === "assistant.catalog") {
       exact(request, ["action", "workspaceId"]); id(request.workspaceId);
@@ -143,7 +159,7 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
       exact(request, ["action", "workspaceId", "expectedRevision", "profiles"]); id(request.workspaceId);
       const actions = profiles(request.profiles); const state = read(); expected(state, request.expectedRevision);
       if (state.plans.length >= 100) fail("PLAN_LIMIT");
-      state.plans.push({ id: randomUUID(), workspaceId: request.workspaceId, createdAt: new Date().toISOString(), steps: actions.map(item => ({ ...item, state: "pending", attempt: 0, receipt: null })), checkpoints: [] });
+      state.plans.push({ id: randomUUID(), workspaceId: request.workspaceId, createdAt: new Date().toISOString(), steps: actions.map(item => ({ ...item, operationId: null, state: "pending", attempt: 0, receipt: null })), checkpoints: [] });
       return { revision: save(state, state.revision).revision };
     }
     if (action === "assistant.preview") {
@@ -153,6 +169,7 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
       if (step.state !== "pending" || plan.steps.slice(0, request.index).some(item => !["succeeded", "acknowledged"].includes(item.state))) fail("ACTION_NOT_READY");
       const target = await prepare(step.profile, plan.workspaceId, step.selection);
       const binding = await bind(plan.workspaceId);
+      if (hash(await prepare(step.profile, plan.workspaceId, step.selection)) !== hash(target)) fail("SOURCE_OR_GRANT_CHANGED");
       ready(); if (active || read().revision !== state.revision) fail("REVISION_CONFLICT");
       const now = Date.now(); for (const [key, value] of previews) if (value.expiresAt <= now) previews.delete(key);
       if (previews.size >= 100) fail("PREVIEW_LIMIT");
@@ -174,24 +191,30 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
       const job = { planId: plan.id, index: preview.index, workspaceId: plan.workspaceId, controller, promise: null, started: false };
       active = job;
       try {
-        await prepare(step.profile, plan.workspaceId, step.selection);
+        if (hash(await prepare(step.profile, plan.workspaceId, step.selection)) !== hash(preview.target)) fail("SOURCE_OR_GRANT_CHANGED");
         const binding = await bind(plan.workspaceId, controller.signal);
         ready();
         if (controller.signal.aborted) fail("ACTION_CANCELLED");
         if (binding.sourceRevision !== preview.sourceRevision || binding.configRevision !== preview.configRevision || binding.grantBinding !== preview.grantBinding) fail("SOURCE_OR_GRANT_CHANGED");
         if (Date.now() >= preview.expiresAt) fail("PREVIEW_EXPIRED");
         expected(read(), preview.revision);
-        step.state = "running"; step.attempt++; save(state, state.revision); job.started = true;
+        step.state = "running"; step.attempt++; step.operationId = randomUUID(); save(state, state.revision); job.started = true;
         job.promise = (async () => {
           let outcome = "unknown", receipt = null;
           try {
-            const result = await execute(step.profile, plan.workspaceId, controller.signal, binding, step.selection);
+            const result = await execute(step.profile, plan.workspaceId, controller.signal, binding, step.selection, step.operationId);
+            if (result.submitted === true && step.profile === "build-submit") {
+              if (controller.signal.aborted) await cancelJob(plan.workspaceId, step.operationId);
+              outcome = "submitted";
+              receipt = { sourceRevision: binding.sourceRevision, configRevision: binding.configRevision, count: 1 };
+            } else {
             const after = await bind(plan.workspaceId, controller.signal);
             if (after.sourceRevision !== binding.sourceRevision || (step.profile !== "apply-defconfig" && after.configRevision !== binding.configRevision) || after.grantBinding !== binding.grantBinding) fail("SOURCE_OR_GRANT_CHANGED");
             if (!Number.isSafeInteger(result.count) || result.count < 0) fail("INVALID_RESULT");
             outcome = controller.signal.aborted ? (step.profile === "apply-defconfig" ? "unknown" : "cancelled") : "succeeded";
             receipt = { sourceRevision: binding.sourceRevision, configRevision: after.configRevision, count: result.count };
-          } catch { outcome = step.profile === "apply-defconfig" ? "unknown" : controller.signal.aborted ? "cancelled" : "failed"; }
+            }
+          } catch { outcome = ["apply-defconfig", "build-submit"].includes(step.profile) ? "unknown" : controller.signal.aborted ? "cancelled" : "failed"; }
           try {
             const current = read(); const record = selected(current, preview); const currentStep = stepAt(record, preview.index);
             currentStep.state = outcome; currentStep.receipt = receipt; save(current, current.revision);
@@ -203,7 +226,13 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
     }
     if (action === "assistant.cancel") {
       exact(request, ["action", "workspaceId", "planId"]); id(request.workspaceId); id(request.planId);
-      if (!active || active.planId !== request.planId || active.workspaceId !== request.workspaceId) fail("ACTION_NOT_RUNNING");
+      if (!active || active.planId !== request.planId || active.workspaceId !== request.workspaceId) {
+        const state = read(); const plan = selected(state, request);
+        const step = plan.steps.find(item=>item.profile === "build-submit" && item.operationId && ["submitted","unknown"].includes(item.state));
+        if (!step) fail("ACTION_NOT_RUNNING");
+        await cancelJob(plan.workspaceId, step.operationId);
+        return {cancellationRequested:true,settled:false};
+      }
       active.controller.abort();
       if (active.started) { const state = read(); const plan = selected(state, request); stepAt(plan, active.index).state = "cancelling"; save(state, state.revision); }
       return { cancellationRequested: true, settled: false };
@@ -220,6 +249,10 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
       if (request.consent !== true) fail("CONSENT_REQUIRED"); if (active) fail("ASSISTANT_BUSY");
       const state = read(); expected(state, request.expectedRevision); const step = stepAt(selected(state, request), request.index);
       if (!["unknown", "failed", "cancelled"].includes(step.state) || !["retry", "acknowledge"].includes(request.resolution)) fail("RECOVERY_NOT_AVAILABLE");
+      if (step.profile === "build-submit" && step.operationId) {
+        const job = observe(request.workspaceId, step.operationId);
+        if (job && !["failed","cancelled"].includes(job.state)) fail("BUILD_RECOVERY_REQUIRED");
+      }
       if (request.resolution === "retry" && step.attempt >= 3) fail("ACTION_ATTEMPT_LIMIT");
       step.state = request.resolution === "retry" ? "pending" : "acknowledged"; step.receipt = null; previews.clear();
       return { revision: save(state, state.revision).revision, executed: false };
@@ -229,5 +262,8 @@ function createAssistantActions({ directory, bind, execute, catalog, prepare }) 
   return { dispatch, async dispose() { closed = true; previews.clear(); active?.controller.abort(); await active?.promise; } };
 }
 module.exports = { createAssistantActions, PROFILES };
+
+
+
 
 

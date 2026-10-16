@@ -7,6 +7,7 @@ const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
+const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
@@ -18,6 +19,7 @@ const { createConfigurationConsent } = require("./configuration/runtime-consent.
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { OutputViewers } = require("./deployment/output-viewers.cjs");
+const { SdkExport } = require("./deployment/sdk-export.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -100,6 +102,7 @@ const fields = {
   "project.options": ["workspaceId"],
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
+  "build.targets": ["workspaceId"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
   "build.confirmation.challenge": ["request"],
   "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
@@ -139,6 +142,8 @@ const fields = {
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
+  "sdk.preview": ["workspaceId", "fileId"],
+  "sdk.export": ["workspaceId", "id"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
   "artifacts.compliance": ["workspaceId"],
@@ -248,6 +253,7 @@ function createOperationsService({
   parentWindow,
   version,
   source,
+  notificationTransition = () => {},
   documentationDirectory,
   openDocumentationExternal,
   updateHostFactory,
@@ -455,6 +461,7 @@ function createOperationsService({
     listJobs: () => jobs.list(owner),
   });
   const jobs = createJobManager({
+    onTransition: notificationTransition,
     directory: path.join(directory, "jobs"),
     adapters: {
       build: async (payload, context) => {
@@ -847,7 +854,7 @@ function createOperationsService({
     if (
       typeof payload.workspaceId !== "string" ||
       !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
-      !TARGETS.includes(payload.target) ||
+      !targetActions.isBuildTarget(payload.target, TARGETS) ||
       !Number.isSafeInteger(payload.jobs) ||
       payload.jobs < 1 ||
       payload.jobs > 32
@@ -1197,6 +1204,12 @@ function createOperationsService({
   });
   const deployments = new Map();
   const outputViewers = new Map();
+  const sdkExports = new Map();
+  function sdkExport(id) {
+    project(id);
+    if (!sdkExports.has(id)) sdkExports.set(id, new SdkExport({ viewer: outputViewer(id), manifest: relative => perform({ action: "artifacts.manifest", workspaceId: id, paths: [relative] }) }));
+    return sdkExports.get(id);
+  }
   function outputViewer(id) {
     const item = project(id);
     if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
@@ -1284,6 +1297,68 @@ function createOperationsService({
       release();
     }
   }
+  async function submitBuild(request, {operationId, expectedIntent, signal} = {}) {
+
+        const item = project(request.workspaceId);
+        if (!item.externalStateVerified)
+          reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+        if (
+          !targetActions.isBuildTarget(request.target, TARGETS) ||
+          !Number.isSafeInteger(request.jobs) ||
+          request.jobs < 1 ||
+          request.jobs > 32
+        )
+          reject("INVALID_TARGET");
+        targetActions.assertPackage(item, request.target);
+        const selectedRuntime = runtime(request.runtime);
+        item.runtime = selectedRuntime;
+        const resources = reservations(
+          request.resources,
+          selectedRuntime,
+          request.jobs,
+        );
+        const captured = await captureBuildIntent({
+          source: item.source,
+          output: item.output,
+          externalTrees: authorizedExternalPaths(request.workspaceId, item),
+        });
+        project(request.workspaceId);
+        if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling) reject("UPDATE_INSTALL_PENDING");
+        if (targetActions.isDestructiveTarget(request.target)) buildConfirmation.consume(request);
+        else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
+        if (signal?.aborted) reject("ACTION_CANCELLED");
+        if (expectedIntent && (captured.sourceRevision !== expectedIntent.sourceRevision || captured.configRevision !== expectedIntent.configRevision || createHash("sha256").update(JSON.stringify([item.grantId, item.identities, item.runtime])).digest("hex") !== expectedIntent.grantBinding || JSON.stringify(item.runtime) !== JSON.stringify(selectedRuntime))) reject("SOURCE_OR_GRANT_CHANGED");
+        const job = jobs.enqueue({
+          ...(operationId ? {operationId} : {}),
+          kind: "build",
+          ownerId: owner,
+          payload: {
+            workspaceId: request.workspaceId,
+            target: request.target,
+            runtime: selectedRuntime,
+            jobs: request.jobs,
+            resources,
+            intent: {
+              projectId: request.workspaceId,
+              sourceRevision: captured.sourceRevision,
+              configRevision: captured.configRevision,
+            },
+            snapshot: {
+              version: captured.snapshot.version,
+              entries: captured.snapshot.entries,
+              bytes: captured.snapshot.bytes,
+              excludesGitObjectHistory: true,
+              symlinkPolicy: captured.snapshot.symlinkPolicy,
+              symlinks: captured.snapshot.symlinks,
+              limitations: [...captured.snapshot.limitations],
+            },
+          },
+        });
+        void scheduler.pump().catch(() => {});
+        return job;
+      
+  }
   const assistant = createAssistantActions({
     directory: path.join(directory, "assistant"),
     bind: async (workspaceId, signal) => {
@@ -1299,8 +1374,25 @@ function createOperationsService({
       const result = await defconfigWorkflows.catalog({workspaceId});
       return { revision: result.revision, entries: result.entries.map(({id,name,origin}) => ({id,name,origin})) };
     },
+    observe: (workspaceId, operationId) => {
+      const job = jobs.list(owner).find(item => item.operationId === operationId && item.payload.workspaceId === workspaceId);
+      return job ? {id:job.id,sequence:job.sequence,state:job.state} : null;
+    },
+    cancelJob: async (workspaceId, operationId) => {
+      project(workspaceId);
+      const job = jobs.list(owner).find(item => item.operationId === operationId && item.payload.workspaceId === workspaceId);
+      if (!job) reject("JOB_NOT_FOUND");
+      return perform({action:"jobs.projectCancel",workspaceId,id:job.id,sequence:job.sequence});
+    },
     prepare: async (profile, workspaceId, selection) => {
       project(workspaceId);
+      if (profile === "build-submit") {
+        const item = project(workspaceId);
+        if (!item.runtime) reject("SELECT_RUNTIME");
+        const selectedRuntime = runtime(item.runtime);
+        reservations(undefined, selectedRuntime, selection.jobs);
+        return {name:selection.target,origin:JSON.stringify(selectedRuntime),sha256:null,jobs:selection.jobs};
+      }
       if (profile !== "apply-defconfig") return null;
       const result = await defconfigWorkflows.catalog({workspaceId});
       if (result.revision !== selection.revision) reject("DEFCONFIG_CATALOG_CHANGED");
@@ -1308,9 +1400,14 @@ function createOperationsService({
       if (!selected) reject("INVALID_DEFCONFIG");
       return { name: selected.name, origin: selected.origin, sha256: selected.sha256 };
     },
-    execute: async (profile, workspaceId, signal, binding, selection) => {
+    execute: async (profile, workspaceId, signal, binding, selection, operationId) => {
       project(workspaceId);
       if (signal.aborted) reject("ACTION_CANCELLED");
+      if (profile === "build-submit") {
+        const item = project(workspaceId);
+        const job = await submitBuild({workspaceId,target:selection.target,jobs:selection.jobs,runtime:item.runtime}, {operationId,expectedIntent:binding,signal});
+        return {count:1,submitted:true,job:{id:job.id,sequence:job.sequence,state:job.state}};
+      }
       if (profile === "apply-defconfig") {
         // Existing runtime trust, catalogue revision, configuration transaction and rollback stay authoritative.
         await changeConfig(projectPaths(workspaceId), () => defconfigWorkflows.apply({workspaceId, ...selection}));
@@ -1523,7 +1620,7 @@ function createOperationsService({
       case "project.runtime":
         return changeConfig(projectPaths(request.workspaceId), () => {
           const item = project(request.workspaceId);
-          const selectedRuntime = runtime(request.runtime);
+        const selectedRuntime = runtime(request.runtime);
           const previous = projectOptions.get({
             workspaceId: request.workspaceId,
           });
@@ -1566,10 +1663,11 @@ function createOperationsService({
           expectedRevision: request.expectedRevision,
           layout: request.layout,
         });
+      case "build.targets": return targetActions.catalog(project(request.workspaceId));
       case "build.confirmation.challenge": {
         const candidate=request.request;
         exact(candidate,["action",...fields["build.submit"],...(Object.hasOwn(candidate||{},"resources")?["resources"]:[])]);
-        if(candidate.action!=="build.submit"||candidate.target!=="clean"||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
+        if(candidate.action!=="build.submit"||!targetActions.isDestructiveTarget(candidate.target)||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
         reservations(candidate.resources,runtime(candidate.runtime),candidate.jobs);
         return buildConfirmation.challenge(candidate);
       }
@@ -1578,62 +1676,7 @@ function createOperationsService({
       case "build.confirmation.cancel":
         buildConfirmation.cancel(request.id);
         return {cancelled:true};
-      case "build.submit": {
-        const item = project(request.workspaceId);
-        if (!item.externalStateVerified)
-          reject("EXTERNAL_TREES_NOT_AUTHORIZED");
-        if (
-          !TARGETS.includes(request.target) ||
-          !Number.isSafeInteger(request.jobs) ||
-          request.jobs < 1 ||
-          request.jobs > 32
-        )
-          reject("INVALID_TARGET");
-        const selectedRuntime = runtime(request.runtime);
-        item.runtime = selectedRuntime;
-        const resources = reservations(
-          request.resources,
-          selectedRuntime,
-          request.jobs,
-        );
-        const captured = await captureBuildIntent({
-          source: item.source,
-          output: item.output,
-          externalTrees: authorizedExternalPaths(request.workspaceId, item),
-        });
-        project(request.workspaceId);
-        if (disposed) reject("UNAVAILABLE");
-    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
-        if (request.target === "clean") buildConfirmation.consume(request);
-        else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
-        const job = jobs.enqueue({
-          kind: "build",
-          ownerId: owner,
-          payload: {
-            workspaceId: request.workspaceId,
-            target: request.target,
-            runtime: selectedRuntime,
-            jobs: request.jobs,
-            resources,
-            intent: {
-              projectId: request.workspaceId,
-              sourceRevision: captured.sourceRevision,
-              configRevision: captured.configRevision,
-            },
-            snapshot: {
-              version: captured.snapshot.version,
-              entries: captured.snapshot.entries,
-              bytes: captured.snapshot.bytes,
-              excludesGitObjectHistory: true,
-              symlinkPolicy: captured.snapshot.symlinkPolicy,
-              symlinks: captured.snapshot.symlinks,
-              limitations: [...captured.snapshot.limitations],
-            },
-          },
-        });
-        void scheduler.pump().catch(() => {});
-        return job;
-      }
+      case "build.submit": return submitBuild(request);
       case "scheduler.configure": {
         schedulerLimits = budgetStore.write(request.limits);
         scheduler.setLimits(schedulerLimits);
@@ -1713,7 +1756,7 @@ function createOperationsService({
         }
       case "jobs.retry": {
         const previous = ownJob(request.id);
-        if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
+        if(targetActions.isDestructiveTarget(previous.payload.target)) reject("CONFIRMATION_REQUIRED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
@@ -1762,6 +1805,12 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "sdk.preview":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).preview(request.fileId));
+      case "sdk.export":
+        if (typeof request.id !== "string" || request.id.length !== 36) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).execute(request.id));
       case "outputs.browse":
         if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
         return outputViewer(request.workspaceId).browse(request.directoryId);
@@ -2157,5 +2206,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
 
 
