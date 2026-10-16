@@ -15,8 +15,6 @@
     "dist:win": "build-installer.bat /s"
   },
   "dependencies": {
-    "@fontsource-variable/noto-sans-hk": "5.3.1",
-    "@fontsource-variable/roboto": "5.2.9",
     "@material/web": "2.5.0",
     "ajv": "8.20.0",
     "electron-squirrel-startup": "1.0.1",
@@ -27,6 +25,8 @@
     "yaml": "2.9.1"
   },
   "devDependencies": {
+    "@fontsource-variable/noto-sans-hk": "5.3.1",
+    "@fontsource-variable/roboto": "5.2.9",
     "@playwright/test": "1.64.1",
     "electron": "44.7.2",
     "electron-builder": "26.15.3",
