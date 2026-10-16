@@ -52,8 +52,16 @@ const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const { createExecutionSetup } = require('./execution/setup.cjs');
 const { createWorkflowService } = require('./execution/workflow-service.cjs');
+const { createAssistantActions } = require("./assistant/actions.cjs");
 const owner = "desktop-owner";
 const fields = {
+  "assistant.list": ["workspaceId"],
+  "assistant.create": ["workspaceId", "expectedRevision", "profiles"],
+  "assistant.preview": ["workspaceId", "planId", "index", "expectedRevision"],
+  "assistant.run": ["workspaceId", "previewId", "digest", "consent"],
+  "assistant.cancel": ["workspaceId", "planId"],
+  "assistant.checkpoint": ["workspaceId", "planId", "expectedRevision"],
+  "assistant.recover": ["workspaceId", "planId", "index", "expectedRevision", "resolution", "consent"],
   'execution.cli': ['kind'],
   'execution.inspect': ['sourceRepository','executionRepository','mode'],
   'execution.discover': ['selectionId'],
@@ -1274,6 +1282,31 @@ function createOperationsService({
       release();
     }
   }
+  const assistant = createAssistantActions({
+    directory: path.join(directory, "assistant"),
+    bind: async (workspaceId, signal) => {
+      const item = project(workspaceId);
+      if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+      if (item.storage) await execution.verifyWslGrant(execution.grants.get(item.grantId), item.runtime);
+      if (signal?.aborted) reject("ACTION_CANCELLED");
+      const snapshot = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: authorizedExternalPaths(workspaceId, item), signal });
+      project(workspaceId);
+      return { ...snapshot, grantBinding: createHash("sha256").update(JSON.stringify([item.grantId, item.identities, item.runtime])).digest("hex") };
+    },
+    execute: async (profile, workspaceId, signal, binding) => {
+      project(workspaceId);
+      if (signal.aborted) reject("ACTION_CANCELLED");
+      if (profile === "source-summary") return { count: binding.snapshot.entries };
+      if (profile === "build-status") return { count: jobs.list(owner).filter(job => job.payload.workspaceId === workspaceId).length };
+      if (profile === "output-inventory") {
+        const result = await deployment(workspaceId).listArtifacts();
+        if (signal.aborted) reject("ACTION_CANCELLED");
+        if (!Array.isArray(result)) reject("INVALID_RESULT");
+        return { count: result.length };
+      }
+      reject("INVALID_ACTION");
+    },
+  });
   async function perform(request) {
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
@@ -1291,6 +1324,7 @@ function createOperationsService({
     const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
+    if (action.startsWith("assistant.")) return assistant.dispatch(request);
     switch (action) {
       case 'execution.cli': {
         if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
@@ -2092,6 +2126,7 @@ function createOperationsService({
       externalWorkspaces.clear();
       sources.dispose();
       disposal = Promise.allSettled([
+        assistant.dispose(),
         scheduler.awaitIdle(),
         tools.dispose?.(),
         companion?.request("companion.stop", {}),
@@ -2102,3 +2137,4 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+

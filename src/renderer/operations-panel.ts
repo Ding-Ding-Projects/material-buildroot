@@ -8,6 +8,7 @@ import "./execution-setup-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./ollama-workspace-panel";
+import "./assistant-plan-panel";
 import "./build-queue-panel";
 import { requestDestructiveConfirmation } from "./destructive-confirmation";
 import "./ollama-catalogue-panel";
@@ -1046,7 +1047,7 @@ export class OperationsPanel extends LitElement {
     return html`<artifact-viewers .workspaceId=${this.workspace.workspaceId} .language=${this.language}></artifact-viewers>`;
   }
   private assistantView() {
-    return html`<section class="panel"><ollama-workspace-panel .language=${this.language}></ollama-workspace-panel></section>`;
+    return html`<section class="panel"><assistant-plan-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @assistant-job-recovery=${()=>{this.tab="builds";}}></assistant-plan-panel><ollama-workspace-panel .language=${this.language}></ollama-workspace-panel></section>`;
   }
   private updatesView() {
     return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.", "儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。")}</p></section>`;
@@ -1203,3 +1204,4 @@ export class OperationsPanel extends LitElement {
   }
 }
 customElements.define("operations-panel", OperationsPanel);
+
