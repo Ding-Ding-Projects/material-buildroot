@@ -161,6 +161,8 @@ else {
         sharedModeService?.close();
         sharedModeService = undefined;
       }
+      const dimSum=require('./preferences/dim-sum.cjs').createDimSum({directory:path.join(app.getPath('userData'),'public-dim-sum-cache'),allowed:()=>{const s=sharedModeService?.status();return s?.available===true&&s.active===false;}});
+      ipcMain.handle('studio:dim-sum',(event,value)=>desktop.admitted(event)?dimSum.request(value):{ok:false,code:'UNAUTHORIZED'});
       const appearanceHistory=createAppearanceHistory({filePath:path.join(app.getPath('userData'),'appearance-history'),fonts:appearanceFonts});
       ipcMain.handle('studio:appearance-history',(event,value)=>desktop.admitted(event)?appearanceHistory.request(value):{ok:false,code:'UNAUTHORIZED'});
       ipcMain.handle('studio:appearance-fonts', (event) => desktop.admitted(event) ? appearanceFonts.read() : {ok:false,code:'UNAUTHORIZED'});
