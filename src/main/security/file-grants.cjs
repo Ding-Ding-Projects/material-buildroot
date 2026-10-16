@@ -27,9 +27,17 @@ function identity(info) {
   return `${info.dev}:${info.ino}:${info.birthtimeMs}`;
 }
 function inspect(absolute) {
+  if (typeof absolute !== "string" || absolute.length > 4096 ||
+      !path.isAbsolute(absolute) || path.resolve(absolute) !== absolute ||
+      /[\x00-\x1f]/.test(absolute) || absolute.startsWith("\\\\"))
+    failure("UNSAFE_PATH");
   const parsed = path.parse(absolute);
+  relativeParts(absolute.slice(parsed.root.length).split(path.sep).join("/"));
   let cursor = parsed.root;
-  const chain = [];
+  const rootInfo = fs.lstatSync(cursor);
+  if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink() ||
+      fs.realpathSync.native(cursor) !== cursor) failure("UNSAFE_PATH");
+  const chain = [{ path: cursor, identity: identity(rootInfo) }];
   for (const part of absolute
     .slice(parsed.root.length)
     .split(path.sep)
@@ -90,6 +98,26 @@ function createFileGrants({ now = Date.now } = {}) {
       if (grant.expires <= time) grants.delete(id);
   }
   const service = {
+    // Trusted host import adapters call this only after obtaining explicit consent.
+    importFile(input) {
+      exact(input, ["path", "owner"]);
+      return service.grant({ ...input, kind: "file", access: "read" });
+    },
+    async translate(input, translator) {
+      if (typeof translator !== "function") failure("INVALID_REQUEST");
+      const before = service.resolve(input);
+      const snapshot = inspect(before.path);
+      const translated = await translator(before.path);
+      const after = service.resolve(input);
+      if (after.path !== before.path ||
+          JSON.stringify(inspect(after.path)) !== JSON.stringify(snapshot))
+        failure("GRANT_CHANGED");
+      if (typeof translated !== "string" || translated.length > 4096 ||
+          !translated.startsWith("/") || /[\x00-\x1f\\]/.test(translated) ||
+          path.posix.normalize(translated) !== translated || translated.startsWith("//"))
+        failure("INVALID_TRANSLATION");
+      return { path: translated, kind: after.kind, access: after.access };
+    },
     grant(input) {
       exact(input, ["path", "kind", "access", "owner"]);
       if (
@@ -130,15 +158,8 @@ function createFileGrants({ now = Date.now } = {}) {
       const parts = relativeParts(input.relative ?? "");
       if (grant.kind === "file" && parts.length) failure("NOT_AUTHORIZED");
       try {
-        for (const item of grant.chain) {
-          const info = fs.lstatSync(item.path);
-          if (
-            info.isSymbolicLink() ||
-            identity(info) !== item.identity ||
-            fs.realpathSync.native(item.path) !== item.path
-          )
-            failure("GRANT_CHANGED");
-        }
+        if (JSON.stringify(inspect(grant.path)) !== JSON.stringify(grant.chain))
+          failure("GRANT_CHANGED");
         const resolved = path.join(grant.path, ...parts);
         const suffix = path.relative(grant.path, resolved);
         if (
@@ -160,6 +181,7 @@ function createFileGrants({ now = Date.now } = {}) {
         }
         return { path: resolved, kind, access: grant.access };
       } catch (error) {
+        grants.delete(input.id);
         if (["GRANT_CHANGED", "UNSAFE_PATH"].includes(error.code)) throw error;
         failure("GRANT_CHANGED");
       }
@@ -180,7 +202,13 @@ function createFileGrants({ now = Date.now } = {}) {
         name,
         (...args) => {
           try {
-            return method(...args);
+            const result = method(...args);
+            if (result && typeof result.then === "function")
+              return result.catch((error) => {
+                if (error.message === "File capability is unavailable.") throw error;
+                failure("GRANT_UNAVAILABLE");
+              });
+            return result;
           } catch (error) {
             if (error.message === "File capability is unavailable.")
               throw error;
@@ -191,4 +219,4 @@ function createFileGrants({ now = Date.now } = {}) {
     ),
   );
 }
-module.exports = { createFileGrants };
+module.exports = { createFileGrants, inspectCanonicalPath: inspect };
