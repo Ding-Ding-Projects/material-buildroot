@@ -179,6 +179,8 @@ else {
         }
       });
       const authenticatorIPC = createAuthenticatorIPC({desktop, directory:app.getPath("userData"), safeStorage});
+      window.webContents.on("did-start-navigation", () => authenticatorIPC.revoke());
+      window.webContents.on("destroyed", () => authenticatorIPC.revoke());
       ipcMain.handle("studio:authenticator", (event,value) => authenticatorIPC.request(event,value));
       const experienceIPC = createExperienceIPC({ desktop, directory: app.getPath("userData"), safeStorage, openFolder: folder => shell.openPath(folder), schoolMode: () => sharedModeService?.status()?.active !== false });
       ipcMain.handle("studio:experience-policies", (event, value) => experienceIPC.request(event, value));
