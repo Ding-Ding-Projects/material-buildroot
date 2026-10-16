@@ -82,6 +82,10 @@ The typed host adapter admits these exact actions, subject to the current sessio
 
 The server validates the argument schema and scope before dispatch. The consumer rechecks authorization before each call and after awaited reads. Project actions revalidate the adopted root identity. Output identifiers are opaque handles scoped to one session and project; each session has its own output viewer. Browser callers cannot submit a host path, invoke a generic IPC operation, create a grant, select an executable or assert native consent.
 
+## Companion setup and resume
+
+The three-step companion guide reviews pairing, requires a selected native-admitted project and reads that project's current runtime/external-tree admission before completion. Back/Next and local save/resume retain only guide progress. A captured project/session identity prevents a late result from validating another selection. Completion opens the productive configuration workflow. Missing runtime configuration points to the actual native setup route; the guide does not manufacture it or treat saved progress as a grant. Runtime interaction and reload acceptance remain deferred.
+
 ## Independent control search
 
 Each C workflow now has its own literal-first control search and adjacent complete regex workbench, reusing the isolated search component rather than visitor storage. Worker-backed expression evaluation remains bounded by that component. Matching changes the actual visible workflow controls, never host authority or remote queries. Native catalogue filters remain literal server queries; this local control search does not claim regex search across unseen remote records.
@@ -143,6 +147,7 @@ The browser supplies only repository identifiers, an immutable source revision a
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
