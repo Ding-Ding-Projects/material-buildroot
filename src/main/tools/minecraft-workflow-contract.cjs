@@ -1,7 +1,8 @@
 "use strict";
 const { fail, text, token } = require("./runtime.cjs");
-const actions = ["minecraft.world.list", "minecraft.world.preview", "minecraft.world.execute", "minecraft.records.list", "minecraft.records.save", "minecraft.records.import", "minecraft.records.export", "minecraft.players.read", "minecraft.players.write", "minecraft.command", "minecraft.schedule.add", "minecraft.schedule.cancel", "minecraft.schedule.list", "minecraft.managed.reconnect", "minecraft.fabric.options", "minecraft.fabric.install"];
+const actions = ["minecraft.remote.list", "minecraft.remote.preview", "minecraft.remote.execute", "minecraft.remote.cancel", "minecraft.remote.status", "minecraft.world.list", "minecraft.world.preview", "minecraft.world.execute", "minecraft.records.list", "minecraft.records.save", "minecraft.records.import", "minecraft.records.export", "minecraft.players.read", "minecraft.players.write", "minecraft.command", "minecraft.schedule.add", "minecraft.schedule.cancel", "minecraft.schedule.list", "minecraft.managed.reconnect", "minecraft.fabric.options", "minecraft.fabric.install"];
 function validate(request) {
+  if (request.action.startsWith("minecraft.remote.")) return require("./minecraft-remote.cjs").validate(request);
   const keys = (required, optional = []) => { if (required.some(key => !Object.hasOwn(request, key)) || Object.keys(request).some(key => !["action", ...required, ...optional].includes(key))) fail("INVALID_REQUEST"); };
   const edition = () => { if (!["java", "bedrock"].includes(request.edition)) fail("INVALID_REQUEST"); };
   switch (request.action) {
