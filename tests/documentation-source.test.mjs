@@ -1,3 +1,4 @@
+import fixtureLinks from './helpers/filesystem-links.cjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -27,7 +28,7 @@ test('documentation source and destination reject linked ancestors',()=>{
   const source=path.join(fixture,'source'), outside=path.join(fixture,'outside');
   fs.mkdirSync(source); fs.mkdirSync(outside);
   fs.writeFileSync(path.join(outside,'image.png'),Buffer.from([0,255,1]));
-  fs.symlinkSync(outside,path.join(source,'linked'),process.platform==='win32'?'junction':'dir');
+  fixtureLinks.symlinkSync(outside,path.join(source,'linked'),process.platform==='win32'?'junction':'dir');
   assert.throws(()=>containedPath(source,'linked/image.png'),/symbolic link or junction/);
   assert.throws(()=>containedPath(source,'linked/new/image.png'),/symbolic link or junction/);
 });

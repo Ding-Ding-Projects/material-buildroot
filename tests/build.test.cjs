@@ -14,7 +14,7 @@ test.after(()=>{for(const directory of fixtures)fs.rmSync(directory,{recursive:t
 test('build paths reject traversal, absolute paths and a real junction escape',()=>{
   const root=fixture(),outside=fixture();
   for(const value of ['../escape','a/../b','a//b','a\\b','C:/escape','/escape'])assert.throws(()=>contained(root,value));
-  fs.symlinkSync(outside,path.join(root,'linked'),process.platform==='win32'?'junction':'dir');
+  require('./helpers/filesystem-links.cjs').symlinkSync(outside,path.join(root,'linked'),process.platform==='win32'?'junction':'dir');
   assert.throws(()=>contained(root,'linked/output'));
   assert.equal(contained(root,'nested/output'),path.join(root,'nested','output'));
 });

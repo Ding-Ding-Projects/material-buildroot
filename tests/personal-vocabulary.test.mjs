@@ -1,3 +1,4 @@
+import fixtureLinks from './helpers/filesystem-links.cjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -97,13 +98,17 @@ test('literal longest matching is Unicode aware, nonrecursive, and restricted to
 test('file cache revalidates privately, rejects links, and clear persists across reopen', async t => {
  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'language-cache-')); t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
  const cache = createFileVocabularyCache({ directory }); await cache.replace(payload({ [neutral(1)]: neutral(2) }));
- const filename = path.join(directory, 'local-language-cache.json'); assert.equal(fs.statSync(filename).mode & 0o077, 0);
+ const filename = path.join(directory, 'local-language-cache.json');
+ await t.test('POSIX cache permission bits exclude other users', {skip:process.platform === 'win32' ? 'NTFS ACL privacy requires native ACL evidence; POSIX mode bits do not verify it.' : false}, () => assert.equal(fs.statSync(filename).mode & 0o077, 0));
  const restored = createVocabularyController({ privateCache: createFileVocabularyCache({ directory }) }); await restored.load(); assert.equal(format(restored, neutral(1)), neutral(2));
  await cache.clear(); assert.equal(await createFileVocabularyCache({ directory }).read(), null);
  fs.writeFileSync(filename, '{'); assert.deepEqual(await restored.load(), { state: 'corrupt', active: false });
- fs.unlinkSync(filename); const outside = path.join(directory, 'outside'); fs.writeFileSync(outside, '{}'); fs.symlinkSync(outside, filename);
+ await t.test('real file symbolic links cannot redirect cache reads or mutations', async linkTest => {
+ fs.unlinkSync(filename); const outside = path.join(directory, 'outside'); fs.writeFileSync(outside, '{}');
+ try { fixtureLinks.symlinkSync(outside, filename); } catch (error) { if (process.platform === 'win32' && error.code === 'EPERM') { linkTest.skip('File symbolic-link privilege unavailable; this file-link case remains unverified.'); return; } throw error; }
  await assert.rejects(cache.read()); await assert.rejects(cache.replace(payload({}))); await assert.rejects(cache.clear()); assert.equal(fs.readFileSync(outside, 'utf8'), '{}');
- const link = path.join(directory, 'link'); fs.symlinkSync(directory, link, 'dir'); assert.throws(() => createFileVocabularyCache({ directory: path.join(link, 'child') }));
+ });
+ const link = path.join(directory, 'link'); fixtureLinks.symlinkSync(directory, link, 'dir'); assert.throws(() => createFileVocabularyCache({ directory: path.join(link, 'child') }));
 });
 
 test('IndexedDB absence is a generic local storage failure without network fallback', async () => {

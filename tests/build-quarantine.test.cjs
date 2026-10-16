@@ -49,13 +49,16 @@ test("foreign and malformed recovery data are preserved without replacement", (t
     assert.equal(fs.readFileSync(f.file, "utf8"), text);
   }
 });
-test("recovery storage refuses symbolic links, multiple links and replaced parent identity", (t) => {
+test("recovery storage refuses symbolic links, multiple links and replaced parent identity", async (t) => {
   const f = fixture(t),
     outside = path.join(f.directory, "outside");
   fs.writeFileSync(outside, '{"version":1,"records":[]}');
-  fs.symlinkSync(outside, f.file);
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real symbolic-link recovery storage",async()=>{
+require('./helpers/filesystem-links.cjs').symlinkSync(outside, f.file);
   assert.throws(() => f.create());
   fs.unlinkSync(f.file);
+
+});
   fs.linkSync(outside, f.file);
   assert.throws(() => f.create());
   fs.unlinkSync(f.file);

@@ -68,7 +68,7 @@ These are genuine, unretouched Linux Chromium captures of renderer source `e8f9b
 
 ## Scope and verification
 
-The full product remains in active implementation. Windows runtime testing is deferred by owner direction. Source implementation, Linux browser fixtures, Windows packaging and native acceptance are separate evidence. The [workspace guide](docs/desktop/modern-workspace.md) describes actual behavior and limits; the [roadmap](ROADMAP.md) retains missing functionality and acceptance requirements.
+The full product remains in active implementation. Windows testing resumed on 2026-10-16: the exact desktop build and six native build-toolchain checks passed, and the actual packaged workspace and runtime-discovery action ran on an isolated hidden desktop. The initial complete native test baseline failed; reviewed portability repairs are being delivered in focused batches. See [native continuation evidence](docs/evidence/native-windows-20261016/README.md) for exact sources, counts and remaining gaps. Source implementation, browser fixtures, packaging and full native acceptance remain separate evidence. The [workspace guide](docs/desktop/modern-workspace.md) describes actual behavior and limits; the [roadmap](ROADMAP.md) retains missing functionality and acceptance requirements.
 
 Buildroot runs in a non-root Linux runtime. Docker requires an existing digest-pinned image. External converters and PDF tools require admitted payloads and verified isolation. Companion pairing requires browser-trusted TLS and native owner approval. Downloading an update does not install it. Existing sources, outputs and protected data are preserved.
 

@@ -226,11 +226,14 @@ test("corrupt, foreign, duplicate, symlink and hardlink records refuse mutations
   assert.equal((await service.reload()).available, true);
   const other = path.join(sharedDirectory, "other");
   fs.renameSync(file, other);
-  fs.symlinkSync(other, file);
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real symbolic-link shared record",async()=>{
+require('./helpers/filesystem-links.cjs').symlinkSync(other, file);
   assert.equal((await service.reload()).available, false);
   await assert.rejects(service.initialize());
   assert.equal(fs.readFileSync(other, "utf8"), valid);
   fs.unlinkSync(file);
+
+});
   fs.linkSync(other, file);
   assert.equal((await service.reload()).available, false);
   fs.unlinkSync(file);
@@ -243,7 +246,7 @@ test("linked ancestors and directory identity replacement fail closed", async (t
   const service = create();
   await initialized(service);
   const link = path.join(sharedDirectory, "alias");
-  fs.symlinkSync(sharedDirectory, link, "dir");
+  require('./helpers/filesystem-links.cjs').symlinkSync(sharedDirectory, link, "dir");
   const linked = create({ sharedDirectory: path.join(link, "child") });
   await assert.rejects(linked.start());
   const moved = sharedDirectory + "-moved";

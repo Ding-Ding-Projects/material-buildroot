@@ -67,19 +67,22 @@ test("Git object history and unrelated output artifacts never become retained sn
 });
 test("internal links are hashed without following outside links or reading hardlinked data", async (t) => {
   const f = await fixture(t);
-  await fs.symlink("Makefile", path.join(f.source, "local-link"));
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real internal and outside symbolic links",async()=>{
+await require('./helpers/filesystem-links.cjs').symlink("Makefile", path.join(f.source, "local-link"));
   const first = await captureBuildIntent(f.input);
   await fs.writeFile(path.join(f.source, "Makefile"), "changed target\n");
   assert.notEqual(
     (await captureBuildIntent(f.input)).sourceRevision,
     first.sourceRevision,
   );
-  await fs.symlink(f.directory, path.join(f.source, "escape"));
+  await require('./helpers/filesystem-links.cjs').symlink(f.directory, path.join(f.source, "escape"));
   const linked = await captureBuildIntent(f.input);
   assert.equal(linked.snapshot.symlinkPolicy, "link-text-only");
   assert.equal(linked.snapshot.symlinks, 2);
   assert.equal(linked.snapshot.version, 2);
   await fs.unlink(path.join(f.source, "escape"));
+
+});
   const outside = path.join(f.directory, "outside");
   await fs.writeFile(outside, "outside-grant-data");
   await fs.link(outside, path.join(f.source, "hardlink"));
@@ -163,8 +166,9 @@ test("absolute filesystem-template links are retained as text without reading or
   const f = await fixture(t),
     outside = path.join(f.directory, "external-target");
   await fs.writeFile(outside, "private outside fixture");
-  await fs.symlink(outside, path.join(f.source, "template-link"));
-  await fs.symlink("/proc/mounts", path.join(f.source, "mtab-template"));
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,'real absolute template links',async()=>{
+await require('./helpers/filesystem-links.cjs').symlink(outside, path.join(f.source, "template-link"));
+  await require('./helpers/filesystem-links.cjs').symlink("/proc/mounts", path.join(f.source, "mtab-template"));
   const first = await captureBuildIntent(f.input);
   await fs.writeFile(outside, "changed outside fixture");
   const after = await captureBuildIntent(f.input);
@@ -176,15 +180,16 @@ test("absolute filesystem-template links are retained as text without reading or
     "SYMLINK_TARGETS_OUTSIDE_CAPTURED_FILE_NAMESPACE_ARE_NOT_BOUND",
   ]);
 });
+});
 
 test("link receipts preserve raw bytes and ambiguous non-UTF-8 filenames fail explicitly", async (t) => {
   if (process.platform === "win32") return t.skip("POSIX raw filename fixture");
   const f = await fixture(t),
     selected = path.join(f.source, "raw-link");
-  await fs.symlink(Buffer.from([0x61, 0xff]), selected);
+  await require('./helpers/filesystem-links.cjs').symlink(Buffer.from([0x61, 0xff]), selected);
   const first = await captureBuildIntent(f.input);
   await fs.unlink(selected);
-  await fs.symlink(Buffer.from([0x61, 0xfe]), selected);
+  await require('./helpers/filesystem-links.cjs').symlink(Buffer.from([0x61, 0xfe]), selected);
   assert.notEqual(
     (await captureBuildIntent(f.input)).sourceRevision,
     first.sourceRevision,

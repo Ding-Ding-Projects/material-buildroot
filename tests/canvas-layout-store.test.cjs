@@ -205,7 +205,7 @@ test("128 unique nodes and scale endpoints save while overflow preserves existin
     2,
   );
 });
-test("symlink, hardlink and redirected directory storage fail closed", (t) => {
+test("symlink, hardlink and redirected directory storage fail closed", async (t) => {
   const { store, directory, request, parent } = setup(t);
   store.save({ ...request, expectedRevision: 0, layout: layout() });
   const file = path.join(
@@ -215,10 +215,12 @@ test("symlink, hardlink and redirected directory storage fail closed", (t) => {
   );
   const target = path.join(parent, "preserve");
   fs.renameSync(file, target);
+  let linkCaseIndex=0;
   for (const link of [
-    () => fs.symlinkSync(target, file),
+    () => require('./helpers/filesystem-links.cjs').symlinkSync(target, file),
     () => fs.linkSync(target, file),
   ]) {
+    await require('./helpers/filesystem-links.cjs').fileLinkCase(t,`real linked-file boundary ${++linkCaseIndex}`,async()=>{
     link();
     assert.throws(() => store.get(request), { code: "STORAGE_UNAVAILABLE" });
     assert.throws(
@@ -226,11 +228,12 @@ test("symlink, hardlink and redirected directory storage fail closed", (t) => {
       { code: "STORAGE_UNAVAILABLE" },
     );
     fs.unlinkSync(file);
+    });
   }
   const elsewhere = path.join(parent, "elsewhere");
   fs.mkdirSync(elsewhere);
   const redirected = path.join(parent, "redirected");
-  fs.symlinkSync(elsewhere, redirected);
+  require('./helpers/filesystem-links.cjs').symlinkSync(elsewhere, redirected);
   const unsafe = createCanvasLayoutStore({
     directory: path.join(redirected, "new-child"),
   });

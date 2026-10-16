@@ -250,7 +250,7 @@ test("corrupt, foreign, mismatched and invalid UTF-8 records remain unchanged", 
     assert.deepEqual(fs.readFileSync(file), bytes);
   }
 });
-test("linked storage and redirected directories fail closed while foreign locks remain untouched", (t) => {
+test("linked storage and redirected directories fail closed while foreign locks remain untouched", async (t) => {
   const { directory, request, parent, store } = setup(t);
   store.save({
     ...request,
@@ -261,10 +261,12 @@ test("linked storage and redirected directories fail closed while foreign locks 
   const file = path.join(directory, `${request.workspaceId}.json`),
     target = path.join(parent, "preserve");
   fs.renameSync(file, target);
+  let linkCaseIndex=0;
   for (const link of [
-    () => fs.symlinkSync(target, file),
+    () => require('./helpers/filesystem-links.cjs').symlinkSync(target, file),
     () => fs.linkSync(target, file),
   ]) {
+    await require('./helpers/filesystem-links.cjs').fileLinkCase(t,`real linked-file boundary ${++linkCaseIndex}`,async()=>{
     link();
     assert.throws(() => store.get(request), { code: "STORAGE_UNAVAILABLE" });
     assert.throws(
@@ -278,6 +280,7 @@ test("linked storage and redirected directories fail closed while foreign locks 
       { code: "STORAGE_UNAVAILABLE" },
     );
     fs.unlinkSync(file);
+    });
   }
   fs.renameSync(target, file);
   fs.writeFileSync(`${file}.lock`, "another owner");
@@ -296,7 +299,7 @@ test("linked storage and redirected directories fail closed while foreign locks 
   const elsewhere = path.join(parent, "elsewhere");
   fs.mkdirSync(elsewhere);
   const redirected = path.join(parent, "redirected");
-  fs.symlinkSync(elsewhere, redirected);
+  require('./helpers/filesystem-links.cjs').symlinkSync(elsewhere, redirected);
   const unsafe = createProjectOptionsStore({
     directory: path.join(redirected, "new-child"),
   });

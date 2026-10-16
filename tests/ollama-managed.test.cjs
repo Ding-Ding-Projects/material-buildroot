@@ -151,7 +151,8 @@ test("managed cached installation owns version/cache/model roots and never start
       false,
     );
     await assert.rejects(controller.start(), {
-      code: "OWNED_RUNTIME_VERIFICATION_UNAVAILABLE",
+      // The non-executable fixture cannot establish runtime ownership on either platform.
+      code: process.platform === "win32" ? "NATIVE_OWNERSHIP_FAILED" : "OWNED_RUNTIME_VERIFICATION_UNAVAILABLE",
     });
     assert.ok(progress.includes("verify"));
     await controller.dispose();

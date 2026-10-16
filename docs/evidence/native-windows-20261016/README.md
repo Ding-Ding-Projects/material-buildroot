@@ -43,6 +43,10 @@ A bounded retry independently passed ownership proof, opened the real setup dial
 
 ## Open acceptance
 
+The following fixture recovery batch has zero static parse errors across 28 changed non-renderer files and bounded independent assertion-preservation review. It separates unavailable real file-link cases from hardlink, junction, malformed-data, revision and persistence checks; preserves exact native process protocol assertions; and adds a Windows SQLite sharing-denial/rollback case alongside the four explicitly unverified foreign-journal retention cases. Runtime verification of this batch is still pending. Native cache ACL privacy remains unverified, and POSIX mode bits are not used as a substitute.
+
+The [scheduled-preferences recovery archive](../../../design/archive/schedule-editor-20261016/README.md) records its exact source bytes and the incomplete twelve-case browser verdict. No candidate acceptance is inferred from TypeScript or a single assertion.
+
 - [ ] Complete the native fixture repair groups and establish a new complete-suite result.
 - [ ] Complete scheduled-preferences consumers and independently review their browser and native behavior.
 - [ ] Promote inspected captures with sanitized source/build/runtime receipts and finish owned process teardown.

@@ -21,7 +21,7 @@ check('missing documentation fails',r=>{r.documents=[];},/missing documents/);
 check('stale source hashes fail',(r,f)=>{fs.writeFileSync(path.join(f.root,r.consumers[0].path),'changed');},/stale hash/);
 check('missing implementation files fail',r=>{r.consumers[0].path='src/imaginary.cjs';},/missing file/);
 check('traversal fails',r=>{r.consumers[0].path='../outside';},/invalid repository path/);
-check('outside symlink fails',(r,f)=>{fs.symlinkSync(os.tmpdir(),path.join(f.root,'src/outside'));r.consumers[0].path='src/outside';},/outside repository/);
+check('outside symlink fails',(r,f)=>{require('./helpers/filesystem-links.cjs').symlinkSync(os.tmpdir(),path.join(f.root,'src/outside'));r.consumers[0].path='src/outside';},/outside repository/);
 check('tested claims require receipts',r=>{r.state='tested';},/requires receipts/);
 check('source-bound passing receipt validates',(r,f)=>{r.state='tested';r.receipts=[{sourceRevision:r.sourceRevision,builtHash:f.binding('docs/receipt.txt').sha256,buildArtifact:f.binding('docs/receipt.txt'),exitCode:0,command:'node --test tests/consumer.test.cjs',environment:'Linux test fixture',recordedAt:'2026-10-15T00:00:00Z',output:f.binding('docs/receipt.txt'),bindings:[...r.consumers,...r.tests]}];});
 check('receipt cannot omit current source bindings',(r,f)=>{r.state='tested';r.receipts=[{sourceRevision:r.sourceRevision,builtHash:f.binding('docs/receipt.txt').sha256,buildArtifact:f.binding('docs/receipt.txt'),exitCode:0,command:'node --test',environment:'fixture',recordedAt:'2026-10-15T00:00:00Z',output:f.binding('docs/receipt.txt'),bindings:[...r.tests]}];},/missing current source/);

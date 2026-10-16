@@ -18,4 +18,16 @@ function symlinkSync(target, destination, type) {
 function symlink(target, destination, type) {
   return fs.promises.symlink(target, destination, linkType(target, destination, type));
 }
-module.exports = {symlinkSync, symlink};
+async function fileLinkCase(t, name, body) {
+  return t.test(name, async linkTest => {
+    try { await body(); }
+    catch (error) {
+      if (process.platform === 'win32' && error.code === 'EPERM' && error.syscall === 'symlink') {
+        linkTest.skip('Real file symbolic-link privilege is unavailable; this file-link case remains unverified.');
+        return;
+      }
+      throw error;
+    }
+  });
+}
+module.exports = {symlinkSync, symlink, fileLinkCase};

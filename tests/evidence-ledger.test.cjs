@@ -90,7 +90,7 @@ test('realpath containment rejects an internal directory link to external proof'
     fs.copyFileSync(path.join(root,'docs/planning/feature-coverage.md'),path.join(isolated,'docs/planning/feature-coverage.md'));
     fs.copyFileSync(__filename,path.join(isolated,'tests/evidence-ledger.test.cjs'));
     fs.writeFileSync(path.join(external,'proof.txt'),'external fixture proof');
-    fs.symlinkSync(external,path.join(isolated,'linked-proof'),process.platform==='win32'?'junction':'dir');
+    require('./helpers/filesystem-links.cjs').symlinkSync(external,path.join(isolated,'linked-proof'),process.platform==='win32'?'junction':'dir');
     const ledger=completeFixture();
     assert.deepEqual(validate(ledger,{root:isolated}),[]);
     ledger.identities[0].surfaces.A.proof.runtime.files=[{path:'linked-proof/proof.txt',sha256:hash(fs.readFileSync(path.join(external,'proof.txt')))}];

@@ -34,8 +34,11 @@ test("artifact paths, binary metadata, manifests and repeat-build differences", 
   assert.equal(a.partitions[0].withinImage, true);
   assert.equal(a.sha256.length, 64);
   await assert.rejects(s.inspectArtifact("../outside"), /ENOENT|outside/);
-  fs.symlinkSync("/etc/passwd", path.join(root, "escape"));
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real outside artifact symbolic link",async()=>{
+require('./helpers/filesystem-links.cjs').symlinkSync("/etc/passwd", path.join(root, "escape"));
   await assert.rejects(s.inspectArtifact("escape"), /outside/);
+
+});
   const first = await s.createManifest({
     paths: ["notes.txt"],
     locks: { sourceRevision: "abcdef123" },

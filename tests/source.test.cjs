@@ -30,7 +30,7 @@ test('source acquisition rejects protocols, traversal, nonempty roots, refs and 
   await assert.rejects(service.clone({ grantId: grant.grantId, directory: 'origin', url: origin, trustedSource: true }), /not-empty/);
   await assert.rejects(service.clone({ grantId: grant.grantId, directory: 'new', url: origin, trustedSource: false }), /trust/);
   await assert.rejects(service.clone({ grantId: grant.grantId, directory: 'new', url: origin, ref: '--upload-pack=id', trustedSource: true }), /ref/);
-  fs.symlinkSync(origin, path.join(root, 'alias')); assert.throws(() => service.destination(grant.grantId, 'alias'), /alias/);
+  require('./helpers/filesystem-links.cjs').symlinkSync(origin, path.join(root, 'alias')); assert.throws(() => service.destination(grant.grantId, 'alias'), /alias/);
   const production = new SourceService(); t.after(() => production.dispose()); assert.throws(() => production.url(origin), /unsafe/);
 });
 test('external source-lock denial prevents upgrade writes', async t => {

@@ -1,3 +1,4 @@
+import fixtureLinks from './helpers/filesystem-links.cjs';
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -103,14 +104,18 @@ test("actual killed writer reopens owned journal and rolls back uncommitted docu
     store = createScheduleStore({ adapter: a, registry });
   await store.replace(document([]), { expectedRevision: null });
   a.close();
-  const script = `import {createSqliteScheduleAdapter} from ${JSON.stringify(new URL("../src/main/preferences/schedule-store.mjs", import.meta.url).href)};import {createScheduleStore} from ${JSON.stringify(new URL("../src/shared/scheduled-settings.mjs", import.meta.url).href)};const registry={language:v=>['en','zh-HK','bilingual'].includes(v),'appearance.theme':v=>['system','light','dark'].includes(v)};const adapter=createSqliteScheduleAdapter({directory:${JSON.stringify(f.directory)},profileId:'desktop',registry,afterWrite(){process.kill(process.pid,'SIGKILL')}});await createScheduleStore({adapter,registry}).replace(${JSON.stringify(document(Array.from({ length: 256 }, (_, i) => rule(i))))},{expectedRevision:0});`;
+  const script = `import fs from 'node:fs';import {createSqliteScheduleAdapter} from ${JSON.stringify(new URL("../src/main/preferences/schedule-store.mjs", import.meta.url).href)};import {createScheduleStore} from ${JSON.stringify(new URL("../src/shared/scheduled-settings.mjs", import.meta.url).href)};const registry={language:v=>['en','zh-HK','bilingual'].includes(v),'appearance.theme':v=>['system','light','dark'].includes(v)};const adapter=createSqliteScheduleAdapter({directory:${JSON.stringify(f.directory)},profileId:'desktop',registry,afterWrite(){fs.writeSync(1,'TRANSACTION_READY\\n');process.kill(process.pid,'SIGKILL')}});await createScheduleStore({adapter,registry}).replace(${JSON.stringify(document(Array.from({ length: 256 }, (_, i) => rule(i))))},{expectedRevision:0});`;
+  const writerDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "schedule-writer-"));
+  t.after(() => fs.rmSync(writerDirectory, {recursive:true, force:true}));
+  const writer = path.join(writerDirectory, "writer.mjs");
+  fs.writeFileSync(writer, script);
   let killed = false;
   try {
-    execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+    execFileSync(process.execPath, [writer], {
       stdio: "pipe",
     });
   } catch (error) {
-    killed = error.signal === "SIGKILL";
+    killed = error.signal === "SIGKILL" || (process.platform === "win32" && error.status === 1 && String(error.stdout).includes("TRANSACTION_READY"));
   }
   assert.equal(killed, true);
   assert.equal(
@@ -217,7 +222,7 @@ test("journal checkpoint reads use bounded retained descriptors and preserve ove
   assert.equal(fs.statSync(checkpoint).size, 2049);
 });
 
-test("unexpected active journal replacement survives SQLite cleanup and latches profile unavailable", async (t) => {
+test("unexpected active journal replacement survives SQLite cleanup and latches profile unavailable", {skip:process.platform === "win32" ? "Active SQLite journal replacement is blocked by Windows file sharing; native blocked-attack rollback is tested separately. Foreign-evidence retention remains unverified here." : false}, async (t) => {
   const f = fixture(t),
     base = f.create(),
     store = createScheduleStore({ adapter: base, registry });
@@ -257,7 +262,7 @@ test("unexpected active journal replacement survives SQLite cleanup and latches 
   assert.throws(() => f.create());
 });
 
-test("unexpected symlink journal is retained without following it or changing its target", async (t) => {
+test("unexpected symlink journal is retained without following it or changing its target", {skip:process.platform === "win32" ? "Active SQLite journal replacement is blocked by Windows file sharing; native blocked-attack rollback is tested separately. Foreign-evidence retention remains unverified here." : false}, async (t) => {
   const f = fixture(t),
     base = f.create(),
     store = createScheduleStore({ adapter: base, registry });
@@ -269,7 +274,7 @@ test("unexpected symlink journal is retained without following it or changing it
   const attacked = f.create("desktop", {
     afterWrite() {
       fs.unlinkSync(journal);
-      fs.symlinkSync(outside, journal);
+      fixtureLinks.symlinkSync(outside, journal);
     },
   });
   await assert.rejects(
@@ -297,7 +302,7 @@ test("unexpected symlink journal is retained without following it or changing it
   attacked.close();
 });
 
-test("incident publication failure still closes SQLite and preserves foreign incident/journal evidence", async (t) => {
+test("incident publication failure still closes SQLite and preserves foreign incident/journal evidence", {skip:process.platform === "win32" ? "Active SQLite journal replacement is blocked by Windows file sharing; native blocked-attack rollback is tested separately. Foreign-evidence retention remains unverified here." : false}, async (t) => {
   const { DatabaseSync } = await import("node:sqlite"),
     f = fixture(t),
     base = f.create(),
@@ -338,7 +343,7 @@ test("incident publication failure still closes SQLite and preserves foreign inc
   assert.throws(() => f.create());
 });
 
-test("pre-retention rename failure uses exclusive link retention and releases the owned SQLite connection", async (t) => {
+test("pre-retention rename failure uses exclusive link retention and releases the owned SQLite connection", {skip:process.platform === "win32" ? "Active SQLite journal replacement is blocked by Windows file sharing; native blocked-attack rollback is tested separately. Foreign-evidence retention remains unverified here." : false}, async (t) => {
   const { DatabaseSync } = await import("node:sqlite"),
     f = fixture(t),
     base = f.create(),
@@ -385,4 +390,28 @@ test("pre-retention rename failure uses exclusive link retention and releases th
   } finally {
     db.close();
   }
+});
+
+
+test("Windows file sharing blocks active-journal replacement and rollback preserves the prior document", {skip:process.platform !== "win32"}, async t => {
+  const f=fixture(t), initial=f.create();
+  await createScheduleStore({adapter:initial, registry}).replace(document([]), {expectedRevision:null});
+  initial.close();
+  const journal=path.join(f.directory,"scheduled-settings.sqlite-journal");
+  let blocked;
+  const attacked=f.create("desktop", {afterWrite() {
+    try { fs.unlinkSync(journal); }
+    catch(error) { blocked=error; throw error; }
+    assert.fail("This host allowed active-journal removal; use the foreign-journal retention acceptance route instead.");
+  }});
+  await assert.rejects(createScheduleStore({adapter:attacked,registry}).replace(document([rule(1)]),{expectedRevision:0}),{code:"STORAGE_UNAVAILABLE"});
+  assert.ok(blocked,"Attack setup must reach the native sharing boundary.");
+  assert.ok(["EPERM","EBUSY","EACCES"].includes(blocked.code),blocked.code);
+  attacked.close();
+  assert.equal(fs.existsSync(journal),false);
+  assert.equal(fs.existsSync(path.join(f.directory,"scheduled-settings-incident.json")),false);
+  const reopened=f.create();
+  assert.equal((await createScheduleStore({adapter:reopened,registry}).load()).revision,0);
+  assert.equal((await reopened.history()).records.length,1);
+  reopened.close();
 });

@@ -178,12 +178,13 @@ test("stale discovery symlink escapes and oversized response content are bounded
   assert.equal(large.sha256.length, 64);
   assert.equal(large.bytesBase64, undefined);
   assert.equal(imported.roundTripAllowed, false);
-  await fs.symlink(os.tmpdir(), path.join(sourceRoot, "package/escape"));
+  await require('./helpers/filesystem-links.cjs').symlink(os.tmpdir(), path.join(sourceRoot, "package/escape"));
   const discovered = await service.discover({ workspaceId: "w" });
   assert.ok(
     discovered.warnings.some((warning) => warning.reason === "Symlink skipped"),
   );
-  await fs.symlink(
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real package-file symbolic-link escape",async()=>{
+await require('./helpers/filesystem-links.cjs').symlink(
     path.join(sourceRoot, "package/upstream/upstream.mk"),
     path.join(external, "package/local/escape.mk"),
   );
@@ -195,6 +196,7 @@ test("stale discovery symlink escapes and oversized response content are bounded
     }),
     { code: "UNSAFE_PACKAGE_PATH" },
   );
+});
 });
 test(
   "actual downloaded Buildroot package catalogue exposes real identifiers without accepting custom roundtrip",
@@ -261,7 +263,7 @@ test("changed granted roots and symlink substitutions fail instead of silently g
     code: "ROOT_NOT_GRANTED",
   });
   await fs.rmdir(sourceRoot);
-  await fs.symlink(sourceRoot + "-original", sourceRoot);
+  await require('./helpers/filesystem-links.cjs').symlink(sourceRoot + "-original", sourceRoot);
   await assert.rejects(service.discover({ workspaceId: "w" }), {
     code: "ROOT_NOT_GRANTED",
   });

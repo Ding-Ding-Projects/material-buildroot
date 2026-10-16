@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-16T05:41:48.9808014Z",
+  "baseCommit": "08ba5a8a2a1f85737bc5fccb5527231fdbae8ce6",
+  "verification": {
+    "typeScript": "passed during implementation",
+    "native": "not run for this candidate",
+    "browserMatrix": "unverified: interrupted teardown and reload timeout"
+  },
+  "files": [
+    {
+      "savedPath": "design/archive/schedule-editor-20261016/source-files/src/renderer/main.ts.txt",
+      "sha256": "4c3a2ef80b883e8f23577fb577f8567f495947c1c6e05038f9642ae19534684b",
+      "bytes": 85314,
+      "path": "src/renderer/main.ts"
+    },
+    {
+      "savedPath": "design/archive/schedule-editor-20261016/source-files/src/renderer/scheduled-preferences-panel.ts.txt",
+      "sha256": "f1a891a3687a9920a4cc19910635d802552c71b3c18e1872b181330474566c03",
+      "bytes": 26313,
+      "path": "src/renderer/scheduled-preferences-panel.ts"
+    },
+    {
+      "savedPath": "design/archive/schedule-editor-20261016/source-files/tests/renderer/renderer-scheduled-preferences.spec.mjs.txt",
+      "sha256": "e497e21f1d31c3c5ec86d850ef8f7990bf5dc681e66feddcd370e6bf220b244b",
+      "bytes": 12322,
+      "path": "tests/renderer/renderer-scheduled-preferences.spec.mjs"
+    }
+  ],
+  "state": "unfinished-inactive-recovery"
+}

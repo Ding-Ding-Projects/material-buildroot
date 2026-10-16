@@ -104,11 +104,14 @@ test("cache growth during retained-handle read is rejected within its original b
   fs.open=async function(file,...args){const handle=await originalOpen.call(this,file,...args);if(file===target){const originalRead=handle.read.bind(handle);let mutated=false;handle.read=async function(...readArgs){requested+=readArgs[2];if(!mutated){mutated=true;await fs.truncate(target,65*1024*1024);}return originalRead(...readArgs);};}return handle;};
   try{await assert.rejects(catalogue.status(),{code:"CATALOGUE_CACHE_CHANGED"});assert.ok(requested<=initial+1);}finally{fs.open=originalOpen;}
 }));
-test("cache replacement with a symlink after open fails identity admission", () => fixture(async directory => {
+test("cache replacement with a symlink after open fails identity admission", async t => fixture(async directory => {
   const catalogue=createOllamaCatalogue({directory,fetchImpl:transport([]),paceMs:0});await catalogue.refresh();
   const target=path.join(directory,"official-catalogue.json"),saved=path.join(directory,"saved.json"),other=path.join(directory,"other.json");await fs.copyFile(target,other);
+  const capability=path.join(directory,"file-link-capability");
+  try { await require('./helpers/filesystem-links.cjs').symlink(other,capability); await fs.unlink(capability); }
+  catch(error) { if(process.platform==='win32' && error.code==='EPERM' && error.syscall==='symlink'){t.skip('Real file symbolic-link privilege unavailable; replacement race remains unverified.');return;}throw error; }
   const originalOpen=fs.open;
-  fs.open=async function(file,...args){const handle=await originalOpen.call(this,file,...args);if(file===target){const originalRead=handle.read.bind(handle);let mutated=false;handle.read=async function(...readArgs){if(!mutated){mutated=true;await fs.rename(target,saved);await fs.symlink(other,target);}return originalRead(...readArgs);};}return handle;};
+  fs.open=async function(file,...args){const handle=await originalOpen.call(this,file,...args);if(file===target){const originalRead=handle.read.bind(handle);let mutated=false;handle.read=async function(...readArgs){if(!mutated){mutated=true;await fs.rename(target,saved);await require('./helpers/filesystem-links.cjs').symlink(other,target);}return originalRead(...readArgs);};}return handle;};
   try{await assert.rejects(catalogue.status(),{code:"CATALOGUE_CACHE_CHANGED"});}finally{fs.open=originalOpen;}
 }));
 test("atomic publication is explicitly noncancellable once rename begins", () => fixture(async directory => {

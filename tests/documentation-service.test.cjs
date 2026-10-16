@@ -251,7 +251,8 @@ test("indexed symbolic-link article sources are refused and existing output is p
   const fixtureData = await fixture(t);
   const outside = path.join(path.dirname(fixtureData.root), "outside.md");
   fs.writeFileSync(outside, "# Private outside source");
-  fs.symlinkSync(outside, path.join(fixtureData.root, "docs/linked.md"));
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real indexed source symbolic link",async()=>{
+require('./helpers/filesystem-links.cjs').symlinkSync(outside, path.join(fixtureData.root, "docs/linked.md"));
   execFileSync("git", ["add", "docs/linked.md"], { cwd: fixtureData.root });
   await assert.rejects(fixtureData.build(), /symbolic link|junction/);
   assert.equal(fs.existsSync(fixtureData.output), false);
@@ -260,6 +261,8 @@ test("indexed symbolic-link article sources are refused and existing output is p
     cwd: fixtureData.root,
     stdio: "ignore",
   });
+
+});
   await fixtureData.build();
   const original = fs.readFileSync(path.join(fixtureData.output, "index.json"));
   await assert.rejects(fixtureData.build(), /new or empty/);
@@ -313,9 +316,12 @@ test("generated path escapes, symbolic links and multiply linked files are not a
   fs.writeFileSync(indexPath, original);
   const target = path.join(path.dirname(fixtureData.output), "manifest-copy");
   fs.renameSync(indexPath, target);
-  fs.symlinkSync(target, indexPath);
+  await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real generated manifest symbolic link",async()=>{
+require('./helpers/filesystem-links.cjs').symlinkSync(target, indexPath);
   assert.throws(() => fixtureData.service().list(), { code: "INVALID_BUNDLE" });
   fs.unlinkSync(indexPath);
+
+});
   fs.linkSync(target, indexPath);
   assert.throws(() => fixtureData.service().list(), { code: "INVALID_BUNDLE" });
 });

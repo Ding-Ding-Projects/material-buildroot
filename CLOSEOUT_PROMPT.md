@@ -1,3 +1,18 @@
+# Current recovery state, 2026-10-16
+
+Owner steering: continue the complete roadmap and perform actual Windows tests. This objective remains active and incomplete.
+
+Verified native repair batches are on main at 22861aed9678918b5a9a23e319ac5f17719f5d5d (44/47 passed, three explicit skips) and 08ba5a8a2a1f85737bc5fccb5527231fdbae8ce6 (16/16 passed, zero skips). Both exact remote refs were read back. The matching private-instruction synchronization operations completed separately. Full baseline remains 444 tests, 361 pass, 74 fail, nine skipped until a new full run genuinely replaces it.
+
+A further 28-file native test recovery batch passed static parsing and bounded independent assertion-preservation review. Its runtime result is unverified. It retains explicit file-link, native ACL and foreign-journal evidence gaps. No product security check was weakened to obtain a passing test.
+
+The unfinished scheduled-preferences candidate has exact byte-verified copies under design/archive/schedule-editor-20261016/. It includes reviewed effective-readout corrections and twelve browser cases. One save/reload/history assertion passed, but runner teardown was interrupted. The final twelve-case run timed out after reload in its first case, and eleven cases did not run. Overall browser and native acceptance remain unverified. The archive is inactive, not a shipped feature. Original working candidate paths remain locally owned for continuation; do not overwrite valid newer work blindly when restoring.
+
+The latest host reading reached about 4.6 MiB free physical memory. Heavy checks are held while capacity is unavailable; the owner has been asked to report when capacity is freed. Do not claim a resource timeout proves a product defect or a passing matrix. Continue independent lightweight review and preserve every owned nonignored file. Resume the smallest focused check after a fresh capacity observation, then finish the source-bound build and actual runtime evidence.
+
+The earlier baseline runtime and release/gallery evidence below retains its exact original source boundaries. Owned baseline process absence was confirmed for all four recorded process IDs; final empty-desktop closure proof is still being recorded. No host power/login action, security weakening or unrelated process termination is authorized.
+
+---
 # Native Windows continuation, 2026-10-16
 
 The owner resumed complete PH00–PH10 implementation and requested actual Windows tests. The earlier stop and runtime-test deferral below are historical and superseded. Work remains on main.

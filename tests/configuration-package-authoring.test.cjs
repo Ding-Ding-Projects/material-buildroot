@@ -114,7 +114,7 @@ test("untrusted fields command injection traversal and symlink paths fail before
     { licenseFiles: ["../LICENSE"] },
   ])
     assert.throws(() => validateAuthoringModel({ ...model(), ...change }));
-  await fs.symlink(os.tmpdir(), path.join(root, "package"));
+  await require('./helpers/filesystem-links.cjs').symlink(os.tmpdir(), path.join(root, "package"));
   await assert.rejects(service.preview({ model: model() }), {
     code: "UNSAFE_PACKAGE_PATH",
   });
@@ -514,7 +514,7 @@ test("authoring refuses a selected root redirected to a different canonical dire
   await service.preview({ model: model() });
   await fs.rename(root, root + "-selected");
   t.after(() => fs.rm(root + "-selected", { recursive: true, force: true }));
-  await fs.symlink(root + "-selected", root);
+  await require('./helpers/filesystem-links.cjs').symlink(root + "-selected", root);
   await assert.rejects(service.preview({ model: model() }), {
     code: "ROOT_NOT_GRANTED",
   });
