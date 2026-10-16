@@ -38,6 +38,7 @@ function admit(request, nested = false) {
   object(request);
   string(request.action, 80);
   const action = request.action;
+  if (action.startsWith("editor.") || action.startsWith("transfer.")) { require("./editor-transfer.cjs").validate(request); return structuredClone(request); }
   if (require("./minecraft-workflow-contract.cjs").actions.includes(action)) { require("./minecraft-workflow-contract.cjs").validate(request); return structuredClone(request); }
   if (action.startsWith("minecraft.managed.") || action.startsWith("minecraft.configuration.")) { require("./minecraft-managed.cjs").validate(request); return structuredClone(request); }
   const simple = [
@@ -320,7 +321,7 @@ function admit(request, nested = false) {
         keys(request, ["action", "job"]);
         if (
           nested ||
-          !["converter.convert", "ollama.pull", "pdf.execute"].includes(
+          !["converter.convert", "ollama.pull", "pdf.execute", "transfer.download"].includes(
             request.job?.action,
           )
         )
@@ -346,7 +347,7 @@ function admit(request, nested = false) {
         break;
       case "queue.rebind":
         keys(request, ["action", "id", "job"]);
-        if (!uuid(request.id) || nested || !["converter.convert", "pdf.execute"].includes(request.job?.action)) fail("INVALID_REQUEST");
+        if (!uuid(request.id) || nested || !["converter.convert", "pdf.execute", "transfer.download"].includes(request.job?.action)) fail("INVALID_REQUEST");
         admit(request.job, true);
         break;
       case "queue.cancel":
@@ -360,3 +361,4 @@ function admit(request, nested = false) {
   return structuredClone(request);
 }
 module.exports = { admit };
+

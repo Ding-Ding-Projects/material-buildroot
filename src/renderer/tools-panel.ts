@@ -1,3 +1,4 @@
+import "./editor-transfer-panel";
 import "./settings-search";
 import {localizedCopy} from './language-wording';
 import "./minecraft-panel";
@@ -347,7 +348,7 @@ export class ToolsPanel extends LitElement {
     const requiresPages = ["split", "extract", "reorder", "rotate"].includes(
       this.pdfOperation,
     );
-    return html`<div class="stack" aria-busy=${this.pending}>
+    return html`<div class="stack" aria-busy=${this.pending}><editor-transfer-panel .language=${this.language}></editor-transfer-panel>
       ${this.pending || this.runningQueue
         ? html`<md-linear-progress
             indeterminate
@@ -663,3 +664,4 @@ export class ToolsPanel extends LitElement {
   }
 }
 customElements.define("tools-panel", ToolsPanel);
+

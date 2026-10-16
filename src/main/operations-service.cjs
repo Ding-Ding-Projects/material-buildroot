@@ -1153,6 +1153,8 @@ function createOperationsService({
     nativeFileBroker,
     nativeFileBrokerError,
     queueDirectory: path.join(directory, "tool-queue"),
+    editorTransferDirectory: path.join(directory, "editor-transfers"),
+    openTransferBrowser: openDocumentationExternal,
     minecraftManagedDirectory: path.join(directory, "minecraft-manager"),
     ollamaManagedDirectory: path.join(directory, "ollama"),
     ollamaCatalogueDirectory: path.join(directory, "ollama-catalogue"),
@@ -1993,6 +1995,8 @@ function createOperationsService({
             "ollama.chat.read",
             "ollama.chat.cancel",
             "ollama.chat.forget",
+            "editor.choose", "editor.status", "editor.open", "editor.reconcile", "editor.acknowledge", "editor.handoffs", "editor.rebind",
+            "transfer.preview", "transfer.browser", "transfer.visibility",
             "converter.catalog",
             "minecraft.remote.list",
             "minecraft.remote.preview",
@@ -2270,6 +2274,9 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
+
 
 
 

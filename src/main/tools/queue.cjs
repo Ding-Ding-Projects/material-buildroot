@@ -78,7 +78,7 @@ function createToolQueue(directory, execute, options = {}) {
         "failed",
         "cancelled",
       ].includes(record.state) ||
-      !["converter.convert", "ollama.pull", "pdf.execute"].includes(
+      !["converter.convert", "ollama.pull", "pdf.execute", "transfer.download"].includes(
         record.request?.action,
       )
     )
@@ -163,6 +163,7 @@ function createToolQueue(directory, execute, options = {}) {
           const record = await read(request.id);
           if (consuming || active.has(record.id) || record.state === "completed") fail("INVALID_QUEUE_STATE");
           if (record.request.action !== request.job.action) fail("INVALID_REQUEST");
+          if (record.request.action === "transfer.download" && (request.job.accepted !== true || request.job.destinationId === record.request.destinationId)) fail("FRESH_TRANSFER_CONSENT_REQUIRED");
           const previous={...record};
           retainOutcome(record);
           record.request = require("./request-contract.cjs").admit(request.job);
@@ -176,7 +177,7 @@ function createToolQueue(directory, execute, options = {}) {
         case "queue.add":
           if (
             !request.job ||
-            !["converter.convert", "ollama.pull", "pdf.execute"].includes(
+            !["converter.convert", "ollama.pull", "pdf.execute", "transfer.download"].includes(
               request.job.action,
             )
           )
@@ -250,6 +251,7 @@ function createToolQueue(directory, execute, options = {}) {
           return transition(request.id, async () => {
           const record = await read(request.id);
           if (consuming || active.has(record.id)) fail("QUEUE_ALREADY_RUNNING");
+          if (record.request.action === "transfer.download") fail("FRESH_TRANSFER_CONSENT_REQUIRED");
           if (record.state === "interrupted" || record.result?.incompleteOutput?.state === "unknown") fail("QUEUE_OUTCOME_UNKNOWN");
           if (!["interrupted", "failed", "cancelled"].includes(record.state))
             fail("INVALID_QUEUE_STATE");
@@ -301,8 +303,13 @@ function createToolQueue(directory, execute, options = {}) {
                 let result;
                 try { result = await execute(record.request, {
                   signal: controller.signal,
-                  onProgress: (event) =>
-                    context.onProgress?.({ jobId: record.id, ...event }),
+                  onProgress: async (event) => {
+                    if (record.request.action === "transfer.download" && event?.type === "transfer" && Number.isSafeInteger(event.bytes) && event.bytes >= 0 && event.bytes <= 536870912 && (event.total === null || Number.isSafeInteger(event.total) && event.total >= event.bytes && event.total <= 536870912) && Number.isSafeInteger(event.bytesPerSecond) && event.bytesPerSecond >= 0 && (event.etaSeconds === null || Number.isSafeInteger(event.etaSeconds) && event.etaSeconds >= 0)) {
+                      record.progress = {bytes:event.bytes,total:event.total,bytesPerSecond:event.bytesPerSecond,etaSeconds:event.etaSeconds};
+                      await write(record);
+                    }
+                    context.onProgress?.({ jobId: record.id, ...event });
+                  },
                 }); } catch {
                   result = {ok:false,code:"QUEUE_ADAPTER_OUTCOME_UNKNOWN",incompleteOutput:{state:"unknown",publication:"unconfirmed"}};
                 }
@@ -343,3 +350,4 @@ function createToolQueue(directory, execute, options = {}) {
   };
 }
 module.exports = { createToolQueue };
+

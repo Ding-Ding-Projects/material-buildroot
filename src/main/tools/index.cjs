@@ -14,6 +14,7 @@ function createToolsService(options = {}) {
   const ollama = createOllama(options),
     converter = createConverter(options),
     minecraft = createMinecraft(options);
+  const editorTransfer = require("./editor-transfer.cjs").createEditorTransfer(options);
   let disposed = false;
   const active = new Set();
   const inFlight = new Set();
@@ -63,13 +64,9 @@ function createToolsService(options = {}) {
         result = await converter.convert(request, context);
       else if (request.action.startsWith("minecraft."))
         result = await minecraft(request, context);
-      else if (request.action === "editor.open") {
-        const editorId = text(request.editorId, 80);
-        if (!options.editorIds?.includes(editorId)) fail("EDITOR_NOT_ADMITTED");
-        const file = await grant(options, request.sourceId, "read");
-        await processRun(await executable(options, editorId), [file], context);
-        result = { opened: true };
-      } else if (request.action === "forge.preview") {
+      else if (request.action.startsWith("editor.") || request.action.startsWith("transfer."))
+        result = await editorTransfer(request, context);
+      else if (request.action === "forge.preview") {
         if (
           !["github", "gitlab"].includes(request.provider) ||
           !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(request.repository || "")
@@ -170,3 +167,4 @@ function createToolsService(options = {}) {
   return { execute, dispose };
 }
 module.exports = { createToolsService };
+
