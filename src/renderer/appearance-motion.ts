@@ -71,3 +71,12 @@ customElements.define('appearance-motion',AppearanceMotion);
 
 
 
+export function exportAppearanceMotion(){return Object.fromEntries([...records].map(([id,record])=>[id,structuredClone(record)]));}
+export function importAppearanceMotion(value:unknown){
+ if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length>1000)throw Error('motion-import');
+ const next=new Map<string,MotionRecord>();for(const [id,record] of Object.entries(value)){if(!/^e[a-f0-9]{16}$/.test(id)||!appearancePermissionsAllowed(id,'motion',['tracks']))throw Error('motion-identity');next.set(id,validate(record));}
+ for(const id of records.keys())if(!appearancePermissionsAllowed(id,'motion',['tracks']))throw Error('motion-locked');
+ const text=JSON.stringify(Object.fromEntries(next));if(text.length>300000)throw Error('motion-bounds');localStorage.setItem(key,text);cancelAll();records.clear();for(const [id,record] of next)records.set(id,record);
+ document.dispatchEvent(new Event('appearance-motion-records'));
+}
+export function resetAppearanceMotion(identity?:string){const next=exportAppearanceMotion();if(identity)delete next[identity];else for(const id of Object.keys(next))delete next[id];importAppearanceMotion(next);}
