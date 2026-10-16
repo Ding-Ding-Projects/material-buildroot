@@ -176,12 +176,19 @@ if ((await fs.readdir(outputRoot)).length) throw new Error('Documentation stagin
 await fs.mkdir(path.join(out,'assets'),{recursive:true});
 await fs.copyFile(admittedSource(root,'assets/branding/icon.ico',sourceIndex),path.join(out,'assets/icon.ico'));
 await fs.copyFile(admittedSource(root,'assets/branding/icon.png',sourceIndex),path.join(out,'assets/icon.png'));
-await build({entryPoints:{'browser-native-image-worker':path.join(here,'browser-native-image-worker.ts'),'browser-native-logo-worker':path.join(root,'src/renderer/appearance-logo-worker.ts'),'browser-native-regex-worker':path.join(root,'src/renderer/regex-worker.ts'),'browser-native-search-worker':path.join(root,'src/renderer/documentation-search-worker.ts')},bundle:true,minify:true,format:'esm',outdir:path.join(out,'assets'),target:['chrome120','edge120']});
+await build({entryPoints:{'browser-native-document-worker':path.join(here,'browser-native-document-worker.js'),'browser-native-image-worker':path.join(here,'browser-native-image-worker.ts'),'browser-native-logo-worker':path.join(root,'src/renderer/appearance-logo-worker.ts'),'browser-native-regex-worker':path.join(root,'src/renderer/regex-worker.ts'),'browser-native-search-worker':path.join(root,'src/renderer/documentation-search-worker.ts')},bundle:true,minify:true,format:'esm',outdir:path.join(out,'assets'),target:['chrome120','edge120']});
 await build({entryPoints:[path.join(here,'app.js')],bundle:true,minify:true,format:'esm',outdir:path.join(out,'assets'),entryNames:'app',assetNames:'[name]-[hash]',loader:{'.woff2':'file','.woff':'file'},target:['chrome120','edge120'],legalComments:'eof'});
 await fs.writeFile(path.join(out,'assets/icon.svg'),`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="13" fill="#4052d6"/><path d="m10 16 14-7 14 7-14 7Z" fill="#fff"/><path d="m10 24 14 7 14-7v8l-14 7-14-7Z" fill="#bfc9ff"/></svg>`);
-for (const [packageName,license] of [['@material/web','LICENSE'],['@fontsource-variable/roboto','LICENSE'],['lit','LICENSE']]) {
+for (const [packageName,license] of [['@material/web','LICENSE'],['@fontsource-variable/roboto','LICENSE'],['lit','LICENSE'],['pdf-lib','LICENSE.md'],['fflate','LICENSE']]) {
   const destination=packageName.replace(/[^a-z0-9-]/g,'_')+'-LICENSE.txt';
   await fs.copyFile(path.join(here,'node_modules',packageName,license),path.join(out,'assets',destination));
+}
+for (const packageName of ['@pdf-lib/standard-fonts','@pdf-lib/upng','pako','tslib']) {
+  const packageRoot=path.join(here,'node_modules',packageName);
+  const files=await fs.readdir(packageRoot);
+  const license=files.find(name=>/^license(?:\.md|\.txt)?$/i.test(name));
+  if(!license) throw new Error(`Required bundled package license is missing: ${packageName}`);
+  await fs.copyFile(path.join(packageRoot,license),path.join(out,'assets',packageName.replace(/[^a-z0-9-]/g,'_')+'-LICENSE.txt'));
 }
 await fs.writeFile(path.join(outputRoot,'index.html'),page('Interactive Buildroot field guide',home,{active:'Learn by doing',description:'Work through an interactive source-to-image guide, package recipe preview and safe troubleshooting steps.'}));
 await fs.writeFile(path.join(outputRoot,'.nojekyll'),'');
@@ -234,6 +241,8 @@ await fs.writeFile(path.join(out,'asset-inventory.json'),JSON.stringify([...loca
 const walkFiles = async directory => (await Promise.all((await fs.readdir(directory,{withFileTypes:true})).map(entry => entry.isDirectory() ? walkFiles(path.join(directory,entry.name)) : [path.relative(outputRoot,path.join(directory,entry.name)).split(path.sep).join('/')]))).flat();
 const offlineFiles = [...new Set([...pages,...await walkFiles(out),'index.html'])].map(file => new URL(file,origin).pathname);
 await fs.writeFile(path.join(outputRoot,'service-worker.js'),`const CACHE='material-buildroot-docs-${snapshot.slice(0,12)}';const FILES=${JSON.stringify(offlineFiles)};self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('material-buildroot-docs-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));self.addEventListener('message',event=>{if(event.data!=='CACHE_DOCUMENTATION')return;event.waitUntil((async()=>{try{const cache=await caches.open(CACHE);await cache.addAll(FILES);event.source?.postMessage({type:'CACHE_COMPLETE',count:FILES.length})}catch(error){event.source?.postMessage({type:'CACHE_ERROR',message:String(error)})}})())});self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(url.origin!==self.location.origin||event.request.method!=='GET')return;event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)))})`);
+
+
 
 
 

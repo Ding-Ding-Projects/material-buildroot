@@ -1,3 +1,4 @@
+import {mountBrowserDocuments} from './browser-native-documents.js';
 import {mountBrowserConverter} from './browser-native-converter.js';
 import {mountBrowserExport} from './browser-native-exports.js';
 import {mountBrowserGuidance} from './browser-native-guidance.js';
@@ -170,6 +171,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   const authenticator = mountBrowserAuthenticator(visitor);
   mountBrowserLocks(visitor, authenticator);
   mountBrowserConverter(visitor);
+  mountBrowserDocuments(visitor);
   mountBrowserNavigation(visitor);
   mountBrowserTabs(visitor);
   mountBrowserGuidance(visitor);
@@ -179,6 +181,7 @@ export function mountBrowserNative(visitor, {readPlan, restorePlan, applyPrefere
   document.querySelector('#language')?.addEventListener('change', () => localized.forEach(update => update()));
   document.addEventListener('browser-native-copy-change', () => localized.forEach(update => update()));
 }
+
 
 
 
