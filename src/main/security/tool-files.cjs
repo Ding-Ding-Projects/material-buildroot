@@ -131,6 +131,13 @@ function createToolFiles({ dialog, parentWindow, purpose = "server" }) {
         fail("GRANT_CHANGED");
       }
     },
+    nativeGrant(id, mode) {
+      const selected = this.resolve(id, mode);
+      const record = records.get(id);
+      // New outputs bind the originally selected existing parent, not a later lookup.
+      const identity = record.chain.at(-1).identity.split(":").slice(0, 2).join(":");
+      return { path: selected, identity, newOutput: record.newOutput, kind: record.kind };
+    },
     serverAuthorized(id) {
       const record = records.get(id);
       if (
