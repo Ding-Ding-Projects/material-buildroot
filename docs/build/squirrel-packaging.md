@@ -1,0 +1,21 @@
+# Squirrel package and installed-version identity
+
+Run the exact root entrypoint `build-installer.bat /s`. It builds the real desktop payload and produces unsigned Squirrel.Windows `Setup.exe`, `RELEASES`, and `MaterialBuildroot-<version>-full.nupkg`. The output receipt binds the files to the unchanged source commit, tree, index, manifest, lockfile, and effective installed version. Packaging checks the actual application archive metadata against that version. Production does not install or launch the application and does not establish update, rollback, or runtime acceptance.
+
+## Release versions
+
+`MATERIAL_BUILD_VERSION` selects an explicit three-component numeric version. Otherwise a hosted `GITHUB_RUN_NUMBER` selects `<source major>.<source minor>.<run number>`. Components are bounded to 0 through 65534, and a workflow sequence is positive. Each independently numbered hosted build therefore changes the actual installed application and Squirrel package version, rather than merely changing a release tag while shipping version 0.1.0 again. Retrying the same workflow run retains its installed version. The release provenance and tag use the receipt's exact package version, and publication rejects a conflicting build/publication identity.
+
+A local build without either input uses the source manifest version and records `packageVersionSource: local-base`. This is suitable for local production only. Manual publication requires an explicit `MATERIAL_BUILD_VERSION`, chosen strictly newer than the published installed version; publishing a locally produced base version is rejected. Keep the same version input for production and publication. Do not rewrite historical release tags or replace their packages.
+
+## Genuine delta production
+
+Set `MATERIAL_BUILD_SQUIRREL_BASELINE` to a local directory containing a previous release's `RELEASES` and its matching full package before invoking the root installer entrypoint. Acquire those files through the project's existing trusted release route. The producer preserves the originals, rejects linked baseline paths, bounds metadata and package size, selects the newest strictly older compatible full package, and verifies its SHA-1 and byte count against `RELEASES`. This is transport integrity, not a publisher authenticity claim.
+
+The verified baseline is copied into the isolated Squirrel output directory. The pinned genuine Squirrel releasifier produces the new full and delta packages. A supplied baseline without a resulting delta fails production. Generated `RELEASES` entries must match each package's actual bytes and digest. The output keeps the older full package needed by that feed alongside the current packages. Publication must retain every package named by the feed.
+
+Without a baseline the producer creates a valid full-package release and records `delta.status: unavailable` with its reason. It never fabricates a delta or treats that state as two-version update proof. To produce the next delta, provide the previous successful output's Squirrel directory or the corresponding downloaded release files, and choose a strictly higher installed version.
+
+## Scope and remaining evidence
+
+No paid certificate or public trust claim is introduced. Unsigned packages can trigger unknown-publisher or SmartScreen warnings. Installation, installed launch, cross-version update, cancellation, rollback, and native runtime behavior require separate acceptance evidence. Under the fast release workflow, tests, reviews, static analysis, screenshots, installation, and runtime checks are intentionally not run. PH10-T02 remains pending its final applicable acceptance until those separately required records exist.

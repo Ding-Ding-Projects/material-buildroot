@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
+const {packageIdentity,stageBaseline} = require('./squirrel.cjs');
 const root = path.resolve(__dirname, '../..');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -179,11 +180,22 @@ async function main() {
   if (target.kind === 'desktop') fs.writeFileSync(path.join(root,'dist/build-info.json'),JSON.stringify({source:before.commit,updatedAt:new Date().toISOString()})+'\n');
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
+  let packageVersion = null, packageVersionSource = null, delta = null;
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
+    const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
+    packageVersion = identity.version;
+    packageVersionSource = identity.source;
+    command.push(`--config.extraMetadata.version=${packageVersion}`);
     command.push(`--config.electronDist=${process.env.MATERIAL_BUILD_ELECTRON_DIST}`);
+    if (installer) delta = stageBaseline(process.env.MATERIAL_BUILD_SQUIRREL_BASELINE,output,packageVersion);
   }
   execute(node,command,{env:childEnv});
+  if (target.kind === 'desktop') {
+    const asar = require('@electron/asar');
+    const packaged = JSON.parse(asar.extractFile(nonempty(output,'win-unpacked/resources/app.asar'),'package.json').toString('utf8'));
+    if (packaged.version !== packageVersion) throw new Error('Packaged application metadata differs from the installed package version.');
+  }
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
   if (installer) verifyInstaller(output);
   else {
@@ -192,7 +204,15 @@ async function main() {
   }
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   const files = inventory(output);
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  if (installer && target.kind === 'desktop') {
+    const expectedFull = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-full.nupkg`);
+    if (!expectedFull) throw new Error('Squirrel full package identity differs from the requested installed version.');
+    const generatedDelta = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-delta.nupkg`);
+    if (delta.status === 'staged' && !generatedDelta) throw new Error('Squirrel did not produce a delta from the supplied baseline.');
+    if (generatedDelta) delta = {...delta,status:'produced',package:path.basename(generatedDelta.path),sha256:generatedDelta.sha256};
+    console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
+  }
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);
