@@ -196,7 +196,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',complete:false}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null;
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null;
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -226,9 +226,9 @@ async function main() {
           }
         }
       }
-      console.log('Assembling the complete declared offline payload inventory. Original cache inputs are read only.');
+      console.log('Assembling every required bundled payload. Host-selected external tools remain separate and unadmitted. Original cache inputs are read only.');
       const assembled = await require('./payloads.cjs').assemblePayloads({output:path.join(staging,'offline-payloads'),cache,complete:true});
-      if(assembled.manifest.complete!==true) throw Error('Normal installer production requires the complete offline payload inventory.');
+      if(assembled.manifest.scope!=='bundled-payload-inventory'||assembled.manifest.bundledComplete!==true||assembled.manifest.wholeToolsetOffline!==false||!Array.isArray(assembled.manifest.requiredBundledToolIds)||!Array.isArray(assembled.manifest.externalTools)) throw Error('Normal installer production requires explicit bundled completeness and external tool classification.');
       const longest = Math.max(...assembled.manifest.tools.flatMap(tool=>tool.files.map(file=>file.path.length)));
       if(path.join(output,'win-unpacked/resources/offline-payloads').length+1+longest>=240) throw Error('Exclusive producer staging is still too long for the genuine package toolchain. Outputs retained.');
       if(!process.env.MATERIAL_BUILD_NATIVE_TOOLCHAIN) throw Error('Native broker production requires root-initialized installed compiler discovery.');
@@ -260,7 +260,7 @@ async function main() {
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
       command.push(`--config=${configurationPath}`);
-      payloads={status:'assembled',complete:true,manifestSha256:sha256(fs.readFileSync(path.join(assembled.directory,'manifest.json'))),tools:assembled.manifest.tools.map(tool=>({id:tool.id,version:tool.version,archive:tool.archive,license:tool.license,sourceUrl:tool.sourceUrl}))};
+      payloads={status:'assembled',scope:assembled.manifest.scope,bundledComplete:assembled.manifest.bundledComplete,wholeToolsetOffline:assembled.manifest.wholeToolsetOffline,requiredBundledToolIds:assembled.manifest.requiredBundledToolIds,externalTools:assembled.manifest.externalTools,manifestSha256:sha256(fs.readFileSync(path.join(assembled.directory,'manifest.json'))),tools:assembled.manifest.tools.map(tool=>({id:tool.id,classification:tool.classification,version:tool.version,archive:tool.archive,license:tool.license,sourceUrl:tool.sourceUrl,runtimeVerified:false}))};
       const baseline = acquireHostedBaseline(root,packageVersion);
       delta = stageBaseline(baseline.directory,output,packageVersion);
       if (!baseline.directory) delta.reason = baseline.reason;
