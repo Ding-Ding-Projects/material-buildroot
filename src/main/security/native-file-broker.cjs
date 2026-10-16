@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { inspectCanonicalPath } = require("./file-grants.cjs");
 const capabilities = new WeakSet();
-const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]) });
+const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder"]) });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function hash(bytes) { return crypto.createHash("sha256").update(bytes).digest("hex"); }
 function relative(value) {
@@ -62,12 +62,16 @@ function execute(file, args, signal) {
         const receipt = JSON.parse(stdout);
         const operation = args[0];
         const admission = receipt.admission;
+        const pdf = operation === "qpdf-extract" || operation === "qpdf-reorder";
+        const selection = pdf ? args[7].split(",").map(Number) : [];
         if (receipt.protocol !== 1 || receipt.state !== "completed" || receipt.operation !== operation || receipt.mechanism !== "appcontainer-handle-job" ||
             !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes < 1 || receipt.outputBytes > 128 * 1024 * 1024 ||
             !/^[a-f0-9]{64}$/.test(receipt.sourceSha256 || "") || !/^[a-f0-9]{64}$/.test(receipt.outputSha256 || "") ||
-            receipt.validation !== "signature-and-decoder-roundtrip" || receipt.publication !== "atomic-no-replace" ||
+            receipt.validation !== (pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip") || receipt.publication !== "atomic-no-replace" ||
             !admission || admission.appContainer !== true || admission.lpac !== true || admission.capabilityCount !== 0 || admission.jobAssigned !== true || admission.handleList !== true ||
-            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== 10) fail("INVALID_BROKER_RECEIPT");
+            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (pdf ? 13 : 10)) fail("INVALID_BROKER_RECEIPT");
+        if (pdf && (!Number.isSafeInteger(receipt.inputPages) || receipt.inputPages < 1 || receipt.inputPages > 10000 ||
+            receipt.expectedPages !== selection.length || receipt.outputPages !== selection.length || selection.some(page => page > receipt.inputPages))) fail("INVALID_BROKER_RECEIPT");
         resolve(receipt);
       } catch { reject(Object.assign(new Error("INVALID_BROKER_RECEIPT"), { code: "INVALID_BROKER_RECEIPT", incompleteOutput: { state: "unknown", publication: "unconfirmed" } })); }
     });
@@ -106,6 +110,8 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
       if (process.platform !== "win32") fail("NATIVE_BROKER_PLATFORM_REQUIRED");
       const { adapterId, sourceId, destinationId, format } = request;
       if (!supported[adapterId]?.includes(format)) fail("BROKER_FORMAT_UNAVAILABLE");
+      const pdf = adapterId === "qpdf";
+      if (pdf && (!Array.isArray(request.pages) || !request.pages.length || request.pages.length > 1000 || request.pages.some(page => !Number.isInteger(page) || page < 1 || page > 10000))) fail("INVALID_PAGE_SELECTION");
       const source = await resolveNativeGrant(sourceId, "read");
       const output = await resolveNativeGrant(destinationId, "write");
       if (source.kind !== "file" || source.newOutput || !/^[0-9]+:[0-9]+$/.test(source.identity || "") || output.kind !== "file" || !output.newOutput || !/^[0-9]+:[0-9]+$/.test(output.identity || "") || source.path === output.path) fail("NATIVE_FILE_GRANT_REQUIRED");
@@ -139,7 +145,9 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
         // Revalidate host grants immediately before crossing into the native broker.
         const currentSource = await resolveNativeGrant(sourceId, "read"), currentOutput = await resolveNativeGrant(destinationId, "write");
         if (JSON.stringify(currentSource) !== JSON.stringify(source) || JSON.stringify(currentOutput) !== JSON.stringify(output)) fail("GRANT_CHANGED");
-        const receipt = await execute(localBroker, [adapterId + "-" + format, source.path, output.path, runtime, executable, source.identity, output.identity], context.signal);
+        const args = [adapterId + "-" + format, source.path, output.path, runtime, executable, source.identity, output.identity];
+        if (pdf) args.push(request.pages.join(","));
+        const receipt = await execute(localBroker, args, context.signal);
         return { ...receipt, destinationId, outputCreated: true };
       } finally {
         // Only the exact newly created private staging root is removed.
