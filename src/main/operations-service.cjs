@@ -1147,6 +1147,9 @@ function createOperationsService({
     cloneOfficial: request => sources.handle({action:'source.clone.official',...request,trust:true}),
     confirmSource: async (request,context,authorize) => {authorize();const answer=await dialog.showMessageBox(parentWindow,{type:'warning',title:'Approve source clone',message:'Clone official Buildroot source into the selected folder?',detail:`Origin: ${context.origin}\nDevice: ${context.deviceName}\nDirectory: ${request.directory}\nRef: ${request.ref}\nSource: https://gitlab.com/buildroot.org/buildroot.git\n\nThis approves source trust and project adoption for this one clone. Existing directories are preserved.`,buttons:['Cancel','Approve clone'],defaultId:0,cancelId:0,noLink:true});authorize();return answer.response===1;},
     modelStatus: () => tools.execute({action:'ollama.status'}),
+    chooseConversionFile: access => toolFiles.choose({access,kind:'file'}),
+    conversionCatalog: () => tools.execute({action:'converter.catalog'}),
+    runConversion: async (request,authorize) => {authorize();toolFiles.resolve(request.sourceId,'read');toolFiles.resolve(request.destinationId,'write');const controller=new AbortController();const observer=setInterval(()=>{try{authorize();if(disposed)throw Error('closed');}catch{controller.abort();}},250);observer.unref?.();try{return await tools.execute({action:'converter.convert',...request},{signal:controller.signal});}finally{clearInterval(observer);}},
     startModelChat: async (request,authorize) => {
       authorize();const value=await tools.execute({action:'ollama.chat.start',model:request.model,messages:[{role:'user',content:request.prompt}]});
       if(value.ok===false)return value;
@@ -2171,6 +2174,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
 
 
 
