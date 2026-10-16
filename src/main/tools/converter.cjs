@@ -60,6 +60,12 @@ function createConverter(options) {
     if(context.signal?.aborted)controller.abort();
     active.add(controller);
     try {return await broker.run(request,{...context,signal:controller.signal});}
+    catch(error) {
+      // A malformed completion receipt cannot prove that publication did not happen.
+      if(error?.code === "INVALID_BROKER_RECEIPT" && !error.incompleteOutput)
+        error.incompleteOutput={state:"unknown",publication:"unconfirmed"};
+      throw error;
+    }
     finally {active.delete(controller);context.signal?.removeEventListener("abort",abort);}
   }
   return {
@@ -132,7 +138,7 @@ function createConverter(options) {
         if(description?.attemptAvailable!==true || !description.formats?.includes(request.format) || description.mechanism!=="appcontainer-handle-job")fail(description?.reason||"NATIVE_BROKER_UNAVAILABLE");
         // run performs actual OS admission before resuming the isolated decoder.
         const receipt=await isolatedRun(broker,{adapterId:adapter,sourceId:request.sourceId,destinationId:request.destinationId,format:request.format},context);
-        if(receipt.protocol!==1 || receipt.state!=="completed" || receipt.mechanism!=="appcontainer-handle-job" ||
+        if(!receipt || receipt.protocol!==1 || receipt.state!=="completed" || receipt.mechanism!=="appcontainer-handle-job" ||
           receipt.operation!==adapter+"-"+request.format || receipt.validation!=="signature-and-decoder-roundtrip" ||
           receipt.publication!=="atomic-no-replace" || !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes<1 || receipt.outputBytes>128*1024*1024 ||
           !/^[a-f0-9]{64}$/.test(receipt.outputSha256||"") || !/^[a-f0-9]{64}$/.test(receipt.sourceSha256||"") || receipt.admission?.lpac!==true || receipt.admission?.appContainer!==true || receipt.admission?.capabilityCount!==0 ||
