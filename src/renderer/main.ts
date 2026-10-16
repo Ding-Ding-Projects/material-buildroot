@@ -1706,7 +1706,7 @@ class MaterialBuildroot extends LitElement {
               <p>
                 ${this.l(
                   this.restricted?"Your plan is ready to edit. Choose a theme below.":"Your plan is ready to edit. Review language in Settings and choose a theme below. English and Cantonese humor each default to level 5 and style all messages, including errors and warnings. Reset either level in Settings.",
-                  "計劃已可編輯。你可以喺設定檢視語言，並喺下面選擇主題。",
+                  "計劃已可編輯。你可以喺設定檢視語言，並喺下面選擇主題。英文同粵語幽默預設各為第 5 級，會調整所有訊息、錯誤同警告嘅語氣。兩種語言可喺設定分開重設。",
                 )}
               </p>
               <md-outlined-select
