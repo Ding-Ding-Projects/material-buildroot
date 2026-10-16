@@ -30,7 +30,21 @@ function validate(value) {
 function read(file) {
   const info=fs.lstatSync(file);
   if(!info.isFile() || info.isSymbolicLink() || info.size>MAX_BYTES)fail();
-  const bytes=fs.readFileSync(file);
+  const fd=fs.openSync(file,"r");
+  let bytes;
+  try {
+    const opened=fs.fstatSync(fd);
+    if(!opened.isFile() || opened.dev!==info.dev || opened.ino!==info.ino || opened.size>MAX_BYTES)fail();
+    const buffer=Buffer.alloc(MAX_BYTES+1);
+    let length=0;
+    while(length<buffer.length) {
+      const count=fs.readSync(fd,buffer,length,buffer.length-length,null);
+      if(count===0)break;
+      length+=count;
+    }
+    if(length>MAX_BYTES)fail();
+    bytes=buffer.subarray(0,length);
+  } finally {fs.closeSync(fd);}
   const serialized=bytes.toString("utf8");
   if(!Buffer.from(serialized).equals(bytes))fail();
   return validate(parse(serialized));
