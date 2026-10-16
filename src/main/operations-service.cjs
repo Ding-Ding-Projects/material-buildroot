@@ -4,10 +4,14 @@ const path = require("node:path");
 const { randomUUID, createHash } = require("node:crypto");
 const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
+const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { resolveDomains } = require("./configuration/domains.cjs");
+const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
+const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
@@ -53,6 +57,9 @@ const fields = {
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
+  "build.confirmation.challenge": ["request"],
+  "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
+  "build.confirmation.cancel": ["id"],
   "jobs.list": [],
   "scheduler.status": [],
   "jobs.pump": [],
@@ -60,6 +67,9 @@ const fields = {
   "jobs.page": ["id", "after", "limit"],
   "jobs.cancel": ["id", "sequence"],
   "jobs.retry": ["id", "sequence"],
+  "config.trustPreview": ["workspaceId"],
+  "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
+  "config.trustRevoke": ["workspaceId"],
   "config.inspect": ["workspaceId"],
   "config.defconfigs": ["workspaceId"],
   "config.apply": ["workspaceId", "revision", "changes"],
@@ -116,6 +126,9 @@ const fields = {
   "updates.state": [],
   "updates.download": [],
   "updates.cancel": [],
+  "updates.install": ["confirmUnsigned", "workSaved"],
+  "updates.notes": [],
+  "updates.later": [],
 };
 function reject(code) {
   throw Object.assign(new Error(code), { code });
@@ -171,6 +184,7 @@ function createOperationsService({
   source,
   documentationDirectory,
   openDocumentationExternal,
+  updateHostFactory,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -213,6 +227,7 @@ function createOperationsService({
     },
   });
   const activeRecovery = new Set();
+  const buildConfirmation = createBuildConfirmation({ resolveWorkspace: project });
   let recoveryUnavailable = false;
   function project(id) {
     const item = projects.get(id);
@@ -777,15 +792,79 @@ function createOperationsService({
     )
       reject("BLOCKED_INTENT_CHANGED");
   }
-  const config = createConfigurationService({
-    semanticAdapter: async (roots) => {
-      if (!kconfigAdapter) reject("PYTHON_NOT_ADMITTED");
+  async function configurationDomains(id, item) {
+    await configurationConsent.requireTrust(id);
+    const result = await executeProject({ workspaceId: id, runtime: item.runtime, target: "material-config-domains", jobs: 1 });
+    if (result.state !== "succeeded") reject("DOMAIN_DISCOVERY_FAILED");
+    project(id);
+    await configurationConsent.requireTrust(id);
+    const domains = resolveDomains(item, result.stdout);
+    for (const roots of Object.values(domains)) { roots.workspaceId = id; roots.kconfig.externalRoots = item.externalTrees; }
+    return domains;
+  }
+  const configurationConsent = createConfigurationConsent({ resolveProject: project, discoverDomains: configurationDomains });
+  async function inspectConfigurationSemantics(roots) {
+    try { await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots); }
+    catch (error) {
+      if (!["KCONFIG_SOURCE_TRUST_REQUIRED", "KCONFIG_SOURCE_TRUST_CHANGED"].includes(error.code)) throw error;
+      if (!kconfigAdapter) throw error;
       return kconfigAdapter(roots);
-    },
-    resolveWorkspace: async (id) => {
+    }
+    const context = async admissionId => {
+      const current = await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots);
+      if (current.admissionId !== admissionId) reject("KCONFIG_ADMISSION_CHANGED");
+      return { grantId: current.grantId, runtime: current.runtime, sourceRoot: current.sourceRoot, outputRoot: current.outputRoot,
+        binding: { admissionId, sourceRevision: current.sourceRevision, configRevision: current.configRevision } };
+    };
+    const adapter = createKconfigAdapter({
+      executeInspection: async operation => {
+        const controller = new AbortController(), jobId = randomUUID();
+        const job = { cancel: async () => controller.abort() };
+        let receipt, recorded = false;
+        const cancel = () => controller.abort();
+        operation.signal?.addEventListener("abort", cancel, { once: true });
+        if (disposed || operation.signal?.aborted) controller.abort();
+        running.add(job);
+        activeRecovery.add(jobId);
+        const executeInspection = createKconfigInspection({ execution, resolveContext: context,
+          onOwnership: async current => {
+            if (!recorded) { quarantine.begin({ jobId, workspaceId: roots.workspaceId }); recorded = true; }
+            quarantine.checkpoint(jobId, current); receipt = current;
+          },
+        });
+        try {
+          const result = await executeInspection({ ...operation, signal: controller.signal });
+          if (recorded) quarantine.clear(jobId);
+          return result;
+        } catch (error) {
+          if (recorded && receipt) {
+            try {
+              const state = await execution.reconcileCleanup(receipt);
+              if (state.state === "verified-stopped") quarantine.clear(jobId);
+            } catch { recoveryUnavailable = true; }
+          }
+          throw error;
+        } finally {
+          activeRecovery.delete(jobId); running.delete(job);
+          operation.signal?.removeEventListener("abort", cancel);
+        }
+      },
+      resolveAdmission: async () => {
+        const current = await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots);
+        return { sourceTrusted: true, runtime: current.runtime.kind === "wsl" ? "wsl2" : "docker", admissionId: current.admissionId,
+          sourceRevision: current.sourceRevision, configRevision: current.configRevision };
+      },
+    });
+    return adapter(roots);
+  }
+  const config = createConfigurationService({
+    authorize: roots => configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots),
+    semanticAdapter: inspectConfigurationSemantics,
+    resolveWorkspace: async (id, domain = "buildroot") => {
       const item = project(id);
       if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
       if (!item.runtime) reject("SELECT_RUNTIME");
+      if (domain !== "buildroot") return { domains: await configurationDomains(id, item) };
       const environment = await execution.probeEnvironment({
         grantId: item.grantId,
         runtime: item.runtime,
@@ -805,6 +884,7 @@ function createOperationsService({
         granted: true,
         sourceRoot: item.source,
         outputRoot: item.output,
+        workspaceId: id,
         kconfig: {
           buildroot: true,
           externalRoots: item.externalTrees,
@@ -818,6 +898,10 @@ function createOperationsService({
     },
     executor: async (input) => {
       const item = project(input.workspaceId);
+      if (input.domain !== "buildroot") {
+        const roots = (await configurationDomains(input.workspaceId, item))[input.domain];
+        if (!roots || roots.sourceRoot !== input.sourceRoot || roots.outputRoot !== input.outputRoot || roots.binding !== input.binding || roots.reconcileTarget !== input.target) reject("DOMAIN_BINDING_CHANGED");
+      }
       if (!item.runtime) reject("SELECT_RUNTIME");
       const result = await executeProject({
         workspaceId: input.workspaceId,
@@ -978,7 +1062,8 @@ function createOperationsService({
           },
         })
       : null;
-  const updates = createUpdateService({
+  let updateInstalling = false, activeRequests = 0;
+  const updates = updateHostFactory ? updateHostFactory({ canInstall: () => !disposed && activeRequests <= 1 && running.size === 0 && !jobs.list(owner).some(job => ["queued", "running", "cancelling", "dispatching"].includes(job.state)) }) : createUpdateService({
     userData: directory,
     currentVersion: version,
     currentSource: source,
@@ -1069,12 +1154,11 @@ function createOperationsService({
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
-    const optional =
-      action === "build.submit" && Object.hasOwn(request, "resources")
-        ? ["resources"]
-        : [];
-    exact(request, ["action", ...fields[action], ...optional]);
+    const optional = action === "build.submit"
+      ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : [];
+    exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
     switch (action) {
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
@@ -1204,6 +1288,18 @@ function createOperationsService({
           expectedRevision: request.expectedRevision,
           layout: request.layout,
         });
+      case "build.confirmation.challenge": {
+        const candidate=request.request;
+        exact(candidate,["action",...fields["build.submit"],...(Object.hasOwn(candidate||{},"resources")?["resources"]:[])]);
+        if(candidate.action!=="build.submit"||candidate.target!=="clean"||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
+        reservations(candidate.resources,runtime(candidate.runtime),candidate.jobs);
+        return buildConfirmation.challenge(candidate);
+      }
+      case "build.confirmation.confirm":
+        return buildConfirmation.confirm(request);
+      case "build.confirmation.cancel":
+        buildConfirmation.cancel(request.id);
+        return {cancelled:true};
       case "build.submit": {
         const item = project(request.workspaceId);
         if (!item.externalStateVerified)
@@ -1229,6 +1325,9 @@ function createOperationsService({
         });
         project(request.workspaceId);
         if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+        if (request.target === "clean") buildConfirmation.consume(request);
+        else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
         const job = jobs.enqueue({
           kind: "build",
           ownerId: owner,
@@ -1313,15 +1412,23 @@ function createOperationsService({
         }
       case "jobs.retry": {
         const previous = ownJob(request.id);
+        if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
         return job;
       }
+      case "config.trustPreview":
+        return changeConfig(projectPaths(request.workspaceId), () => configurationConsent.preview(request));
+      case "config.trustGrant":
+        return changeConfig(projectPaths(request.workspaceId), () => configurationConsent.grant(request));
+      case "config.trustRevoke":
+        project(request.workspaceId);
+        return configurationConsent.revoke(request);
       case "config.inspect":
-        return config.inspect(request);
+        return changeConfig(projectPaths(request.workspaceId), () => config.inspect(request));
       case "config.defconfigs":
-        return config.listDefconfigs(request);
+        return changeConfig(projectPaths(request.workspaceId), () => config.listDefconfigs(request));
       case "config.apply":
         return changeConfig(projectPaths(request.workspaceId), () =>
           config.apply(request),
@@ -1442,6 +1549,7 @@ function createOperationsService({
           kind: "directory",
         });
         if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
         project(request.workspaceId);
         externalWorkspaces.set(choice.id, request.workspaceId);
         return { externalTreeId: choice.id, name: choice.name };
@@ -1564,6 +1672,17 @@ function createOperationsService({
         exact(request.request, ["action", "args"]);
         if (!companion) reject("COMPANION_UNAVAILABLE");
         return companion.request(request.request.action, request.request.args);
+      case "updates.install":
+        if (request.confirmUnsigned !== true || request.workSaved !== true || !updateHostFactory) reject("UPDATE_CONSENT_REQUIRED");
+        updateInstalling = true;
+        try { return safeUpdateState(await updates.requestInstall({ confirmUnsigned: true, workSaved: true })); }
+        finally { updateInstalling = false; }
+      case "updates.notes":
+        if (!updates.notes) reject("UNAVAILABLE");
+        return safeUpdateState(await updates.notes());
+      case "updates.later":
+        if (!updates.later) reject("UNAVAILABLE");
+        return safeUpdateState(updates.later());
       case "updates.check":
         return safeUpdateState(await updates.check());
       case "updates.state":
@@ -1580,6 +1699,7 @@ function createOperationsService({
   }
   return {
     async request(serialized) {
+      activeRequests++;
       try {
         return { ok: true, result: await perform(contract.parse(serialized)) };
       } catch (error) {
@@ -1596,11 +1716,12 @@ function createOperationsService({
             ? error.code
             : deploymentCode || "OPERATION_FAILED";
         return { ok: false, code };
-      }
+      } finally { activeRequests--; }
     },
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
         if (["running", "cancelling"].includes(job.state)) {
@@ -1611,6 +1732,7 @@ function createOperationsService({
           }
         }
       fileGrants.clear();
+      updates.close?.();
       updates.cancel();
       toolFiles.dispose();
       externalFiles.dispose();

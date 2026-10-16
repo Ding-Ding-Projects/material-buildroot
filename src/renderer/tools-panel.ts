@@ -317,7 +317,7 @@ export class ToolsPanel extends LitElement {
           ></md-linear-progress>`
         : nothing}
       <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
-      <section class="panel stack">
+      <section class="panel stack" data-destination="local" data-experience-id="tools-section:local" tabindex="-1">
         <h2>${this.l("Local tools", "本機工具")}</h2>
         <p class="note">
           ${this.l(
@@ -352,7 +352,7 @@ export class ToolsPanel extends LitElement {
         )}
       </section>
       <div class="columns">
-        <section class="panel stack">
+        <section class="panel stack" data-destination="convert" data-experience-id="tools-section:convert" tabindex="-1">
           <h2>${this.l("Convert a file", "轉換檔案")}</h2>
           ${this.button("Load formats", "載入格式", async () => {
             this.categories = (
@@ -422,7 +422,7 @@ export class ToolsPanel extends LitElement {
             )}
           </div>
         </section>
-        <section class="panel stack">
+        <section class="panel stack" data-destination="pdf" data-experience-id="tools-section:pdf" tabindex="-1">
           <h2>${this.l("PDF workspace", "PDF 工作區")}</h2>
           <p class="note">
             ${this.l(
@@ -516,7 +516,7 @@ export class ToolsPanel extends LitElement {
           </div>
         </section>
       </div>
-      <section class="panel stack">
+      <section class="panel stack" data-destination="queue" data-experience-id="tools-section:queue" tabindex="-1">
         <h2>${this.l("File and model queue", "檔案同模型佇列")}</h2>
         <p class="note">
           ${this.l(
@@ -610,7 +610,7 @@ export class ToolsPanel extends LitElement {
             )
           : nothing}
       </section>
-      <section class="panel stack">
+      <section class="panel stack" data-destination="server" data-experience-id="tools-section:server" tabindex="-1">
         <h2>${this.l("Minecraft Java server", "Minecraft Java 伺服器")}</h2>
         <p class="note">
           ${this.l(

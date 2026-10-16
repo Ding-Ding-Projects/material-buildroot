@@ -1,6 +1,8 @@
+import "./update-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./build-queue-panel";
+import { requestDestructiveConfirmation } from "./destructive-confirmation";
 import "./ollama-catalogue-panel";
 import "./documentation-panel";
 import {materialIcon, actionIcon} from "./material-icons";
@@ -44,6 +46,9 @@ export class OperationsPanel extends LitElement {
     logs: { state: true },
     selectedJob: { state: true },
     config: { state: true },
+    configDomain: { state: true },
+    configTrustPreview: { state: true },
+    configTrustAccepted: { state: true },
     changes: { state: true },
     defconfigs: { state: true },
     artifacts: { state: true },
@@ -80,6 +85,9 @@ export class OperationsPanel extends LitElement {
   logs: any[] = [];
   selectedJob = "";
   config: any;
+  configDomain = "buildroot";
+  configTrustPreview: any;
+  configTrustAccepted = false;
   changes: Record<string, { type: string; value: unknown }> = {};
   defconfigs: any[] = [];
   artifacts: any[] = [];
@@ -101,6 +109,7 @@ export class OperationsPanel extends LitElement {
   dockOpen = true;
   private logCursor = 0;
   private logMore = false;
+  private confirmingClean = false;
   static styles = [
     workspaceStyles,
     css`
@@ -352,7 +361,9 @@ export class OperationsPanel extends LitElement {
       trust: true,
     });
     if (result !== undefined) {
+      if(!this.dispatchEvent(new CustomEvent('workspace-adopted',{bubbles:true,composed:true,cancelable:true,detail:result}))) { this.selection=undefined;this.trust=false;return; }
       this.workspace = result;
+      this.configTrustPreview = undefined; this.configTrustAccepted = false;
       this.config = undefined;
       this.artifacts = [];
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
@@ -384,19 +395,41 @@ export class OperationsPanel extends LitElement {
       ));
   }
   private validResources(){return !this.customResources||(Number.isSafeInteger(this.cpuSlots)&&this.cpuSlots>=(this.runtimeKind==="docker"?2:this.parallelism)&&this.cpuSlots<=64&&Number.isSafeInteger(this.memoryMiB)&&this.memoryMiB>=(this.runtimeKind==="docker"?4096:256)&&this.memoryMiB<=262144&&Number.isSafeInteger(this.storageGiB)&&this.storageGiB>=0&&this.storageGiB<=1024);}
-  private async submit() {
-    if (!this.workspace || !this.validResources()) return;
+  private async submit(event?:Event) {
+    if (!this.workspace || !this.validResources() || this.pending || this.confirmingClean) return;
+    const origin=event?.currentTarget instanceof HTMLElement?event.currentTarget:undefined;
     const runtime =
       this.runtimeKind === "wsl"
         ? { kind: "wsl", distribution: this.distribution }
         : { kind: "docker", image: this.image, uid: 1000, gid: 1000 };
-    const result = await this.run("build.submit", {
+    const input = {
       workspaceId: this.workspace.workspaceId,
       target: this.target,
       runtime,
       jobs: this.parallelism,
       ...(this.customResources?{resources:{cpuSlots:this.cpuSlots,memoryBytes:this.memoryMiB*1024**2,storageBytes:this.storageGiB*1024**3}}:{}),
-    });
+    };
+    let confirmationToken: string | undefined;
+    if(input.target === "clean") {
+      this.confirmingClean=true;
+      let challenge;
+      try {
+        challenge=await this.run("build.confirmation.challenge",{request:{action:"build.submit",...input}});
+        if(!challenge)return;
+        const proof=await requestDestructiveConfirmation(this,this.language,challenge,origin);
+        if(!proof)return;
+        if(this.workspace?.workspaceId!==input.workspaceId)return;
+        const granted=await this.run("build.confirmation.confirm",proof);
+        if(!granted)return;
+        confirmationToken=granted.token;
+      } finally {
+        if(challenge)await this.api?.({action:"build.confirmation.cancel",id:challenge.id}).catch(()=>undefined);
+        this.confirmingClean=false;
+        await this.updateComplete;
+        if(origin?.isConnected)origin.focus();
+      }
+    }
+    const result = await this.run("build.submit", {...input,...(confirmationToken?{confirmationToken}:{})});
     if (result !== undefined) {
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
         "Build request accepted. Job records determine its outcome.",
@@ -404,6 +437,8 @@ export class OperationsPanel extends LitElement {
       ));
       await this.refreshJobs();
     }
+    await this.updateComplete;
+    if(origin?.isConnected)origin.focus();
   }
   private async jobAction(action: string, job: Job) {
     const result = await this.run("jobs." + action, {
@@ -427,10 +462,35 @@ export class OperationsPanel extends LitElement {
       this.logMore = result.hasMore;
     }
   }
+  private async previewConfigTrust() {
+    if (!this.workspace) return;
+    this.configTrustAccepted = false;
+    this.configTrustPreview = undefined;
+    const workspaceId = this.workspace.workspaceId, domain = this.configDomain;
+    const result = await this.run("config.trustPreview", { workspaceId, domain });
+    if (this.workspace?.workspaceId === workspaceId && this.configDomain === domain && result !== undefined) this.configTrustPreview = result;
+  }
+  private async grantConfigTrust() {
+    if (!this.workspace || !this.configTrustPreview || !this.configTrustAccepted) return;
+    const result = await this.run("config.trustGrant", { workspaceId: this.workspace.workspaceId, challengeId: this.configTrustPreview.id, trusted: true });
+    const discoveryOnly = this.configTrustPreview?.discoveryOnly;
+    this.configTrustAccepted = false;
+    this.configTrustPreview = undefined;
+    if (result !== undefined) {
+      if (discoveryOnly) await this.previewConfigTrust();
+      else await this.inspectConfig();
+    }
+  }
+  private async revokeConfigTrust() {
+    if (!this.workspace) return;
+    await this.run("config.trustRevoke", { workspaceId: this.workspace.workspaceId });
+    this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {};
+  }
   private async inspectConfig() {
     if (!this.workspace) return;
     const result = await this.run("config.inspect", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
     });
     if (result !== undefined) {
       this.config = result;
@@ -442,6 +502,7 @@ export class OperationsPanel extends LitElement {
     if (!this.config || !Object.keys(this.changes).length) return;
     const result = await this.run("config.apply", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
       revision: this.config.revision,
       changes: this.changes,
     });
@@ -456,6 +517,7 @@ export class OperationsPanel extends LitElement {
   private async listDefconfigs() {
     const result = await this.run("config.defconfigs", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
     });
     if (Array.isArray(result)) this.defconfigs = result;
   }
@@ -463,6 +525,7 @@ export class OperationsPanel extends LitElement {
     if (!this.config) return;
     const result = await this.run("config.defconfig", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
       revision: this.config.revision,
       path,
     });
@@ -471,6 +534,7 @@ export class OperationsPanel extends LitElement {
   private async undoConfig() {
     const result = await this.run("config.undo", {
       workspaceId: this.workspace.workspaceId,
+      domain: this.configDomain,
       revision: this.config.revision,
     });
     if (result !== undefined) await this.inspectConfig();
@@ -717,6 +781,7 @@ export class OperationsPanel extends LitElement {
                 >${this.options(
                   [
                     "all",
+                    "clean",
                     "olddefconfig",
                     "savedefconfig",
                     "legal-info",
@@ -860,7 +925,10 @@ export class OperationsPanel extends LitElement {
     const entries = this.configEntries();
     return html`<section class="panel stack">
       <div class="row">
-        <h2>${this.l("Buildroot configuration", "Buildroot 設定")}</h2>
+        <h2>${this.l("Configuration domain", "設定範圍")}</h2>
+        <md-outlined-select .label=${this.l("Domain", "範圍")} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
+          ${this.options([["buildroot", "Buildroot"], ["linux", "Linux"], ["busybox", "BusyBox"], ["uboot", "U-Boot"]])}
+        </md-outlined-select>
         <md-outlined-button
           ?disabled=${this.pending || !!Object.keys(this.changes).length}
           @click=${this.inspectConfig}
@@ -869,6 +937,23 @@ export class OperationsPanel extends LitElement {
           >${actionIcon('List defconfigs')}${this.l("List defconfigs", "列出預設設定")}</md-text-button
         >
       </div>
+      <p>${this.l("Authoritative inspection can execute commands from the selected Make/Kconfig sources. Review the exact source and runtime before allowing it. WSL commands have your distribution account's access; the container route has read-only source mounts and no network. Configuration apply uses the admitted writable build route.", "權威檢視可以執行所選 Make／Kconfig 來源入面嘅指令。批准前請核對確切來源同執行環境。WSL 指令具有發行版帳戶嘅存取權；容器路線使用唯讀來源掛載同停用網絡。套用設定會使用已授權嘅可寫建置路線。")}</p>
+      <div class="row">
+        <md-outlined-button ?disabled=${this.pending} @click=${this.previewConfigTrust}>${this.l("Review source execution permission", "核對來源執行權限")}</md-outlined-button>
+        <md-text-button ?disabled=${this.pending} @click=${this.revokeConfigTrust}>${this.l("Revoke configuration permission", "撤銷設定權限")}</md-text-button>
+      </div>
+      ${this.configTrustPreview ? html`<section class="panel stack" aria-label=${this.l("Source execution permission", "來源執行權限")}>
+        <h3>${this.configTrustPreview.domain} · ${this.l("Review exact scope", "核對確切範圍")}</h3>
+        <p>${this.configTrustPreview.discoveryOnly ? this.l("First allow this Buildroot revision to discover the selected component. A second review will name that component's actual source.", "先批准呢個 Buildroot 修訂以尋找所選元件。第二次核對會列出該元件嘅實際來源。") : this.l("Permission lasts up to 15 minutes in this session and expires when source, configuration, roots or runtime change.", "權限只喺本次工作階段維持最多 15 分鐘；來源、設定、目錄或執行環境一改就失效。")}</p>
+        <dl><dt>${this.l("Source", "來源")}</dt><dd class="symbol">${this.configTrustPreview.sourceRoot}</dd>
+        <dt>${this.l("Output", "輸出")}</dt><dd class="symbol">${this.configTrustPreview.outputRoot}</dd>
+        <dt>${this.l("Runtime", "執行環境")}</dt><dd class="symbol">${JSON.stringify(this.configTrustPreview.runtime)}</dd>
+        <dt>${this.l("Source revision", "來源修訂")}</dt><dd class="symbol">${this.configTrustPreview.sourceRevision}</dd>
+        <dt>${this.l("Configuration revision", "設定修訂")}</dt><dd class="symbol">${this.configTrustPreview.configRevision}</dd>
+        <dt>${this.l("External sources", "外部來源")}</dt><dd class="symbol">${this.configTrustPreview.externalRoots.join(" · ") || this.l("None", "無")}</dd></dl>
+        <label class="row"><md-checkbox ?disabled=${this.pending} .checked=${this.configTrustAccepted} @change=${(event: Event) => this.configTrustAccepted = (event.target as any).checked}></md-checkbox>${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.", "批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。")}</label>
+        <md-filled-button ?disabled=${this.pending || !this.configTrustAccepted} @click=${this.grantConfigTrust}>${this.l("Allow this scope", "批准此範圍")}</md-filled-button>
+      </section>` : nothing}
       ${this.config
         ? html`<p class="notice">
               ${this.config.semantics?.available
@@ -877,8 +962,8 @@ export class OperationsPanel extends LitElement {
                     "已授權解析器提供 Kconfig 選單、實際值、相依關係同說明，變更會由所選執行環境協調。",
                   )
                 : this.l(
-                    "Full Kconfig semantics are unavailable. Choose a trusted Python interpreter, then inspect again.",
-                    "未能使用完整 Kconfig 語意。請揀選可信 Python 解譯器，再重新檢視。",
+                    "Full Kconfig semantics are unavailable. Review source execution permission for authoritative inspection, or choose a trusted Python interpreter for limited read-only inspection.",
+                    "未能使用完整 Kconfig 語意。請核對來源執行權限以作權威檢視，或選擇可信 Python 解譯器作有限唯讀檢視。",
                   ) +
                   " " +
                   (this.config.semantics?.reason ?? "")}
@@ -1156,54 +1241,8 @@ export class OperationsPanel extends LitElement {
     </section>`;
   }
   private updatesView() {
-    return html`<section class="panel stack">
-      <h2>${this.l("Application updates", "應用程式更新")}</h2>
-      <p>
-        ${this.l(
-          "Check published releases and verify installer size, source and checksum. Installers are unsigned; downloading does not install an update.",
-          "檢查已發佈版本，並驗證安裝程式大小、來源同摘要。安裝程式未經簽署，下載唔會安裝更新。",
-        )}
-      </p>
-      <div class="row">
-        <md-filled-button
-          ?disabled=${this.pending}
-          @click=${() => this.updateAction("check")}
-          >${actionIcon('Check for updates')}${this.l("Check for updates", "檢查更新")}</md-filled-button
-        ><md-outlined-button
-          ?disabled=${this.pending}
-          @click=${() => this.updateAction("state")}
-          >${actionIcon('Refresh status')}${this.l("Refresh status", "重新整理狀態")}</md-outlined-button
-        >${this.updateState?.status === "available"
-          ? html`<md-outlined-button
-              ?disabled=${this.pending}
-              @click=${() => this.updateAction("download")}
-              >${actionIcon('Download verified installer')}${this.l("Download verified installer",
-                "下載已驗證安裝程式",
-              )}</md-outlined-button
-            >`
-          : nothing}
-      </div>
-      ${this.updateState
-        ? html`<dl>
-            <dt>${this.l("Status", "狀態")}</dt>
-            <dd>${this.updateState.status}</dd>
-            ${this.updateState.release
-              ? html`<dt>${this.l("Version", "版本")}</dt>
-                  <dd>${this.updateState.release.version}</dd>
-                  <dt>${this.l("Source", "來源")}</dt>
-                  <dd class="symbol">${this.updateState.release.source}</dd>`
-              : nothing}${this.updateState.total
-              ? html`<dt>${this.l("Downloaded", "已下載")}</dt>
-                  <dd>
-                    ${this.updateState.received} / ${this.updateState.total}
-                    ${this.l("bytes", "位元組")}
-                  </dd>`
-              : nothing}
-          </dl>`
-        : nothing}
-    </section>`;
-  }
-  private resizeDock(event: PointerEvent) {
+    return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.", "儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。")}</p></section>`;
+  }  private resizeDock(event: PointerEvent) {
     const separator = event.currentTarget as HTMLElement;
     const start = event.clientY, original = this.dockHeight;
     separator.setPointerCapture(event.pointerId);
@@ -1323,6 +1362,7 @@ export class OperationsPanel extends LitElement {
         .workspaceId=${this.workspace?.workspaceId ?? ""}
         .language=${this.language}
         @source-adopted=${(event: CustomEvent) => {
+          if(!this.dispatchEvent(new CustomEvent('workspace-adopted',{bubbles:true,composed:true,cancelable:true,detail:event.detail})))return;
           this.workspace = event.detail;
           this.config = undefined;
           this.artifacts = [];

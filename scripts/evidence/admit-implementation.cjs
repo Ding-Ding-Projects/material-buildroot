@@ -2,6 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {validateConsumerInventory} = require('./validate-surface-proof.cjs');
 const hash = data => crypto.createHash('sha256').update(data).digest('hex');
 const phases = Array.from({length: 11}, (_, i) => `PH${String(i).padStart(2, '0')}`);
 function validate(ledger, {root = path.resolve(__dirname, '../..')} = {}) {
@@ -50,6 +51,12 @@ function validate(ledger, {root = path.resolve(__dirname, '../..')} = {}) {
     if (row.state === 'authored' && row.receipts.length) fail(`${label}: authored state cannot claim test receipts`);
   }
   for (const phase of phases) if (!ids.has(phase)) fail(`Missing ${phase}`);
+  if (Object.hasOwn(ledger, 'surfaceConsumerAdmission')) {
+    try {
+      const featureLedger = JSON.parse(fs.readFileSync(path.join(root, 'docs/planning/feature-evidence.json'), 'utf8'));
+      errors.push(...validateConsumerInventory(ledger.surfaceConsumerAdmission, featureLedger, {root}));
+    } catch { fail('Unable to read independent feature ledger for consumer admission'); }
+  }
   return errors;
 }
 if (require.main === module) {

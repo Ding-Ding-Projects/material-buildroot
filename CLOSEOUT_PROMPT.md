@@ -1,20 +1,13 @@
-# Active isolated implementation handoff
+# Active implementation continuation
 
-## Objective and boundary
+Complete the finite roadmap implementation with one worker per leaf. All tests, reviews, audits, static analysis and captures remain deliberately deferred, including VM and Docker tests. No full completion is claimed.
 
-Finish the existing Material Buildroot roadmap implementation with one worker per unfinished leaf item, isolated branches and checkouts, prompt integration into main and normal releases. The owner selected implementation/release-only execution: all tests, reviews, audits, static analysis and screenshots are deferred, including VM and Docker tests. Acceptance-dependent tasks remain unchecked.
+Verified remote main before this record: fb3dcdf3d782a7807d4ece621dea99d652f1f62e. It includes history/evidence, appearance and shared command destinations, experience permissions, background updates and retained project tabs in addition to earlier foundational work. The cumulative desktop build at this source is running. Release v0.1.0-build.88.1 was read back at source02acf2ad674a1bc36360677a2704d38eeb1aa93b with five expected nonempty assets and normal release flags. This is not complete offline packaging evidence.
 
-## Preserved state
+Full offline assembly: 10 tools, 30972 files,3760387226 raw bytes. Packaging producer bd0a4fce58cc69cd9ec19b30ba86a9ec7d166720 uses source-bound short private staging after NuGet path limits; final package size/result pending. Never publish local version0.1.1000. Preserve packaging merge d29a4ce6c9d49131a802593988e2c88d2676a42f with its known message metadata deviation, no history rewrite.
 
-Initial baseline: cb88af0c006b62f5ab300630d4093f63ec8714d7.
-Main contains file-capability contribution 08cf7b42215ecf2018329971c3f82da4d5516c29, verified against the remote. Exact desktop and unsigned Squirrel production succeeded. Normal release v0.1.0-build.56.1 targets this exact commit and has all five expected nonempty downloadable assets. Runtime behavior is unverified.
-Project model adff340fe855c55eb6548e5cbc77cf6849474f87 is preserved remotely on task/project-model; desktop production succeeded. Integration is next.
-Vault boundaries f23b3c68848fbea2baeec28d7ad75a72b98ecb34 is local on task/vault-boundaries; its build stopped during deeply nested Node extraction. The dedicated bootstrap worker owns the repair.
-Consumer mapping 9e89119 is local on task/consumer-admission: 436 explicit dispositions, 45 bounded current mappings, historical evidence separate. Complete current admission remains open.
-Search controls, container-runtime and hypervisor-control implementation are active in separate owned branches. Preserve these checkouts and their ignored private announcement originals.
+Active branches: task/project-workflows, task/workspace-tabs, task/source-lifecycle, task/build-queues, task/configuration-controls, task/defconfig-workflows, task/package-editors, task/squirrel-packaging. WSL49bd3f2 is built and incorporated into project-workflows. Preserve prerequisite ancestry when integrating. Queue records are in docs/planning/implementation-queue.json.
 
-## Next actions
+Continue independent implementation and candidate-bound production, preserve each owning branch, integrate coherent built contributions, push main and verify exact remote refs. Update shared records after each meaningful integration. Runtime and evidence acceptance remain open, never tick them from compilation alone.
 
-Integrate and deliver each completed coherent contribution independently. Keep producers pinned to exact source. Finish the bootstrap repair before retrying the failed vault build. Continue the finite implementation queue in docs/planning/implementation-queue.json. Do not treat historical source mappings as runtime or independent acceptance.
-
-No cleanup has run. Archive and prove remote ancestry before removing only task-owned inactive merged candidates. Never delete unrelated or unfinished work. No host power/login action, force-push or private publication is authorized.
+No cleanup has occurred. Preserve all active/unfinished checkouts and private ignored announcement variants. Only delete task-owned inactive merged candidates after verified archive and remote ancestry. No force push, unrelated deletion, host power/login action or private publication. Goal remains active. Latest account allowance reading was83 percent remaining; no battery-preservation trigger was observed.

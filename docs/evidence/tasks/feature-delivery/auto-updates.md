@@ -129,3 +129,17 @@ Missing proof: No real current-source update, corrupt-feed UI, cancel/recovery/r
 Next action: Implement the host-owned full Squirrel update workflow, preserve drafts and explicit consent, then exercise all real lifecycle cases.
 
 [Return to the delivery index](README.md). [Read the snapshot and admission limits](../PH01-delivery-audit.md).
+
+## Current source implementation update
+
+# Automatic updates delivery state
+
+PH10-T04 has source implementation for startup and six-hour discovery, automatic download, persistent localized unsigned-ready presentation, manual check, cancel/retry, Later, release notes, explicit native install consent, known unsaved-work checks and next-launch version-transition reporting.
+
+Source references: `src/main/updates/service.cjs`, `src/main/updates/host.cjs`, `src/main/operations-service.cjs`, `src/main/index.cjs`, `src/renderer/update-panel.ts`, `src/renderer/operations-panel.ts`, `src/renderer/main.ts`.
+
+The existing admitted operations API owns the single host updater. Installed numeric versions must strictly increase. Same-version releases are not upgrade candidates. Download hashes and unsigned feed metadata remain integrity checks, never publisher authentication. Installer launch is user initiated and does not establish completed installation.
+
+Runtime acceptance remains open. No actual update, download, installation, restart, cancellation, rollback, migration, accessibility check or screenshot was performed during this source-only delivery. Unknown nested editor drafts conservatively prevent restart until closed. The task must not be marked accepted from source or package production alone.
+
+[Behavior and recovery](../../../desktop/updates.md). [Delivery index](README.md).

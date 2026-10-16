@@ -1,3 +1,8 @@
+import "./experience-policies";
+import "./experience-policy-panel";
+import "./update-panel";
+import {repeat} from "lit/directives/repeat.js";
+import {WorkspaceTabs, type WorkspaceDestination} from "./workspace-tabs";
 import "./command-surfaces";
 import "./shared-mode-panel";
 import "./scheduled-preferences-panel";
@@ -85,6 +90,8 @@ class MaterialBuildroot extends LitElement {
     restoreId: { state: true },
     importText: { state: true },
     importSummary: { state: true },
+    projectSessions: { state: true },
+    activeProject: { state: true },
   };
   declare state: StudioBootstrap | undefined;
   route = window.studio?.operations ? "operations" : "projects";
@@ -101,6 +108,65 @@ class MaterialBuildroot extends LitElement {
   restoreId = "";
   importText = "";
   importSummary = "";
+  private projectSessions: {workspaceId:string;name:string}[]=[];
+  private activeProject='';
+  private tabsHost(){return this.renderRoot.querySelector('workspace-tabs') as WorkspaceTabs|null;}
+  private activeOperations(){return Array.from(this.renderRoot.querySelectorAll<import('./operations-panel').OperationsPanel>('operations-panel')).find(panel=>panel.dataset.projectId===this.activeProject)??null;}
+  private workspaceDestinations():WorkspaceDestination[]{return [
+    {id:'open-project',en:'Open or adopt project',zh:'開啟或接入專案',icon:'folder_open'},
+    ...this.projectSessions.map(p=>({id:`project:${p.workspaceId}`,en:p.name,zh:p.name,icon:'folder_open'})),
+    ...[['projects','Plans','計劃','dashboard'],['activity','Activity','活動','history'],['settings','Settings','設定','settings'],['about','About','關於','info']].map(([id,en,zh,icon])=>({id,en,zh,icon})),
+    ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
+    ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
+    ...this.settingsEntries().map(e=>({id:`setting:${e.id}`,en:e.text,zh:e.text,icon:'settings'})),
+    {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
+    {id:'export-plans',en:'Export plans',zh:'匯出計劃',icon:'download'},
+    ...(!this.restricted?[{id:'wording:upload',en:'Import personal vocabulary',zh:'匯入個人詞彙',icon:'upload'},{id:'wording:status',en:'Personal vocabulary status',zh:'個人詞彙狀態',icon:'info'},{id:'wording:clear',en:'Clear personal vocabulary',zh:'清除個人詞彙',icon:'delete'}]:[]),
+    {id:'setup',en:'First-run setup',zh:'首次設定',icon:'tune'}
+  ];}
+  private async workspaceDestination(event:CustomEvent){
+    const destination=event.detail.destination as string;
+    if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before switching tabs.','切換分頁前請先儲存或捨棄目前草稿。');return;}
+    const owner=event.detail.projectContext;
+    if(typeof owner==='string'&&owner){if(!this.projectSessions.some(p=>p.workspaceId===owner)){this.notice=this.noticeText('Reopen the owning project before using its saved utility tab.','使用已儲存工具分頁前，請重新開啟所屬專案。');return;}this.activeProject=owner;}
+    if(destination.startsWith('project:')){
+      const id=destination.slice(8),project=this.projectSessions.find(p=>p.workspaceId===id);
+      if(!project){await this.navigate('operations');if(this.route==='operations'){this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';}this.notice=this.noticeText('Reopen this project through the folder picker to renew access.','請透過資料夾選擇器重新開啟專案，以更新存取權。');return;}
+      await this.navigate('operations');if(this.route!=='operations')return;
+      this.activeProject=id;this.tabsHost()?.acknowledge(destination,project.name,id);return;
+    }
+    if(destination==='open-project'){
+      await this.navigate('operations');if(this.route!=='operations')return;
+      this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';this.tabsHost()?.acknowledge(destination);return;
+    }
+    if(destination==='setup'){this.openDialog('setup-dialog');return;}
+    if(destination==='new-plan'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.beginNew();}return;}
+    if(destination==='export-plans'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.exportPlans();}return;}
+    if(destination.startsWith('wording:')){if(this.restricted)return;await this.navigate('settings');if(this.route!=='settings')return;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(destination.slice(8) as 'upload'|'status'|'clear');this.tabsHost()?.acknowledge('setting:vocabulary');return;}
+    if(destination.startsWith('tool:')){
+      await this.navigate('operations');if(this.route!=='operations')return;const panel=this.activeOperations();if(panel){panel.tab='tools';await panel.updateComplete;const tools=panel.shadowRoot?.querySelector('tools-panel') as import('lit').LitElement|null;await tools?.updateComplete;const section=tools?.shadowRoot?.querySelector<HTMLElement>(`[data-destination="${destination.slice(5)}"]`);section?.scrollIntoView({block:'start'});section?.focus();}
+    }else if(destination.startsWith('operation:')){
+      await this.navigate('operations');if(this.route!=='operations')return;
+      const panel=this.activeOperations();if(panel)panel.tab=destination.slice(10);
+    }else if(destination.startsWith('setting:')){
+      await this.navigate('settings');if(this.route!=='settings')return;
+      const id=destination.slice(8);const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;const entry=this.settingsEntries().find(e=>e.id===id);if(search&&entry){search.regex=false;search.query=entry.text;search.focusQuery();}
+    }else{await this.navigate(destination);if(this.route!==destination)return;}
+    this.tabsHost()?.acknowledge(destination,'','',destination.startsWith('operation:')||destination.startsWith('tool:')?this.activeProject:'');
+  }
+  private async adoptedProject(event:CustomEvent){
+    event.preventDefault();event.stopPropagation();
+    const workspace=event.detail;if(!workspace||typeof workspace.workspaceId!=='string'||typeof workspace.name!=='string')return;
+    if(!this.projectSessions.some(p=>p.workspaceId===workspace.workspaceId))this.projectSessions=[...this.projectSessions,{workspaceId:workspace.workspaceId,name:workspace.name}];
+    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;
+    this.tabsHost()?.acknowledge(`project:${workspace.workspaceId}`,workspace.name,workspace.workspaceId);
+  }
+  protected firstUpdated(){this.tabsHost()?.acknowledge(window.studio?.operations?'open-project':'projects');}
+  private async closeWorkspaceTab(event:CustomEvent){
+    // Keep mounted instances so closing navigation never discards pending drafts or job output.
+    if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before closing a tab.','關閉分頁前請先儲存或捨棄目前草稿。');return;}
+    event.detail.complete();
+  }
   private workspaceRevision = 0;
   plans: Plan[] = [];
   selectedId = "";
@@ -165,13 +231,14 @@ class MaterialBuildroot extends LitElement {
     if(panel.hasPendingDraft&&!this.settingIds.includes('schedules')){this.settingIds=[...this.settingIds,'schedules'];this.requestUpdate();await this.updateComplete;}
     return panel.confirmLeave();
   }
-  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
+  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
   private applySharedSnapshot(snapshot:SharedModeSnapshot|null){this.sharedSnapshot=snapshot;void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');this.syncDocumentLanguage();this.requestUpdate();}
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
-  private settingIds=['language','appearance','backups','vocabulary','shared','schedules'];
+  private settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];
   private settingsEntries(){return [
     ...(!this.restricted?[{id:'language',text:this.l('Language Interface language','語言 介面語言')}]:[]),
     {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記')},
+    {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰')},
     {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原')},
     {id:'appearance',text:this.l('Appearance Theme','外觀 主題')},
     {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入')},
@@ -186,7 +253,7 @@ class MaterialBuildroot extends LitElement {
   }
   private async sharedPreferenceAction(){
     const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;
-    this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;
+    this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;
     const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('shared-mode-panel') as import('./shared-mode-panel').SharedModePanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#shared-heading') as HTMLElement|null)?.focus();
   }
@@ -194,7 +261,7 @@ class MaterialBuildroot extends LitElement {
     if(vocabulary.school()!=='inactive')return;
     const dialog=this.renderRoot.querySelector('#actions-dialog');
     const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));
-    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules'];await this.navigate('settings');await this.updateComplete;
+    this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;
     const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
     const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
     panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
@@ -900,6 +967,14 @@ class MaterialBuildroot extends LitElement {
   private get selected() {
     return this.plans.find((p) => p.id === this.selectedId);
   }
+  private updateWorkSaved() {
+    if (!this.state || this.dirty || this.workspaceBusy || this.draft !== this.state.language || this.saveState === "saving" || this.schedulePanel()?.hasPendingDraft) return false;
+    const panel = this.renderRoot.querySelector('operations-panel') as any;
+    if (panel && (panel.pending || Object.keys(panel.changes || {}).length || panel.jobs?.some((job:any) => ['queued','running','cancelling'].includes(job.state)))) return false;
+    // Unknown nested editors cannot silently claim that their drafts are saved.
+    if (panel?.shadowRoot?.querySelector('source-panel,package-panel,tools-panel,guest-panel,companion-panel')) return false;
+    return true;
+  }
   private get dirty() {
     return (
       !!this.edit &&
@@ -1258,7 +1333,7 @@ class MaterialBuildroot extends LitElement {
     ].map(
       (route, index) =>
         html`<md-text-button
-          title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
+          data-experience-id=${"navigation:"+route} title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
           aria-label=${this.route === route
             ? `${this.routeLabel(route,"accessible-name")}, ${this.owned("current workspace", "目前工作區","accessible-name")}`
             : this.routeLabel(route,"accessible-name")}
@@ -1487,7 +1562,7 @@ class MaterialBuildroot extends LitElement {
           )}
         </p>
         ${this.confirmedPreference()}<md-outlined-select
-          id="language-select"
+          id="language-select" data-experience-id="settings:language"
           .label=${this.l("Interface language", "介面語言")}
           .value=${this.draft}
           .displayText=${this.languageName(this.draft)}
@@ -1561,6 +1636,7 @@ class MaterialBuildroot extends LitElement {
               )}
         </p>
       </section>
+      <section class="panel stack" ?hidden=${!this.settingIds.includes('experience')}><experience-policy-panel .language=${this.effectiveLanguage}></experience-policy-panel></section>
       <section class="panel stack" ?hidden=${!this.settingIds.includes('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
       <section class="panel stack" ?hidden=${!this.settingIds.includes('schedules')}><scheduled-preferences-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .snapshot=${this.scheduleSnapshot} .baseLanguage=${this.state?.language||"bilingual"} .baseTheme=${this.theme} @scheduled-snapshot=${(e:CustomEvent<ScheduledPreferencesSnapshot|null>)=>this.applyScheduledSnapshot(e.detail)}></scheduled-preferences-panel></section>
       <div ?hidden=${!this.settingIds.includes('backups')}>${this.historyPanel()}</div>
@@ -1587,7 +1663,7 @@ class MaterialBuildroot extends LitElement {
                 "Buildroot 需要 Linux。記錄你打算使用嘅環境，選填檢查會檢視已安裝執行環境，唔會安裝。",
               )}
             </p>
-            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
+            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
             <md-outlined-select
               label=${this.l("Intended runtime", "預定執行環境")}
               .value=${this.newRuntime}
@@ -1763,7 +1839,9 @@ class MaterialBuildroot extends LitElement {
             ></md-text-button
           >
         </nav>
+        <workspace-tabs .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
         <main>
+          <update-panel compact .language=${this.state?.language || "bilingual"} .canRestart=${() => this.updateWorkSaved()}></update-panel>
           <div class="toolbar">
             <div class="heading">
               <h1 id="workspace-heading" tabindex="-1">
@@ -1891,15 +1969,16 @@ class MaterialBuildroot extends LitElement {
                         " " +
                         this.scope()}
                       </p>
-                    </section>`}<operations-panel
-            class="operations-host"
-            ?hidden=${this.route !== "operations"}
+                    </section>`}${repeat([{workspaceId:'',name:''},...this.projectSessions],project=>project.workspaceId,project=>html`<operations-panel
+            class="operations-host" data-project-id=${project.workspaceId}
+            ?hidden=${this.route !== "operations"||this.activeProject!==project.workspaceId}
+            .workspace=${project.workspaceId?project:undefined}
             .language=${this.effectiveLanguage} .restricted=${this.restricted}
-          ></operations-panel
-          >${this.notice
+            @workspace-adopted=${this.adoptedProject}
+          ></operations-panel>`)}${this.notice
             ? html`<p class="notice" role="status">${this.restricted?this.noticeEnglish:this.notice}</p>`
             : nothing}
-        </main>
+        </main></workspace-tabs>
       </div>
       <div class="status" role="status" aria-live="polite">
         ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
@@ -2054,7 +2133,7 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.renderRoot.querySelector("operations-panel") as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
+            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.activeOperations() as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");
@@ -2082,4 +2161,3 @@ class MaterialBuildroot extends LitElement {
   }
 }
 customElements.define("material-buildroot", MaterialBuildroot);
-
