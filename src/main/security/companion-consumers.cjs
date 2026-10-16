@@ -26,6 +26,9 @@ const actionContracts=Object.freeze({
  'conversion.choose':contract('tools:write',['access'],a=>['read','write'].includes(a.access)),
  'conversion.catalog':contract('tools:read',[]),
  'conversion.run':contract('tools:write',['sourceId','destinationId','category','format'],a=>id(a.sourceId)&&id(a.destinationId)&&['images','audio','video','documents','archives','structured','text','binary'].includes(a.category)&&typeof a.format==='string'&&/^[a-z0-9]{1,16}$/.test(a.format)),
+ 'servers.list':contract('servers:read',[]),
+ 'servers.status':contract('servers:read',['serverId'],a=>typeof a.serverId==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(a.serverId)),
+ 'servers.stop':contract('servers:write',['serverId'],a=>typeof a.serverId==='string'&&/^[A-Za-z0-9_-]{1,64}$/.test(a.serverId)),
  'models.status':contract('tools:read',[]),
  'models.list':contract('tools:read',[]),
  'workspace.read':contract('workspace:read',[]),
@@ -54,7 +57,7 @@ const summary=job=>({id:job.id,kind:job.kind,state:job.state,sequence:job.sequen
 function createCompanionConsumers(host){
  const sessions=new Map();
  function admitted(context,scope){if(!context||typeof context.isAuthorized!=='function'||!context.isAuthorized()||!context.scopes.includes(scope))fail('UNAUTHORIZED');}
- function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),ownedJobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),cloudJobs:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),sourceRollbacks:new Map(),models:new Set(),chats:new Set(),toolFiles:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
+ function state(context){let current=sessions.get(context.sessionId);if(!current){if(sessions.size>=100)fail('SESSION_LIMIT');current={origin:context.origin,files:new Map(),jobs:new Set(),ownedJobs:new Set(),viewers:new Map(),destinations:new Map(),cloudPreviews:new Map(),cloudJobs:new Map(),sourceSelections:new Set(),sourcePreviews:new Map(),sourceRollbacks:new Map(),models:new Set(),chats:new Set(),toolFiles:new Map(),servers:new Map()};sessions.set(context.sessionId,current);}if(current.origin!==context.origin)fail('UNAUTHORIZED');return current;}
  function file(state,args,kind){const entry=state.files.get(args.fileId||args.directoryId);if(!entry||entry.workspaceId!==args.workspaceId||entry.kind!==kind)fail('FILE_NOT_ADMITTED');return entry.id;}
  return Object.freeze({actionContracts,async dispatch(request,context){
   const definition=actionContracts[request.action];if(!definition)fail('ACTION_NOT_ADMITTED');definition.validate(request.args);admitted(context,definition.scope);const owned=state(context),a=request.args;
@@ -77,6 +80,9 @@ function createCompanionConsumers(host){
    case 'conversion.choose':{if(owned.toolFiles.size>=100)fail('FILE_LIMIT');const value=await host.chooseConversionFile(a.access);owned.toolFiles.set(value.id,a.access);result={id:value.id,name:value.name,access:a.access};break;}
    case 'conversion.catalog':{const value=await host.conversionCatalog();if(value.ok===false)fail('CONVERSION_UNAVAILABLE');result={categories:value.categories.map(item=>({category:item.category,formats:item.formats.map(format=>({format:format.format,available:format.available,reason:format.reason||null}))}))};break;}
    case 'conversion.run':{if(owned.toolFiles.get(a.sourceId)!=='read'||owned.toolFiles.get(a.destinationId)!=='write')fail('FILE_NOT_ADMITTED');admitted(context,definition.scope);const value=await host.runConversion(a,()=>admitted(context,definition.scope));if(value.ok===false)fail('CONVERSION_UNAVAILABLE');owned.toolFiles.delete(a.destinationId);result={bytes:value.bytes,sha256:value.sha256,format:value.format};break;}
+   case 'servers.list':{const value=await host.listServers();if(value.ok===false||!Array.isArray(value.ownership))fail('SERVER_MANAGER_UNAVAILABLE');owned.servers=new Map(value.ownership.map(item=>[item.serverId,item.target]));result={servers:value.ownership.map(({serverId,target,state,updatedAt,adoptionVerified})=>({serverId,target,state,updatedAt,adoptionVerified}))};break;}
+   case 'servers.status':{if(!owned.servers.has(a.serverId))fail('SERVER_NOT_ADMITTED');const value=await host.serverStatus(a.serverId);if(value.ok===false)fail('SERVER_STATUS_UNAVAILABLE');result={serverId:a.serverId,state:value.state,readinessVerified:value.readinessVerified===true,adoptionVerified:value.adoptionVerified===true,readinessState:value.readinessState||'unknown',processSpawned:value.processSpawned===true};break;}
+   case 'servers.stop':{if(!owned.servers.has(a.serverId))fail('SERVER_NOT_ADMITTED');const approved=await host.confirmServerStop(a.serverId,owned.servers.get(a.serverId),context,()=>admitted(context,definition.scope));admitted(context,definition.scope);if(!approved){result={serverId:a.serverId,state:'cancelled-before-stop'};break;}const value=await host.stopServer(a.serverId);if(value.ok===false)fail('SERVER_STOP_UNAVAILABLE');result={serverId:a.serverId,state:value.state||'stop-requested'};break;}
    case 'models.status':{const value=await host.modelStatus();if(value.ok===false)fail('MODEL_SERVICE_UNAVAILABLE');result={version:typeof value.version==='string'?value.version:'unavailable'};break;}
    case 'models.list':{const value=await host.modelList();if(value.ok===false||!Array.isArray(value.models))fail('MODEL_SERVICE_UNAVAILABLE');owned.models=new Set(value.models.slice(0,100).map(item=>item.name));result={models:value.models.slice(0,100).map(item=>({name:item.name,size:item.size,digest:item.digest,modifiedAt:item.modified_at}))};break;}
    case 'cloud.cancel':{if(owned.cloudJobs.get(a.id)!==a.workspaceId)fail('JOB_NOT_ADMITTED');admitted(context,definition.scope);result=host.cancelCloud(a.workspaceId,a.id);break;}
@@ -107,6 +113,7 @@ function createCompanionConsumers(host){
  },forget(sessionId){sessions.delete(sessionId);}});
 }
 module.exports={actionContracts,createCompanionConsumers};
+
 
 
 

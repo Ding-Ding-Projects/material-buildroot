@@ -2,7 +2,7 @@
 
 ## Implemented source routes
 
-The authenticated browser has six explicit task workflows: source/projects, configuration/build, output/cloud transfer, local models, file conversion, and preferences/recovery. Switching workflows only changes visible controls and sends no host request. It has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication. A separate explicit Save/Restore/Clear local draft workflow persists only the named build target, parallelism, configuration domain and clone folder/ref draft, bounded to 1,024 characters. Restoration never submits a request and never restores session, project, file or source-selection capabilities.
+The authenticated browser has seven explicit task workflows: source/projects, configuration/build, output/cloud transfer, local models, managed servers, file conversion, and preferences/recovery. Switching workflows only changes visible controls and sends no host request. It has a separate project workspace, selected project, optional checksum comparison draft, file selection, result view and bounded request history. None of this state shares visitor storage. Sessions, file handles, host results and the last 50 request summaries remain in page memory. Reload requires pairing again and does not restore authority. The endpoint preference remains separate from authentication. A separate explicit Save/Restore/Clear local draft workflow persists only the named build target, parallelism, configuration domain and clone folder/ref draft, bounded to 1,024 characters. Restoration never submits a request and never restores session, project, file or source-selection capabilities.
 
 The typed host adapter admits these exact actions, subject to the current session scope. Non-destructive build submission uses a named target selector and bounded parallel-job control, never a command string:
 
@@ -18,6 +18,9 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | conversion.choose | tools:write | Native input or new-output picker, scoped to this session |
 | conversion.catalog | tools:read | Actual eight-category adapter availability |
 | conversion.run | tools:write | Convert the session-selected files through a named category/format |
+| servers.list | servers:read | Saved managed-server ownership summaries without host paths |
+| servers.status | servers:read | Current managed state for a server disclosed to this session |
+| servers.stop | servers:write | Existing manager stop after separate native confirmation |
 | models.status | tools:read | Actual local model-service version |
 | models.list | tools:read | Installed model names, sizes and digests |
 | workspace.read | workspace:read | Workspace summary |
@@ -51,6 +54,10 @@ The server validates the argument schema and scope before dispatch. The consumer
 
 The authenticated workspace keeps its own English/Cantonese/bilingual language, light/dark/system theme and 100/125/150/200 percent text-size preferences under a separate bounded browser key. They do not alter visitor settings or host authority. Static controls relabel immediately; existing host-result text retains its original rendering until explicitly refreshed. This source increment is not full localization, layout or accessibility proof.
 
+## Existing managed servers
+
+The companion lists sanitized ownership records, refreshes the existing manager state and requests native-confirmed stopping of a disclosed server. It does not infer ownership or readiness from persisted metadata. Creation, version/flavour/plugin installation, configuration and enrollment of the four execution targets remain separate implementation gaps.
+
 ## Native file conversion
 
 Conversion controls use the existing native input/new-output pickers. The browser receives only names and session-owned identifiers, never filesystem paths. The category/format selectors reflect the existing converter adapter availability; unavailable packaged adapters remain disabled. Run converts only the current session-selected read and write grants. Revocation requests abortion of the owned operation, while a lost reply remains unknown and never claims output rollback. Existing no-overwrite and output-signature checks remain in the converter. Disk-backed queue controls and PDF-specific workflows are still incomplete.
@@ -73,13 +80,14 @@ This increment does not complete PH09-T03 or all C identities. The following are
 - Configuration string/credential editing, complete semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal rows now support bounded symbol filtering and pagination. Their edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
 - Custom source clone, existing-source adopt/ref acquisition and historical rollback discovery need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean. Source upgrade now retains its immutable preview in the session and requires native review of the actual patch before the existing revision-bound apply. Rollback previews and apply are also bound to rollback records created by this session, with the same native review and current-revision checks. Patches above 16,000 characters require the full native workflow instead of a truncated approval.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
-- Full disk-backed converter queues/PDF operations, server manager, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
+- Full disk-backed converter queues/PDF operations, server creation/configuration/version discovery, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
 - Native credential enrollment, TLS selection, listener binding, executable selection and operating-system consent remain desktop-only authority operations; companion workflows must request their approved results rather than emulate consent.
 
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
