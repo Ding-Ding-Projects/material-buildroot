@@ -252,7 +252,37 @@ class SourceService {
       branch: branch || null,
       dirty: changes.length > 0,
       changes,
+      snapshots: await this.snapshots(projectId),
     };
+  }
+  async snapshots(projectId) {
+    const project = this.project(projectId);
+    const text = await this.run(project.source, ["for-each-ref", "--sort=-refname", "--count=100", "--format=%(refname) %(objectname)", "refs/material-buildroot/snapshots/"]);
+    return text.trim().split("\n").filter(Boolean).map(line => {
+      const match = /^refs\/material-buildroot\/snapshots\/(\d{13}-[a-f0-9-]{36}) ([a-f0-9]{40}|[a-f0-9]{64})$/.exec(line.trim());
+      return match ? { id: match[1], revision: match[2], createdAt: new Date(Number(match[1].slice(0, 13))).toISOString() } : null;
+    }).filter(Boolean);
+  }
+  async snapshotRevision(projectId, snapshotId) {
+    if (!/^\d{13}-[a-f0-9-]{36}$/.test(snapshotId || "")) throw Error("snapshot-unavailable");
+    const project = this.project(projectId);
+    return this.resolve(project.source, `refs/material-buildroot/snapshots/${snapshotId}`);
+  }
+  async retainRevision(projectId, revision) {
+    const project = this.project(projectId);
+    const id = `${Date.now()}-${crypto.randomUUID()}`;
+    // A separate immutable ref retains the exact prior commit without altering user branches.
+    await this.run(project.source, ["update-ref", `refs/material-buildroot/snapshots/${id}`, revision, "0".repeat(revision.length)]);
+    return { id, revision, createdAt: new Date(Number(id.slice(0, 13))).toISOString() };
+  }
+  async snapshot({ projectId, expectedRevision }) {
+    const project = this.project(projectId);
+    return this.exclusive(project.source, async () => {
+      const current = await this.status(projectId);
+      if (current.dirty || current.revision !== expectedRevision) throw Error("upgrade-source-changed-or-dirty");
+      const snapshot = await this.retainRevision(projectId, current.revision);
+      return { ...(await this.status(projectId)), snapshot };
+    }, true);
   }
   async acquireRef({ projectId, ref }) {
     if (!safeRef(ref)) throw Error("invalid-source-ref");
@@ -275,10 +305,10 @@ class SourceService {
         fetchedRevision: await this.resolve(project.source, "FETCH_HEAD"),
         ...(await this.status(projectId)),
       };
-    });
+    }, true);
   }
   async previewUpgrade({ projectId, revision }) {
-    if (!/^[a-f0-9]{40,64}$/.test(revision || ""))
+    if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(revision || ""))
       throw Error("immutable-revision-required");
     const project = this.project(projectId);
     const before = await this.status(projectId);
@@ -292,14 +322,23 @@ class SourceService {
       target,
       "--",
     ]);
+    const files = (await this.run(project.source, ["diff", "--no-ext-diff", "--no-textconv", "--name-only", "-z", before.revision, target, "--"])).split("\0").filter(Boolean);
+    const patch = await this.run(project.source, ["diff", "--no-ext-diff", "--no-textconv", "--no-color", "--unified=3", before.revision, target, "--"]);
+    const compatibilityAreas = [
+      ["toolchain", /^(toolchain|arch)\//], ["configuration", /(^|\/)(Config\.in[^/]*|.*_defconfig)$|^configs\//],
+      ["packages", /^package\//], ["kernel", /^(linux|boot)\//], ["build-system", /^(Makefile|support\/|system\/|fs\/)/],
+    ].filter(([, pattern]) => files.some(file => pattern.test(file))).map(([area]) => area);
     const previewId = crypto.randomUUID();
-    this.previews.set(previewId, { projectId, before, target });
+    this.previews.set(previewId, { projectId, before, target, expiresAt: Date.now() + 10 * 60 * 1000 });
     return {
       previewId,
       fromRevision: before.revision,
       toRevision: target,
       dirty: before.dirty,
       diff,
+      patch,
+      changedFiles: files,
+      compatibilityAreas,
       outputCompatibility: "unknown",
       outputPreserved: true,
     };
@@ -308,6 +347,7 @@ class SourceService {
     const preview = this.previews.get(previewId);
     if (
       !preview ||
+      preview.expiresAt < Date.now() ||
       consent !== true ||
       preview.before.revision !== expectedRevision
     )
@@ -324,15 +364,18 @@ class SourceService {
           preview.before.dirty
         )
           throw Error("upgrade-source-changed-or-dirty");
+        const snapshot = await this.retainRevision(preview.projectId, expectedRevision);
         await this.run(project.source, [
           "checkout",
           "--detach",
+          "--no-overwrite-ignore",
           preview.target,
         ]);
         this.previews.delete(previewId);
         return {
           ...(await this.status(preview.projectId)),
           rollbackRevision: expectedRevision,
+          snapshot,
           outputPreserved: true,
           outputCompatibility: "unknown",
         };
