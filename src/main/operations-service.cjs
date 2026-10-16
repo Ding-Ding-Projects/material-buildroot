@@ -2117,7 +2117,3 @@ function createOperationsService({
 }
 module.exports = { createOperationsService };
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 8b644adf39438e54b79553839617ea8dfabea5c0
