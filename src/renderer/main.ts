@@ -1,3 +1,4 @@
+import "./command-surfaces";
 import "./shared-mode-panel";
 import "./scheduled-preferences-panel";
 import type {ScheduledPreferencesSnapshot} from "../shared/scheduled-preferences";
@@ -1941,3 +1942,4 @@ class MaterialBuildroot extends LitElement {
   }
 }
 customElements.define("material-buildroot", MaterialBuildroot);
+

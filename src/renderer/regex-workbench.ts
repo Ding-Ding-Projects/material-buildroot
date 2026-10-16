@@ -327,8 +327,8 @@ export class RegexWorkbench extends LitElement {
     this.snippetName = "";
   }
   private loadSnippet(snippet: Snippet) {
-    this.updatePattern(snippet.pattern);
     this.flags = snippet.flags;
+    this.updatePattern(snippet.pattern);
     this.sample = snippet.sample;
     this.replacement = snippet.replacement;
   }
@@ -834,3 +834,4 @@ export class RegexWorkbench extends LitElement {
   }
 }
 customElements.define("regex-workbench", RegexWorkbench);
+

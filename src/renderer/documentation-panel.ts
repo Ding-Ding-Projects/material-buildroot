@@ -1,3 +1,4 @@
+import "./regex-workbench";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { materialIcon } from "./material-icons";
@@ -666,14 +667,14 @@ export class DocumentationPanel extends LitElement {
       <div class="search">
         <md-outlined-text-field
           .label=${this.l("Search documentation", "搜尋文件")}
-          .value=${this.query}
+          .value=${this.mode === "regex" ? this.pattern : this.query}
           .supportingText=${this.l(
             "Titles, topics and summaries; local only.",
             "只喺本機搜尋標題、主題同摘要。",
           )}
           @input=${(e: Event) => {
             this.query = (e.target as HTMLInputElement).value;
-            this.mode = "literal";
+            if (this.mode === "regex") this.pattern=this.query;
             this.search();
           }}
         ></md-outlined-text-field
@@ -687,13 +688,14 @@ export class DocumentationPanel extends LitElement {
           aria-controls="documentation-regex"
           @click=${() => {
             this.builder = !this.builder;
+            if(this.mode === "literal") this.pattern=this.query;
             this.revision++;
           }}
           >${materialIcon("code")}</md-icon-button
         >
         ${this.builder
           ? html`<section
-              class="builder"
+              class="builder" style="display:block;max-height:65vh;overflow:auto;width:min(760px,calc(100vw - 48px))"
               id="documentation-regex"
               role="region"
               aria-label=${this.l(
@@ -729,81 +731,9 @@ export class DocumentationPanel extends LitElement {
                   },
                 )}
               </div>
-              <md-outlined-text-field
-                .label=${this.l("Literal text to construct", "要建構嘅原文")}
-                .value=${this.literal}
-                @input=${(e: Event) => {
-                  this.literal = (e.target as HTMLInputElement).value;
-                }}
-              ></md-outlined-text-field
-              ><md-outlined-select
-                .label=${this.l("Match construction", "符合項目建構")}
-                .value=${this.construct}
-                .displayText=${(
-                  {
-                    contains: this.l("Contains", "包含"),
-                    start: this.l("Starts with", "開頭"),
-                    end: this.l("Ends with", "結尾"),
-                    exact: this.l("Exact text", "完整文字"),
-                  } as Record<string, string>
-                )[this.construct]}
-                @change=${(e: Event) => {
-                  this.construct = (e.target as HTMLSelectElement).value;
-                  this.revision++;
-                }}
-                >${[
-                  ["contains", this.l("Contains", "包含")],
-                  ["start", this.l("Starts with", "開頭")],
-                  ["end", this.l("Ends with", "結尾")],
-                  ["exact", this.l("Exact text", "完整文字")],
-                ].map(
-                  ([value, label]) =>
-                    html`<md-select-option .value=${value}
-                      ><div slot="headline">${label}</div></md-select-option
-                    >`,
-                )}</md-outlined-select
-              ><md-outlined-button @click=${this.build}
-                >${materialIcon("build", "icon")}${this.l(
-                  "Build escaped expression",
-                  "建構已逸出表達式",
-                )}</md-outlined-button
-              ><md-outlined-text-field
-                .label=${this.l("Documentation pattern", "文件模式")}
-                .value=${this.pattern}
-                @input=${(e: Event) => {
-                  this.pattern = (e.target as HTMLInputElement).value;
-                  this.mode = "regex";
-                  this.search();
-                }}
-              ></md-outlined-text-field>
-              <div class="row flags">
-                ${["i", "m", "s", "u"].map(
-                  (flag) =>
-                    html`<label
-                      ><md-checkbox
-                        aria-label=${this.l(
-                          `Documentation flag ${flag}`,
-                          `文件旗標 ${flag}`,
-                        )}
-                        ?checked=${this.flags.includes(flag)}
-                        @change=${(e: Event) => {
-                          this.flags = (e.target as HTMLInputElement).checked
-                            ? this.flags + flag
-                            : this.flags.replace(flag, "");
-                          this.mode = "regex";
-                          this.search();
-                        }}
-                      ></md-checkbox
-                      >${flag}</label
-                    >`,
-                )}
-              </div>
-              <p>
-                ${this.l(
-                  "i ignores case; m enables line anchors; s lets dot match newlines; u uses Unicode. Search is bounded and can time out.",
-                  "i 忽略大小寫，m 啟用逐行錨點，s 允許點號符合換行，u 使用 Unicode。搜尋有限制並可能逾時。",
-                )}
-              </p>
+              <regex-workbench .language=${this.language} .pattern=${this.pattern} .flags=${this.flags}
+                @pattern-change=${(e:CustomEvent)=>{e.stopPropagation();this.pattern=e.detail.pattern;this.query=this.pattern;this.flags=e.detail.flags;this.mode="regex";this.search();}}
+              ></regex-workbench>
               <md-text-button
                 @click=${() => {
                   this.mode = "literal";

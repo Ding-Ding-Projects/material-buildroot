@@ -1,3 +1,4 @@
+import "./regex-workbench";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { materialIcon } from "./material-icons";
@@ -385,7 +386,7 @@ export class PackageDiscoveryPanel extends LitElement {
           >${materialIcon("code")}</md-icon-button
         >${this.builder
           ? html`<section
-              id="package-regex"
+              id="package-regex" style="display:block;max-height:65vh;overflow:auto;width:min(760px,calc(100vw - 48px))"
               class="builder stack"
               role="region"
               aria-label=${this.l(
@@ -414,58 +415,9 @@ export class PackageDiscoveryPanel extends LitElement {
                   "ECMAScript 表達式，唔係完整目錄搜尋。清除以顯示整個已載入頁面。",
                 )}
               </p>
-              <md-outlined-text-field
-                .label=${this.l("Package literal text", "套件原文")}
-                .value=${this.literal}
-                @input=${(e: Event) =>
-                  (this.literal = (e.target as HTMLInputElement).value)}
-              ></md-outlined-text-field>
-              <div class="row">
-                ${[
-                  ["Contains", "包含", ""],
-                  ["Starts with", "開頭", "^"],
-                ].map(
-                  ([en, zh, prefix]) =>
-                    html`<md-text-button
-                      @click=${() => {
-                        this.pattern =
-                          prefix +
-                          this.literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-                        this.filter();
-                      }}
-                      >${this.l(en, zh)}</md-text-button
-                    >`,
-                )}
-              </div>
-              <md-outlined-text-field
-                .label=${this.l("Package page pattern", "套件頁面模式")}
-                .value=${this.pattern}
-                @input=${(e: Event) => {
-                  this.pattern = (e.target as HTMLInputElement).value;
-                  this.filter();
-                }}
-              ></md-outlined-text-field>
-              <div class="row flags">
-                ${["i", "m", "s", "u"].map(
-                  (flag) =>
-                    html`<label
-                      ><md-checkbox
-                        aria-label=${this.l(
-                          `Package flag ${flag}`,
-                          `套件旗標 ${flag}`,
-                        )}
-                        ?checked=${this.flags.includes(flag)}
-                        @change=${(e: Event) => {
-                          this.flags = (e.target as HTMLInputElement).checked
-                            ? this.flags + flag
-                            : this.flags.replace(flag, "");
-                          this.filter();
-                        }}
-                      ></md-checkbox
-                      >${flag}</label
-                    >`,
-                )}
-              </div>
+              <regex-workbench .language=${this.language} .pattern=${this.pattern} .flags=${this.flags}
+                @pattern-change=${(e:CustomEvent)=>{e.stopPropagation();this.pattern=e.detail.pattern;this.flags=e.detail.flags;this.filter();}}
+              ></regex-workbench>
               <md-text-button
                 @click=${() => {
                   this.pattern = "";
