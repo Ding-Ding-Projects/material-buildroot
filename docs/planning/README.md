@@ -9,3 +9,5 @@
 - [Planning implementation plan](../../PLAN.md), [decisions](../../DECISIONS.md) and [roadmap](../../ROADMAP.md).
 
 These files document admission and pending work; their existence is not runtime evidence. No HTTP API is introduced by this planning category, so a Postman collection is not applicable here. Future admitted HTTP endpoints require their own category/master collections.
+
+- [Group A semantic-detail planning](../evidence/tasks/PH01-canonical-group-a.md): five reviewed identities, 15 proposed detail additions, 427 current planned requirements; product acceptance remains open.

@@ -206,10 +206,28 @@ test('new drop and private documentation identities retain exact independent bou
  for(const s of ['D','R'])assert.equal(drop.surfaces[s].state,'not-applicable');
  assert.equal(pack.disposition,'not-applicable');
  for(const s of ['A','D','C','R'])assert.equal(pack.surfaces[s].state,'not-applicable');
- assert.equal(baseline.identities.reduce((n,r)=>n+r.subrequirements.length,0),412);
+ assert.equal(baseline.identities.reduce((n,r)=>n+r.subrequirements.length,0),427);
  for(const id of ['vocabulary-drop-apply','private-documentation-package']){const ledger=copy();ledger.identities=ledger.identities.filter(x=>x.id!==id);assert(validate(ledger).includes('Missing identity: '+id));}
  const activation=copy();activation.identities.find(x=>x.id==='private-documentation-package').surfaces.D.state='unimplemented';assert(validate(activation).some(x=>x.includes('private delivery must remain inactive')));
  const waiver=copy();waiver.identities.find(x=>x.id==='vocabulary-drop-apply').surfaces.C.state='not-applicable';assert(validate(waiver).some(x=>x.includes('required surface cannot be waived')));
  const visitor=copy();visitor.identities.find(x=>x.id==='vocabulary-drop-apply').surfaces.D.state='unimplemented';assert(validate(visitor).some(x=>x.includes('expressly excluded')));
+ assert.deepEqual(validate(baseline),[]);
+});
+
+
+test('Group A detail clauses retain stable IDs and every planned surface binding',()=>{
+ const additions=[{"identity":"funny-emoji","id":"funny-emoji-REQ-05"},{"identity":"funny-emoji","id":"funny-emoji-REQ-06"},{"identity":"personal-vocabulary","id":"personal-vocabulary-REQ-05"},{"identity":"personal-vocabulary","id":"personal-vocabulary-REQ-06"},{"identity":"personal-vocabulary","id":"personal-vocabulary-REQ-07"},{"identity":"personal-vocabulary","id":"personal-vocabulary-REQ-08"},{"identity":"personal-vocabulary","id":"personal-vocabulary-REQ-09"},{"identity":"personal-vocabulary","id":"personal-vocabulary-REQ-10"},{"identity":"school-mode","id":"school-mode-REQ-05"},{"identity":"school-mode","id":"school-mode-REQ-06"},{"identity":"school-mode","id":"school-mode-REQ-07"},{"identity":"school-mode","id":"school-mode-REQ-08"},{"identity":"narration","id":"narration-REQ-05"},{"identity":"narration","id":"narration-REQ-06"},{"identity":"narration","id":"narration-REQ-07"}];
+ assert.equal(baseline.identities.reduce((n,r)=>n+r.subrequirements.length,0),427);
+ for(const {identity,id} of additions){
+  const record=baseline.identities.find(x=>x.id===identity);
+  assert(record.subrequirements.some(x=>x.id===id));
+  for(const surface of ['A','D','C','R'])assert(record.surfaces[surface].plannedAdmission.requirementIds.includes(id));
+  const omitted=copy(),row=omitted.identities.find(x=>x.id===identity);
+  row.subrequirements=row.subrequirements.filter(x=>x.id!==id);
+  for(const entry of Object.values(row.surfaces))entry.plannedAdmission.requirementIds=entry.plannedAdmission.requirementIds.filter(x=>x!==id);
+  assert(validate(omitted).some(x=>x.includes('independent expected inventory')));
+  const unbound=copy();unbound.identities.find(x=>x.id===identity).surfaces.C.plannedAdmission.requirementIds=unbound.identities.find(x=>x.id===identity).surfaces.C.plannedAdmission.requirementIds.filter(x=>x!==id);
+  assert(validate(unbound).some(x=>x.includes('planned requirement bindings')));
+ }
  assert.deepEqual(validate(baseline),[]);
 });

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "canonicalRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
   "canonicalCatalogueSha256": "06c596e8136362f3c60acedec3aa7efcbb6a16c22065b371aae253f107358333",
-  "publicCatalogueSha256": "7cf1e2512352546d35e6da226ab4cb5f7475545c1be1b8e1adbe77e6192e2af9",
+  "publicCatalogueSha256": "e30334f2c0723682fb91b39595b54e13ffabbfafd4c0c82679c14d9c28e898bc",
   "identityCount": 109,
   "surfaceRecordCount": 436,
-  "plannedRequirementCount": 412,
+  "plannedRequirementCount": 427,
   "referencePolicy": "Exact source document, canonical revision and opaque link locator identify canonical sections without publishing private headings or vocabulary. Non-restricted feature sections also carry content hashes. Restricted private instruction content digests are deliberately omitted. Reference indexing is not independent review, implementation or runtime acceptance.",
   "identities": [
     {
@@ -79,7 +79,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -361,12 +361,14 @@
     {
       "id": "funny-emoji",
       "state": "direct-sections-detail-mapped-cross-contract-review-pending",
-      "publicRequirement": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
+      "publicRequirement": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
       "requirementIds": [
         "funny-emoji-REQ-01",
         "funny-emoji-REQ-02",
         "funny-emoji-REQ-03",
-        "funny-emoji-REQ-04"
+        "funny-emoji-REQ-04",
+        "funny-emoji-REQ-05",
+        "funny-emoji-REQ-06"
       ],
       "catalogueSurface": "A+D+C",
       "disposition": "applicable",
@@ -387,7 +389,7 @@
           {
             "requirementId": "funny-emoji-REQ-01",
             "canonicalObligation": "Two independent persisted funny-level sliders, one for English and one for Cantonese, run from 1 (fully serious) to 5 (maximum playfulness), ship at 5, and reset independently.",
-            "missingDetailOrEvidence": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "missingDetailOrEvidence": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "publicRequirementText": "Two independent persisted funny-level sliders, one for English and one for Cantonese, run from 1 (fully serious) to 5 (maximum playfulness), ship at 5, and reset independently."
           },
           {
@@ -407,6 +409,35 @@
             "canonicalObligation": "universal proof; rendered copy demonstrably changes at every level in both languages; facts identical at levels 1 and 5; emoji switch persistence and narrow-layout gates.",
             "missingDetailOrEvidence": "Disclose both defaults and all-message scope at first run/settings; compare actual copy at all levels and no-emoji behavior.",
             "publicRequirementText": "universal proof; rendered copy demonstrably changes at every level in both languages; facts identical at levels 1 and 5; emoji switch persistence and narrow-layout gates."
+          },
+          {
+            "requirementId": "funny-emoji-REQ-05",
+            "canonicalObligation": "At every humor level, preserve the exact affected file, account, action, irreversible consequence, actual error and available choices. Humor must never mock the user, data loss, money or disability.",
+            "publicRequirementText": "At every humor level, preserve the exact affected file, account, action, irreversible consequence, actual error and available choices. Humor must never mock the user, data loss, money or disability.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "funny-emoji-REQ-02"
+            ]
+          },
+          {
+            "requirementId": "funny-emoji-REQ-06",
+            "canonicalObligation": "Keep the dialog emoji toggle localized and keyboard-accessible in each surface settings. Turning it off removes only decoration and preserves identical factual copy. Verify persistence, visible focus, accessible control text without emoji and narrow layouts in both states.",
+            "publicRequirementText": "Keep the dialog emoji toggle localized and keyboard-accessible in each surface settings. Turning it off removes only decoration and preserves identical factual copy. Verify persistence, visible focus, accessible control text without emoji and narrow layouts in both states.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "funny-emoji-REQ-03",
+              "funny-emoji-REQ-04"
+            ]
           }
         ],
         "remaining": [
@@ -716,7 +747,13 @@
         "personal-vocabulary-REQ-01",
         "personal-vocabulary-REQ-02",
         "personal-vocabulary-REQ-03",
-        "personal-vocabulary-REQ-04"
+        "personal-vocabulary-REQ-04",
+        "personal-vocabulary-REQ-05",
+        "personal-vocabulary-REQ-06",
+        "personal-vocabulary-REQ-07",
+        "personal-vocabulary-REQ-08",
+        "personal-vocabulary-REQ-09",
+        "personal-vocabulary-REQ-10"
       ],
       "catalogueSurface": "A+D+C",
       "disposition": "applicable",
@@ -762,6 +799,91 @@
             "canonicalObligation": "universal proof; the empty control without a file; every schema, version, and size bound; malformed and duplicate-key input; no partial application; cache corruption; no-network behaviour; absence from logs, exports, history, and public records; the release-grade shutdown drive with the current canonical private JSON from the owner-managed private source and no private payload in any screenshot.",
             "missingDetailOrEvidence": "Owned copy and accessible names are eligible; commands/URLs/paths/code/provider facts remain immutable. Prove no-network, leak exclusion, mode suppression/restoration and all three languages.",
             "publicRequirementText": "universal proof; the empty control without a file; every schema, version, and size bound; malformed and duplicate-key input; no partial application; cache corruption; no-network behaviour; absence from logs, exports, history, and public records; the release-grade shutdown drive with the current canonical private JSON from the owner-managed private source and no private payload in any screenshot."
+          },
+          {
+            "requirementId": "personal-vocabulary-REQ-05",
+            "canonicalObligation": "Use a semantic local JSON picker with keyboard and screen-reader operation and an adequate touch target. Settings search and the command palette index and focus upload, status, replace and clear/reset controls. Each owned picker or file list has its own local filter and adjacent anchored full regex builder.",
+            "publicRequirementText": "Use a semantic local JSON picker with keyboard and screen-reader operation and an adequate touch target. Settings search and the command palette index and focus upload, status, replace and clear/reset controls. Each owned picker or file list has its own local filter and adjacent anchored full regex builder.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "personal-vocabulary-REQ-01"
+            ]
+          },
+          {
+            "requirementId": "personal-vocabulary-REQ-06",
+            "canonicalObligation": "Reject unknown schema versions, unsafe object keys, unexpected fields and non-string replacement values before display or caching. Do not impose a fixed minimum, exact or maximum entry count; accept every valid entry within the documented byte, depth and key/value bounds.",
+            "publicRequirementText": "Reject unknown schema versions, unsafe object keys, unexpected fields and non-string replacement values before display or caching. Do not impose a fixed minimum, exact or maximum entry count; accept every valid entry within the documented byte, depth and key/value bounds.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "personal-vocabulary-REQ-02"
+            ]
+          },
+          {
+            "requirementId": "personal-vocabulary-REQ-07",
+            "canonicalObligation": "Revalidate the private cache before every load. A missing, corrupt, stale or unsupported cache renders original wording. An invalid import preserves an existing valid selection only until explicit clear; clear purges the cache and restores original wording immediately. Never ship mappings, samples, guesses or private defaults.",
+            "publicRequirementText": "Revalidate the private cache before every load. A missing, corrupt, stale or unsupported cache renders original wording. An invalid import preserves an existing valid selection only until explicit clear; clear purges the cache and restores original wording immediately. Never ship mappings, samples, guesses or private defaults.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "personal-vocabulary-REQ-02",
+              "personal-vocabulary-REQ-03"
+            ]
+          },
+          {
+            "requirementId": "personal-vocabulary-REQ-08",
+            "canonicalObligation": "Exclude imported wording, cached content and source metadata from clipboard, crash reports, diagnostics, analytics, synchronized settings and user-specific evidence as well as existing excluded destinations. Exports and history disclose the omission without serializing reconstructable or identifying metadata.",
+            "publicRequirementText": "Exclude imported wording, cached content and source metadata from clipboard, crash reports, diagnostics, analytics, synchronized settings and user-specific evidence as well as existing excluded destinations. Exports and history disclose the omission without serializing reconstructable or identifying metadata.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "personal-vocabulary-REQ-03"
+            ]
+          },
+          {
+            "requirementId": "personal-vocabulary-REQ-09",
+            "canonicalObligation": "Apply replacements only at the private user-facing text boundary, including accessible names. Preserve commands, URLs, identifiers, code, paths and factual external records verbatim. Verify replace, clear/reset, restart, all language modes, both humor extremes, restricted-mode suppression/restoration, settings and palette discovery, keyboard/screen-reader access, narrow layouts and high scales independently per surface.",
+            "publicRequirementText": "Apply replacements only at the private user-facing text boundary, including accessible names. Preserve commands, URLs, identifiers, code, paths and factual external records verbatim. Verify replace, clear/reset, restart, all language modes, both humor extremes, restricted-mode suppression/restoration, settings and palette discovery, keyboard/screen-reader access, narrow layouts and high scales independently per surface.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "personal-vocabulary-REQ-04"
+            ]
+          },
+          {
+            "requirementId": "personal-vocabulary-REQ-10",
+            "canonicalObligation": "Release-grade verification first checks the current owner-managed JSON generator and schema inventory, then uses the real built upload control on every applicable surface to prove valid load, applied wording, persistence, replace, clear/reset, invalid-file rejection, local-only behavior and original-wording restoration. Keep the payload out of every capture and public record.",
+            "publicRequirementText": "Release-grade verification first checks the current owner-managed JSON generator and schema inventory, then uses the real built upload control on every applicable surface to prove valid load, applied wording, persistence, replace, clear/reset, invalid-file rejection, local-only behavior and original-wording restoration. Keep the payload out of every capture and public record.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "personal-vocabulary-REQ-04"
+            ]
           }
         ],
         "remaining": [
@@ -853,7 +975,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -1070,7 +1192,11 @@
         "school-mode-REQ-01",
         "school-mode-REQ-02",
         "school-mode-REQ-03",
-        "school-mode-REQ-04"
+        "school-mode-REQ-04",
+        "school-mode-REQ-05",
+        "school-mode-REQ-06",
+        "school-mode-REQ-07",
+        "school-mode-REQ-08"
       ],
       "catalogueSurface": "A+D+C",
       "disposition": "applicable",
@@ -1117,6 +1243,64 @@
             "canonicalObligation": "universal proof; live propagation across running applications; zero shipped-name occurrences after a rename; suppression and restoration of every hidden capability; an honest unreadable-record state; no credential in exports, logs, screenshots, or Git history.",
             "missingDetailOrEvidence": "Exit verifies shared PIN/password/passkey, preserves prior settings, documents user-owned deletion reset and never treats experience lock as authentication.",
             "publicRequirementText": "universal proof; live propagation across running applications; zero shipped-name occurrences after a rename; suppression and restoration of every hidden capability; an honest unreadable-record state; no credential in exports, logs, screenshots, or Git history."
+          },
+          {
+            "requirementId": "school-mode-REQ-05",
+            "canonicalObligation": "Provide the shared-mode control in each surface's own settings. Watch and apply mode, chosen-name and unlock-credential changes live across running applications. An unreadable record or unavailable watcher reports the actual unavailable state instead of assuming the mode is off.",
+            "publicRequirementText": "Provide the shared-mode control in each surface's own settings. Watch and apply mode, chosen-name and unlock-credential changes live across running applications. An unreadable record or unavailable watcher reports the actual unavailable state instead of assuming the mode is off.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "school-mode-REQ-01"
+            ]
+          },
+          {
+            "requirementId": "school-mode-REQ-06",
+            "canonicalObligation": "After rename use only the exact chosen name in labels, descriptions, search results, notifications and accessible names. Preserve prior settings while their capabilities are absent and restore them only after exit. Keep the mode control discoverable and accessible; any disabled-state explanation uses the chosen name and unlock route.",
+            "publicRequirementText": "After rename use only the exact chosen name in labels, descriptions, search results, notifications and accessible names. Preserve prior settings while their capabilities are absent and restore them only after exit. Keep the mode control discoverable and accessible; any disabled-state explanation uses the chosen name and unlock route.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "school-mode-REQ-02",
+              "school-mode-REQ-03"
+            ]
+          },
+          {
+            "requirementId": "school-mode-REQ-07",
+            "canonicalObligation": "Use one shared starting-rung decision so restricted mode starts the unlock ladder at arithmetic. The absent themed rung is not replaced with explanatory copy that reveals the hidden capability.",
+            "publicRequirementText": "Use one shared starting-rung decision so restricted mode starts the unlock ladder at arithmetic. The absent themed rung is not replaced with explanatory copy that reveals the hidden capability.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "4414d7347d07b40f57208ffb2b2728c3efe92702e7d2ffd0146898bd2c02b368"
+            },
+            "expandsRequirementIds": [
+              "school-mode-REQ-02"
+            ]
+          },
+          {
+            "requirementId": "school-mode-REQ-08",
+            "canonicalObligation": "Use one universal resettable locally verified PIN, password or passkey choice. Credential material never enters the personal-wording file, synchronization repository, source, exports, logs, telemetry, captures or version history. Explain the user-owned shared-record deletion reset without claiming a security boundary.",
+            "publicRequirementText": "Use one universal resettable locally verified PIN, password or passkey choice. Credential material never enters the personal-wording file, synchronization repository, source, exports, logs, telemetry, captures or version history. Explain the user-owned shared-record deletion reset without claiming a security boundary.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "school-mode-REQ-03",
+              "school-mode-REQ-04"
+            ]
           }
         ],
         "remaining": [
@@ -1139,7 +1323,7 @@
               "unlock-ladder-REQ-03",
               "unlock-ladder-REQ-04"
             ],
-            "specificDetail": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "specificDetail": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -1209,7 +1393,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -1454,7 +1638,10 @@
         "narration-REQ-01",
         "narration-REQ-02",
         "narration-REQ-03",
-        "narration-REQ-04"
+        "narration-REQ-04",
+        "narration-REQ-05",
+        "narration-REQ-06",
+        "narration-REQ-07"
       ],
       "catalogueSurface": "A+D+C",
       "disposition": "applicable",
@@ -1493,8 +1680,52 @@
           {
             "requirementId": "narration-REQ-04",
             "canonicalObligation": "universal proof; no speech synthesis available; an empty first enumeration followed by a populated one; uninstalled and network-only voices; a language with no voice; rate and pitch at and beyond their bounds; persistence across restart.",
-            "missingDetailOrEvidence": "Duck/yield for screen readers and quiet preferences; test empty\u2192populated voices, uninstall, offline, bounds/reload, all languages/humor extremes and no secret narration.",
+            "missingDetailOrEvidence": "Duck/yield for screen readers and quiet preferences; test empty→populated voices, uninstall, offline, bounds/reload, all languages/humor extremes and no secret narration.",
             "publicRequirementText": "universal proof; no speech synthesis available; an empty first enumeration followed by a populated one; uninstalled and network-only voices; a language with no voice; rate and pitch at and beyond their bounds; persistence across restart."
+          },
+          {
+            "requirementId": "narration-REQ-05",
+            "canonicalObligation": "Both speaks English then Cantonese through one serialized queue. Replace a superseded queued line instead of accumulating it, debounce and apply per-category cooldowns without suppressing actual error facts or recovery actions. Respect reduced-sound and quiet-hours preferences where those settings exist and yield to or duck beneath an active screen reader.",
+            "publicRequirementText": "Both speaks English then Cantonese through one serialized queue. Replace a superseded queued line instead of accumulating it, debounce and apply per-category cooldowns without suppressing actual error facts or recovery actions. Respect reduced-sound and quiet-hours preferences where those settings exist and yield to or duck beneath an active screen reader.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "narration-REQ-01",
+              "narration-REQ-03"
+            ]
+          },
+          {
+            "requirementId": "narration-REQ-06",
+            "canonicalObligation": "Resolve actual voices per language at runtime, subscribe and re-read when enumeration arrives late, and unsubscribe on teardown. Persist stable platform identities. Keep an unavailable selected identity while explaining the actual fallback, network-backed offline limitation or absence of any voice for the language beneath its picker. Never ship a named-voice default.",
+            "publicRequirementText": "Resolve actual voices per language at runtime, subscribe and re-read when enumeration arrives late, and unsubscribe on teardown. Persist stable platform identities. Keep an unavailable selected identity while explaining the actual fallback, network-backed offline limitation or absence of any voice for the language beneath its picker. Never ship a named-voice default.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "narration-REQ-02"
+            ]
+          },
+          {
+            "requirementId": "narration-REQ-07",
+            "canonicalObligation": "Rate and pitch use documented platform bounds and default to the voice's normal delivery. Each picker participates in settings search, the command palette and local version history, with keyboard focus, accessible name and description, touch targets and narrow/high-scale layouts. Keep voice names, language tags and status facts exact while localized humor styles surrounding copy. Verify all three language modes and both humor extremes.",
+            "publicRequirementText": "Rate and pitch use documented platform bounds and default to the voice's normal delivery. Each picker participates in settings search, the command palette and local version history, with keyboard focus, accessible name and description, touch targets and narrow/high-scale layouts. Keep voice names, language tags and status facts exact while localized humor styles surrounding copy. Verify all three language modes and both humor extremes.",
+            "missingDetailOrEvidence": "Independently supported planning detail. Concrete consumers, localized controls/copy/articles, state handling, focused and omission tests, actual commands and genuine source/build-bound runtime evidence remain unadmitted.",
+            "detailSourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+            "sourceCorrespondence": {
+              "document": "owner-managed-feature-contract",
+              "locatorSha256": "8c5f6bdcbdea4a1fcbe8adb4a1852db92eb637c6c771cfc1f4cf49544a021ca7"
+            },
+            "expandsRequirementIds": [
+              "narration-REQ-02",
+              "narration-REQ-04"
+            ]
           }
         ],
         "remaining": [
@@ -1531,7 +1762,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -1780,7 +2011,12 @@
         "appliesTo": "Independent A+D+C product records; preserve applicable disposition.",
         "acceptanceGap": "Exact per-surface consumer/state inventory and independent review are still required. A dependency graph is planning, never runtime or complete canonical acceptance."
       },
-      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff"
+      "canonicalRevision": "8c0ac54183b5138bec189869d87a753e2689a3ff",
+      "surfaceBasis": {
+        "sourceCatalogue": "A+D",
+        "retainedProductScope": "A+D+C",
+        "companionBasis": "Universal user-facing interface obligation; no companion waiver and no claim that the catalogue explicitly names C."
+      }
     },
     {
       "id": "scheduled-settings",
@@ -1910,7 +2146,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -2265,7 +2501,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -2629,7 +2865,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -2950,7 +3186,7 @@
               "unlock-ladder-REQ-03",
               "unlock-ladder-REQ-04"
             ],
-            "specificDetail": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "specificDetail": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -2978,7 +3214,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -3334,7 +3570,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -3735,7 +3971,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -4104,7 +4340,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -4366,7 +4602,7 @@
           {
             "requirementId": "motion-REQ-03",
             "canonicalObligation": "Motion never becomes the only carrier of a state.",
-            "missingDetailOrEvidence": "Maintain authored settings separately from safe reduced-motion rendering and shared global rainbow level\u2192duration consumer.",
+            "missingDetailOrEvidence": "Maintain authored settings separately from safe reduced-motion rendering and shared global rainbow level→duration consumer.",
             "publicRequirementText": "Motion never becomes the only carrier of a state."
           },
           {
@@ -4452,7 +4688,7 @@
               "unlock-ladder-REQ-03",
               "unlock-ladder-REQ-04"
             ],
-            "specificDetail": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "specificDetail": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -4480,7 +4716,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -4738,9 +4974,9 @@
         "requirements": [
           {
             "requirementId": "appearance-editor-REQ-01",
-            "canonicalObligation": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance\u2026 from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close.",
+            "canonicalObligation": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance… from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close.",
             "missingDetailOrEvidence": "Every rendered element/state, including appearance editor controls themselves, exposes an anchored nonmodal context/keyboard editor.",
-            "publicRequirementText": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance\u2026 from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close."
+            "publicRequirementText": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance… from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close."
           },
           {
             "requirementId": "appearance-editor-REQ-02",
@@ -4871,7 +5107,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -5207,7 +5443,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -5570,7 +5806,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -5933,7 +6169,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -6261,7 +6497,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -6640,7 +6876,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -7005,7 +7241,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -7282,9 +7518,9 @@
           },
           {
             "requirementId": "tabs-REQ-03",
-            "canonicalObligation": "Every application ships the four tab-discovery searches, a Move\u2026 into group\u2026 picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders.",
+            "canonicalObligation": "Every application ships the four tab-discovery searches, a Move… into group… picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders.",
             "missingDetailOrEvidence": "Four isolated discovery searches cover strip, group contents, group names and all owned windows; move-to-group is searchable anchored picker, not growing contextmenu list.",
-            "publicRequirementText": "Every application ships the four tab-discovery searches, a Move\u2026 into group\u2026 picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders."
+            "publicRequirementText": "Every application ships the four tab-discovery searches, a Move… into group… picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders."
           },
           {
             "requirementId": "tabs-REQ-04",
@@ -7399,7 +7635,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -7734,7 +7970,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -8070,7 +8306,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -8313,9 +8549,9 @@
         "requirements": [
           {
             "requirementId": "context-menus-REQ-01",
-            "canonicalObligation": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance\u2026 and Lock this element\u2026.",
+            "canonicalObligation": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance… and Lock this element….",
             "missingDetailOrEvidence": "Every rendered element/state/disabledtarget has actual target-specific context menu with keyboard/touch equivalents, no small control exemptions.",
-            "publicRequirementText": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance\u2026 and Lock this element\u2026."
+            "publicRequirementText": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance… and Lock this element…."
           },
           {
             "requirementId": "context-menus-REQ-02",
@@ -8426,7 +8662,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -8740,7 +8976,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -9092,7 +9328,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -9458,7 +9694,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -9742,7 +9978,7 @@
           {
             "requirementId": "settings-explanations-REQ-04",
             "canonicalObligation": "universal proof; the hand-written settings inventory guard.",
-            "missingDetailOrEvidence": "Include nested own settings search/regex, palette exactfocus, languages, keyboard and real config\u2192default transitions in proof.",
+            "missingDetailOrEvidence": "Include nested own settings search/regex, palette exactfocus, languages, keyboard and real config→default transitions in proof.",
             "publicRequirementText": "universal proof; the hand-written settings inventory guard."
           }
         ],
@@ -9824,7 +10060,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -10182,7 +10418,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -10544,7 +10780,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -10796,9 +11032,9 @@
         "requirements": [
           {
             "requirementId": "element-locks-REQ-01",
-            "canonicalObligation": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element\u2026 command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP.",
+            "canonicalObligation": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element… command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP.",
             "missingDetailOrEvidence": "Every target/state/property/tab/group has own anchored wizard and one of exactsix ordered PIN/password/TOTP policies, owncredentials/durations.",
-            "publicRequirementText": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element\u2026 command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP."
+            "publicRequirementText": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element… command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP."
           },
           {
             "requirementId": "element-locks-REQ-02",
@@ -10853,7 +11089,7 @@
               "unlock-ladder-REQ-03",
               "unlock-ladder-REQ-04"
             ],
-            "specificDetail": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "specificDetail": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -10923,7 +11159,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -11245,7 +11481,7 @@
               "unlock-ladder-REQ-03",
               "unlock-ladder-REQ-04"
             ],
-            "specificDetail": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "specificDetail": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -11273,7 +11509,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -11553,7 +11789,7 @@
           {
             "requirementId": "unlock-ladder-REQ-01",
             "canonicalObligation": "Every application and GitHub Pages that can lock a person out ships the ladder in order: a dim-sum rung with one dish and four choices, ten easy sums, whack-a-mole, then the clock.",
-            "missingDetailOrEvidence": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "missingDetailOrEvidence": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "publicRequirementText": "Every application and GitHub Pages that can lock a person out ships the ladder in order: a dim-sum rung with one dish and four choices, ten easy sums, whack-a-mole, then the clock."
           },
           {
@@ -11665,7 +11901,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -11929,7 +12165,7 @@
           {
             "requirementId": "authenticator-REQ-02",
             "canonicalObligation": "Codes are standards-exact RFC 6238 over RFC 4226 with SHA-1, SHA-256, and SHA-512, 6 to 8 digits, and arbitrary periods verified against the published vectors, shown large with copy, a readable countdown, and a next-code peek, and a skewed clock is reported in plain words.",
-            "missingDetailOrEvidence": "RFC6238/HOTP SHA1/256/512 6\u20138 digits arbitraryperiod; published vectors, skew status, current/nextcode groupedcopy and textcountdown.",
+            "missingDetailOrEvidence": "RFC6238/HOTP SHA1/256/512 6–8 digits arbitraryperiod; published vectors, skew status, current/nextcode groupedcopy and textcountdown.",
             "publicRequirementText": "Codes are standards-exact RFC 6238 over RFC 4226 with SHA-1, SHA-256, and SHA-512, 6 to 8 digits, and arbitrary periods verified against the published vectors, shown large with copy, a readable countdown, and a next-code peek, and a skewed clock is reported in plain words."
           },
           {
@@ -12049,7 +12285,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -12385,7 +12621,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -12735,7 +12971,7 @@
               "unlock-ladder-REQ-03",
               "unlock-ladder-REQ-04"
             ],
-            "specificDetail": "exact sequence dish\u2192after five wrong answers ten easy sums\u2192one wrong answer mole\u2192lost round clock; shared mode starts sums without referencing suppressed dish.",
+            "specificDetail": "exact sequence dish→after five wrong answers ten easy sums→one wrong answer mole→lost round clock; shared mode starts sums without referencing suppressed dish.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -12791,7 +13027,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -13146,7 +13382,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -13495,7 +13731,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -13839,7 +14075,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -14177,7 +14413,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -14519,7 +14755,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -14876,7 +15112,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -15259,7 +15495,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -15625,7 +15861,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -15910,7 +16146,7 @@
           {
             "requirementId": "minecraft-server-manager-REQ-04",
             "canonicalObligation": "universal proof; four target adapters; complete version discovery and compatibility matrix; typed configuration consumers; install/manage/recovery interaction; source-bound references and negative omissions.",
-            "missingDetailOrEvidence": "Edition\u00d7version\u00d7flavour\u00d7target\u00d7extension matrix distinguishes verified, authored, unavailable and incomplete; generic-textbox substitution and lost historical adapter/page negatives must fail.",
+            "missingDetailOrEvidence": "Edition×version×flavour×target×extension matrix distinguishes verified, authored, unavailable and incomplete; generic-textbox substitution and lost historical adapter/page negatives must fail.",
             "publicRequirementText": "universal proof; four target adapters; complete version discovery and compatibility matrix; typed configuration consumers; install/manage/recovery interaction; source-bound references and negative omissions."
           }
         ],
@@ -16006,7 +16242,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -16426,7 +16662,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -16792,7 +17028,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -17136,7 +17372,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -17485,7 +17721,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -17868,7 +18104,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -18252,7 +18488,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -18581,7 +18817,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -18977,7 +19213,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -19312,7 +19548,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -19674,7 +19910,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -19937,9 +20173,9 @@
         "requirements": [
           {
             "requirementId": "design-folder-REQ-01",
-            "canonicalObligation": "Every design surface, including a Astra design implementation subagent\u2019s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface.",
+            "canonicalObligation": "Every design surface, including a Astra design implementation subagent’s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface.",
             "missingDetailOrEvidence": "Checked-in local design source under design/ is authority; remote design project is publish/view surface only.",
-            "publicRequirementText": "Every design surface, including a Astra design implementation subagent\u2019s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface."
+            "publicRequirementText": "Every design surface, including a Astra design implementation subagent’s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface."
           },
           {
             "requirementId": "design-folder-REQ-02",
@@ -20067,7 +20303,7 @@
     {
       "id": "layout-matrix",
       "state": "direct-sections-detail-mapped-cross-contract-review-pending",
-      "publicRequirement": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
+      "publicRequirement": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
       "requirementIds": [
         "layout-matrix-REQ-01",
         "layout-matrix-REQ-02",
@@ -20190,7 +20426,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -20747,7 +20983,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -21124,7 +21360,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -21497,7 +21733,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -21897,7 +22133,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -22255,7 +22491,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -22627,7 +22863,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -22989,7 +23225,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -23369,7 +23605,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -23761,7 +23997,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -24206,7 +24442,7 @@
           {
             "requirementId": "panic-webhooks-REQ-04",
             "canonicalObligation": "suspicion never dispatches; truthful per-destination results; SSRF and DNS-rebinding gates.",
-            "missingDetailOrEvidence": "HomeAssistant\u2192Discord\u2192custom stable ordering, independent failures and idempotent per-event/destination/phase retries preserve evidence and truthful outcomes.",
+            "missingDetailOrEvidence": "HomeAssistant→Discord→custom stable ordering, independent failures and idempotent per-event/destination/phase retries preserve evidence and truthful outcomes.",
             "publicRequirementText": "suspicion never dispatches; truthful per-destination results; SSRF and DNS-rebinding gates."
           }
         ],
@@ -25146,7 +25382,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -25545,7 +25781,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -25909,7 +26145,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -26287,7 +26523,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -26643,7 +26879,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -29629,7 +29865,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -31380,7 +31616,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -31796,7 +32032,7 @@
               "funny-emoji-REQ-03",
               "funny-emoji-REQ-04"
             ],
-            "specificDetail": "Two independent integer levels 1\u20135, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
+            "specificDetail": "Two independent integer levels 1–5, each default 5 and independently resettable, must change rendered English/Cantonese message voice.",
             "scopeBoundary": "A+D+C; applicable; a dependency does not activate or waive the target identity."
           },
           {
@@ -32484,7 +32720,7 @@
   ],
   "reviewSummary": {
     "directIdentitiesMapped": 109,
-    "plannedRequirementsMapped": 412,
+    "plannedRequirementsMapped": 427,
     "crossContractIdentityGraphsMapped": 109,
     "independentlyReviewedIdentities": 0,
     "newAcceptedFeatures": 0,
@@ -32503,5 +32739,38 @@
     "preservedRequirementCount": 398,
     "state": "source-delta-mapped-independent-review-pending",
     "inheritedReferenceBoundary": "Existing identity references retain their previously declared source revision. Only the new identities and explicit delivery-condition amendments are bound to this delta. No global source-reference refresh or runtime acceptance is claimed."
+  },
+  "groupAReview": {
+    "state": "five-identity-semantic-detail-review-parent-verification-pending",
+    "sourceRevision": "13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb",
+    "reviewedIdentities": [
+      "language",
+      "funny-emoji",
+      "personal-vocabulary",
+      "school-mode",
+      "narration"
+    ],
+    "addedRequirementIds": [
+      "funny-emoji-REQ-05",
+      "funny-emoji-REQ-06",
+      "personal-vocabulary-REQ-05",
+      "personal-vocabulary-REQ-06",
+      "personal-vocabulary-REQ-07",
+      "personal-vocabulary-REQ-08",
+      "personal-vocabulary-REQ-09",
+      "personal-vocabulary-REQ-10",
+      "school-mode-REQ-05",
+      "school-mode-REQ-06",
+      "school-mode-REQ-07",
+      "school-mode-REQ-08",
+      "narration-REQ-05",
+      "narration-REQ-06",
+      "narration-REQ-07"
+    ],
+    "preservedRequirementCount": 412,
+    "newRequirementCount": 15,
+    "scope": "Only this five-identity planning unit was reviewed. Overall source/consumer admission, all 109 identity acceptance and product implementation remain open.",
+    "narrationScope": "The source catalogue explicitly names A+D. C remains required through the universal interface rule; A+D+C is the retained product planning scope, not an exact source catalogue quotation.",
+    "historicalBindingPolicy": "Existing canonicalRevision and reference hashes are historical and unchanged. New detail rows carry their own current source revision and opaque correspondence."
   }
 }

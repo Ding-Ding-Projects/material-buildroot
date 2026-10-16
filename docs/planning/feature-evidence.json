@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "catalogue": "docs/planning/feature-coverage.md",
-  "catalogueSha256": "7cf1e2512352546d35e6da226ab4cb5f7475545c1be1b8e1adbe77e6192e2af9",
+  "catalogueSha256": "e30334f2c0723682fb91b39595b54e13ffabbfafd4c0c82679c14d9c28e898bc",
   "baselineRevision": "9c8fe848ff7abb1c11fd3d5014fc0ebfa8c60f1a",
   "status": "admission-only-pending-detailed-reconciliation",
   "identities": [
@@ -657,7 +657,7 @@
     },
     {
       "id": "funny-emoji",
-      "requirement": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
+      "requirement": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
       "catalogueSurface": "A+D+C",
       "disposition": "applicable",
       "reason": "Independent surface delivery required by the catalogue and canonical surface contract.",
@@ -692,7 +692,7 @@
               "path": "src/renderer/features/funny-emoji",
               "operation": "A.funny-emoji.apply",
               "authority": "validated typed IPC and bounded capabilities",
-              "behavior": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
+              "behavior": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -846,7 +846,9 @@
               "funny-emoji-REQ-01",
               "funny-emoji-REQ-02",
               "funny-emoji-REQ-03",
-              "funny-emoji-REQ-04"
+              "funny-emoji-REQ-04",
+              "funny-emoji-REQ-05",
+              "funny-emoji-REQ-06"
             ]
           }
         },
@@ -879,7 +881,7 @@
               "path": "website/features/funny-emoji",
               "operation": "D.funny-emoji.apply",
               "authority": "browser-local; native capability needs explicit authenticated broker grant",
-              "behavior": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
+              "behavior": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -1033,7 +1035,9 @@
               "funny-emoji-REQ-01",
               "funny-emoji-REQ-02",
               "funny-emoji-REQ-03",
-              "funny-emoji-REQ-04"
+              "funny-emoji-REQ-04",
+              "funny-emoji-REQ-05",
+              "funny-emoji-REQ-06"
             ]
           }
         },
@@ -1066,7 +1070,7 @@
               "path": "src/companion/features/funny-emoji",
               "operation": "C.funny-emoji.apply",
               "authority": "paired scoped broker capability; revocation applies",
-              "behavior": "Independent 1\u20135 humor levels default 5, fact-preserving copy, message emoji preference",
+              "behavior": "Independent 1–5 humor levels default 5, fact-preserving copy, message emoji preference",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -1220,7 +1224,9 @@
               "funny-emoji-REQ-01",
               "funny-emoji-REQ-02",
               "funny-emoji-REQ-03",
-              "funny-emoji-REQ-04"
+              "funny-emoji-REQ-04",
+              "funny-emoji-REQ-05",
+              "funny-emoji-REQ-06"
             ]
           }
         },
@@ -1264,7 +1270,9 @@
               "funny-emoji-REQ-01",
               "funny-emoji-REQ-02",
               "funny-emoji-REQ-03",
-              "funny-emoji-REQ-04"
+              "funny-emoji-REQ-04",
+              "funny-emoji-REQ-05",
+              "funny-emoji-REQ-06"
             ]
           }
         }
@@ -1293,6 +1301,18 @@
           "text": "universal proof; rendered copy demonstrably changes at every level in both languages; facts identical at levels 1 and 5; emoji switch persistence and narrow-layout gates.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "funny-emoji-REQ-05",
+          "text": "At every humor level, preserve the exact affected file, account, action, irreversible consequence, actual error and available choices. Humor must never mock the user, data loss, money or disability.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "funny-emoji-REQ-06",
+          "text": "Keep the dialog emoji toggle localized and keyboard-accessible in each surface settings. Turning it off removes only decoration and preserves identical factual copy. Verify persistence, visible focus, accessible control text without emoji and narrow layouts in both states.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
         }
       ],
       "canonicalReview": {
@@ -1496,7 +1516,13 @@
               "personal-vocabulary-REQ-01",
               "personal-vocabulary-REQ-02",
               "personal-vocabulary-REQ-03",
-              "personal-vocabulary-REQ-04"
+              "personal-vocabulary-REQ-04",
+              "personal-vocabulary-REQ-05",
+              "personal-vocabulary-REQ-06",
+              "personal-vocabulary-REQ-07",
+              "personal-vocabulary-REQ-08",
+              "personal-vocabulary-REQ-09",
+              "personal-vocabulary-REQ-10"
             ]
           }
         },
@@ -1683,7 +1709,13 @@
               "personal-vocabulary-REQ-01",
               "personal-vocabulary-REQ-02",
               "personal-vocabulary-REQ-03",
-              "personal-vocabulary-REQ-04"
+              "personal-vocabulary-REQ-04",
+              "personal-vocabulary-REQ-05",
+              "personal-vocabulary-REQ-06",
+              "personal-vocabulary-REQ-07",
+              "personal-vocabulary-REQ-08",
+              "personal-vocabulary-REQ-09",
+              "personal-vocabulary-REQ-10"
             ]
           }
         },
@@ -1870,7 +1902,13 @@
               "personal-vocabulary-REQ-01",
               "personal-vocabulary-REQ-02",
               "personal-vocabulary-REQ-03",
-              "personal-vocabulary-REQ-04"
+              "personal-vocabulary-REQ-04",
+              "personal-vocabulary-REQ-05",
+              "personal-vocabulary-REQ-06",
+              "personal-vocabulary-REQ-07",
+              "personal-vocabulary-REQ-08",
+              "personal-vocabulary-REQ-09",
+              "personal-vocabulary-REQ-10"
             ]
           }
         },
@@ -1914,7 +1952,13 @@
               "personal-vocabulary-REQ-01",
               "personal-vocabulary-REQ-02",
               "personal-vocabulary-REQ-03",
-              "personal-vocabulary-REQ-04"
+              "personal-vocabulary-REQ-04",
+              "personal-vocabulary-REQ-05",
+              "personal-vocabulary-REQ-06",
+              "personal-vocabulary-REQ-07",
+              "personal-vocabulary-REQ-08",
+              "personal-vocabulary-REQ-09",
+              "personal-vocabulary-REQ-10"
             ]
           }
         }
@@ -1943,6 +1987,42 @@
           "text": "universal proof; the empty control without a file; every schema, version, and size bound; malformed and duplicate-key input; no partial application; cache corruption; no-network behaviour; absence from logs, exports, history, and public records; the release-grade shutdown drive with the current canonical private JSON from the owner-managed private source and no private payload in any screenshot.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "personal-vocabulary-REQ-05",
+          "text": "Use a semantic local JSON picker with keyboard and screen-reader operation and an adequate touch target. Settings search and the command palette index and focus upload, status, replace and clear/reset controls. Each owned picker or file list has its own local filter and adjacent anchored full regex builder.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "personal-vocabulary-REQ-06",
+          "text": "Reject unknown schema versions, unsafe object keys, unexpected fields and non-string replacement values before display or caching. Do not impose a fixed minimum, exact or maximum entry count; accept every valid entry within the documented byte, depth and key/value bounds.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "personal-vocabulary-REQ-07",
+          "text": "Revalidate the private cache before every load. A missing, corrupt, stale or unsupported cache renders original wording. An invalid import preserves an existing valid selection only until explicit clear; clear purges the cache and restores original wording immediately. Never ship mappings, samples, guesses or private defaults.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "personal-vocabulary-REQ-08",
+          "text": "Exclude imported wording, cached content and source metadata from clipboard, crash reports, diagnostics, analytics, synchronized settings and user-specific evidence as well as existing excluded destinations. Exports and history disclose the omission without serializing reconstructable or identifying metadata.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "personal-vocabulary-REQ-09",
+          "text": "Apply replacements only at the private user-facing text boundary, including accessible names. Preserve commands, URLs, identifiers, code, paths and factual external records verbatim. Verify replace, clear/reset, restart, all language modes, both humor extremes, restricted-mode suppression/restoration, settings and palette discovery, keyboard/screen-reader access, narrow layouts and high scales independently per surface.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "personal-vocabulary-REQ-10",
+          "text": "Release-grade verification first checks the current owner-managed JSON generator and schema inventory, then uses the real built upload control on every applicable surface to prove valid load, applied wording, persistence, replace, clear/reset, invalid-file rejection, local-only behavior and original-wording restoration. Keep the payload out of every capture and public record.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
         }
       ],
       "canonicalReview": {
@@ -2146,7 +2226,11 @@
               "school-mode-REQ-01",
               "school-mode-REQ-02",
               "school-mode-REQ-03",
-              "school-mode-REQ-04"
+              "school-mode-REQ-04",
+              "school-mode-REQ-05",
+              "school-mode-REQ-06",
+              "school-mode-REQ-07",
+              "school-mode-REQ-08"
             ]
           }
         },
@@ -2333,7 +2417,11 @@
               "school-mode-REQ-01",
               "school-mode-REQ-02",
               "school-mode-REQ-03",
-              "school-mode-REQ-04"
+              "school-mode-REQ-04",
+              "school-mode-REQ-05",
+              "school-mode-REQ-06",
+              "school-mode-REQ-07",
+              "school-mode-REQ-08"
             ]
           }
         },
@@ -2520,7 +2608,11 @@
               "school-mode-REQ-01",
               "school-mode-REQ-02",
               "school-mode-REQ-03",
-              "school-mode-REQ-04"
+              "school-mode-REQ-04",
+              "school-mode-REQ-05",
+              "school-mode-REQ-06",
+              "school-mode-REQ-07",
+              "school-mode-REQ-08"
             ]
           }
         },
@@ -2564,7 +2656,11 @@
               "school-mode-REQ-01",
               "school-mode-REQ-02",
               "school-mode-REQ-03",
-              "school-mode-REQ-04"
+              "school-mode-REQ-04",
+              "school-mode-REQ-05",
+              "school-mode-REQ-06",
+              "school-mode-REQ-07",
+              "school-mode-REQ-08"
             ]
           }
         }
@@ -2593,6 +2689,30 @@
           "text": "universal proof; live propagation across running applications; zero shipped-name occurrences after a rename; suppression and restoration of every hidden capability; an honest unreadable-record state; no credential in exports, logs, screenshots, or Git history.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "school-mode-REQ-05",
+          "text": "Provide the shared-mode control in each surface's own settings. Watch and apply mode, chosen-name and unlock-credential changes live across running applications. An unreadable record or unavailable watcher reports the actual unavailable state instead of assuming the mode is off.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "school-mode-REQ-06",
+          "text": "After rename use only the exact chosen name in labels, descriptions, search results, notifications and accessible names. Preserve prior settings while their capabilities are absent and restore them only after exit. Keep the mode control discoverable and accessible; any disabled-state explanation uses the chosen name and unlock route.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "school-mode-REQ-07",
+          "text": "Use one shared starting-rung decision so restricted mode starts the unlock ladder at arithmetic. The absent themed rung is not replaced with explanatory copy that reveals the hidden capability.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "school-mode-REQ-08",
+          "text": "Use one universal resettable locally verified PIN, password or passkey choice. Credential material never enters the personal-wording file, synchronization repository, source, exports, logs, telemetry, captures or version history. Explain the user-owned shared-record deletion reset without claiming a security boundary.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
         }
       ],
       "canonicalReview": {
@@ -2796,7 +2916,10 @@
               "narration-REQ-01",
               "narration-REQ-02",
               "narration-REQ-03",
-              "narration-REQ-04"
+              "narration-REQ-04",
+              "narration-REQ-05",
+              "narration-REQ-06",
+              "narration-REQ-07"
             ]
           }
         },
@@ -2983,7 +3106,10 @@
               "narration-REQ-01",
               "narration-REQ-02",
               "narration-REQ-03",
-              "narration-REQ-04"
+              "narration-REQ-04",
+              "narration-REQ-05",
+              "narration-REQ-06",
+              "narration-REQ-07"
             ]
           }
         },
@@ -3170,7 +3296,10 @@
               "narration-REQ-01",
               "narration-REQ-02",
               "narration-REQ-03",
-              "narration-REQ-04"
+              "narration-REQ-04",
+              "narration-REQ-05",
+              "narration-REQ-06",
+              "narration-REQ-07"
             ]
           }
         },
@@ -3214,7 +3343,10 @@
               "narration-REQ-01",
               "narration-REQ-02",
               "narration-REQ-03",
-              "narration-REQ-04"
+              "narration-REQ-04",
+              "narration-REQ-05",
+              "narration-REQ-06",
+              "narration-REQ-07"
             ]
           }
         }
@@ -3243,6 +3375,24 @@
           "text": "universal proof; no speech synthesis available; an empty first enumeration followed by a populated one; uninstalled and network-only voices; a language with no voice; rate and pitch at and beyond their bounds; persistence across restart.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
+        },
+        {
+          "id": "narration-REQ-05",
+          "text": "Both speaks English then Cantonese through one serialized queue. Replace a superseded queued line instead of accumulating it, debounce and apply per-category cooldowns without suppressing actual error facts or recovery actions. Respect reduced-sound and quiet-hours preferences where those settings exist and yield to or duck beneath an active screen reader.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "narration-REQ-06",
+          "text": "Resolve actual voices per language at runtime, subscribe and re-read when enumeration arrives late, and unsubscribe on teardown. Persist stable platform identities. Keep an unavailable selected identity while explaining the actual fallback, network-backed offline limitation or absence of any voice for the language beneath its picker. Never ship a named-voice default.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
+        },
+        {
+          "id": "narration-REQ-07",
+          "text": "Rate and pitch use documented platform bounds and default to the voice's normal delivery. Each picker participates in settings search, the command palette and local version history, with keyboard focus, accessible name and description, touch targets and narrow/high-scale layouts. Keep voice names, language tags and status facts exact while localized humor styles surrounding copy. Verify all three language modes and both humor extremes.",
+          "state": "planned",
+          "review": "independently-supported-detail-planning-parent-verification-pending"
         }
       ],
       "canonicalReview": {
@@ -9227,7 +9377,7 @@
       "subrequirements": [
         {
           "id": "appearance-editor-REQ-01",
-          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance\u2026 from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close.",
+          "text": "Every rendered element, state, and pseudo-state, tabs and groups included, exposes Edit appearance… from its context menu and a keyboard path, opening a non-modal editor anchored beside that exact element that returns focus on close.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -13785,7 +13935,7 @@
         },
         {
           "id": "tabs-REQ-03",
-          "text": "Every application ships the four tab-discovery searches, a Move\u2026 into group\u2026 picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders.",
+          "text": "Every application ships the four tab-discovery searches, a Move… into group… picker instead of inline move lists, and the Close tabs containing text and Close tabs not containing text actions with previews, pinned exclusion, and regex builders.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -15723,7 +15873,7 @@
       "subrequirements": [
         {
           "id": "context-menus-REQ-01",
-          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance\u2026 and Lock this element\u2026.",
+          "text": "Every user-facing application and GitHub Pages, and every rendered element within it, provides a target-specific right-click context menu plus accessible keyboard and touch equivalents, including Edit appearance… and Lock this element….",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -20273,7 +20423,7 @@
       "subrequirements": [
         {
           "id": "element-locks-REQ-01",
-          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element\u2026 command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP.",
+          "text": "Every rendered element, tab, tab group, and appearance value can be locked from its own Lock this element… command through a non-modal anchored wizard choosing exactly one of six credential mixes: PIN, password, PIN plus password, password plus TOTP, PIN plus TOTP, or password plus PIN plus TOTP.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -36906,7 +37056,7 @@
       "subrequirements": [
         {
           "id": "design-folder-REQ-01",
-          "text": "Every design surface, including a Astra design implementation subagent\u2019s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface.",
+          "text": "Every design surface, including a Astra design implementation subagent’s handoff and explicitly selected design-tool work, is committed to the repository's own `design/` folder and pushed in the same task that creates or changes it, because the hosted project is only a viewing surface.",
           "state": "planned",
           "review": "canonical-detail-review-pending"
         },
@@ -36935,7 +37085,7 @@
     },
     {
       "id": "layout-matrix",
-      "requirement": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
+      "requirement": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
       "catalogueSurface": "A+D+C+R",
       "disposition": "applicable",
       "reason": "Independent surface delivery required by the catalogue and canonical surface contract.",
@@ -36970,7 +37120,7 @@
               "path": "src/renderer/features/layout-matrix",
               "operation": "A.layout-matrix.apply",
               "authority": "validated typed IPC and bounded capabilities",
-              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
+              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -37157,7 +37307,7 @@
               "path": "website/features/layout-matrix",
               "operation": "D.layout-matrix.apply",
               "authority": "browser-local; native capability needs explicit authenticated broker grant",
-              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
+              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -37344,7 +37494,7 @@
               "path": "src/companion/features/layout-matrix",
               "operation": "C.layout-matrix.apply",
               "authority": "paired scoped broker capability; revocation applies",
-              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
+              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [
@@ -37531,7 +37681,7 @@
               "path": "scripts/features/layout-matrix",
               "operation": "R.layout-matrix.apply",
               "authority": "repository-owned execution; no renderer authority",
-              "behavior": "Full normal/minimum \u00d7 three languages \u00d7 two themes \u00d7 four scales, geometry receipts",
+              "behavior": "Full normal/minimum × three languages × two themes × four scales, geometry receipts",
               "requestContract": "docs/planning/operation-request.schema.json"
             },
             "articles": [

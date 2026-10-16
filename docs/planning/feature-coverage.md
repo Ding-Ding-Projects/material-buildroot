@@ -189,3 +189,12 @@ Application implementation is authorized and underway. The initial PH00 document
 ## Current catalogue delta
 
 The owner contract revision `13b4fb30ddcd1c7a4af6989a985ceae43af4f0eb` adds two independently tracked identities. The inventory now contains 109 identities and 436 explicit A/D/C/R records. The 398 existing requirement IDs are retained and 14 reviewed child requirements are added, giving 412. All new records are planned or explicitly inapplicable to this public product; no implementation or runtime acceptance is implied. See [the bounded reconciliation](catalogue-delta-2026-10-16.md).
+
+
+## Group A semantic-detail planning unit
+
+A bounded review of `language`, `funny-emoji`, `personal-vocabulary`, `school-mode` and `narration` adds 15 independently supported detail clauses to the existing planned inventory. The current totals are **109 identities, 436 surface records and 427 requirements**; all earlier 412 IDs and texts remain unchanged. Several additions formalize detail already present in reconciliation notes rather than announcing newly discovered obligations. All added clauses remain planned and all product acceptance remains open.
+
+Narration has an explicit A+D source-catalogue scope. The retained required C record derives from the universal user-facing interface rule, not an exact catalogue claim. Reduced-sound and quiet-hours behavior applies where those settings exist. Shared browser state still needs explicit per-capability adaptation and actual evidence. No native credential-store proof is inferred.
+
+The new detail rows carry current source revision and opaque correspondence separately; existing identity-level revision and hashes retain their historical meaning. This unit does not finish PH01-T01-C02 or review every identity. See [bounded evidence](../evidence/tasks/PH01-canonical-group-a.md).
