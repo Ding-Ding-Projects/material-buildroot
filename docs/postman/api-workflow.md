@@ -23,7 +23,7 @@ Neither collection stores certificates, cookies, usable challenges or session cr
 | `POST /actions` | `{action,args,sequence,nonce}`; session scopes plus consumer authorization |
 | `POST /disconnect` | `{}`; current cookie, exact origin and CSRF header |
 
-The six typed actions are `workspace.read`, `projects.list`, `jobs.list`, `jobs.get`, `jobs.cancel` and `builds.submit`. Their exact arguments and scopes are in the [protocol article](../security/companion.md#enrollment-and-http-contract). The desktop defaults to read scopes. A mutation request appearing in a collection does not enable its scope or implement its consumer.
+The six baseline typed actions in the existing collection snapshot are `workspace.read`, `projects.list`, `jobs.list`, `jobs.get`, `jobs.cancel` and `builds.submit`. Their original arguments and scopes are in the [protocol article](../security/companion.md#enrollment-and-http-contract). This snapshot does not claim complete coverage of newer host-admitted `actionContracts` or later pairing headers and request fields. Collection regeneration must use the exact integrated host contract before claiming current API completeness. The desktop defaults to read scopes. A mutation request appearing in a collection does not enable its scope or implement its consumer.
 
 ## Recover an uncertain reply
 

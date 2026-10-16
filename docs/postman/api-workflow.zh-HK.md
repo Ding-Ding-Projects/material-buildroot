@@ -23,7 +23,7 @@
 | `POST /actions` | `{action,args,sequence,nonce}`，工作階段範圍加實際處理端授權 |
 | `POST /disconnect` | `{}`，目前 cookie、精確來源及 CSRF 標頭 |
 
-六個有型別動作係 `workspace.read`、`projects.list`、`jobs.list`、`jobs.get`、`jobs.cancel` 同 `builds.submit`，精確參數同範圍見[協定](../security/companion.md#enrollment-and-http-contract)。桌面預設唯讀範圍；集合有修改請求唔等於已啟用範圍或者已實作處理端。
+現有集合快照六個基礎有型別動作係 `workspace.read`、`projects.list`、`jobs.list`、`jobs.get`、`jobs.cancel` 同 `builds.submit`，原有參數同範圍見[協定](../security/companion.md#enrollment-and-http-contract)。此快照唔宣稱完整涵蓋新主機 `actionContracts`，亦唔代替後來配對欄位及標頭；要根據確切已整合協定重新產生先可以宣稱目前 API 完整。桌面預設唯讀範圍；集合有修改請求唔等於已啟用範圍或者已實作處理端。
 
 ## 回覆不確定時
 

@@ -1,5 +1,7 @@
 # Remote Buildroot runtimes
 
+[香港粵語](remote-runtimes.zh-HK.md)
+
 The runtime workspace exposes target enrollment, source transfer, build dispatch, retained job observation, cancellation requests and checksum-verified output download. It implements the four target shapes approved in decision P41:
 
 | Target kind | SSH host | Execution |

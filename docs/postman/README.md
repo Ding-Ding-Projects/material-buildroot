@@ -2,7 +2,7 @@
 
 - [Pair, inspect, act and disconnect safely](api-workflow.md) · [香港粵語](api-workflow.zh-HK.md)
 
-The [master Postman collection](material-buildroot.postman_collection.json) covers every HTTP API the product exposes. The opt-in HTTPS companion is currently the only one; its category collection and usage are documented in [the companion article](../security/companion.md#postman-collections).
+The [master Postman collection](material-buildroot.postman_collection.json) and its category file are a snapshot of the original four HTTPS companion routes and six baseline actions. New host-admitted `actionContracts`, pairing fields and client-binding headers require regeneration from the exact integrated contract before current completeness can be claimed. The opt-in HTTPS companion is the product HTTP surface; its category collection and original usage are documented in [the companion article](../security/companion.md#postman-collections).
 
 Desktop IPC boundaries are not HTTP and have no collection. They are listed in the [security index](../security/README.md).
 
