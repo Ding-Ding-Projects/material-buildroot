@@ -1,5 +1,9 @@
 # Active implementation and verification handoff, 2026-10-16
 
+## Latest bounded evidence update
+
+The native settled dialog after-proof is retained for source `e722cf1b91ccc46465eb449df4abd84d9d6df2a1`. Its exact inventory and sanitized receipt are under `docs/evidence/native-windows-20261016/`; the README displays the byte-identical PNG. All three bilingual actions fit at 1280×752 logical pixels and observed scale 1.5 in light theme. Normal close and fresh absence of all four owned processes are established. The transitional capture is excluded. This replaces only the second dialog repair's pending native-after statement below. Complete matrix, installation/update, public delivery and overall acceptance remain incomplete. Parent review, scans and integration still own the next step; this evidence promotion does not claim a new commit, push or release.
+
 Continue the complete PH00–PH10 implementation and actual Windows acceptance. The objective is active and incomplete. Product work stays on main only. Preserve existing source, installations, settings and genuine evidence; do not force-push or activate unverified work merely to create a backup.
 
 Latest owner steering: synchronize the shared instructions, then perform a deep audit of every applicable required feature across all four product surfaces. The fresh instruction check confirmed all 85 targets current, with zero drift or missing targets. Planned inventory is not delivery proof. The expanded audit must bind actual consumers, working actions, persistence and evidence, and distinguish partial behavior from missing implementation and missing proof.

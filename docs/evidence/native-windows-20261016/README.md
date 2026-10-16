@@ -2,6 +2,23 @@
 
 The owner resumed the complete PH00–PH10 roadmap and requested actual Windows tests. This replaces the earlier runtime-test deferral. The complete product remains unfinished.
 
+## Settled dialog actions at e722cf1
+
+The exact root desktop build at `e722cf1b91ccc46465eb449df4abd84d9d6df2a1` was captured after the dialog's animations stopped. The bilingual, light-theme unsaved-preference dialog contains all three actions; the final action wraps onto a second row. Its action area has equal 560 px client and scroll widths. All three button rectangles remain inside the dialog's x=360..920 and y=180..572 bounds. This is a narrow layout result, not a full accessibility or feature verdict.
+
+![Native Windows unsaved preference drafts dialog with all three bilingual actions contained at 1280 by 752 and 150 percent scale](dialog-actions-e722cf1.png)
+
+- Logical viewport: 1280×752; observed device-pixel ratio: 1.5, without scale emulation.
+- Raw and promoted PNG: 1920×1128, SHA-256 `cf450358cc4ad6eb1c79cdbd192836ff1b77649ac25c6f4fcbe1c6dc26ee77ad`; copied without modifying the image bytes.
+- Executable SHA-256: `47ed433b93e9c924ba510207f670a455c54ec28a5c8c59b5883a8090f5f77c6b`.
+- Root build receipt SHA-256: `00d8933d9f763899ccde2023e9c34f4f4da5c77b0bdaf8db28d29fc2665a9273`; produced at `2026-10-16T09:49:49.246Z`.
+- Capture interval: `2026-10-16T10:04:39.063Z` to `2026-10-16T10:04:39.245Z`, UTC, from the producer's recorded clock.
+- Runtime observation: zero console errors, unhandled exceptions and page errors during `2026-10-16T10:04:39.053Z` to `2026-10-16T10:04:39.250Z` only. Startup history was not observed.
+- The owned native window, process ancestry and exact single renderer target were verified before capture. The visible desktop was untouched. The raw and promoted pixels were inspected for the intended state and sensitive content.
+- Normal close used background native Enter on the focused admitted discard action. A fresh independent query found all four recorded processes absent; the named hidden desktop was absent with native result code 2. Private process and profile details remain outside the published receipt.
+
+The [exact inventory](current-inventory.json) and [sanitized receipt](dialog-actions-e722cf1.receipt.json) record this state. The earlier transitional capture is deliberately excluded. Complete language, theme, viewport and scale coverage, installation, updates and full product acceptance remain unverified. Earlier evidence below retains its original source bindings.
+
 ## Exact baseline
 
 - Source: `1b7ea15359ac2870a9f8bc02889770db4cb48d08`.
