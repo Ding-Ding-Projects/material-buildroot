@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const expectedRequirements = require('./expected-subrequirements.json');
+const {validateSurfaceProof} = require('./validate-surface-proof.cjs');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const sha = /^[a-f0-9]{40}$/;
 const digest = /^[a-f0-9]{64}$/;
@@ -116,6 +117,7 @@ function validate(ledger, { root = path.resolve(__dirname, '../..') } = {}) {
         }
       }
       if (entry.state !== 'complete') continue;
+      errors.push(...validateSurfaceProof(entry, {root, label, surface}));
       if (!required) fail(`${label}: out-of-scope record cannot claim completion`);
       if (record.reconciliation !== 'reviewed') fail(`${label}: canonical reconciliation not reviewed`);
       if (!sha.test(entry.sourceRevision || '') || !digest.test(entry.builtHash || '')) fail(`${label}: missing source/build binding`);
