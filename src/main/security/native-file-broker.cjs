@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { inspectCanonicalPath } = require("./file-grants.cjs");
 const capabilities = new WeakSet();
-const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder", "merge", "rotate", "metadata"]) });
+const supported = Object.freeze({ imagemagick: Object.freeze(["png", "jpg", "webp"]), ffmpeg: Object.freeze(["wav", "mp3", "flac", "mp4", "webm"]), qpdf: Object.freeze(["extract", "reorder", "merge", "rotate", "metadata"]), zipstore: Object.freeze(["zip"]) });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function hash(bytes) { return crypto.createHash("sha256").update(bytes).digest("hex"); }
 function relative(value) {
@@ -64,14 +64,16 @@ function execute(file, args, signal) {
         const admission = receipt.admission;
         const pdf = operation.startsWith("qpdf-");
         const merge = operation === "qpdf-merge", rotate = operation === "qpdf-rotate", metadata = operation === "qpdf-metadata";
+        const zip = operation === "zipstore-zip";
         const selection = pdf && !merge && !metadata ? args[7].split(",").map(Number) : [];
-        const validation = rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip";
+        const validation = zip ? "zip-stored-member-crc-and-source-hash" : rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip";
         if (receipt.protocol !== 1 || receipt.state !== "completed" || receipt.operation !== operation || receipt.mechanism !== "appcontainer-handle-job" ||
             !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes < 1 || receipt.outputBytes > 128 * 1024 * 1024 ||
             !/^[a-f0-9]{64}$/.test(receipt.sourceSha256 || "") || !/^[a-f0-9]{64}$/.test(receipt.outputSha256 || "") ||
             receipt.validation !== validation || receipt.publication !== "atomic-no-replace" ||
             !admission || admission.appContainer !== true || admission.lpac !== true || admission.capabilityCount !== 0 || admission.jobAssigned !== true || admission.handleList !== true ||
-            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (merge || rotate || metadata ? 15 : pdf ? 13 : 10)) fail("INVALID_BROKER_RECEIPT");
+            Object.keys(admission).length !== 5 || Object.keys(receipt).length !== (merge || rotate || metadata ? 15 : pdf ? 13 : zip ? 12 : 10)) fail("INVALID_BROKER_RECEIPT");
+        if (zip && (receipt.memberCount !== 1 || receipt.memberName !== "input.bin" || receipt.outputBytes > 64 * 1024 * 1024 + 116)) fail("INVALID_BROKER_RECEIPT");
         if (pdf && (!Number.isSafeInteger(receipt.inputPages) || receipt.inputPages < 1 || receipt.inputPages > 10000 ||
             receipt.expectedPages !== (merge || rotate || metadata ? receipt.inputPages : selection.length) || receipt.outputPages !== receipt.expectedPages || selection.some(page => page > receipt.inputPages))) fail("INVALID_BROKER_RECEIPT");
         if (merge) {
@@ -89,6 +91,12 @@ function execute(file, args, signal) {
 /** Host-owned adapter manifests and native grant resolver only. Not an IPC API. */
 function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNativeGrant }) {
   if (typeof resolveNativeGrant !== "function") fail("FILE_GRANT_REQUIRED");
+  // The small ZIP worker is part of the exact hash-verified broker executable.
+  // It still runs as a separately admitted AppContainer child, never in the host.
+  const payload = adapterId => adapterId === "zipstore" ? {
+    root: path.dirname(brokerPath), executable: path.basename(brokerPath),
+    files: [{ path: path.basename(brokerPath), sha256: brokerSha256 }],
+  } : payloads?.[adapterId];
   const service = Object.freeze({
     // These are implemented operations, not a claim of runtime acceptance.
     formats: supported,
@@ -96,7 +104,7 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
       try {
         if (process.platform !== "win32" || !supported[adapterId]) fail("BROKER_FORMAT_UNAVAILABLE");
         await verified(brokerPath, brokerSha256, 16 * 1024 * 1024);
-        const manifest = payloads?.[adapterId];
+        const manifest = payload(adapterId);
         if (!manifest || !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 4096 || typeof manifest.root !== "string") fail("MISSING_VERIFIED_PAYLOAD");
         const executable = relative(manifest.executable);
         if (executable.includes("/")) fail("INVALID_BROKER_PAYLOAD");
@@ -131,7 +139,7 @@ function createNativeFileBroker({ brokerPath, brokerSha256, payloads, resolveNat
       const output = await resolveNativeGrant(destinationId, "write");
       if (source.kind !== "file" || source.newOutput || !/^[0-9]+:[0-9]+$/.test(source.identity || "") || output.kind !== "file" || !output.newOutput || !/^[0-9]+:[0-9]+$/.test(output.identity || "") || source.path === output.path) fail("NATIVE_FILE_GRANT_REQUIRED");
       if (sources.some(item => item.kind !== "file" || item.newOutput || !/^[0-9]+:[0-9]+$/.test(item.identity || "") || item.path === output.path)) fail("NATIVE_FILE_GRANT_REQUIRED");
-      const manifest = payloads?.[adapterId];
+      const manifest = payload(adapterId);
       if (!manifest || !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 4096 || typeof manifest.root !== "string") fail("MISSING_VERIFIED_PAYLOAD");
       const executable = relative(manifest.executable);
       // Native broker currently admits one executable directly inside the staged root.

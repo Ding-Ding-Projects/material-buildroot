@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <memory>
 #include "qpdf-json.hpp"
+#include "zip-store.hpp"
 
 // Host-only protocol. No renderer command line is accepted by this executable.
 // argv: operation, input, new output, private payload root, executable basename, input identity, output-parent identity.
@@ -155,6 +156,7 @@ std::wstring arguments(const std::wstring& operation) {
   if (operation == L"ffmpeg-mp4") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -movflags +frag_keyframe+empty_moov+default_base_moof -f mp4 pipe:1";
   if (operation == L"ffmpeg-webm") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 -row-mt 0 -c:a libopus -f webm pipe:1";
   if (operation == L"qpdf-extract" || operation == L"qpdf-reorder" || operation == L"qpdf-merge" || operation == L"qpdf-rotate" || operation == L"qpdf-metadata") return L"";
+  if (operation == L"zipstore-zip") return L" --zip-worker";
   stop();
 }
 }
@@ -201,6 +203,7 @@ void signature(HANDLE handle, const std::wstring& operation) {
     const BYTE magic[] = {0x1a,0x45,0xdf,0xa3}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0;
   }
   else if (operation.rfind(L"qpdf-", 0) == 0) matches = std::memcmp(bytes, "%PDF-", 5) == 0;
+  else if (operation == L"zipstore-zip") { const BYTE magic[] = {0x50,0x4b,0x03,0x04}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0; }
   require(matches); rewindFile(handle);
 }
 std::wstring validationArguments(const std::wstring& operation) {
@@ -361,14 +364,31 @@ std::string fileIdentity(HANDLE handle) {
   const ULONGLONG index = (ULONGLONG(identity.nFileIndexHigh) << 32) | identity.nFileIndexLow;
   return std::to_string(identity.dwVolumeSerialNumber) + ":" + std::to_string(index);
 }
+void isolatedWorkerAdmission() {
+  HANDLE raw = nullptr; require(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &raw) != 0); Handle token(raw);
+  DWORD value = 0, size = 0;
+  require(GetTokenInformation(token.value, TokenIsAppContainer, &value, sizeof(value), &size) && value != 0);
+  value = 0; require(GetTokenInformation(token.value, TokenIsLessPrivilegedAppContainer, &value, sizeof(value), &size) && value != 0);
+  size = 0; GetTokenInformation(token.value, TokenCapabilities, nullptr, 0, &size); require(size >= sizeof(DWORD) && size < 65536);
+  std::vector<BYTE> groups(size); require(GetTokenInformation(token.value, TokenCapabilities, groups.data(), size, &size) != 0);
+  require(reinterpret_cast<TOKEN_GROUPS*>(groups.data())->GroupCount == 0);
+  BOOL inJob = FALSE; require(IsProcessInJob(GetCurrentProcess(), nullptr, &inJob) && inJob);
+}
 }
 int wmain(int argc, wchar_t** argv) {
   std::wstring temporaryName;
   bool published = false;
   try {
+    if (argc == 2 && std::wstring(argv[1]) == L"--zip-worker") {
+      isolatedWorkerAdmission(); zip_store::create(GetStdHandle(STD_INPUT_HANDLE), GetStdHandle(STD_OUTPUT_HANDLE)); return 0;
+    }
+    if (argc == 3 && std::wstring(argv[1]) == L"--zip-validate") {
+      isolatedWorkerAdmission(); zip_store::validate(GetStdHandle(STD_INPUT_HANDLE), ascii(argv[2])); return 0;
+    }
     require(argc >= 8 && argc <= 23);
     std::wstring operation(argv[1]); const auto args = arguments(operation);
     const bool pdf = operation.rfind(L"qpdf-", 0) == 0;
+    const bool zip = operation == L"zipstore-zip";
     const bool merge = operation == L"qpdf-merge", rotate = operation == L"qpdf-rotate", metadata = operation == L"qpdf-metadata";
     require(pdf ? (merge ? argc >= 9 && (argc - 9) % 2 == 0 : rotate ? argc == 10 : argc == 9) : argc == 8);
     if (merge) require(std::wstring(argv[8]) == L"merge");
@@ -522,7 +542,7 @@ int wmain(int argc, wchar_t** argv) {
     }
     require(GetFileSizeEx(destination.value, &size) && size.QuadPart > 0 && size.QuadPart <= 128ll * 1024 * 1024);
     require(FlushFileBuffers(destination.value) != 0); signature(destination.value, operation);
-    if (!pdf) decoder(executable, validationArguments(operation), root, profile.sid, job.value, destination.value, errors.value, destination.value, errors.value, deadline);
+    if (!pdf) decoder(executable, zip ? L" --zip-validate " + std::wstring(inputDigest.begin(), inputDigest.end()) : validationArguments(operation), root, profile.sid, job.value, destination.value, errors.value, destination.value, errors.value, deadline);
     const std::string outputDigest = sha256(destination.value);
     DWORD available = 0;
     require(PeekNamedPipe(GetStdHandle(STD_INPUT_HANDLE), nullptr, 0, nullptr, &available, nullptr) && !available && GetTickCount64() < deadline);
@@ -540,9 +560,10 @@ int wmain(int argc, wchar_t** argv) {
     }
     if (rotate) pdfFields += ",\"degrees\":" + std::to_string(degrees) + ",\"rotationVerified\":" + (rotationVerified ? "true" : "false");
     if (metadata) pdfFields += ",\"metadataMode\":\"remove\",\"metadataAbsent\":" + std::string(metadataVerified ? "true" : "false");
+    if (zip) pdfFields += ",\"memberCount\":1,\"memberName\":\"input.bin\"";
     std::printf("{\"protocol\":1,\"state\":\"completed\",\"operation\":\"%s\",\"mechanism\":\"appcontainer-handle-job\",\"sourceSha256\":\"%s\",\"outputBytes\":%llu,\"outputSha256\":\"%s\",\"validation\":\"%s\",\"admission\":{\"appContainer\":true,\"lpac\":true,\"capabilityCount\":0,\"jobAssigned\":true,\"handleList\":true},\"publication\":\"atomic-no-replace\"%s}\n",
       operationText.c_str(), inputDigest.c_str(), static_cast<unsigned long long>(size.QuadPart), outputDigest.c_str(),
-      rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
+      zip ? "zip-stored-member-crc-and-source-hash" : rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
     return 0;
   } catch (...) {
     // Preserve the exact partial output under its explicit incomplete name. Never
