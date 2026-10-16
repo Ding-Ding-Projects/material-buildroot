@@ -110,6 +110,10 @@ function createBuildScheduler({ jobs, ownerId, resolveAdmission, observeResource
   }
   return {
     pump,
+    setLimits(next) {
+      if (!next || Object.keys(next).length !== 4 || !["maxConcurrent", "cpuSlots", "memoryBytes"].every(key => safeInteger(next[key], 1)) || !safeInteger(next.storageBytes)) fail("INVALID_SCHEDULER_LIMITS");
+      limits = { ...next };
+    },
     acquireMutationLease,
     status() { return { closed, running: [...running].map(([jobId, item]) => ({ jobId, projectId: item.admission.projectId, cpuSlots: item.admission.cpuSlots, memoryBytes: item.admission.memoryBytes, storageBytes: item.admission.storageBytes })), blocked: [...blocked].map(([jobId, reason]) => ({ jobId, reason })), reservations: usage() }; },
     async awaitIdle() { for (;;) { await pumping; const active = [...running.values()].map(item => item.promise); if (!active.length && !pumping) return; await Promise.allSettled(active); } },

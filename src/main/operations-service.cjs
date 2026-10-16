@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID, createHash } = require("node:crypto");
+const { createBudgetStore } = require("./jobs/budgets.cjs");
 const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
@@ -62,6 +63,10 @@ const fields = {
   "build.confirmation.cancel": ["id"],
   "jobs.list": [],
   "scheduler.status": [],
+  "scheduler.configure": ["limits"],
+  "jobs.project": ["workspaceId"],
+  "jobs.projectPage": ["workspaceId", "id", "after", "limit"],
+  "jobs.projectCancel": ["workspaceId", "id", "sequence"],
   "jobs.pump": [],
   "jobs.reconcile": ["id"],
   "jobs.page": ["id", "after", "limit"],
@@ -437,6 +442,8 @@ function createOperationsService({
       .list()
       .filter((record) => !activeRecovery.has(record.jobId));
   }
+  const budgetStore = createBudgetStore(path.join(directory, "scheduler-budgets.json"), schedulerLimits);
+  schedulerLimits = budgetStore.read();
   const scheduler = createBuildScheduler({
     jobs: {
       list: (who) => jobs.list(who),
@@ -1355,6 +1362,29 @@ function createOperationsService({
         });
         void scheduler.pump().catch(() => {});
         return job;
+      }
+      case "scheduler.configure": {
+        schedulerLimits = budgetStore.write(request.limits);
+        scheduler.setLimits(schedulerLimits);
+        void scheduler.pump().catch(() => {});
+        return schedulerStatus();
+      }
+      case "jobs.project":
+        project(request.workspaceId);
+        return jobs.list(owner).filter(job => job.payload.workspaceId === request.workspaceId);
+      case "jobs.projectPage": {
+        project(request.workspaceId);
+        const job = ownJob(request.id);
+        if (job.payload.workspaceId !== request.workspaceId) reject("UNAUTHORIZED");
+        return jobs.page(request.id, "log", { after: request.after, limit: request.limit }, owner);
+      }
+      case "jobs.projectCancel": {
+        project(request.workspaceId);
+        const job = ownJob(request.id);
+        if (job.payload.workspaceId !== request.workspaceId) reject("UNAUTHORIZED");
+        const result = jobs.cancel(request.id, owner, request.sequence);
+        void scheduler.pump().catch(() => {});
+        return result;
       }
       case "scheduler.status":
         return schedulerStatus();
