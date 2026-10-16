@@ -1,5 +1,7 @@
 # Private cloud destinations
 
+[香港粵語](cloud-destinations.zh-HK.md)
+
 PH07-T09 adds an output-inspector workflow for S3-compatible storage, Azure Blob Storage, Google Cloud Storage and existing GitHub Releases. The implementation is source-only at this checkpoint. Builds, tests, reviews, runtime transfers and visual verification have not run for this change.
 
 ## Workflow
