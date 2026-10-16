@@ -18,6 +18,7 @@ import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
 import "./personal-vocabulary-drop";
 import "./settings-search";
+import "./guided-forms";
 import "./regex-workbench";
 import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
 import {materialIcon, actionIcon} from "./material-icons";
@@ -1520,7 +1521,7 @@ class MaterialBuildroot extends LitElement {
         <p>
           ${this.l("Bilingual is the default. A successful save persists across application restarts.","預設使用雙語。成功儲存後，重新啟動都會保留。",true)}
         </p>
-        ${this.confirmedPreference()}<md-outlined-select
+        ${this.confirmedPreference()}<guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Interface language","介面語言",true),purpose:this.l("Choose English, Cantonese or both, then save explicitly. Discard choice restores the confirmed value. Scheduled overrides can temporarily change the effective language without overwriting the saved base.","選擇英文、粵語或雙語，再明確儲存。放棄選擇會還原已確認值。排程覆寫可暫時改變有效語言，但唔會覆蓋已儲存基礎值。",true),steps:[this.l("Try a sample language below. This practice does not change the interface.","喺下面試用語言範例，練習唔會改變介面。",true),this.l("Choose in the real selector, save, and read the confirmed result. If saving is unavailable, reconnect or reload before retrying.","喺真實選單選擇並儲存，再閱讀已確認結果。如無法儲存，請重新連接或載入再試。",true)],example:"bilingual",options:["en","zh-HK","bilingual"],expected:this.l("The example selection changes only; actual language requires Save language.","只會改變範例選項，真實語言須使用儲存語言。",true)}}></guided-forms><md-outlined-select
           id="language-select" data-experience-id="settings:language"
           .label=${this.l("Interface language","介面語言",true)}
           .value=${this.draft}
@@ -1565,6 +1566,8 @@ class MaterialBuildroot extends LitElement {
       </section>`:nothing}
       <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
         <h2>${this.owned("Appearance", "外觀")}</h2>
+        <p class="muted">${this.workspaceMode==="durable"?this.l("Source: current local workspace document. Per-field written-versus-default origin is not recorded. Compiled initial value: follow system.","來源：目前本機工作區文件。未記錄逐欄位寫入或預設來源。內置初始值：跟隨系統。",true):this.workspaceMode==="session"?this.l("Source: session preference; initial fallback follows system and is not a confirmed saved value.","來源：工作階段偏好；初始後備值跟隨系統，唔係已確認儲存值。",true):this.l("Saved preference provenance is unavailable while loading or disconnected.","載入中或連線中斷時，無法確認已儲存偏好來源。",true)} ${this.l("Current base value:","目前基礎值：",true)} ${this.theme}</p>
+        <guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Theme","主題",true),purpose:this.l("System follows the operating-system appearance; light and dark choose a fixed palette. This selector saves immediately when local workspace storage is available. A schedule may temporarily override the base palette.","跟隨系統會使用作業系統外觀，淺色同深色使用固定配色。本機工作區儲存可用時，此選單會即時儲存。排程可能暫時覆寫基礎配色。",true),steps:[this.l("Try a sample palette choice here; this isolated selection does not restyle or save the application.","喺呢度試用配色選項，獨立選擇唔會改變或儲存程式外觀。",true),this.l("Use the real selector below and wait for the save outcome. Choose the previous value to reverse the preference.","使用下方真實選單並等候儲存結果，選擇之前嘅值可還原偏好。",true)],example:"system",options:["system","light","dark"],expected:this.l("The practice choice is retained only while this guide is open.","練習選項只會喺此說明開啟期間保留。",true)}}></guided-forms>
         <md-outlined-select
           .label=${this.workspaceMode === "durable"
             ? this.l("Theme","主題",true)
