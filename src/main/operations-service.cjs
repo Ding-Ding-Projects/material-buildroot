@@ -35,6 +35,7 @@ const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
 const { createSourceOperations } = require("./source-operations.cjs");
 const { WslSourceService } = require("./execution/wsl-source.cjs");
+const { createBuildProvenance } = require("./deployment/build-provenance.cjs");
 const {
   createPackageAuthoringService,
 } = require("./configuration/package-authoring.cjs");
@@ -95,6 +96,8 @@ const fields = {
   "outputs.inspect": ["workspaceId", "fileId"],
   "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "artifacts.manifest": ["workspaceId", "paths"],
+  "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
+  "artifacts.compliance": ["workspaceId"],
   tools: ["request"],
   "payload.list": [],
   "payload.choose": ["toolId"],
@@ -383,6 +386,11 @@ function createOperationsService({
       signal?.removeEventListener("abort", cancel);
     }
   }
+  const provenance = createBuildProvenance({
+    directory: path.join(directory, "reproducibility"),
+    getJob: id => jobs.get(id, owner),
+    listJobs: () => jobs.list(owner),
+  });
   const jobs = createJobManager({
     directory: path.join(directory, "jobs"),
     adapters: {
@@ -404,6 +412,7 @@ function createOperationsService({
           });
           throw error;
         }
+        const buildLineage = provenance.begin(project(payload.workspaceId), payload);
         quarantine.begin({
           jobId: context.jobId,
           workspaceId: payload.workspaceId,
@@ -456,7 +465,14 @@ function createOperationsService({
         context.item({ state: result.state, code: result.code });
         if (result.state !== "succeeded")
           reject("BUILD_" + result.state.toUpperCase().replaceAll("-", "_"));
-        return { state: result.state, code: result.code };
+        let reproducibility;
+        try {
+          reproducibility = await provenance.complete({ item: project(payload.workspaceId), payload, jobId: context.jobId, signal: context.signal, lineage: buildLineage });
+        } catch (error) {
+          reproducibility = { state: "unbound", reason: typeof error.code === "string" && /^(?:PROVENANCE|BLOCKED)_[A-Z_]+$/.test(error.code) ? error.code : "PROVENANCE_UNAVAILABLE" };
+        }
+        context.item({ kind: "reproducibility", ...reproducibility });
+        return { state: result.state, code: result.code, reproducibility };
       },
     },
   });
@@ -1594,10 +1610,22 @@ function createOperationsService({
         return outputViewer(request.workspaceId).checksum(request.fileId, request.expected);
       case "artifacts.inspect":
         return deployment(request.workspaceId).inspectArtifact(request.path);
-      case "artifacts.manifest":
-        return deployment(request.workspaceId).createManifest({
+      case "artifacts.manifest": {
+        const item = project(request.workspaceId);
+        const hasConfiguration = fs.existsSync(path.join(item.output, ".config"));
+        const before = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        const manifest = await deployment(request.workspaceId).createManifest({
           paths: request.paths,
+          locks: { sourceRevision: before.sourceRevision, ...(hasConfiguration ? { configurationSha256: before.configRevision } : {}) },
         });
+        const after = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        if (hasConfiguration !== fs.existsSync(path.join(item.output, ".config")) || before.sourceRevision !== after.sourceRevision || before.configRevision !== after.configRevision) reject("REPRODUCIBILITY_INPUTS_CHANGED");
+        return { ...manifest, provenance: { ...provenance.bind(manifest, item, request.workspaceId), limitations: before.snapshot.limitations } };
+      }
+      case "artifacts.compare":
+        return deployment(request.workspaceId).compareManifestFiles(request.beforePath, request.afterPath, manifest => provenance.bind(manifest, project(request.workspaceId), request.workspaceId, manifest.provenance?.buildTimeBinding ? manifest.provenance : null));
+      case "artifacts.compliance":
+        return deployment(request.workspaceId).collectCompliance();
       case "guest.discover":
         return deployment(request.workspaceId).discoverHypervisors();
       case "guest.networks":
