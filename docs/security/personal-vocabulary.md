@@ -1,5 +1,7 @@
 # Local personal vocabulary boundary
 
+[香港粵語](personal-vocabulary.zh-HK.md)
+
 The reusable loader contains no built-in mappings. Original shipped wording remains unchanged until the user explicitly imports a valid local file or a valid private cache is reloaded. The portable service contract and current desktop integration are described separately below. Website and companion upload consumers remain separate acceptance work.
 
 ## Portable input contract
