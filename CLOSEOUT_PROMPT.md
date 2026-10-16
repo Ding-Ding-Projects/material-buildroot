@@ -1,5 +1,9 @@
 # Active implementation and verification handoff, 2026-10-16
 
+## Current source repair and publication state
+
+Main `7a6b2b5ee5d23f9029d3128d9961cb8aef52cf79` is published. Normal release `v0.1.0-build.49.1` and both workflows succeeded; five published asset sizes/digests and the source tag match, with three small metadata files independently downloaded. Installation/update remains unverified. The live home and exact promoted PNG returned HTTP 200, the PNG hash matched and About homepage readback matched. Full generated-article completeness remains open. The newer browser response/link repair has eight focused source checks and bounded independent review; actual fresh built-browser proof and deployment are pending. Shared instruction main `70d25ec9db4c5c7e154c59de67a91dd8118b9628` and all 85 synchronized targets are current. Its catalogue summary now matches the dedicated public-reference rule; the historical full sweep remains non-green.
+
 ## Latest bounded evidence update
 
 The native settled dialog after-proof is retained for source `e722cf1b91ccc46465eb449df4abd84d9d6df2a1`. Its exact inventory and sanitized receipt are under `docs/evidence/native-windows-20261016/`; the README displays the byte-identical PNG. All three bilingual actions fit at 1280×752 logical pixels and observed scale 1.5 in light theme. Normal close and fresh absence of all four owned processes are established. The transitional capture is excluded. This replaces only the second dialog repair's pending native-after statement below. Complete matrix, installation/update, public delivery and overall acceptance remain incomplete. Parent review, scans and integration still own the next step; this evidence promotion does not claim a new commit, push or release.

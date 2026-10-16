@@ -119,7 +119,7 @@ if (learning) {
     setBilingual(learning.querySelector('#workflow-stage-title'),current.title);
     setBilingual(learning.querySelector('#workflow-stage-body'),current.body);
     setBilingual(learning.querySelector('#workflow-stage-next'),current.next);
-    const reference=learning.querySelector('#workflow-reference');reference.href=`/material-buildroot/site/articles/${current.url}`;reference.textContent=copy('Open the supporting contract','開啟相關規格');
+    const reference=learning.querySelector('#workflow-reference');reference.href=`/material-buildroot/site/articles/${current.url.replace(/\.md$/,'.html')}`;reference.textContent=copy('Open the supporting contract','開啟相關規格');
     const id=`workflow:${state.workflowFamily}:${state.workflowStage}`,done=state.complete.includes(id),button=learning.querySelector('#workflow-complete');
     button.disabled=false;setBilingual(button,done?['Guide step saved as complete','已記錄此指南步驟完成']:['Mark this guide step complete','標記此指南步驟已完成']);button.setAttribute('aria-pressed',String(done));
     setBilingual(learning.querySelector('#workflow-status'),done?['Progress is stored in this browser only.','進度只儲存喺此瀏覽器。']:['This is a visitor learning example. No desktop action was run.','呢個係訪客學習示例，並無執行任何桌面操作。']);
@@ -591,53 +591,68 @@ if (visitor) {
       if(!response.ok){companionMessage.textContent=companionError(payload.code);renderCompanionData(action,null,payload.code);return;}
       if(payload.operation?.action!==action||!['succeeded','failed','unknown'].includes(payload.operation?.state)||!Object.hasOwn(payload,'result'))throw new Error('response-invalid');
       if(payload.operation.state!=='succeeded'){companionMessage.textContent=companionError('ACTION_FAILED');renderCompanionData(action,null,'ACTION_FAILED');return;}
-      renderCompanionData(action,payload.result,'');
-      companionMessage.textContent=copy('The desktop returned a read-only result.','桌面已回覆唯讀資料。');
+      const displayed=renderCompanionData(action,payload.result,'');
+      companionMessage.textContent=displayed
+        ? copy('The desktop returned a read-only result.','桌面已回覆唯讀資料。')
+        : copy('The host response did not match this read-only view. No raw data was displayed.','主機回覆格式與唯讀檢視不符，未顯示原始資料。');
     } catch {
       companion.sequenceUnknown=true;
+      renderCompanionData(action,null,'INVALID_RESULT');
       companionMessage.textContent=copy('The request may have reached the desktop, but its reply was lost. No automatic retry was sent. Refresh the session before another request; this page cannot infer whether host work stopped.','要求可能已送達桌面，但回覆遺失。頁面無自動重試。請更新連線狀態後再要求資料；此頁無法推斷主機工作是否停止。');
     } finally {actionButtons.forEach(item=>item.disabled=!companion||!companion.session.scopes.includes(actionScope[item.dataset.companionAction]));}
   }));
 
   function renderCompanionData(action,result,errorCode) {
-    lastCompanionResult = {action,result,errorCode};
+    // Accept only the host's public projection, never a full workspace or raw response.
+    const exact=(value,keys)=>value!==null&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&keys.every(key=>Object.hasOwn(value,key));
+    const text=value=>typeof value==='string'&&value.length<=1024;
+    const count=value=>Number.isSafeInteger(value)&&value>=0;
+    const list=(value,validate)=>Array.isArray(value)&&value.length<=1000&&value.every(validate);
+    const plan=value=>exact(value,['id','name','runtime','target','status','updatedAt'])&&Object.values(value).every(text);
+    const project=value=>exact(value,['id','name','authorized'])&&text(value.id)&&text(value.name)&&typeof value.authorized==='boolean';
+    const job=value=>exact(value,['id','kind','state','sequence','createdAt','updatedAt','logCount','itemCount'])&&['id','kind','state','createdAt','updatedAt'].every(key=>text(value[key]))&&['sequence','logCount','itemCount'].every(key=>count(value[key]));
+    const valid=!errorCode&&(action==='workspace.read'
+      ? exact(result,['revision','onboardingCompleted','plans'])&&count(result.revision)&&typeof result.onboardingCompleted==='boolean'&&list(result.plans,plan)
+      : action==='projects.list' ? exact(result,['projects'])&&list(result.projects,project)
+      : action==='jobs.list' ? exact(result,['jobs'])&&list(result.jobs,job) : false);
+    lastCompanionResult = {action,result:valid?result:null,errorCode:errorCode||(!valid?'INVALID_RESULT':'')};
     const region=visitor.querySelector('#companion-data');region.replaceChildren();
     const actionNames={'workspace.read':copy('Workspace summary','工作區摘要'),'projects.list':copy('Saved projects','已儲存項目'),'jobs.list':copy('Recent jobs','最近工作')};
     const heading=document.createElement('h4');heading.textContent=actionNames[action]||copy('Read-only result','唯讀結果');region.append(heading);
     const summary=document.createElement('dl');summary.className='companion-summary';region.append(summary);
-    if(errorCode){const note=document.createElement('p');note.textContent=companionError(errorCode);region.append(note);return;}
+    if(errorCode){const note=document.createElement('p');note.textContent=companionError(errorCode);region.append(note);return false;}
     const addRow=(title,value)=>{const term=document.createElement('dt');term.textContent=title;const description=document.createElement('dd');description.textContent=String(value);summary.append(term,description);};
+    if(!valid){addRow(copy('Result','結果'),copy('The host response did not match this read-only view. No raw data was displayed.','主機回覆格式與唯讀檢視不符，未顯示原始資料。'));return false;}
     if(action==='workspace.read'){
-      const state=result?.state;
-      if(!state||!Array.isArray(state.plans)||!state.preferences){addRow(copy('Result','結果'),copy('The host response did not match the workspace summary view.','主機回覆格式與工作區摘要不符。'));return;}
-      addRow(copy('Saved plans','已儲存計劃'),state.plans.length);addRow(copy('Theme preference','主題偏好'),state.preferences.theme||copy('Unavailable','無法取得'));addRow(copy('Onboarding','入門設定'),state.onboardingCompleted?copy('Completed','已完成'):copy('In progress','進行中'));
+      const state=result;
+      addRow(copy('Saved plans','已儲存計劃'),state.plans.length);addRow(copy('Onboarding','入門設定'),state.onboardingCompleted?copy('Completed','已完成'):copy('In progress','進行中'));
       for(const plan of state.plans.slice(0,50)){
         const item=document.createElement('div');item.className='companion-record';
         const name=document.createElement('strong');name.textContent=typeof plan?.name==='string'?plan.name:copy('Unnamed plan','未命名計劃');
         const meta=document.createElement('p');meta.textContent=[plan?.runtime,plan?.target,plan?.status].filter(value=>typeof value==='string').join(' · ');
         item.append(name,meta);region.append(item);
       }
-      return;
+      return true;
     }
-    if(action==='projects.list'&&Array.isArray(result)){
-      addRow(copy('Projects','項目'),result.length);
-      for(const project of result.slice(0,100)){
+    if(action==='projects.list'){
+      addRow(copy('Projects','項目'),result.projects.length);
+      for(const project of result.projects.slice(0,100)){
         const item=document.createElement('div');item.className='companion-record';
         const name=document.createElement('strong');name.textContent=typeof project?.name==='string'?project.name:copy('Project','項目');
         const meta=document.createElement('p');meta.textContent=project?.authorized===true?copy('Open in current desktop session','已喺目前桌面連線中開啟'):copy('Saved metadata; not open in this desktop session','已儲存資料；未喺目前桌面連線中開啟');
         item.append(name,meta);region.append(item);
       }
-      return;
+      return true;
     }
-    if(action==='jobs.list'&&Array.isArray(result)){
-      addRow(copy('Jobs','工作'),result.length);
-      for(const job of result.slice(0,100)){
+    if(action==='jobs.list'){
+      addRow(copy('Jobs','工作'),result.jobs.length);
+      for(const job of result.jobs.slice(0,100)){
         const item=document.createElement('div');item.className='companion-record';
         const name=document.createElement('strong');name.textContent=`${typeof job?.kind==='string'?job.kind:copy('Job','工作')} · ${typeof job?.state==='string'?job.state:copy('state unavailable','狀態無法取得')}`;
         const meta=document.createElement('p');meta.textContent=typeof job?.updatedAt==='string'?job.updatedAt:typeof job?.createdAt==='string'?job.createdAt:copy('Latest host record','最新主機記錄');
         item.append(name,meta);region.append(item);
       }
-      return;
+      return true;
     }
     addRow(copy('Result','結果'),copy('The host response did not match this read-only view. No raw data was displayed.','主機回覆格式與唯讀檢視不符，未顯示原始資料。'));
   }

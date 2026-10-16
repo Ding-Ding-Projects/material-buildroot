@@ -70,4 +70,26 @@ CORS reflects only an exact enrolled or currently challenged origin and allows c
 
 ## Current verification
 
+### Browser summary response contract
+
+The browser consumes the host's privacy-filtered `result` directly. `workspace.read` returns
+`{revision,onboardingCompleted,plans}`; it does not return a full workspace, preferences, notes,
+paths or credentials. `projects.list` returns `{projects}` and `jobs.list` returns `{jobs}`.
+Each collection contains only the fields explicitly selected by the host consumer in
+`src/main/operations-service.cjs`.
+
+The browser validates the complete result before rendering any record: exact object fields,
+bounded strings, non-negative integer counters, Boolean flags and at most 1,000 records.
+Malformed replies display a localized unavailable result, retain no raw result for language
+rerendering and never display a success notice. A lost response clears the prior displayed
+result, marks the sequence uncertain and requires session refresh before another request.
+There is no automatic retry. This consumer validation does not grant authority or widen the
+host's disclosure boundary.
+
+Run `node --test tests/browser-workflow-contract.test.mjs` for the focused
+source regression. It executes the actual host projection and browser rendering code with
+in-memory DOM doubles, checks malformed and empty results, language modes and lost replies,
+and compares every dynamic supporting article link with the generator's route expression.
+This is not installed-browser, TLS, pairing, accessibility or built-layout evidence.
+
 The focused tests create a one-day certificate and private key with OpenSSL in a temporary directory, remove the files and use the certificate as the HTTPS client's trusted CA. They do not disable TLS validation or commit private keys. Actual loopback HTTPS checks cover enrollment, native denial, cookie flags, Host/Origin rejection, CSRF, scopes, replay, expiry, rate limiting, bounded JSON, revocation during delegated work, self-disconnect and exact CORS preflight. Injected dialog tests cover private TLS selection, local-interface restrictions and default-Cancel review. No actual LAN listener, Windows firewall action, browser certificate installation or live paired-browser runtime is exercised by these tests.

@@ -120,6 +120,16 @@ try{
  assert.match(await page.locator('#workflow-stage-next').innerText(),/CATALOGUE_COMMIT_IN_PROGRESS/);
  await chooseM3(page.locator('#workflow-stage'),'unknown-metadata');
  assert.match(await page.locator('#workflow-stage-body').innerText(),/Missing exact size.*remains unknown/);
+ for(const family of await page.locator('#workflow-family md-select-option').evaluateAll(options=>options.map(option=>option.value))){
+  await chooseM3(page.locator('#workflow-family'),family);
+  for(const stage of await page.locator('#workflow-stage md-select-option').evaluateAll(options=>options.map(option=>option.value))){
+   await chooseM3(page.locator('#workflow-stage'),stage);
+   const reference=await page.locator('#workflow-reference').getAttribute('href');
+   assert.ok(inventory.some(article=>article.url===reference),'Every dynamic supporting link must match the selected build inventory');
+   const response=await context.request.get(new URL(reference,target).href);assert.equal(response.status(),200);
+  }
+ }
+ receipt.checks.push('Every workflow stage supporting article matches the build inventory and returns HTTP 200.');
  await chooseLanguage('zh');
  await chooseM3(page.locator('#workflow-family'),'vocabulary');
  await chooseM3(page.locator('#workflow-stage'),'clear');

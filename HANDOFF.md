@@ -1,5 +1,9 @@
 # Latest evidence continuation, 2026-10-16
 
+## Current browser response repair
+
+The browser source now consumes the host's actual flat workspace projection and named project/job wrappers, validates complete bounded collections before rendering, clears invalid/lost data before language rerendering and fixes dynamic supporting-article extensions. Eight focused production-source cases passed after the original six-case red baseline; independent review found no blocking regression. These are in-memory DOM checks, not built browser or actual paired-host acceptance. The exact documentation build and headless browser run are next. Main `7a6b2b5ee5d23f9029d3128d9961cb8aef52cf79` is published; its normal release 49.1 has five verified metadata/digest records. Its deployment workflow succeeded, and the home plus exact new dialog PNG returned HTTP 200 with the expected image hash and exact homepage readback. Complete article inventory and current browser repair deployment remain pending.
+
 ## Current native dialog evidence promotion
 
 The settled dialog-action capture now binds to desktop source `e722cf1b91ccc46465eb449df4abd84d9d6df2a1`, executable SHA-256 `47ed433b93e9c924ba510207f670a455c54ec28a5c8c59b5883a8090f5f77c6b`. At 1280×752 logical pixels, observed scale 1.5, bilingual/light state, all three actions are inside the dialog and the final action wraps. The raw PNG was copied byte-for-byte, independently inspected and linked from the README. See [the exact receipt and limits](docs/evidence/native-windows-20261016/README.md#settled-dialog-actions-at-e722cf1). The transitional image remains excluded. Normal owned close and fresh absence of all four recorded processes are verified separately from the bounded visual result. This supersedes the dialog-after-proof pending statements below only; publication, full matrix and overall acceptance remain pending.
