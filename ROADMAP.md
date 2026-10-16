@@ -1,5 +1,15 @@
 # Phased implementation roadmap
 
+## Current execution boundary, 2026-10-16
+
+The owner selected isolated per-item implementation and release delivery. This supersedes the historical main-only source-writer rule below for the current pass: each implementation worker owns a separate branch and checkout, and completed contributions are integrated into main. The finite assignment inventory is [implementation-queue.json](docs/planning/implementation-queue.json).
+
+All tests, reviews, audits, static analysis and screenshots are deliberately deferred for this pass, including virtual-machine and Docker tests. Builds, packaging and bounded release metadata readback remain enabled. Implementation, build, release and acceptance are separate states. No acceptance-dependent checkbox is completed by source changes or package production alone.
+
+- [ ] PH02-T03 follow-up: native handle-level access protection and execution integration of grant-bound translation remain outstanding after the bounded path-validation contribution.
+- [ ] PH02-T04 follow-up: native privileged-operation routes remain outstanding after owner-scoped vault references; runtime acceptance remains deferred.
+- [ ] PH01-T02-C02 follow-up: complete current consumer admission remains outstanding; historical source references do not become independent delivery evidence.
+
 ## Current owner direction, 2026-10-16
 
 - [x] Resume implementation and establish an actual Windows desktop build plus six native build-toolchain checks at source `1b7ea15359ac2870a9f8bc02889770db4cb48d08`. This is bounded build/test evidence, not phase acceptance.

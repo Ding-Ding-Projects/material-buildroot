@@ -1,3 +1,13 @@
+# Current isolated implementation pass, 2026-10-16
+
+The owner selected one implementation worker per unfinished roadmap item with isolated branches/checkouts, followed by preservation-proven task cleanup. All tests, reviews, audits, static analysis and captures are intentionally deferred, including VM and Docker tests. Historical evidence below retains its original source binding.
+
+The initial baseline is `cb88af0c006b62f5ab300630d4093f63ec8714d7`. File-capability contribution `08cf7b42215ecf2018329971c3f82da4d5516c29` is integrated into main and its remote ref was read back. Its exact `build.bat /s` desktop production succeeded with receipt SHA-256 `d5950b8409aa6d1312cc96d55229c52ddc8b6c00fab1c126c50be335738c1f4a`. Installer production and release readback are still pending in this record. Native handle-level protection and translation-consumer integration remain open.
+
+Owner-scoped vault contribution `f23b3c68848fbea2baeec28d7ad75a72b98ecb34` and project-model migration contribution `adff340fe855c55eb6548e5cbc77cf6849474f87` are committed on their owning branches with builds started. Consumer records at `9e89119` contain explicit dispositions for all 436 surfaces, but only 45 bounded current mappings; historical candidates are not admitted consumers. Search-command implementation remains active. No whole-phase or whole-feature acceptance is claimed.
+
+See [the assignment inventory](docs/planning/implementation-queue.json) for the current finite queue. Shared delivery records are maintained by the integration owner. Preserve active branches and checkouts; no cleanup has occurred.
+
 # Latest implementation continuation, 2026-10-16
 
 ## Three pending features implemented, full native suite now passing

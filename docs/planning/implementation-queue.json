@@ -1,0 +1,554 @@
+{
+  "schemaVersion": 1,
+  "baseline": "cb88af0c006b62f5ab300630d4093f63ec8714d7",
+  "mode": "Implementation and release only; all tests, reviews, audits and captures deferred by owner",
+  "assignmentRule": "One implementation worker per unfinished roadmap leaf; parents aggregate children",
+  "items": [
+    {
+      "id": "PH01-T01-C02",
+      "description": "Finish full canonical-section reconciliation and independent review for every identity. The [reconciliation index](docs/planning/canonical-reconciliation.md) maps all 109 identities and 427 current requirements, with bounded independent review. Exhaustive clause/research interpretation and actual consumer admission remain open.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH01-T02-C02",
+      "description": "Admit concrete implementation consumers, localized articles/copy, persistence, detailed runtime/capture tuples and tests before each feature is implemented. All 436 records now have explicit planned identities and tuple axes, but reserved paths are not admitted consumers or runtime evidence.",
+      "state": "implementing",
+      "owner": "task/consumer-admission",
+      "verification": "deferred"
+    },
+    {
+      "id": "PH01-T03",
+      "description": "[R (A/D/C admission only)] Admit genuine registered Material Design 3 components and every native/browser/tool adapter: pin provenance, compatibility, licenses, redistributability, offline payloads and full installer size.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH01-T04",
+      "description": "[R (A/D/C admission only)] Create deterministic screen/state references, a direct reference renderer and hand-written parity/control maps; include reduced-motion, accessible structured canvas alternatives and negative textbox-substitution checks. Thirty reference states and local build tooling are authored. Two source-bound builds and focused runtime repairs are verified; full reference interaction, accessibility, typography and tuple acceptance remain pending.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH01-T05",
+      "description": "[R (A/D/C admission only)] Implement evidence validation that fails red then green when individual implementation, test, article, runtime, capture or parity records are absent or stale; bind proof to source and built artifact hashes.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T11-C01",
+      "description": "Guided setup for source or dedicated execution repositories, scoped credentials and compatible hosted/self-hosted Linux runner discovery.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T11-C02",
+      "description": "Generate workflows and validate reviewed expert YAML through the same admitted action model.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T11-C03",
+      "description": "Queue, observe, cancel, reconnect and download verified outputs from standard public hosted Linux builds.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T11-C04",
+      "description": "Independently verify self-hosted Linux execution and explicit runner choice; never auto-select larger billed runners.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T11-C05",
+      "description": "Review and extract the generic encrypted-builder engine without private records or secrets; enable transport only after user-selected push and private-repository verification.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T09-C01",
+      "description": "Guided/generated and reviewed expert YAML for source or dedicated execution repositories, selecting compatible hosted/self-hosted Windows runners for product builds and packaging.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T09-C02",
+      "description": "Produce and verify Windows outputs by invoking exact root `build.bat` and `build-installer.bat` on compatible Windows runners; Linux coordination alone proves no native package.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T09-C03",
+      "description": "Publish a normal unique release and verify source, downloadable assets and readback independently from user-build jobs.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T01",
+      "description": "[A+R] Replace scaffold assumptions with a reviewed versioned project model, ordered external-tree array, migrations, stable installed identity and isolated per-surface storage.",
+      "state": "implementing",
+      "owner": "task/project-model",
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T02-C03",
+      "description": "Improve and verify settings loading, save progress, conflict recovery, unknown-outcome protection and current navigation feedback. Renderer implementation and Linux Chromium fixtures are being verified; updated packaged Windows evidence remains required. Keep this separate from the earlier C02 native receipts.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T03",
+      "description": "[A+R] Implement canonical file capabilities with picker/import grants, revalidation, path translation and symlink/reparse/case escape rejection.",
+      "state": "building",
+      "owner": "task/file-capabilities",
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T04",
+      "description": "[A+R] Implement OS-vault references, reviewed typed host privilege boundaries, least-privilege operation ownership and secret-redacted records.",
+      "state": "source-committed",
+      "owner": "task/vault-boundaries",
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T05",
+      "description": "[A+R] Implement pinned bundled-first dependency discovery/acquisition and root build.bat/build-installer.bat entrypoints with silent mode and nonzero failures.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T06",
+      "description": "[A+R] Prove the real fresh-Windows one-command bootstrap/build/run route and interrupted dependency recovery without overwriting existing installations or data.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T01",
+      "description": "[A+D-native+R] Implement the productive workspace shell, real window controls, tabs on all four edges, grouping/pinning/reordering/overflow and all discovery searches; use genuine registered Material Design 3 controls, with phone-friendly browser layouts and no generic control substitutes.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T02",
+      "description": "[A+D-native+R] Implement complete English/Cantonese/bilingual copy, persisted fresh bilingual/system-theme defaults, independent humor levels, bounded local vocabulary import and display rename.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T03",
+      "description": "[A+D-native+R] Implement shared School mode, narration/voice discovery, five ADHD modes, scheduled settings with timezone/DST precedence and required surprise/catalogue behavior.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T04",
+      "description": "[A+D-native+R] Implement anchored regex workbenches at every search/picker, Ctrl+Shift+F rich command palette, actual context menus and working shortcut labels from shared action consumers.",
+      "state": "implementing",
+      "owner": "task/search-commands",
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T05",
+      "description": "[A+D-native+R] Implement every-element appearance editor, continuous color tools, logo derivatives, accessible sizing, motion/reduced motion and bounded overlay/collapse behavior.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T06",
+      "description": "[A+D-native+R] Implement guided forms, useful empty-editor presets, settings provenance/help and real rich controls/canvases with keyboard structured equivalents and undo.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T07",
+      "description": "[A+D-native+R] Verify A and implemented browser-native D children independently with reload persistence, interaction, component provenance and source-bound captures. C and remaining D child records stay unchecked for PH09; this task does not close the full identity.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T01",
+      "description": "[A+D-native+R] Implement exact-destination destructive confirmation with two independent keys, full slider, cancellation and focus return; retain explicit clean-rebuild consent.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T02",
+      "description": "[A+D-native+R] Implement reversible per-element experience policies, protected enrollment, support-ticket records and preserved-budget timed unlock ladders; never use these as broker authentication.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T03",
+      "description": "[A+D-native+R] Implement standards-tested local authenticators and real QR/manual pairing with protected secret handling.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T04",
+      "description": "[A+D-native+R] Implement isolated append-only history, snapshots, restore-as-new-revision, complete scoped exports and protected-data exclusions.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T05",
+      "description": "[A+D-native+R] Implement durable jobs, crash/re-entry recovery, progress at initiator, per-item bulk outcomes, cancel/retry and contextual recovery routes.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T06",
+      "description": "[A+D-native+R] Implement factual changelog, safe upstream-markup rendering, complete offline documentation and accessible persistent notification/review centre.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T07",
+      "description": "[A+D-native+R] Verify retention across failure/restart, cancellation ownership and no automatic cache/source/history pruning; prove free defaults and upstream cost/license disclosure.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T01",
+      "description": "[A+R] Implement create/open/adopt/import/clone projects with source/ref/branch status, maintained-LTS recommendation, actual revision provenance and per-project WSL/Docker choice.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T02",
+      "description": "[A+R] Implement existing and dedicated managed WSL distribution discovery/provisioning, prerequisite checks and Linux-side storage with Windows browse/export.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T03",
+      "description": "[A+R] Implement Docker discovery, managed volumes, isolated non-root execution and truthful container lifecycle/permission recovery.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T04",
+      "description": "[A+R] Implement source download/clone/ref acquisition and snapshot/diff/preview/explicit-Apply upgrades with rollback and compatibility boundaries.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T05",
+      "description": "[A+R] Implement concurrent per-project queues with global CPU/RAM/storage limits, serialization per canonical output tree, safe process-group/container cancellation and scoped terminals.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T06",
+      "description": "[A+R] Verify both runtime adapters on real Buildroot source acquisition and owned execution, including interrupted transfer, missing prerequisites and preserved existing trees.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T01",
+      "description": "[A+R] Bridge authoritative Buildroot Kconfig semantics through a pinned admitted library and actual make olddefconfig; expose full menus/types/choices/ranges/dependencies/help.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T02",
+      "description": "[A+R] Implement typed configuration controls and immediate queued reconciliation with requested/effective diff, atomic snapshots, undo ordering and failure restoration.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T03",
+      "description": "[A+R] Implement full Linux kernel, BusyBox and U-Boot configuration domains with the same real semantics and revision-bound behavior.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T04",
+      "description": "[A+R] Implement real defconfig browsing/apply/minimal-save provenance, ordered external trees and separate output directories.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T05",
+      "description": "[A+R] Implement complete package source/build/hash/license/dependency editors, ordered patch/hook workflows, overlays with mappings/permissions and discovered external-editor handoff.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T06",
+      "description": "[A+R] Implement named build/package/clean targets, truthful streaming logs/history/progress and explicit invalidation/rebuild explanations.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T07",
+      "description": "[A+R] Verify real source-to-image builds in WSL and Docker, rapid-edit race/rollback behavior and interaction tests rejecting generic textbox substitutions.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T01",
+      "description": "[A+R] Implement minimal/desktop/server/appliance presets and genuinely supported desktop/compositor previews with account/SSH provisioning and protected credentials.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T02",
+      "description": "[A+R] Implement safe artifact viewers, checksums/graphs/licenses, filesystem/archive/image inspection, disk/partition canvas and validated ISO/VMDK/VDI/OVA conversion/export.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T03",
+      "description": "[A+R] Implement VMware Workstation and VirtualBox discovery/create/import/hardware/storage/network/firmware edit/launch/stop with topology controls, NAT default and advanced network options.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T04",
+      "description": "[A+R] Prove real x86_64 BIOS and UEFI guest boot, login/console, networking, disk persistence and graceful shutdown on both observed current-stable hypervisors; record actual versions and no Secure Boot claim.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T05",
+      "description": "[A+R] Implement source/config locks, manifests, hashes, SBOM/license outputs and repeat-build comparisons with explicit nonreproducible differences.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T06",
+      "description": "[A+R] Implement real SDK/toolchain export with consumer smoke-build verification and environment instructions.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T07",
+      "description": "[A+R] After P42, implement exact destination-validated flashing and guest installer routes with reviewed destructive actions, cancellation and recovery proof.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T08",
+      "description": "[A+R] After P41, implement authenticated remote runtime enrollment, transfer/jobs/cancel/recovery/output verification for the approved target types.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T09",
+      "description": "[A+R] After P40, implement approved cloud providers/destinations with scoped vault credentials, previewed upload, checksums, cancel/retry and actual provider readback.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T01",
+      "description": "[A+D-native+R] Implement all eight converter categories and PDF operations with packaged offline adapters, searchable rich controls and unlimited disk-backed paged queues; validate genuine outputs.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T02",
+      "description": "[A+D-native+R] Implement Java/Bedrock version/flavour/plugin discovery and rich Minecraft server creation/configuration/lifecycle across local process, local container, SSH process and SSH container.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T03",
+      "description": "[A+D-native+R] Implement Ollama discovery and one-click managed install/recovery, full catalogue/tags/hardware fit, durable model pulls and streamed chat preserving existing models.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T04",
+      "description": "[A+D-native+R] Implement local assistant plans/checkpoints/reviewed actions and harness recovery with no silent privilege escalation; verify failure and cancellation phases.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T05",
+      "description": "[A+D-native+R] Implement actual external-editor handoff and browser transfer start/progress/completion surfaces with real queue consumers, recovery and supported focus/visibility behavior.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T06",
+      "description": "[A+D-native+R] Implement previewed authenticated forge publication with exact destination/source, scoped credentials and actual readback.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH08-T07",
+      "description": "[A+D-native+R] Verify every A tool and each implemented browser-native D tool using separate runtime/output/persistence/capture proof, including offline missing-payload and partial-result behavior. C and remaining D records stay unchecked for PH09; full identity closure waits for all applicable records.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T01",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete D browser-native implementations for every applicable identity, with local visitor state, reset/export explanations and truthful unavailable/offline behavior.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T02",
+      "description": "[A+D+C+R (through-PH09 scope)] Implement reviewed explicit Edge/Chrome pairing and authenticated LAN capability grants/revocation with origin, TLS, CSRF/replay and browser private-network handling; no internet control exposure.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T03",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete C typed broker consumers and independent client state for every applicable identity; revocation stops new authority and settles owned jobs truthfully.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T04",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete detailed categorized feature articles and Cantonese twins, rendered source wiki, search/offline navigation and actual API Postman category/master collections; distinguish non-HTTP IPC.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T05",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete vendored licensed/hashed fonts, safe shared-link metadata, genuine screenshot/gallery/recording presentation and current source-bound front provenance.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T06",
+      "description": "[A+D+C+R (through-PH09 scope)] Implement authenticated status integration and truthful unavailable states; verify authorized status bridge, protected webhooks and display-event delivery with separate R evidence.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T07",
+      "description": "[A+D+C+R (through-PH09 scope)] Run independent A/D/C identity and state/persistence audits for capabilities implemented through PH09, plus normal/minimum × three languages × two themes × four scales, pure registered Material Design 3 controls and phone-friendly touch/keyboard checks from approximately 320px. Keep PH10 installer/update/download-dependent records unchecked until PH10 final acceptance.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T08",
+      "description": "[A+D+C+R (through-PH09 scope)] Prove exact-boundary completeness and design-reference guards red then green by removing one required record at a time; all missing runtime, hosted, permission or platform evidence remains open. PH10-dependent records are explicitly pending, not waived or treated as passed.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T01",
+      "description": "[A+D+C+R (final applicable acceptance)] Assemble one complete Windows x64 installer with all required capability payloads, original installed icons, valid license disclosures and actual offline bundled-first discovery.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T02",
+      "description": "[A+D+C+R (final applicable acceptance)] Produce real unsigned Squirrel.Windows Setup.exe, RELEASES, full packages and deltas; apply only required project-owned signing without claiming public trust.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T03",
+      "description": "[A+D+C+R (final applicable acceptance)] Verify actual current physical Windows host installation/launch, preservation, cancellation, update/rollback and unsaved-state handling; record fresh-environment and uninstall proof separately when actually available.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T04",
+      "description": "[A+D+C+R (final applicable acceptance)] Implement background update discovery/download with an unsigned-ready banner and explicit restart; exercise real version transitions and recovery.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T05",
+      "description": "[A+D+C+R (final applicable acceptance)] Implement CI bootstrap inventories, compatible accessible runner selection/cloud fallback and defensive evidence collection; use encrypted public builder transport only if private source is introduced.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T06",
+      "description": "[A+D+C+R (final applicable acceptance)] Publish uniquely tagged normal releases with verified installer assets, workflow timing and line counts, factual catalogue-linked naming and resolved permitted release-photo policy; read back draft=false/prerelease=false.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T07",
+      "description": "[A+D+C+R (final applicable acceptance)] Verify live downloads against expected source/version/checksums and complete homepage/wiki/articles/screenshots/gallery links; synchronize repository records, supported discussions/project item and sanitized guidance.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T08",
+      "description": "[A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 109 dispositions before declaring complete.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    }
+  ]
+}
