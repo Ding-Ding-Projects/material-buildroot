@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID, createHash } = require("node:crypto");
+const { createBudgetStore } = require("./jobs/budgets.cjs");
 const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
@@ -9,11 +10,14 @@ const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
+const { createAccountProvisioning } = require("./configuration/account-provisioning.cjs");
+const { createImagePresets } = require("./configuration/image-presets.cjs");
 const { createDefconfigWorkflows } = require("./configuration/defconfig-workflows.cjs");
 const { resolveDomains } = require("./configuration/domains.cjs");
 const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
+const { OutputViewers } = require("./deployment/output-viewers.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -33,6 +37,8 @@ const {
 const { createKconfigAdapter } = require("./configuration/kconfig-adapter.cjs");
 const { boundedProcess } = require("./execution/index.cjs");
 const { createSourceOperations } = require("./source-operations.cjs");
+const { WslSourceService } = require("./execution/wsl-source.cjs");
+const { createBuildProvenance } = require("./deployment/build-provenance.cjs");
 const {
   createPackageAuthoringService,
 } = require("./configuration/package-authoring.cjs");
@@ -41,10 +47,29 @@ const {
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
+const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
+const { createExecutionSetup } = require('./execution/setup.cjs');
+const { createWorkflowService } = require('./execution/workflow-service.cjs');
 const owner = "desktop-owner";
 const fields = {
+  'execution.cli': ['kind'],
+  'execution.inspect': ['sourceRepository','executionRepository','mode'],
+  'execution.discover': ['selectionId'],
+  'execution.selectRunner': ['selectionId','kind','runnerId','billingConsent'],
+  'execution.revoke': ['selectionId'],
+  "execution.workflowPreview": ["selectionId", "model", "text"],
+  "execution.workflowPublish": ["previewId", "sha256", "consent"],
+  "execution.workflowAdmission": ["selectionId"],
+  "execution.jobs.list": [],
+  "execution.jobs.dispatch": ["selectionId", "consent"],
+  "execution.jobs.observe": ["id"],
+  "execution.jobs.reconnect": ["id", "selectionId", "consent"],
+  "execution.jobs.cancel": ["id", "consent"],
+  "execution.jobs.outputs": ["id"],
+  "execution.jobs.download": ["id", "artifactId", "consent"],
+  "execution.jobs.cancelDownload": ["id"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -71,6 +96,10 @@ const fields = {
   "build.confirmation.cancel": ["id"],
   "jobs.list": [],
   "scheduler.status": [],
+  "scheduler.configure": ["limits"],
+  "jobs.project": ["workspaceId"],
+  "jobs.projectPage": ["workspaceId", "id", "after", "limit"],
+  "jobs.projectCancel": ["workspaceId", "id", "sequence"],
   "jobs.pump": [],
   "jobs.reconcile": ["id"],
   "jobs.page": ["id", "after", "limit"],
@@ -79,6 +108,12 @@ const fields = {
   "config.trustPreview": ["workspaceId"],
   "config.trustGrant": ["workspaceId", "challengeId", "trusted"],
   "config.trustRevoke": ["workspaceId"],
+  "accountProvisioning.choose": ["workspaceId"],
+  "accountProvisioning.preview": ["workspaceId", "username", "uid", "keyId"],
+  "accountProvisioning.apply": ["workspaceId", "planId"],
+  "imagePreset.catalog": ["workspaceId"],
+  "imagePreset.plan": ["workspaceId", "revision", "preset", "desktop", "ssh"],
+  "imagePreset.apply": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "defconfig.catalog": ["workspaceId"],
   "defconfig.apply": ["workspaceId", "revision", "id"],
   "defconfig.save": ["workspaceId", "revision"],
@@ -89,7 +124,14 @@ const fields = {
   "config.defconfig": ["workspaceId", "revision", "path"],
   "artifacts.list": ["workspaceId"],
   "artifacts.inspect": ["workspaceId", "path"],
+  "outputs.browse": ["workspaceId", "directoryId"],
+  "outputs.inspect": ["workspaceId", "fileId"],
+  "outputs.checksum": ["workspaceId", "fileId", "expected"],
+  "outputs.manifest": ["workspaceId", "fileIds"],
+  "outputs.compare": ["workspaceId", "beforeId", "afterId"],
   "artifacts.manifest": ["workspaceId", "paths"],
+  "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
+  "artifacts.compliance": ["workspaceId"],
   tools: ["request"],
   "payload.list": [],
   "payload.choose": ["toolId"],
@@ -211,12 +253,31 @@ function createOperationsService({
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
+  const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
+  const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
         openExternal: openDocumentationExternal,
       })
     : null;
+  let executionJobs;
+  function hostedJobs() {
+    return executionJobs ??= createExecutionJobs({
+      setup: executionSetup, workflows: executionWorkflows, directory,
+      chooseDirectory: async () => {
+        if (choosing) reject("PICKER_BUSY");
+        choosing = true;
+        try {
+          const selected = await dialog.showOpenDialog(parentWindow, {
+            title: "Choose folder for verified Buildroot outputs",
+            properties: ["openDirectory", "dontAddToRecent"],
+          });
+          return selected.canceled ? null : selected.filePaths[0] || null;
+        } finally { choosing = false; }
+      },
+    });
+  }
   const selections = new Map(),
     portableImports = new Map(),
     projects = new Map(),
@@ -304,6 +365,20 @@ function createOperationsService({
       }
     },
     resolveWorkspace: (id) => project(id),
+    sourceServiceForWorkspace: (workspace) => {
+      if (!workspace.storage) return undefined;
+      const grant = execution.grants.get(workspace.grantId);
+      if (!grant?.wslReceipt || grant.wslReceipt !== workspace.receipt) reject("WSL_SOURCE_OPERATION_UNAVAILABLE");
+      return new WslSourceService({
+        receipt: grant.wslReceipt,
+        run: (args) => boundedProcess(execution.executables.wsl, args, {timeoutMs:600000,maxBytes:4*1024*1024}).completion,
+        acquireSourceLock: () => {
+          if (disposed) reject("SOURCE_BUSY");
+          project([...projects].find(([,item])=>item===workspace)?.[0]);
+          return acquirePathLeases([workspace.source,workspace.output]);
+        },
+      });
+    },
     acquireSourceLock: (sourceRoot) => {
       if (disposed) reject("SOURCE_BUSY");
       let existing = sourceRoot;
@@ -364,6 +439,11 @@ function createOperationsService({
       signal?.removeEventListener("abort", cancel);
     }
   }
+  const provenance = createBuildProvenance({
+    directory: path.join(directory, "reproducibility"),
+    getJob: id => jobs.get(id, owner),
+    listJobs: () => jobs.list(owner),
+  });
   const jobs = createJobManager({
     directory: path.join(directory, "jobs"),
     adapters: {
@@ -385,6 +465,7 @@ function createOperationsService({
           });
           throw error;
         }
+        const buildLineage = provenance.begin(project(payload.workspaceId), payload);
         quarantine.begin({
           jobId: context.jobId,
           workspaceId: payload.workspaceId,
@@ -437,7 +518,14 @@ function createOperationsService({
         context.item({ state: result.state, code: result.code });
         if (result.state !== "succeeded")
           reject("BUILD_" + result.state.toUpperCase().replaceAll("-", "_"));
-        return { state: result.state, code: result.code };
+        let reproducibility;
+        try {
+          reproducibility = await provenance.complete({ item: project(payload.workspaceId), payload, jobId: context.jobId, signal: context.signal, lineage: buildLineage });
+        } catch (error) {
+          reproducibility = { state: "unbound", reason: typeof error.code === "string" && /^(?:PROVENANCE|BLOCKED)_[A-Z_]+$/.test(error.code) ? error.code : "PROVENANCE_UNAVAILABLE" };
+        }
+        context.item({ kind: "reproducibility", ...reproducibility });
+        return { state: result.state, code: result.code, reproducibility };
       },
     },
   });
@@ -455,6 +543,8 @@ function createOperationsService({
       .list()
       .filter((record) => !activeRecovery.has(record.jobId));
   }
+  const budgetStore = createBudgetStore(path.join(directory, "scheduler-budgets.json"), schedulerLimits);
+  schedulerLimits = budgetStore.read();
   const scheduler = createBuildScheduler({
     jobs: {
       list: (who) => jobs.list(who),
@@ -930,6 +1020,8 @@ function createOperationsService({
       return { ok: result.state === "succeeded", exitCode: result.code };
     },
   });
+  const accountProvisioning = createAccountProvisioning({ resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; }, authorize: id => configurationConsent.requireTrust(id), configuration: config, dialog, parentWindow });
+  const imagePresets = createImagePresets({ configuration: config });
   const defconfigWorkflows = createDefconfigWorkflows({
     resolveProject: id => { const item = project(id); authorizedExternalPaths(id, item); return item; },
     authorize: id => configurationConsent.requireTrust(id),
@@ -1094,6 +1186,12 @@ function createOperationsService({
     currentSource: source,
   });
   const deployments = new Map();
+  const outputViewers = new Map();
+  function outputViewer(id) {
+    const item = project(id);
+    if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
+    return outputViewers.get(id);
+  }
   function deployment(id) {
     const item = project(id);
     if (!deployments.has(id))
@@ -1102,6 +1200,7 @@ function createOperationsService({
         createDeploymentService({
           root: item.output,
           managedDirectory: path.join(directory, "guests", id),
+          resolveExecutable: (toolId) => payloadManager.resolve(toolId),
         }),
       );
     return deployments.get(id);
@@ -1184,10 +1283,26 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("execution.jobs.")) {
+      const method = action.slice("execution.jobs.".length);
+      const { action: _action, ...args } = request;
+      return hostedJobs()[method](args);
+    }
     const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
+      case 'execution.cli': {
+        if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
+        return executionSetup.host[request.kind]();
+      }
+      case 'execution.inspect': return executionSetup.inspect(request);
+      case 'execution.discover': return executionSetup.discover(request.selectionId);
+      case 'execution.selectRunner': return executionSetup.selectRunner(request);
+      case 'execution.revoke': return {revoked:executionSetup.revoke(request.selectionId)};
+      case "execution.workflowPreview": return executionWorkflows.preview(request);
+      case "execution.workflowPublish": return executionWorkflows.publish(request);
+      case "execution.workflowAdmission": return executionWorkflows.admission(request);
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
@@ -1465,6 +1580,29 @@ function createOperationsService({
         void scheduler.pump().catch(() => {});
         return job;
       }
+      case "scheduler.configure": {
+        schedulerLimits = budgetStore.write(request.limits);
+        scheduler.setLimits(schedulerLimits);
+        void scheduler.pump().catch(() => {});
+        return schedulerStatus();
+      }
+      case "jobs.project":
+        project(request.workspaceId);
+        return jobs.list(owner).filter(job => job.payload.workspaceId === request.workspaceId);
+      case "jobs.projectPage": {
+        project(request.workspaceId);
+        const job = ownJob(request.id);
+        if (job.payload.workspaceId !== request.workspaceId) reject("UNAUTHORIZED");
+        return jobs.page(request.id, "log", { after: request.after, limit: request.limit }, owner);
+      }
+      case "jobs.projectCancel": {
+        project(request.workspaceId);
+        const job = ownJob(request.id);
+        if (job.payload.workspaceId !== request.workspaceId) reject("UNAUTHORIZED");
+        const result = jobs.cancel(request.id, owner, request.sequence);
+        void scheduler.pump().catch(() => {});
+        return result;
+      }
       case "scheduler.status":
         return schedulerStatus();
       case "jobs.pump":
@@ -1534,6 +1672,18 @@ function createOperationsService({
       case "config.trustRevoke":
         project(request.workspaceId);
         return configurationConsent.revoke(request);
+      case "accountProvisioning.choose":
+        return accountProvisioning.choose(request);
+      case "accountProvisioning.preview":
+        return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.preview(request));
+      case "accountProvisioning.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.apply(request));
+      case "imagePreset.catalog":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.catalog(request));
+      case "imagePreset.plan":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.plan(request));
+      case "imagePreset.apply":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.apply(request));
       case "defconfig.catalog":
         return changeConfig(projectPaths(request.workspaceId), () => defconfigWorkflows.catalog(request));
       case "defconfig.apply":
@@ -1558,12 +1708,53 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "outputs.browse":
+        if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).browse(request.directoryId);
+      case "outputs.inspect":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).inspect(request.fileId);
+      case "outputs.checksum":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36 || typeof request.expected !== "string") reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).checksum(request.fileId, request.expected);
       case "artifacts.inspect":
         return deployment(request.workspaceId).inspectArtifact(request.path);
-      case "artifacts.manifest":
-        return deployment(request.workspaceId).createManifest({
-          paths: request.paths,
+      case "outputs.manifest": {
+        if (!Array.isArray(request.fileIds) || !request.fileIds.length || request.fileIds.length > 1000 || new Set(request.fileIds).size !== request.fileIds.length || request.fileIds.some(id => typeof id !== "string" || id.length !== 36)) reject("INVALID_REQUEST");
+        return changeConfig(projectPaths(request.workspaceId), async () => {
+          const viewer = outputViewer(request.workspaceId);
+          const paths = request.fileIds.map(id => viewer.resolve(id, "file").grant.relative.split(path.sep).join("/"));
+          const manifest = await perform({ action: "artifacts.manifest", workspaceId: request.workspaceId, paths });
+          const content = JSON.stringify(manifest, null, 2) + "\n";
+          if (Buffer.byteLength(content) > 4 * 1024 * 1024) reject("MANIFEST_SIZE_LIMIT");
+          const name = `manifest-${randomUUID()}.json`;
+          fs.writeFileSync(path.join(project(request.workspaceId).output, name), content, {flag:"wx", mode:0o600});
+          return {manifest, name, fileId:viewer.admit(name,"file")};
         });
+      }
+      case "outputs.compare": {
+        if (typeof request.beforeId !== "string" || typeof request.afterId !== "string" || request.beforeId.length !== 36 || request.afterId.length !== 36) reject("INVALID_REQUEST");
+        const viewer = outputViewer(request.workspaceId);
+        return perform({ action:"artifacts.compare", workspaceId:request.workspaceId,
+          beforePath:viewer.resolve(request.beforeId,"file").grant.relative,
+          afterPath:viewer.resolve(request.afterId,"file").grant.relative });
+      }
+      case "artifacts.manifest": {
+        const item = project(request.workspaceId);
+        const hasConfiguration = fs.existsSync(path.join(item.output, ".config"));
+        const before = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        const manifest = await deployment(request.workspaceId).createManifest({
+          paths: request.paths,
+          locks: { sourceRevision: before.sourceRevision, ...(hasConfiguration ? { configurationSha256: before.configRevision } : {}) },
+        });
+        const after = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        if (hasConfiguration !== fs.existsSync(path.join(item.output, ".config")) || before.sourceRevision !== after.sourceRevision || before.configRevision !== after.configRevision) reject("REPRODUCIBILITY_INPUTS_CHANGED");
+        return { ...manifest, provenance: { ...provenance.bind(manifest, item, request.workspaceId), limitations: before.snapshot.limitations } };
+      }
+      case "artifacts.compare":
+        return deployment(request.workspaceId).compareManifestFiles(request.beforePath, request.afterPath, manifest => provenance.bind(manifest, project(request.workspaceId), request.workspaceId, manifest.provenance?.buildTimeBinding ? manifest.provenance : null));
+      case "artifacts.compliance":
+        return deployment(request.workspaceId).collectCompliance();
       case "guest.discover":
         return deployment(request.workspaceId).discoverHypervisors();
       case "guest.networks":
@@ -1601,9 +1792,13 @@ function createOperationsService({
       case "guest.refresh":
         return deployment(request.workspaceId).refreshGuest(request.request);
       case "conversion.preview":
-        return deployment(request.workspaceId).previewConversion(
-          request.request,
-        );
+        exact(request.request, ["fileId", "format", "outputName"]);
+        if (typeof request.request.fileId !== "string" || request.request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return deployment(request.workspaceId).previewConversion({
+          artifact: outputViewer(request.workspaceId).resolve(request.request.fileId, "file").grant.relative,
+          format: request.request.format,
+          outputName: request.request.outputName,
+        });
       case "conversion.execute":
         return changeConfig(projectPaths(request.workspaceId), () =>
           deployment(request.workspaceId).executeConversion(request.request),
@@ -1628,6 +1823,14 @@ function createOperationsService({
             "ollama.running",
             "ollama.show",
             "ollama.chat",
+            "ollama.conversations.list",
+            "ollama.conversations.save",
+            "ollama.conversations.load",
+            "ollama.conversations.delete",
+            "ollama.chat.start",
+            "ollama.chat.read",
+            "ollama.chat.cancel",
+            "ollama.chat.forget",
             "converter.catalog",
             "minecraft.remote.list",
             "minecraft.remote.preview",
@@ -1807,7 +2010,7 @@ function createOperationsService({
       case "package.apply":
         return packageAuthoring.apply(request);
       case "source":
-        if (requestedProject?.storage) reject("WSL_SOURCE_OPERATION_UNAVAILABLE"); {
+        {
         const result = await sources.handle(request.request);
         if (!result.ok) reject(result.code);
         return result;
@@ -1869,6 +2072,8 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      executionSetup.dispose();
+      executionJobs?.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
@@ -1897,6 +2102,3 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
-
-
-

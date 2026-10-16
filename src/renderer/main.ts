@@ -6,6 +6,7 @@ import {repeat} from "lit/directives/repeat.js";
 import {WorkspaceTabs, type WorkspaceDestination} from "./workspace-tabs";
 import "./command-surfaces";
 import "./shared-mode-panel";
+import "./attention-mode-panel";
 import "./scheduled-preferences-panel";
 import type {ScheduledPreferencesSnapshot} from "../shared/scheduled-preferences";
 import type {SharedModeSnapshot} from "../shared/shared-mode";
@@ -117,7 +118,7 @@ class MaterialBuildroot extends LitElement {
     {id:'open-project',en:'Open or adopt project',zh:'開啟或接入專案',icon:'folder_open'},
     ...this.projectSessions.map(p=>({id:`project:${p.workspaceId}`,en:p.name,zh:p.name,icon:'folder_open'})),
     ...[['projects','Plans','計劃','dashboard'],['activity','Activity','活動','history'],['settings','Settings','設定','settings'],['about','About','關於','info']].map(([id,en,zh,icon])=>({id,en,zh,icon})),
-    ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
+    ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['authenticator','Authenticator','驗證器','key'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
     ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
     ...this.settingsEntries().map(e=>({id:`setting:${e.id}`,en:e.text,zh:e.text,icon:'settings'})),
     {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
@@ -1794,6 +1795,7 @@ class MaterialBuildroot extends LitElement {
   }
   render() {
     return html`<div class="shell ${this.dark ? "dark" : ""}">
+      <attention-mode-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .startupEligible=${this.setupDone&&this.state?.origin==='saved'} data-experience-exempt></attention-mode-panel>
       <header>
         <md-text-button
           class="menu"

@@ -155,11 +155,13 @@ async function fetchBounded(
     method = "GET",
     onLine,
     fetchImpl = fetch,
+    timeoutMs = 120000,
   } = {},
 ) {
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 3600000) fail("INVALID_TIMEOUT");
   signal = signal
-    ? AbortSignal.any([signal, AbortSignal.timeout(120000)])
-    : AbortSignal.timeout(120000);
+    ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
+    : AbortSignal.timeout(timeoutMs);
   const response = await fetchImpl(url, {
     method,
     body: body === undefined ? undefined : JSON.stringify(body),

@@ -3,6 +3,7 @@ import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { materialIcon } from "./material-icons";
 type Hardware = {
   observedAt: string;
+  adapterInventory?: {state:string;reason?:string;observedAt?:string;adapters:{name:string|null;vendor:string|null;driverVersion:string|null;reportedAdapterRamBytes:number|null}[]};
   ram: { totalBytes: number; availableBytes: number; source: string };
   cpu: {
     architecture: string;
@@ -302,6 +303,13 @@ export class OllamaEvidencePanel extends LitElement {
                   ${h.cpu.architecture} · ${h.cpu.logicalCores}
                   ${this.l("logical cores", "邏輯核心")} ·
                   ${this.evidence(h.cpu.backendSupported)}
+                </dd>
+                <dt>${this.l("Reported graphics adapters", "報告嘅顯示卡")}</dt>
+                <dd>
+                  ${h.adapterInventory?.state === "observed" ? this.l("Operating-system inventory observed", "已觀察作業系統清單") : this.l("Inventory unavailable", "未能取得清單")}
+                  ${h.adapterInventory?.observedAt || ""} ${h.adapterInventory?.reason || ""}
+                  ${(h.adapterInventory?.adapters || []).map(adapter=>html`<p>${adapter.name || this.l("Unknown adapter", "未知顯示卡")} · ${adapter.vendor || this.l("Unknown vendor", "未知廠商")} · ${adapter.driverVersion || this.l("Unknown driver", "未知驅動程式")}<br>${this.l("Raw 32-bit AdapterRAM report", "原始 32 位元 AdapterRAM 報告")}: ${adapter.reportedAdapterRamBytes === null ? this.l("Unknown", "未知") : adapter.reportedAdapterRamBytes} ${this.l("bytes", "位元組")}</p>`)}
+                  <p>${this.l("AdapterRAM is a 32-bit report, not verified total or usable VRAM. Detected hardware does not prove an Ollama backend, free accelerator memory or a working driver. CPU-only runtime packages remain CPU-only; this inventory never enables GPU execution or installs drivers.", "AdapterRAM 係 32 位元報告，唔代表已驗證總顯示記憶體或可用顯示記憶體。偵測硬件唔代表 Ollama 後端、可用加速器記憶體或驅動程式正常。純 CPU 執行環境仍然只用 CPU，呢個清單唔會啟用 GPU 或安裝驅動程式。")}</p>
                 </dd>
                 <dt>GPU</dt>
                 <dd>

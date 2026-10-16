@@ -42,6 +42,7 @@ function admit(request, nested = false) {
   if (action.startsWith("minecraft.managed.") || action.startsWith("minecraft.configuration.")) { require("./minecraft-managed.cjs").validate(request); return structuredClone(request); }
   const simple = [
     "ollama.status",
+    "ollama.conversations.list",
     "ollama.hardware",
     "ollama.catalogue.status",
     "ollama.catalogue.refresh",
@@ -88,6 +89,26 @@ function admit(request, nested = false) {
         keys(request, ["action", "model"]);
         token(request.model);
         break;
+      case "ollama.conversations.save":
+        keys(request,["action","title","model","messages"]);
+        string(request.title,120);
+        admit({action:"ollama.chat",model:request.model,messages:request.messages});
+        break;
+      case "ollama.conversations.load":
+      case "ollama.conversations.delete":
+        keys(request,["action","id"]);
+        if(!uuid(request.id))fail("INVALID_REQUEST");
+        break;
+      case "ollama.chat.read":
+        keys(request,["action","id"],["offset"]);
+        if(!uuid(request.id)||request.offset!==undefined&&!integer(request.offset,0,1048576))fail("INVALID_REQUEST");
+        break;
+      case "ollama.chat.cancel":
+      case "ollama.chat.forget":
+        keys(request,["action","id"]);
+        if(!uuid(request.id))fail("INVALID_REQUEST");
+        break;
+      case "ollama.chat.start":
       case "ollama.chat":
         keys(request, ["action", "model", "messages"]);
         token(request.model);
@@ -101,7 +122,7 @@ function admit(request, nested = false) {
         for (const message of request.messages) {
           keys(message, ["role", "content"]);
           one(message.role, ["user", "assistant", "system"]);
-          string(message.content, 65536);
+          if (typeof message.content !== "string" || !message.content.length || message.content.length > 65536 || /[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(message.content)) fail("INVALID_REQUEST");
           size += message.content.length;
         }
         if (size > 262144) fail("REQUEST_LIMIT");

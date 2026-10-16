@@ -187,12 +187,13 @@ export class GuestPanel extends LitElement {
     const targetWorkspace = this.workspaceId;
     try {
       const reply = await api({
-        action: "artifacts.list",
+        action: "outputs.browse",
         workspaceId: targetWorkspace,
+        directoryId: "root",
       });
       if (targetWorkspace !== this.workspaceId) return;
-      if (reply.ok && Array.isArray(reply.result))
-        this.files = reply.result.filter((item: any) => item.kind === "file");
+      if (reply.ok && Array.isArray((reply.result as any)?.rows))
+        this.files = (reply.result as any).rows.filter((item: any) => item.kind === "file").map((item:any) => ({...item,path:item.name}));
       else
         this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
           "Output files could not be loaded.",
@@ -265,8 +266,10 @@ export class GuestPanel extends LitElement {
   }
   private async previewConversion() {
     if (!this.disk || !this.outputName) return;
+    const fileId = this.files.find(item => item.path === this.disk)?.id;
+    if (!fileId) return;
     const result = await this.run("conversion.preview", {
-      artifact: this.disk,
+      fileId,
       format: this.format,
       outputName: this.outputName,
     });
@@ -475,7 +478,7 @@ export class GuestPanel extends LitElement {
               this.preview = undefined;
             }}
             >${this.options(
-              ["raw", "vmdk", "vdi", "qcow2"].map((value) => [value, value]),
+              ["raw", "vmdk", "vdi", "qcow2", "iso", "ova"].map((value) => [value, value]),
             )}</md-outlined-select
           ><md-outlined-text-field
             label=${this.l("New output filename", "新輸出檔名")}
@@ -500,6 +503,10 @@ export class GuestPanel extends LitElement {
                   <dd class="code">${this.preview.sha256}</dd>
                   <dt>${this.l("Output", "輸出")}</dt>
                   <dd>${this.preview.outputName} (${this.preview.format})</dd>
+                  <dt>${this.l("Export operation", "匯出操作")}</dt>
+                  <dd>${this.preview.operation}</dd>
+                  <dt>${this.l("Limits", "限制")}</dt>
+                  <dd>${this.l("ISO export copies existing ISO bytes. OVA exports one CPU, 1024 MiB RAM, SATA storage and no network. Boot and importer compatibility are not verified.", "ISO 匯出只複製現有 ISO 位元組。OVA 使用一個 CPU、1024 MiB 記憶體、SATA 儲存同無網絡。開機同匯入相容性未核實。")}</dd>
                 </dl>
                 <md-filled-button
                   ?disabled=${this.pending}

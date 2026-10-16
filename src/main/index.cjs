@@ -22,6 +22,7 @@ const {createWorkspaceTabRegistry}=require('./workspace-tabs.cjs');
 const workspaceTabs=createWorkspaceTabRegistry();
 const { createUpdateHost } = require("./updates/host.cjs");
 const { createVault } = require("./security/vault.cjs");
+const { createAuthenticatorIPC } = require("./security/authenticator-controller.cjs");
 const {
   createSharedModeService,
 } = require("./privacy/shared-mode-service.cjs");
@@ -160,6 +161,10 @@ else {
         sharedModeService?.close();
         sharedModeService = undefined;
       }
+      const attentionHistory=require('./preferences/attention-history.cjs').createAttentionHistory({filePath:path.join(app.getPath('userData'),'attention-history')});
+      ipcMain.handle('studio:attention-history',(event,value)=>desktop.admitted(event)?attentionHistory.request(value):{ok:false,code:'UNAUTHORIZED'});
+      const dimSum=require('./preferences/dim-sum.cjs').createDimSum({directory:path.join(app.getPath('userData'),'public-dim-sum-cache'),allowed:()=>{const s=sharedModeService?.status();return s?.available===true&&s.active===false;}});
+      ipcMain.handle('studio:dim-sum',(event,value)=>desktop.admitted(event)?dimSum.request(value):{ok:false,code:'UNAUTHORIZED'});
       const appearanceHistory=createAppearanceHistory({filePath:path.join(app.getPath('userData'),'appearance-history'),fonts:appearanceFonts});
       ipcMain.handle('studio:appearance-history',(event,value)=>desktop.admitted(event)?appearanceHistory.request(value):{ok:false,code:'UNAUTHORIZED'});
       ipcMain.handle('studio:appearance-fonts', (event) => desktop.admitted(event) ? appearanceFonts.read() : {ok:false,code:'UNAUTHORIZED'});
@@ -181,6 +186,10 @@ else {
           } catch {}
         }
       });
+      const authenticatorIPC = createAuthenticatorIPC({desktop, directory:app.getPath("userData"), safeStorage});
+      window.webContents.on("did-start-navigation", () => authenticatorIPC.revoke());
+      window.webContents.on("destroyed", () => authenticatorIPC.revoke());
+      ipcMain.handle("studio:authenticator", (event,value) => authenticatorIPC.request(event,value));
       const experienceIPC = createExperienceIPC({ desktop, directory: app.getPath("userData"), safeStorage, openFolder: folder => shell.openPath(folder), schoolMode: () => sharedModeService?.status()?.active !== false });
       ipcMain.handle("studio:experience-policies", (event, value) => experienceIPC.request(event, value));
       const workspaceService = createWorkspaceService({
