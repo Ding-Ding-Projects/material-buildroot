@@ -13,7 +13,7 @@ function createAuthenticatorIPC({ desktop, directory, safeStorage, now = Date.no
   const file = path.join(directory, "authenticator-index.json");
   const history = createWorkspaceHistory(path.join(directory, "authenticator-history.json"));
   const accessFile = path.join(directory,"authenticator-history-access.json");
-  let historyUntil = 0, historyAttempts = 0, historyWait = 0;
+  let historyUntil = 0, historyAttempts = 0, historyWait = 0, generation = 0;
   function validState(value) {
     return value && Object.keys(value).sort().join() === 'entries,revision' && Number.isSafeInteger(value.revision) && value.revision >= 0 && Array.isArray(value.entries) && value.entries.length <= 500 && value.entries.every(e => e && Object.keys(e).every(k=>['id','issuer','account','group','icon','algorithm','digits','period','reference'].includes(k)) && /^[0-9a-f-]{36}$/.test(e.id) && /^vault:[0-9a-f-]{36}$/.test(e.reference) && [e.issuer,e.account,e.group,e.icon||''].every(v=>typeof v==='string'&&v.length<=128&&!/[\x00-\x1f\x7f]/.test(v)) && ['sha1','sha256','sha512'].includes(e.algorithm) && [6,7,8].includes(e.digits) && Number.isInteger(e.period) && e.period>=1 && e.period<=86400) && new Set(value.entries.map(e=>e.id)).size===value.entries.length;
   }
@@ -46,9 +46,10 @@ function createAuthenticatorIPC({ desktop, directory, safeStorage, now = Date.no
     state = next;
   }
   function status() { return {available:ready && vault.availability().available, entries:state.entries.map(metadata), clock:now(), clockWarning:"CLOCK_NOT_EXTERNALLY_VERIFIED",historyConfigured:!!historyReference(),historyUnlocked:historyUntil>now()}; }
-  const fields = {status:[], begin:["input","revealAccepted"], generate:["account","revealAccepted"], confirm:["pendingId","code"], cancel:[], cancelPairing:['pendingId'], codes:[], remove:["ids"], organize:["id","group","direction"],edit:['id','issuer','account','icon'],bulkGroup:['ids','group'],historySetup:['password','confirmation'],historyUnlock:['password'],historyLock:[],history:['before'],historyRead:['revision'],historyRestore:['revision','expectedRevision','accepted']};
-  async function run(event, serialized) {
-    if (!desktop.admitted(event)) return {ok:false,code:"UNAUTHORIZED"};
+  const fields = {status:[], begin:["input","revealAccepted"], generate:["account","revealAccepted"], confirm:["pendingId","code"], cancel:[], cancelPairing:['pendingId'], codes:[], remove:["ids"], organize:["id","group","direction"],edit:['id','issuer','account','icon'],bulkGroup:['ids','group'],historySetup:['password','confirmation'],historyUnlock:['password'],historyChangePassword:['currentPassword','password','confirmation'],historyLock:[],history:['before'],historyRead:['revision'],historyRestore:['revision','expectedRevision','accepted'],historyLabel:['revision','label']};
+  async function run(event, serialized, admittedGeneration) {
+    const admitted=()=>generation===admittedGeneration&&desktop.admitted(event);
+    if (!admitted()) return {ok:false,code:"UNAUTHORIZED"};
     try {
       if (typeof serialized !== "string" || Buffer.byteLength(serialized) > 8192) throw Error();
       const input = parse(serialized);
@@ -101,7 +102,7 @@ function createAuthenticatorIPC({ desktop, directory, safeStorage, now = Date.no
           if(reference||input.confirmation!==input.password)throw Error();
           const salt=randomBytes(32),hash=await derive(input.password,salt,32,{N:32768,r:8,p:1,maxmem:67108864});
           let protectedReference;
-          try {protectedReference=vault.write(JSON.stringify({salt:salt.toString('hex'),hash:hash.toString('hex')}));fs.writeFileSync(accessFile,JSON.stringify({reference:protectedReference}),{flag:'wx',mode:0o600});}catch{if(protectedReference)vault.remove(protectedReference);throw Error();}finally{salt.fill(0);hash.fill(0);}
+          try {if(!admitted())throw Error();protectedReference=vault.write(JSON.stringify({salt:salt.toString('hex'),hash:hash.toString('hex')}));fs.writeFileSync(accessFile,JSON.stringify({reference:protectedReference}),{flag:'wx',mode:0o600});}catch{if(protectedReference)vault.remove(protectedReference);throw Error();}finally{salt.fill(0);hash.fill(0);}
         }else{
           if(!reference)throw Error();
           const record=parse(vault.read(reference));if(!record||!/^[a-f0-9]{64}$/.test(record.salt)||!/^[a-f0-9]{64}$/.test(record.hash))throw Error();
@@ -109,22 +110,33 @@ function createAuthenticatorIPC({ desktop, directory, safeStorage, now = Date.no
           let matched;try{matched=timingSafeEqual(expected,actual);}finally{expected.fill(0);actual.fill(0);}
           if(!matched){historyAttempts++;historyUntil=0;if(historyAttempts>=5){historyWait=now()+30000;historyAttempts=0;}return {ok:false,code:'HISTORY_LOCKED'};}
         }
-        historyAttempts=0;historyUntil=now()+300000;result=status();
+        if(!admitted())throw Error();historyAttempts=0;historyUntil=now()+300000;result=status();
+      } else if(input.action==='historyChangePassword'){
+        historyOpen();if(now()<historyWait||typeof input.currentPassword!=='string'||input.currentPassword.length>1024||typeof input.password!=='string'||input.password.length<12||input.password.length>1024||input.password!==input.confirmation)throw Error();
+        const reference=historyReference();if(!reference)throw Error();const record=parse(vault.read(reference));if(!record||!/^[a-f0-9]{64}$/.test(record.salt)||!/^[a-f0-9]{64}$/.test(record.hash))throw Error();
+        const old=await derive(input.currentPassword,Buffer.from(record.salt,'hex'),32,{N:32768,r:8,p:1,maxmem:67108864}),expected=Buffer.from(record.hash,'hex');
+        let matched;try{matched=timingSafeEqual(old,expected);}finally{old.fill(0);expected.fill(0);}
+        if(!matched){historyUntil=0;historyAttempts++;if(historyAttempts>=5){historyWait=now()+30000;historyAttempts=0;}throw Error();}
+        const salt=randomBytes(32),hash=await derive(input.password,salt,32,{N:32768,r:8,p:1,maxmem:67108864});let nextReference;const temporary=`${accessFile}.${randomUUID()}.tmp`;
+        try{if(!admitted())throw Error();historyOpen();nextReference=vault.write(JSON.stringify({salt:salt.toString('hex'),hash:hash.toString('hex')}));fs.writeFileSync(temporary,JSON.stringify({reference:nextReference}),{flag:'wx',mode:0o600});fs.renameSync(temporary,accessFile);}
+        catch{if(nextReference)vault.remove(nextReference);throw Error();}finally{salt.fill(0);hash.fill(0);try{fs.unlinkSync(temporary);}catch{}}
+        historyUntil=0;historyAttempts=0;result={changed:true};
       } else if(input.action==='historyLock'){historyUntil=0;result={locked:true};}
       else if(input.action==='history'){
         historyOpen();if(!Number.isSafeInteger(input.before)||input.before<0)throw Error();
         const revisions=history.revisions().filter(r=>input.before===0||r<input.before).sort((a,b)=>b-a);
         result={currentRevision:state.revision,revisions:revisions.slice(0,25),hasMore:revisions.length>25,expires:historyUntil};
-      } else if(input.action==='historyRead'||input.action==='historyRestore'){
+      } else if(input.action==='historyRead'||input.action==='historyRestore'||input.action==='historyLabel'){
         historyOpen();if(!Number.isSafeInteger(input.revision)||input.revision<0)throw Error();
         const snapshot=parse(history.read(input.revision));if(!validState(snapshot)||snapshot.revision!==input.revision)throw Error();
-        if(input.action==='historyRead')result={revision:snapshot.revision,entries:snapshot.entries.map(metadata),currentRevision:state.revision};
+        if(input.action==='historyRead')result={revision:snapshot.revision,entries:snapshot.entries.map(metadata),currentRevision:state.revision,labels:history.labels().filter(item=>item.revision===snapshot.revision).slice(-100).map(item=>({label:item.label,timestamp:item.timestamp}))};
+        else if(input.action==='historyLabel'){if(typeof input.label!=='string'||!input.label.trim()||input.label.length>120||/[\x00-\x1f\x7f]/.test(input.label))throw Error();history.label(input.revision,input.label.trim());result={labelled:true};}
         else {if(input.accepted!==true||input.expectedRevision!==state.revision)throw Error();for(const entry of snapshot.entries)vault.read(entry.reference);save(snapshot.entries);result=status();}
       }
-      if (!desktop.admitted(event)) { pending.clear(); return {ok:false,code:"UNAUTHORIZED"}; }
+      if (!admitted()) { pending.clear(); historyUntil=0; return {ok:false,code:"UNAUTHORIZED"}; }
       return {ok:true,result};
     } catch { return {ok:false,code:"AUTHENTICATOR_UNAVAILABLE"}; }
   }
-  return {request(event,input) { const result=queue.then(()=>run(event,input)); queue=result.then(()=>undefined,()=>undefined); return result; }};
+  return {revoke(){generation++;pending.clear();historyUntil=0;},request(event,input) { const admittedGeneration=generation;const result=queue.then(()=>run(event,input,admittedGeneration)); queue=result.then(()=>undefined,()=>undefined); return result; }};
 }
 module.exports={createAuthenticatorIPC};

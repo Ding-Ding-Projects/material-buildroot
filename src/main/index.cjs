@@ -18,6 +18,8 @@ const { createWorkspaceService } = require("./workspace-service.cjs");
 const { createWorkspaceIPC } = require("./security/workspace-ipc.cjs");
 const { createOperationsService } = require("./operations-service.cjs");
 const { createExperienceIPC } = require("./experience-policies.cjs");
+const {createWorkspaceTabRegistry}=require('./workspace-tabs.cjs');
+const workspaceTabs=createWorkspaceTabRegistry();
 const { createUpdateHost } = require("./updates/host.cjs");
 const { createVault } = require("./security/vault.cjs");
 const { createAuthenticatorIPC } = require("./security/authenticator-controller.cjs");
@@ -124,6 +126,8 @@ else {
         metadata,
         storageReady: !!store,
       });
+      workspaceTabs.register(window,desktop,url);
+      ipcMain.handle('studio:workspace-tabs',(event,value)=>workspaceTabs.request(event,value));
       let sharedModeService;
       try {
         // Common protocol location, separate from this application's workspace/profile.
@@ -179,6 +183,8 @@ else {
         }
       });
       const authenticatorIPC = createAuthenticatorIPC({desktop, directory:app.getPath("userData"), safeStorage});
+      window.webContents.on("did-start-navigation", () => authenticatorIPC.revoke());
+      window.webContents.on("destroyed", () => authenticatorIPC.revoke());
       ipcMain.handle("studio:authenticator", (event,value) => authenticatorIPC.request(event,value));
       const experienceIPC = createExperienceIPC({ desktop, directory: app.getPath("userData"), safeStorage, openFolder: folder => shell.openPath(folder), schoolMode: () => sharedModeService?.status()?.active !== false });
       ipcMain.handle("studio:experience-policies", (event, value) => experienceIPC.request(event, value));
