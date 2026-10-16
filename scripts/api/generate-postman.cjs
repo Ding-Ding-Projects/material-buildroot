@@ -53,9 +53,13 @@ const variables=[
 if(expanded)variables.push(
  {key:'clientId',value:EXAMPLE_UUID,description:'Replace with a fresh UUID before pairing; retain it for this session only.'},
  {key:'browser',value:'edge',description:'Exact native-reviewed compatibility choice: edge or chrome; not device attestation.'},
- ...['recordId','fileId','destinationId','sourceId','directoryId','previewId','selectionId'].map(key=>({key,value:EXAMPLE_UUID,description:'Replace with the exact identity returned by an admitted prior operation in this session.'})),
+ ...['recordId','fileId','destinationId','sourceId','directoryId','previewId','selectionId','challengeId','choiceId','targetId','transferId'].map(key=>({key,value:EXAMPLE_UUID,description:'Replace with the exact identity returned by an admitted prior operation in this session.'})),
  ...['configRevision','defconfigId','packageId'].map(key=>({key,value:'0'.repeat(64),description:'Replace with the exact source-bound digest returned by the host; this is an example only.'})),
  {key:'sourceRevision',value:'0'.repeat(40),description:'Replace with a reviewed immutable source commit.'},
+ {key:'outputSha256',value:'0'.repeat(64),description:'Replace with the exact digest reported for the selected remote output.'},
+ {key:'remoteOutputName',value:'rootfs.ext4',description:'Replace with an exact output name returned by this session-owned remote job.'},
+ {key:'sourceRepository',value:'example/buildroot-source',description:'Replace with the public source explicitly reviewed by native setup.'},
+ {key:'executionRepository',value:'example/buildroot-source',description:'Use the reviewed source or existing execution destination; choosing another destination requires its separate native approval.'},
  ...['modelName','serverVersion','loaderVersion','installerVersion','pluginVersionId','pluginProjectId','serverId','rollbackId','sourceRef','editorId'].map(key=>({key,value:'REPLACE_FROM_ACTUAL_REPLY',description:'Use a value discovered and admitted by the corresponding host workflow; never assume this placeholder exists.'})),
  {key:'sshHost',value:'builder.example.org',description:'Host alias explicitly admitted by native setup; illustrative only.'},
  {key:'remoteDirectory',value:'/home/builder/servers',description:'Native-reviewed remote destination; illustrative only.'}

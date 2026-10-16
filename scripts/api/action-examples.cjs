@@ -1,6 +1,15 @@
 'use strict';
 // Documentation examples only. Returned IDs must come from this session's actual earlier replies.
 const keys={
+ 'config.trust.preview':'workspaceId domain','config.trust.grant':'workspaceId challengeId',
+ 'runtimes.list':'','runtimes.configure':'workspaceId choiceId uid gid','runtimes.prepare':'workspaceId',
+ 'runtimes.wsl.project':'choiceId',
+ 'product.inspect':'sourceRepository executionRepository mode','product.runners':'selectionId',
+ 'product.selectRunner':'selectionId kind runnerId','product.preview':'selectionId sourceRevision target',
+ 'product.publish':'previewId','product.export':'previewId',
+ 'remote.list':'','remote.enroll':'','remote.reconnect':'targetId','remote.transfer':'workspaceId targetId',
+ 'remote.start':'targetId transferId target parallelism','remote.adopt':'id','remote.observe':'id',
+ 'remote.cancel':'id','remote.outputs':'id','remote.download':'id name sha256',
  'config.details':'workspaceId domain revision symbol',
  'config.inspect':'workspaceId domain offset query',
  'config.apply':'workspaceId domain revision symbol change',
@@ -43,6 +52,10 @@ const keys={
  'outputs.inspect':'workspaceId fileId','outputs.checksum':'workspaceId fileId expected'
 };
 const defaults={
+ challengeId:'{{challengeId}}',choiceId:'{{choiceId}}',uid:1000,gid:1000,
+ sourceRepository:'{{sourceRepository}}',executionRepository:'{{executionRepository}}',mode:'source',
+ runnerId:null,sourceRevision:'{{sourceRevision}}',targetId:'{{targetId}}',transferId:'{{transferId}}',
+ parallelism:1,name:'{{remoteOutputName}}',sha256:'{{outputSha256}}',
  workspaceId:'{{workspaceId}}',domain:'buildroot',revision:'{{configRevision}}',symbol:'BR2_SHARED_LIBS',
  offset:0,query:'',change:{type:'bool',value:true},id:'{{recordId}}',fileId:'{{fileId}}',
  destinationId:'{{destinationId}}',sourceId:'{{sourceId}}',sourceIds:['{{sourceId}}'],
@@ -69,6 +82,8 @@ function example(action){
  if(action==='servers.start'){args.target='local-process';args.host='';}
  if(action==='servers.flavours')args.flavour='paper';
  if(action==='guests.disk.create')args.format='vdi';
+ if(action==='product.selectRunner')args.kind='hosted';
+ if(action==='product.preview')args.target='build';
  if(action==='outputs.browse')args.directoryId='root';
  return args;
 }
