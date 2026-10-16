@@ -1,0 +1,59 @@
+name: Release timing annotation
+on:
+  workflow_run:
+    workflows: ['Windows release']
+    types: [completed]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: release-timing-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}
+  queue: max
+  cancel-in-progress: false
+jobs:
+  annotate:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: windows-2025
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Bootstrap pinned publication CLI
+        shell: powershell
+        run: .\scripts\release\bootstrap-gh.ps1
+      - name: Bootstrap only pinned annotation runtime
+        shell: powershell
+        run: |
+          . .\scripts\build\toolchains.ps1
+          $manifest = Get-Content build-manifest.json -Raw | ConvertFrom-Json
+          $spec = @($manifest.toolchains | Where-Object id -eq 'node')
+          if ($spec.Count -ne 1) { throw 'Pinned annotation runtime missing.' }
+          $runtime = Install-PinnedTool $spec[0] (Join-Path $env:RUNNER_TEMP 'release-timing-tools')
+          "TIMING_NODE=$(Join-Path $runtime 'node.exe')" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Annotate original terminal workflow timing
+        shell: powershell
+        run: |
+          & $env:TIMING_NODE scripts/release/annotate-timing.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Collect safe annotation evidence
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: powershell
+        env:
+          ANNOTATION_JOB_STATUS: ${{ job.status }}
+        run: |
+          $destination = Join-Path $env:RUNNER_TEMP 'release-timing-evidence'
+          New-Item -ItemType Directory -Path $destination -Force | Out-Null
+          @{annotationRunId=$env:GITHUB_RUN_ID; trustedSource=$env:GITHUB_SHA; status=$env:ANNOTATION_JOB_STATUS} | ConvertTo-Json | Set-Content (Join-Path $destination 'run.json')
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        continue-on-error: true
+        with:
+          name: release-timing-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-timing-evidence
+          if-no-files-found: warn
+          retention-days: 7

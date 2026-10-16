@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "source": "7a6b2b5ee5d23f9029d3128d9961cb8aef52cf79",
+  "tag": "v0.1.0-build.49.1",
+  "releaseUrl": "https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.49.1",
+  "normal": true,
+  "workflow": {
+    "id": 38886263001,
+    "attempt": 1,
+    "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38886263001",
+    "started": "2026-10-16T10:17:41Z",
+    "publicationCompleted": "2026-10-16T10:21:23Z",
+    "duration": "00:03:42",
+    "timingNotesReadback": "exact after terminal metadata correction"
+  },
+  "assets": [
+    {
+      "name": "MaterialBuildroot-0.1.0-full.nupkg",
+      "bytes": 162355680,
+      "sha256": "5f9635c78e613eaa69fdff8cba735d27826cddff406607d95b5d4c6589432937",
+      "localDownloadVerified": false
+    },
+    {
+      "name": "provenance.json",
+      "bytes": 1891,
+      "sha256": "29c1f23a81ea0221dce633e9dc1d08381696139efd35fd38263f58d5e443b0b0",
+      "localDownloadVerified": true
+    },
+    {
+      "name": "RELEASES",
+      "bytes": 88,
+      "sha256": "99d7a7f683b1cd00de7444a3d31f573b1269d43d1fa7a2cf5fc4483789b0b814",
+      "localDownloadVerified": true
+    },
+    {
+      "name": "Setup.exe",
+      "bytes": 163054080,
+      "sha256": "2c36a3916958d45db2836cbf3a031cdfeabb2ff118438231cd37bd43fd9ccc7c",
+      "localDownloadVerified": false
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 334,
+      "sha256": "a3b5d23bc33e0f5137fe4349b73fcceab895f9b96679502aeca00a3ffd31467c",
+      "localDownloadVerified": true
+    }
+  ],
+  "publicPhotoReference": {
+    "state": "selected",
+    "id": "hk-dish-0002",
+    "name": {
+      "en": "Scallop Har Gow",
+      "zhHant": "帶子蝦餃"
+    },
+    "filename": "hk-dish-0002-scallop-har-gow.png",
+    "catalogRevision": "7e180e19f9a117ea38e30955e8ff111a870bdfa2",
+    "catalogUrl": "https://raw.githubusercontent.com/Ding-Ding-Projects/dim-sum-photos/7e180e19f9a117ea38e30955e8ff111a870bdfa2/catalog/index.json",
+    "photoUrl": "https://github.com/Ding-Ding-Projects/dim-sum-photos/releases/download/catalog-v1/hk-dish-0002-scallop-har-gow.png",
+    "bytes": 2398458,
+    "sha256": "a7c6469b52794d32ceedf3fd53e38b3afc493e1062e261f21e5e6f8a201e12d5",
+    "project": "Ding-Ding-Projects/material-buildroot",
+    "releaseTag": "v0.1.0-build.49.1",
+    "historyCount": 45
+  },
+  "limits": [
+    "Package and installer were not downloaded or installed by this check.",
+    "Published asset digests/sizes match provenance; three small metadata downloads matched independently.",
+    "No installer, update, fresh-environment or complete product acceptance."
+  ]
+}

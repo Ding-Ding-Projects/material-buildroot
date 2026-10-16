@@ -1,5 +1,9 @@
 # Active implementation and verification handoff, 2026-10-16
 
+## Current timing implementation
+
+The future publisher/annotation route is implemented with six passing focused tests, syntax/YAML validation and bounded independent security/correctness review. A completed original workflow supplies first-job start through final publication-step completion; its later job completion is separate evidence. Trusted default-branch code alone edits the owned block and verifies exact source/tag/normal-release identity and unchanged assets. Hosted execution remains pending. Release 49.1's existing notes were separately corrected and read back against actual API duration 00:03:42. The complete roadmap, installer/update and feature acceptance remain incomplete.
+
 ## Feature audit checkpoint
 
 The source audit is retained as a provisional snapshot at e722cf1, with 109 exact identities, 436 surface records and one public audit article per identity. No whole feature is verified complete. Independent review confirmed source/identity integrity; seven applicability questions remain partial, repeated traces are explicitly shared context, and 1,908 detailed rows are not independently admitted public clause projections. The 427 existing public requirement IDs remain linked. Counts: 71 partial, 21 missing, six implemented-unverified, 11 scoped conditional exclusions. Current browser/markup deltas and unrun acceptance remain separate. Continue actual implementation rather than treating this inventory as delivery.

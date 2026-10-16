@@ -1,5 +1,9 @@
 # Latest evidence continuation, 2026-10-16
 
+## Terminal release timing correction
+
+The publisher now leaves timing explicitly pending until a separate completed-workflow listener reads the original attempt's actual first-job start and final publication-step completion. The listener executes reviewed default-branch code, never triggering-branch code or artifacts, validates exact source/tag/normal-release identity, edits only its owned timing block and reads back unchanged assets. Six focused cases, syntax/YAML checks and independent security/correctness review passed. Hosted trigger/bootstrap/annotation remain unverified. Release 49.1 was manually corrected from terminal API records and read back at `00:03:42`; its five published digests and three independent metadata downloads are recorded separately. Source publication remains a checkpoint, not complete product acceptance.
+
 ## Complete identity source inventory, incomplete delivery
 
 The preserved source audit at `e722cf1b91ccc46465eb449df4abd84d9d6df2a1` accounts for all 109 public identities exactly once and 436 surface rows. Independent review confirmed the identifier/source hashes and found 62 applicability differences: 55 have explicit scope interpretations, seven remain partial applicable obligations. Shared feature traces are not independent surface proof. The public overview links all 427 ledger requirement IDs and 109 individual source-audit articles; all 1,908 detailed private audit rows remain outside independent public clause admission. Provisional counts are 71 partial, 21 missing, six implemented-unverified and 11 scoped conditional exclusions, with no whole-feature verified-complete result. Later browser and markup repairs retain separate delta evidence. See the [audit and limits](docs/evidence/tasks/PH01-delivery-audit.md).

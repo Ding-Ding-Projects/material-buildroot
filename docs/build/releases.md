@@ -1,5 +1,9 @@
 # Unsigned Windows releases
 
+## Verified build 49.1 metadata
+
+Normal release [v0.1.0-build.49.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.49.1) binds to `7a6b2b5ee5d23f9029d3128d9961cb8aef52cf79`. All five published asset sizes and digests match, and the three small metadata files were independently downloaded. The [sanitized receipt](../evidence/native-windows-20261016/release-v0.1.0-build.49.1.json) does not claim installer/package download or installation. Its Scallop Har Gow original is public and returned HTTP 200 to a HEAD request; no photo bytes were acquired. The terminal original workflow API supplied first-job start `2026-10-16T10:17:41Z` and publication-step completion `2026-10-16T10:21:23Z`, duration `00:03:42`. Corrected notes and unchanged assets were read back exactly. Future automatic annotation has focused source checks and independent review; hosted delivery remains pending.
+
 ## Published version 0.1.0
 
 Automatic workflow [38682722692](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38682722692) subsequently completed successfully and created normal release `v0.1.0-build.1.1`, superseding the running observation below. The first `v0.1.0` direct download remains stable.
@@ -41,3 +45,18 @@ The `package` job requires Windows PowerShell/.NET and archive support supplied 
 ## Branding
 
 `assets/branding/mark.json` is the geometric source for the project's existing layered-build mark. `scripts/build/branding.cjs` deterministically generates SVG, 256-pixel PNG and ICO entries at 16, 24, 32, 48, 64, 128 and 256 pixels. `--check` checks exact output bytes. The desktop window, executable and Squirrel setup use the owned ICO. The documentation generator copies that icon to `site/assets/icon.ico`; the installer metadata uses its exact deployed project-owned URL. Live delivery of that URL must be verified before publication is claimed.
+
+
+## Terminal workflow timing
+
+The publisher leaves an owned timing block explicitly pending throughout creation and all asset/tag readbacks. It never labels a local pre-readback clock sample as workflow completion. A separate `workflow_run: completed` annotation listens only to the Windows release workflow and revalidates its successful same-repository push/manual attempt through GitHub CLI.
+
+The annotator executes only reviewed default-branch code at the completion workflow SHA. It never checks out the triggering branch, restores a shared cache, downloads run artifacts, evaluates release notes or executes source package metadata. A minimal default-branch checkout supplies the annotation helper, verified portable Node bootstrap and pinned GitHub CLI bootstrap. The job requires Windows PowerShell/.NET archive support, checkout v4, Node 24.22.0 from the trusted build manifest, GitHub CLI 2.96.0 from the existing pinned bootstrap, and upload-artifact v4 for safe annotation evidence. It installs only its missing pinned runtime; no npm dependencies, product build, tests or lint run. Hosted bootstrap and event delivery remain unverified until real execution.
+
+Timing comes from the complete bounded job inventory of the exact original attempt: earliest job `started_at`, the final publication step `completed_at`, and latest terminal job `completed_at`. The required Workflow completed field is the final release-publication step completed_at, and duration ends exactly at that step after every asset/tag readback. The latest terminal job completion is separately labelled additional evidence for final output collection; it never substitutes for the headline or duration. No unsupported run completion field or mutable `updated_at` is substituted. Missing, invalid, unsuccessful, incomplete or inconsistent metadata leaves timing incomplete and fails only the annotation operation. The original successful publication remains separately recorded.
+
+The annotation verifies source/version/run/attempt, normal-release identity and exact tag before editing only a uniquely delimited timing block. It reads the notes back exactly and confirms assets are unchanged. It creates no release, tag or base-repository push and therefore does not recursively publish. Rerunning the same completed attempt is idempotent. The listener must exist on the default branch; earlier runs without the owned block are not silently rewritten.
+
+The measured timestamps belong exclusively to the original release workflow. The annotation operation and its own terminal outcome are a separate evidence boundary and are never included in the original duration. A local annotation timestamp cannot claim the annotation workflow has already completed. Overall timing acceptance requires the release-note readback and the separate annotation workflow terminal success. This resolves the self-referential timestamp problem without moving the premature claim to another step.
+
+Official platform references: [workflow completion events and trusted default-branch execution](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run) and [attempt-specific job timing metadata](https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run-attempt).
