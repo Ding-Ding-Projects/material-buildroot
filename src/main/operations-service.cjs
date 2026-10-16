@@ -54,6 +54,9 @@ const fields = {
   'execution.discover': ['selectionId'],
   'execution.selectRunner': ['selectionId','kind','runnerId','billingConsent'],
   'execution.revoke': ['selectionId'],
+  "execution.workflowPreview": ["selectionId", "model", "text"],
+  "execution.workflowPublish": ["previewId", "sha256", "consent"],
+  "execution.workflowAdmission": ["selectionId"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -1226,6 +1229,9 @@ function createOperationsService({
       case 'execution.discover': return executionSetup.discover(request.selectionId);
       case 'execution.selectRunner': return executionSetup.selectRunner(request);
       case 'execution.revoke': return {revoked:executionSetup.revoke(request.selectionId)};
+      case "execution.workflowPreview": return executionWorkflows.preview(request);
+      case "execution.workflowPublish": return executionWorkflows.publish(request);
+      case "execution.workflowAdmission": return executionWorkflows.admission(request);
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
