@@ -1,5 +1,13 @@
 # Phased implementation roadmap
 
+## Current owner direction, 2026-10-16
+
+- [x] Resume implementation and establish an actual Windows desktop build plus six native build-toolchain checks at source `1b7ea15359ac2870a9f8bc02889770db4cb48d08`. This is bounded build/test evidence, not phase acceptance.
+- [ ] Repair the failing native full-suite baseline (444 discovered, 361 passed, 74 failed, nine skipped), retain explicit unsupported cases and record a new combined verdict.
+- [ ] Complete reviewed scheduled-preferences consumers and their browser/native acceptance.
+
+Windows runtime testing is now requested. This supersedes the historical deferral in the status text below. See [native continuation evidence](docs/evidence/native-windows-20261016/README.md).
+
 Status: complete-product implementation is active. The owner requested implementation across all phases, a practical in-application onboarding wizard, frequent checkpoints on main, and deferral of Windows runtime testing. New host services and Material workspace controls have local tests; authored code, browser fixtures, packaged builds, native runtime acceptance and A/D/C parity remain separate verdicts. The roadmap retains its complete scope.
 
 ## Execution and checkbox rules

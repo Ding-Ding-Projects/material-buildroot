@@ -1,3 +1,20 @@
+# Native Windows continuation, 2026-10-16
+
+The owner resumed complete PH00–PH10 implementation and requested actual Windows tests. The earlier stop and runtime-test deferral below are historical and superseded. Work remains on main.
+
+Baseline source 1b7ea15359ac2870a9f8bc02889770db4cb48d08 built successfully through build.bat /s --target desktop. Build receipt SHA-256: b834005e5e2888f615e9ddfc7fc8b607b6c3752aa66786f6fa9663a53ff897aa. Six focused native build tests passed without skips. Complete Node baseline: 444 tests, 361 pass, 74 fail, nine skipped. Reviewed discovery/TLS/Kconfig repair: 47 tests, 44 pass, zero fail, three explicit skips. Native vendor checkout attributes now preserve exact provenance-bound bytes. See docs/evidence/native-windows-20261016/README.md.
+
+The actual packaged workspace launched through Lowlevel on a named hidden Windows desktop with an isolated verification profile, exact process ownership and one exact CDP page. Runtime discovery invoked the actual host and settled; its recorded interval had no console, exception or page errors. A later ownership query timed out before attachment and is not onboarding proof. Captures and private process receipts remain locally retained pending sanitized promotion and owned teardown.
+
+The reviewed native fixture batch is being delivered independently. Further executable/journal/permission fixture repairs and scheduled-preferences renderer work remain active, with explicit non-overlapping ownership. Do not stage unfinished files belonging to another writer or treat a focused passing subset as a new full-suite result. Finish each batch, review assertions, rerun affected checks, preserve it and publish main promptly. The first native fixture batch received independent correctness and security review with no actionable findings.
+
+Remaining work: complete native test repairs and fresh full-suite verdict; finish schedule editor, effective preference consumers and source enrollment forms; protect drafts across every navigation/close route; verify latest workspace-tab/catalogue requirements; build/capture the settled source; complete real Linux builds, guest lifecycle, installer/update and all A/D/C roadmap acceptance. WSL is not installed and Docker is not currently discoverable. No complete product acceptance is claimed.
+
+The private instruction source was separately reconciled, synchronized and published. No private payload belongs in this public repository. Status Hub health responded, but no configured session-ingest credential was available. Project-board discovery lacked read:project, so further Project work is skipped. Existing implementation discussion 2 and issue 1 retain progress.
+
+The earlier detailed preservation record below retains source/release/gallery provenance. Its stop directions do not override the current owner request.
+
+---
 # Material Buildroot continuation handoff
 
 The owner requested the complete product roadmap, a modern interactive Material desktop workspace, functional canvas editors, practical application onboarding, icon controls, motion with reduced-motion support, interactive documentation, expanded genuine captures and separate screenshot archives. Work stays on main. Desktop GUI uses the designated GUI model, other implementation the designated coding model, and website/public gallery work the designated website model. Windows runtime testing is deferred. The latest instruction requests immediate preservation and scoped cleanup; new implementation has stopped. The full roadmap remains incomplete. No verified allowance reading or goal-state tool is available.

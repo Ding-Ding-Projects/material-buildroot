@@ -1,3 +1,4 @@
+import hostTools from './helpers/host-tools.cjs';
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -34,7 +35,7 @@ const makeRule = (source) => ({
 async function fixture(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "schedule-tls-"));
   execFileSync(
-    "openssl",
+    hostTools.hostTool('openssl'),
     [
       "req",
       "-x509",

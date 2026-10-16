@@ -1,5 +1,11 @@
 # Handoff
 
+## Native Windows continuation, 2026-10-16
+
+The owner resumed complete-roadmap implementation and explicitly requested Windows tests, superseding the older deferral below. Baseline source `1b7ea15359ac2870a9f8bc02889770db4cb48d08` built successfully through the exact desktop entrypoint. Six focused native toolchain tests passed without skips. The complete Node baseline reports 444 tests, 361 passed, 74 failed and nine skipped. A later focused discovery/TLS/Kconfig batch reports 44 passed, zero failed and three explicit skips. See [native continuation evidence](docs/evidence/native-windows-20261016/README.md) for source boundaries and limitations.
+
+Native checkout newline conversion changed pinned Kconfig vendor bytes; exact-byte attributes and a provenance regression repair that checkout behavior without changing expected hashes. Other native fixture repairs and the reviewed scheduled-preferences renderer are in progress. A real packaged workspace launched on a named hidden Windows desktop and runtime discovery was exercised against the host. Installer, successful Linux builds, guest lifecycle and full phase acceptance remain open. Older source/capture/test records retain their historical boundaries.
+
 ## Public gallery preservation, 2026-10-15
 
 The source preservation checkpoint is `d236a1fddc8c57609ab9697db0e64979dbe7923a`; its Windows release and Pages workflows passed. The unfinished schedule editor remains an inactive, byte-verified recovery patch. New implementation remains stopped, and the full roadmap is incomplete.

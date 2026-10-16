@@ -1,3 +1,5 @@
+import fixtureLinks from './helpers/filesystem-links.cjs';
+import hostTools from './helpers/host-tools.cjs';
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -216,13 +218,15 @@ test("corrupt/foreign/duplicate/linked metadata is preserved and oversized reads
     await assert.rejects(store.list());
     assert.equal(fs.readFileSync(f.file, "utf8"), text);
   }
+  await t.test("real file symbolic-link metadata", async linkTest => {
   fs.unlinkSync(f.file);
   const outside = path.join(f.directory, "outside");
   fs.writeFileSync(outside, "foreign");
-  fs.symlinkSync(outside, f.file);
+  try { fixtureLinks.symlinkSync(outside, f.file); } catch (error) { if (process.platform === "win32" && error.code === "EPERM") { linkTest.skip("File symbolic-link privilege is unavailable; linked metadata acceptance remains unverified."); return; } throw error; }
   await assert.rejects(store.list());
   await assert.rejects(store.save({ ...input, expectedRevision: null }));
   assert.equal(fs.readFileSync(outside, "utf8"), "foreign");
+  });
 });
 test("same-revision edits during vault await are preserved as conflicts without publishing new reference", async (t) => {
   const f = fixture(t),
@@ -422,7 +426,7 @@ test("live enrollment changes and failed reads revoke prior actual HTTPS generat
     { execFileSync } = await import("node:child_process"),
     directory = fs.mkdtempSync(path.join(os.tmpdir(), "enrollment-live-"));
   execFileSync(
-    "openssl",
+    hostTools.hostTool('openssl'),
     [
       "req",
       "-x509",

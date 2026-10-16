@@ -1,3 +1,4 @@
+import hostTools from './helpers/host-tools.cjs';
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -221,7 +222,7 @@ test("five actual HTTPS rules receive bounded worker attempts and failures emit 
     { execFileSync } = await import("node:child_process"),
     directory = fs.mkdtempSync(path.join(os.tmpdir(), "schedule-workers-"));
   execFileSync(
-    "openssl",
+    hostTools.hostTool('openssl'),
     [
       "req",
       "-x509",

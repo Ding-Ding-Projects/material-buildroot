@@ -9,7 +9,7 @@ const {
 } = require("../src/main/configuration/kconfig-adapter.cjs");
 const adapter = () =>
   createKconfigAdapter({
-    pythonExecutable: "/usr/bin/python3",
+    pythonExecutable: require('./helpers/host-tools.cjs').hostTool('python3'),
     admitted: true,
   });
 function flatten(tree) {
@@ -93,6 +93,7 @@ test("external duplicate descriptors and symlink escape are rejected", async (t)
   await assert.rejects(adapter()(roots), {
     code: "INVALID_EXTERNAL_DESCRIPTOR",
   });
+  await t.test("real file symbolic-link escape", async linkTest => {
   await fs.writeFile(
     path.join(roots.kconfig.externalRoots[1], "external.desc"),
     "name: FIRST\n",
@@ -100,11 +101,18 @@ test("external duplicate descriptors and symlink escape are rejected", async (t)
   await fs.rm(path.join(roots.kconfig.externalRoots[0], "package/Config.in"));
   const outside = path.join(roots.root, "outside.in");
   await fs.writeFile(outside, 'config BR2_ESCAPE\n bool "Escape"\n');
-  await fs.symlink(
+  try { await require('./helpers/filesystem-links.cjs').symlink(
     outside,
     path.join(roots.kconfig.externalRoots[0], "package/Config.in"),
-  );
+  ); } catch (error) {
+    if (process.platform === "win32" && error.code === "EPERM") {
+      linkTest.skip("File symbolic-link privilege is unavailable; escape acceptance remains unverified.");
+      return;
+    }
+    throw error;
+  }
   await assert.rejects(adapter()(roots), { code: "KCONFIG_HELPER_FAILED" });
+  });
 });
 test(
   "actual downloaded Buildroot source menu inspection with a granted external package",

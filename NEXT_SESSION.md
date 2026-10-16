@@ -1,5 +1,9 @@
 # Development continuation
 
+## Latest owner direction, 2026-10-16
+
+Complete-roadmap implementation has resumed, and Windows tests are explicitly requested. This supersedes the older stop and runtime-deferral statements below. Read the newest HANDOFF.md and [native evidence](docs/evidence/native-windows-20261016/README.md). Continue on main, preserve every nonignored owned change, finish the reviewed schedule consumers, and repair native test fixtures without weakening product security checks. Keep missing native, installer and runtime acceptance explicit.
+
 The latest owner request stopped new implementation for preservation and scoped cleanup. Read `CLOSEOUT_PROMPT.md` and the newest `HANDOFF.md` entry first. The schedule GUI draft is inactive and preserved under `design/archive/schedule-editor-in-progress/`; source-enrollment forms have not been started. Source preservation checkpoint `d236a1f` has successful Windows release and Pages workflows. The 51-image public gallery is live at `838befc`, with all image hashes and actual browser interactions verified in `gallery/live-delivery.json`. It uses the existing project Pages route because GitHub integration permissions blocked creation of a dedicated repository. The full roadmap remains incomplete. Do not interpret earlier active-work statements below as a direction to restart implementation during this preservation pass. On resumption, apply the updated one-project-per-workspace-tab and explicit New tab destination-catalog contract alongside the existing feature obligations.
 
 ## Active delivery instructions
