@@ -20,6 +20,8 @@ const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs"
 const { createDeploymentService } = require("./deployment/index.cjs");
 const { OutputViewers } = require("./deployment/output-viewers.cjs");
 const { SdkExport } = require("./deployment/sdk-export.cjs");
+const { FlashingRoutes } = require("./deployment/flashing-routes.cjs");
+const { FlashingNative } = require("./deployment/flashing-native.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -135,6 +137,11 @@ const fields = {
   "outputs.manifest": ["workspaceId", "fileIds"],
   "outputs.compare": ["workspaceId", "beforeId", "afterId"],
   "sdk.preview": ["workspaceId", "fileId"],
+  "flashing.state": ["workspaceId"],
+  "flashing.discover": ["workspaceId"],
+  "flashing.preview": ["workspaceId", "fileId", "route", "destinationId"],
+  "flashing.execute": ["workspaceId", "id", "reviewedIdentity"],
+  "flashing.cancel": ["workspaceId", "id"],
   "sdk.export": ["workspaceId", "id"],
   "artifacts.manifest": ["workspaceId", "paths"],
   "artifacts.compare": ["workspaceId", "beforePath", "afterPath"],
@@ -1217,6 +1224,23 @@ function createOperationsService({
   const deployments = new Map();
   const outputViewers = new Map();
   const sdkExports = new Map();
+  const flashingRoutes = new Map();
+  function flashing(id) {
+    project(id);
+    if (!flashingRoutes.has(id)) flashingRoutes.set(id, new FlashingRoutes({
+      viewer: outputViewer(id), guests: deployment(id),
+      native: new FlashingNative(process.resourcesPath || path.join(__dirname, "../../resources"), path.join(directory, "flashing", id)),
+      confirm: async plan => {
+        if(typeof dialog.showMessageBox !== "function") return false;
+        const answer = await dialog.showMessageBox(parentWindow, {type:"warning",buttons:["Cancel / 取消", "Continue / 繼續"],defaultId:0,cancelId:0,noLink:true,
+          title:"Review installation destination / 檢查安裝目的地",
+          message:plan.route === "physical" ? "All data on the exact selected disk will become unusable. / 所選磁碟全部資料將無法使用。" : "Create an owned guest with installation media. No operating system installation is claimed. / 建立附有安裝媒體嘅受管理虛擬機，並不代表完成安裝。",
+          detail:`${plan.destination.name}\n${plan.destination.identity || plan.destination.id}\n${plan.source.name}\nSHA-256: ${plan.source.sha256}\nBytes: ${plan.source.bytes}`});
+        return answer.response === 1;
+      },
+    }));
+    return flashingRoutes.get(id);
+  }
   function sdkExport(id) {
     project(id);
     if (!sdkExports.has(id)) sdkExports.set(id, new SdkExport({ viewer: outputViewer(id), manifest: relative => perform({ action: "artifacts.manifest", workspaceId: id, paths: [relative] }) }));
@@ -1749,6 +1773,11 @@ function createOperationsService({
       case "sdk.preview":
         if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
         return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).preview(request.fileId));
+      case "flashing.state": return flashing(request.workspaceId).state();
+      case "flashing.discover": return flashing(request.workspaceId).discover();
+      case "flashing.preview": return flashing(request.workspaceId).preview(request);
+      case "flashing.execute": return changeConfig(projectPaths(request.workspaceId), () => flashing(request.workspaceId).execute(request));
+      case "flashing.cancel": return flashing(request.workspaceId).cancel(request.id);
       case "sdk.export":
         if (typeof request.id !== "string" || request.id.length !== 36) reject("INVALID_REQUEST");
         return changeConfig(projectPaths(request.workspaceId), () => sdkExport(request.workspaceId).execute(request.id));
