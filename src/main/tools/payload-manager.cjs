@@ -4,6 +4,9 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { fail, digest, processRun } = require("./runtime.cjs");
 const TOOLS = Object.freeze({
+  vboxmanage: { names: ["vboxmanage"], args: ["--version"], version: /^([0-9]+\.[0-9]+[^\s]*)/m },
+  vmrun: { names: ["vmrun"], args: ["-T", "ws", "list"], capability: /^Total running VMs:\s*\d+\s*$/m },
+  "qemu-img": { names: ["qemu-img"], args: ["--version"], version: /qemu-img version\s+([^\s]+)/i },
   ffmpeg: {
     names: ["ffmpeg"],
     args: ["-version"],
@@ -217,7 +220,7 @@ function createPayloadManager({
       title: "Trust selected tool",
       message: "Allow this " + id + " executable?",
       detail:
-        "Selecting Allow executes its fixed version probe now and allows later tool operations. This executable runs with your account permissions. Choose only a trusted installation. It is user-selected and is not an application-bundled dependency.\n\n" +
+        "Selecting Allow executes its fixed version or availability probe now and allows later tool operations. This executable runs with your account permissions. Choose only a trusted installation. It is user-selected and is not an application-bundled dependency.\n\n" +
         file +
         "\nSHA-256: " +
         sha256,
@@ -236,7 +239,7 @@ function createPayloadManager({
       maxBytes: 65536,
     });
     const match = (output.stdout + "\n" + (output.stderr || "")).match(
-      TOOLS[id].version,
+      TOOLS[id].version || TOOLS[id].capability,
     );
     if (!match) fail("VERSION_PROBE_MISMATCH");
     if ((await digest(file)) !== sha256) fail("PAYLOAD_HASH_MISMATCH");
@@ -244,7 +247,8 @@ function createPayloadManager({
       toolId: id,
       path: file,
       sha256,
-      version: match[1].slice(0, 128),
+      // A capability response is not a product version, and its paths are never persisted.
+      version: TOOLS[id].version ? match[1].slice(0, 128) : "unverified",
       receiptId: randomUUID(),
       origin: "user-selected",
       admittedAt: new Date().toISOString(),

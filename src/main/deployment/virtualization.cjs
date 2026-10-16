@@ -5,6 +5,7 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { safePath, hashFile } = require("./artifacts.cjs");
 const { boundedProcess } = require("../execution/index.cjs");
+const { executable: admittedExecutable } = require("../tools/runtime.cjs");
 const defaultExecutor = async (file, args, options) =>
   boundedProcess(file, args, options).completion;
 function validateHardware(input = {}) {
@@ -105,7 +106,7 @@ class Virtualization {
     store,
     managedDirectory,
     executor = defaultExecutor,
-    executables = {},
+    resolveExecutable,
   }) {
     this.store = store;
     this.executor = executor;
@@ -179,7 +180,12 @@ class Virtualization {
     fs.renameSync(`${file}.tmp`, file);
   }
   async run(provider, args, timeoutMs = 30000) {
-    const result = await this.executor(this.executables[provider], args, {
+    const toolId = { virtualbox: "vboxmanage", vmware: "vmrun", qemu: "qemu-img" }[provider];
+    if (!toolId || typeof this.resolveExecutable !== "function")
+      throw new Error("MISSING_VERIFIED_PAYLOAD");
+    const file = await admittedExecutable({ payloadManager: { resolve: this.resolveExecutable } }, toolId);
+    const result = await this.executor(file, args, {
+      cwd: path.dirname(file),
       timeoutMs,
       maxBytes: 1024 * 1024,
     });
@@ -199,6 +205,7 @@ class Virtualization {
           available: true,
           output,
           versionVerified: provider === "virtualbox",
+          executableAdmission: "sha256-receipt",
           nativeAcceptance: "unverified",
           capabilities: {
             hardware: ["memoryMiB", "cpus", "firmware"],
