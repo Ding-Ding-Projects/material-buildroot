@@ -22,6 +22,8 @@ The root package lock pins desktop/reference npm dependencies and integrity valu
 
 The observed acquisition run obtained Node.js and MinGit, read back their versions and installed 311 locked packages. This proves acquisition on the current Windows host. It is not a fresh-operating-system receipt, and no production installer or runtime proof is implied.
 
+Extraction and complete-tree verification use extended-length Windows paths at the .NET file I/O boundary, including local-drive and UNC paths. This supports deeply nested package members in long checkout paths under Windows PowerShell 5.1 without changing host long-path settings. Verification walks entries without following reparse points and still checks every regular file against the pinned archive inventory. Child tools receive ordinary paths. Existing failed stages and acquisition caches remain preserved.
+
 ## Production and recovery boundaries
 
 A checkout-wide producer lock covers acquisition, npm mutation, renderer generation, package output activation and launch checks. A competing producer stops with an explicit ownership message. Every actual build requires committed source, an unchanged index and no untracked source files. The receipt binds commit, source tree, index tree, manifest schema/hash, target metadata, canonical command, package-lock hash and exact output bytes. Source identity is checked again after production and before a requested launch.
