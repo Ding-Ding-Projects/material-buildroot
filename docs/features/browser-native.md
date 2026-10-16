@@ -200,3 +200,9 @@ This is an inactive recovery checkpoint, not a production or runtime verdict. Ou
 粵語：呢個係未啟用嘅來源恢復點，八類工具已接入共用持久佇列來源，但仍有歷史輸出、原始輸入恢復、受保護歷史及分頁群組工作未完成。未有執行測試、實際介面操作或畫面驗收；之前建置證據唔適用於呢次延續。
 
 The subsequent source correction adds digest-checked historical-output download and original-input recovery. Each recovered input has its own explicit download control. Retained raster output now opens an actual bounded image preview instead of dispatching to a missing consumer. Legacy history without a stored digest remains unavailable through the verified recovery route. These controls remain unverified at runtime; protected authenticator history and tab/group restrictions are still unfinished.
+
+## Encrypted account snapshot continuation
+
+New account additions and removals retain the preceding account collection inside the encrypted vault payload. The unlocked history exposes only event metadata and whether a snapshot exists. A confirmed restore writes a new encrypted revision, retaining the replaced collection as another history snapshot. Old events without snapshots stay visible but cannot be restored. The existing optimistic storage revision protects writes against another tab. History is never silently pruned; fifty accounts, one hundred events and a 500,000-character serialized payload bound reject further mutations at capacity. Secrets never enter general queue history or plaintext exports.
+
+This source adds local snapshot restoration only. Encrypted backup-file import, password rotation, other remaining authenticator routes and tab/group restrictions are still incomplete. No build, test, runtime interaction or capture establishes this new source behavior yet.
