@@ -25,7 +25,7 @@ function createBuildProvenance({ directory, getJob, listJobs }) {
     return { roots: identity(item), intentDigest: hash(payload.intent), runtimeDigest: hash(payload.runtime) };
   }
   async function complete({ item, payload, jobId, signal, lineage }) {
-    if (payload.target !== "all") return { state: "unbound", reason: "non-image-build-target" };
+    if (!["all", "sdk"].includes(payload.target)) return { state: "unbound", reason: "non-image-build-target" };
     if (!fs.existsSync(path.join(item.output, ".config"))) return { state: "unbound", reason: "missing-configuration" };
     const roots = identity(item), started = Date.now();
     if (!lineage || hash(lineage.roots) !== hash(roots) || lineage.intentDigest !== hash(payload.intent) || lineage.runtimeDigest !== hash(payload.runtime)) fail("PROVENANCE_ROOT_CHANGED");
@@ -40,16 +40,16 @@ function createBuildProvenance({ directory, getJob, listJobs }) {
       for (const entry of await store.listArtifacts(pending.pop())) {
         check();
         if (++entries > 10000) fail("PROVENANCE_ENTRY_LIMIT");
-        if (entry.kind === "directory") pending.push(entry.path);
-        else { bytes += entry.size; if (bytes > 4 * 1024 ** 3) fail("PROVENANCE_BYTE_LIMIT"); paths.push(entry.path); }
+        if (entry.kind === "directory") { if (payload.target === "all") pending.push(entry.path); }
+        else { if (payload.target === "sdk" && !/^[^/]+_sdk-buildroot\.tar\.gz$/.test(path.basename(entry.path))) continue; bytes += entry.size; if (bytes > 4 * 1024 ** 3) fail("PROVENANCE_BYTE_LIMIT"); paths.push(entry.path); }
       }
     }
-    if (!paths.length) return { state: "unbound", reason: "no-image-outputs" };
+    if (!paths.length) return { state: "unbound", reason: payload.target === "sdk" ? "no-sdk-outputs" : "no-image-outputs" };
     const manifest = await store.createManifest({ paths, locks: { sourceRevision: before.sourceRevision, configurationSha256: before.configRevision } });
     check();
     const after = await capture();
     if (after.sourceRevision !== before.sourceRevision || after.configRevision !== before.configRevision || hash(identity(item)) !== hash(roots)) fail("PROVENANCE_INPUTS_CHANGED");
-    const record = { version: 1, jobId, workspaceId: payload.workspaceId, roots, intent: payload.intent, runtimeDigest: hash(payload.runtime), manifest, capturedAt: new Date().toISOString(), policy: "successful-build-post-output-snapshot" };
+    const record = { version: 1, ...(payload.target === "sdk" ? { target: "sdk" } : {}), jobId, workspaceId: payload.workspaceId, roots, intent: payload.intent, runtimeDigest: hash(payload.runtime), manifest, capturedAt: new Date().toISOString(), policy: "successful-build-post-output-snapshot" };
     if (Buffer.byteLength(JSON.stringify(record), "utf8") > 4 * 1024 * 1024 - 256) fail("PROVENANCE_RECORD_LIMIT");
     const digest = hash(record);
     storage.atomic(receiptPath(jobId), { ...record, digest });
@@ -61,15 +61,17 @@ function createBuildProvenance({ directory, getJob, listJobs }) {
     catch { candidates = []; }
     for (const job of candidates) {
       try {
-        if (job.kind !== "build" || job.state !== "succeeded" || job.payload?.workspaceId !== workspaceId || job.payload.target !== "all" || job.result?.reproducibility?.state !== "recorded") continue;
+        if (job.kind !== "build" || job.state !== "succeeded" || job.payload?.workspaceId !== workspaceId || !["all", "sdk"].includes(job.payload.target) || job.result?.reproducibility?.state !== "recorded") continue;
         storage.assertSafe(receiptPath(job.id));
         const saved = JSON.parse(readBoundedText(receiptPath(job.id)));
         const { digest, ...record } = saved;
+        if (job.payload.target === "sdk" && record.target !== "sdk") continue;
+        if (job.payload.target === "all" && record.target && record.target !== "all") continue;
         if (hash(record) !== digest || digest !== job.result.reproducibility.digest || (hint && hint.receiptDigest !== digest) || record.workspaceId !== workspaceId || record.jobId !== job.id || hash(record.intent) !== hash(job.payload.intent) || record.runtimeDigest !== hash(job.payload.runtime) || hash(record.roots) !== hash(identity(item))) continue;
         if (createRecord(record.manifest).digest !== record.manifest.digest || record.manifest.digest !== job.result.reproducibility.manifestDigest || hash(record.manifest.locks) !== hash(manifest.locks)) continue;
         const outputs = new Map(record.manifest.entries.map(entry => [entry.path, entry]));
         if (!manifest.entries.every(entry => { const built = outputs.get(entry.path); return built && built.sha256 === entry.sha256 && built.size === entry.size; })) continue;
-        return { kind: record.policy, buildTimeBinding: true, jobId: job.id, receiptDigest: digest, capturedAt: record.capturedAt, outputScope: "selected-files-from-post-build-images", incrementalBuild: "unchanged outputs may be reused by Buildroot", runtimeDigest: record.runtimeDigest };
+        return { kind: record.policy, buildTimeBinding: true, jobId: job.id, receiptDigest: digest, capturedAt: record.capturedAt, outputScope: job.payload.target === "sdk" ? "selected-files-from-post-sdk-images" : "selected-files-from-post-build-images", incrementalBuild: "unchanged outputs may be reused by Buildroot", runtimeDigest: record.runtimeDigest };
       } catch { /* Missing, stale or malformed host evidence never admits a binding. */ }
     }
     return { kind: "current-input-observation", buildTimeBinding: false, reason: "no-matching-successful-job-output-lineage" };
@@ -77,3 +79,4 @@ function createBuildProvenance({ directory, getJob, listJobs }) {
   return Object.freeze({ begin, complete, bind });
 }
 module.exports = { createBuildProvenance };
+

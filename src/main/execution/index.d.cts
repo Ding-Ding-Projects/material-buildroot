@@ -1,5 +1,8 @@
 export type BuildTarget =
   | "all"
+  | "sdk"
+  | "clean"
+  | `${string}-${"rebuild" | "reconfigure" | "dirclean" | "download"}`
   | "olddefconfig"
   | "savedefconfig"
   | "legal-info"
@@ -90,3 +93,5 @@ export class ExecutionService {
   ): Promise<ExecutionJob>;
 }
 export const TARGETS: readonly BuildTarget[];
+
+
