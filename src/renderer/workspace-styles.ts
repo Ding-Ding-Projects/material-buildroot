@@ -4,11 +4,11 @@ export const workspaceStyles = css`
   :host {
     display: block;
     height: 100%;
-    font-family: Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    font-family: 'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
     --md-ref-typeface-plain:
-      Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
+      'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
     --md-ref-typeface-brand:
-      Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
+      'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
     --md-sys-color-primary: #6750a4;
     --md-sys-color-on-primary: #fff;
     --md-sys-color-primary-container: #eaddff;

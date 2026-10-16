@@ -16,7 +16,7 @@ import '@material/web/list/list.js';
 import '@material/web/list/list-item.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import '@fontsource-variable/roboto';
+import './fonts.css';
 import './style.css';
 
 const read = (key, fallback) => { try { return localStorage.getItem(key) || fallback; } catch { return fallback; } };

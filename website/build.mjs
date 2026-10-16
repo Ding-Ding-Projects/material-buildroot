@@ -86,7 +86,7 @@ md.renderer.rules.image = (tokens,i,options,env,self) => {
 const render = (text, source='README.md', headings=[]) => md.render(text,{source,headings}).replace(/<table>/g,'<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>').replace(/<\/table>/g,'</table></div>').replace(/<li>(\s*(?:<p>)?<md-checkbox class="task-mark)/g,'<li class="task-item">$1');
 // Render once to discover every linked asset before computing source provenance.
 for (const doc of documents) render(doc.content,doc.source);
-const inputs = [...sources, ...localAssets, 'assets/branding/icon.ico','assets/branding/icon.png', 'website/package.json','website/package-lock.json','website/build.mjs','website/presentation-provenance.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/style.css','website/components.json', ...[...sourceIndex].filter(file=>file.startsWith('website/browser-native')), 'src/renderer/regex-worker.ts','src/renderer/documentation-search-worker.ts','src/shared/appearance.ts','src/renderer/appearance-logo-worker.ts'].sort();
+const inputs = [...sources, ...localAssets, 'assets/branding/icon.ico','assets/branding/icon.png', 'website/package.json','website/package-lock.json','website/build.mjs','website/presentation-provenance.mjs','website/check.mjs','website/inventory.mjs','website/source-boundary.mjs','website/roadmap.mjs','website/app.js','website/fonts.css','website/style.css','website/components.json', ...[...sourceIndex].filter(file=>file.startsWith('website/browser-native')), 'src/renderer/regex-worker.ts','src/renderer/documentation-search-worker.ts','src/shared/appearance.ts','src/renderer/appearance-logo-worker.ts'].sort();
 const snapshot = sourceSnapshot(root,inputs,sourceIndex);
 const sourceCommit = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const dirty = Boolean(execFileSync('git',['status','--porcelain','--',...inputs],{cwd:root,encoding:'utf8'}).trim());
@@ -192,7 +192,7 @@ for (const packageName of ['@pdf-lib/standard-fonts','@pdf-lib/upng','pako','tsl
   if(!license) throw new Error(`Required bundled package license is missing: ${packageName}`);
   await fs.copyFile(path.join(packageRoot,license),path.join(out,'assets',packageName.replace(/[^a-z0-9-]/g,'_')+'-LICENSE.txt'));
 }
-await writeFontInventory({assets:path.join(out,'assets'),packageRoot:path.join(here,'node_modules','@fontsource-variable/roboto'),sourceCommit,snapshot});
+await writeFontInventory({assets:path.join(out,'assets'),packagesRoot:path.join(here,'node_modules'),sourceCommit,snapshot});
 await fs.writeFile(path.join(outputRoot,'index.html'),page('Interactive Buildroot field guide',home,{active:'Learn by doing',description:'Work through an interactive source-to-image guide, package recipe preview and safe troubleshooting steps.'}));
 await fs.writeFile(path.join(outputRoot,'.nojekyll'),'');
 await fs.writeFile(path.join(out,'build-info.json'),JSON.stringify(meta,null,2)+'\n');

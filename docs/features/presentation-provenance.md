@@ -8,9 +8,11 @@ The documentation header shows its package version, abbreviated source commit, e
 
 ## Local font inventory
 
-The existing root documentation build installs the lockfile-pinned `@fontsource-variable/roboto` package and bundles its imported stylesheet and font files locally. The build now writes `site/assets/fonts-manifest.json` from actual emitted font bytes, recording each filename, byte count and SHA-256, plus the exact package version and hashes of its copied license and emitted stylesheet. An empty font output stops production. The footer links to this inventory.
+Both root build targets acquire exact lockfile-pinned packages: `@fontsource-variable/roboto@5.2.9` and `@fontsource-variable/noto-sans-hk@5.3.1`. Roboto supplies all normal and italic weight subsets from the selected package stylesheets; Noto Sans HK supplies every normal weight subset for the Cantonese fallback. Imports preserve the published weight and Unicode-range declarations. Only WOFF2 files referenced by these stylesheets ship, rather than redundant package variants or source trees. Dependencies download through the normal build bootstrap, and no new font binaries enter source control.
 
-The manifest is generated production metadata, not a claim of complete family acquisition or correct rendering. Binary variation axes, every required script, weight selection and CJK fallback remain unverified. The existing stylesheet import preserves package declarations through the bundler; this change does not invent axis support or replace font assets. Complete acquisition and pinned per-source-file inventory remain unfinished beyond the existing package lock.
+Desktop and documentation font stacks select `Roboto Variable` and `Noto Sans HK Variable`, followed by their existing system fallbacks. Desktop fonts remain addressable output files rather than inline data. The production hook copies each complete package license, records its hash, records each required source stylesheet and subset hash, and requires every source font hash to match a produced local font file. A missing subset or wrong installed package version stops production. The resulting `assets/fonts-manifest.json` contains actual byte counts, total output font bytes and source identity. The documentation footer links its inventory; desktop output carries its own inventory and licenses in `dist/assets`.
+
+The manifest is production metadata, not correct-rendering proof. Binary variation axes, glyph interpretation, every required weight and CJK fallback remain unverified. Noto Sans HK has no italic import in this selection; no native italic-face claim is made. Installer compression and final package size require actual production. Browser font checks and offline rendering remain pending.
 
 ## Shared links
 
