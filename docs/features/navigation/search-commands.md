@@ -12,8 +12,8 @@ Expression filtering runs in a separate worker with a 600 ms deadline. Patterns 
 | --- | --- | --- |
 | Settings search, including nested settings-search instances | Supplied setting labels and descriptions, excluding imported vocabulary contents | Adjacent full workbench, isolated field state |
 | Command palette | Registered mounted controls and existing destination actions | Own settings-search instance |
-| Element context menu | Applicable focus, activation/edit and command-discovery actions | Own settings-search state for each opened menu |
-| Application select picker | Options from the original Material or native select | Own filtered choice inventory, original value/change consumer |
+| Element context menu | Applicable focus, activation/edit and command-discovery actions | Independent settings-search instance retained per target for the session |
+| Application select picker | Options from the original Material or native select | Independent per-picker search state, filtered choice inventory, original value/change consumer |
 | Documentation | Indexed article titles, summaries and host-admitted article bodies, with the existing explicit fallback | Adjacent full workbench feeds the actual article worker |
 | Source package catalogue | Existing host literal catalogue query; expression filters the loaded page only | Full workbench feeds the existing page filter |
 | Model catalogue | Existing host literal cached-name query; expression filters the loaded page only | Full workbench feeds the existing page filter |
@@ -34,4 +34,8 @@ Application-owned Material and native select controls open a searchable choice s
 
 This change is implementation only. Tests, static analysis, reviews, accessibility checks, runtime interaction and screenshots were intentionally not run in the selected accelerated delivery mode. No installed or runtime acceptance is claimed.
 
-Remaining implementation includes exhaustive registered discovery of unmounted feature controls and unloaded article targets; per-element appearance and authentication-backed lock actions; independent retained search history per context target; searchable nested workbench picker popups; and the complete per-surface inventory for lists that do not yet have search. Existing standalone workbench engine diagnostics are reused without claiming unsupported engine trace capabilities. End-to-end validation of keyboard, touch, all language modes, focus return, cancellation, narrow layouts, scales, invalid expressions, settings persistence and original validation consumers remains deferred.
+Remaining implementation includes exhaustive registered discovery of unmounted feature controls and unloaded article targets; per-element appearance and authentication-backed lock actions; searchable nested workbench picker popups; and the complete per-surface inventory for lists that do not yet have search. Existing standalone workbench engine diagnostics are reused without claiming unsupported engine trace capabilities. End-to-end validation of keyboard, touch, all language modes, focus return, cancellation, narrow layouts, scales, invalid expressions, settings persistence and original validation consumers remains deferred.
+
+## Build repair follow-up
+
+The command-card size control had a missing template-expression delimiter, which prevented the production bundle from compiling. The delimiter is repaired. Context and picker searches now retain separate component instances per target for the current session, including query, mode, flags and workbench snippets; reopening a different target cannot replace another target's search draft. Read-only original fields remain protected from inline writes. Build production is recorded separately from unrun functional acceptance.
