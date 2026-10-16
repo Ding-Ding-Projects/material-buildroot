@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import "./minecraft-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
@@ -138,13 +139,7 @@ export class ToolsPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private changed() {
     this.revision++;
   }

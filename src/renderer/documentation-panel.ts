@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import "./regex-workbench";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -309,13 +310,7 @@ export class DocumentationPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   protected updated(changed: PropertyValues) {
     if(changed.has("restricted")){if(this.restricted)this.stopSearch();else if(this.index)this.search();}
     if ((changed.has("active")||changed.has("restricted")) && this.active && !this.restricted && !this.index && !this.loading)

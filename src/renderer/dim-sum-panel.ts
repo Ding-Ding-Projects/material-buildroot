@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing,type PropertyValues} from 'lit';
 import '@material/web/button/outlined-button.js';
 import '@material/web/textfield/outlined-text-field.js';
@@ -7,7 +8,7 @@ export class DimSumPanel extends LitElement {
  language='en';restricted=true;startupEligible=false;quiet=false;opened=false;dishes:Dish[]=[];selected:Dish|null=null;query='';message='';busy=false;private attempted=false;private epoch=0;private dismiss?:ReturnType<typeof setTimeout>;private interacted=false;
  private activity=()=>{this.interacted=true;};
  static styles=css`:host{display:block}.catalog{padding:16px;max-height:50vh;overflow:auto}.row{display:flex;flex-wrap:wrap;gap:8px}.photo{max-width:160px;max-height:160px;object-fit:contain}.surprise{position:fixed;bottom:16px;right:16px;max-width:min(360px,calc(100vw - 32px));padding:16px;border-radius:16px;background:var(--md-sys-color-surface-container-high);color:var(--md-sys-color-on-surface);z-index:10;pointer-events:none}md-outlined-button{min-height:48px}md-outlined-text-field{width:100%}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  connectedCallback(){super.connectedCallback();document.addEventListener('pointerdown',this.activity,true);document.addEventListener('keydown',this.activity,true);}
  disconnectedCallback(){super.disconnectedCallback();this.epoch++;clearTimeout(this.dismiss);document.removeEventListener('pointerdown',this.activity,true);document.removeEventListener('keydown',this.activity,true);}
  protected updated(changed:PropertyValues){if(changed.has('restricted')&&this.restricted){this.epoch++;this.opened=false;this.dishes=[];this.selected=null;}if(!this.attempted&&this.startupEligible&&!this.restricted){this.attempted=true;if(!this.quiet&&!this.interacted)void this.surprise();}}

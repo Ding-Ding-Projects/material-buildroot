@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
@@ -112,13 +113,7 @@ export class GuestPanel extends LitElement {
       this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     }
   }
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private async run(action: string, request?: Record<string, unknown>) {
     const api = window.studio?.operations;
     if (!api || this.pending) return undefined;

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./package-discovery-panel";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
@@ -97,7 +98,7 @@ export class PackagePanel extends LitElement {
     @media(max-width:750px){.package-workbench{display:flex;flex-direction:column;height:auto;max-height:none}.canvas-pane{height:330px}.package-inspector{max-height:500px}}
     @media(max-width:1000px){.columns{grid-template-columns:1fr}}
   `];
-  private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   private changed(){this.revision++;}
   private edit(){this.generation++;this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.validation=[];this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");this.changed();}
   private field(label:string,value:string,set:(value:string)=>void,hint="",textarea=false){

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import './dim-sum-panel';
 import {LitElement,html,css,nothing,type PropertyValues} from 'lit';
 import {registerCommandActionProvider} from './command-surfaces';
@@ -16,7 +17,7 @@ export class AttentionModePanel extends LitElement {
  private activity=()=>{this.lastActivity=Date.now();};
  private labels:Record<AttentionKey,[string,string]>={focus:['Focus','專注'],lowStimulation:['Low stimulation','低刺激'],timeAwareness:['Time awareness','時間提示'],oneThing:['One thing at a time','一次一件事'],momentum:['Momentum','繼續提示']};
  static styles=css`:host{display:block;grid-column:1/-1}*{box-sizing:border-box}.strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 16px;background:var(--md-sys-color-surface-container);color:var(--md-sys-color-on-surface)}.strip p{margin:0;overflow-wrap:anywhere}.settings{padding:16px;border-bottom:1px solid var(--md-sys-color-outline);max-height:55vh;overflow:auto}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}label{display:flex;align-items:center;min-height:48px}md-outlined-text-field,md-outlined-select{width:100%}md-outlined-button{min-height:48px}md-slider{width:200px;max-width:100%}h2{font-size:18px}p{line-height:1.5}.status{overflow-wrap:anywhere}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  connectedCallback(){super.connectedCallback();this.narrator=new LocalNarrator(()=>this.requestUpdate());this.narrator.configure(this.effectiveNarration);this.disposeCommands=registerCommandActionProvider('attention',()=>[{id:'settings',label:this.l('Attention and narration settings','專注同旁白設定'),run:()=>{this.opened=true;}}]);this.timer=setInterval(()=>{this.now=Date.now();this.requestUpdate();},10000);document.addEventListener('input',this.activity,true);document.addEventListener('click',this.activity,true);document.addEventListener('keydown',this.activity,true);this.apply();}
  disconnectedCallback(){super.disconnectedCallback();clearInterval(this.timer);this.disposeCommands?.();this.narrator?.dispose();this.style?.remove();document.removeEventListener('input',this.activity,true);document.removeEventListener('click',this.activity,true);document.removeEventListener('keydown',this.activity,true);}
  private get effectiveNarration(){return {...this.preferences.narration,...(this.restricted?{language:'en' as const}:{})};}

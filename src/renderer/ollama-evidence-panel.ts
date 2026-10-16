@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { materialIcon } from "./material-icons";
@@ -144,13 +145,7 @@ export class OllamaEvidencePanel extends LitElement {
       this.revision++;
     }
   }
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private bytes(value?: number) {
     return typeof value === "number" && Number.isFinite(value)
       ? `${(value / 1024 ** 3).toFixed(2)} GiB`

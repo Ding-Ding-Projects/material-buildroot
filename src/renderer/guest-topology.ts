@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
@@ -18,7 +19,7 @@ export class GuestTopology extends LitElement {
  @media(max-width:760px){.workbench{height:auto;max-height:none;grid-template-columns:1fr}.workbench diagram-workbench{height:330px}.inspector{max-height:420px}}
  `];
  protected updated(changed:PropertyValues){if(changed.has("workspaceId")){this.guests=[];this.files=[];this.providers=undefined;this.interfaces={bridged:[],hostonly:[]};this.feedback="";this.choose("");}}
- private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private edit(){this.preview=undefined;this.consent=false;this.revision++;}
  private call<K extends Parameters<typeof guestOperation>[1]>(action:K,request?:Parameters<typeof guestOperation<K>>[2]){return guestOperation(this.workspaceId,action,request);}
 

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing} from 'lit';
 import {appearancePermissionsAllowed,properties,validValue,type Property} from '../shared/appearance';
 import './settings-search';
@@ -52,7 +53,7 @@ class AppearanceMotion extends LitElement{
  static properties={target:{attribute:false},identity:{type:String},durable:{type:Boolean},language:{type:String},record:{state:true},selected:{state:true},message:{state:true},time:{state:true},matchedIds:{state:true},zoom:{state:true}};
  target?:HTMLElement;identity='';durable=false;language='en';record:MotionRecord={version:1,tracks:[]};selected='';message='';time=0;matchedIds:string[]=[];zoom=1;private copiedFrames:Frame[]=[];private history:MotionRecord[]=[];private future:MotionRecord[]=[];
  static styles=css`:host{display:block}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.frame{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:8px;margin:8px 0}p{line-height:1.5;overflow-wrap:anywhere}md-outlined-button,md-text-button{min-height:44px}@media(max-width:500px){.frame{grid-template-columns:minmax(0,1fr)}}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  protected updated(changed:Map<string,unknown>){if(changed.has('identity')){this.record=structuredClone(records.get(this.identity)||{version:1,tracks:[]});this.selected=this.record.tracks[0]?.id||'';this.matchedIds=this.record.tracks.map(t=>t.id);this.history=[];this.future=[];}}
  disconnectedCallback(){if(this.target)stop(this.target);super.disconnectedCallback();}
  private get track(){return this.record.tracks.find(t=>t.id===this.selected);}

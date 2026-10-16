@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import "./account-provisioning-panel";
 import "./image-presets-panel";
 import "./configuration-panel";
@@ -266,13 +267,7 @@ export class OperationsPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private get api() {
     return (
       window.studio as unknown as {

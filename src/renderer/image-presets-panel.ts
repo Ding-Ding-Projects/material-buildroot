@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import { LitElement, html, nothing, type PropertyValues } from 'lit';
 import '@material/web/button/outlined-button.js';
 import '@material/web/select/outlined-select.js';
@@ -10,7 +11,7 @@ export class ImagePresetsPanel extends LitElement {
  workspaceId=''; language='bilingual'; disabled=false; revision=0;
  private catalog:any; private preview:any; private outcome:any; private preset='minimal'; private desktop='none'; private ssh=false; private approved=false; private busy=false; private message='';
  protected updated(changed:PropertyValues){if(changed.has('workspaceId')){this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;}}
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private changed(){this.preview=undefined;this.approved=false;this.outcome=undefined;this.revision++;}
  private async run(action:string){
   if(this.busy||this.disabled||!this.workspaceId||!window.studio?.operations)return;

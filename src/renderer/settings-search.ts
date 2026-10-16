@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus, displayOwnedStatus} from './owned-status';
 import {LitElement, html, css, nothing} from 'lit';
 import {materialIcon} from './material-icons';
@@ -14,7 +15,7 @@ export class SettingsSearch extends LitElement {
   static styles=css`:host{display:block;grid-column:1/-1;min-width:0}.bar{display:flex;align-items:center;gap:8px;position:relative}md-outlined-text-field{flex:1;min-width:0}.builder{padding:12px;border:1px solid var(--md-sys-color-outline);border-radius:16px;background:var(--md-sys-color-surface-container);display:grid;gap:12px;max-height:65vh;overflow:auto}label{display:flex;align-items:center}p{font-size:12px}regex-workbench{display:block;min-width:0}`;
   reset(){this.query='';this.pattern='';this.flags='i';this.regex=false;this.error='';this.search();}
   focusQuery(){(this.renderRoot.querySelector('md-outlined-text-field') as HTMLElement|null)?.focus();}
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   disconnectedCallback(){this.generation++;this.worker?.terminate();clearTimeout(this.timer);super.disconnectedCallback();}
   protected updated(changed:Map<string,unknown>){if(['query','pattern','flags','regex','entries'].some(key=>changed.has(key)))this.search();}
   private emit(ids:string[]){this.count=ids.length;this.dispatchEvent(new CustomEvent('settings-filter',{bubbles:true,composed:true,detail:ids}));}

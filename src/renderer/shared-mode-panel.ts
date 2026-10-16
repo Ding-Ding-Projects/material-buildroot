@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import './appearance-panel';
 import {LitElement,html,css,nothing,type PropertyValues} from 'lit';
 import {materialIcon} from './material-icons';
@@ -10,7 +11,7 @@ export class SharedModePanel extends LitElement{
  static properties={snapshot:{attribute:false},language:{type:String},busy:{state:true},message:{state:true},name:{state:true},kind:{state:true},secret:{state:true},confirmation:{state:true},current:{state:true},proof:{state:true},recovery:{state:true},uncertain:{state:true}};
  snapshot:SharedModeSnapshot|null=null;language='en';busy=false;message='';name='';kind:'pin'|'password'='pin';secret='';confirmation='';current='';proof='';recovery:SharedModeRecovery|null=null;uncertain=false;private epoch=0;private code='';
  static styles=css`:host{display:block;grid-column:1/-1}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}md-outlined-text-field,md-outlined-select{width:100%}md-outlined-button{min-height:48px;--md-outlined-button-container-height:48px}h2{margin:0;font-size:16px}p{line-height:1.5}code{overflow-wrap:anywhere}details{margin-top:12px}.name{font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  protected updated(changed:PropertyValues){if(changed.has('snapshot')){this.epoch++;this.name=this.snapshot?.displayName??'';this.secret=this.confirmation=this.current=this.proof='';}}
  private get ready(){return this.snapshot?.available===true&&this.snapshot.active!==null&&!this.busy&&!this.uncertain;}
  private get validName(){return [...this.name].length>=1&&[...this.name].length<=96&&!!this.name.trim()&&!/[\u0000-\u001f\u007f]/u.test(this.name);}

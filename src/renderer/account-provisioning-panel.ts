@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import { LitElement, html, nothing, type PropertyValues } from 'lit';
 import '@material/web/button/outlined-button.js';
 import '@material/web/textfield/outlined-text-field.js';
@@ -9,7 +10,7 @@ export class AccountProvisioningPanel extends LitElement {
  workspaceId=''; language='bilingual'; disabled=false; revision=0;
  private username=''; private uid='2000'; private keyId=''; private plan:any; private result:any; private approved=false; private busy=false; private message='';
  protected updated(changed:PropertyValues){if(changed.has('workspaceId')){this.username='';this.uid='2000';this.keyId='';this.plan=undefined;this.result=undefined;this.approved=false;this.message='';this.revision++;}}
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private changed(){this.plan=undefined;this.approved=false;this.result=undefined;this.revision++;}
  private async run(action:string){if(this.busy||this.disabled||!window.studio?.operations)return;this.busy=true;this.message='';this.revision++;const workspaceId=this.workspaceId;
  try{const response=await window.studio.operations({action,workspaceId,...(action==='accountProvisioning.preview'?{username:this.username,uid:Number(this.uid),keyId:this.keyId}:action==='accountProvisioning.apply'?{planId:this.plan.planId}:{})});if(this.workspaceId!==workspaceId)return;if(!response.ok)throw Error(response.code);

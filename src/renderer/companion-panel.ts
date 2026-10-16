@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
@@ -105,13 +106,7 @@ export class CompanionPanel extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private async request(action: string, args: Record<string, unknown> = {}) {
     if (!window.studio?.operations) throw new Error("DESKTOP_REQUIRED");
     const reply: { ok: boolean; code?: string; result?: any } =

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing} from 'lit';
 import './managed-ollama-panel';
 import './ollama-catalogue-panel';
@@ -11,7 +12,7 @@ export class OllamaWorkspacePanel extends LitElement {
  private saved:any[]=[];private title='';private deleting='';
  private busy=false;private session='';private streaming='';private offset=0;private timer?:ReturnType<typeof setTimeout>;private polling=false;private state='';private feedback='';private jobs:any[]=[];private next:string|null=null;private queueRunning=false;
  static styles=css`:host{display:block}.stack{display:grid;gap:16px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.row>*{min-width:0}md-outlined-text-field,md-outlined-select{width:100%;max-width:100%}.record{border-top:1px solid var(--md-sys-color-outline-variant);padding:12px 0;overflow-wrap:anywhere}.message{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:var(--md-sys-color-surface-container);border-radius:12px}p{overflow-wrap:anywhere}md-outlined-button,md-filled-button{min-height:48px}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private changed(){this.revision++;}
  private async call(action:string,fields:Record<string,unknown>={}){const r=await window.studio?.operations?.({action:'tools',request:{action,...fields}});if(!r?.ok)throw Error(r?.code||'DESKTOP_REQUIRED');const result=r.result as any;if(result?.ok===false)throw Error(result.code);return result;}
  private failure(e:unknown){const code=e instanceof Error&&/^[A-Z_]+$/.test(e.message)?e.message:'UNAVAILABLE';this.feedback=code;this.changed();}

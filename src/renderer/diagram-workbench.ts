@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon} from "./material-icons";
 import { LitElement, html, svg, css, nothing, type PropertyValues } from "lit";
@@ -35,7 +36,7 @@ export class DiagramWorkbench extends LitElement {
     .hint{font-size:11px;color:var(--md-sys-color-on-surface-variant);margin:0;padding:4px 8px;background:var(--md-sys-color-surface-container)}
     .empty{padding:24px;color:var(--md-sys-color-on-surface-variant)}
   `;
-  private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   protected updated(changed:PropertyValues){
     if(changed.has("layoutKey")){this.layout={positions:{},x:30,y:30,scale:1};this.undoStack=[];this.redoStack=[];this.selected="";this.savedRevision=undefined;this.saveMessage=captureOwnedStatus(this,"saveMessage",this.l.bind(this),l=>"");}
     if(changed.has("nodes")||changed.has("layoutKey")){

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import "./minecraft-workflow-panel";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
@@ -64,7 +65,7 @@ export class MinecraftPanel extends LitElement {
     nav { display:flex; flex-wrap:wrap; gap:8px; } nav [aria-pressed=true] { --md-outlined-button-outline-color:var(--md-sys-color-primary); }
     .status { padding:12px; background:var(--md-sys-color-surface-container); border-radius:12px; overflow-wrap:anywhere; }
   `];
-  private l(en: string, zh: string) { return this.language === "en" ? en : this.language === "zh-HK" ? zh : `${en} · ${zh}`; }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private change() { this.revision++; }
   private async call(action: string, fields: Record<string, unknown> = {}) {
     const reply: any = await window.studio?.operations({ action, ...fields });

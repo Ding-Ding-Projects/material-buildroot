@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
@@ -87,9 +88,7 @@ export class SourcePanel extends LitElement {
     @media(max-width:1000px) { .columns { grid-template-columns: 1fr; } }
   `];
 
-  private l(en: string, zh: string) {
-    return this.language === "en" ? en : this.language === "zh-HK" ? zh : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private changed() { this.revision++; }
   private async request(request: SourceOperation): Promise<SourceOperationSuccess> {
     if (!window.studio?.operations) throw new Error("DESKTOP_REQUIRED");

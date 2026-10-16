@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import { LitElement, html, css, nothing } from "lit";
 import { workspaceStyles } from "./workspace-styles";
 import "@material/web/button/outlined-button.js";
@@ -14,7 +15,7 @@ export class MinecraftWorkflowPanel extends LitElement {
   private command="list"; private announcement=""; private rule="keepInventory"; private ruleValue=true; private difficulty="normal";
   private profiles:any[]=[]; private history:any[]=[]; private ownership:any[]=[]; private schedules:any[]=[]; private at=""; private timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone;
   static styles=[workspaceStyles,css`:host{display:block;min-width:0}.stack{display:grid;gap:16px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.note{color:var(--md-sys-color-on-surface-variant);overflow-wrap:anywhere}.record{padding:12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;overflow-wrap:anywhere}code{overflow-wrap:anywhere}`];
-  private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:en+" · "+zh;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   private async call(action:string,fields:Record<string,unknown>={}){const r:any=await window.studio?.operations({action,...fields});if(!r?.ok||r.result?.ok===false||r.result?.cancelled)throw new Error(r?.code||r?.result?.code||"CANCELLED");return r.result;}
   private tool(request:Record<string,unknown>){return this.call("tools",{request});}
   private async run(work:()=>Promise<void>){if(this.busy)return;this.busy=true;this.message="";this.revision++;try{await work();this.message ||= this.l("Operation completed.","操作完成。");}catch(e){this.message=this.l("Operation incomplete","操作未完成")+": "+(e instanceof Error&&/^[A-Z_]+$/.test(e.message)?e.message:"OPERATION_FAILED");}finally{this.busy=false;this.revision++;}}

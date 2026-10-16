@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing} from 'lit';
 import '@material/web/labs/card/filled-card.js';
 import '@material/web/focus/md-focus-ring.js';
@@ -72,7 +73,7 @@ export class PersonalVocabularyDrop extends LitElement{
   this.unsubscribe?.();this.unsubscribeOutcome?.();this.motion.removeEventListener('change',this.motionChanged);this.observer.disconnect();
   this.reset();this.view.remove();super.disconnectedCallback();
  }
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private presentationHeadline(headline:string|null){
   // Display-only fallback. Never normalize the mapping or a nonblank heading;
   // other Unicode formatting characters retain their existing behavior.

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import "./regex-workbench";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
@@ -173,13 +174,7 @@ export class PackageDiscoveryPanel extends LitElement {
       }
     }
   `;
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   protected updated(changed: PropertyValues) {
     if (changed.has("workspaceId")) {
       this.serial++;

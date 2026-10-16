@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement, html, css, nothing} from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/button/filled-button.js";
@@ -8,7 +9,7 @@ export class WslRuntimePanel extends LitElement {
   static properties={language:{type:String},pending:{state:true},distributions:{state:true},selected:{state:true},status:{state:true}};
   language="bilingual"; pending=false; distributions:any[]=[]; selected=""; status:any=null;
   static styles=css`:host{display:block;min-width:0}section{display:grid;gap:12px}h3,p{margin:0}.actions{display:flex;flex-wrap:wrap;gap:8px}md-outlined-select{max-width:100%;min-width:0}p,dd{overflow-wrap:anywhere}dl{margin:0}dd{margin-inline-start:12px}`;
-  private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} / ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   private async act(kind:string){
     if(this.pending)return;this.pending=true;
     try {

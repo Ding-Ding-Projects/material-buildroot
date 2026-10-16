@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import './authenticator-pairing';
 import type {Pairing} from '../shared/authenticator';
 import {LitElement,html,css,nothing} from 'lit';
@@ -19,7 +20,7 @@ export class ExperiencePolicyPanel extends LitElement{
  pairing?:Pairing;pairingConsent=false;pairingSaved=false;pairingBusy=false;private pairingVersion=0;private pairingTimer=0;private pairingRoute:string|undefined;
  private origin:HTMLElement|null=null;private secrets:Record<string,string>={};private confirmations:Record<string,string>={};private answers:number[]=[];private roundStart=0;
  static styles=css`:host{display:block;color:var(--md-sys-color-on-surface,#25232a);font:inherit}:host([data-floating]){position:fixed;z-index:10000;max-height:85vh;overflow:auto;width:min(520px,calc(100vw - 24px));border:1px solid var(--md-sys-color-outline,#777);border-radius:20px;box-shadow:0 8px 28px #0005;padding:18px;background:var(--md-sys-color-surface,#fff);box-sizing:border-box}h2,h3,p{overflow-wrap:anywhere}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.stack{display:grid;gap:12px}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.keypad{display:grid;grid-template-columns:repeat(3,minmax(48px,1fr));gap:8px}md-text-button,md-filled-button{min-height:48px;white-space:normal}article{padding:12px;border:1px solid var(--md-sys-color-outline-variant,#aaa);border-radius:12px;margin-block:10px}.path{overflow-wrap:anywhere;user-select:all}.notice{padding:10px;background:var(--md-sys-color-surface-container,#eee)}:focus-visible{outline:3px solid var(--md-sys-color-primary,#6750a4)}[hidden]{display:none!important}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private updateState=(event:Event)=>{this.state=(event as CustomEvent).detail;this.requestUpdate();};
  connectedCallback(){super.connectedCallback();document.addEventListener('experience-state',this.updateState);document.addEventListener('visibilitychange',this.pairingVisibility);this.pairingTimer=window.setInterval(()=>this.expirePairing(),500);void this.refresh();}
  disconnectedCallback(){document.removeEventListener('experience-state',this.updateState);document.removeEventListener('visibilitychange',this.pairingVisibility);clearInterval(this.pairingTimer);this.clearSecrets();super.disconnectedCallback();}

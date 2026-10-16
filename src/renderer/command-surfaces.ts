@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement, html, css, nothing} from 'lit';
 import {SettingsSearch} from './settings-search';
 import {materialIcon} from './material-icons';
@@ -98,7 +99,7 @@ class CommandSurfaces extends LitElement {
   mode:'palette'|'context'|'picker'='palette';actions:Action[]=[];matched:string[]=[];language='bilingual';wide=false;targetName='';notice='';
   private pickers=new WeakMap<Control,SearchablePicker>();private searches=new WeakMap<Control,Map<string,SettingsSearch>>();private searchControl?:SettingsSearch;private origin?:Control;private contextTarget?:Control;private searchEntries:{id:string;text:string}[]=[];private rowIndex=0;
   static styles=css`:host{font:inherit;color:var(--md-sys-color-on-surface)}md-dialog{--md-dialog-container-color:var(--md-sys-color-surface-container-high,#fff);max-width:calc(100vw - 24px);width:720px;max-height:calc(100dvh - 24px)}md-dialog.wide{width:calc(100vw - 24px);height:calc(100dvh - 24px)}[slot=content]{display:grid;gap:12px;min-width:0}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px;border-bottom:1px solid var(--md-sys-color-outline-variant)}.row>div{display:grid;gap:8px;min-width:0}.row small{overflow-wrap:anywhere}.row md-outlined-text-field{width:100%;min-width:0}md-text-button{min-height:48px;white-space:normal}kbd{font:inherit;white-space:nowrap}.preview{padding:8px;border-radius:12px;background:var(--md-sys-color-surface-container);overflow-wrap:anywhere}settings-search{display:block}p{overflow-wrap:anywhere}`;
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   private get app(){return document.querySelector('material-buildroot') as Control|null;}
   private currentLanguage(){const app=this.app as any;return app?.effectiveLanguage||app?.state?.language||'bilingual';}
   private dialog(){return this.renderRoot.querySelector('md-dialog') as HTMLElement&{show:()=>Promise<void>;close:()=>Promise<void>;open:boolean};}
@@ -259,7 +260,7 @@ class SearchablePicker extends LitElement {
   language='bilingual';options:Control[]=[];matched:string[]=[];heading='';
   private target?:Control;private entries:{id:string;text:string}[]=[];
   static styles=css`md-dialog{width:640px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);--md-dialog-container-color:var(--md-sys-color-surface-container-high,#fff)}[slot=content]{display:grid;gap:8px;min-width:0}md-text-button{min-height:48px;white-space:normal}small{padding-inline-start:8px}`;
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:en+' · '+zh;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   private dialog(){return this.renderRoot.querySelector('md-dialog') as HTMLElement&{show:()=>Promise<void>;close:()=>Promise<void>;open:boolean};}
   async openFor(target:Control,language:string){
     this.target=target;this.language=language;this.heading=label(target)||this.l('Choose an option','選擇選項');

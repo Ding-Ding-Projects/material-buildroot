@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
 import "@material/web/button/filled-button.js";
@@ -30,7 +31,7 @@ export class ProjectWorkflowPanel extends LitElement {
     .record{border-bottom:1px solid var(--md-sys-color-outline-variant);padding:12px 0}
     h2,h3,p{margin:0} md-outlined-text-field{width:100%;min-width:0} dd,code{overflow-wrap:anywhere} dd{margin-inline-start:16px}
   `];
-  private l(en: string, zh: string) { return this.language === "en" ? en : this.language === "zh-HK" ? zh : `${en} · ${zh}`; }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   private changed() { this.revision++; }
   private async request(action: string, fields: Record<string, unknown> = {}) {
     if (!window.studio?.operations) throw Error("DESKTOP_REQUIRED");

@@ -1,3 +1,6 @@
+import {localizedCopy} from './language-wording';
+import {wording} from './language-wording-state';
+import './language-wording-panel';
 import {registerCommandActionProvider} from './command-surfaces';
 import "./experience-policies";
 import "./experience-policy-panel";
@@ -241,7 +244,7 @@ class MaterialBuildroot extends LitElement {
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
   private settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];
   private settingsEntries(){return [
-    ...(!this.restricted?[{id:'language',text:this.l('Language Interface language','語言 介面語言')}]:[]),
+    ...(!this.restricted?[{id:'language',text:this.l('Language Interface language Humor English Cantonese Display name Rename','語言 介面語言 幽默 英文 粵語 顯示名稱 改名')}]:[]),
     {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記')},
     {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰')},
     {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原')},
@@ -273,7 +276,7 @@ class MaterialBuildroot extends LitElement {
   }
   private l(en: string, zh: string) {
     const language = this.effectiveLanguage;
-    return language === "en" ? en : language === "zh-HK" ? zh : `${en} · ${zh}`;
+    return localizedCopy(en,zh,language);
   }
   private buildTime() {
     const value = this.state?.updatedAt;
@@ -1607,6 +1610,7 @@ class MaterialBuildroot extends LitElement {
         </div>
         <p class="muted">${this.storageMessage()}</p>
         <p id="save-feedback">${this.statusMessage()}</p>
+        <language-wording-panel .language=${this.effectiveLanguage}></language-wording-panel>
       </section>`:nothing}
       <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
         <h2>${this.owned("Appearance", "外觀")}</h2>
@@ -1701,7 +1705,7 @@ class MaterialBuildroot extends LitElement {
               </h2>
               <p>
                 ${this.l(
-                  this.restricted?"Your plan is ready to edit. Choose a theme below.":"Your plan is ready to edit. Review language in Settings and choose a theme below.",
+                  this.restricted?"Your plan is ready to edit. Choose a theme below.":"Your plan is ready to edit. Review language in Settings and choose a theme below. English and Cantonese humor each default to level 5 and style all messages, including errors and warnings. Reset either level in Settings.",
                   "計劃已可編輯。你可以喺設定檢視語言，並喺下面選擇主題。",
                 )}
               </p>
@@ -1804,7 +1808,7 @@ class MaterialBuildroot extends LitElement {
           >${materialIcon("menu")}</md-text-button
         >
         <div class="brand">
-          <strong>Material Buildroot</strong
+          <strong>${wording.productName()}</strong
           ><small>${this.l("Desktop workspace", "桌面工作區")}</small>
         </div>
         <md-text-button
@@ -1952,7 +1956,7 @@ class MaterialBuildroot extends LitElement {
                             </p>`}
                     </section>`
                   : html`<section class="panel view">
-                      <h2>Material Buildroot</h2><details><summary>${this.l("Material Icons license", "Material Icons 授權")}</summary><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></details>
+                      <h2>${wording.productName()}</h2><details><summary>${this.l("Material Icons license", "Material Icons 授權")}</summary><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></details>
                       <dl>
                         <dt>${this.l("Version", "版本")}</dt>
                         <dd>

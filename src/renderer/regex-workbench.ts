@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {actionIcon} from "./material-icons";
 import { LitElement, html, nothing, css } from "lit";
@@ -157,13 +158,7 @@ export class RegexWorkbench extends LitElement {
       }
     `,
   ];
-  private l(en: string, zh: string) {
-    return this.language === "en"
-      ? en
-      : this.language === "zh-HK"
-        ? zh
-        : `${en} · ${zh}`;
-  }
+  private l(en: string, zh: string) {return localizedCopy(en,zh,this.language);}
   disconnectedCallback() {
     this.stop();
     super.disconnectedCallback();

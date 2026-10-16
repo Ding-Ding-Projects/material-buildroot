@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {keyed} from 'lit/directives/keyed.js';
 import {getCommandActionEntries,registerContextActionProvider} from './command-surfaces';
 import {openAppearanceEditor} from './appearance-panel';
@@ -76,7 +77,7 @@ export class WorkspaceTabs extends LitElement {
 
   private async refreshMaster(){const generation=++this.masterGeneration;this.masterState=this.l('Loading actual application windows…','正在載入實際視窗…');try{const reply=await window.studio?.workspaceTabs?.({action:'list'});if(generation!==this.masterGeneration)return;if(!reply?.ok||!reply.windows)throw Error();this.masterRows=reply.windows.flatMap(window=>window.tabs.map(tab=>({...tab,id:`${window.id}:${tab.id}`,windowId:window.id,tabId:tab.id})));this.masterState=this.l(`${reply.windows.length} registered application window(s).`,`${reply.windows.length} 個已登記視窗。`);}catch{if(generation===this.masterGeneration){this.masterRows=[];this.masterState=this.l('Host window discovery unavailable. Local tab management remains available.','未能探索主機視窗；仍可管理本機分頁。');}}}
   private async activateMaster(row:{windowId:string;tabId:string}){try{const reply=await window.studio?.workspaceTabs?.({action:'activate',windowId:row.windowId,tabId:row.tabId});this.masterState=reply?.ok?this.l('Activation requested. The owning workspace retains its draft protections.','已要求開啟；所屬工作區保留草稿保護。'):this.l('That tab is no longer available. Refresh the list.','該分頁已無法使用，請重新整理。');}catch{this.masterState=this.l('Host activation unavailable.','未能透過主機開啟。');}}
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   private title(tab:OpenTab){const d=this.destinations.find(d=>d.id===tab.destination);return tab.name||(d?this.l(d.en,d.zh):tab.destination);}
   private save(){void this.publish();try{localStorage.setItem(storageKey,JSON.stringify({version:1,tabs:this.tabs,groups:this.groups,active:this.active,edge:this.edge}));}catch{this.notice=this.l('Tab layout is available for this session only.','分頁排列只適用於本次工作階段。');}}
   /** Called only after the owner has accepted navigation and its unsaved-work decision. */

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import "./regex-workbench";
 import {LitElement,html,css,nothing} from 'lit';
 import {materialIcon} from './material-icons';
@@ -10,7 +11,7 @@ export class OllamaCataloguePanel extends LitElement{
  private status?:Status;private page?:Page;private offset=0;private query='';private family='';private pending=false;private refreshing=false;private cancelling=false;private feedback='';private serial=0;
  private builder=false;private pattern='';private flags='i';private regex=false;private matched?:Set<string>;private filterError='';private worker?:Worker;private timer?:ReturnType<typeof setTimeout>;
  static styles=css`.rule,.record,.status{transition:background-color 140ms ease,border-color 140ms ease}.record,.status{animation:state-enter 120ms ease-out}@keyframes state-enter{from{opacity:.6}to{opacity:1}}@media(prefers-reduced-motion:reduce){.rule,.record,.status{transition:none;animation:none}}:host{display:block}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}h3{font-size:16px}.search{position:relative}.builder{position:absolute;top:100%;left:0;z-index:10;padding:12px;width:min(760px,90%);max-height:65vh;overflow:auto;background:var(--md-sys-color-surface-container-high);border:1px solid var(--md-sys-color-outline);box-shadow:0 6px 20px #0003;display:grid;gap:8px}.record{padding:12px 0;border-top:1px solid var(--md-sys-color-outline-variant);overflow-wrap:anywhere}.record p{margin:6px 0}md-outlined-button,md-text-button,md-icon-button{min-height:48px}md-icon-button{min-width:48px}.row md-outlined-text-field{flex:1;min-width:160px}p{overflow-wrap:anywhere}.muted{color:var(--md-sys-color-on-surface-variant)}`;
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  private changed(){this.revision++;}
  private async call(action:string,fields:Record<string,unknown>={}){const r=await window.studio?.operations?.({action:'tools',request:{action:'ollama.catalogue.'+action,...fields}});if(!r?.ok)throw Error(r?.code||'DESKTOP_REQUIRED');return r.result as any;}
  private fail(e:unknown){const code=e instanceof Error&&/^[A-Z_]+$/.test(e.message)?e.message:'UNAVAILABLE';this.feedback=captureOwnedStatus(this,'feedback',this.l.bind(this),l=>l('Catalogue operation not confirmed. Inspect status before retrying.','未能確認目錄操作，重試前請檢視狀態。')+' '+code);}

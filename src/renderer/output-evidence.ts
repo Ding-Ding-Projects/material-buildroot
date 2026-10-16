@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing,type PropertyValues} from "lit";
 import {workspaceStyles} from "./workspace-styles";
 type FileChoice={id:string;name:string};
@@ -10,7 +11,7 @@ export class OutputEvidence extends LitElement {
   static properties={workspaceId:{type:String},language:{type:String},selection:{attribute:false},selectedFile:{attribute:false},saved:{state:true},beforeManifest:{state:true},afterManifest:{state:true},comparison:{state:true},compliance:{state:true},busy:{state:true},feedback:{state:true}};
   workspaceId="";language="bilingual";selection:FileChoice[]=[];selectedFile?:FileChoice;saved?:Saved;beforeManifest?:FileChoice;afterManifest?:FileChoice;comparison?:Comparison;compliance?:Compliance;busy=false;feedback="";private generation=0;
   static styles=[workspaceStyles,css`:host{display:block;min-width:0;margin-top:24px}section{border-top:1px solid var(--md-sys-color-outline-variant);padding:16px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.scroll{max-height:360px;overflow:auto}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:8px;border-bottom:1px solid var(--md-sys-color-outline-variant);overflow-wrap:anywhere}code,dd,p{overflow-wrap:anywhere}dd{margin:0 0 8px}details{padding:8px 0}`];
-  private l(en:string,zh:string){return this.language==="en"?en:this.language==="zh-HK"?zh:`${en} · ${zh}`;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   protected updated(changed:PropertyValues){if(changed.has("workspaceId")){this.generation++;this.saved=undefined;this.beforeManifest=undefined;this.afterManifest=undefined;this.comparison=undefined;this.compliance=undefined;this.feedback="";}}
   private async run(action:string,fields:Record<string,unknown>={}){const api=window.studio?.operations;if(!api||this.busy||!this.workspaceId)return;const generation=this.generation,workspaceId=this.workspaceId;this.busy=true;this.feedback="";try{const reply=await api({action,workspaceId,...fields});if(generation!==this.generation||workspaceId!==this.workspaceId)return;if(!reply.ok){this.feedback=reply.code;return;}return reply.result;}catch{if(generation===this.generation)this.feedback=this.l("Evidence operation unavailable; refresh and retry.","證據操作暫時不可用，請重新整理再試。");}finally{this.busy=false;}}
   private async create(){const result=await this.run("outputs.manifest",{fileIds:this.selection.map(f=>f.id)}) as Saved|undefined;if(result)this.saved=result;}

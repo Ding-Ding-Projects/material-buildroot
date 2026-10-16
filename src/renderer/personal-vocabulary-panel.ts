@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {LitElement,html,css,nothing} from 'lit';
 import {materialIcon} from './material-icons';
 import {vocabulary} from './owned-copy';
@@ -8,7 +9,7 @@ export class PersonalVocabularyPanel extends LitElement{
  static styles=css`:host{display:block}:host([hidden]){display:none}.row{display:flex;gap:8px;flex-wrap:wrap}h2{font-size:16px;margin:0}p{line-height:1.5}input[hidden]{display:none}md-outlined-button{min-height:48px;--md-outlined-button-container-height:48px}`;
  connectedCallback(){super.connectedCallback();this.unsubscribe=vocabulary.subscribe(()=>this.revision++);}
  disconnectedCallback(){this.unsubscribe?.();super.disconnectedCallback();}
- private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
  focusAction(action:'upload'|'status'|'clear'){(this.renderRoot.querySelector('#'+action) as HTMLElement|null)?.focus();}
  private async importFile(event:Event){const input=event.target as HTMLInputElement,file=input.files?.[0];input.value='';if(!file||vocabulary.school()!=='inactive')return;this.busy=true;this.error=false;try{const result=await vocabulary.importFile(file);if(result.state==='unavailable')this.error=true;}catch{this.error=true;}finally{this.busy=false;}}
  private async clear(){this.busy=true;this.error=false;try{await vocabulary.clear();}catch{this.error=true;}finally{this.busy=false;}}

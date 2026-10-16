@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import { LitElement, html, css } from 'lit';
 import '@material/web/dialog/dialog.js';
 import '@material/web/checkbox/checkbox.js';
@@ -28,7 +29,7 @@ export class DestructiveConfirmation extends LitElement {
     :focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:3px}
     @media(prefers-reduced-motion:reduce){.fill{transition:none}.complete{animation:none}}
   `;
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:en+' / '+zh;}
+  private l(en:string,zh:string){return localizedCopy(en,zh,this.language);}
   async request(origin?:HTMLElement):Promise<DestructiveProof|null>{
     this.origin=origin;
     const result=new Promise<DestructiveProof|null>(resolve=>this.finish=resolve);
