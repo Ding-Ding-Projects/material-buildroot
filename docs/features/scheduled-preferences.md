@@ -43,3 +43,25 @@ This evidence does not prove native frame admission, packaged-window input,
 installed-profile protection, complete language/theme/display-scale layout,
 installer/update behavior or full roadmap acceptance. Those remain pending.
 No new HTTP API is introduced, so a Postman collection is not applicable.
+
+## Native layout repair
+
+The first actual desktop build at `10ec6bc40eb985f8c0f62f3d104bd97856dbf4f4`
+confirmed save, draft preservation, editor-only restoration, invalid-draft rejection
+and restart persistence through the real admitted frame. Both owned native runs
+closed normally, with all four processes absent and each named desktop gone.
+This is current-host built-payload evidence, not installer or native keyboard-input proof.
+
+That built run also exposed horizontal rule-editor overflow at a 1280 × 752 logical
+viewport and actual 150% scale. A seven-element validated layout receipt measured
+503/531 px layout client/scroll widths and 296/325 px editor widths. The panel was
+only about 503 px wide even though viewport media queries selected the two-column
+layout. Implicit intrinsic grid tracks compounded the mismatch.
+
+The bounded repair uses the panel's inline-size container for responsive rules and
+explicit shrinkable single-column tracks. A regression first failed against the
+original styles, then passed at 1200, 1280 and 1440 px widths in bilingual light mode
+at device ratio 1.5. TypeScript and independent source review passed. The expanded
+Material touch region is excluded from visible-content geometry checks; panel,
+field and control bounds and owning-main scroll containment remain asserted.
+The rebuilt native after-state and identical-tuple measurement are still pending.

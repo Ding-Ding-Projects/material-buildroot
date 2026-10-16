@@ -14,6 +14,40 @@ const field=(page,name)=>panel(page).getByRole('textbox',{name,exact:true});
 const fixtures=new Set();
 test.afterEach(()=>{for(const close of fixtures)close();});
 
+test.describe('schedule panel container sizing',()=>{
+ test.use({deviceScaleFactor:1.5});
+ for(const width of [1200,1280,1440])test(`schedule panel fits a narrow settings column at ${width}x752`,async({page})=>{
+  await page.setViewportSize({width,height:752});await page.emulateMedia({colorScheme:'light'});
+  const f=await open(page,{language:'bilingual',rules:[local({'appearance.theme':'light'},{label:'Recovered native draft'})]});
+  try{
+   await expect(panel(page).locator('.editor')).toBeVisible();await page.evaluate(()=>document.fonts.ready);
+   const measurements=await panel(page).evaluate(el=>{
+    const host=el.getBoundingClientRect();
+    const elements=[...el.shadowRoot.querySelectorAll('.layout,.rules,.rule,.editor,.fields,.timeline,.status,.editor md-outlined-text-field,.editor md-outlined-select')];
+    return {viewport:innerWidth,scale:devicePixelRatio,hostWidth:host.width,overflow:elements.map(node=>{
+     const rect=node.getBoundingClientRect();return {selector:node.className||node.localName,clientWidth:node.clientWidth,scrollWidth:node.scrollWidth,left:rect.left-host.left,right:rect.right-host.right};
+    }).filter(row=>row.scrollWidth>row.clientWidth+1||row.left< -1||row.right>1)};
+   });
+   // A wide viewport still places this panel in the narrower second settings column.
+   expect(measurements.viewport).toBeGreaterThan(1100);expect(measurements.scale).toBe(1.5);
+   expect(measurements.hostWidth).toBeGreaterThan(350);expect(measurements.hostWidth).toBeLessThan(650);
+   expect(measurements.overflow).toEqual([]);
+   // Material icon controls extend their touch regions into surrounding spacing.
+   // Keep strict content bounds above and check scrolling at the owning main surface.
+   const parentBounds=await page.locator('material-buildroot').evaluate(el=>{
+    const main=el.shadowRoot.querySelector('main'),grid=el.shadowRoot.querySelector('.settings-grid');
+    const outer=main.getBoundingClientRect(),inner=grid.getBoundingClientRect();
+    return {clientWidth:main.clientWidth,scrollWidth:main.scrollWidth,left:inner.left-outer.left,right:inner.right-outer.right};
+   });
+   expect(parentBounds.scrollWidth).toBeLessThanOrEqual(parentBounds.clientWidth+1);
+   expect(parentBounds.left).toBeGreaterThanOrEqual(-1);expect(parentBounds.right).toBeLessThanOrEqual(1);
+   await field(page,'Rule label · 規則標籤').fill('Reviewed local rule');
+   await expect(field(page,'Rule label · 規則標籤')).toHaveValue('Reviewed local rule');
+   expect(f.errors).toEqual([]);
+  }finally{f.close();}
+ });
+});
+
 // Browser source preview with the production SQLite service and typed IPC adapter.
 // Native frame admission, window input and installer behavior require separate evidence.
 async function open(page,{language='en',rules,restricted=false}={}){
