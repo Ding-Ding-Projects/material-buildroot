@@ -6,7 +6,7 @@ The owner selected isolated per-item implementation and release delivery. This s
 
 All tests, reviews, audits, static analysis and screenshots are deliberately deferred for this pass, including virtual-machine and Docker tests. Builds, packaging and bounded release metadata readback remain enabled. Implementation, build, release and acceptance are separate states. No acceptance-dependent checkbox is completed by source changes or package production alone.
 
-- [ ] PH02-T03 follow-up: native handle-level broker and six-format consumer source is authored, but native compilation, package admission and runtime acceptance remain outstanding.
+- [ ] PH02-T03 follow-up: native handle-level broker and six-format consumer source is authored, but native compilation is recorded in run 38972521474; final setup embedding/package admission and runtime acceptance remain outstanding.
 - [ ] PH02-T04 follow-up: native privileged-operation routes remain outstanding after owner-scoped vault references; runtime acceptance remains deferred.
 - [ ] PH01-T02-C02 follow-up: complete current consumer admission remains outstanding; historical source references do not become independent delivery evidence.
 

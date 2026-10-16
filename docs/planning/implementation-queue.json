@@ -82,8 +82,8 @@
     {
       "id": "PH10-T09-C01",
       "description": "Guided/generated and reviewed expert YAML for source or dedicated execution repositories, selecting compatible hosted/self-hosted Windows runners for product builds and packaging.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/product-workflows",
       "verification": "deferred"
     },
     {
@@ -158,9 +158,10 @@
     {
       "id": "PH03-T02",
       "description": "[A+D-native+R] Implement complete English/Cantonese/bilingual copy, persisted fresh bilingual/system-theme defaults, independent humor levels, bounded local vocabulary import and display rename.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/language-wording",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "632f86de3d698458f755868c4f25a9ed4937c581"
     },
     {
       "id": "PH03-T03",
@@ -190,9 +191,10 @@
     {
       "id": "PH03-T06",
       "description": "[A+D-native+R] Implement guided forms, useful empty-editor presets, settings provenance/help and real rich controls/canvases with keyboard structured equivalents and undo.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/guided-forms",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "98203b2f79b484abb83f0ed14103ab3acce8bf89"
     },
     {
       "id": "PH03-T07",
@@ -238,16 +240,18 @@
     {
       "id": "PH04-T05",
       "description": "[A+D-native+R] Implement durable jobs, crash/re-entry recovery, progress at initiator, per-item bulk outcomes, cancel/retry and contextual recovery routes.",
-      "state": "owned-implementation-in-progress",
+      "state": "preserved-source-integration-pending",
       "owner": "task/durable-jobs",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "8efc504fe46b5f5cc682e5a6069aff3b8e1c4f0b"
     },
     {
       "id": "PH04-T06",
       "description": "[A+D-native+R] Implement factual changelog, safe upstream-markup rendering, complete offline documentation and accessible persistent notification/review centre.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/documentation-notifications",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "632f86de3d698458f755868c4f25a9ed4937c581"
     },
     {
       "id": "PH04-T07",
@@ -351,9 +355,10 @@
     {
       "id": "PH06-T06",
       "description": "[A+R] Implement named build/package/clean targets, truthful streaming logs/history/progress and explicit invalidation/rebuild explanations.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/named-targets",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "ea20112761862f2b76d8752348ec71622e5a4941"
     },
     {
       "id": "PH06-T07",
@@ -408,37 +413,42 @@
     {
       "id": "PH07-T06",
       "description": "[A+R] Implement real SDK/toolchain export with consumer smoke-build verification and environment instructions.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/sdk-export",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "ea20112761862f2b76d8752348ec71622e5a4941"
     },
     {
       "id": "PH07-T07",
       "description": "[A+R] After P42, implement exact destination-validated flashing and guest installer routes with reviewed destructive actions, cancellation and recovery proof.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/flashing-routes",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "0ac283315ae869caafd6accb12e0898500a7e596"
     },
     {
       "id": "PH07-T08",
       "description": "[A+R] After P41, implement authenticated remote runtime enrollment, transfer/jobs/cancel/recovery/output verification for the approved target types.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/remote-runtimes",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "0ac283315ae869caafd6accb12e0898500a7e596"
     },
     {
       "id": "PH07-T09",
       "description": "[A+R] After P40, implement approved cloud providers/destinations with scoped vault credentials, previewed upload, checksums, cancel/retry and actual provider readback.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/cloud-destinations",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "2499e954554c16e243e5edd1fbca1b9b4f215888"
     },
     {
       "id": "PH08-T01",
       "description": "[A+D-native+R] Implement all eight converter categories and PDF operations with packaged offline adapters, searchable rich controls and unlimited disk-backed paged queues; validate genuine outputs.",
-      "state": "owned-implementation-in-progress",
+      "state": "preserved-source-integration-pending",
       "owner": "task/converter-workflows",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "030c97f4ebe5116e403825f3f08a41a3667f2ff0"
     },
     {
       "id": "PH08-T02",
@@ -461,23 +471,26 @@
     {
       "id": "PH08-T04",
       "description": "[A+D-native+R] Implement local assistant plans/checkpoints/reviewed actions and harness recovery with no silent privilege escalation; verify failure and cancellation phases.",
-      "state": "owned-implementation-in-progress",
+      "state": "preserved-source-integration-pending",
       "owner": "task/assistant-actions",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "f6c9d25d328817b84fa20021c8cd7283eb589cca"
     },
     {
       "id": "PH08-T05",
       "description": "[A+D-native+R] Implement actual external-editor handoff and browser transfer start/progress/completion surfaces with real queue consumers, recovery and supported focus/visibility behavior.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/editor-transfers",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "dbfeb8fcf1a54ea95d256748881d57459d85c4a6"
     },
     {
       "id": "PH08-T06",
       "description": "[A+D-native+R] Implement previewed authenticated forge publication with exact destination/source, scoped credentials and actual readback.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/forge-publication",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "7cfa95f7fc52397a25e0c71f6a0e7bf918eaca00"
     },
     {
       "id": "PH08-T07",
@@ -489,29 +502,32 @@
     {
       "id": "PH09-T01",
       "description": "[A+D+C+R (through-PH09 scope)] Complete D browser-native implementations for every applicable identity, with local visitor state, reset/export explanations and truthful unavailable/offline behavior.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/browser-native",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "f1ee6423ecd827bf5e5f491f45a9b1a0ae9b7311"
     },
     {
       "id": "PH09-T02",
       "description": "[A+D+C+R (through-PH09 scope)] Implement reviewed explicit Edge/Chrome pairing and authenticated LAN capability grants/revocation with origin, TLS, CSRF/replay and browser private-network handling; no internet control exposure.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/pairing-security",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "e840d9113ff15ea61d26f4b75bfa274b39363b39"
     },
     {
       "id": "PH09-T03",
       "description": "[A+D+C+R (through-PH09 scope)] Complete C typed broker consumers and independent client state for every applicable identity; revocation stops new authority and settles owned jobs truthfully.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/companion-consumers",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "80529d3628f7c51692563c40141a0cfb1430464c"
     },
     {
       "id": "PH09-T04",
       "description": "[A+D+C+R (through-PH09 scope)] Complete detailed categorized feature articles and Cantonese twins, rendered source wiki, search/offline navigation and actual API Postman category/master collections; distinguish non-HTTP IPC.",
-      "state": "queued",
-      "owner": null,
+      "state": "owned-implementation-in-progress",
+      "owner": "task/complete-articles",
       "verification": "deferred"
     },
     {
@@ -524,9 +540,10 @@
     {
       "id": "PH09-T06",
       "description": "[A+D+C+R (through-PH09 scope)] Implement authenticated status integration and truthful unavailable states; verify authorized status bridge, protected webhooks and display-event delivery with separate R evidence.",
-      "state": "owned-implementation-in-progress",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/status-integration",
-      "verification": "deferred"
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "632f86de3d698458f755868c4f25a9ed4937c581"
     },
     {
       "id": "PH09-T07",
@@ -545,17 +562,18 @@
     {
       "id": "PH10-T01",
       "description": "[A+D+C+R (final applicable acceptance)] Assemble one complete Windows x64 installer with all required capability payloads, original installed icons, valid license disclosures and actual offline bundled-first discovery.",
-      "state": "owned-implementation-in-progress",
-      "owner": "task/offline-payloads",
-      "verification": "deferred"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/offline-payload-host-classification",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "524a7767edda7a358df0e93f41437bcdc3699919"
     },
     {
       "id": "PH10-T02",
       "description": "[A+D+C+R (final applicable acceptance)] Produce real unsigned Squirrel.Windows Setup.exe, RELEASES, full packages and deltas; apply only required project-owned signing without claiming public trust.",
-      "state": "owned-implementation-in-progress",
-      "owner": "task/squirrel-packaging",
-      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "3810a4cfc2879ada5f88fd9995a9e0d70a9da8d4"
+      "state": "preserved-source-integration-pending",
+      "owner": "task/squirrel-native",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "714cd3d2ca7d5857b1cc5cfbe84658db25c48666"
     },
     {
       "id": "PH10-T03",
@@ -603,5 +621,5 @@
     }
   ],
   "updatedAt": "2026-10-16T18:35:07.7280332Z",
-  "integrationCommit": "6003e6f9b27b57b760c895282f6d595956028abb"
+  "integrationCommit": "ba486005c2c91f0e216b695610ab764570bac29d"
 }
