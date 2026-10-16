@@ -5,6 +5,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { createDockerRuntime } = require("./docker-runtime.cjs");
 const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs");
+const { isBuildTarget, assertPackage } = require("../build/target-actions.cjs");
 const TARGETS = Object.freeze([
   "all",
   "clean",
@@ -527,6 +528,7 @@ class ExecutionService {
       throw new Error("invalid-environment-probe");
     const grant = this.grants.get(request.grantId);
     if (!grant) throw new Error("grant-unavailable");
+    assertPackage({source:grant.source,externalTrees:grant.external.map(entry => entry.path)}, target);
     await this.verifyWslGrant(grant, request?.runtime);
     const validate = () => {
       if (this.grants.get(request.grantId) !== grant)
@@ -661,7 +663,7 @@ class ExecutionService {
     )
       throw new Error("unknown-execution-field");
     if (
-      !TARGETS.includes(target) ||
+      !isBuildTarget(target, TARGETS) ||
       !Number.isInteger(jobs) ||
       jobs < 1 ||
       jobs > 64
@@ -669,6 +671,7 @@ class ExecutionService {
       throw new Error("invalid-build-request");
     const grant = this.grants.get(grantId);
     if (!grant) throw new Error("grant-unavailable");
+    assertPackage({source:grant.source,externalTrees:grant.external.map(entry => entry.path)}, target);
     await this.verifyWslGrant(grant, request?.runtime);
     const revalidateAuthority = () => {
       if (signal?.aborted) throw new Error("execution-cancelled");
@@ -967,6 +970,8 @@ class ExecutionService {
   }
 }
 module.exports = { ExecutionService, TARGETS, boundedProcess, validateOwnershipReceipt };
+
+
 
 
 

@@ -7,6 +7,7 @@ const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
+const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
 const { createConfigurationService } = require("./configuration/index.cjs");
@@ -90,6 +91,7 @@ const fields = {
   "project.options": ["workspaceId"],
   "canvas.read": ["workspaceId", "canvasId"],
   "canvas.write": ["workspaceId", "canvasId", "expectedRevision", "layout"],
+  "build.targets": ["workspaceId"],
   "build.submit": ["workspaceId", "target", "runtime", "jobs"],
   "build.confirmation.challenge": ["request"],
   "build.confirmation.confirm": ["id", "firstKey", "secondKey", "slider", "rebuildConsent"],
@@ -837,7 +839,7 @@ function createOperationsService({
     if (
       typeof payload.workspaceId !== "string" ||
       !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
-      !TARGETS.includes(payload.target) ||
+      !targetActions.isBuildTarget(payload.target, TARGETS) ||
       !Number.isSafeInteger(payload.jobs) ||
       payload.jobs < 1 ||
       payload.jobs > 32
@@ -1469,7 +1471,7 @@ function createOperationsService({
       case "project.runtime":
         return changeConfig(projectPaths(request.workspaceId), () => {
           const item = project(request.workspaceId);
-          const selectedRuntime = runtime(request.runtime);
+        const selectedRuntime = runtime(request.runtime);
           const previous = projectOptions.get({
             workspaceId: request.workspaceId,
           });
@@ -1512,10 +1514,11 @@ function createOperationsService({
           expectedRevision: request.expectedRevision,
           layout: request.layout,
         });
+      case "build.targets": return targetActions.catalog(project(request.workspaceId));
       case "build.confirmation.challenge": {
         const candidate=request.request;
         exact(candidate,["action",...fields["build.submit"],...(Object.hasOwn(candidate||{},"resources")?["resources"]:[])]);
-        if(candidate.action!=="build.submit"||candidate.target!=="clean"||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
+        if(candidate.action!=="build.submit"||!targetActions.isDestructiveTarget(candidate.target)||!Number.isSafeInteger(candidate.jobs)||candidate.jobs<1||candidate.jobs>32) reject("INVALID_TARGET");
         reservations(candidate.resources,runtime(candidate.runtime),candidate.jobs);
         return buildConfirmation.challenge(candidate);
       }
@@ -1529,12 +1532,13 @@ function createOperationsService({
         if (!item.externalStateVerified)
           reject("EXTERNAL_TREES_NOT_AUTHORIZED");
         if (
-          !TARGETS.includes(request.target) ||
+          !targetActions.isBuildTarget(request.target, TARGETS) ||
           !Number.isSafeInteger(request.jobs) ||
           request.jobs < 1 ||
           request.jobs > 32
         )
           reject("INVALID_TARGET");
+        targetActions.assertPackage(item, request.target);
         const selectedRuntime = runtime(request.runtime);
         item.runtime = selectedRuntime;
         const resources = reservations(
@@ -1550,7 +1554,7 @@ function createOperationsService({
         project(request.workspaceId);
         if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
-        if (request.target === "clean") buildConfirmation.consume(request);
+        if (targetActions.isDestructiveTarget(request.target)) buildConfirmation.consume(request);
         else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
         const job = jobs.enqueue({
           kind: "build",
@@ -1659,7 +1663,7 @@ function createOperationsService({
         }
       case "jobs.retry": {
         const previous = ownJob(request.id);
-        if(previous.payload.target === "clean") reject("CONFIRMATION_REQUIRED");
+        if(targetActions.isDestructiveTarget(previous.payload.target)) reject("CONFIRMATION_REQUIRED");
         project(previous.payload.workspaceId);
         const job = jobs.retry(request.id, owner, request.sequence);
         void scheduler.pump().catch(() => {});
@@ -2097,3 +2101,5 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
