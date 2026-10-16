@@ -6,6 +6,7 @@ const cp = require('node:child_process');
 const os = require('node:os');
 const {packageIdentity,stageBaseline} = require('./squirrel.cjs');
 const {acquireHostedBaseline} = require('./squirrel-baseline.cjs');
+const {loadAdapterAdmission,assertInstallerAdmission} = require('./adapter-admission.cjs');
 const root = path.resolve(__dirname, '../..');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -171,6 +172,7 @@ async function main() {
   }
   execute(node,[path.join(root,'scripts/check-vocabulary.cjs')]);
   const before = dependenciesOnly ? null : sourceIdentity(root,git,manifestBytes);
+  const adapterAdmission = dependenciesOnly ? null : loadAdapterAdmission(root);
   console.log('Installing exact locked npm packages with lifecycle scripts disabled.');
   execute(node,[npm,'ci','--ignore-scripts','--no-audit','--no-fund'],{cwd:packageRoot});
   if (dependenciesOnly) { console.log('Locked dependencies acquired. No build or runtime verification is claimed.'); return; }
@@ -341,6 +343,7 @@ async function main() {
   }
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   const files = inventory(output);
+  let adapterInstallerMeasurement = null;
   if (installer && target.kind === 'desktop') {
     for(const file of files.filter(file=>/(^|\/)(Setup\.exe|RELEASES|[^/]+\.nupkg)$/.test(file.path))) {
       console.log(`Installer transfer asset: ${path.basename(file.path)} (${file.bytes} bytes).`);
@@ -348,6 +351,7 @@ async function main() {
     }
     const expectedFull = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-full.nupkg`);
     if (!expectedFull) throw new Error('Squirrel full package identity differs from the requested installed version.');
+    adapterInstallerMeasurement = assertInstallerAdmission(adapterAdmission, files.map(file => ({path:file.path,size:file.bytes})));
     const generatedDelta = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-delta.nupkg`);
     if (delta.status === 'staged' && !generatedDelta) throw new Error('Squirrel did not produce a delta from the supplied baseline.');
     if (generatedDelta) {
@@ -356,7 +360,7 @@ async function main() {
     }
     console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
   }
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupEmbedding, setupPayload, flashingHelper, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupEmbedding, setupPayload, flashingHelper, adapterAdmission, adapterInstallerMeasurement, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);

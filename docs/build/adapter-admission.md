@@ -16,6 +16,8 @@ External executable selection still belongs to the existing runtime and payload 
 
 `assertInstallerAdmission(admission, installerFiles)` consumes actual `{path, size}` output records and requires at least one nonempty full Squirrel package no larger than 1,400,000,000 bytes. The returned measurement proves only the supplied size policy. It deliberately retains `payloadEmbedding: unverified`; a small package can still omit required data. The build producer must supply actual measured package records after packaging, and include the inventory in its source-bound receipt.
 
+The root producer now loads the inventory before acquiring production packages and records it as `adapterAdmission`. After actual desktop installer production, it maps the output inventory's measured byte counts into `adapterInstallerMeasurement`. This scoped size measurement remains separate from `setupPayload` and `setupEmbedding`, which require actual embedded package identity. Existing independent limits on Setup, full and delta files remain unchanged. Other build targets retain a null installer measurement. Source integration is authored; production consumption of this later candidate has not yet run.
+
 ## Verification and remaining admission
 
 Implementation was authored under the requested release-speed mode. Tests, static analysis, builds, runtime interaction and screenshots were not run in this lane. Integration requires the packaging lane's existing `offline-payloads.json`, which is not duplicated by this change. Production build consumption, actual component registration, full transitive license/notice coverage, selected external binary versions, redistributability decisions, payload embedding and current installer size remain acceptance work. No HTTP API is introduced.
