@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Material Buildroot - all HTTP APIs",
-    "description": "Master collection for every HTTP API the product exposes. The HTTPS companion is the only HTTP surface; desktop IPC boundaries are not HTTP and are documented in docs/security/README.md.\n\nPrerequisites: start the opt-in companion from the desktop with your own TLS certificate and key, trust that certificate in the client, and create a pairing challenge for the exact origin you will send. Requests must carry the exact Host authority and Origin, or they are rejected. This collection contains placeholders only; it holds no certificates, cookies, challenges, CSRF tokens or session identifiers. See docs/security/companion.md.",
+    "description": "Master HTTP collection snapshot. The HTTPS companion is the HTTP surface; desktop IPC boundaries are not HTTP and are documented in docs/security/README.md.\n\nBaseline snapshot only: four routes and six original actions. New actionContracts and client-binding pairing are not included until their host module is integrated and these files are regenerated.\n\nPrerequisites: start the opt-in companion from the desktop with your own TLS certificate and key, trust that certificate in the client, and create a pairing challenge for the exact origin you will send. Requests must carry the exact Host authority and Origin, or they are rejected. This collection contains placeholders only; it holds no certificates, cookies, challenges, CSRF tokens or session identifiers. See docs/security/companion.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -78,7 +78,7 @@
                 "pair"
               ]
             },
-            "description": "Copy the single-use challenge shown by the desktop into the `challenge` variable, then send. The desktop shows a native review dialog; enrollment succeeds only after that review is approved. The reply contains `csrfToken`; copy it into the current (unshared) value of `csrfToken`. The session cookie is stored by the client cookie jar and is never placed in this collection."
+            "description": "Copy the single-use challenge shown by the desktop into the `challenge` variable, then send. The desktop shows a native review dialog; enrollment succeeds only after that review is approved. The reply contains `csrfToken`; copy it into the current (unshared) value of `csrfToken`. The session cookie is stored by the client cookie jar and is never placed in this collection. This is the baseline pairing snapshot, not the later client-binding protocol."
           }
         },
         {
@@ -121,7 +121,7 @@
           }
         },
         {
-          "name": "Action workspace.read",
+          "name": "Action builds.submit",
           "request": {
             "method": "POST",
             "header": [
@@ -140,7 +140,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"action\": \"workspace.read\",\n  \"args\": {},\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+              "raw": "{\n  \"action\": \"builds.submit\",\n  \"args\": {\n    \"workspaceId\": \"{{workspaceId}}\",\n    \"runtime\": \"wsl\",\n    \"target\": \"all\",\n    \"jobs\": 4\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -156,124 +156,7 @@
                 "actions"
               ]
             },
-            "description": "Requires scope `workspace:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send."
-          }
-        },
-        {
-          "name": "Action projects.list",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Origin",
-                "value": "{{origin}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-CSRF-Token",
-                "value": "{{csrfToken}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"action\": \"projects.list\",\n  \"args\": {},\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/actions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "actions"
-              ]
-            },
-            "description": "Requires scope `projects:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send."
-          }
-        },
-        {
-          "name": "Action jobs.list",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Origin",
-                "value": "{{origin}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-CSRF-Token",
-                "value": "{{csrfToken}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"action\": \"jobs.list\",\n  \"args\": {},\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/actions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "actions"
-              ]
-            },
-            "description": "Requires scope `jobs:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send."
-          }
-        },
-        {
-          "name": "Action jobs.get",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Origin",
-                "value": "{{origin}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-CSRF-Token",
-                "value": "{{csrfToken}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"action\": \"jobs.get\",\n  \"args\": {\n    \"jobId\": \"{{jobId}}\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/actions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "actions"
-              ]
-            },
-            "description": "Requires scope `jobs:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send."
+            "description": "Requires scope `builds:submit`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
           }
         },
         {
@@ -312,11 +195,11 @@
                 "actions"
               ]
             },
-            "description": "Requires scope `jobs:cancel`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. This is a mutation scope: it is disabled by default and must be explicitly enabled by the desktop host. Never resend an accepted mutation after a lost reply; first reconcile actual job state with jobs.list or jobs.get."
+            "description": "Requires scope `jobs:cancel`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
           }
         },
         {
-          "name": "Action builds.submit",
+          "name": "Action jobs.get",
           "request": {
             "method": "POST",
             "header": [
@@ -335,7 +218,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"action\": \"builds.submit\",\n  \"args\": {\n    \"workspaceId\": \"{{workspaceId}}\",\n    \"runtime\": \"wsl\",\n    \"target\": \"all\",\n    \"jobs\": 4\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+              "raw": "{\n  \"action\": \"jobs.get\",\n  \"args\": {\n    \"jobId\": \"{{jobId}}\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -351,7 +234,124 @@
                 "actions"
               ]
             },
-            "description": "Requires scope `builds:submit`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. This is a mutation scope: it is disabled by default and must be explicitly enabled by the desktop host. Never resend an accepted mutation after a lost reply; first reconcile actual job state with jobs.list or jobs.get."
+            "description": "Requires scope `jobs:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority."
+          }
+        },
+        {
+          "name": "Action jobs.list",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"jobs.list\",\n  \"args\": {},\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actions"
+              ]
+            },
+            "description": "Requires scope `jobs:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority."
+          }
+        },
+        {
+          "name": "Action projects.list",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"projects.list\",\n  \"args\": {},\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actions"
+              ]
+            },
+            "description": "Requires scope `projects:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority."
+          }
+        },
+        {
+          "name": "Action workspace.read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{origin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"workspace.read\",\n  \"args\": {},\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actions"
+              ]
+            },
+            "description": "Requires scope `workspace:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority."
           }
         },
         {

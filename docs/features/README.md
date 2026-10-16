@@ -13,13 +13,18 @@ Choose a task below and read its permission, recovery and verification boundarie
 
 - [Typed configuration and undo](../desktop/typed-configuration-controls.md) · [有型別控制](../desktop/typed-configuration-controls.zh-HK.md)
 - [Defconfig discovery and minimal save](../desktop/defconfig-workflows.md) · [defconfig 流程](../desktop/defconfig-workflows.zh-HK.md)
-- [Component configuration domains](../desktop/configuration-domains.md)
-- [Kconfig evaluation and source trust](../desktop/kconfig-semantics.md)
+- [Component configuration domains](../desktop/configuration-domains.md) · [元件範疇](../desktop/configuration-domains.zh-HK.md)
+- [Kconfig evaluation and source trust](../desktop/kconfig-semantics.md) · [Kconfig 求值](../desktop/kconfig-semantics.zh-HK.md)
 - [Build targets](build-targets.md) · [建置目標](build-targets.zh-HK.md)
 - [Concurrent queues and job terminals](build-queues.md) · [建置佇列](build-queues.zh-HK.md)
 - [Exact-destination clean confirmation](destructive-confirmation.md) · [清理確認](destructive-confirmation.zh-HK.md)
 - [Pinned local container runtime](runtime-containers.md) · [Container 執行環境](runtime-containers.zh-HK.md)
-- [WSL and Linux storage](wsl-runtime.md), [remote runtimes](remote-runtimes.md), [execution setup](execution/setup.md), [hosted jobs](execution/hosted-jobs.md) and [managed workflow authoring](execution-workflows.md)
+- [WSL and Linux storage](wsl-runtime.md) · [WSL 及 Linux 儲存](wsl-runtime.zh-HK.md)
+- [Remote runtimes](remote-runtimes.md) · [遠端執行環境](remote-runtimes.zh-HK.md)
+- [Execution setup](execution/setup.md) · [執行設定](execution/setup.zh-HK.md)
+- [Hosted jobs](execution/hosted-jobs.md) · [託管工作](execution/hosted-jobs.zh-HK.md)
+- [Managed workflow authoring](execution-workflows.md) · [受管理 workflow](execution-workflows.zh-HK.md)
+- [Package authoring and source-editor handoff](packages/package-authoring.md) · [套件編寫](packages/package-authoring.zh-HK.md)
 - [Jobs and interruption recovery](../security/jobs-and-recovery.md)
 
 ## Inspect and deliver outputs
