@@ -40,6 +40,7 @@ const owner = "desktop-owner";
 const fields = {
   "documentation.list": [],
   "documentation.read": ["id"],
+  "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
   "runtime.discover": [],
   "runtime.python.choose": [],
@@ -1077,6 +1078,9 @@ function createOperationsService({
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
+      case "documentation.searchText":
+        if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
+        return documentation.searchText();
       case "documentation.read":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.read({ id: request.id });

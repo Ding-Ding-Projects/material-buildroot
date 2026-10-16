@@ -20,7 +20,7 @@ context.onmessage = (event: MessageEvent) => {
         if (
           typeof a.id !== "string" ||
           typeof a.text !== "string" ||
-          a.text.length > 2000
+          a.text.length > 70000
         )
           throw Error("INVALID_SEARCH");
         return expression.test(a.text);

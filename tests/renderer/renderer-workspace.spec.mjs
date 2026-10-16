@@ -37,6 +37,7 @@ test('first-run wizard creates a real saved plan and resumes after reload',async
   await page.screenshot({path:testInfo.outputPath('onboarding.png'),fullPage:true});
   await dialog.getByRole('button',{name:'Create plan',exact:true}).click();await expect(dialog).toContainText('Step 3 / 3');
   expect(f.service.get().state.plans[0].name).toBe('Guided image');
+  {const state=f.service.get().state;expect(state.plans).toHaveLength(1);expect(state.onboarding).toMatchObject({step:2,planId:state.plans[0].id});expect(state.activity.map(a=>a.action).slice(-2)).toEqual(['onboarding.update','onboarding.createPlan']);}
   await page.reload();await page.locator('nav').getByRole('button',{name:'Resume setup',exact:true}).click();
   await expect(dialog).toContainText('Step 3 / 3');await dialog.getByRole('button',{name:'Open workspace',exact:true}).click();
   await expect.poll(()=>f.service.get().state.onboardingCompleted).toBe(true);expect(f.errors).toEqual([]);

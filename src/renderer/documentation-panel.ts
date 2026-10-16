@@ -59,6 +59,9 @@ export class DocumentationPanel extends LitElement {
   private searching = false;
   private worker?: Worker;
   private timer?: ReturnType<typeof setTimeout>;
+  /** Plain article text from the host, used only for local matching. */
+  private bodies?: Map<string, string>;
+  private bodyState: "idle" | "loading" | "ready" | "unavailable" = "idle";
   static styles = [
     workspaceStyles,
     css`
@@ -350,7 +353,10 @@ export class DocumentationPanel extends LitElement {
       const index = await this.call<Index>("documentation.list");
       if (token !== this.serial) return;
       this.index = index;
+      this.bodies = undefined;
+      this.bodyState = "idle";
       this.search();
+      void this.loadBodies(index);
     } catch (e) {
       if (token === this.serial) this.feedback = this.error(e);
     } finally {
@@ -478,6 +484,63 @@ export class DocumentationPanel extends LitElement {
       this.revision++;
     }
   }
+  private async loadBodies(index: Index) {
+    this.bodyState = "loading";
+    this.revision++;
+    try {
+      const reply = await this.call<{
+        entries: { id: string; text: string; truncated: boolean }[];
+      }>("documentation.searchText");
+      if (this.index !== index) return;
+      const known = new Set(index.articles.map((a) => a.id));
+      if (
+        !reply ||
+        !Array.isArray(reply.entries) ||
+        reply.entries.length > 1000
+      )
+        throw Error("INVALID_SEARCH_TEXT");
+      const bodies = new Map<string, string>();
+      for (const entry of reply.entries) {
+        if (
+          !entry ||
+          typeof entry.id !== "string" ||
+          !known.has(entry.id) ||
+          bodies.has(entry.id) ||
+          typeof entry.text !== "string" ||
+          entry.text.length > 65536 ||
+          typeof entry.truncated !== "boolean"
+        )
+          throw Error("INVALID_SEARCH_TEXT");
+        bodies.set(entry.id, entry.text);
+      }
+      this.bodies = bodies;
+      this.bodyState = "ready";
+    } catch {
+      if (this.index !== index) return;
+      this.bodies = undefined;
+      this.bodyState = "unavailable";
+    }
+    if (!this.restricted) this.search();
+    else this.revision++;
+  }
+  private searchable(a: Article) {
+    return [a.title, a.category, a.summary, this.bodies?.get(a.id) || ""]
+      .join(" ")
+      .slice(0, 70000);
+  }
+  private scopeNotice() {
+    return this.bodyState === "ready"
+      ? this.l("titles, summaries and article text", "標題、摘要及文章內容")
+      : this.bodyState === "loading"
+        ? this.l(
+            "titles and summaries while article text loads",
+            "標題及摘要（文章內容載入中）",
+          )
+        : this.l(
+            "titles and summaries only; article text is unavailable",
+            "只限標題及摘要；文章內容未能使用",
+          );
+  }
   private stopSearch() {
     this.worker?.terminate();
     this.worker = undefined;
@@ -492,12 +555,7 @@ export class DocumentationPanel extends LitElement {
       const query = this.query.toLocaleLowerCase();
       this.matchedIds = new Set(
         articles
-          .filter((a) =>
-            [a.title, a.category, a.summary]
-              .join(" ")
-              .toLocaleLowerCase()
-              .includes(query),
-          )
+          .filter((a) => this.searchable(a).toLocaleLowerCase().includes(query))
           .map((a) => a.id),
       );
       this.revision++;
@@ -544,7 +602,7 @@ export class DocumentationPanel extends LitElement {
       flags: this.flags,
       articles: articles.map((a) => ({
         id: a.id,
-        text: [a.title, a.category, a.summary].join(" ").slice(0, 2000),
+        text: this.searchable(a),
       })),
     });
   }
@@ -763,6 +821,7 @@ export class DocumentationPanel extends LitElement {
           `${articles.length} articles · ${this.mode} search`,
           `${articles.length} 篇文章 · ${this.mode === "regex" ? "表達式" : "文字"}搜尋`,
         )}
+        · ${this.l("Searching", "搜尋範圍")}: ${this.scopeNotice()}
       </p>
       ${this.loading || this.searching
         ? html`<md-linear-progress

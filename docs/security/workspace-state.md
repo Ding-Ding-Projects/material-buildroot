@@ -14,6 +14,7 @@ Every mutation requires an integer `expectedRevision` matching the current durab
 | `preferences.update` | `preferences: {theme}` |
 | `onboarding.complete` | none |
 | `onboarding.update` | `onboarding: {step,runtime,name,dismissed,planId?}` |
+| `onboarding.createPlan` | `plan: {name,runtime,target,status,notes}` |
 | `snapshot.create` | `name` |
 | `snapshot.restore` | `id` |
 | `document.import` | `document`, a serialized export document |
@@ -51,6 +52,8 @@ A mutation flushes its next-revision journal record before replacing workspace s
 ## Resumable onboarding
 
 Workspace `onboarding` contains `{step:0|1|2,runtime:"wsl"|"docker",name:string,dismissed:boolean,planId?:UUID}`. Its default is `{step:0,runtime:"wsl",name:"",dismissed:false}`. Names are bounded to 80 characters, including an allowed empty initial draft. `onboarding.update` replaces this exact progress object at the expected revision. Dismissal and the existing `onboardingCompleted` flag are independent; dismissal does not mark onboarding complete, and completion preserves the saved progress. Snapshots and exports include progress.
+
+`onboarding.createPlan` is the setup wizard's plan step. In one transaction, at one revision and with one activity record, it creates the plan and sets progress to `{step:2,runtime,name,dismissed:false,planId}` from that plan. If progress already names a plan that still exists, that plan is reused and nothing new is created, so retrying after an interrupted or lost reply cannot duplicate it. If the recorded plan was removed, a new one is created and recorded. A failed write leaves the prior file unchanged, with neither the plan nor the progress applied. The ordinary `plan.create` action is unchanged for plans created outside setup.
 
 An exact legacy version-one workspace, snapshot payload or export without the new progress field receives the default additively in memory. Existing plans, revisions, completion, preferences, snapshots and history are retained. Reading does not rewrite the workspace file; the next successful mutation persists the additive shape. Unknown fields and malformed progress are rejected with the original file preserved. This compatibility path cannot reconstruct progress that older versions never stored.
 

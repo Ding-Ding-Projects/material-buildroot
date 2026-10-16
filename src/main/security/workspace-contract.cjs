@@ -216,6 +216,7 @@ const ACTIONS = [
   "preferences.update",
   "onboarding.complete",
   "onboarding.update",
+  "onboarding.createPlan",
   "snapshot.create",
   "snapshot.restore",
   "document.import",
@@ -245,12 +246,14 @@ function request(value) {
     "preferences.update": ["preferences"],
     "onboarding.complete": [],
     "onboarding.update": ["onboarding"],
+    "onboarding.createPlan": ["plan"],
     "snapshot.create": ["name"],
     "snapshot.restore": ["id"],
     "document.import": ["document"],
   }[value.action];
   object(value, ["expectedRevision", "action", ...fields]);
-  if (value.action === "plan.create") planFields(value.plan);
+  if (["plan.create", "onboarding.createPlan"].includes(value.action))
+    planFields(value.plan);
   if (value.action === "plan.update") {
     id(value.id);
     planFields(value.changes, true);

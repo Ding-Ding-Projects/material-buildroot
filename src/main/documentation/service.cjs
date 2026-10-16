@@ -8,6 +8,7 @@ const FORMAT = "material-buildroot-documentation";
 const HASH = /^[0-9a-f]{64}$/;
 const DOC = /^doc-[0-9a-f]{64}$/;
 const MAX_ARTICLE = 512 * 1024,
+  MAX_SEARCH_TEXT = 32 * 1024,
   MAX_ASSET = 8 * 1024 * 1024,
   MAX_TOTAL = 64 * 1024 * 1024;
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
@@ -452,6 +453,41 @@ function createDocumentationService({ directory, openExternal } = {}) {
       fail("CORRUPT_BUNDLE");
     return { index, article, rendered };
   }
+  function codePoint(value, fallback) {
+    return Number.isInteger(value) &&
+      value > 0 &&
+      value <= 0x10ffff &&
+      (value < 0xd800 || value > 0xdfff)
+      ? String.fromCodePoint(value)
+      : fallback;
+  }
+  function plainText(html) {
+    const named = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+    return html
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, entity) => {
+        const lower = entity.toLowerCase();
+        if (lower.startsWith("#x"))
+          return codePoint(parseInt(lower.slice(2), 16), match);
+        if (lower.startsWith("#")) return codePoint(Number(lower.slice(1)), match);
+        return Object.hasOwn(named, lower) ? named[lower] : match;
+      })
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function searchEntry(index, article) {
+    const rendered = renderMarkdown(articleText(article), {
+      source: article.source,
+      documents: index.documents,
+      assets: index.assets,
+    });
+    const characters = Array.from(plainText(rendered.html));
+    return {
+      id: article.id,
+      text: characters.slice(0, MAX_SEARCH_TEXT).join(""),
+      truncated: characters.length > MAX_SEARCH_TEXT,
+    };
+  }
   function safe(method) {
     return (...args) => {
       try {
@@ -472,6 +508,13 @@ function createDocumentationService({ directory, openExternal } = {}) {
         navigation: navigation(index),
         issues: index.issues,
         complete: index.issues.length === 0,
+      };
+    }),
+    searchText: safe(() => {
+      const index = manifest();
+      verifySnapshot(index);
+      return {
+        entries: index.documents.map((article) => searchEntry(index, article)),
       };
     }),
     read: safe((input) => {
@@ -513,6 +556,7 @@ module.exports = {
   headingMetadata,
   imageMime,
   MAX_ARTICLE,
+  MAX_SEARCH_TEXT,
   MAX_ASSET,
   MAX_TOTAL,
   FORMAT,

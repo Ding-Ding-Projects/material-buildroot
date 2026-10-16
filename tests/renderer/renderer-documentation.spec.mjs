@@ -83,6 +83,20 @@ async function fixture(page, options = {}) {
               result: documents.find((d) => d.article.id === r.id),
             };
           }
+          if (r.action === "documentation.searchText") {
+            if (window.__searchTextUnavailable)
+              return { ok: false, code: "CORRUPT_BUNDLE" };
+            return {
+              ok: true,
+              result: {
+                entries: documents.map((d) => ({
+                  id: d.article.id,
+                  text: d.html.replace(/<[^>]*>/g, " "),
+                  truncated: false,
+                })),
+              },
+            };
+          }
           if (r.action === "documentation.open")
             return { ok: true, result: { opened: true } };
         }
@@ -288,6 +302,39 @@ test("command launcher opens help and a stale article cannot replace documentati
       }),
     ).toBeVisible();
     await expect(p.locator("table")).toHaveCount(0);
+    expect(f.errors).toEqual([]);
+  } finally {
+    f.close();
+  }
+});
+
+test("documentation search matches article body text and reports a title-only fallback", async ({
+  page,
+}) => {
+  const f = await fixture(page);
+  try {
+    const p = page.locator("documentation-panel");
+    await expect(p.locator(".notice")).toContainText("titles, summaries and article text");
+    await p
+      .getByRole("textbox", { name: "Search documentation", exact: true })
+      .fill("external-tree activation");
+    await expect(p.locator(".topics .topic")).toHaveCount(1);
+    await expect(p.locator(".topics")).toContainText("Author a package");
+    await p
+      .getByRole("button", { name: "Documentation regex builder", exact: true })
+      .click();
+    await p
+      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .fill("inspect the runtime\\.");
+    await expect(p.locator(".topics .topic")).toHaveCount(1);
+    await expect(p.locator(".topics")).toContainText("Build your first image");
+    await p.evaluate(() => (window.__searchTextUnavailable = true));
+    await p.evaluate((el) => el.refresh());
+    await expect(p.locator(".notice")).toContainText("article text is unavailable");
+    await p
+      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .fill("external-tree");
+    await expect(p.locator(".topics .topic")).toHaveCount(0);
     expect(f.errors).toEqual([]);
   } finally {
     f.close();

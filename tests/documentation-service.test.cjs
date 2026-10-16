@@ -325,3 +325,34 @@ require('./helpers/filesystem-links.cjs').symlinkSync(target, indexPath);
   fs.linkSync(target, indexPath);
   assert.throws(() => fixtureData.service().list(), { code: "INVALID_BUNDLE" });
 });
+test("article body search text is plain, bounded, verified and limited to indexed articles", async (t) => {
+  const f = await fixture(t, {
+    readme:
+      "# Reader\n\nThe **quarantined** overlay keeps `make all` &amp; <b>raw</b> text.\n\n```sh\nbr2-external-tree\n```\n",
+  });
+  await f.build();
+  const service = f.service();
+  const { entries } = service.searchText();
+  assert.equal(entries.length, service.list().articles.length);
+  const reader = entries.find((entry) => entry.id === articleId("README.md"));
+  assert.equal(reader.truncated, false);
+  assert.match(reader.text, /The quarantined overlay keeps make all & <b>raw<\/b> text\./);
+  assert.match(reader.text, /br2-external-tree/);
+  assert.doesNotMatch(reader.text, /<strong>|<code>|<pre>/);
+  assert.equal(JSON.stringify(entries).includes("Never bundle this unindexed"), false);
+  const operations = createOperationsService({
+    directory: path.join(f.root, ".operations"),
+    documentationDirectory: f.output,
+    dialog: {},
+    version: "0.1.0",
+  });
+  t.after(() => operations.dispose());
+  const reply = await operations.request(JSON.stringify({ action: "documentation.searchText" }));
+  assert.equal(reply.ok, true);
+  assert.equal(reply.result.entries.length, entries.length);
+  const extra = await operations.request(JSON.stringify({ action: "documentation.searchText", extra: true }));
+  assert.equal(extra.ok, false);
+  const file = path.join(f.output, "articles", `${reader.id}.md`);
+  fs.appendFileSync(file, "tampered");
+  assert.throws(() => f.service().searchText(), { code: "CORRUPT_BUNDLE" });
+});

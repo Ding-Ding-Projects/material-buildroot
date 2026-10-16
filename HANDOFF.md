@@ -1,3 +1,18 @@
+# Latest implementation continuation, 2026-10-16
+
+## Three pending features implemented, full native suite now passing
+
+Account allowance was re-read before work: the lowest window had 34% remaining, so implementation resumed. This supersedes the account-preservation stop recorded below.
+
+- **API collections.** `docs/security/postman/companion.postman_collection.json` (category) and `docs/postman/material-buildroot.postman_collection.json` (master) cover the four HTTPS companion routes and six typed actions with placeholders only. `scripts/api/generate-postman.cjs` generates both; `--check` fails when stale. `tests/postman-collections.test.cjs` has four passing cases, including an in-order replay of every request against a real loopback HTTPS companion with a temporary certificate. It was watched red when the `sequence` placeholder was serialized as a JSON string. Not a Postman-application, LAN, firewall or browser-trust result.
+- **Article-body search.** New host operation `documentation.searchText` returns verified plain text per indexed article, at most 32,768 characters each, with a `truncated` flag. The Help panel loads it after the index, validates every entry, and uses it for literal and regex search; the status line names a title-and-summary fallback while loading or when unavailable. One new host case and one new renderer case pass with the existing documentation suite (eight renderer cases).
+- **Atomic onboarding plan step.** New workspace action `onboarding.createPlan` creates the setup plan and records `{step:2,planId}` in one transaction, reuses a recorded existing plan on retry, and leaves neither half after a failed write. Two new host cases pass and were watched red with reuse disabled. The real-service wizard renderer spec asserts the single transaction; 54 renderer cases across workspace, source and settings pass.
+- **Full native suite.** With `TEST_PYTHON3_EXECUTABLE` set to a Python 3.13 interpreter: 514 discovered, 479 passed, zero failed, 35 explicit skips. Skips need Linux/WSL, downloaded Buildroot source, symbolic-link privilege, Windows-blocked SQLite journal replacement, POSIX filenames or browser IndexedDB, and stay unverified. TypeScript passes.
+
+Not done in this continuation: packaged native interaction for any of the three features, documentation rebuild and deployment, and every roadmap item that needs WSL, Docker, hypervisors, real Buildroot builds or other unavailable host capabilities. WSL is still absent and Docker unavailable on this host.
+
+---
+
 # Latest evidence continuation, 2026-10-16
 
 ## Latest bounded audit and native result

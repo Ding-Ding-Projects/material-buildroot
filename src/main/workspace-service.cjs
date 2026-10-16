@@ -68,6 +68,33 @@ function createWorkspaceService(options) {
           case "onboarding.update":
             current.onboarding = request.onboarding;
             break;
+          case "onboarding.createPlan": {
+            // One transaction creates the setup plan and records it in onboarding progress,
+            // so an interrupted setup can never leave an orphaned or duplicated plan.
+            const recorded = current.onboarding.planId;
+            let planId = current.plans.some((p) => p.id === recorded)
+              ? recorded
+              : undefined;
+            if (!planId) {
+              if (current.plans.length >= 100) reject("LIMIT_REACHED");
+              planId = randomUUID();
+              current.plans.push({
+                id: planId,
+                ...request.plan,
+                createdAt: timestamp,
+                updatedAt: timestamp,
+              });
+            }
+            const created = current.plans.find((p) => p.id === planId);
+            current.onboarding = {
+              step: 2,
+              runtime: created.runtime,
+              name: created.name,
+              dismissed: false,
+              planId,
+            };
+            break;
+          }
           case "onboarding.complete":
             current.onboardingCompleted = true;
             break;

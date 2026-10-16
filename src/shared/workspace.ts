@@ -51,6 +51,7 @@ export type WorkspaceMutation = { expectedRevision: number } & (
     }
   | { action: "onboarding.complete" }
   | { action: "onboarding.update"; onboarding: WorkspacePayload["onboarding"] }
+  | { action: "onboarding.createPlan"; plan: PlanInput }
   | { action: "snapshot.create"; name: string }
   | { action: "snapshot.restore"; id: string }
   | { action: "document.import"; document: string }

@@ -14,9 +14,11 @@ Articles are limited to 512 KiB each, images to 8 MiB each, and total admitted c
 
 ## Host service and renderer contract
 
-`createDocumentationService({directory,openExternal?})` receives the absolute generated documentation directory from the trusted host. It exposes synchronous `list()` and `read({id})`, plus asynchronous `open({id,linkId})`. None accepts a caller path. Unknown fields and malformed IDs are rejected.
+`createDocumentationService({directory,openExternal?})` receives the absolute generated documentation directory from the trusted host. It exposes synchronous `list()`, `searchText()` and `read({id})`, plus asynchronous `open({id,linkId})`. None accepts a caller path. Unknown fields and malformed IDs are rejected.
 
 `list()` returns `{articles,navigation,issues,complete}`. Article metadata is exactly `{id,title,category,language,summary}`. Navigation is `{categories:[{name,articles:[{id,title}]}],headings:[]}`. `read({id})` returns `{article,html,navigation,issues,complete}`; its navigation headings contain `{id,text,level}` for the current article. `complete` is false while any admitted issue remains. Reading does not fetch resources or open links.
+
+`searchText()` returns `{entries:[{id,text,truncated}]}`, one entry per indexed article. It verifies the same aggregate snapshot as `list()`, renders each article with the production renderer and returns only its plain text, with tags removed, entities decoded and whitespace collapsed. Text is bounded to 32,768 characters per article and `truncated` reports a cut. Unindexed files are never included. The desktop exposes it as the argument-free `documentation.searchText` operation; the renderer validates every entry against the current index before using it for local matching.
 
 The service revalidates the exact manifest schema, generated filename forms, file sizes, hashes, UTF-8 article bytes, image signatures and aggregate source snapshot. Symbolic links, junction-style canonical-path changes and multiply linked files are rejected. Missing or corrupt files cause a sanitized failure instead of a partial success. SHA-256 checks detect accidental or out-of-sync bundle changes; they are not a signature against an attacker who can replace both trusted packaged code and the manifest.
 

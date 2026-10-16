@@ -112,6 +112,7 @@ class MaterialBuildroot extends LitElement {
   nameError = false;
   setupStep = 0;
   setupDone = false;
+  private storedOnboarding: any;
   setupRuntime: any;
   setupChecking = false;
   inspector = false;
@@ -461,6 +462,7 @@ class MaterialBuildroot extends LitElement {
     this.mediaChanged();
     this.setupDone =
       state.onboardingCompleted || state.onboarding?.dismissed === true;
+    this.storedOnboarding = state.onboarding;
     this.workspaceMode = "durable";
     this.events = state.activity
       .slice()
@@ -482,6 +484,10 @@ class MaterialBuildroot extends LitElement {
         "已更新工作區偏好設定",
       ],
       "onboarding.complete": ["Completed workspace setup", "已完成工作區設定"],
+      "onboarding.createPlan": [
+        "Created the setup project plan",
+        "已建立設定專案計劃",
+      ],
       "snapshot.create": ["Created a workspace snapshot", "已建立工作區快照"],
       "snapshot.restore": ["Restored a workspace snapshot", "已還原工作區快照"],
       "document.import": ["Imported a workspace document", "已匯入工作區文件"],
@@ -933,15 +939,18 @@ class MaterialBuildroot extends LitElement {
     if (this.workspaceMode === "durable") {
       const oldIds = new Set(this.plans.map((p) => p.id));
       if (
-        !(await this.mutateWorkspace("plan.create", {
-          plan: {
-            name,
-            runtime: this.newRuntime,
-            target: "image",
-            status: "draft",
-            notes: "",
+        !(await this.mutateWorkspace(
+          onboarding ? "onboarding.createPlan" : "plan.create",
+          {
+            plan: {
+              name,
+              runtime: this.newRuntime,
+              target: "image",
+              status: "draft",
+              notes: "",
+            },
           },
-        }))
+        ))
       )
         return;
       this.selectedId = this.plans.find((p) => !oldIds.has(p.id))?.id ?? "";
@@ -963,7 +972,14 @@ class MaterialBuildroot extends LitElement {
             "已建立工作階段計劃，未建立專案檔案。",
           );
     this.nameError = false;
-    if (onboarding) {
+    if (onboarding && this.workspaceMode === "durable") {
+      // The host already recorded the plan and step 2 in the same transaction.
+      this.restoreSetup(this.storedOnboarding);
+      if (this.setupPlanId) {
+        this.selectedId = this.setupPlanId;
+        this.edit = this.selected ? { ...this.selected } : undefined;
+      }
+    } else if (onboarding) {
       this.setupPlanId = this.selectedId;
       await this.saveSetup(2);
     } else {

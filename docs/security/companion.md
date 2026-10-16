@@ -68,6 +68,14 @@ Per remote IP, the server admits at most 20 pairing attempts and 120 total reque
 
 CORS reflects only an exact enrolled or currently challenged origin and allows credentials without wildcards. Preflight admits only POST and the Content-Type/CSRF headers. Private-network preflight acknowledgement is limited to those same approved origins; it does not override browser local-network permission or certificate trust. Actual Edge/Chrome permission and cross-origin cookie behavior remain runtime acceptance work.
 
+## Postman collections
+
+The category collection is [postman/companion.postman_collection.json](postman/companion.postman_collection.json); the master collection for every product HTTP API is [../postman/material-buildroot.postman_collection.json](../postman/material-buildroot.postman_collection.json). The companion is the only HTTP surface, so the master contains exactly one folder that mirrors the category collection.
+
+To use them: start the companion from the desktop with your own TLS files, trust the certificate in the client, create a pairing challenge for the exact origin you will send, then set `baseUrl`, `origin` and `challenge`. Send **Pair browser** and approve the native review. Copy `csrfToken` from the reply into the unshared current value; the client cookie jar keeps the session cookie. After each action, set `sequence` to the reply's `nextSequence`. `{{$guid}}` creates a fresh nonce per send. The mutation actions need scopes the desktop leaves disabled by default.
+
+Regenerate with `node scripts/api/generate-postman.cjs`; `--check` fails when either file is stale. `node --test tests/postman-collections.test.cjs` checks route and action coverage, the absence of credential material, and replays every request in order against a real loopback HTTPS companion with a temporary certificate. That replay is not a Postman-application, LAN, firewall or browser-trust result.
+
 ## Current verification
 
 ### Browser summary response contract
