@@ -1,3 +1,4 @@
+import "./configuration-panel";
 import "./defconfig-panel";
 import "./update-panel";
 import "./wsl-runtime-panel";
@@ -971,126 +972,9 @@ export class OperationsPanel extends LitElement {
                   " " +
                   (this.config.semantics?.reason ?? "")}
             </p>
-            ${entries
-              .slice(this.configPage * 30, this.configPage * 30 + 30)
-              .map((entry: any) => {
-                const value = this.changes[entry.symbol]?.value ?? entry.value;
-                return html`<div class="config-row">
-                  <div>
-                    <label class="symbol">${entry.symbol}</label>${entry.prompt
-                      ? html`<p>${entry.prompt}</p>`
-                      : nothing}${entry.menu
-                      ? html`<small>${entry.menu}</small>`
-                      : nothing}${entry.dependency || entry.help
-                      ? html`<details>
-                          <summary>
-                            ${this.l("Help and dependencies", "說明同相依關係")}
-                          </summary>
-                          <p>
-                            ${entry.help ||
-                            this.l(
-                              "No help text supplied by this source.",
-                              "呢個來源未提供說明文字。",
-                            )}
-                          </p>
-                          <p class="symbol">${entry.dependency}</p>
-                          ${entry.ranges?.map(
-                            (range: any) =>
-                              html`<p>
-                                ${range.min} … ${range.max} (${range.condition})
-                              </p>`,
-                          )}
-                        </details>`
-                      : nothing}
-                  </div>
-                  ${entry.type === "bool"
-                    ? html`<md-switch
-                        ?disabled=${entry.visibility === 0 ||
-                        entry.assignable?.length === 1}
-                        aria-label=${entry.symbol}
-                        .selected=${value === true}
-                        @change=${(e: Event) =>
-                          (this.changes = {
-                            ...this.changes,
-                            [entry.symbol]: {
-                              type: "bool",
-                              value: (e.target as any).selected,
-                            },
-                          })}
-                      ></md-switch>`
-                    : entry.type === "tristate"
-                      ? html`<md-outlined-select
-                          ?disabled=${entry.visibility === 0 ||
-                          entry.assignable?.length === 1}
-                          label=${entry.symbol}
-                          .value=${String(value)}
-                          .displayText=${String(value)}
-                          @change=${(e: Event) =>
-                            (this.changes = {
-                              ...this.changes,
-                              [entry.symbol]: {
-                                type: "tristate",
-                                value: (e.target as HTMLSelectElement).value,
-                              },
-                            })}
-                          >${this.options([
-                            ["y", "y"],
-                            ["m", "m"],
-                            ["n", "n"],
-                          ])}</md-outlined-select
-                        >`
-                      : entry.type === "raw"
-                        ? html`<span>${String(value)}</span>`
-                        : html`<md-outlined-text-field
-                            ?disabled=${entry.visibility === 0}
-                            label=${entry.symbol}
-                            .value=${String(value)}
-                            @input=${(e: Event) =>
-                              (this.changes = {
-                                ...this.changes,
-                                [entry.symbol]: {
-                                  type: entry.type,
-                                  value: (
-                                    e.composedPath()[0] as HTMLInputElement
-                                  ).value,
-                                },
-                              })}
-                          ></md-outlined-text-field>`}
-                </div>`;
-              })}
-            <div class="row">
-              <md-text-button
-                ?disabled=${this.configPage === 0}
-                @click=${() => this.configPage--}
-                >${actionIcon('Previous')}${this.l("Previous", "上一頁")}</md-text-button
-              ><span
-                >${this.configPage + 1} /
-                ${Math.max(1, Math.ceil(entries.length / 30))}</span
-              ><md-text-button
-                ?disabled=${(this.configPage + 1) * 30 >= entries.length}
-                @click=${() => this.configPage++}
-                >${actionIcon('Next')}${this.l("Next", "下一頁")}</md-text-button
-              >
-            </div>
-            <div class="row">
-              <md-filled-button
-                ?disabled=${this.pending || !Object.keys(this.changes).length}
-                @click=${this.applyConfig}
-                >${actionIcon('Apply and reconcile')}${this.l("Apply and reconcile",
-                  "套用並協調",
-                )}</md-filled-button
-              ><md-text-button
-                ?disabled=${this.pending || !Object.keys(this.changes).length}
-                @click=${() => (this.changes = {})}
-                >${actionIcon('Discard changes')}${this.l("Discard changes", "放棄變更")}</md-text-button
-              ><md-outlined-button
-                ?disabled=${this.pending || !!Object.keys(this.changes).length}
-                @click=${this.undoConfig}
-                >${actionIcon('Undo last application')}${this.l("Undo last application",
-                  "復原上次套用",
-                )}</md-outlined-button
-              >
-            </div>`
+            <configuration-panel .config=${this.config} .api=${this.api} .language=${this.language} .workspaceId=${this.workspace.workspaceId} .domain=${this.configDomain}
+              @configuration-queue=${(event: CustomEvent) => { this.pending=event.detail.pending; this.changes=event.detail.blocked ? {__retained:{type:'raw',value:true}} : {}; }}
+              @configuration-result=${(event: CustomEvent) => { this.config=event.detail; }}></configuration-panel>`
         : html`<p>
             ${this.l(
               "Inspect the active output configuration before editing.",
