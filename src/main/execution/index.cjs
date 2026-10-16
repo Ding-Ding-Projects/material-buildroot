@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
+const { createDockerRuntime } = require("./docker-runtime.cjs");
 const TARGETS = Object.freeze([
   "all",
   "olddefconfig",
@@ -267,6 +268,7 @@ class ExecutionService {
       ...executables,
     };
     this.linuxFixture = linuxFixture;
+    this.dockerRuntime = createDockerRuntime({ run: (args) => boundedProcess(this.executables.docker, args, { timeoutMs: 10000, maxBytes: 262144 }).completion, identity: () => this.dockerIdentity() });
     this.grants = new Map();
     this.locks = new Set();
   }
@@ -381,17 +383,13 @@ class ExecutionService {
   async discover() {
     const probe = async (file, args) => boundedProcess(file, args).completion;
     const [docker, wsl] = await Promise.all([
-      probe(this.executables.docker, ["version", "--format", "{{.Server.Os}}"]),
+      this.dockerRuntime.discover(),
       this.platform === "win32"
         ? probe(this.executables.wsl, ["--list", "--quiet"])
         : Promise.resolve({ state: "unsupported-platform", stdout: "" }),
     ]);
     return {
-      docker: {
-        ...docker,
-        available:
-          docker.state === "succeeded" && docker.stdout.trim() === "linux",
-      },
+      docker,
       wsl: {
         ...wsl,
         distributions:
@@ -405,7 +403,19 @@ class ExecutionService {
       },
     };
   }
+  async prepareDocker({ grantId, runtime }) {
+    const grant = this.grants.get(grantId);
+    if (!grant) throw new Error("grant-unavailable");
+    return this.dockerRuntime.prepare(grant, runtime);
+  }
   validateOwnershipReceipt(receipt) { return validateOwnershipReceipt(receipt); }
+  async stopOwnedDocker(receipt) {
+    const owned = await this.ownedDocker(receipt);
+    if (owned.state === "verified-stopped" || (owned.state === "owned" && owned.stopped)) return;
+    if (owned.state !== "owned" || await this.dockerIdentity() !== receipt.daemonId) throw new Error("container-ownership-unverified");
+    const result = await boundedProcess(this.executables.docker, ["stop", "--time", "2", owned.containerId], { timeoutMs: 5000 }).completion;
+    if (result.state !== "succeeded") throw new Error("container-stop-failed");
+  }
   async dockerIdentity() {
     const result = await boundedProcess(this.executables.docker, ["info", "--format", "{{json .ID}}"], { timeoutMs: 10000, maxBytes: 1024 }).completion;
     if (result.state !== "succeeded") throw new Error("runtime-identity-unavailable");
@@ -465,9 +475,11 @@ class ExecutionService {
     validate(); const runtime = request.runtime; let file, args, onTerminate;
     if (runtime?.kind === "docker") {
       if (!/^[a-z0-9][a-z0-9./_-]*@sha256:[a-f0-9]{64}$/.test(runtime.image || "") || !Number.isSafeInteger(runtime.uid) || runtime.uid < 1 || runtime.uid > 4294967294 || !Number.isSafeInteger(runtime.gid) || runtime.gid < 1 || runtime.gid > 4294967294) throw new Error("invalid-container-runtime");
-      const name = `material-buildroot-resources-${crypto.randomUUID()}`; file = this.executables.docker;
-      args = ["run", "--rm", "--pull=never", "--name", name, "--user", `${runtime.uid}:${runtime.gid}`, "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=64", "--memory=4g", "--cpus=2", "--cgroupns=host", "--network=none", "--mount", `type=bind,src=${grant.output},dst=/output,readonly`, "--entrypoint", "/bin/sh", runtime.image, "-c", RESOURCE_SCRIPT, "resources", "/output", "docker-owned-probe"];
-      onTerminate = async () => { const stopped = await boundedProcess(file, ["stop", "--time", "2", name], { timeoutMs: 5000 }).completion; if (stopped.state !== "succeeded") throw new Error("container-stop-failed"); };
+      const ownerToken = crypto.randomUUID();
+      const name = `material-buildroot-${ownerToken}`; file = this.executables.docker;
+      const receipt = validateOwnershipReceipt({ version: 1, kind: "docker", ownerToken, containerName: name, daemonId: await this.dockerIdentity() });
+      args = ["run", "--rm", "--pull=never", "--name", name, "--label", `io.material-buildroot.operation=${ownerToken}`, "--user", `${runtime.uid}:${runtime.gid}`, "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=64", "--memory=4g", "--cpus=2", "--cgroupns=host", "--network=none", "--mount", `type=bind,src=${grant.output},dst=/output,readonly`, "--entrypoint", "/bin/sh", runtime.image, "-c", RESOURCE_SCRIPT, "resources", "/output", "docker-owned-probe"];
+      onTerminate = () => this.stopOwnedDocker(receipt);
     } else if (runtime?.kind === "wsl") {
       if (this.platform !== "win32" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(runtime.distribution || "")) throw new Error("invalid-wsl-runtime");
       file = this.executables.wsl;
@@ -524,7 +536,9 @@ class ExecutionService {
         runtime.gid > 4294967294
       )
         throw new Error("invalid-container-runtime");
-      const name = `material-buildroot-probe-${crypto.randomUUID()}`;
+      const ownerToken = crypto.randomUUID();
+      const name = `material-buildroot-${ownerToken}`;
+      const receipt = validateOwnershipReceipt({ version: 1, kind: "docker", ownerToken, containerName: name, daemonId: await this.dockerIdentity() });
       file = this.executables.docker;
       args = [
         "run",
@@ -532,6 +546,8 @@ class ExecutionService {
         "--pull=never",
         "--name",
         name,
+        "--label",
+        `io.material-buildroot.operation=${ownerToken}`,
         "--user",
         `${runtime.uid}:${runtime.gid}`,
         "--read-only",
@@ -547,15 +563,7 @@ class ExecutionService {
         "-c",
         ENVIRONMENT_SCRIPT,
       ];
-      onTerminate = async () => {
-        const stopped = await boundedProcess(
-          file,
-          ["stop", "--time", "2", name],
-          { timeoutMs: 5000 },
-        ).completion;
-        if (stopped.state !== "succeeded")
-          throw new Error("container-stop-failed");
-      };
+      onTerminate = () => this.stopOwnedDocker(receipt);
     } else if (runtime?.kind === "wsl") {
       if (
         this.platform !== "win32" ||
@@ -708,6 +716,8 @@ class ExecutionService {
         throw new Error("invalid-container-runtime");
       if ([grant.source, grant.output].some((x) => x.includes(",")))
         throw new Error("unsupported-mount-path");
+      const cache = await this.dockerRuntime.requireCache(grant, runtime);
+      revalidateAuthority();
       const ownerToken = crypto.randomUUID();
       const name = `material-buildroot-${ownerToken}`;
       ownership = validateOwnershipReceipt({ version: 1, kind: "docker", ownerToken, containerName: name, daemonId: await this.dockerIdentity() });
@@ -721,6 +731,11 @@ class ExecutionService {
         name,
         "--label",
         `io.material-buildroot.operation=${ownership.ownerToken}`,
+        "--read-only",
+        "--tmpfs",
+        "/tmp:rw,nosuid,nodev,size=256m",
+        "--mount",
+        `type=volume,src=${cache.name},dst=/material-buildroot-cache`,
         "--user",
         `${runtime.uid}:${runtime.gid}`,
         "--cap-drop=ALL",
@@ -743,7 +758,7 @@ class ExecutionService {
         "/bin/sh",
         runtime.image,
         "-c",
-        LINUX_SCRIPT,
+        'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; test -w /material-buildroot-cache && test -w /output || { echo container-storage-permission-denied >&2; exit 77; }; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "DL_DIR=/material-buildroot-cache" "$4"',
         "build",
         "/source",
         "/output",
@@ -755,6 +770,7 @@ class ExecutionService {
         const owned = await this.ownedDocker(ownership);
         if (owned.state === "verified-stopped") return;
         if (owned.state !== "owned") throw new Error("container-ownership-unverified");
+        if (await this.dockerIdentity() !== ownership.daemonId) throw new Error("runtime-namespace-changed");
         const result = await boundedProcess(
           file,
           ["stop", "--time", "2", owned.containerId],

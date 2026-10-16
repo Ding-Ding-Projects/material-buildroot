@@ -37,6 +37,7 @@ export class OperationsPanel extends LitElement {
     pending: { state: true },
     feedback: { state: true },
     runtime: { state: true },
+    containerStorage: { state: true },
     selection: { state: true },
     workspace: { state: true },
     jobs: { state: true },
@@ -72,6 +73,7 @@ export class OperationsPanel extends LitElement {
   pending = false;
   feedback = "";
   runtime: any;
+  containerStorage?: { name: string; state: string; permissions: string };
   selection: any;
   workspace: any;
   jobs: Job[] = [];
@@ -319,6 +321,22 @@ export class OperationsPanel extends LitElement {
   private async discover() {
     const result = await this.run("runtime.discover");
     if (result !== undefined) this.runtime = result;
+  }
+  private async prepareContainerStorage() {
+    if (!this.workspace) return;
+    const workspaceId = this.workspace.workspaceId;
+    const image = this.image;
+    const result = await this.run("runtime.docker.prepare", { workspaceId, runtime: { kind: "docker", image, uid: 1000, gid: 1000 } });
+    if (result !== undefined && this.workspace?.workspaceId === workspaceId && this.image === image) this.containerStorage = result;
+  }
+  private containerRecovery(reason: string) {
+    switch (reason) {
+      case "ready": return this.l("Linux engine is available. Image compatibility and volume permissions are checked when the build starts.", "Linux 引擎可用，建置開始時會檢查映像相容性同磁碟區權限。");
+      case "client-unavailable": return this.l("Install the Docker CLI using its supported installer, then retry discovery.", "請透過支援嘅安裝程式安裝 Docker CLI，再重新探索。");
+      case "permission-denied": return this.l("Docker access was denied. Ask the runtime administrator to grant your account access, then retry. No elevation or permission change is performed here.", "Docker 存取被拒絕。請執行環境管理員授予帳戶權限，再重試；此處唔會提升或更改權限。");
+      case "linux-engine-required": return this.l("Select the Linux container engine in Docker, then retry discovery.", "請喺 Docker 選擇 Linux 容器引擎，再重新探索。");
+      default: return this.l("Start the intended Docker engine and check its selected context, then retry discovery. Existing volumes and containers are preserved.", "請啟動指定 Docker 引擎並檢查所選環境，再重新探索；現有磁碟區同容器會保留。");
+    }
   }
   private async choose() {
     const result = await this.run("project.choose");
@@ -582,6 +600,7 @@ export class OperationsPanel extends LitElement {
                   ? this.l("Available", "可使用")
                   : this.l("Unavailable", "未能使用")}
               </dd>
+              <dd role="status">${this.containerRecovery(this.runtime.docker?.reason)}</dd>
               <dt>WSL</dt>
               <dd>
                 ${(this.runtime.wsl?.distributions ?? []).map(
@@ -650,6 +669,15 @@ export class OperationsPanel extends LitElement {
     return html`${this.workspace
         ? html`<section class="panel stack">
             <h2>${this.workspace.name}</h2>
+            ${this.runtimeKind === "docker" ? html`<section class="panel stack" aria-label=${this.l("Container storage", "容器儲存")}>
+              <h3>${this.l("Managed download cache", "受管理下載快取")}</h3>
+              <md-outlined-button ?disabled=${this.pending} @click=${this.discover}>${this.l("Refresh local images and engine", "重新整理本機映像同引擎")}</md-outlined-button>
+              ${this.runtime?.docker ? html`<p role="status">${this.containerRecovery(this.runtime.docker.reason)}</p><md-outlined-select label=${this.l("Installed digest-pinned image", "已安裝固定摘要映像")} .value=${this.image} @change=${(e: Event) => { this.image = (e.target as HTMLSelectElement).value; this.containerStorage = undefined; }}>${this.options((this.runtime.docker.images ?? []).map((value: string) => [value, value]))}</md-outlined-select>` : nothing}
+              <p>${this.l("Prepare a retained cache volume for this project, image and UID/GID 1000. No image is downloaded. The image must contain /material-buildroot-cache writable by UID/GID 1000 so Docker can initialize its volume without a root helper. Existing cache data is never deleted or repaired automatically.", "為此專案、映像同 UID/GID 1000 準備保留快取磁碟區，唔會下載映像。映像必須有 UID/GID 1000 可寫入嘅 /material-buildroot-cache，讓 Docker 毋須 root 輔助程序初始化磁碟區。現有快取唔會自動刪除或修復。")}</p>
+              <md-outlined-button ?disabled=${this.pending || !/^[a-z0-9][a-z0-9./:_-]*@sha256:[0-9a-f]{64}$/.test(this.image)} @click=${this.prepareContainerStorage}>${this.l("Prepare retained cache", "準備保留快取")}</md-outlined-button>
+              ${this.containerStorage ? html`<p role="status">${this.containerStorage.name}: ${this.l("Prepared. Write permissions remain unverified until execution.", "已準備；寫入權限仍待執行時驗證。")}</p>` : nothing}
+              <p>${this.l("If storage access fails, preserve the existing volume and correct the image directory ownership or output-folder permissions through your administrator. Retry preparation and then the failed job. Cancellation stops only an ownership-verified container; uncertain cleanup remains quarantined until job reconciliation proves it stopped.", "如果儲存存取失敗，請保留現有磁碟區，經管理員修正映像目錄擁有權或輸出資料夾權限，再重新準備同重試工作。取消只會停止已確認擁有權嘅容器；未確認清理會繼續隔離，直到工作復核證明已停止。")}</p>
+            </section>` : nothing}
             <div class="fields">
               <md-outlined-select
                 label=${this.l("Runtime", "執行環境")}
@@ -678,9 +706,7 @@ export class OperationsPanel extends LitElement {
                     )}
                     .value=${this.image}
                     @input=${(e: Event) =>
-                      (this.image = (
-                        e.composedPath()[0] as HTMLInputElement
-                      ).value)}
+                      { this.image = (e.composedPath()[0] as HTMLInputElement).value; this.containerStorage = undefined; }}
                   ></md-outlined-text-field>`}<md-outlined-select
                 label=${this.l("Build target", "建置目標")}
                 id="build-target"

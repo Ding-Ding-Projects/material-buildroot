@@ -43,6 +43,7 @@ const fields = {
   "documentation.searchText": [],
   "documentation.open": ["id", "linkId"],
   "runtime.discover": [],
+  "runtime.docker.prepare": ["workspaceId", "runtime"],
   "runtime.python.choose": [],
   "project.list": [],
   "project.choose": [],
@@ -1089,6 +1090,16 @@ function createOperationsService({
         return documentation.open({ id: request.id, linkId: request.linkId });
       case "runtime.discover":
         return execution.discover();
+      case "runtime.docker.prepare": {
+        const item = project(request.workspaceId);
+        const selected = runtime(request.runtime);
+        if (selected.kind !== "docker") reject("INVALID_RUNTIME");
+        try { return await execution.prepareDocker({ grantId: item.grantId, runtime: selected }); }
+        catch (error) {
+          const reasons = ["client-unavailable", "permission-denied", "daemon-unavailable", "runtime-unavailable", "runtime-namespace-changed", "runtime-identity-unavailable", "managed-volume-ownership-mismatch"];
+          reject(reasons.includes(error.message) ? error.message.toUpperCase().replaceAll("-", "_") : "CONTAINER_PREPARATION_FAILED");
+        }
+      }
       case "runtime.python.choose": {
         if (choosing) reject("PICKER_BUSY");
         choosing = true;
