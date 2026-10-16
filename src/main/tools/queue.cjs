@@ -81,7 +81,7 @@ function createToolQueue(directory, execute, options = {}) {
         if(context.signal?.aborted) fail("CANCELLED");
         if(!entry.name.endsWith(".json")) continue;
         const r=await read(entry.name.slice(0,-5));
-        const row={id:r.id,action:r.request.action,category:r.request.category,format:r.request.format,operation:r.request.operation,state:r.state,createdAt:r.createdAt,finishedAt:r.finishedAt,bytes:r.result?.bytes,sha256:r.result?.sha256,code:r.result?.code};
+        const row={id:r.id,action:r.request.action,category:r.request.category,format:r.request.format,operation:r.request.operation,state:r.state,createdAt:r.createdAt,finishedAt:r.finishedAt,bytes:r.result?.bytes,sha256:r.result?.sha256,code:r.result?.code,incompleteOutput:r.result?.incompleteOutput};
         const line=JSON.stringify(row)+"\n";bytes+=Buffer.byteLength(line);
         await handle.writeFile(line);count++;
       }
@@ -235,11 +235,8 @@ function createToolQueue(directory, execute, options = {}) {
                   onProgress: (event) =>
                     context.onProgress?.({ jobId: record.id, ...event }),
                 });
-                record.state = controller.signal.aborted
-                  ? "cancelled"
-                  : result.ok
-                    ? "completed"
-                    : "failed";
+                // A validated published result wins over a cancellation arriving after completion.
+                record.state = result.ok ? "completed" : controller.signal.aborted ? "cancelled" : "failed";
                 record.finishedAt = new Date().toISOString();
                 record.result = result;
                 await write(record);

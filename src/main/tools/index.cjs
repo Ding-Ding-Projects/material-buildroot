@@ -55,6 +55,8 @@ function createToolsService(options = {}) {
         );
       else if (request.action === "converter.catalog")
         result = { categories: await converter.catalog() };
+      else if (request.action === "converter.cancel")
+        result = converter.cancel();
       else if (request.action === "converter.inspect")
         result = await converter.inspect(request);
       else if (request.action === "converter.convert")
@@ -110,7 +112,12 @@ function createToolsService(options = {}) {
       } else fail("INVALID_REQUEST");
       return { ok: true, ...result };
     } catch (error) {
+      const partial=error.incompleteOutput;
+      const incompleteOutput=partial?.state==="retained" && partial.publication==="not-published" && /^\.material-incomplete-[0-9a-fA-F-]{36}\.tmp$/.test(partial.name||"")
+        ? {state:"retained",name:partial.name,publication:"not-published"}
+        : partial?.state==="unknown"&&partial.publication==="unconfirmed" ? {state:"unknown",publication:"unconfirmed"} : undefined;
       return {
+        ...(incompleteOutput?{incompleteOutput}:{}),
         ok: false,
         code:
           error.name === "AbortError"

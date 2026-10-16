@@ -994,7 +994,17 @@ function createOperationsService({
         return result;
       }),
   });
+  let nativeFileBroker, nativeFileBrokerError;
+  try {
+    nativeFileBroker = require("./tools/packaged-converter-broker.cjs").createPackagedConverterBroker({
+      resolveNativeGrant:(id,mode)=>toolFiles.nativeGrant(id,mode),
+    });
+  } catch(error) {
+    nativeFileBrokerError = /^[A-Z_]+$/.test(error.code||"") ? error.code : "NATIVE_BROKER_UNAVAILABLE";
+  }
   const tools = createToolsService({
+    nativeFileBroker,
+    nativeFileBrokerError,
     queueDirectory: path.join(directory, "tool-queue"),
     ollamaManagedDirectory: path.join(directory, "ollama"),
     ollamaCatalogueDirectory: path.join(directory, "ollama-catalogue"),

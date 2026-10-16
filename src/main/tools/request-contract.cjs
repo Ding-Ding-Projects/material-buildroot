@@ -51,6 +51,7 @@ function admit(request, nested = false) {
     "ollama.managed.start",
     "ollama.managed.stop",
     "converter.catalog",
+    "converter.cancel",
     "minecraft.bedrock.discovery",
     "queue.run",
     "queue.pause",

@@ -5,10 +5,10 @@ const { randomUUID } = require("node:crypto");
 const {
   fail,
   grant,
-  executable,
-  processRun,
   digest,
 } = require("./runtime.cjs");
+const { isNativeFileBroker } = require("../security/native-file-broker.cjs");
+const isolatedFormats = {images:["png","jpg","webp"],audio:["wav","mp3","flac"]};
 const formats = {
   images: { png: "imagemagick", jpg: "imagemagick", webp: "imagemagick" },
   audio: { mp3: "ffmpeg", wav: "ffmpeg", flac: "ffmpeg" },
@@ -52,23 +52,45 @@ function signature(bytes, format) {
   return false;
 }
 function createConverter(options) {
+  const active = new Set();
+  async function isolatedRun(broker,request,context) {
+    const controller=new AbortController();
+    const abort=()=>controller.abort();
+    context.signal?.addEventListener("abort",abort,{once:true});
+    if(context.signal?.aborted)controller.abort();
+    active.add(controller);
+    try {return await broker.run(request,{...context,signal:controller.signal});}
+    finally {active.delete(controller);context.signal?.removeEventListener("abort",abort);}
+  }
   return {
+    cancel() {const count=active.size;for(const controller of active)controller.abort();return {requested:count};},
     async catalog() {
       const categories = [];
+      const admissionCache = new Map();
       for (const [category, targets] of Object.entries(formats)) {
         const entries = [];
         for (const [format, adapter] of Object.entries(targets)) {
-          let available = adapter === "native", reason;
+          const available = adapter === "native";
+          let attemptAvailable = false, reason;
           if (!available) {
             try {
-              const record = await options.payloadManager?.resolve(adapter);
-              if (!record?.bundled) fail("BUNDLED_ADAPTER_REQUIRED");
-              await executable(options, adapter);
-              if (!options.isolationVerified) fail("ISOLATED_RUNTIME_REQUIRED");
-              available = true;
+              if (!isolatedFormats[category]?.includes(format)) fail("NATIVE_FORMAT_NOT_SUPPORTED");
+              let admission=admissionCache.get(adapter);
+              if(!admission){
+                admission=(async()=>{
+                  const record=await options.payloadManager?.resolve(adapter);
+                  if(!record?.bundled)fail("BUNDLED_ADAPTER_REQUIRED");
+                  if(!isNativeFileBroker(options.nativeFileBroker)||typeof options.nativeFileBroker.describe!=="function")fail(options.nativeFileBrokerError||"NATIVE_BROKER_UNAVAILABLE");
+                  return options.nativeFileBroker.describe(adapter);
+                })();
+                admissionCache.set(adapter,admission);
+              }
+              const description=await admission;
+              attemptAvailable = description?.attemptAvailable === true && description.formats?.includes(format) && description.runtimeAcceptance === "unverified" && description.mechanism === "appcontainer-handle-job";
+              reason = attemptAvailable ? "ISOLATED_ATTEMPT_UNVERIFIED" : description?.reason || "NATIVE_BROKER_UNAVAILABLE";
             } catch (error) { reason = /^[A-Z_]+$/.test(error.code || "") ? error.code : "BUNDLED_ADAPTER_REQUIRED"; }
           }
-          entries.push({format, adapter, available, reason,
+          entries.push({format, adapter, available, attemptAvailable, runtimeVerified:false, reason,
             disclosure: category === "binary" ? "Encodes every input byte as text."
               : category === "structured" ? "JSON and CSV tables only. CSV loses value types. Nested values and spreadsheet formulas are rejected."
               : category === "text" ? "Strict UTF-8 only. Line endings are preserved."
@@ -100,6 +122,24 @@ function createConverter(options) {
       if (!stat.isFile() || stat.size > 64 * 1024 * 1024) fail("INPUT_LIMIT");
       const capacity = await fs.statfs(path.dirname(destination));
       if (capacity.bavail * capacity.bsize < 256 * 1024 * 1024) fail("DESTINATION_STORAGE_LIMIT");
+      if (adapter !== "native") {
+        if (!isolatedFormats[request.category]?.includes(request.format)) fail("NATIVE_FORMAT_NOT_SUPPORTED");
+        const record=await options.payloadManager?.resolve(adapter);
+        if(!record?.bundled)fail("BUNDLED_ADAPTER_REQUIRED");
+        const broker=options.nativeFileBroker;
+        if(!isNativeFileBroker(broker) || typeof broker.describe!=="function")fail(options.nativeFileBrokerError||"NATIVE_BROKER_UNAVAILABLE");
+        const description=await broker.describe(adapter);
+        if(description?.attemptAvailable!==true || !description.formats?.includes(request.format) || description.mechanism!=="appcontainer-handle-job")fail(description?.reason||"NATIVE_BROKER_UNAVAILABLE");
+        // run performs actual OS admission before resuming the isolated decoder.
+        const receipt=await isolatedRun(broker,{adapterId:adapter,sourceId:request.sourceId,destinationId:request.destinationId,format:request.format},context);
+        if(receipt.protocol!==1 || receipt.state!=="completed" || receipt.mechanism!=="appcontainer-handle-job" ||
+          receipt.operation!==adapter+"-"+request.format || receipt.validation!=="signature-and-decoder-roundtrip" ||
+          receipt.publication!=="atomic-no-replace" || !Number.isSafeInteger(receipt.outputBytes) || receipt.outputBytes<1 || receipt.outputBytes>128*1024*1024 ||
+          !/^[a-f0-9]{64}$/.test(receipt.outputSha256||"") || !/^[a-f0-9]{64}$/.test(receipt.sourceSha256||"") || receipt.admission?.lpac!==true || receipt.admission?.appContainer!==true || receipt.admission?.capabilityCount!==0 ||
+          receipt.admission?.jobAssigned!==true || receipt.admission?.handleList!==true || receipt.destinationId!==request.destinationId || receipt.outputCreated!==true)
+          throw Object.assign(new Error("CONVERSION_OUTPUT_UNVERIFIED"),{code:"CONVERSION_OUTPUT_UNVERIFIED",incompleteOutput:{state:"unknown",publication:"unconfirmed"}});
+        return {bytes:receipt.outputBytes,sha256:receipt.outputSha256,sourceSha256:receipt.sourceSha256,format:request.format,validation:receipt.validation,mechanism:receipt.mechanism,publication:receipt.publication};
+      }
       const temporary = path.join(
         path.dirname(destination),
         ".conversion-" + randomUUID() + "." + request.format,
@@ -110,60 +150,10 @@ function createConverter(options) {
           if (context.signal?.aborted) fail("CANCELLED");
           const output = require("./converter-native.cjs").convertNative(bytes, request.category, request.format);
           await fs.writeFile(temporary, output, { flag: "wx", mode: 0o600 });
-        } else {
-          const record = await options.payloadManager?.resolve(adapter);
-          if (!record?.bundled) fail("BUNDLED_ADAPTER_REQUIRED");
-          const file = await executable(options, adapter);
-          if (!options.isolationVerified) fail("ISOLATED_RUNTIME_REQUIRED");
-          let args;
-          if (adapter === "ffmpeg")
-            args = [
-              "-nostdin",
-              "-n",
-              "-i",
-              source,
-              "-map_metadata",
-              "0",
-              temporary,
-            ];
-          else if (adapter === "imagemagick")
-            args = [
-              source,
-              "-limit",
-              "memory",
-              "128MiB",
-              "-limit",
-              "disk",
-              "256MiB",
-              temporary,
-            ];
-          else if (adapter === "pandoc")
-            args = ["--sandbox", source, "-o", temporary];
-          else if (adapter === "tar") args = ["-a", "-c", "-f", temporary, "-C", path.dirname(source), "--", path.basename(source)];
-          else if (adapter === "libreoffice") {
-            const folder = await fs.mkdtemp(path.join(path.dirname(destination), ".document-"));
-            try {
-              const { pathToFileURL } = require("node:url");
-              const profile = pathToFileURL(path.join(folder, "profile")).href;
-              await processRun(file, ["-env:UserInstallation=" + profile, "--headless", "--convert-to", "pdf", "--outdir", folder, source], context);
-              await fs.rename(path.join(folder, path.parse(source).name + ".pdf"), temporary);
-            } finally { await fs.rm(folder, {recursive:true, force:true}); }
-          } else fail("ADAPTER_RUNTIME_UNAVAILABLE");
-          if (args) await processRun(file, args, context);
         }
         const out = await fs.stat(temporary);
         if (!out.isFile() || out.size === 0 || out.size > 128 * 1024 * 1024)
           fail("INVALID_OUTPUT");
-        if (adapter !== "native") {
-          const handle = await fs.open(temporary, "r");
-          const bytes = Buffer.alloc(16);
-          try {
-            await handle.read(bytes, 0, 16, 0);
-          } finally {
-            await handle.close();
-          }
-          if (!signature(bytes, request.format)) fail("OUTPUT_TYPE_MISMATCH");
-        }
         const sha256 = await digest(temporary);
         if (context.signal?.aborted) fail("CANCELLED");
         await grant(options, request.sourceId, "read");

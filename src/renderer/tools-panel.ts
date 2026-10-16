@@ -14,13 +14,13 @@ import { workspaceStyles } from "./workspace-styles";
 type Grant = { id: string; name: string; kind: string };
 type Category = {
   category: string;
-  formats: { format: string; adapter: string; available: boolean; reason?: string; disclosure?: string }[];
+  formats: { format: string; adapter: string; available: boolean; attemptAvailable?: boolean; reason?: string; disclosure?: string }[];
 };
 type QueueItem = {
   id: string;
   state: string;
   request: { action: string; sourceIds?: string[]; sourceId?: string; destinationId?: string; [key: string]: unknown };
-  result?: { code?: string; bytes?: number };
+  result?: { code?: string; bytes?: number; incompleteOutput?: {state:string;name?:string;publication:string} };
   startedAt?: string; finishedAt?: string;
 };
 export class ToolsPanel extends LitElement {
@@ -162,7 +162,7 @@ export class ToolsPanel extends LitElement {
     const reply: { ok: boolean; code?: string; result?: any } =
       await window.studio.operations({ action, ...fields });
     if (!reply.ok) throw new Error(reply.code);
-    if (reply.result?.ok === false) throw new Error(reply.result.code);
+    if (reply.result?.ok === false) throw Object.assign(new Error(reply.result.code),{incompleteOutput:reply.result.incompleteOutput});
     if (reply.result?.cancelled) throw new Error("CANCELLED");
     return reply.result;
   }
@@ -182,7 +182,8 @@ export class ToolsPanel extends LitElement {
         error instanceof Error && /^[A-Z_]+$/.test(error.message)
           ? error.message
           : "OPERATION_FAILED";
-      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Operation not completed", "操作未完成")}: ${code}`);
+      const partial=(error as {incompleteOutput?:{state:string;name?:string;publication:string}})?.incompleteOutput;
+      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Operation not completed", "操作未完成")}: ${code} ${partial?.state==="retained"?l("Incomplete output retained; final output was not published.","已保留未完成輸出，最終輸出未發佈。")+" "+partial.name:partial?.state==="unknown"?l("Output publication could not be confirmed. Inspect the selected output folder before retrying.","未能確認輸出發佈狀態，重試前請檢查所選輸出資料夾。"):""}`);
     } finally {
       this.pending = false;
       this.changed();
@@ -255,7 +256,7 @@ export class ToolsPanel extends LitElement {
     return this.l("The target may omit metadata, fonts, layers, animation, transparency or precision. Keep the original file.","目標格式可能唔保留中繼資料、字體、圖層、動畫、透明度或精確度，請保留原檔。");
   }
   private unavailable(code?:string) {
-    const reasons:Record<string,[string,string]>={BUNDLED_ADAPTER_REQUIRED:["Verified packaged adapter required","需要已驗證封裝工具"],MISSING_VERIFIED_PAYLOAD:["Packaged adapter is missing","缺少封裝工具"],ISOLATED_RUNTIME_REQUIRED:["Verified isolated execution unavailable","未有已驗證隔離執行環境"],PAYLOAD_HASH_MISMATCH:["Packaged adapter integrity mismatch","封裝工具完整性不符"]};
+    const reasons:Record<string,[string,string]>={BUNDLED_ADAPTER_REQUIRED:["Verified packaged adapter required","需要已驗證封裝工具"],MISSING_VERIFIED_PAYLOAD:["Packaged adapter is missing","缺少封裝工具"],ISOLATED_RUNTIME_REQUIRED:["Verified isolated execution unavailable","未有已驗證隔離執行環境"],PAYLOAD_HASH_MISMATCH:["Packaged adapter integrity mismatch","封裝工具完整性不符"],NATIVE_BROKER_UNAVAILABLE:["Native isolation broker unavailable","原生隔離程序未能使用"],NATIVE_FORMAT_NOT_SUPPORTED:["No native isolated operation for this format","此格式未有原生隔離操作"],ISOLATED_ATTEMPT_UNVERIFIED:["Packaged isolated attempt available; runtime acceptance unverified","可嘗試封裝隔離操作，實際執行驗收未驗證"]};
     const reason=code&&reasons[code];return reason?this.l(...reason):code||this.l("Unavailable","未能使用");
   }
   private async release(ids:string[]) { if(ids.length) await this.call("file.release",{ids}); }
@@ -291,10 +292,12 @@ export class ToolsPanel extends LitElement {
     bytes?: number;
     pages?: number;
     pageCounts?: number[];
+    validation?: string;
   }) {
     this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>[
       l("Completed", "已完成"),
       result.bytes !== undefined ? `${result.bytes} bytes` : "",
+      result.validation === "signature-and-decoder-roundtrip" ? l("This output passed signature and decoder round-trip checks", "此輸出已通過格式簽章同解碼往返檢查") : "",
       result.pageCounts
         ? `${l("Pages", "頁數")}: ${result.pageCounts.join(", ")}`
         : "",
@@ -403,7 +406,7 @@ export class ToolsPanel extends LitElement {
               .entries=${c.formats.map(f=>({id:f.format,text:`${f.format} ${f.adapter} ${f.reason||""}`}))}
               @settings-filter=${(e:CustomEvent)=>{e.stopPropagation();const ids=e.detail as string[];if(JSON.stringify(this.visibleFormats[c.category])!==JSON.stringify(ids)){this.visibleFormats[c.category]=ids;this.changed();}}}></settings-search>
             ${c.formats.filter(f=>!this.visibleFormats[c.category]||this.visibleFormats[c.category].includes(f.format)).map(f=>html`<div class="record">
-              <md-outlined-button ?disabled=${!f.available||this.pending} aria-pressed=${this.category===c.category&&this.format===f.format}
+              <md-outlined-button ?disabled=${(!f.available&&!f.attemptAvailable)||this.pending} aria-pressed=${this.category===c.category&&this.format===f.format}
                 @click=${()=>{this.category=c.category;this.format=f.format;this.changed();}}>${f.format.toUpperCase()}</md-outlined-button>
               <span>${f.adapter} · ${f.available?this.l("Available", "可用"):this.unavailable(f.reason)}</span>
             </div>`)}
@@ -430,14 +433,14 @@ export class ToolsPanel extends LitElement {
           </div>
           <div class="row">
             ${this.button(
-              "Convert now",
-              "立即轉換",
+              formats?.find(f=>f.format===this.format)?.attemptAvailable?"Attempt isolated conversion":"Convert now",
+              formats?.find(f=>f.format===this.format)?.attemptAvailable?"嘗試隔離轉換":"立即轉換",
               async () => {
                 this.result(await this.tool(this.conversion()));
                 await this.release([this.source!.id,this.destination!.id]);
                 this.source=undefined;this.sourcePreview=undefined;this.destination = undefined;
               },
-              !this.source || !this.destination || !formats?.find(f=>f.format===this.format)?.available,
+              !this.source || !this.destination || !formats?.find(f=>f.format===this.format&&(f.available||f.attemptAvailable)),
             )}${this.button(
               "Add to queue",
               "加入佇列",
@@ -449,9 +452,13 @@ export class ToolsPanel extends LitElement {
                 this.source=undefined;this.sourcePreview=undefined;this.destination = undefined;
                 await this.queuePage();
               },
-              !this.source || !this.destination || !formats?.find(f=>f.format===this.format)?.available,
+              !this.source || !this.destination || !formats?.find(f=>f.format===this.format&&(f.available||f.attemptAvailable)),
             )}
           </div>
+          <md-outlined-button ?disabled=${!this.pending&&!this.runningQueue} @click=${async()=>{
+            try{const r=await this.tool({action:"converter.cancel"});this.feedback=this.l("Cancellation requested for active isolated conversions","已要求取消目前隔離轉換")+`: ${r.requested}`;}
+            catch{this.feedback=this.l("Cancellation could not be delivered","未能送出取消要求");}this.changed();
+          }}>${this.l("Cancel active isolated conversions","取消目前隔離轉換")}</md-outlined-button>
           <h3>${this.l("Batch conversion", "批次轉換")}</h3>
           <p>${this.l("Choose up to 100 files per selection. Queue storage has no total-file limit. Process or release a page before selecting another; live permissions stay bounded.","每次選擇最多 100 個檔案，儲存佇列冇總檔案上限。選取下一批前請處理或釋放目前批次，以限制即時權限數量。")}</p>
           ${this.button("Choose batch and output folder","選擇批次同輸出資料夾",async()=>{
@@ -459,7 +466,7 @@ export class ToolsPanel extends LitElement {
             await this.release(this.batch.flatMap(i=>[i.source.id,i.destination.id]));
             this.batchCategory=this.category;this.batchFormat=this.format;
             this.batch=r.items;this.selectedBatch=new Set(this.batch.map(i=>i.source.id));
-          },!formats?.find(f=>f.format===this.format)?.available)}
+          },!formats?.find(f=>f.format===this.format&&(f.available||f.attemptAvailable)))}
           ${this.batch.length?html`<div class="row">
             ${this.button("Select all","全選",async()=>{this.selectedBatch=new Set(this.batch.map(i=>i.source.id));})}
             ${this.button("Select none","全部取消選取",async()=>{this.selectedBatch.clear();})}
@@ -639,8 +646,8 @@ export class ToolsPanel extends LitElement {
         ${this.jobs.map(
           (j) =>
             html`<div class="row record">
-              <span>${j.request.action}</span><strong>${j.state}</strong
-              >${j.request.action!=="ollama.pull"&&!["running","completed"].includes(j.state)?this.button("Reauthorize files", "重新授權檔案",()=>this.reauthorize(j),this.runningQueue):nothing}<span>${j.result?.code}</span><span>${j.result?.bytes!==undefined?`${j.result.bytes} bytes`:""}</span><span>${j.finishedAt||j.startedAt||""}</span>${[
+              <span>${j.request.action} ${j.request.category||""} ${j.request.format||""}</span>${j.request.action==="converter.convert"&&!["structured","text","binary"].includes(String(j.request.category))?html`<span>${this.l("Isolated attempt","隔離轉換嘗試")}</span>`:nothing}<strong>${j.state}</strong
+              >${j.request.action!=="ollama.pull"&&!["running","completed"].includes(j.state)?this.button("Reauthorize files", "重新授權檔案",()=>this.reauthorize(j),this.runningQueue):nothing}<span>${j.result?.code}</span>${j.result?.incompleteOutput?html`<span>${j.result.incompleteOutput.state==="retained"?this.l("Incomplete output retained; final output not published","已保留未完成輸出，最終輸出未發佈"):this.l("Output publication unconfirmed; inspect destination before retrying","未能確認輸出發佈，重試前請檢查目的地")} ${j.result.incompleteOutput.name||""}</span>`:nothing}<span>${j.result?.bytes!==undefined?`${j.result.bytes} bytes`:""}</span><span>${j.finishedAt||j.startedAt||""}</span>${[
                 "queued",
                 "running",
                 "interrupted",
