@@ -1,3 +1,4 @@
+import {mountBrowserExport} from './browser-native-exports.js';
 import {browserCopy} from './browser-native-tone.js';
 import {mountLocalSearch} from './browser-native-search-mount.js';
 import {confirmBrowserMutation} from './browser-native-confirmation.js';
@@ -29,10 +30,12 @@ export function mountBrowserSchedule(visitor,applyPreferences){
   const reset=make('md-text-button','Remove local schedule','移除本機排程',actions);reset.addEventListener('click',async()=>{if(!await confirmBrowserMutation(reset,l('Remove only this visitor language/theme schedule and restore the saved manual base. Plan notes and companion authority remain unchanged.','只移除此訪客語言／主題排程並恢復手動基礎設定，計劃筆記同配對權限不變。')))return;try{localStorage.removeItem(KEY);saved=defaults();origin='default';signature='';populate();apply();report('Local schedule removed; manual settings restored.','已移除本機排程，恢復手動設定。');}catch{report('Schedule could not be removed. The saved rule is retained.','未能移除排程，已保留儲存規則。');}});
   make('md-outlined-button','Export schedule JSON','匯出排程 JSON',actions).addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(saved,null,2)],{type:'application/json'}));const a=make('a');a.href=url;a.download='visitor-schedule.json';a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);report('Schedule download requested; confirm completion in browser downloads.','已要求下載排程，請喺瀏覽器下載記錄確認完成。');});
   const searchHost=make('div');fields.before(searchHost);mountLocalSearch(searchHost,'Search schedule controls','搜尋排程控制',[{id:'interval',text:'Enable Start End Weekday Language Theme 啟用 開始 結束 星期 語言 主題'}],ids=>fields.hidden=!ids.has('interval'));
+  mountBrowserExport(root,()=>structuredClone(saved),'visitor-schedule','The saved local language and theme interval');
   visitor.append(root);localized.forEach(update=>update());populate();apply();
   document.querySelector('#language')?.addEventListener('change',()=>{localized.forEach(update=>update());feedback.textContent=l(...message);if(!applying){signature='';apply();}});
   document.querySelector('#theme')?.addEventListener('change',()=>{if(!applying){signature='';apply();}});document.querySelector('#system-theme')?.addEventListener('click',()=>{if(!applying){signature='';apply();}});
   const timer=setInterval(apply,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)apply();});window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
   window.addEventListener('storage',event=>{if(event.key===KEY){try{saved=event.newValue?valid(JSON.parse(event.newValue)):defaults();origin=event.newValue?'stored':'default';signature='';populate();apply();}catch{report('Another tab supplied an invalid schedule. The current rule remains active.','另一分頁提供無效排程，目前規則保持生效。');}}else if(['mb-docs-language','mb-docs-theme'].includes(event.key)){signature='';apply();}});
 }
+
 

@@ -137,3 +137,9 @@ An isolated worker has a 15-second deadline and reports actual admitted/decoded 
 This is a raster category implementation, not the full eight-category converter. PDF, office, audio/video, SVG/animated image and archive conversions remain unavailable through this route. No native executable, cloud service or hidden desktop operation is substituted. The implementation uses existing bounded image admission source and native browser primitives without adding an unpinned runtime dependency. Its source changes postdate the first documentation build and remain unproduced until another assigned root build.
 
 粵語轉換補充：圖片佇列會保存明確選取嘅本機原檔同完成輸出，每頁顯示二十項，唔會以固定記錄數量偷偷截斷。瀏覽器配額仍然限制容量。只有取得跨分頁獨佔控制先會開始轉換，重試亦要明確操作。中斷唔等於成功，下載要求亦唔等於檔案已儲存完成。此路線只處理列明嘅點陣圖片格式，唔會將未完成嘅 PDF、音訊、影片或封存功能當作已交付。
+
+## Nonsecret settings and binary output encoding
+
+The same structured export controls also consume the current visitor presentation/narration preferences, saved local schedule, stored appearance overrides and wording-style preferences. These scoped exports exclude authenticator data and logo pixels. Each control names its actual record scope; the appearance and schedule formats retain their original versions, while decoding an envelope still requires the disclosed format-specific step.
+
+Completed raster outputs up to 4 MiB can be encoded as Base64 or hexadecimal text from their actual stored bytes. This is reversible byte encoding, not compression or encryption. Larger outputs retain their ordinary binary download route and receive a clear size-limit message rather than a partial text export. This delivers a bounded binary category consumer for existing image outputs, not arbitrary-file decoding or the full binary conversion inventory.

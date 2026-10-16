@@ -1,3 +1,4 @@
+import {mountBrowserExport} from './browser-native-exports.js';
 import {browserCopy} from './browser-native-tone.js';
 import '@material/web/slider/slider.js';
 import {properties,states,defaultDocument,validateDocument,validValue,declarations,stateSelectors,rainbowCss,contrast,translateColor,colorRepresentations,hexToHsv,hsvToHex} from '../src/shared/appearance';
@@ -66,9 +67,11 @@ export function mountBrowserAppearance(visitor) {
   const menu=async element=>{if(excluded(element)||activeMenu)return;const dialog=document.createElement('md-dialog');let requestedAction='';activeMenu=dialog;const title=make('div','','',dialog);title.slot='headline';title.textContent=l('Element actions','元素操作');const content=make('div','','',dialog);content.slot='content';const label=make('p','','',content);label.textContent=targetName(element);const searchHolder=make('div','','',content);const actions=make('div','','',content);const edit=make('md-outlined-button','','',actions);edit.textContent=l('Edit appearance','編輯外觀');edit.addEventListener('click',()=>{requestedAction='edit';dialog.close();});const focus=make('md-text-button','','',actions);focus.textContent=l('Return to this element','返回此元素');focus.addEventListener('click',()=>{requestedAction='focus';dialog.close();});const lock=make('md-outlined-button','','',actions);lock.textContent=l('Lock this element','鎖定此元素');lock.addEventListener('click',()=>{assign(element);requestedAction='lock';dialog.close();});mountLocalSearch(searchHolder,'Search element actions','搜尋元素操作',[{id:'edit',text:'Edit appearance 編輯外觀'},{id:'focus',text:'Return to this element 返回此元素'},{id:'lock',text:'Lock this element 鎖定此元素'}],ids=>{edit.hidden=!ids.has('edit');focus.hidden=!ids.has('focus');lock.hidden=!ids.has('lock');});const exit=make('md-text-button','','',dialog);exit.slot='actions';exit.textContent=l('Close','關閉');exit.addEventListener('click',()=>dialog.close());dialog.addEventListener('closed',()=>{activeMenu=undefined;dialog.remove();if(requestedAction==='edit')choose(element);else if(requestedAction==='focus')element.focus();else if(requestedAction==='lock')visitor.dispatchEvent(new CustomEvent('browser-native-lock-request',{detail:{element}}));},{once:true});document.body.append(dialog);await dialog.show();};
   visitor.addEventListener('contextmenu',event=>{if(excluded(event.target))return;event.preventDefault();menu(event.target);});visitor.addEventListener('keydown',event=>{if((event.shiftKey&&event.key==='F10')||event.key==='ContextMenu'){if(excluded(event.target))return;event.preventDefault();menu(event.target);}});
   let hold;visitor.addEventListener('pointerdown',event=>{if(event.pointerType==='touch'&&!excluded(event.target))hold=setTimeout(()=>menu(event.target),600);});for(const type of ['pointerup','pointercancel','pointermove'])visitor.addEventListener(type,()=>clearTimeout(hold));
+  mountBrowserExport(editor,()=>structuredClone(data),'visitor-appearance','Stored visitor appearance overrides only, excluding logo pixels and account data');
   visitor.append(editor);localized.forEach(update=>update());apply();renderValues();updateColor(color.value);
   document.querySelector('#language')?.addEventListener('change',()=>{localized.forEach(update=>update());feedback.textContent=l(...notice);renderValues();updateColor(color.value);});
 }
+
 
 
 

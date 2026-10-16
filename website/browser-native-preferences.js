@@ -1,3 +1,4 @@
+import {mountBrowserExport} from './browser-native-exports.js';
 import {browserCopy} from './browser-native-tone.js';
 import {protectBrowserMutation} from './browser-native-confirmation.js';
 import {mountSectionSearch,mountLocalSearch} from './browser-native-search-mount.js';
@@ -109,6 +110,7 @@ export function mountBrowserPreferences(visitor) {
     provenance.textContent=storageState==='stored'?l('Current values come from this browser profile.','目前數值來自此瀏覽器設定檔。'):storageState==='default'?l('Using shipped defaults: all modes off, empty custom name/action, automatic voices, rate and pitch 1.','使用原有預設值：全部模式關閉、自訂名稱／下一步留空、聲音自動選擇、語速同音高為 1。'):l('Browser storage is unavailable or invalid. Values may exist only in memory.','瀏覽器儲存無法使用或格式無效，數值可能只存在記憶體。');
     bindings.forEach(update=>update());updateTime();refreshVoices();if(!prefs.narration||prefs.screenReader)stop();
   };
+  mountBrowserExport(section,()=>structuredClone(prefs),'visitor-preferences','Current nonsecret visitor presentation and narration preferences');
   visitor.querySelector('#browser-native-tools')?.before(section);if(!section.isConnected)visitor.append(section);
   const relocalize=()=>{localized.forEach(update=>update());feedback.textContent=l(...notice);render();};
   document.querySelector('#language')?.addEventListener('change',relocalize);document.addEventListener('browser-native-copy-change',relocalize);
@@ -117,6 +119,7 @@ export function mountBrowserPreferences(visitor) {
   relocalize();
   mountSectionSearch(section, 'Search browser preferences', '搜尋瀏覽器偏好');
 }
+
 
 
 
