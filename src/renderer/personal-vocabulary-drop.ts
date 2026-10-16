@@ -73,6 +73,12 @@ export class PersonalVocabularyDrop extends LitElement{
   this.reset();this.view.remove();super.disconnectedCallback();
  }
  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:`${en} · ${zh}`;}
+ private presentationHeadline(headline:string|null){
+  // Display-only fallback. Never normalize the mapping or a nonblank heading;
+  // other Unicode formatting characters retain their existing behavior.
+  return headline===null||/^[ \t\r\n]*$/u.test(headline)
+   ?this.l('Personal wording applied','已套用個人用語'):headline;
+ }
  private clearRenderedText(){
   // Retain Lit's comment anchors and TextPart nodes so the next outcome can
   // update the same component after synchronous privacy suppression.
@@ -125,7 +131,7 @@ export class PersonalVocabularyDrop extends LitElement{
  private async receive(outcome:VocabularyOutcome){
   this.reset();if(!this.isConnected||!vocabulary.available()||outcome.state==='suppressed')return;
   this.kind=outcome.state;
-  this.currentText=outcome.state==='applied'?(outcome.headline??this.l('Personal wording applied','已套用個人用語')):outcome.state==='invalid'?this.l('Choose one valid vocabulary JSON file, no larger than 256 KiB. Existing wording was not changed.','請選擇一個有效嘅詞彙 JSON 檔，最大 256 KiB。原有用語未有變更。'):this.l('The local file or storage could not confirm the change. Reload and review the saved wording before retrying.','本機檔案或儲存未能確認變更。請重新載入並檢視已儲存用語，再試一次。');
+  this.currentText=outcome.state==='applied'?this.presentationHeadline(outcome.headline):outcome.state==='invalid'?this.l('Choose one valid vocabulary JSON file, no larger than 256 KiB. Existing wording was not changed.','請選擇一個有效嘅詞彙 JSON 檔，最大 256 KiB。原有用語未有變更。'):this.l('The local file or storage could not confirm the change. Reload and review the saved wording before retrying.','本機檔案或儲存未能確認變更。請重新載入並檢視已儲存用語，再試一次。');
   this.view.kind=this.kind;this.view.setAttribute('data-outcome',this.kind);this.view.phase=this.motion.matches?'hold':'enter';
   const version=this.epoch;await this.syncBoundary();
   if(version!==this.epoch||!this.currentText||!this.isConnected||!vocabulary.available())return;

@@ -16,5 +16,6 @@ These records preserve source revisions, checks and explicit acceptance limits. 
 - [PH10-implementation](PH10-implementation.md)
 - [browser-workflow-repair](browser-workflow-repair.md)
 - [learning-markup-repair](learning-markup-repair.md)
+- [Window-wide personal wording: bounded desktop evidence](wording-drop-native.md)
 
 - [Individual feature delivery audits](feature-delivery/README.md)

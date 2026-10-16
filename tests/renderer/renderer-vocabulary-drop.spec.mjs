@@ -22,6 +22,28 @@ async function drop(page,text,{name='neutral-fixture.json',count=1}={}){
   const event=new DragEvent('drop',{bubbles:true,composed:true,cancelable:true,dataTransfer:data});target.dispatchEvent(event);return event.defaultPrevented;
  },{text,name,count});
 }
+for(const sample of [
+ {name:'absent',language:'en',entries:{},expected:'Personal wording applied'},
+ {name:'empty',language:'zh-HK',entries:{'private vocabulary':''},expected:'已套用個人用語'},
+ {name:'ordinary whitespace',language:'bilingual',entries:{'private vocabulary':' \t\r\n '},expected:'Personal wording applied · 已套用個人用語'},
+ {name:'nonblank with surrounding whitespace',language:'en',entries:{'private vocabulary':' \tLocal labels applied\r\n '},expected:' \tLocal labels applied\r\n '},
+ {name:'non-whitespace invisible character',language:'en',entries:{'private vocabulary':'\u200b'},expected:'\u200b'},
+])test(`heading presentation preserves mapping: ${sample.name}`,async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await open(page,{language:sample.language});
+ await drop(page,JSON.stringify({schemaVersion:1,entries:sample.entries}));
+ const feedback=page.locator('personal-vocabulary-feedback');const status=feedback.locator('[role=status]');
+ // Exact text comparison intentionally preserves whitespace, unlike toHaveText.
+ await expect.poll(()=>status.textContent()).toBe(sample.expected);
+ await expect(status).toHaveAttribute('aria-live','polite');await expect(feedback.locator('md-filled-card')).toBeVisible();
+ const stored=await page.evaluate(async()=>{
+  const request=indexedDB.open('material-buildroot-private-language-v1');
+  const db=await new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=reject;});
+  try{return await new Promise((resolve,reject)=>{const tx=db.transaction('private-cache','readonly'),read=tx.objectStore('private-cache').get('selection');read.onsuccess=()=>resolve(JSON.parse(new TextDecoder().decode(read.result)).entries);read.onerror=reject;});}finally{db.close();}
+ });
+ expect(stored).toEqual(sample.entries);
+ expect(await page.evaluate(async()=>{const {ownedCopy}=await import('/src/renderer/owned-copy.ts');return ownedCopy('private vocabulary','unused','en');})).toBe(sample.entries['private vocabulary']??'private vocabulary');
+ await expect(feedback).toHaveCount(0,{timeout:4500});
+});
 test('a window drop applies, privately announces, permits input, persists and clears',async({page})=>{
  const p=await open(page);const requests=[];page.on('request',r=>requests.push(r.url()));
  const search=page.locator('settings-search').getByRole('textbox',{name:'Search settings',exact:true});await search.focus();
