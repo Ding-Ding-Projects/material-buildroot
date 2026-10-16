@@ -517,6 +517,13 @@ export function createSchedulePreferencesService({
       void cycle();
       return copy(saved);
     },
+    async historyRead({revision,authorize=()=>true}) {
+      ready();
+      if(authorize()!==true)fail("UNAUTHORIZED");
+      const record=await adapter.historyRead({revision});
+      if(authorize()!==true)fail("UNAUTHORIZED");
+      return record;
+    },
     async history(page) {
       ready();
       return adapter.history(page);
