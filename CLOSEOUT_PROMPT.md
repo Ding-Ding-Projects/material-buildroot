@@ -2,19 +2,20 @@
 
 ## Objective and boundary
 
-Finish the existing Material Buildroot roadmap implementation with one worker per unfinished leaf item, isolated branches and checkouts, prompt integration into main and normal releases. The owner selected implementation/release-only execution: all tests, reviews, audits, static analysis and screenshots are deferred, including VM and Docker tests. Acceptance-dependent tasks remain unchecked.
+Complete the finite Material Buildroot roadmap implementation with one worker per unfinished implementation leaf, isolated ownership, prompt main integration and normal release delivery. All tests, reviews, audits, static analysis and captures are intentionally deferred, including VM and Docker tests. Acceptance-only tasks remain open. No full product completion is claimed.
 
-## Preserved state
+## Integration and production
 
-Initial baseline: cb88af0c006b62f5ab300630d4093f63ec8714d7.
-Main contains file-capability contribution 08cf7b42215ecf2018329971c3f82da4d5516c29, verified against the remote. Exact desktop and unsigned Squirrel production succeeded. Normal release v0.1.0-build.56.1 targets this exact commit and has all five expected nonempty downloadable assets. Runtime behavior is unverified.
-Project model adff340fe855c55eb6548e5cbc77cf6849474f87 is preserved remotely on task/project-model; desktop production succeeded. Integration is next.
-Vault boundaries f23b3c68848fbea2baeec28d7ad75a72b98ecb34 is local on task/vault-boundaries; its build stopped during deeply nested Node extraction. The dedicated bootstrap worker owns the repair.
-Consumer mapping 9e89119 is local on task/consumer-admission: 436 explicit dispositions, 45 bounded current mappings, historical evidence separate. Complete current admission remains open.
-Search controls, container-runtime and hypervisor-control implementation are active in separate owned branches. Preserve these checkouts and their ignored private announcement originals.
+Initial baseline cb88af0c006b62f5ab300630d4093f63ec8714d7. Verified remote main before this record: 88de056deadb40858b868296af6b39c24b1d0cc6. It includes file grants, project migrations, bootstrap repair, scoped vault, consumer dispositions, guest/container controls, search/provider interfaces, configuration semantics and clean-build consent.
+Exact root builds produced the individual candidates. A cumulative unsigned Squirrel installer at f1489c2f5a1a439208eb33352a3f81cd7e735ca2 has receipt SHA-256 2849191ecfdd1148d281b42d841064c79f0d97c5ca73b947e1103b3f559225c0. Later changes require their own production proof.
+Normal releases v0.1.0-build.56.1 and v0.1.0-build.58.1 were verified against exact source tags and expected nonempty assets. Later releases are asynchronous; do not infer their results.
 
-## Next actions
+## Active queue
 
-Integrate and deliver each completed coherent contribution independently. Keep producers pinned to exact source. Finish the bootstrap repair before retrying the failed vault build. Continue the finite implementation queue in docs/planning/implementation-queue.json. Do not treat historical source mappings as runtime or independent acceptance.
+History/export 9e689cf9f63dd94b4ddd34ae2e36b66b13976d1c and evidence admission 38044fd6f3f6378e3baaf707883382fecaf8c8f8 have successful pinned desktop builds and await integration. Appearance, experience policies, updater, genuine package version/delta production and workspace tabs remain active. Their owning branches are listed in docs/planning/implementation-queue.json; inspect current branch tips and producer receipts before resuming. Do not change any active producer's source, index or refs.
+Consumer mapping has 436 dispositions and 45 bounded current maps; exhaustive current admission remains incomplete. Missing native-handle protection, complete dynamic control identities and advanced appearance requirements remain explicit source gaps. Runtime proof is deferred everywhere in this pass.
 
-No cleanup has run. Archive and prove remote ancestry before removing only task-owned inactive merged candidates. Never delete unrelated or unfinished work. No host power/login action, force-push or private publication is authorized.
+## Next steps and preservation
+
+Integrate built coherent contributions independently, preserve each owning branch first, push main and verify exact remote refs. Update documentation indexes and source-bound handoff records. Continue queued roadmap leaves with one worker each, preserving path ownership. Do not relabel old packages as newer-source proof.
+No cleanup has occurred. Preserve every active/unfinished checkout and all ignored private announcement variants. Before deleting exact owned inactive merged candidates, verify the required archive and remote ancestry. No force-push, unrelated deletion, host power/login action, security weakening or private publication is authorized. The goal remains active and incomplete.
