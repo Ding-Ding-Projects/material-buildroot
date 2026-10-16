@@ -19,6 +19,8 @@ The typed host adapter admits these exact actions, subject to the current sessio
 | workspace.read | workspace:read | Workspace summary |
 | projects.list | projects:read | Select a currently adopted project |
 | project.options | projects:read | Runtime kind, revision and external-tree authorization summary |
+| source.rollback.preview | source:write | Preview a rollback created by a source change in this session |
+| source.rollback.apply | source:write | Apply that rollback after native patch review |
 | source.upgrade.preview | source:write | Preview an immutable source revision and retain its record in this session |
 | source.upgrade.apply | source:write | Apply the exact preview after native patch review, preserving the existing rollback snapshot |
 | source.choose | source:write | Open the native destination picker and retain the selection only in this session |
@@ -56,7 +58,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 
 - Destructive build submission and job retry remain incomplete companion workflows. Non-destructive named builds now recheck the live session at their final enqueue boundary, use the desktop-adopted runtime and source grant, and enter the existing durable scheduler.
 - Configuration string/credential editing, complete semantic menus, defconfig save, presets, account provisioning and package/external-tree editors still need dedicated capability-bound projections and controls. Boolean, tristate, integer and hexadecimal rows now support bounded symbol filtering and pagination. Their edits plus undo and defconfig apply now use the existing trusted configuration transaction after a separate native approval. Each request names its observed revision; browser-supplied consent is not accepted.
-- Custom source clone, existing-source adopt/ref acquisition/rollback need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean. Source upgrade now retains its immutable preview in the session and requires native review of the actual patch before the existing revision-bound apply. Patches above 16,000 characters require the full native workflow instead of a truncated approval.
+- Custom source clone, existing-source adopt/ref acquisition and historical rollback discovery need further native selection and revision-bound approval bridges. Official source cloning now uses a native destination picker, session-owned selection and a separate native trust approval. The browser supplies no trust or consent boolean. Source upgrade now retains its immutable preview in the session and requires native review of the actual patch before the existing revision-bound apply. Rollback previews and apply are also bound to rollback records created by this session, with the same native review and current-revision checks. Patches above 16,000 characters require the full native workflow instead of a truncated approval.
 - Rich artifact content, manifests/comparisons, SDK export, conversion, guest lifecycle, physical media, remote execution and cloud upload retry need their own narrowly admitted consumers. Enrolled destination listing, exact selected-output preview and upload start are implemented. Start consumes a preview owned by the current session and invokes the existing native exact-file/destination confirmation. A host-only authority callback is checked after native approval, after snapshot creation and before transfer effects. During transfer, revocation requests owned cancellation and preserves partial/unknown outcomes; it never claims a rollback. A preview alone does not upload or grant publication authority.
 - Converter, server manager, model pulls and full conversation management, assistant/recovery, external editor, transfer and forge publication need actual dedicated authenticated consumers.
 - Appearance, navigation, history, exports, accessibility, localization, locks and other applicable shared identities need their independent C records. The existing visitor implementation is not C evidence.
@@ -65,6 +67,7 @@ This increment does not complete PH09-T03 or all C identities. The following are
 ## Verification status
 
 Source implementation only. Tests, static analysis, reviews, browser/runtime execution and screenshots were intentionally deferred in the current speed-focused task. No listener, paired request, host action, build or publication was run by this lane. Build and integration belong to the coordinating task. Source presence is not runtime acceptance, security proof or full identity closure.
+
 
 
 
