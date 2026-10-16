@@ -66,14 +66,15 @@ function createProductWorkflows({setup,dialog,parentWindow}){
  previews.set(result.previewId,{...result,identity:identity(selection)});return structuredClone(result);
  }
  function admitted(r){const p=previews.get(r.previewId);if(!p||p.expiresAt<Date.now()||p.sha256!==r.sha256||r.consent!==true||identity(setup.selected(p.selectionId))!==p.identity)throw Error('PRODUCT_CONFIRMATION_REQUIRED');return p;}
- async function publish(r){const p=admitted(r);const head=await setup.call(p.selectionId,{suffix:'/commits/'+encodeURIComponent(p.workflowRef)});if(head.sha!==p.baseRevision)throw Error('PRODUCT_DESTINATION_CHANGED');await setup.sourceCommit(p.selectionId,p.sourceRevision);previews.delete(p.previewId);
- const result=await setup.call(p.selectionId,{method:'PUT',suffix:'/contents/.github/workflows/'+p.workflow,body:{message:'Add confirmed product production workflow',content:Buffer.from(p.yaml).toString('base64'),branch:p.workflowRef}});
+ async function publish(r,authority=null){if(authority!==null&&typeof authority!=="function")throw Error("PRODUCT_AUTHORITY_INVALID");authority?.();const p=admitted(r);const head=await setup.call(p.selectionId,{suffix:'/commits/'+encodeURIComponent(p.workflowRef)},authority);authority?.();if(head.sha!==p.baseRevision)throw Error('PRODUCT_DESTINATION_CHANGED');await setup.sourceCommit(p.selectionId,p.sourceRevision);authority?.();previews.delete(p.previewId);
+ const result=await setup.call(p.selectionId,{method:'PUT',suffix:'/contents/.github/workflows/'+p.workflow,body:{message:'Add confirmed product production workflow',content:Buffer.from(p.yaml).toString('base64'),branch:p.workflowRef}},authority);
  if(!/^[a-f0-9]{40}$/.test(result?.commit?.sha||''))throw Error('PRODUCT_WRITE_UNVERIFIED');
- const saved=await setup.call(p.selectionId,{suffix:'/contents/.github/workflows/'+p.workflow+'?ref='+result.commit.sha});
+ const saved=await setup.call(p.selectionId,{suffix:'/contents/.github/workflows/'+p.workflow+'?ref='+result.commit.sha},authority);
  if(saved?.encoding!=='base64'||typeof saved.content!=='string'||saved.content.length>100000||Buffer.from(saved.content,'base64').toString('utf8')!==p.yaml)throw Error('PRODUCT_WRITE_UNVERIFIED');
  return {workflowRevision:result.commit.sha,repository:p.repository,workflow:p.workflow};}
  let exporting=false;
- async function exportYaml(r){const p=admitted(r);if(exporting||!dialog?.showSaveDialog)throw Error('PRODUCT_EXPORT_UNAVAILABLE');exporting=true;try{const options={title:'Export product workflow',defaultPath:p.workflow,filters:[{name:'YAML workflow',extensions:['yml']}]};const parent=parentWindow;const chosen=parent?await dialog.showSaveDialog(parent,options):await dialog.showSaveDialog(options);if(chosen.canceled||!chosen.filePath)return {cancelled:true};admitted(r);await fs.writeFile(chosen.filePath,p.yaml,{encoding:'utf8',flag:'wx'});return {exported:true,sha256:p.sha256};}finally{exporting=false;}}
+ async function exportYaml(r,authority=null){if(authority!==null&&typeof authority!=="function")throw Error("PRODUCT_AUTHORITY_INVALID");authority?.();const p=admitted(r);if(exporting||!dialog?.showSaveDialog)throw Error('PRODUCT_EXPORT_UNAVAILABLE');exporting=true;try{const options={title:'Export product workflow',defaultPath:p.workflow,filters:[{name:'YAML workflow',extensions:['yml']}]};const parent=parentWindow;const chosen=parent?await dialog.showSaveDialog(parent,options):await dialog.showSaveDialog(options);authority?.();if(chosen.canceled||!chosen.filePath)return {cancelled:true};admitted(r);authority?.();await fs.writeFile(chosen.filePath,p.yaml,{encoding:'utf8',flag:'wx'});return {exported:true,sha256:p.sha256};}finally{exporting=false;}}
  return {preview,publish,exportYaml};
 }
 module.exports={createProductWorkflows,normalizeModel,generate,parseExpert,runnerLabels};
+

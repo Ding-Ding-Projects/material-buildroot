@@ -1,5 +1,7 @@
 # Bundled offline documentation
 
+[香港粵語](offline-documentation.zh-HK.md)
+
 The documentation bundle is generated from the existing public website article inventory, not from arbitrary filesystem discovery. `scripts/documentation/bundle.mjs` imports `website/inventory.mjs` and `website/source-boundary.mjs`, admits only indexed canonical public Markdown sources, and refuses linked or escaping article paths. Unindexed articles and unindexed image contents never enter the bundle. No network fetch occurs.
 
 Run `node scripts/documentation/bundle.mjs --root <repository> --output <generated-documentation-directory>`. The output must be new or empty, outside indexed source destinations. The root build driver owns clean staging and packaging; the helper does not replace existing nonempty directories. Generated files are:

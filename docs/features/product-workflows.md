@@ -1,5 +1,7 @@
 # Product production workflows
 
+[香港粵語](product-workflows.zh-HK.md)
+
 The Execution workspace has a separate product build setup, independent of Linux Buildroot user jobs. Sign in through the existing GitHub CLI controls, choose the public source repository and its immutable 40-character revision, then select the source repository or a dedicated existing execution repository. Account and repository write access are checked through GitHub CLI. Private product source is rejected because this route does not supply the required encrypted builder.
 
 ## Runner and build selection

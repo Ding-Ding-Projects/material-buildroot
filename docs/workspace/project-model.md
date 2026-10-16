@@ -1,5 +1,7 @@
 # Versioned project model
 
+[香港粵語](project-model.zh-HK.md)
+
 Implementation scope: PH02-T01. Source changes are authored; tests, independent
 review, installed migration, cross-surface isolation and runtime acceptance are
 not performed in this delivery mode. The roadmap acceptance item remains open.

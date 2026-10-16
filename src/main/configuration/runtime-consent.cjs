@@ -64,15 +64,19 @@ function createConfigurationConsent({ resolveProject, discoverDomains, now = Dat
         outputRoot: current.outputRoot, sourceRevision: current.sourceRevision, configRevision: current.configRevision,
         runtime: current.runtime, externalRoots: current.externalTrees, discoveryOnly: actualDomain !== domain };
     },
-    async grant({ workspaceId, challengeId, trusted }) {
+    async grant({ workspaceId, challengeId, trusted }, authority = null) {
+      if (authority !== null && typeof authority !== "function") fail("KCONFIG_AUTHORITY_INVALID");
+      authority?.();
       prune();
       const challenge = challenges.get(challengeId);
       challenges.delete(challengeId);
       if (!challenge || trusted !== true || challenge.snapshot.workspaceId !== workspaceId) fail("KCONFIG_SOURCE_TRUST_REQUIRED");
       const previous = challenge.snapshot;
       const current = await snapshot(workspaceId, previous.domain, previous);
+      authority?.();
       if (current.revision !== previous.revision) fail("KCONFIG_SOURCE_TRUST_CHANGED");
       if (grants.size >= 64 && !grants.has(`${workspaceId}:${previous.domain}`)) fail("KCONFIG_CONSENT_LIMIT");
+      authority?.();
       grants.set(`${workspaceId}:${previous.domain}`, { id: randomUUID(), snapshot: current, expires: now() + 15 * 60 * 1000 });
       return { domain: previous.domain, trusted: true };
     },
@@ -84,3 +88,4 @@ function createConfigurationConsent({ resolveProject, discoverDomains, now = Dat
   };
 }
 module.exports = { createConfigurationConsent };
+

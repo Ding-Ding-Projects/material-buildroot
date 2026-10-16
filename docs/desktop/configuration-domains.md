@@ -1,5 +1,7 @@
 # Component configuration domains
 
+[香港粵語](configuration-domains.zh-HK.md)
+
 The Configuration workspace has separate Buildroot, Linux, BusyBox and U-Boot selections. Changing domains clears loaded values and defconfig results; unsaved edits must first be applied or discarded. Inspect, typed apply, defconfig discovery/application and undo all send the selected domain to the desktop host.
 
 ## Real component discovery

@@ -1,5 +1,7 @@
 # WSL setup and Linux storage
 
+[香港粵語](wsl-runtime.zh-HK.md)
+
 The Projects & runtime workspace includes a dedicated WSL panel. Discovery enumerates registered distributions and their WSL version without launching them. Inspection deliberately starts the selected WSL 2 distribution and checks that its default user is non-root, that its home is an ordinary `/home/<user>` directory, and that common Buildroot host commands exist.
 
 ## Setup actions

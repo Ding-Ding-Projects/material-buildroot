@@ -1,5 +1,7 @@
 # Element appearance, motion and local profiles
 
+[香港粵語](appearance-editor.zh-HK.md)
+
 Material Buildroot provides a target-specific, non-modal appearance editor through the shared element context menu. The keyboard context-menu route and touch long-press route use the same action. The shared command inventory lists every admitted property, identifies the current target, and opens/focuses the actual editor control. Execution re-resolves the stable target; a missing or ambiguous target produces an unavailable editor without changing another element. A workspace-surface fallback is explicitly labelled when no element has been selected.
 
 This article describes current source behavior. Production builds have been produced, but tests, static analysis, reviews, installed execution, interaction and screenshots were intentionally not run in the selected delivery mode. No statement below constitutes rendered acceptance. Historical build receipts remain bound to their original commits in the task evidence, not relabelled as proof for later source.

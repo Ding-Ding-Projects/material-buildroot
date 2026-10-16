@@ -1,5 +1,7 @@
 # Managed Buildroot execution workflows
 
+[香港粵語](execution-workflows.zh-HK.md)
+
 The execution setup workspace includes a fixed-action workflow builder and an expert YAML editor. Select and authorize the source repository, destination repository, and Linux runner in execution setup first. The builder requires a full 40-character source commit, a Buildroot defconfig name, one target (`all`, `source`, `legal-info`, or `sdk`), and parallelism from 1 through 8.
 
 ## Preview and publication

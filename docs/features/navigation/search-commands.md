@@ -1,5 +1,7 @@
 # Search and command surfaces
 
+[香港粵語](search-commands.zh-HK.md)
+
 ## Search workbenches
 
 The desktop renderer imports a shared command surface from its application entry point. Settings, command results, context actions and application-owned select choices use an isolated search component. Literal text is the default. The adjacent code button opens the complete local expression workbench, including construction, flags, capture and replacement previews, cases, timing, capability explanations and session snippets. Editing the expression synchronizes the owning field; using the expression is explicit. Closing and reopening the settings workbench retains its session state.

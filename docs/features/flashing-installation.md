@@ -1,5 +1,7 @@
 # Flashing and installation routes
 
+[香港粵語](flashing-installation.zh-HK.md)
+
 The output inspector includes an exact-destination workflow for physical media and ISO guest preparation. Select a file from the adopted output browser, choose a route, and prepare a two-minute preview. The host resolves the file capability, inspects its format and hashes its bytes. No renderer-provided path or command establishes authority.
 
 ## Physical media

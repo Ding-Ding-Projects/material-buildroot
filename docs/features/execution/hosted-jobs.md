@@ -1,5 +1,7 @@
 # Hosted Buildroot job controls
 
+[香港粵語](hosted-jobs.zh-HK.md)
+
 The execution workflow panel queues one published and admitted workflow after the user selects its explicit consent checkbox. Only public source and execution repositories with the standard `ubuntu-24.04` hosted runner are admitted. The workflow fixes the source commit, target, defconfig and parallelism; dispatch supplies only a fresh operation UUID.
 
 The local journal is written before dispatch. An uncertain response remains `dispatch-unconfirmed` and must be observed or reconnected, never automatically dispatched again. Run discovery matches the operation UUID, exact repository, workflow path and workflow commit. Rerun attempts are rejected rather than silently adopted. Polling is user initiated, with a bounded five-page discovery request. Queued, pending, waiting, in-progress and completed states report the service observation. A cancellation request does not claim termination; the next observation must confirm the terminal conclusion.

@@ -1,5 +1,7 @@
 # Scheduled preferences core and host service
 
+[香港粵語](scheduled-settings.zh-HK.md)
+
 `src/shared/scheduled-settings.mjs` is a portable offline scheduling candidate. It validates rules, evaluates civil-time windows, resolves temporary per-setting overrides, guards external-source results, and defines a persistence/history transaction seam. It performs no network access, native storage operation, setting mutation, timer polling, token lookup, or renderer action. Existing application build-job scheduling has a different purpose. The sibling browser preference schema is not adopted or claimed compatible.
 
 ## Explicit admitted setting registry

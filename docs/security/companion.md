@@ -1,5 +1,9 @@
 # Opt-in HTTPS companion boundary
 
+## Historical baseline and current contract
+
+The detailed six-action protocol below records the original implementation boundary. Current pairing additionally requires a reviewed browser choice and the original client-instance header, and the trusted host now supplies expanded typed action contracts. Read [current browser pairing](../features/browser-pairing.md), [authenticated consumer workflows](../features/companion-consumers.md) and [current collection usage](../postman/api-workflow.md) for those changes. The regenerated category/master collections enumerate the integrated action contracts. Historical fixture descriptions below do not claim coverage or runtime acceptance of the newer contract.
+
 The companion server is disabled until the trusted desktop explicitly starts it. It accepts only supplied HTTPS credentials. It does not generate, install or trust certificates, bypass browser certificate checks, open a wildcard interface or publish an internet listener. Certificate provisioning, browser trust, operating-system firewall permissions and real Windows/LAN behavior require separate verification.
 
 ## Trusted host APIs

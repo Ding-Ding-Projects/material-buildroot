@@ -1,5 +1,7 @@
 # Host vault and privilege boundaries
 
+[香港粵語](vault-boundaries.zh-HK.md)
+
 Status: source implementation for PH02-T04. Tests, static analysis, review and runtime acceptance are deferred for this release lane. This article does not claim a completed roadmap acceptance check.
 
 ## Protected storage and references

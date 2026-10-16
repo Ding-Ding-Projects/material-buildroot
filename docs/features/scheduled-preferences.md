@@ -1,5 +1,7 @@
 # Scheduled language and appearance preferences
 
+[香港粵語](scheduled-preferences.zh-HK.md)
+
 The Settings schedule workspace edits local date, time, weekday and priority rules.
 An explicit Save validates the whole document against the current stored revision.
 The effective view identifies active values while preserving the user's base

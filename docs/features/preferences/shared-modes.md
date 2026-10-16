@@ -1,5 +1,7 @@
 # Shared modes, attention controls and narration
 
+[香港粵語](shared-modes.zh-HK.md)
+
 The persistent Attention & narration entry opens five independent interface accommodations. All five are off by default and persist in the current local profile. Focus outlines the active panel, record or section and removes inactive elevation without reducing text contrast. Low stimulation removes motion and quiets accent colors in discovered open shadow roots, including dynamically mounted controls. System reduced motion is respected independently. Explicitly marked nonessential routine notifications are hidden; warnings, decisions and unclassified notifications remain visible. Time awareness shows elapsed session time and time since input in the work strip. One thing at a time keeps a user-written next action in that strip. Momentum offers a non-blocking prompt after 20 minutes without interaction, with a one-hour persisted dismissal. Reset restores defaults. These controls make no medical claims.
 
 The existing shared preference enrollment remains authoritative. Unknown or active shared state enforces English, omits narration language customization and the food catalogue, and cancels queued narration before applying English. The stored personal narration language remains recoverable after leaving with the enrolled credential. This feature does not replace or weaken enrollment, vault storage, revision checks or recovery.
