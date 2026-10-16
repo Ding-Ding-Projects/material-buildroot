@@ -1,3 +1,11 @@
+# Latest evidence continuation, 2026-10-16
+
+The active objective remains complete PH00–PH10 implementation and actual Windows acceptance. The complete repaired native run found 466 cases: 423 passed, nine failed, 34 skipped. Seven failures came from an omitted interpreter selection; the corrected focused invocation passed eight cases with two explicit skips. Two unchanged HTTPS cases remain under focused diagnosis during severe paging. Storage recovery passed 17 cases with six explicit skips. These are bounded results, not complete product acceptance.
+
+The latest test-only scheduled-editor correction has a separate byte-bound recovery receipt at `design/archive/schedule-editor-20261016/receipt-v2.json`. The candidate remains inactive and unverified. Baseline application, hidden desktop and owned Lowlevel server teardown is independently confirmed; see `docs/evidence/native-windows-20261016/README.md`. Installer/update, source-to-image builds, guest lifecycle, source enrollment and broad roadmap acceptance remain unfinished.
+
+---
+
 # Handoff
 
 ## Native Windows continuation, 2026-10-16

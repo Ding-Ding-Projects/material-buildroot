@@ -1,6 +1,10 @@
 # Current recovery state, 2026-10-16
 
+Latest continuation: main remains at 9246591ade3c11b98adaa3f5309f448e60f89e28 before this evidence checkpoint. Repaired native complete run: 466 discovered, 423 passed, nine failed, 34 skipped. Seven failures were an omitted interpreter selection; corrected focused invocation passed eight of ten with two explicit skips. Two HTTPS cases remain under focused diagnosis with unchanged security deadlines. Storage recovery passed 17 of 23 with six explicit skips. The scheduled test locator correction is preserved separately by receipt-v2.json and remains unverified after initial page-load timeout. Baseline application processes, hidden desktop and task-owned Lowlevel server now have final teardown proof. Release asset download encountered a TLS handshake timeout and is retrying; no byte-verification claim. These latest facts supersede older pending/result statements below without changing their historical source boundaries.
+
 Owner steering: continue the complete roadmap and perform actual Windows tests. This objective remains active and incomplete.
+
+Focused follow-up now passed both corrected positive HTTPS integration cases and the unchanged 100 ms timeout/cancellation/capacity negative case. Only two test fixture allowances changed to 10,000 ms; production deadlines did not change. All five release v0.1.0-build.42.1 downloads now match GitHub sizes/digests, checksums and provenance; the Squirrel record SHA-1 and expected package entries also match. Installation remains unverified. The active schedule lane is adding supported protected source-enrollment controls, so recovery archives must be compared with newer owned source before restoration.
 
 Verified native repair batches are on main at 22861aed9678918b5a9a23e319ac5f17719f5d5d (44/47 passed, three explicit skips) and 08ba5a8a2a1f85737bc5fccb5527231fdbae8ce6 (16/16 passed, zero skips). Both exact remote refs were read back. The matching private-instruction synchronization operations completed separately. Full baseline remains 444 tests, 361 pass, 74 fail, nine skipped until a new full run genuinely replaces it.
 

@@ -10,4 +10,6 @@ TypeScript passed during implementation. One actual-SQLite/typed-IPC save, histo
 
 To recover, first inspect the latest main, current ownership and this receipt. Verify each saved SHA-256, compare intervening source changes, and restore only the intended owned files. The archived `main.ts` must not overwrite newer valid work blindly. Run focused browser checks against the actual SQLite service and typed IPC, independently review the resulting behavior, then build and capture the exact settled commit before acceptance.
 
+`receipt-v2.json` preserves a later test-only variant with four navigation locators corrected to accessible roles and localized names. Its focused run timed out at initial page loading before reaching those locators. This is an unverified correction, not a passing matrix. The original test copy and receipt remain unchanged.
+
 Remaining gaps include durable draft-discard history/restore, external source-enrollment forms, focus-restoration assertions, full language/theme/scale/layout tuples and real built Windows interaction. The earlier `schedule-editor-in-progress` archive remains historical and is preserved separately.

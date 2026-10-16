@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "savedAt": "2026-10-16T06:26:40.5598532Z",
+  "baseCommit": "9246591ade3c11b98adaa3f5309f448e60f89e28",
+  "state": "unfinished-inactive-recovery",
+  "path": "tests/renderer/renderer-scheduled-preferences.spec.mjs",
+  "savedPath": "design/archive/schedule-editor-20261016/source-files/tests/renderer/renderer-scheduled-preferences.spec.v2.mjs.txt",
+  "sha256": "19edb7e74fa3aaa2e3fc301311359889f5b1ea65cf72aea928224ce09f1e7b0c",
+  "bytes": 12369,
+  "change": "Four localized navigation locators use accessible roles. The corrected focused run timed out at initial page load before reaching those locators. No passing verdict."
+}

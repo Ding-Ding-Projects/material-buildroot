@@ -310,7 +310,8 @@ test("five actual HTTPS rules receive bounded worker attempts and failures emit 
         type: "https",
         url: origin + "/v1/rule" + n,
         refreshMs: 30000,
-        timeoutMs: 500,
+        // This integration check tests worker bounds, not the timeout boundary.
+        timeoutMs: 10000,
         maxResponseBytes: 4096,
       },
       values: { language: "bilingual", "appearance.theme": "dark" },

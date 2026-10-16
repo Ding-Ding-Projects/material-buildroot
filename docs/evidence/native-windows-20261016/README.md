@@ -23,6 +23,12 @@ A later focused discovery/TLS/Kconfig run discovered **47 tests: 44 passed, zero
 
 A separate complete `tests/tools.test.cjs` run passed **16 tests, zero failed and zero skipped**. Its Windows fixtures are genuine test-owned PE executables compiled with the installed Framework64 compiler. They launch the pinned Node executable directly with quoted arguments and use an unnamed native job with kill-on-close behavior. Consent, grants, actual child existence/disappearance, PDF output, page selection and queue assertions remain. Independent correctness/security review found no actionable defect in that batch. The helper assumes the selected x64 host and does not establish 32-bit support or production admission of arbitrary fixture sidecars.
 
+The repaired complete native run discovered **466 tests: 423 passed, nine failed, 34 skipped**. Seven failures were caused by the invocation omitting `TEST_PYTHON3_EXECUTABLE`. Repeating only the affected Kconfig files with the verified interpreter discovered ten cases: eight passed, zero failed and two explicitly skipped. This corrects the invocation evidence, not the complete-run verdict.
+
+The remaining two failures were positive local-TLS integration cases with a 500 ms fixture timeout under severe paging. Both still failed in an unchanged sequential pair. Only these two positive rules now use the already supported bounded 10,000 ms allowance. The corrected pair passed both cases with no skips, retaining request count, worker concurrency, authentication and base/effective-state assertions. The separate unchanged 100 ms timeout/cancellation/capacity case also passed. No production deadline changed. These focused results account for the nine failures but do not fabricate a new combined-suite pass.
+
+The focused SQLite storage and personal-vocabulary recovery run discovered **23 tests: 17 passed, zero failed, six skipped**. Native file-link privilege, ACL privacy and foreign-journal retention limitations remain explicit. A native sharing-denial case verifies rollback and reopened state without treating POSIX mode bits as native ACL proof.
+
 ## Exact-byte vendor repair
 
 The committed `scripts/configuration/vendor/kconfiglib.py` and `LICENSE.txt` blobs matched their existing SHA-256 provenance. Native checkout text conversion changed their working bytes to CRLF, correctly triggering `KCONFIG_INTEGRITY_FAILED` before interpreter execution.
@@ -39,17 +45,21 @@ Original captures and private process receipts are retained locally pending sani
 
 A later ownership query timed out at its bounded listener-query stage before attachment. That attempt proves no onboarding interaction or capture. No timeout was relabelled as a successful operation.
 
-A bounded retry independently passed ownership proof, opened the real setup dialog and captured its first step. The capture SHA-256 is `8297e58c353390fad2a3af038d7270cf3ef0ae50fca10a19be63a57870b198f0`. Its recorded observation interval also had zero console, exception and page errors. This proves setup opening and displayed controls, not save/resume or completion. A native HWND-targeted PrintWindow capture was separately retained. Owned teardown remains pending until its final absence proof.
+A bounded retry independently passed ownership proof, opened the real setup dialog and captured its first step. The capture SHA-256 is `8297e58c353390fad2a3af038d7270cf3ef0ae50fca10a19be63a57870b198f0`. Its recorded observation interval also had zero console, exception and page errors. This proves setup opening and displayed controls, not save/resume or completion. A native HWND-targeted PrintWindow capture was separately retained. Final owned teardown evidence is recorded below.
+
+The final alternate teardown used the supported application close operation after exact process ancestry, listener and page checks. All four recorded process IDs were subsequently absent. Lowlevel reported zero windows on the owned hidden desktop and confirmed that desktop closed. The task-owned persistent Lowlevel server was then stopped after repeated identity checks. Earlier helper receipts retain their actual incomplete verdicts; separate final receipts establish this alternate cleanup route.
 
 ## Open acceptance
 
-The following fixture recovery batch has zero static parse errors across 28 changed non-renderer files and bounded independent assertion-preservation review. It separates unavailable real file-link cases from hardlink, junction, malformed-data, revision and persistence checks; preserves exact native process protocol assertions; and adds a Windows SQLite sharing-denial/rollback case alongside the four explicitly unverified foreign-journal retention cases. Runtime verification of this batch is still pending. Native cache ACL privacy remains unverified, and POSIX mode bits are not used as a substitute.
+Release [v0.1.0-build.42.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.42.1) is a normal release bound to `22861aed9678918b5a9a23e319ac5f17719f5d5d`. All five downloaded files match GitHub asset sizes and SHA-256 digests, and the published checksum list and provenance agree. The [asset receipt](release-v0.1.0-build.42.1.json) records those exact bytes. This establishes download integrity for that earlier source, not installation, updates, current-candidate acceptance or full release completeness.
+
+The fixture recovery batch has zero static parse errors across 28 changed non-renderer files and bounded independent assertion-preservation review. It separates unavailable real file-link cases from hardlink, junction, malformed-data, revision and persistence checks; preserves exact native process protocol assertions; and adds a Windows SQLite sharing-denial/rollback case alongside the four explicitly unverified foreign-journal retention cases. Its complete-run and focused runtime results are recorded above. Native cache ACL privacy remains unverified, and POSIX mode bits are not used as a substitute.
 
 The [scheduled-preferences recovery archive](../../../design/archive/schedule-editor-20261016/README.md) records its exact source bytes and the incomplete twelve-case browser verdict. No candidate acceptance is inferred from TypeScript or a single assertion.
 
 - [ ] Complete the native fixture repair groups and establish a new complete-suite result.
 - [ ] Complete scheduled-preferences consumers and independently review their browser and native behavior.
-- [ ] Promote inspected captures with sanitized source/build/runtime receipts and finish owned process teardown.
+- [ ] Promote inspected captures with sanitized source/build/runtime receipts. Owned baseline process, desktop and server teardown is verified separately above.
 - [ ] Build and verify the final installer, installation, update, rollback and cancellation paths.
 - [ ] Acquire and verify supported WSL/Docker capability before claiming real source-to-image builds.
 - [ ] Complete actual guest lifecycle, provider and A/D/C acceptance across the roadmap.

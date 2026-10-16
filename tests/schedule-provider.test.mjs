@@ -148,7 +148,8 @@ test("actual local HTTPS with trusted certificate composes core coordinator with
       trustedCa: f.cert,
       lookup: f.lookup,
     }),
-    rule = makeRule(f.source),
+    // Keep this positive TLS integration independent of subsecond host scheduling.
+    rule = makeRule({...f.source, timeoutMs:10000}),
     document = {
       schemaVersion: 1,
       revision: 0,
