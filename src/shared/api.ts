@@ -87,6 +87,7 @@ export type WorkspaceTabsReply={ok:false;code:string}|{ok:true;windowId?:string;
 export interface StudioAPI {
   notifications?(request:import('./notifications').NotificationRequest):Promise<import('./notifications').NotificationReply>;
   onNotificationsChanged?(listener:()=>void):()=>void;
+  attentionHistory?(request:{action:string;[key:string]:unknown}):Promise<{ok:boolean;revision?:number;snapshot?:unknown;records?:Array<{revision:number;timestamp:string}>;hasMore?:boolean;code?:string}>;
   workspaceTabs?(request:WorkspaceTabsRequest):Promise<WorkspaceTabsReply>;
   onWorkspaceTabActivate?(listener:(tabId:string)=>void):()=>void;
   onWorkspaceTabsChanged?(listener:()=>void):()=>void;

@@ -47,10 +47,29 @@ const {
 } = require("./configuration/package-discovery.cjs");
 const contract = require("./security/workspace-contract.cjs");
 const portableProject = require("./storage/portable-project.cjs");
+const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
+const { createExecutionSetup } = require('./execution/setup.cjs');
+const { createWorkflowService } = require('./execution/workflow-service.cjs');
 const owner = "desktop-owner";
 const fields = {
+  'execution.cli': ['kind'],
+  'execution.inspect': ['sourceRepository','executionRepository','mode'],
+  'execution.discover': ['selectionId'],
+  'execution.selectRunner': ['selectionId','kind','runnerId','billingConsent'],
+  'execution.revoke': ['selectionId'],
+  "execution.workflowPreview": ["selectionId", "model", "text"],
+  "execution.workflowPublish": ["previewId", "sha256", "consent"],
+  "execution.workflowAdmission": ["selectionId"],
+  "execution.jobs.list": [],
+  "execution.jobs.dispatch": ["selectionId", "consent"],
+  "execution.jobs.observe": ["id"],
+  "execution.jobs.reconnect": ["id", "selectionId", "consent"],
+  "execution.jobs.cancel": ["id", "consent"],
+  "execution.jobs.outputs": ["id"],
+  "execution.jobs.download": ["id", "artifactId", "consent"],
+  "execution.jobs.cancelDownload": ["id"],
   "documentation.list": [],
   "documentation.read": ["id"],
   "documentation.searchText": [],
@@ -235,12 +254,31 @@ function createOperationsService({
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
+  const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
+  const executionWorkflows = createWorkflowService({setup:executionSetup});
   const documentation = documentationDirectory
     ? createDocumentationService({
         directory: documentationDirectory,
         openExternal: openDocumentationExternal,
       })
     : null;
+  let executionJobs;
+  function hostedJobs() {
+    return executionJobs ??= createExecutionJobs({
+      setup: executionSetup, workflows: executionWorkflows, directory,
+      chooseDirectory: async () => {
+        if (choosing) reject("PICKER_BUSY");
+        choosing = true;
+        try {
+          const selected = await dialog.showOpenDialog(parentWindow, {
+            title: "Choose folder for verified Buildroot outputs",
+            properties: ["openDirectory", "dontAddToRecent"],
+          });
+          return selected.canceled ? null : selected.filePaths[0] || null;
+        } finally { choosing = false; }
+      },
+    });
+  }
   const selections = new Map(),
     portableImports = new Map(),
     projects = new Map(),
@@ -1247,10 +1285,26 @@ function createOperationsService({
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith("execution.jobs.")) {
+      const method = action.slice("execution.jobs.".length);
+      const { action: _action, ...args } = request;
+      return hostedJobs()[method](args);
+    }
     const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
+      case 'execution.cli': {
+        if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
+        return executionSetup.host[request.kind]();
+      }
+      case 'execution.inspect': return executionSetup.inspect(request);
+      case 'execution.discover': return executionSetup.discover(request.selectionId);
+      case 'execution.selectRunner': return executionSetup.selectRunner(request);
+      case 'execution.revoke': return {revoked:executionSetup.revoke(request.selectionId)};
+      case "execution.workflowPreview": return executionWorkflows.preview(request);
+      case "execution.workflowPublish": return executionWorkflows.publish(request);
+      case "execution.workflowAdmission": return executionWorkflows.admission(request);
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.list();
@@ -2015,6 +2069,8 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      executionSetup.dispose();
+      executionJobs?.dispose();
       buildConfirmation.dispose();
       scheduler.close();
       for (const job of jobs.list(owner))
