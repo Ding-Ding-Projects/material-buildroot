@@ -22,6 +22,7 @@ function createRecords(options) {
       if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 4194304) fail("INVALID_SERVER_RECORD_STORE");
       const data = JSON.parse(await fs.readFile(file, "utf8"));
       if (data.schema !== 1 || !Array.isArray(data.profiles) || !Array.isArray(data.history) || !Array.isArray(data.ownership) || !Array.isArray(data.schedules) || data.profiles.length > 100 || data.ownership.length > 100 || data.schedules.length > 100 || data.history.length > 1000) fail("INVALID_SERVER_RECORD_STORE");
+      if (data.transfers !== undefined && (!Array.isArray(data.transfers) || data.transfers.length > 100 || data.transfers.some(row => !row || typeof row !== "object" || Array.isArray(row)))) fail("INVALID_SERVER_RECORD_STORE");
       data.profiles.forEach(profile);
       return data;
     } catch (error) { if (error.code === "ENOENT") return { schema: 1, profiles: [], history: [], ownership: [], schedules: [] }; throw error; }

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import {materialIcon, actionIcon, actionSymbol} from "./material-icons";
 import { LitElement, html, css, nothing } from "lit";
@@ -87,9 +88,7 @@ export class SourcePanel extends LitElement {
     @media(max-width:1000px) { .columns { grid-template-columns: 1fr; } }
   `];
 
-  private l(en: string, zh: string) {
-    return this.language === "en" ? en : this.language === "zh-HK" ? zh : `${en} · ${zh}`;
-  }
+  private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private changed() { this.revision++; }
   private async request(request: SourceOperation): Promise<SourceOperationSuccess> {
     if (!window.studio?.operations) throw new Error("DESKTOP_REQUIRED");
@@ -188,49 +187,49 @@ export class SourcePanel extends LitElement {
 
   render() {
     return html`<div class="stack" aria-busy=${this.pending}>
-      ${this.pending ? html`<md-linear-progress indeterminate aria-label=${this.l("Source operation in progress","來源操作進行中")}></md-linear-progress>` : nothing}
+      ${this.pending ? html`<md-linear-progress indeterminate aria-label=${this.l("Source operation in progress","來源操作進行中",true)}></md-linear-progress>` : nothing}
       <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
       <div class="columns">
-        <section class="panel stack"><h2>${this.l("Clone Buildroot source","複製 Buildroot 來源")}</h2>
-          <p class="note">${this.l("Choose a parent folder and a new child folder name. The source is cloned from HTTPS; a separate output folder is created beside it. Existing directories are preserved.","選擇上層資料夾同新子資料夾名稱。來源會從 HTTPS 複製，並喺旁邊建立獨立輸出資料夾，保留現有目錄。")}</p>
+        <section class="panel stack"><h2>${this.l("Clone Buildroot source","複製 Buildroot 來源",true)}</h2>
+          <p class="note">${this.l("Choose a parent folder and a new child folder name. The source is cloned from HTTPS; a separate output folder is created beside it. Existing directories are preserved.","選擇上層資料夾同新子資料夾名稱。來源會從 HTTPS 複製，並喺旁邊建立獨立輸出資料夾，保留現有目錄。",true)}</p>
           ${this.button("Choose parent folder","選擇上層資料夾",async current=>{const result=await this.request({action:"source.choose"});if(current()){this.selection={selectionId:result.selectionId!,name:result.name!};this.trust=false;}})}
-          ${this.selection ? html`<p>${this.l("Selected folder","已選資料夾")}: ${this.selection.name}</p>` : nothing}
-          <label class="row consent"><md-checkbox aria-label=${this.l("Use the fixed official Buildroot origin","使用固定官方 Buildroot 來源")} ?checked=${this.officialSource} ?disabled=${this.pending} @change=${(event:Event)=>{this.officialSource=(event.target as HTMLInputElement).checked;this.trust=false;this.changed();}}></md-checkbox><span>${this.l("Use the fixed official Buildroot origin","使用固定官方 Buildroot 來源")}</span></label>
-          ${this.officialSource?html`<p class="hash">https://gitlab.com/buildroot.org/buildroot.git</p><p class="note">${this.l("HTTPS authenticates the source endpoint. Signed-commit verification and release archive extraction are not provided.","HTTPS 驗證來源端點，未提供簽署提交驗證或發行封存檔解壓。")}</p>`:this.field(this.l("Custom HTTPS repository URL","自訂 HTTPS 儲存庫網址"),this.url,v=>{this.url=v;this.trust=false;},"url")}
-          ${this.field(this.l("New source folder name","新來源資料夾名稱"),this.directory,v=>{this.directory=v;this.trust=false;})}
-          ${this.field(this.l("Initial branch or tag","初始分支或標籤"),this.cloneRef,v=>{this.cloneRef=v;this.trust=false;})}
-          <label class="row consent"><md-checkbox aria-label=${this.l("I trust this source. Its build scripts may execute with my selected runtime permissions.","我信任呢個來源，其建置指令碼可能會以所選執行環境權限執行。")} ?checked=${this.trust} ?disabled=${this.pending} @change=${(e:Event)=>{this.trust=(e.target as HTMLInputElement).checked;this.changed();}}></md-checkbox><span>${this.l("I trust this source. Its build scripts may execute with my selected runtime permissions.","我信任呢個來源，其建置指令碼可能會以所選執行環境權限執行。")}</span></label>
+          ${this.selection ? html`<p>${this.l("Selected folder","已選資料夾",true)}: ${this.selection.name}</p>` : nothing}
+          <label class="row consent"><md-checkbox aria-label=${this.l("Use the fixed official Buildroot origin","使用固定官方 Buildroot 來源",true)} ?checked=${this.officialSource} ?disabled=${this.pending} @change=${(event:Event)=>{this.officialSource=(event.target as HTMLInputElement).checked;this.trust=false;this.changed();}}></md-checkbox><span>${this.l("Use the fixed official Buildroot origin","使用固定官方 Buildroot 來源",true)}</span></label>
+          ${this.officialSource?html`<p class="hash">https://gitlab.com/buildroot.org/buildroot.git</p><p class="note">${this.l("HTTPS authenticates the source endpoint. Signed-commit verification and release archive extraction are not provided.","HTTPS 驗證來源端點，未提供簽署提交驗證或發行封存檔解壓。",true)}</p>`:this.field(this.l("Custom HTTPS repository URL","自訂 HTTPS 儲存庫網址",true),this.url,v=>{this.url=v;this.trust=false;},"url")}
+          ${this.field(this.l("New source folder name","新來源資料夾名稱",true),this.directory,v=>{this.directory=v;this.trust=false;})}
+          ${this.field(this.l("Initial branch or tag","初始分支或標籤",true),this.cloneRef,v=>{this.cloneRef=v;this.trust=false;})}
+          <label class="row consent"><md-checkbox aria-label=${this.l("I trust this source. Its build scripts may execute with my selected runtime permissions.","我信任呢個來源，其建置指令碼可能會以所選執行環境權限執行。",true)} ?checked=${this.trust} ?disabled=${this.pending} @change=${(e:Event)=>{this.trust=(e.target as HTMLInputElement).checked;this.changed();}}></md-checkbox><span>${this.l("I trust this source. Its build scripts may execute with my selected runtime permissions.","我信任呢個來源，其建置指令碼可能會以所選執行環境權限執行。",true)}</span></label>
           ${this.button("Clone and adopt source","複製並接入來源",current=>this.clone(current),!this.selection||!this.trust||!this.url.trim()||!this.directory.trim()||!this.cloneRef.trim())}
         </section>
-        <section class="panel stack"><h2>${this.l("Active source revision","目前來源修訂版本")}</h2>
-          ${!this.workspaceId ? html`<p>${this.l("Adopt an existing project in Projects & runtime, or clone a source here to inspect revisions.","請喺專案同執行環境接入現有專案，或喺呢度複製來源以檢視修訂版本。")}</p>` : html`
+        <section class="panel stack"><h2>${this.l("Active source revision","目前來源修訂版本",true)}</h2>
+          ${!this.workspaceId ? html`<p>${this.l("Adopt an existing project in Projects & runtime, or clone a source here to inspect revisions.","請喺專案同執行環境接入現有專案，或喺呢度複製來源以檢視修訂版本。",true)}</p>` : html`
             ${this.button("Refresh source status","重新整理來源狀態",current=>this.refresh(current))}
-            <p class="note">${this.l("Native source trees and currently adopted WSL Git projects use separate host authority. WSL acquisition remains in Projects & runtime; source inspection and revision changes require its current non-root distribution identity.","原生來源樹同目前已接入嘅 WSL Git 專案使用獨立主機權限。WSL 取得流程仍喺專案同執行環境，來源檢視同修訂變更需要有效嘅非 root 發行版身分。")}</p>
-            ${this.status ? html`<dl><dt>${this.l("Revision","修訂版本")}</dt><dd class="hash">${this.status.revision}</dd><dt>${this.l("Branch","分支")}</dt><dd>${this.status.branch || this.l("Detached revision","獨立修訂版本")}</dd><dt>${this.l("Working tree","工作樹")}</dt><dd>${this.status.dirty?this.l("Local changes present","有本機變更"):this.l("Clean","乾淨")}</dd></dl>${this.status.changes?html`<pre class="diff" tabindex="0" role="region" aria-label=${this.l("Working tree changes","工作樹變更")}>${this.status.changes}</pre>`:nothing}` : html`<p>${this.l("Refresh to inspect the current source before changing revisions.","更改修訂版本前，請先重新整理以檢視目前來源。")}</p>`}
-            <h3>${this.l("Acquire and review a revision","取得並審核修訂版本")}</h3>
-            <h3>${this.l("Retained revision snapshots","已保留修訂快照")}</h3>
-            <p class="note">${this.l("Snapshots retain committed source revisions locally across restarts. They do not back up uncommitted files, ignored files, configuration drafts, external trees or output. Apply also retains the previous revision before switching. Up to 100 recent snapshots are listed; older snapshots remain retained.","快照會喺本機保留已提交來源修訂，重新啟動後仍可使用。唔會備份未提交檔案、忽略檔案、設定草稿、外部樹或輸出。套用前亦會保留上一個修訂。最多列出最近 100 個快照，較舊快照仍會保留。")}</p>
+            <p class="note">${this.l("Native source trees and currently adopted WSL Git projects use separate host authority. WSL acquisition remains in Projects & runtime; source inspection and revision changes require its current non-root distribution identity.","原生來源樹同目前已接入嘅 WSL Git 專案使用獨立主機權限。WSL 取得流程仍喺專案同執行環境，來源檢視同修訂變更需要有效嘅非 root 發行版身分。",true)}</p>
+            ${this.status ? html`<dl><dt>${this.l("Revision","修訂版本",true)}</dt><dd class="hash">${this.status.revision}</dd><dt>${this.l("Branch","分支",true)}</dt><dd>${this.status.branch || this.l("Detached revision","獨立修訂版本",true)}</dd><dt>${this.l("Working tree","工作樹",true)}</dt><dd>${this.status.dirty?this.l("Local changes present","有本機變更",true):this.l("Clean","乾淨",true)}</dd></dl>${this.status.changes?html`<pre class="diff" tabindex="0" role="region" aria-label=${this.l("Working tree changes","工作樹變更",true)}>${this.status.changes}</pre>`:nothing}` : html`<p>${this.l("Refresh to inspect the current source before changing revisions.","更改修訂版本前，請先重新整理以檢視目前來源。",true)}</p>`}
+            <h3>${this.l("Acquire and review a revision","取得並審核修訂版本",true)}</h3>
+            <h3>${this.l("Retained revision snapshots","已保留修訂快照",true)}</h3>
+            <p class="note">${this.l("Snapshots retain committed source revisions locally across restarts. They do not back up uncommitted files, ignored files, configuration drafts, external trees or output. Apply also retains the previous revision before switching. Up to 100 recent snapshots are listed; older snapshots remain retained.","快照會喺本機保留已提交來源修訂，重新啟動後仍可使用。唔會備份未提交檔案、忽略檔案、設定草稿、外部樹或輸出。套用前亦會保留上一個修訂。最多列出最近 100 個快照，較舊快照仍會保留。",true)}</p>
             ${this.button("Retain current revision","保留目前修訂",current=>this.snapshot(current),!this.status||this.status.dirty)}
             ${this.status?.snapshots?.map(snapshot=>html`<article><p class="hash">${snapshot.revision}</p><p>${snapshot.createdAt}</p>${this.button("Preview this snapshot","預覽此快照",current=>{this.rollback={id:snapshot.id,revision:snapshot.revision};return this.review(current,true);})}</article>`)}
-            <p class="note">${this.l("Fetching a branch or tag does not change the working tree. Preview and apply are separate steps. Local changes block applying a revision.","取得分支或標籤唔會改變工作樹。預覽同套用係獨立步驟，有本機變更時唔可以套用修訂版本。")}</p>
-            ${this.field(this.l("Branch or tag to fetch","要取得嘅分支或標籤"),this.ref,v=>{this.ref=v;this.targetRevision="";this.invalidatePreview();})}
+            <p class="note">${this.l("Fetching a branch or tag does not change the working tree. Preview and apply are separate steps. Local changes block applying a revision.","取得分支或標籤唔會改變工作樹。預覽同套用係獨立步驟，有本機變更時唔可以套用修訂版本。",true)}</p>
+            ${this.field(this.l("Branch or tag to fetch","要取得嘅分支或標籤",true),this.ref,v=>{this.ref=v;this.targetRevision="";this.invalidatePreview();})}
             ${this.button("Fetch reference","取得參照",current=>this.acquire(current),!this.ref.trim())}
-            ${this.field(this.l("Exact target revision","確切目標修訂版本"),this.targetRevision,v=>{this.targetRevision=v;this.invalidatePreview();})}
+            ${this.field(this.l("Exact target revision","確切目標修訂版本",true),this.targetRevision,v=>{this.targetRevision=v;this.invalidatePreview();})}
             ${this.button("Review source changes","審核來源變更",current=>this.review(current),!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(this.targetRevision))}
-            ${this.rollback ? html`<h3>${this.l("Rollback available","可復原修訂版本")}</h3><p class="hash">${this.rollback.revision}</p>${this.button("Review rollback","審核復原",current=>this.review(current,true))}` : nothing}
+            ${this.rollback ? html`<h3>${this.l("Rollback available","可復原修訂版本",true)}</h3><p class="hash">${this.rollback.revision}</p>${this.button("Review rollback","審核復原",current=>this.review(current,true))}` : nothing}
           `}
         </section>
       </div>
-      ${this.preview ? html`<section class="panel stack"><h2>${this.preview.kind==="rollback"?this.l("Review rollback","審核復原"):this.l("Review source update","審核來源更新")}</h2>
-        <dl><dt>${this.l("Current revision","目前修訂版本")}</dt><dd class="hash">${this.preview.fromRevision}</dd><dt>${this.l("Proposed revision","建議修訂版本")}</dt><dd class="hash">${this.preview.toRevision}</dd></dl>
-        <p>${this.l("Unsaved configuration edits will be cleared. Output files will be preserved. Compatibility with this revision has not been verified. The preview reports changed files and counts; inspect the source before accepting unfamiliar changes.","未儲存嘅設定編輯會被清除。會保留輸出檔案，但尚未驗證同呢個修訂版本嘅相容性。預覽列出變更檔案同數量，接受唔熟悉嘅變更前請先檢視來源。")}</p>
-        <pre class="diff" tabindex="0" role="region" aria-label=${this.l("Source change summary","來源變更摘要")}>${this.preview.diff||this.l("No file differences reported.","未報告檔案差異。")}</pre>
-        <p>${this.l("Changed files","變更檔案")}: ${this.preview.changedFiles?.length??0}. ${this.l("Output compatibility remains unknown. Changed areas are advisory, not compatibility approval.","輸出相容性仍未確認，變更範圍只供參考，唔代表相容性批准。")}</p>
-        ${(this.preview.compatibilityAreas||[]).length?html`<ul>${this.preview.compatibilityAreas!.map(area=>html`<li>${({toolchain:this.l("Toolchain and architecture","工具鏈同架構"),configuration:this.l("Configuration definitions","設定定義"),packages:this.l("Packages","套件"),kernel:this.l("Kernel and boot","核心同開機"),'build-system':this.l("Build infrastructure","建置基礎設施")} as Record<string,string>)[area]||this.l("Other changes","其他變更")}</li>`)}</ul>`:nothing}
-        <details><summary>${this.l("Full source patch","完整來源差異")}</summary><pre class="diff" tabindex="0" role="region" aria-label=${this.l("Source patch","來源差異")}>${this.preview.patch||this.l("No text patch reported. Binary changes appear in the summary.","未報告文字差異，二進位變更會喺摘要顯示。")}</pre></details>
-        <p class="note">${this.l("This preview expires after ten minutes. Apply refuses changed or dirty source and refuses overwriting ignored files. A retained prior revision remains available if switching fails; refresh status to inspect the actual outcome.","預覽十分鐘後到期。來源有變更或未儲存內容時唔會套用，亦唔會覆寫忽略檔案。切換失敗時仍會保留先前修訂，請重新整理狀態檢視實際結果。")}</p>
-        ${this.preview.dirty?html`<p role="alert">${this.l("Local changes block this operation. Preserve them outside this workflow and refresh source status before reviewing again.","本機變更阻止呢個操作。請喺此流程以外保存變更，再重新整理來源狀態同審核。")}</p>`:nothing}
-        <label class="row consent"><md-checkbox aria-label=${this.l("I reviewed these revisions and accept changing the source working tree.","我已審核以上修訂版本，並接受更改來源工作樹。")} ?checked=${this.consent} ?disabled=${this.pending||this.preview.dirty} @change=${(e:Event)=>{this.consent=(e.target as HTMLInputElement).checked;this.changed();}}></md-checkbox><span>${this.l("I reviewed these revisions and accept changing the source working tree.","我已審核以上修訂版本，並接受更改來源工作樹。")}</span></label>
+      ${this.preview ? html`<section class="panel stack"><h2>${this.preview.kind==="rollback"?this.l("Review rollback","審核復原",true):this.l("Review source update","審核來源更新",true)}</h2>
+        <dl><dt>${this.l("Current revision","目前修訂版本",true)}</dt><dd class="hash">${this.preview.fromRevision}</dd><dt>${this.l("Proposed revision","建議修訂版本",true)}</dt><dd class="hash">${this.preview.toRevision}</dd></dl>
+        <p>${this.l("Unsaved configuration edits will be cleared. Output files will be preserved. Compatibility with this revision has not been verified. The preview reports changed files and counts; inspect the source before accepting unfamiliar changes.","未儲存嘅設定編輯會被清除。會保留輸出檔案，但尚未驗證同呢個修訂版本嘅相容性。預覽列出變更檔案同數量，接受唔熟悉嘅變更前請先檢視來源。",true)}</p>
+        <pre class="diff" tabindex="0" role="region" aria-label=${this.l("Source change summary","來源變更摘要",true)}>${this.preview.diff||this.l("No file differences reported.","未報告檔案差異。",true)}</pre>
+        <p>${this.l("Changed files","變更檔案",true)}: ${this.preview.changedFiles?.length??0}. ${this.l("Output compatibility remains unknown. Changed areas are advisory, not compatibility approval.","輸出相容性仍未確認，變更範圍只供參考，唔代表相容性批准。",true)}</p>
+        ${(this.preview.compatibilityAreas||[]).length?html`<ul>${this.preview.compatibilityAreas!.map(area=>html`<li>${({toolchain:this.l("Toolchain and architecture","工具鏈同架構",true),configuration:this.l("Configuration definitions","設定定義",true),packages:this.l("Packages","套件",true),kernel:this.l("Kernel and boot","核心同開機",true),'build-system':this.l("Build infrastructure","建置基礎設施",true)} as Record<string,string>)[area]||this.l("Other changes","其他變更",true)}</li>`)}</ul>`:nothing}
+        <details><summary>${this.l("Full source patch","完整來源差異",true)}</summary><pre class="diff" tabindex="0" role="region" aria-label=${this.l("Source patch","來源差異",true)}>${this.preview.patch||this.l("No text patch reported. Binary changes appear in the summary.","未報告文字差異，二進位變更會喺摘要顯示。",true)}</pre></details>
+        <p class="note">${this.l("This preview expires after ten minutes. Apply refuses changed or dirty source and refuses overwriting ignored files. A retained prior revision remains available if switching fails; refresh status to inspect the actual outcome.","預覽十分鐘後到期。來源有變更或未儲存內容時唔會套用，亦唔會覆寫忽略檔案。切換失敗時仍會保留先前修訂，請重新整理狀態檢視實際結果。",true)}</p>
+        ${this.preview.dirty?html`<p role="alert">${this.l("Local changes block this operation. Preserve them outside this workflow and refresh source status before reviewing again.","本機變更阻止呢個操作。請喺此流程以外保存變更，再重新整理來源狀態同審核。",true)}</p>`:nothing}
+        <label class="row consent"><md-checkbox aria-label=${this.l("I reviewed these revisions and accept changing the source working tree.","我已審核以上修訂版本，並接受更改來源工作樹。",true)} ?checked=${this.consent} ?disabled=${this.pending||this.preview.dirty} @change=${(e:Event)=>{this.consent=(e.target as HTMLInputElement).checked;this.changed();}}></md-checkbox><span>${this.l("I reviewed these revisions and accept changing the source working tree.","我已審核以上修訂版本，並接受更改來源工作樹。",true)}</span></label>
         <div class="row">${this.button(this.preview.kind==="rollback"?"Apply reviewed rollback":"Apply reviewed source update",this.preview.kind==="rollback"?"套用已審核復原":"套用已審核來源更新",current=>this.apply(current),!this.consent||this.preview.dirty)}${this.button("Discard preview","放棄預覽",async()=>this.invalidatePreview())}</div>
       </section>` : nothing}
     </div>`;
