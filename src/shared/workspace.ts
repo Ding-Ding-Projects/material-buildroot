@@ -58,12 +58,14 @@ export type WorkspaceMutation = { expectedRevision: number } & (
   | { action: "revision.restore"; revision: number }
   | { action: "history.read"; beforeRevision?: number }
   | { action: "history.compare"; revision: number }
+  | { action: "native.history" | "native.export"; kind: "catalogue" | "options"; workspaceId?: string }
+  | { action: "native.restore"; kind: "catalogue" | "options"; workspaceId?: string; revision: number; expectedNativeRevision: number }
   | { action: "history.label"; revision: number; label: string }
   | { action: "history.retain"; keep: 25 | 100 | 500 }
-  | { action: "document.export"; scope: "workspace" | "plans" | "history" | "revisions"; ids: string[] }
+  | { action: "document.export"; scope: "workspace" | "plans" | "history" | "revisions" | "revision-page"; ids: string[] }
 );
 export type WorkspaceReply =
-  | { ok: true; state: WorkspaceState & { historyWarning?: boolean }; document?: string; history?: { records: Array<{ revision: number; action: string; timestamp: string | null; plans: number; labels: string[] }>; nextBeforeRevision: number | null }; removed?: number; comparison?: { fromRevision: number; toRevision: number; changes: Array<{ kind: string; id?: string; before: unknown; after: unknown }> } }
+  | { ok: true; state: WorkspaceState & { historyWarning?: boolean }; document?: string; nativeHistory?: { kind: string; revision: number; records: Array<{revision:number;projects?:Array<{id:string;name:string}>;runtime?:unknown;externalTrees?:Array<{name:string}>}>; projects:Array<{id:string;name:string}> }; nativeResult?: {revision:number;historyWarning?:boolean}; history?: { records: Array<{ revision: number; action: string; timestamp: string | null; plans: number; labels: string[] }>; nextBeforeRevision: number | null }; removed?: number; comparison?: { fromRevision: number; toRevision: number; changes: Array<{ kind: string; id?: string; before: unknown; after: unknown }> } }
   | {
       ok: false;
       code:

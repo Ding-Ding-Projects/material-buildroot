@@ -52,6 +52,7 @@ export type ScheduledPreferencesRequest =
   | { action: "draft.discard"; document: ScheduleDocument }
   | { action: "draft.list"; after: number; limit: number }
   | { action: "draft.read"; sequence: number }
+  | { action: "history.read"; revision: number }
   | {
       action: "enrollment.save";
       expectedRevision: string | null;
@@ -78,6 +79,7 @@ export type ScheduledPreferencesReply =
         | ScheduledPreferencesSnapshot
         | ScheduleDocument
         | ScheduledHistoryPage
+        | {document:ScheduleDocument}
         | ScheduledSourceList
         | ScheduleDraftReceipt
         | ScheduleDraftPage

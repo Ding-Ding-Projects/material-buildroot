@@ -6,6 +6,7 @@ import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
 import "./personal-vocabulary-drop";
 import "./settings-search";
+import "./regex-workbench";
 import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
 import {materialIcon, actionIcon} from "./material-icons";
 import { LitElement, html, nothing } from "lit";
@@ -696,6 +697,70 @@ class MaterialBuildroot extends LitElement {
   private historyBusy = false;
   private historyWarning = false;
   private revisionLabel = "";
+  private revisionQuery = "";
+  private revisionFrom = "";
+  private revisionTo = "";
+  private revisionActions = new Set<string>();
+  private revisionRegex = false;
+  private revisionPattern = "";
+  private revisionFlags = "i";
+  private revisionMatches: string[] | null = null;
+  private revisionFilterError = "";
+  private revisionFilterGeneration = 0;
+  private get filteredRevisionRows() {
+    const datesValid=(!this.revisionFrom||/^\d{4}-\d{2}-\d{2}$/.test(this.revisionFrom))&&(!this.revisionTo||/^\d{4}-\d{2}-\d{2}$/.test(this.revisionTo))&&(!this.revisionFrom||!this.revisionTo||this.revisionFrom<=this.revisionTo);
+    if(!datesValid)return [];
+    return this.revisionRows.filter(row=>{
+      const date=row.timestamp?.slice(0,10)??"";
+      const text=JSON.stringify(row).toLocaleLowerCase();
+      return (!this.revisionFrom||(date&&date>=this.revisionFrom))&&(!this.revisionTo||(date&&date<=this.revisionTo))&&
+        (!this.revisionActions.size||this.revisionActions.has(row.action))&&
+        (this.revisionRegex?this.revisionMatches?.includes(String(row.revision)):text.includes(this.revisionQuery.toLocaleLowerCase()));
+    });
+  }
+  private async filterRevisionRegex() {
+    const generation=++this.revisionFilterGeneration;
+    this.revisionMatches=null;this.revisionFilterError="";this.requestUpdate();
+    if(!this.revisionRegex)return;
+    const matches:string[]=[];
+    try {
+      for(let start=0;start<this.revisionRows.length;start+=1000){
+        const articles=this.revisionRows.slice(start,start+1000).map(row=>({id:String(row.revision),text:JSON.stringify(row)}));
+        const ids=await new Promise<string[]>((resolve,reject)=>{
+          const worker=new Worker(new URL('./documentation-search-worker.ts',import.meta.url),{type:'module'});
+          const timer=setTimeout(()=>{worker.terminate();reject(new Error('timeout'));},600);
+          worker.onerror=()=>{clearTimeout(timer);worker.terminate();reject(new Error('unavailable'));};
+          worker.onmessage=e=>{clearTimeout(timer);worker.terminate();e.data.ok?resolve(e.data.ids):reject(new Error('invalid'));};
+          worker.postMessage({pattern:this.revisionPattern,flags:this.revisionFlags.replace(/[gy]/g,''),articles});
+        });
+        if(generation!==this.revisionFilterGeneration)return;
+        matches.push(...ids);
+      }
+      if(generation===this.revisionFilterGeneration)this.revisionMatches=matches;
+    }catch{if(generation===this.revisionFilterGeneration)this.revisionFilterError=this.l("Invalid or timed-out expression. No filtered results are shown.","表達式無效或逾時，暫時唔顯示篩選結果。");}
+    this.requestUpdate();
+  }
+  private nativeHistory: any = null;
+  private nativeKind: "catalogue" | "options" = "catalogue";
+  private nativeProjectId = "";
+  private nativeRestoreRevision: number | null = null;
+  private async nativeHistoryAction(action: "native.history" | "native.restore" | "native.export") {
+    if(this.historyBusy||!this.workspaceAPI?.workspaceMutate)return;
+    this.historyBusy=true;this.requestUpdate();
+    try {
+      const reply=await this.workspaceAPI.workspaceMutate({action,expectedRevision:this.workspaceRevision,kind:this.nativeKind,
+        ...(this.nativeKind==="options"?{workspaceId:this.nativeProjectId}:{}),
+        ...(action==="native.restore"?{revision:this.nativeRestoreRevision,expectedNativeRevision:this.nativeHistory?.revision}:{} )});
+      if(!reply.ok)throw new Error("unavailable");
+      if(action==="native.history")this.nativeHistory=reply.nativeHistory;
+      if(action==="native.restore"){this.nativeHistory=null;this.closeDialog("native-history-restore-dialog");this.notice=this.noticeText("Metadata restored as a new revision. Reopen the project through its picker before use; existing running operations are unchanged.","資料已還原為新版本，使用前請經選擇器重新開啟專案，現有執行中工作保持不變。");}
+      if(action==="native.export"&&typeof reply.document==="string"){
+        const url=URL.createObjectURL(new Blob([reply.document],{type:"application/json"}));
+        const link=document.createElement("a");link.href=url;link.download=`material-buildroot-${this.nativeKind}-history.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }
+    }catch{this.notice=this.noticeText("Native metadata history is unavailable or changed. Read it again before restoring.","原生資料歷史未能使用或已變更，還原前請重新讀取。");}
+    finally{this.historyBusy=false;this.requestUpdate();}
+  }
   private revisionComparison = "";
   private retentionKeep: 25 | 100 | 500 = 100;
   private async historyAction(action: "history.compare" | "history.label" | "history.retain", revision = 0) {
@@ -713,7 +778,7 @@ class MaterialBuildroot extends LitElement {
     finally {this.historyBusy=false;this.requestUpdate();}
   }
   private historyLoaded = false;
-  private exportScope: "workspace" | "plans" | "history" | "revisions" = "workspace";
+  private exportScope: "workspace" | "plans" | "history" | "revisions" | "revision-page" = "workspace";
   private exportPlanIds = new Set<string>();
   private async readRevisions(more = false) {
     if (this.historyBusy || !this.workspaceAPI?.workspaceMutate) return;
@@ -723,7 +788,7 @@ class MaterialBuildroot extends LitElement {
         ...(more && this.revisionCursor !== null ? {beforeRevision:this.revisionCursor} : {})});
       if (!reply.ok || !reply.history) throw new Error("unavailable");
       this.revisionRows = more ? [...this.revisionRows,...reply.history.records] : reply.history.records;
-      this.revisionCursor = reply.history.nextBeforeRevision; this.historyLoaded = true;
+      this.revisionCursor = reply.history.nextBeforeRevision; this.historyLoaded = true;void this.filterRevisionRegex();
     } catch {this.notice=this.noticeText("Revision history unavailable. Current workspace is retained.","版本歷史未能使用，目前工作區仍然保留。");}
     finally {this.historyBusy=false;this.requestUpdate();}
   }
@@ -786,7 +851,14 @@ class MaterialBuildroot extends LitElement {
             <md-text-button @click=${()=>{this.revisionLabel="";this.requestUpdate();}}>${this.l("Clear label draft","清除標籤草稿")}</md-text-button>
             <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions()}>${materialIcon("history","icon")}${this.l("Read revisions","讀取版本")}</md-outlined-button>
             ${this.historyLoaded&&!this.revisionRows.length?html`<p>${this.l("No complete revision records yet. Older activity has no restorable state.","暫時未有完整版本記錄。較舊活動冇可還原狀態。")}</p>`:nothing}
-            ${this.revisionRows.map(row=>html`<div class="row"><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")} · ${row.labels.join(" · ")}</span><md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.compare",row.revision)}>${this.l("Compare with current","比較目前版本")}</md-outlined-button><md-outlined-button ?disabled=${this.historyBusy||!this.revisionLabel.trim()} @click=${()=>this.historyAction("history.label",row.revision)}>${this.l("Append label","新增標籤")}</md-outlined-button><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
+            <p>${this.l("Filters apply to loaded revision pages only. Dates use UTC calendar days; load older pages to expand the scope.","篩選只適用於已載入版本頁，日期使用 UTC 日曆日，載入較舊頁面可擴大範圍。")}</p>
+            <div class="row"><md-outlined-text-field .label=${this.l("Search loaded revisions","搜尋已載入版本")} .value=${this.revisionQuery} @input=${(e:Event)=>{this.revisionQuery=(e.target as HTMLInputElement).value;this.revisionPattern=this.revisionQuery;if(this.revisionRegex)void this.filterRevisionRegex();this.requestUpdate();}}></md-outlined-text-field><md-text-button @click=${()=>{this.revisionQuery=this.revisionPattern="";void this.filterRevisionRegex();}}>${this.l("Clear search","清除搜尋")}</md-text-button><md-outlined-button aria-pressed=${this.revisionRegex} @click=${()=>{this.revisionRegex=!this.revisionRegex;void this.filterRevisionRegex();}}>${this.l("Regex builder","正規表達式建構器")}</md-outlined-button></div>
+            ${this.revisionRegex?html`<regex-workbench .language=${this.effectiveLanguage} .pattern=${this.revisionPattern} .flags=${this.revisionFlags} @pattern-change=${(e:CustomEvent)=>{this.revisionPattern=e.detail.pattern;this.revisionQuery=e.detail.pattern;this.revisionFlags=e.detail.flags;void this.filterRevisionRegex();}}></regex-workbench>`:nothing}
+            <div class="row"><label>${this.l("From date (UTC)","開始日期（UTC）")}<input type="date" .value=${this.revisionFrom} @input=${(e:Event)=>{this.revisionFrom=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><label>${this.l("Through date (UTC)","結束日期（UTC）")}<input type="date" .value=${this.revisionTo} @input=${(e:Event)=>{this.revisionTo=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><md-text-button @click=${()=>{this.revisionFrom=this.revisionTo="";this.requestUpdate();}}>${this.l("Clear dates","清除日期")}</md-text-button></div>
+            ${this.revisionFrom&&this.revisionTo&&this.revisionFrom>this.revisionTo?html`<p role="alert">${this.l("End date must not precede start date.","結束日期唔可以早過開始日期。")}</p>`:nothing}
+            <div class="row">${[...new Set(this.revisionRows.map(row=>row.action))].map(action=>html`<md-outlined-button aria-pressed=${this.revisionActions.has(action)} @click=${()=>{this.revisionActions.has(action)?this.revisionActions.delete(action):this.revisionActions.add(action);this.requestUpdate();}}>${this.activityName(action,this.effectiveLanguage==="zh-HK")} (${this.revisionRows.filter(row=>row.action===action).length})</md-outlined-button>`)}</div>
+            ${this.revisionFilterError?html`<p role="alert">${this.revisionFilterError}</p>`:nothing}<p>${this.filteredRevisionRows.length} / ${this.revisionRows.length} ${this.l("loaded revisions match","個已載入版本符合篩選")}</p>
+            ${this.filteredRevisionRows.map(row=>html`<div class="row"><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")} · ${row.labels.join(" · ")}</span><md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.compare",row.revision)}>${this.l("Compare with current","比較目前版本")}</md-outlined-button><md-outlined-button ?disabled=${this.historyBusy||!this.revisionLabel.trim()} @click=${()=>this.historyAction("history.label",row.revision)}>${this.l("Append label","新增標籤")}</md-outlined-button><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
             ${this.revisionCursor!==null?html`<md-text-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions(true)}>${this.l("More revisions","更多版本")}</md-text-button>`:nothing}
             ${this.revisionComparison?html`<h4>${this.l("Selected revision versus current workspace","所選版本與目前工作區比較")}</h4><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${this.revisionComparison}</pre><md-text-button @click=${()=>{this.revisionComparison="";this.requestUpdate();}}>${this.l("Close comparison","關閉比較")}</md-text-button>`:nothing}
             <h3>${this.l("Revision cache retention","版本快取保留")}</h3>
@@ -794,10 +866,17 @@ class MaterialBuildroot extends LitElement {
             <md-outlined-select .label=${this.l("Recent cached copies to keep","保留最近快取數目")} .value=${String(this.retentionKeep)} @change=${(e:Event)=>{this.retentionKeep=Number((e.target as HTMLSelectElement).value) as 25|100|500;this.requestUpdate();}}>${[25,100,500].map(count=>html`<md-select-option .value=${String(count)}><div slot="headline">${count}</div></md-select-option>`)}</md-outlined-select>
             <md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>this.openDialog("history-retention-dialog",e)}>${this.l("Review cache pruning","檢視快取刪減")}</md-outlined-button>
             <md-dialog id="history-retention-dialog"><div slot="headline">${this.l("Remove redundant revision caches?","移除重複版本快取？")}</div><div slot="content">${this.l(`Keep the newest ${this.retentionKeep} recorded revisions cached. Older cache files are deleted only when identical bytes exist in local history. History commits and restore access are preserved.`, `保留最近 ${this.retentionKeep} 個已記錄版本快取。只有本機歷史保留完全相同內容時，先會刪除較舊快取。歷史提交同還原存取保持不變。`)}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("history-retention-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.retain")}>${this.l("Remove redundant caches","移除重複快取")}</md-filled-button></div></md-dialog>
+            <h3>${this.l("Native project history","原生專案歷史")}</h3>
+            <p>${this.l("Project catalogue and options have independent revisions. Paths are retained only in local recovery records and omitted from these views and exports. Restoring metadata grants no filesystem authority; reopen through the project picker.","專案目錄同選項有獨立版本。路徑只保留喺本機復原記錄，唔會顯示或匯出。還原資料唔會授予檔案權限，請經專案選擇器重新開啟。")}</p>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="catalogue";this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read catalogue history","讀取目錄歷史")}</md-outlined-button>
+            ${this.nativeHistory?.projects?.map((project:any)=>html`<md-outlined-button ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="options";this.nativeProjectId=project.id;this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read options history","讀取選項歷史")}: ${project.name}</md-outlined-button>`)}
+            ${this.nativeHistory?html`<p>${this.l("Current metadata revision","目前資料版本")}: ${this.nativeHistory.revision}</p>${this.nativeHistory.records.map((record:any)=>html`<section><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(record,null,2)}</pre><md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>{this.nativeRestoreRevision=record.revision;this.openDialog("native-history-restore-dialog",e);}}>${this.l("Restore metadata as new revision","還原資料為新版本")}</md-outlined-button></section>`)}<md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.export")}>${this.l("Export this metadata history without paths","匯出此資料歷史，不含路徑")}</md-outlined-button>`:nothing}
+            <md-dialog id="native-history-restore-dialog"><div slot="headline">${this.l("Restore native metadata?","還原原生資料？")}</div><div slot="content">${this.l("Replace the current metadata with the selected historical state as a new revision. This may remove later catalogue entries or change saved runtime and external-tree choices. Source and output files are not changed. Reopen affected projects after restoration.","將目前資料取代為所選歷史狀態並建立新版本，可能移除較後目錄項目或變更執行環境同外部樹選擇。來源同輸出檔案保持不變，還原後請重新開啟受影響專案。")} ${this.nativeRestoreRevision}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("native-history-restore-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.restore")}>${this.l("Restore metadata","還原資料")}</md-filled-button></div></md-dialog>
             <h3>${this.l("Export scope","匯出範圍")}</h3>
             <md-outlined-select .label=${this.l("Include","包含")} .value=${this.exportScope} @change=${(e:Event)=>{this.exportScope=(e.target as HTMLSelectElement).value as typeof this.exportScope;this.requestUpdate();}}>
               <md-select-option value="workspace"><div slot="headline">${this.l("Current workspace, re-importable","目前工作區，可重新匯入")}</div></md-select-option>
               <md-select-option value="plans"><div slot="headline">${this.l("Selected saved plans","已選儲存計劃")}</div></md-select-option>
+              <md-select-option value="revision-page"><div slot="headline">${this.l("Last 25 matching loaded revisions","最後 25 個符合篩選嘅已載入版本")}</div></md-select-option>
               <md-select-option value="revisions"><div slot="headline">${this.l("All complete recorded revisions (maximum 32 MiB)","全部完整已記錄版本（最大 32 MiB）")}</div></md-select-option>
               <md-select-option value="history"><div slot="headline">${this.l("Complete recorded activity","全部已記錄活動")}</div></md-select-option>
             </md-outlined-select>
@@ -1121,7 +1200,7 @@ class MaterialBuildroot extends LitElement {
     );
     if (this.workspaceMode === "durable") {
       try {
-        const reply = await this.workspaceAPI.workspaceMutate!({action:"document.export",expectedRevision:this.workspaceRevision,scope:this.exportScope,ids:this.exportScope==="plans"?this.plans.filter(p=>this.exportPlanIds.has(p.id)).map(p=>p.id):[]});
+        const reply = await this.workspaceAPI.workspaceMutate!({action:"document.export",expectedRevision:this.workspaceRevision,scope:this.exportScope,ids:this.exportScope==="plans"?this.plans.filter(p=>this.exportPlanIds.has(p.id)).map(p=>p.id):this.exportScope==="revision-page"?this.filteredRevisionRows.slice(-25).map(row=>String(row.revision)):[]});
         if (!reply.ok || typeof reply.document !== "string") throw new Error("unavailable");
         document = reply.document;
       } catch {

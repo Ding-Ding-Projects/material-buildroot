@@ -75,6 +75,7 @@ export function createSchedulePreferencesService(options: {
     expectedRevision: number | null;
     authorize?: () => boolean;
   }): Promise<ScheduleDocument>;
+  historyRead(input:{revision:number;authorize?:()=>boolean}):Promise<{document:ScheduleDocument}|null>;
   history(page?: { after?: number; limit?: number }): Promise<{
     records: Array<{ sequence: number; receipt: ScheduleHistoryReceipt }>;
     next: number;

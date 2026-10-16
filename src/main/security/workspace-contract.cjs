@@ -241,10 +241,21 @@ function request(value) {
       "ids",
       "label",
       "keep",
+      "kind",
+      "workspaceId",
+      "expectedNativeRevision",
     ],
     ["expectedRevision", "action"],
   );
   revision(value.expectedRevision);
+  if (["native.history","native.restore","native.export"].includes(value.action)) {
+    one(value.kind,["catalogue","options"]);
+    const fields=["expectedRevision","action","kind",...(value.kind==="options"?["workspaceId"]:[]),...(value.action==="native.restore"?["revision","expectedNativeRevision"]:[])];
+    object(value,fields);
+    if(value.kind==="options") id(value.workspaceId);
+    if(value.action==="native.restore"){revision(value.revision);revision(value.expectedNativeRevision);}
+    return value;
+  }
   if (["history.compare", "history.label", "history.retain"].includes(value.action)) {
     const keys = value.action === "history.label" ? ["revision", "label"] : value.action === "history.retain" ? ["keep"] : ["revision"];
     object(value, ["expectedRevision", "action", ...keys]);
@@ -260,9 +271,10 @@ function request(value) {
   }
   if (value.action === "document.export") {
     object(value, ["expectedRevision", "action", "scope", "ids"]);
-    one(value.scope, ["workspace", "plans", "history", "revisions"]);
+    one(value.scope, ["workspace", "plans", "history", "revisions", "revision-page"]);
     if (!Array.isArray(value.ids) || value.ids.length > 100 || new Set(value.ids).size !== value.ids.length) fail();
     if (value.scope === "plans") value.ids.forEach(id);
+    else if (value.scope === "revision-page") { if(value.ids.length>25||value.ids.some(id=>typeof id!=="string"||! /^(0|[1-9][0-9]*)$/.test(id)||!Number.isSafeInteger(Number(id))))fail(); }
     else if (value.ids.length) fail();
     return value;
   }

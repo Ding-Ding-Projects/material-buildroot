@@ -12,6 +12,10 @@ const payload = (state) =>
   });
 function createWorkspaceService(options) {
   const store = createWorkspaceStore(options);
+  const path = require("node:path");
+  const directory = path.join(path.dirname(options.filePath), "operations");
+  const catalogue = require("./storage/project-store.cjs").createProjectStore({filePath:path.join(directory,"projects.json")});
+  const projectOptions = require("./storage/project-options-store.cjs").createProjectOptionsStore({directory:path.join(directory,"project-options")});
   const result = (work) => {
     try {
       return { ok: true, ...work() };
@@ -39,6 +43,19 @@ function createWorkspaceService(options) {
     return result(() => {
       contract.request(input);
       const request = clone(input);
+      if (["native.history","native.restore","native.export"].includes(request.action)) {
+        const state=store.read();
+        if(request.kind==="options"&&!catalogue.list().some(project=>project.id===request.workspaceId))reject("NOT_FOUND");
+        const target=request.kind==="catalogue"?catalogue:projectOptions;
+        const identity=request.kind==="options"?{workspaceId:request.workspaceId}:{};
+        if(request.action==="native.restore") {
+          const restored=target.restore({...identity,revision:request.revision,expectedRevision:request.expectedNativeRevision});
+          return {state,nativeResult:restored};
+        }
+        const nativeHistory={kind:request.kind,...target.historyRead(identity),projects:catalogue.list().map(({id,name})=>({id,name}))};
+        if(request.action==="native.export") return {state,document:JSON.stringify({format:"material-buildroot-native-history-export",version:1,...nativeHistory,exclusions:["project and external-tree paths","credentials","personal wording","build output"]},null,2)};
+        return {state,nativeHistory};
+      }
       if (["history.compare", "history.label", "history.retain"].includes(request.action)) {
         const state = store.read();
         if (state.revision !== request.expectedRevision) reject("REVISION_CONFLICT");
@@ -66,6 +83,9 @@ function createWorkspaceService(options) {
           if (request.ids.some(id => !state.plans.some(plan => plan.id === id))) reject("NOT_FOUND");
           content = { format: "material-buildroot-plans-export", version: 1, scope: "selected-plans", sourceRevision: state.revision,
             plans: state.plans.filter(plan => request.ids.includes(plan.id)), exclusions };
+        } else if (request.scope === "revision-page") {
+          const records=request.ids.map(id=>{const saved=store.readRevision(Number(id));return {revision:saved.revision,state:saved};});
+          content={format:"material-buildroot-revisions-export",version:1,scope:"explicit-selected-revision-page",sourceRevision:state.revision,selectedRevisions:request.ids.map(Number),records,exclusions};
         } else if (request.scope === "revisions") {
           const records = [];
           let before;

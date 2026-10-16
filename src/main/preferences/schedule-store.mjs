@@ -578,6 +578,17 @@ export function createSqliteScheduleAdapter({
           db.exec("UPDATE guard SET value=1-value WHERE id=1");
           journal = identity(file + "-journal");
           publishMarker(journal);
+          // Reserved profile keys keep local-only revision snapshots in the existing
+          // database and transaction, without duplicating its history journal.
+          const retainLocal = document => {
+            const local = localDraft({...document,rules:document.rules.filter(rule=>rule.source.type==="local")});
+            const key = `${profileId}:revision:${document.revision}`;
+            const previous = db.prepare("SELECT document FROM documents WHERE profile=?").get(key);
+            if(previous && !Buffer.from(previous.document).equals(local.bytes)) fail("SCHEDULE_STORAGE_INVALID");
+            if(!previous) db.prepare("INSERT INTO documents(profile,document) VALUES(?,?)").run(key,local.bytes);
+          };
+          if(current) retainLocal((allowUnenrolledSources?parseStoredSchedule:parseScheduleBytes)(current,options));
+          retainLocal(candidate);
           db.prepare(
             "INSERT INTO documents VALUES(?,?) ON CONFLICT(profile) DO UPDATE SET document=excluded.document",
           ).run(profileId, bytes);
@@ -619,6 +630,20 @@ export function createSqliteScheduleAdapter({
             if (preservationError) throw preservationError;
           }
         }
+      });
+    },
+    async historyRead({revision}) {
+      if(!Number.isSafeInteger(revision)||revision<0)fail("INVALID_HISTORY_PAGE");
+      return safe(()=>{
+        const db=open();
+        try {
+          const row=db.prepare("SELECT CASE WHEN length(document) BETWEEN 1 AND 262144 THEN document ELSE NULL END AS document FROM documents WHERE profile=?").get(`${profileId}:revision:${revision}`);
+          if(!row)return null;
+          if(row.document===null)fail("SCHEDULE_STORAGE_INVALID");
+          const document=localDraft(parseScheduleBytes(new Uint8Array(row.document),{registry:options.registry})).document;
+          if(document.revision!==revision)fail("SCHEDULE_STORAGE_INVALID");
+          return {document};
+        } finally {db.close();}
       });
     },
     async history({ after = 0, limit = 50 } = {}) {

@@ -54,6 +54,7 @@ function admit(serialized) {
     cancel: ["action"],
     replace: ["action", "document", "expectedRevision"],
     history: ["action", "after", "limit"],
+    "history.read": ["action", "revision"],
     "enrollment.list": ["action"],
     "enrollment.save": [
       "action",
@@ -120,6 +121,7 @@ function admit(serialized) {
       value.limit > (value.action === "draft.list" ? 20 : 100))
   )
     throw Error();
+  if(value.action === "history.read" && (!Number.isSafeInteger(value.revision)||value.revision<0))throw Error();
   if(value.action === "draft.read" && (!Number.isSafeInteger(value.sequence) || value.sequence<1)) throw Error();
   return value;
 }
@@ -143,7 +145,7 @@ function createScheduleIPC({ desktop, service, sharedModeStatus }) {
       }
       try {
         const { action, ...options } = input;
-        const draftAction=action.startsWith("draft.");
+        const draftAction=action.startsWith("draft.")||action==="history.read";
         const permitted=()=>draftAction ? draftAuthorized(event) : authorized(event);
         if(!permitted()) return {ok:false,code:"UNAUTHORIZED"};
         const method =
@@ -154,6 +156,7 @@ function createScheduleIPC({ desktop, service, sharedModeStatus }) {
             "draft.discard": "draftDiscard",
             "draft.list": "draftList",
             "draft.read": "draftRead",
+            "history.read": "historyRead",
           }[action] || action;
         const result = [
           "replace",
@@ -162,6 +165,7 @@ function createScheduleIPC({ desktop, service, sharedModeStatus }) {
           "draft.discard",
           "draft.list",
           "draft.read",
+          "history.read",
         ].includes(action)
           ? await service[method]({
               ...options,
@@ -171,7 +175,7 @@ function createScheduleIPC({ desktop, service, sharedModeStatus }) {
         if (!permitted()) return { ok: false, code: "UNAUTHORIZED" };
         return { ok: true, result };
       } catch (error) {
-        if (!authorized(event) || (input.action.startsWith("draft.") && !draftAuthorized(event))) return { ok: false, code: "UNAUTHORIZED" };
+        if (!authorized(event) || ((input.action.startsWith("draft.")||input.action==="history.read") && !draftAuthorized(event))) return { ok: false, code: "UNAUTHORIZED" };
         return {
           ok: false,
           code: CODES.has(error?.code) ? error.code : "UNAVAILABLE",
