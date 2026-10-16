@@ -13,3 +13,17 @@ The searchable tab manager remains available regardless of overflow. It provides
 ## Verification and limits
 
 This implementation was prepared in the speed-focused release mode. Runtime interaction, accessibility acceptance, display-scale geometry, persisted restart behavior and screenshots were deliberately not exercised. The first production build completed for e1615cde49e4dbc80a86b3248de8431c30a4b77f; it is superseded by the utility ownership and tool-catalog follow-up. A successful production build is compilation evidence only. Per-tab and per-group appearance controls are supplied by the separate appearance integration through stable target identities; this change does not claim that integration's runtime acceptance. The catalog lists destinations, not arbitrary executable commands, and never authorizes execution from persisted metadata.
+
+## Shared command destinations and host window discovery
+
+The shell registers its real destination callbacks through `registerCommandActionProvider`. Both the command palette and New tab catalog consume that same registry. Catalog activation resolves the current callable entry, closes the catalog, and invokes the existing destination handler. Restricted or removed entries are not resurrected from a cached label.
+
+The master search obtains its inventory from the main process. Only registered application windows and admitted main-frame documents can publish bounded tab metadata. The host assigns window identity, clears navigation records when a document navigates or crashes, and removes destroyed windows. Metadata is held in memory, never persisted by the host, and cannot authorize a project, select a filesystem path or execute an arbitrary command. Activation only targets an existing tab in an extant registered window and requests its normal renderer navigation, preserving draft decisions.
+
+The current desktop host creates one application window and does not expose a new-window action. The inventory therefore reports one actual window in that host configuration. The registry supports explicitly registered additional application windows without claiming that this release creates them. A missing host bridge is shown as unavailable, never replaced with invented renderer window records.
+
+The local strip manager, master window search, group search and individual group searches use separate expression-workbench instances. Switching catalog/dialog modes does not reuse another search's hidden query state.
+
+Tab and group context actions open the existing nonmodal appearance editor, with an explicit Shift+right-click route. Typography, colors, geometry, state styles, export/reset and presets remain owned by that editor. Stable tab/group identity is separate from their order and current navigation destination.
+
+These additions remain source and production-build work. Runtime, multi-window activation, appearance persistence, access-revocation behavior and geometry have not been exercised under this task mode.

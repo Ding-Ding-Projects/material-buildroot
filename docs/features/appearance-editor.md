@@ -73,3 +73,11 @@ Property rows and their public Material controls share `appearance:<target>:<sta
 | Logos | Isolated decode and admitted derivatives | Local derivative cache | Unrun |
 
 Full layered-image editing remains separate roadmap work. Arbitrary CSS/custom-property authoring, font-specific axis discovery, universal stable identity outside instrumented records, complete non-overlap layout, and full rendered acceptance remain unproved or unimplemented as described above. A successful build cannot establish those claims or satisfy the required keyboard, localization, contrast, scale, decoder, timing and per-interaction capture evidence.
+
+### Stable workspace-tab and group identity
+
+Workspace-tab targets may declare `data-appearance-owner="workspace-tabs"` with a bounded explicit key: `tab:workspace:<backend-id>`, `tab:utility:<owner-and-destination>` or `group:<stable-id>`. The appearance adapter uses this route only within an instance of the registered `workspace-tabs` component belonging to the current application. It hashes the fixed presentation namespace plus that explicit key independently of the application route, group placement and ancestor order. Descendants receive separate structural suffixes relative to the nearest explicitly keyed target, rather than sharing the parent style identity.
+
+The marker conveys presentation identity only. It never grants an action, changes a credential, bypasses the permission provider or treats DOM metadata as authorization. Original appearance mutation checks remain in place. Duplicate live identities remain ambiguous for command re-resolution instead of silently selecting a different target. Changes to the explicit identity attributes schedule reassociation. Other element identities retain their existing behavior.
+
+Earlier structural records are preserved and are not automatically reassigned to a new namespace, because a reordered old position cannot prove which record originally owned the style. This source addition has a candidate-bound production build only; tab/group reorder, route changes, persistence and permission behavior still require the separate runtime acceptance pass.
