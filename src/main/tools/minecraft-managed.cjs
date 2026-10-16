@@ -129,6 +129,8 @@ function createManagedMinecraft(options) {
       const remote = request.target.startsWith("ssh-"), container = request.target.endsWith("container");
       const directory = remote ? request.remoteDirectory : await localDirectory(request);
       if (!remote && workflows.busy(directory)) fail("WORLD_TRANSFER_ACTIVE");
+      const previousDirectoryOwner = (await workflows.store.read()).ownership.find(row => row.directory === directory && (row.host || "") === (remote ? request.host : "") && !["stopped", "exited", "start-failed"].includes(row.state));
+      if (previousDirectoryOwner && !records.has(previousDirectoryOwner.serverId)) fail("SERVER_OWNERSHIP_RECONCILIATION_REQUIRED");
       resource = (remote ? request.host + ":" : "") + directory;
       if (locks.has(resource) || [...records.values()].some(r => r.resource === resource && !["stopped", "exited", "start-failed"].includes(r.state))) fail("SERVER_DIRECTORY_IN_USE");
       locks.add(resource); ownsResource = true;
