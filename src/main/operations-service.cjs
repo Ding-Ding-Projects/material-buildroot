@@ -55,8 +55,18 @@ const { createExecutionJobs } = require("./execution/jobs-service.cjs");
 const { createWslRuntime } = require("./execution/wsl-runtime.cjs");
 const { createExecutionSetup } = require('./execution/setup.cjs');
 const { createWorkflowService } = require('./execution/workflow-service.cjs');
+const { createAssistantActions } = require("./assistant/actions.cjs");
 const owner = "desktop-owner";
 const fields = {
+  "assistant.catalog": ["workspaceId"],
+  "assistant.propose": ["workspaceId", "expectedRevision", "document"],
+  "assistant.list": ["workspaceId"],
+  "assistant.create": ["workspaceId", "expectedRevision", "profiles"],
+  "assistant.preview": ["workspaceId", "planId", "index", "expectedRevision"],
+  "assistant.run": ["workspaceId", "previewId", "digest", "consent"],
+  "assistant.cancel": ["workspaceId", "planId"],
+  "assistant.checkpoint": ["workspaceId", "planId", "expectedRevision"],
+  "assistant.recover": ["workspaceId", "planId", "index", "expectedRevision", "resolution", "consent"],
   'execution.cli': ['kind'],
   'execution.inspect': ['sourceRepository','executionRepository','mode'],
   'execution.discover': ['selectionId'],
@@ -1306,6 +1316,133 @@ function createOperationsService({
     }
   }
   const jobRecovery = createJobRecovery({ directory: path.join(directory, "job-recovery"), jobs, owner, perform });
+  async function submitBuild(request, {operationId, expectedIntent, signal} = {}) {
+
+        const item = project(request.workspaceId);
+        if (!item.externalStateVerified)
+          reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+        if (
+          !targetActions.isBuildTarget(request.target, TARGETS) ||
+          !Number.isSafeInteger(request.jobs) ||
+          request.jobs < 1 ||
+          request.jobs > 32
+        )
+          reject("INVALID_TARGET");
+        targetActions.assertPackage(item, request.target);
+        const selectedRuntime = runtime(request.runtime);
+        item.runtime = selectedRuntime;
+        const resources = reservations(
+          request.resources,
+          selectedRuntime,
+          request.jobs,
+        );
+        const captured = await captureBuildIntent({
+          source: item.source,
+          output: item.output,
+          externalTrees: authorizedExternalPaths(request.workspaceId, item),
+        });
+        project(request.workspaceId);
+        if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling) reject("UPDATE_INSTALL_PENDING");
+        if (targetActions.isDestructiveTarget(request.target)) buildConfirmation.consume(request);
+        else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
+        if (signal?.aborted) reject("ACTION_CANCELLED");
+        if (expectedIntent && (captured.sourceRevision !== expectedIntent.sourceRevision || captured.configRevision !== expectedIntent.configRevision || createHash("sha256").update(JSON.stringify([item.grantId, item.identities, item.runtime])).digest("hex") !== expectedIntent.grantBinding || JSON.stringify(item.runtime) !== JSON.stringify(selectedRuntime))) reject("SOURCE_OR_GRANT_CHANGED");
+        const job = jobs.enqueue({
+          ...(operationId ? {operationId} : {}),
+          kind: "build",
+          ownerId: owner,
+          payload: {
+            workspaceId: request.workspaceId,
+            target: request.target,
+            runtime: selectedRuntime,
+            jobs: request.jobs,
+            resources,
+            intent: {
+              projectId: request.workspaceId,
+              sourceRevision: captured.sourceRevision,
+              configRevision: captured.configRevision,
+            },
+            snapshot: {
+              version: captured.snapshot.version,
+              entries: captured.snapshot.entries,
+              bytes: captured.snapshot.bytes,
+              excludesGitObjectHistory: true,
+              symlinkPolicy: captured.snapshot.symlinkPolicy,
+              symlinks: captured.snapshot.symlinks,
+              limitations: [...captured.snapshot.limitations],
+            },
+          },
+        });
+        void scheduler.pump().catch(() => {});
+        return job;
+      
+  }
+  const assistant = createAssistantActions({
+    directory: path.join(directory, "assistant"),
+    bind: async (workspaceId, signal) => {
+      const item = project(workspaceId);
+      if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
+      if (item.storage) await execution.verifyWslGrant(execution.grants.get(item.grantId), item.runtime);
+      if (signal?.aborted) reject("ACTION_CANCELLED");
+      const snapshot = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: authorizedExternalPaths(workspaceId, item), signal });
+      project(workspaceId);
+      return { ...snapshot, grantBinding: createHash("sha256").update(JSON.stringify([item.grantId, item.identities, item.runtime])).digest("hex") };
+    },
+    catalog: async workspaceId => {
+      const result = await defconfigWorkflows.catalog({workspaceId});
+      return { revision: result.revision, entries: result.entries.map(({id,name,origin}) => ({id,name,origin})) };
+    },
+    observe: (workspaceId, operationId) => {
+      const job = jobs.list(owner).find(item => item.operationId === operationId && item.payload.workspaceId === workspaceId);
+      return job ? {id:job.id,sequence:job.sequence,state:job.state} : null;
+    },
+    cancelJob: async (workspaceId, operationId) => {
+      project(workspaceId);
+      const job = jobs.list(owner).find(item => item.operationId === operationId && item.payload.workspaceId === workspaceId);
+      if (!job) reject("JOB_NOT_FOUND");
+      return perform({action:"jobs.projectCancel",workspaceId,id:job.id,sequence:job.sequence});
+    },
+    prepare: async (profile, workspaceId, selection) => {
+      project(workspaceId);
+      if (profile === "build-submit") {
+        const item = project(workspaceId);
+        if (!item.runtime) reject("SELECT_RUNTIME");
+        const selectedRuntime = runtime(item.runtime);
+        reservations(undefined, selectedRuntime, selection.jobs);
+        return {name:selection.target,origin:JSON.stringify(selectedRuntime),sha256:null,jobs:selection.jobs};
+      }
+      if (profile !== "apply-defconfig") return null;
+      const result = await defconfigWorkflows.catalog({workspaceId});
+      if (result.revision !== selection.revision) reject("DEFCONFIG_CATALOG_CHANGED");
+      const selected = result.entries.find(item => item.id === selection.id);
+      if (!selected) reject("INVALID_DEFCONFIG");
+      return { name: selected.name, origin: selected.origin, sha256: selected.sha256 };
+    },
+    execute: async (profile, workspaceId, signal, binding, selection, operationId) => {
+      project(workspaceId);
+      if (signal.aborted) reject("ACTION_CANCELLED");
+      if (profile === "build-submit") {
+        const item = project(workspaceId);
+        const job = await submitBuild({workspaceId,target:selection.target,jobs:selection.jobs,runtime:item.runtime}, {operationId,expectedIntent:binding,signal});
+        return {count:1,submitted:true,job:{id:job.id,sequence:job.sequence,state:job.state}};
+      }
+      if (profile === "apply-defconfig") {
+        // Existing runtime trust, catalogue revision, configuration transaction and rollback stay authoritative.
+        await changeConfig(projectPaths(workspaceId), () => defconfigWorkflows.apply({workspaceId, ...selection}));
+        return { count: 1 };
+      }
+      if (profile === "source-summary") return { count: binding.snapshot.entries };
+      if (profile === "build-status") return { count: jobs.list(owner).filter(job => job.payload.workspaceId === workspaceId).length };
+      if (profile === "output-inventory") {
+        const result = await deployment(workspaceId).listArtifacts();
+        if (signal.aborted) reject("ACTION_CANCELLED");
+        if (!Array.isArray(result)) reject("INVALID_RESULT");
+        return { count: result.length };
+      }
+      reject("INVALID_ACTION");
+    },
+  });
   async function perform(request) {
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
@@ -1323,6 +1460,7 @@ function createOperationsService({
     const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
     const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
     if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
+    if (action.startsWith("assistant.")) return assistant.dispatch(request);
     switch (action) {
       case 'execution.cli': {
         if(!['status','choose','acquire','login','openLogin','cancel'].includes(request.kind)) reject('INVALID_REQUEST');
@@ -1557,63 +1695,7 @@ function createOperationsService({
       case "build.confirmation.cancel":
         buildConfirmation.cancel(request.id);
         return {cancelled:true};
-      case "build.submit": {
-        const item = project(request.workspaceId);
-        if (!item.externalStateVerified)
-          reject("EXTERNAL_TREES_NOT_AUTHORIZED");
-        if (
-          !targetActions.isBuildTarget(request.target, TARGETS) ||
-          !Number.isSafeInteger(request.jobs) ||
-          request.jobs < 1 ||
-          request.jobs > 32
-        )
-          reject("INVALID_TARGET");
-        targetActions.assertPackage(item, request.target);
-        const selectedRuntime = runtime(request.runtime);
-        item.runtime = selectedRuntime;
-        const resources = reservations(
-          request.resources,
-          selectedRuntime,
-          request.jobs,
-        );
-        const captured = await captureBuildIntent({
-          source: item.source,
-          output: item.output,
-          externalTrees: authorizedExternalPaths(request.workspaceId, item),
-        });
-        project(request.workspaceId);
-        if (disposed) reject("UNAVAILABLE");
-    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
-        if (targetActions.isDestructiveTarget(request.target)) buildConfirmation.consume(request);
-        else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
-        const job = jobs.enqueue({
-          kind: "build",
-          ownerId: owner,
-          payload: {
-            workspaceId: request.workspaceId,
-            target: request.target,
-            runtime: selectedRuntime,
-            jobs: request.jobs,
-            resources,
-            intent: {
-              projectId: request.workspaceId,
-              sourceRevision: captured.sourceRevision,
-              configRevision: captured.configRevision,
-            },
-            snapshot: {
-              version: captured.snapshot.version,
-              entries: captured.snapshot.entries,
-              bytes: captured.snapshot.bytes,
-              excludesGitObjectHistory: true,
-              symlinkPolicy: captured.snapshot.symlinkPolicy,
-              symlinks: captured.snapshot.symlinks,
-              limitations: [...captured.snapshot.limitations],
-            },
-          },
-        });
-        void scheduler.pump().catch(() => {});
-        return job;
-      }
+      case "build.submit": return submitBuild(request);
       case "scheduler.configure": {
         schedulerLimits = budgetStore.write(request.limits);
         scheduler.setLimits(schedulerLimits);
@@ -2145,6 +2227,7 @@ function createOperationsService({
       externalWorkspaces.clear();
       sources.dispose();
       disposal = Promise.allSettled([
+        assistant.dispose(),
         scheduler.awaitIdle(),
         tools.dispose?.(),
         companion?.request("companion.stop", {}),
@@ -2155,4 +2238,7 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
+
 
