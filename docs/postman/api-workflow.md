@@ -8,7 +8,7 @@ The product's HTTP surface is the opt-in HTTPS companion. The [category collecti
 
 1. Configure the desktop companion with your own TLS certificate and key through its native controls. Trust that certificate through the client's supported certificate route. Do not disable TLS verification.
 2. Create a pairing challenge for the exact HTTPS origin you will send. Set `baseUrl` to the exact endpoint reported by the desktop, including its port, and set `origin` and the single-use `challenge` in unshared current values.
-3. Send **Pair browser**, then approve the native desktop review of the origin and scopes. Copy the reply's `csrfToken` to an unshared current value. The client's cookie jar retains the secure session cookie. The challenge alone cannot enroll a client.
+3. Choose a fresh UUID `clientId` and the native-selected `browser` (`edge` or `chrome`), then send **Pair browser**. Compare the browser-instance identity, device label, peer, origin and scopes in the native review before approval. Retain that same `clientId` as `X-Companion-Client` on subsequent calls. Copy the reply's `csrfToken` to an unshared current value. The client's cookie jar retains the secure session cookie. The challenge alone cannot enroll a client. Browser choice and device labels are compatibility/user labels, not hardware attestation.
 4. Send **Read session** to obtain the current `nextSequence`. Set `sequence` to that value before each action. `{{$guid}}` creates a fresh UUID nonce. Read the actual operation result, then use its next sequence rather than assuming the previous action was accepted.
 5. Send **Disconnect** to revoke this session. It does not cancel already dispatched jobs. Inspect durable job state separately.
 
@@ -18,12 +18,12 @@ Neither collection stores certificates, cookies, usable challenges or session cr
 
 | Request | Body and authority |
 | --- | --- |
-| `POST /pair` | `{challenge,clientNonce}`; exact approved origin, single-use five-minute challenge and native approval |
-| `POST /session` | `{}`; current cookie, exact origin and CSRF header |
+| `POST /pair` | `{challenge,clientNonce,browser}`; exact approved origin, single-use five-minute challenge and native approval |
+| `POST /session` | `{}`; current cookie, exact origin, CSRF and client-binding headers |
 | `POST /actions` | `{action,args,sequence,nonce}`; session scopes plus consumer authorization |
-| `POST /disconnect` | `{}`; current cookie, exact origin and CSRF header |
+| `POST /disconnect` | `{}`; current cookie, exact origin, CSRF and client-binding headers |
 
-The six baseline typed actions in the existing collection snapshot are `workspace.read`, `projects.list`, `jobs.list`, `jobs.get`, `jobs.cancel` and `builds.submit`. Their original arguments and scopes are in the [protocol article](../security/companion.md#enrollment-and-http-contract). This snapshot does not claim complete coverage of newer host-admitted `actionContracts` or later pairing headers and request fields. Collection regeneration must use the exact integrated host contract before claiming current API completeness. The desktop defaults to read scopes. A mutation request appearing in a collection does not enable its scope or implement its consumer.
+The collection contains 83 action requests enumerated from the integrated `src/main/security/companion-consumers.cjs` contract. The [consumer article](../features/companion-consumers.md) describes their scopes, workflows, native approvals and remaining gaps. Argument examples in `scripts/api/action-examples.cjs` are structural templates: replace each placeholder with a value actually discovered and admitted to the current session. An arbitrary UUID or a copied preview from another session grants no authority. The desktop defaults to read scopes. A mutation appearing in the collection does not enable its scope, supply native consent or prove its operation succeeded. Newly registered actions without an authored example stop generation rather than disappearing silently.
 
 ## Recover an uncertain reply
 
@@ -37,4 +37,4 @@ Project adoption, source changes, settings, configuration, output viewers, local
 
 ## Generation and acceptance
 
-The existing root documentation producer owns regeneration of articles and wiki routes. Collection generation uses `node scripts/api/generate-postman.cjs`; its existing `--check` mode reports stale files. This documentation change regenerated the baseline collection snapshot only; expanded generation still requires the integrated consumer module. The focused collection fixture is described in the [protocol article](../security/companion.md#postman-collections), but no test, Postman session, TLS connection, browser pairing, LAN request or runtime exercise was run. Source inventory, generated publication and installed-client acceptance remain separate.
+The existing root documentation producer owns regeneration of articles and wiki routes. Collection generation uses `node scripts/api/generate-postman.cjs`; its existing `--check` mode reports stale files. This change regenerated the expanded collection from the integrated consumer module, including current pairing/client-binding fields. The original focused fixture is described in the [historical protocol article](../security/companion.md#postman-collections); its baseline coverage is not evidence for all newer actions. No test, Postman session, TLS connection, browser pairing, LAN request or runtime exercise was run. Source inventory, generated publication and installed-client acceptance remain separate.

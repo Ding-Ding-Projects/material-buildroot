@@ -2,7 +2,7 @@
 
 - [Pair, inspect, act and disconnect safely](api-workflow.md) · [香港粵語](api-workflow.zh-HK.md)
 
-The [master Postman collection](material-buildroot.postman_collection.json) and its category file are a snapshot of the original four HTTPS companion routes and six baseline actions. New host-admitted `actionContracts`, pairing fields and client-binding headers require regeneration from the exact integrated contract before current completeness can be claimed. The opt-in HTTPS companion is the product HTTP surface; its category collection and original usage are documented in [the companion article](../security/companion.md#postman-collections).
+The [master Postman collection](material-buildroot.postman_collection.json) and its category file now contain four HTTPS session routes and 83 typed actions from the integrated host `actionContracts`. This is an authored contract snapshot, not proof of a paired request or complete companion feature implementation. Pairing fields and client-binding headers follow the [current pairing protocol](../features/browser-pairing.md); each action remains subject to the [consumer boundaries](../features/companion-consumers.md), session scope and independent native authority. The opt-in HTTPS companion is the product HTTP surface.
 
 Desktop IPC boundaries are not HTTP and have no collection. They are listed in the [security index](../security/README.md).
 

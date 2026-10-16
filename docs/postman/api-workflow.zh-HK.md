@@ -8,7 +8,7 @@
 
 1. 經原生控制以自己嘅 TLS 憑證及私鑰設定桌面伴隨服務，再透過用戶端支援流程信任憑證，唔好停用 TLS 驗證。
 2. 為將要送出嘅精確 HTTPS origin 建立挑戰。將 `baseUrl` 設為桌面回報嘅完整端點，包括連接埠，再將 `origin` 同單次 `challenge` 放入不共用嘅目前值。
-3. 送出 **Pair browser**，喺桌面原生對話框核對及批准來源同範圍。回覆嘅 `csrfToken` 放入不共用目前值，cookie jar 保存安全工作階段 cookie。單憑挑戰唔可以登記。
+3. 先選新 UUID `clientId` 同原生已選 `browser`（`edge` 或 `chrome`），再送 **Pair browser**。原生審批核對瀏覽器實例、裝置名、peer、來源及範圍。之後保持同一 `clientId` 作 `X-Companion-Client`。回覆 `csrfToken` 放不共用目前值，cookie jar 存安全 cookie。單憑挑戰唔可以登記，瀏覽器及裝置名稱只係相容/使用者標籤，唔係硬件認證。
 4. 用 **Read session** 取得 `nextSequence`，每次操作前設定 `sequence`。`{{$guid}}` 會產生新 UUID nonce。讀實際結果後用回覆下一序號，唔好假設上一操作已接受。
 5. 用 **Disconnect** 撤銷本次工作階段；呢個唔會取消已派出工作，要另外檢視持久工作狀態。
 
@@ -18,12 +18,12 @@
 
 | 請求 | 內容及權限 |
 | --- | --- |
-| `POST /pair` | `{challenge,clientNonce}`，精確已批准來源、五分鐘單次挑戰及原生批准 |
-| `POST /session` | `{}`，目前 cookie、精確來源及 CSRF 標頭 |
+| `POST /pair` | `{challenge,clientNonce,browser}`，精確已批准來源、五分鐘單次挑戰及原生批准 |
+| `POST /session` | `{}`，目前 cookie、精確來源、CSRF 及 client-binding 標頭 |
 | `POST /actions` | `{action,args,sequence,nonce}`，工作階段範圍加實際處理端授權 |
-| `POST /disconnect` | `{}`，目前 cookie、精確來源及 CSRF 標頭 |
+| `POST /disconnect` | `{}`，目前 cookie、精確來源、CSRF 及 client-binding 標頭 |
 
-現有集合快照六個基礎有型別動作係 `workspace.read`、`projects.list`、`jobs.list`、`jobs.get`、`jobs.cancel` 同 `builds.submit`，原有參數同範圍見[協定](../security/companion.md#enrollment-and-http-contract)。此快照唔宣稱完整涵蓋新主機 `actionContracts`，亦唔代替後來配對欄位及標頭；要根據確切已整合協定重新產生先可以宣稱目前 API 完整。桌面預設唯讀範圍；集合有修改請求唔等於已啟用範圍或者已實作處理端。
+集合有 83 個動作，名稱同範圍由已整合 `src/main/security/companion-consumers.cjs` 列舉。[處理端文章](../features/companion-consumers.md)列範圍、流程、原生批准及缺口。`scripts/api/action-examples.cjs` 只係結構範本，佔位值要換成本次工作階段真正探索及獲准值；任意 UUID 或其他工作階段預覽唔授權。桌面預設唯讀，集合有修改動作唔代表已啟用範圍、已原生確認或者成功。新動作冇範例會停止產生，唔默默漏項。
 
 ## 回覆不確定時
 
@@ -37,4 +37,4 @@
 
 ## 產生及驗收
 
-既有根目錄文件建置負責產生文章及 wiki 路由。集合由 `node scripts/api/generate-postman.cjs` 產生，現有 `--check` 可報告過期檔案。此變更只重新產生基礎集合快照，擴充版仍需已整合處理端模組。[協定文章](../security/companion.md#postman-collections)描述既有測試，但本輪冇執行測試、Postman、TLS、瀏覽器配對、LAN 或實際操作。來源清單、產生後發佈及安裝用戶端驗收保持分開。
+既有根目錄文件建置負責產生文章及 wiki 路由。集合由 `node scripts/api/generate-postman.cjs` 產生，現有 `--check` 可報告過期。此輪按已整合處理端重新產生擴充集合，包括目前配對及 client-binding 欄位。[歷史協定文章](../security/companion.md#postman-collections)描述原基礎測試，唔證明新動作全部覆蓋。本輪冇執行測試、Postman、TLS、瀏覽器配對、LAN 或實際操作。來源清單、產生後發佈及安裝用戶端驗收保持分開。
