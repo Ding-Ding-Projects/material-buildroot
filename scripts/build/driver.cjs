@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
+const os = require('node:os');
 const {packageIdentity,stageBaseline} = require('./squirrel.cjs');
 const {acquireHostedBaseline} = require('./squirrel-baseline.cjs');
 const root = path.resolve(__dirname, '../..');
@@ -131,7 +132,11 @@ function activateOutput(base, relative, produced) {
   try {fs.writeFileSync(fd,JSON.stringify({schemaVersion:1,target:relative,previous:path.basename(previous)}));fs.fsyncSync(fd);} finally {fs.closeSync(fd);}
   try {
     if (fs.existsSync(destination)) fs.renameSync(destination,previous);
-    fs.renameSync(produced,destination);
+    try { fs.renameSync(produced,destination); }
+    catch(error) {
+      if(error.code!=='EXDEV') throw error;
+      fs.cpSync(produced,destination,{recursive:true,errorOnExist:true,force:false});
+    }
     if (!verifiedOutput(destination)) throw new Error('Activated output failed its receipt verification.');
     fs.renameSync(journal,`${journal}.complete-${crypto.randomUUID()}`);
   } catch(error) {
@@ -172,8 +177,18 @@ async function main() {
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   recoverOutput(root,installer ? target.installerOutput : target.output);
   const generation = crypto.randomUUID();
-  const staging = contained(root,`.cache/builds/${generation}`);
-  fs.mkdirSync(staging,{recursive:true});
+  let staging;
+  if(installer) {
+    const temporary=fs.realpathSync(os.tmpdir());
+    // Genuine NuGet uses legacy path limits. Keep its owned producer tree short.
+    staging=fs.mkdtempSync(path.join(temporary,'mbr-'));
+    contained(temporary,path.basename(staging));
+    fs.writeFileSync(path.join(staging,'producer-owner.json'),JSON.stringify({schemaVersion:1,source:before.commit,root,createdAt:new Date().toISOString(),purpose:'Squirrel installer production'}));
+    console.log(`Private retained producer staging: ${staging}`);
+  } else {
+    staging = contained(root,`.cache/builds/${generation}`);
+    fs.mkdirSync(staging,{recursive:true});
+  }
   const output = path.join(staging,'output');
   const template = installer ? target.installerCommand : target.command;
   if (!Array.isArray(template) || !template.length) throw new Error('Canonical package command is missing.');
@@ -213,6 +228,8 @@ async function main() {
       console.log('Assembling the complete declared offline payload inventory. Original cache inputs are read only.');
       const assembled = await require('./payloads.cjs').assemblePayloads({output:path.join(staging,'offline-payloads'),cache,complete:true});
       if(assembled.manifest.complete!==true) throw Error('Normal installer production requires the complete offline payload inventory.');
+      const longest = Math.max(...assembled.manifest.tools.flatMap(tool=>tool.files.map(file=>file.path.length)));
+      if(path.join(output,'win-unpacked/resources/offline-payloads').length+1+longest>=240) throw Error('Exclusive producer staging is still too long for the genuine package toolchain. Outputs retained.');
       const configuration = {...JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build,extraResources:[assembled.extraResources]};
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
