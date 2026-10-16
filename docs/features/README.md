@@ -9,4 +9,5 @@ a category Postman collection is not applicable.
 - [Managed container runtime](runtime-containers.md): local discovery, retained download caches, non-root execution and permission/lifecycle recovery.
 - [Search and command consumers](navigation/search-commands.md): connected searches, picker workbenches and extensible context actions.
 - [Destructive confirmation](destructive-confirmation.md): exact-destination, single-use consent for explicit clean builds.
-- [WSL setup and Linux storage](wsl-runtime.md): preserved distribution import, prerequisite setup, native browse and backup; Linux project execution remains incomplete.
+- [WSL setup and Linux storage](wsl-runtime.md): official image acquisition, preserved distribution import, prerequisite setup, bounded Linux project/build grants, native browse and backup; runtime acceptance remains pending.
+

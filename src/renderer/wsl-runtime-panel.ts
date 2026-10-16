@@ -15,8 +15,9 @@ export class WslRuntimePanel extends LitElement {
       const reply=await window.studio.operations?.({action:"runtime.wsl",kind,distribution:this.selected});
       if(!reply?.ok){this.status={state:"operation-unavailable"};return;}
       const result=reply.result as any;this.status=result;
+      if(kind==="chooseProject" && result.workspaceId)this.dispatchEvent(new CustomEvent("wsl-project-adopted",{detail:result,bubbles:true,composed:true}));
       if(kind==="discover"){this.distributions=result.distributions||[];if(!this.distributions.some(x=>x.name===this.selected))this.selected="";}
-      if(kind==="import" && result.distribution){this.selected=result.distribution;const listing=await window.studio.operations?.({action:"runtime.wsl",kind:"discover",distribution:""});if(listing?.ok)this.distributions=(listing.result as any).distributions||[];}
+      if((kind==="import" || kind==="install") && result.distribution){this.selected=result.distribution;const listing=await window.studio.operations?.({action:"runtime.wsl",kind:"discover",distribution:""});if(listing?.ok)this.distributions=(listing.result as any).distributions||[];}
     } catch {this.status={state:"operation-unavailable"};} finally{this.pending=false;}
   }
   private message(state:string){
@@ -37,9 +38,9 @@ export class WslRuntimePanel extends LitElement {
   render(){return html`<section aria-label=${this.l("WSL setup and storage","WSL 設定同儲存")}>
     <h3>${this.l("WSL setup and Linux storage","WSL 設定同 Linux 儲存")}</h3>
     <p>${this.l("WSL 2 requires supported Windows, hardware virtualization and the WSL/Virtual Machine Platform features. Install or enable these through Windows before setup. Any required restart is yours to perform. Discovery does not start a distribution; inspection and setup do.","WSL 2 需要支援嘅 Windows、硬件虛擬化同 WSL／虛擬機平台功能，請先透過 Windows 安裝或啟用。如需重新啟動，請自行處理。探索唔會啟動發行版，檢查同設定會啟動。")}</p>
-    <div class="actions"><md-outlined-button ?disabled=${this.pending} @click=${()=>this.act("discover")}>${this.l("Find distributions","尋找發行版")}</md-outlined-button><md-outlined-button ?disabled=${this.pending} @click=${()=>this.act("import")}>${this.l("Import dedicated distribution","匯入獨立發行版")}</md-outlined-button></div>
+    <div class="actions"><md-filled-button ?disabled=${this.pending} @click=${()=>this.act("install")}>${this.l("Get dedicated Ubuntu","取得獨立 Ubuntu")}</md-filled-button><md-outlined-button ?disabled=${this.pending} @click=${()=>this.act("discover")}>${this.l("Find distributions","尋找發行版")}</md-outlined-button><md-outlined-button ?disabled=${this.pending} @click=${()=>this.act("import")}>${this.l("Import dedicated distribution","匯入獨立發行版")}</md-outlined-button></div>
     <md-outlined-select label=${this.l("WSL 2 distribution","WSL 2 發行版")} .value=${this.selected} ?disabled=${this.pending} @change=${(e:Event)=>{this.selected=(e.target as HTMLSelectElement).value;this.status=null;}}>${this.distributions.map(x=>html`<md-select-option value=${x.name} ?disabled=${x.version!==2}><div slot="headline">${x.name} (WSL ${x.version}) ${x.managed?this.l("Managed","受管理"):this.l("Existing","現有")}</div></md-select-option>`)}</md-outlined-select>
-    <div class="actions">${([ ["inspect","Inspect readiness","檢查就緒狀態"],["prerequisites","Install prerequisites","安裝所需套件"],["storage","Prepare Linux folders","建立 Linux 目錄"],["browse","Browse Linux folders","瀏覽 Linux 目錄"],["export","Export distribution backup","匯出發行版備份"]] as string[][]).map(([kind,en,zh])=>html`<md-outlined-button ?disabled=${this.pending||!this.selected} @click=${()=>this.act(kind)}>${this.l(en,zh)}</md-outlined-button>`)}</div>
+    <div class="actions">${([ ["inspect","Inspect readiness","檢查就緒狀態"],["prerequisites","Install prerequisites","安裝所需套件"],["storage","Prepare Linux folders","建立 Linux 目錄"],["cloneSource","Get official Buildroot source","取得官方 Buildroot 來源"],["chooseProject","Use Linux project","使用 Linux 專案"],["browse","Browse Linux folders","瀏覽 Linux 目錄"],["export","Export distribution backup","匯出發行版備份"]] as string[][]).map(([kind,en,zh])=>html`<md-outlined-button ?disabled=${this.pending||!this.selected} @click=${()=>this.act(kind)}>${this.l(en,zh)}</md-outlined-button>`)}</div>
     ${this.pending?html`<md-linear-progress indeterminate aria-label=${this.l("WSL operation running","WSL 操作進行中")}></md-linear-progress>`:nothing}
     <p role="status" aria-live="polite">${this.status?this.message(this.status.state):""}</p>
     ${this.status?.missing?.length?html`<p>${this.l("Missing tools","欠缺工具")}: ${this.status.missing.join(", ")}</p>`:nothing}
@@ -49,3 +50,4 @@ export class WslRuntimePanel extends LitElement {
   </section>`;}
 }
 customElements.define("wsl-runtime-panel",WslRuntimePanel);
+

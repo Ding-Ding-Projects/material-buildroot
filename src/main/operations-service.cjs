@@ -244,8 +244,8 @@ function createOperationsService({
     }
     return item;
   }
-  function registerProject(selected) {
-    const granted = execution.grantProject({
+  function registerProject(selected, wslGranted) {
+    const granted = wslGranted || execution.grantProject({
       ...selected,
       trustedSource: true,
     });
@@ -254,6 +254,7 @@ function createOperationsService({
       root: selected.root,
       source: selected.source,
       output: selected.output,
+      ...(selected.storage ? { storage: selected.storage } : {}),
     });
     const identities = Object.fromEntries(
       ["root", "source", "output"].map((key) => {
@@ -266,7 +267,7 @@ function createOperationsService({
       ...selected,
       identities,
       grantId: granted.grantId,
-      runtime: options.runtime,
+      runtime: selected.storage ? { kind: "wsl", distribution: selected.storage.distribution } : options.runtime,
       externalTrees: [],
       externalTreeIds: [],
       externalStateVerified: options.externalTrees.length === 0,
@@ -1157,6 +1158,9 @@ function createOperationsService({
       ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : [];
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
+    const requestWorkspace = request.workspaceId || (action === "source" ? request.request?.workspaceId : null);
+    const requestedProject = typeof requestWorkspace === "string" ? projects.get(requestWorkspace) : null;
+    if (requestedProject?.storage) await execution.verifyWslGrant(execution.grants.get(requestedProject.grantId), request.runtime || requestedProject.runtime);
     switch (action) {
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
@@ -1171,7 +1175,14 @@ function createOperationsService({
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
       case "runtime.wsl":
-        if (!["discover", "inspect", "import", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
+        if (!["discover", "inspect", "import", "install", "cloneSource", "chooseProject", "prerequisites", "storage", "browse", "export"].includes(request.kind) || typeof request.distribution !== "string") reject("INVALID_REQUEST");
+        if (request.kind === "chooseProject") {
+          const selected = await wslRuntime.chooseProject(request.distribution);
+          if (!selected) return {state:"cancelled"};
+          const granted = await execution.grantWslProject(selected.receipt);
+          try { return { ...registerProject(selected, granted), state:"project-adopted", distribution:request.distribution }; }
+          catch (error) { execution.revoke(granted.grantId); throw error; }
+        }
         return wslRuntime.perform(request.kind, request.distribution);
       case "runtime.discover":
         return execution.discover();
@@ -1658,7 +1669,8 @@ function createOperationsService({
         return packageAuthoring.applyInitialize(request);
       case "package.apply":
         return packageAuthoring.apply(request);
-      case "source": {
+      case "source":
+        if (requestedProject?.storage) reject("WSL_SOURCE_OPERATION_UNAVAILABLE"); {
         const result = await sources.handle(request.request);
         if (!result.ok) reject(result.code);
         return result;
@@ -1735,4 +1747,6 @@ function createOperationsService({
   };
 }
 module.exports = { createOperationsService };
+
+
 
