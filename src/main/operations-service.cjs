@@ -14,6 +14,7 @@ const { resolveDomains } = require("./configuration/domains.cjs");
 const { createConfigurationConsent } = require("./configuration/runtime-consent.cjs");
 const { createKconfigInspection } = require("./execution/kconfig-inspection.cjs");
 const { createDeploymentService } = require("./deployment/index.cjs");
+const { OutputViewers } = require("./deployment/output-viewers.cjs");
 const { createToolsService } = require("./tools/index.cjs");
 const { createPayloadManager } = require("./tools/payload-manager.cjs");
 const { createToolFiles } = require("./security/tool-files.cjs");
@@ -90,6 +91,9 @@ const fields = {
   "config.defconfig": ["workspaceId", "revision", "path"],
   "artifacts.list": ["workspaceId"],
   "artifacts.inspect": ["workspaceId", "path"],
+  "outputs.browse": ["workspaceId", "directoryId"],
+  "outputs.inspect": ["workspaceId", "fileId"],
+  "outputs.checksum": ["workspaceId", "fileId", "expected"],
   "artifacts.manifest": ["workspaceId", "paths"],
   tools: ["request"],
   "payload.list": [],
@@ -1108,6 +1112,12 @@ function createOperationsService({
     currentSource: source,
   });
   const deployments = new Map();
+  const outputViewers = new Map();
+  function outputViewer(id) {
+    const item = project(id);
+    if (!outputViewers.has(id)) outputViewers.set(id, new OutputViewers(item.output));
+    return outputViewers.get(id);
+  }
   function deployment(id) {
     const item = project(id);
     if (!deployments.has(id))
@@ -1572,6 +1582,15 @@ function createOperationsService({
         );
       case "artifacts.list":
         return deployment(request.workspaceId).listArtifacts();
+      case "outputs.browse":
+        if (typeof request.directoryId !== "string" || request.directoryId.length > 36) reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).browse(request.directoryId);
+      case "outputs.inspect":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36) reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).inspect(request.fileId);
+      case "outputs.checksum":
+        if (typeof request.fileId !== "string" || request.fileId.length !== 36 || typeof request.expected !== "string") reject("INVALID_REQUEST");
+        return outputViewer(request.workspaceId).checksum(request.fileId, request.expected);
       case "artifacts.inspect":
         return deployment(request.workspaceId).inspectArtifact(request.path);
       case "artifacts.manifest":
