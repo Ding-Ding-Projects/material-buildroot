@@ -108,6 +108,7 @@ async function hardwareSnapshot(options = {}, context = {}) {
       backendSupported: null,
     },
     gpu: { state: "unknown", devices: [], reason: "GPU_PROBE_UNAVAILABLE" },
+    adapterInventory: await require("./ollama-hardware.cjs").observeAdapters({signal:context.signal}),
     storage: await diskEvidence(
       options.ollamaModelDirectory ||
         (options.ollamaManagedDirectory

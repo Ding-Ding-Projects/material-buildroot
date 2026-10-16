@@ -4,6 +4,7 @@ import "./update-panel";
 import "./wsl-runtime-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
+import "./ollama-workspace-panel";
 import "./build-queue-panel";
 import { requestDestructiveConfirmation } from "./destructive-confirmation";
 import "./ollama-catalogue-panel";
@@ -1096,59 +1097,7 @@ export class OperationsPanel extends LitElement {
     </section>`;
   }
   private assistantView() {
-    return html`<section class="panel stack">
-      <h2>${this.l("Local Ollama assistant", "本機 Ollama 助理")}</h2>
-      <managed-ollama-panel .language=${this.language}></managed-ollama-panel>
-      <ollama-catalogue-panel .language=${this.language}></ollama-catalogue-panel>
-      <p>
-        ${this.l(
-          "Messages are sent only to Ollama on this computer. No project files or logs are attached automatically. Model installation is not performed here.",
-          "訊息只會傳送到呢部電腦嘅 Ollama，唔會自動附加專案檔案或記錄，呢度唔會安裝模型。",
-        )}
-      </p>
-      <md-outlined-button ?disabled=${this.pending} @click=${this.loadModels}
-        >${actionIcon('Load installed models')}${this.l("Load installed models",
-          "載入已安裝模型",
-        )}</md-outlined-button
-      >${this.models.length
-        ? html`<md-outlined-select
-            label=${this.l("Model", "模型")}
-            id="assistant-model"
-            .value=${this.model}
-            .displayText=${this.model}
-            @change=${(e: Event) =>
-              (this.model = (e.target as HTMLSelectElement).value)}
-            >${this.options(
-              this.models.map((model) => [model.name, model.name]),
-            )}</md-outlined-select
-          >`
-        : nothing}<ollama-evidence-panel .model=${this.model} .language=${this.language}></ollama-evidence-panel>${this.messages.map(
-        (message) =>
-          html`<div class="message">
-            <strong
-              >${message.role === "user"
-                ? this.l("You", "你")
-                : this.l("Local model", "本機模型")}</strong
-            >${message.content}
-          </div>`,
-      )}<md-outlined-text-field
-        type="textarea"
-        rows="3"
-        maxlength="4000"
-        label=${this.l("Message to local model", "傳送到本機模型嘅訊息")}
-        .value=${this.prompt}
-        @input=${(e: Event) =>
-          (this.prompt = (e.composedPath()[0] as HTMLInputElement).value)}
-      ></md-outlined-text-field
-      ><md-filled-button
-        ?disabled=${this.pending ||
-        !this.model ||
-        !this.prompt.trim() ||
-        this.messages.length >= 98}
-        @click=${this.sendMessage}
-        >${actionIcon('Send message')}${this.l("Send message", "傳送訊息")}</md-filled-button
-      >
-    </section>`;
+    return html`<section class="panel"><ollama-workspace-panel .language=${this.language}></ollama-workspace-panel></section>`;
   }
   private updatesView() {
     return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.", "儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。")}</p></section>`;
