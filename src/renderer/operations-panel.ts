@@ -1,3 +1,4 @@
+import "./update-panel";
 import {captureOwnedStatus,displayOwnedStatus} from "./owned-status";
 import "./ollama-evidence-panel";
 import "./build-queue-panel";
@@ -1239,54 +1240,8 @@ export class OperationsPanel extends LitElement {
     </section>`;
   }
   private updatesView() {
-    return html`<section class="panel stack">
-      <h2>${this.l("Application updates", "應用程式更新")}</h2>
-      <p>
-        ${this.l(
-          "Check published releases and verify installer size, source and checksum. Installers are unsigned; downloading does not install an update.",
-          "檢查已發佈版本，並驗證安裝程式大小、來源同摘要。安裝程式未經簽署，下載唔會安裝更新。",
-        )}
-      </p>
-      <div class="row">
-        <md-filled-button
-          ?disabled=${this.pending}
-          @click=${() => this.updateAction("check")}
-          >${actionIcon('Check for updates')}${this.l("Check for updates", "檢查更新")}</md-filled-button
-        ><md-outlined-button
-          ?disabled=${this.pending}
-          @click=${() => this.updateAction("state")}
-          >${actionIcon('Refresh status')}${this.l("Refresh status", "重新整理狀態")}</md-outlined-button
-        >${this.updateState?.status === "available"
-          ? html`<md-outlined-button
-              ?disabled=${this.pending}
-              @click=${() => this.updateAction("download")}
-              >${actionIcon('Download verified installer')}${this.l("Download verified installer",
-                "下載已驗證安裝程式",
-              )}</md-outlined-button
-            >`
-          : nothing}
-      </div>
-      ${this.updateState
-        ? html`<dl>
-            <dt>${this.l("Status", "狀態")}</dt>
-            <dd>${this.updateState.status}</dd>
-            ${this.updateState.release
-              ? html`<dt>${this.l("Version", "版本")}</dt>
-                  <dd>${this.updateState.release.version}</dd>
-                  <dt>${this.l("Source", "來源")}</dt>
-                  <dd class="symbol">${this.updateState.release.source}</dd>`
-              : nothing}${this.updateState.total
-              ? html`<dt>${this.l("Downloaded", "已下載")}</dt>
-                  <dd>
-                    ${this.updateState.received} / ${this.updateState.total}
-                    ${this.l("bytes", "位元組")}
-                  </dd>`
-              : nothing}
-          </dl>`
-        : nothing}
-    </section>`;
-  }
-  private resizeDock(event: PointerEvent) {
+    return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.", "儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。")}</p></section>`;
+  }  private resizeDock(event: PointerEvent) {
     const separator = event.currentTarget as HTMLElement;
     const start = event.clientY, original = this.dockHeight;
     separator.setPointerCapture(event.pointerId);

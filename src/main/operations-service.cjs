@@ -126,6 +126,9 @@ const fields = {
   "updates.state": [],
   "updates.download": [],
   "updates.cancel": [],
+  "updates.install": ["confirmUnsigned", "workSaved"],
+  "updates.notes": [],
+  "updates.later": [],
 };
 function reject(code) {
   throw Object.assign(new Error(code), { code });
@@ -181,6 +184,7 @@ function createOperationsService({
   source,
   documentationDirectory,
   openDocumentationExternal,
+  updateHostFactory,
   execution = new ExecutionService(),
   workspaceRead,
   schedulerLimits = {
@@ -1058,7 +1062,8 @@ function createOperationsService({
           },
         })
       : null;
-  const updates = createUpdateService({
+  let updateInstalling = false, activeRequests = 0;
+  const updates = updateHostFactory ? updateHostFactory({ canInstall: () => !disposed && activeRequests <= 1 && running.size === 0 && !jobs.list(owner).some(job => ["queued", "running", "cancelling", "dispatching"].includes(job.state)) }) : createUpdateService({
     userData: directory,
     currentVersion: version,
     currentSource: source,
@@ -1153,6 +1158,7 @@ function createOperationsService({
       ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : [];
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
     switch (action) {
       case "documentation.list":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
@@ -1319,6 +1325,7 @@ function createOperationsService({
         });
         project(request.workspaceId);
         if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
         if (request.target === "clean") buildConfirmation.consume(request);
         else if (Object.hasOwn(request,"confirmationToken")) reject("INVALID_REQUEST");
         const job = jobs.enqueue({
@@ -1542,6 +1549,7 @@ function createOperationsService({
           kind: "directory",
         });
         if (disposed) reject("UNAVAILABLE");
+    if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
         project(request.workspaceId);
         externalWorkspaces.set(choice.id, request.workspaceId);
         return { externalTreeId: choice.id, name: choice.name };
@@ -1664,6 +1672,17 @@ function createOperationsService({
         exact(request.request, ["action", "args"]);
         if (!companion) reject("COMPANION_UNAVAILABLE");
         return companion.request(request.request.action, request.request.args);
+      case "updates.install":
+        if (request.confirmUnsigned !== true || request.workSaved !== true || !updateHostFactory) reject("UPDATE_CONSENT_REQUIRED");
+        updateInstalling = true;
+        try { return safeUpdateState(await updates.requestInstall({ confirmUnsigned: true, workSaved: true })); }
+        finally { updateInstalling = false; }
+      case "updates.notes":
+        if (!updates.notes) reject("UNAVAILABLE");
+        return safeUpdateState(await updates.notes());
+      case "updates.later":
+        if (!updates.later) reject("UNAVAILABLE");
+        return safeUpdateState(updates.later());
       case "updates.check":
         return safeUpdateState(await updates.check());
       case "updates.state":
@@ -1680,6 +1699,7 @@ function createOperationsService({
   }
   return {
     async request(serialized) {
+      activeRequests++;
       try {
         return { ok: true, result: await perform(contract.parse(serialized)) };
       } catch (error) {
@@ -1696,7 +1716,7 @@ function createOperationsService({
             ? error.code
             : deploymentCode || "OPERATION_FAILED";
         return { ok: false, code };
-      }
+      } finally { activeRequests--; }
     },
     dispose() {
       if (disposal) return disposal;
@@ -1712,6 +1732,7 @@ function createOperationsService({
           }
         }
       fileGrants.clear();
+      updates.close?.();
       updates.cancel();
       toolFiles.dispose();
       externalFiles.dispose();

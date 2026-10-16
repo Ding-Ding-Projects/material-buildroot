@@ -1,3 +1,4 @@
+import "./update-panel";
 import "./command-surfaces";
 import "./shared-mode-panel";
 import "./scheduled-preferences-panel";
@@ -759,6 +760,14 @@ class MaterialBuildroot extends LitElement {
   }
   private get selected() {
     return this.plans.find((p) => p.id === this.selectedId);
+  }
+  private updateWorkSaved() {
+    if (!this.state || this.dirty || this.workspaceBusy || this.draft !== this.state.language || this.saveState === "saving" || this.schedulePanel()?.hasPendingDraft) return false;
+    const panel = this.renderRoot.querySelector('operations-panel') as any;
+    if (panel && (panel.pending || Object.keys(panel.changes || {}).length || panel.jobs?.some((job:any) => ['queued','running','cancelling'].includes(job.state)))) return false;
+    // Unknown nested editors cannot silently claim that their drafts are saved.
+    if (panel?.shadowRoot?.querySelector('source-panel,package-panel,tools-panel,guest-panel,companion-panel')) return false;
+    return true;
   }
   private get dirty() {
     return (
@@ -1624,6 +1633,7 @@ class MaterialBuildroot extends LitElement {
           >
         </nav>
         <main>
+          <update-panel compact .language=${this.state?.language || "bilingual"} .canRestart=${() => this.updateWorkSaved()}></update-panel>
           <div class="toolbar">
             <div class="heading">
               <h1 id="workspace-heading" tabindex="-1">
@@ -1942,4 +1952,3 @@ class MaterialBuildroot extends LitElement {
   }
 }
 customElements.define("material-buildroot", MaterialBuildroot);
-

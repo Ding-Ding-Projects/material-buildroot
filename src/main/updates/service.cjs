@@ -7,7 +7,9 @@ const API = `https://api.github.com/repos/${REPOSITORY}`;
 const MAX_INSTALLER = 2 * 1024 * 1024 * 1024;
 function version(value) {
   if (!/^\d+\.\d+\.\d+$/.test(value)) throw Error("Invalid release version.");
-  return value.split(".").map(Number);
+  const parts = value.split(".").map(Number);
+  if (parts.some((part) => !Number.isSafeInteger(part) || part < 0)) throw Error("Invalid release version.");
+  return parts;
 }
 function compare(a, b) {
   a = version(a);
@@ -115,6 +117,7 @@ function createUpdateService({
     }
   }
   async function check() {
+    if (state.status === "unsigned-ready") return snapshot();
     return run(async () => {
       state = { status: "checking" };
       candidate = null;
@@ -141,7 +144,7 @@ function createUpdateService({
         })
         .filter(
           (r) =>
-            compare(r.tag_name.slice(1).split("-")[0], currentVersion) >= 0,
+            compare(r.tag_name.slice(1).split("-")[0], currentVersion) > 0,
         )
         .sort(
           (a, b) =>
@@ -257,6 +260,7 @@ function createUpdateService({
   }
   async function download() {
     if (!candidate) throw Error("Check for an update first.");
+    if (state.status === "unsigned-ready") return snapshot();
     return run(async () => {
       await fs.mkdir(directory, { recursive: true });
       const ownedDirectory = await fs.lstat(directory);
@@ -359,6 +363,7 @@ function createUpdateService({
       busy ||
       state.status !== "unsigned-ready" ||
       consent?.confirmUnsigned !== true ||
+      consent?.workSaved !== true ||
       typeof onInstallRequested !== "function"
     )
       throw Error(
@@ -366,6 +371,7 @@ function createUpdateService({
       );
     return run(async () => {
       await verify(state.installer);
+      state.status = "install-requested";
       await onInstallRequested({
         installer: state.installer,
         version: candidate.version,
