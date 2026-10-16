@@ -1,4 +1,7 @@
 import './notification-centre';
+import {localizedCopy} from './language-wording';
+import {wording} from './language-wording-state';
+import './language-wording-panel';
 import {registerCommandActionProvider} from './command-surfaces';
 import "./experience-policies";
 import "./experience-policy-panel";
@@ -177,7 +180,8 @@ class MaterialBuildroot extends LitElement {
   events: Activity[] = [];
   notice = "";
   private noticeEnglish="";
-  private noticeText(en:string,zh:string){this.noticeEnglish=en;return this.l(en,zh);}
+  private noticeCantonese="";
+  private noticeText(en:string,zh:string){this.noticeEnglish=en;this.noticeCantonese=zh;return this.l(en,zh);}
   newName = "";
   newRuntime: "wsl" | "docker" = "wsl";
   nameError = false;
@@ -204,7 +208,7 @@ class MaterialBuildroot extends LitElement {
   private unregisterWorkspaceCommands?:()=>void;
   connectedCallback() {
     super.connectedCallback();
-    this.unregisterWorkspaceCommands=registerCommandActionProvider('workspace',()=>this.workspaceDestinations().slice(0,256).map(destination=>({id:destination.id,label:this.l(destination.en,destination.zh).slice(0,240),context:this.l('Workspace destination','工作區目的地'),run:()=>this.workspaceDestination(new CustomEvent('workspace-destination',{detail:{destination:destination.id}}))})));
+    this.unregisterWorkspaceCommands=registerCommandActionProvider('workspace',()=>this.workspaceDestinations().slice(0,256).map(destination=>({id:destination.id,label:this.l(destination.en,destination.zh).slice(0,240),context:this.l('Workspace destination','工作區目的地',true),run:()=>this.workspaceDestination(new CustomEvent('workspace-destination',{detail:{destination:destination.id}}))})));
     window.addEventListener("keydown", this.shortcut);
     this.media.addEventListener("change", this.mediaChanged);
     this.mediaChanged();
@@ -242,14 +246,14 @@ class MaterialBuildroot extends LitElement {
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
   private settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];
   private settingsEntries(){return [
-    ...(!this.restricted?[{id:'language',text:this.l('Language Interface language','語言 介面語言')}]:[]),
-    {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記')},
-    {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰')},
-    {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原')},
-    {id:'appearance',text:this.l('Appearance Theme','外觀 主題')},
-    {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入')},
-    ...(this.restricted?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除')}])];}
-  private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return ownedCopy(en,zh,this.effectiveLanguage,kind);}
+    ...(!this.restricted?[{id:'language',text:this.l('Language Interface language Humor English Cantonese Display name Rename','語言 介面語言 幽默 英文 粵語 顯示名稱 改名',true)}]:[]),
+    {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記',true)},
+    {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰',true)},
+    {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原',true)},
+    {id:'appearance',text:this.l('Appearance Theme','外觀 主題',true)},
+    {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入',true)},
+    ...(this.restricted?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除',true)}])];}
+  private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return localizedCopy(en,zh,this.effectiveLanguage,true,kind);}
   private async loadSharedMode(){
     const bridge=window.studio;
     const apply=(snapshot?:SharedModeSnapshot)=>this.applySharedSnapshot(snapshot??null);
@@ -272,14 +276,14 @@ class MaterialBuildroot extends LitElement {
     const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
     panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
   }
-  private l(en: string, zh: string) {
+  private l(en:string,zh:string,authored=false) {
     const language = this.effectiveLanguage;
-    return language === "en" ? en : language === "zh-HK" ? zh : `${en} · ${zh}`;
+    return localizedCopy(en,zh,language,authored);
   }
   private buildTime() {
     const value = this.state?.updatedAt;
     if (!value || !Number.isFinite(Date.parse(value)))
-      return this.l("Unavailable", "未能取得");
+      return this.l("Unavailable","未能取得",true);
     try {
       const locale = this.effectiveLanguage === "zh-HK" ? "zh-HK" : "en-CA";
       const formatter = new Intl.DateTimeFormat(locale, {
@@ -299,7 +303,7 @@ class MaterialBuildroot extends LitElement {
         ")"
       );
     } catch {
-      return this.l("Unavailable", "未能取得");
+      return this.l("Unavailable","未能取得",true);
     }
   }
   private get busy() {
@@ -329,12 +333,12 @@ class MaterialBuildroot extends LitElement {
       return nothing;
     const origin =
       this.state.origin === "default"
-        ? this.l("Application default", "應用程式預設")
+        ? this.l("Application default","應用程式預設",true)
         : this.state.origin === "saved"
-          ? this.l("Saved on this device", "已儲存喺呢部電腦")
-          : this.l("Origin unavailable", "未能取得來源");
+          ? this.l("Saved on this device","已儲存喺呢部電腦",true)
+          : this.l("Origin unavailable","未能取得來源",true);
     return html`<p class="muted" id="confirmed-language">
-      ${this.l("Last confirmed language", "上次確認嘅語言")}:
+      ${this.l("Last confirmed language","上次確認嘅語言",true)}:
       ${this.languageName(this.state.language)}. ${origin}.
     </p>`;
   }
@@ -374,61 +378,37 @@ class MaterialBuildroot extends LitElement {
   }
   private storageMessage() {
     if (this.connection === "loading")
-      return this.l("Loading saved preferences…", "正在載入已儲存嘅偏好設定…");
+      return this.l("Loading saved preferences…","正在載入已儲存嘅偏好設定…",true);
     if (this.connection === "unavailable")
-      return this.l(
-        "Desktop connection unavailable. Restart the application to reconnect.",
-        "未能連接桌面服務。請重新啟動應用程式再連接。",
-      );
+      return this.l("Desktop connection unavailable. Restart the application to reconnect.","未能連接桌面服務。請重新啟動應用程式再連接。",true);
     return this.state?.storage === "ready"
-      ? this.l("Local storage ready.", "本機儲存已就緒。")
-      : this.l(
-          "Local storage unavailable. Existing data is preserved; saving is disabled.",
-          "未能使用本機儲存。現有資料已保留，暫停儲存。",
-        );
+      ? this.l("Local storage ready.","本機儲存已就緒。",true)
+      : this.l("Local storage unavailable. Existing data is preserved; saving is disabled.","未能使用本機儲存。現有資料已保留，暫停儲存。",true);
   }
   private statusMessage() {
     if (this.saveState === "saving")
-      return this.l("Saving language…", "正在儲存語言…");
+      return this.l("Saving language…","正在儲存語言…",true);
     if (this.saveState === "unknown")
-      return this.l(
-        "Save outcome unavailable. Saving is disabled until you restart the application and review the saved language.",
-        "未能確認儲存結果。請重新啟動應用程式並檢視已儲存嘅語言，先可以再儲存。",
-      );
+      return this.l("Save outcome unavailable. Saving is disabled until you restart the application and review the saved language.","未能確認儲存結果。請重新啟動應用程式並檢視已儲存嘅語言，先可以再儲存。",true);
     if (this.saveState === "refresh-unavailable")
-      return this.l(
-        "The save was rejected, and current settings could not be loaded. Restart the application before saving again.",
-        "儲存要求已被拒絕，亦未能載入目前設定。請重新啟動應用程式再儲存。",
-      );
+      return this.l("The save was rejected, and current settings could not be loaded. Restart the application before saving again.","儲存要求已被拒絕，亦未能載入目前設定。請重新啟動應用程式再儲存。",true);
     if (this.windowNotice)
-      return this.l(
-        "The window action could not be completed. Press Alt+F4 if you need to close the application.",
-        "未能完成視窗操作。如要關閉應用程式，請按 Alt+F4。",
-      );
+      return this.l("The window action could not be completed. Press Alt+F4 if you need to close the application.","未能完成視窗操作。如要關閉應用程式，請按 Alt+F4。",true);
     if (this.connection !== "ready" || this.state?.storage !== "ready")
       return this.storageMessage();
     if (this.saveState === "saved")
-      return this.l("Language saved on this device.", "語言已儲存喺呢部電腦。");
+      return this.l("Language saved on this device.","語言已儲存喺呢部電腦。",true);
     if (this.saveState === "discarded")
-      return this.l(
-        "Pending choice reset to the last confirmed language.",
-        "已將待儲存嘅選擇還原為上次確認嘅語言。",
-      );
+      return this.l("Pending choice reset to the last confirmed language.","已將待儲存嘅選擇還原為上次確認嘅語言。",true);
     if (this.saveState === "conflict")
-      return this.l(
-        "Settings changed since this screen loaded. Your choice is retained; review it and Save again.",
-        "設定已經改咗。已保留你嘅選擇，請檢視後再儲存。",
-      );
+      return this.l("Settings changed since this screen loaded. Your choice is retained; review it and Save again.","設定已經改咗。已保留你嘅選擇，請檢視後再儲存。",true);
     if (this.saveState === "failed")
-      return this.l(
-        "Language was not saved. The previous saved setting remains in use.",
-        "語言未能儲存，繼續使用之前嘅設定。",
-      );
+      return this.l("Language was not saved. The previous saved setting remains in use.","語言未能儲存，繼續使用之前嘅設定。",true);
     return this.draft !== this.state.language
-      ? this.l("You have an unsaved language choice.", "你有未儲存嘅語言選擇。")
+      ? this.l("You have an unsaved language choice.","你有未儲存嘅語言選擇。",true)
       : this.route === "operations"
-        ? this.l("Language preferences are ready.", "語言偏好設定已就緒。")
-        : this.l("No operation in progress.", "目前冇操作進行中。");
+        ? this.l("Language preferences are ready.","語言偏好設定已就緒。",true)
+        : this.l("No operation in progress.","目前冇操作進行中。",true);
   }
   private async navigate(route: string) {
     if(route!==this.route&&!(await this.confirmScheduleLeave()))return;
@@ -518,16 +498,10 @@ class MaterialBuildroot extends LitElement {
   }
   private scope() {
     return this.workspaceMode === "durable"
-      ? this.l("Saved on this device", "已儲存喺呢部電腦")
+      ? this.l("Saved on this device","已儲存喺呢部電腦",true)
       : this.workspaceMode === "session"
-        ? this.l(
-            "Session only. Export to keep your plans.",
-            "只限今次工作階段，請匯出以保留計劃。",
-          )
-        : this.l(
-            "Workspace storage unavailable. Changes are disabled.",
-            "未能使用工作區儲存，暫停變更。",
-          );
+        ? this.l("Session only. Export to keep your plans.","只限今次工作階段，請匯出以保留計劃。",true)
+        : this.l("Workspace storage unavailable. Changes are disabled.","未能使用工作區儲存，暫停變更。",true);
   }
   private hydrateWorkspace(state: any) {
     this.workspaceRevision = state.revision;
@@ -811,7 +785,7 @@ class MaterialBuildroot extends LitElement {
         matches.push(...ids);
       }
       if(generation===this.revisionFilterGeneration)this.revisionMatches=matches;
-    }catch{if(generation===this.revisionFilterGeneration)this.revisionFilterError=this.l("Invalid, unsupported or timed-out expression. Filtering accepts i, m, s and u flags only. No filtered results are shown.","表達式無效或逾時，暫時唔顯示篩選結果。");}
+    }catch{if(generation===this.revisionFilterGeneration)this.revisionFilterError=this.l("Invalid, unsupported or timed-out expression. Filtering accepts i, m, s and u flags only. No filtered results are shown.","表達式無效或逾時，暫時唔顯示篩選結果。",true);}
     this.requestUpdate();
   }
   private nativeHistory: any = null;
@@ -868,16 +842,13 @@ class MaterialBuildroot extends LitElement {
   }
   private historyPanel() {
     return html`<section class="panel stack">
-      <h2>${this.l("Workspace backups", "工作區備份")}</h2>
+      <h2>${this.l("Workspace backups","工作區備份",true)}</h2>
       <p>
-        ${this.l(
-          "Snapshots preserve applied plans and preferences. Restore and import create new revisions, retaining recorded earlier revisions. Full history starts with the first save in this version.",
-          "快照保留已套用計劃同偏好。還原同匯入會建立新版本，保留已有版本。完整歷史由此版本首次儲存開始。",
-        )}
+        ${this.l("Snapshots preserve applied plans and preferences. Restore and import create new revisions, retaining recorded earlier revisions. Full history starts with the first save in this version.","快照保留已套用計劃同偏好。還原同匯入會建立新版本，保留已有版本。完整歷史由此版本首次儲存開始。",true)}
       </p>
       ${this.workspaceMode === "durable"
         ? html`<md-outlined-text-field
-              label=${this.l("Snapshot name", "快照名稱")}
+              label=${this.l("Snapshot name","快照名稱",true)}
               maxlength="80"
               .value=${this.snapshotName}
               @input=${(e: Event) =>
@@ -891,7 +862,7 @@ class MaterialBuildroot extends LitElement {
               this.snapshots.length >= 20 ||
               this.dirty}
               @click=${this.createSnapshot}
-              >${actionIcon('Create snapshot')}${this.l("Create snapshot", "建立快照")}</md-filled-tonal-button
+              >${actionIcon('Create snapshot')}${this.l("Create snapshot","建立快照",true)}</md-filled-tonal-button
             >
             <p class="muted">
               ${this.l(
@@ -912,61 +883,58 @@ class MaterialBuildroot extends LitElement {
                       this.restoreId = snapshot.id;
                       this.openDialog("restore-dialog", e);
                     }}
-                    >${actionIcon('Restore')}${this.l("Restore", "還原")}</md-outlined-button
+                    >${actionIcon('Restore')}${this.l("Restore","還原",true)}</md-outlined-button
                   >
                 </div>`,
             )}<md-outlined-button
               ?disabled=${!this.canEditWorkspace || this.dirty}
               @click=${() => this.renderRoot.querySelector<HTMLInputElement>("#workspace-import-file")?.click()}
-            >${materialIcon("upload", "icon")}${this.l("Import workspace JSON (maximum 1 MiB)", "匯入工作區 JSON（最大 1 MiB）")}</md-outlined-button>
-            <h3>${this.l("Recorded revisions", "已記錄版本")}</h3>
-            ${this.historyWarning?html`<p role="alert">${this.l("The workspace was saved but complete local history could not be recorded. Git must be available to the host; inspect storage access before relying on recovery.","工作區已儲存，但未能記錄完整本機歷史。主機需要可用 Git，依賴復原前請檢查儲存存取。")}</p>`:nothing}
-            <md-outlined-text-field .label=${this.l("Label for a revision","版本標籤")} maxlength="80" .value=${this.revisionLabel} @input=${(e:Event)=>{this.revisionLabel=(e.target as HTMLInputElement).value;this.requestUpdate();}}></md-outlined-text-field>
-            <md-text-button @click=${()=>{this.revisionLabel="";this.requestUpdate();}}>${this.l("Clear label draft","清除標籤草稿")}</md-text-button>
-            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions()}>${materialIcon("history","icon")}${this.l("Read revisions","讀取版本")}</md-outlined-button>
-            ${this.historyLoaded&&!this.revisionRows.length?html`<p>${this.l("No complete revision records yet. Older activity has no restorable state.","暫時未有完整版本記錄。較舊活動冇可還原狀態。")}</p>`:nothing}
-            <p>${this.l("Filters apply to loaded revision pages only. Dates use UTC calendar days; load older pages to expand the scope.","篩選只適用於已載入版本頁，日期使用 UTC 日曆日，載入較舊頁面可擴大範圍。")}</p>
-            <div class="row"><md-outlined-text-field .label=${this.l("Search loaded revisions","搜尋已載入版本")} .value=${this.revisionQuery} @input=${(e:Event)=>{this.revisionQuery=(e.target as HTMLInputElement).value;this.revisionPattern=this.revisionQuery;if(this.revisionRegex)void this.filterRevisionRegex();this.requestUpdate();}}></md-outlined-text-field><md-text-button @click=${()=>{this.revisionQuery=this.revisionPattern="";void this.filterRevisionRegex();}}>${this.l("Clear search","清除搜尋")}</md-text-button><md-outlined-button aria-pressed=${this.revisionRegex} @click=${()=>{this.revisionRegex=!this.revisionRegex;void this.filterRevisionRegex();}}>${this.l("Regex builder","正規表達式建構器")}</md-outlined-button></div>
+            >${materialIcon("upload", "icon")}${this.l("Import workspace JSON (maximum 1 MiB)","匯入工作區 JSON（最大 1 MiB）",true)}</md-outlined-button>
+            <h3>${this.l("Recorded revisions","已記錄版本",true)}</h3>
+            ${this.historyWarning?html`<p role="alert">${this.l("The workspace was saved but complete local history could not be recorded. Git must be available to the host; inspect storage access before relying on recovery.","工作區已儲存，但未能記錄完整本機歷史。主機需要可用 Git，依賴復原前請檢查儲存存取。",true)}</p>`:nothing}
+            <md-outlined-text-field .label=${this.l("Label for a revision","版本標籤",true)} maxlength="80" .value=${this.revisionLabel} @input=${(e:Event)=>{this.revisionLabel=(e.target as HTMLInputElement).value;this.requestUpdate();}}></md-outlined-text-field>
+            <md-text-button @click=${()=>{this.revisionLabel="";this.requestUpdate();}}>${this.l("Clear label draft","清除標籤草稿",true)}</md-text-button>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions()}>${materialIcon("history","icon")}${this.l("Read revisions","讀取版本",true)}</md-outlined-button>
+            ${this.historyLoaded&&!this.revisionRows.length?html`<p>${this.l("No complete revision records yet. Older activity has no restorable state.","暫時未有完整版本記錄。較舊活動冇可還原狀態。",true)}</p>`:nothing}
+            <p>${this.l("Filters apply to loaded revision pages only. Dates use UTC calendar days; load older pages to expand the scope.","篩選只適用於已載入版本頁，日期使用 UTC 日曆日，載入較舊頁面可擴大範圍。",true)}</p>
+            <div class="row"><md-outlined-text-field .label=${this.l("Search loaded revisions","搜尋已載入版本",true)} .value=${this.revisionQuery} @input=${(e:Event)=>{this.revisionQuery=(e.target as HTMLInputElement).value;this.revisionPattern=this.revisionQuery;if(this.revisionRegex)void this.filterRevisionRegex();this.requestUpdate();}}></md-outlined-text-field><md-text-button @click=${()=>{this.revisionQuery=this.revisionPattern="";void this.filterRevisionRegex();}}>${this.l("Clear search","清除搜尋",true)}</md-text-button><md-outlined-button aria-pressed=${this.revisionRegex} @click=${()=>{this.revisionRegex=!this.revisionRegex;void this.filterRevisionRegex();}}>${this.l("Regex builder","正規表達式建構器",true)}</md-outlined-button></div>
             ${this.revisionRegex?html`<regex-workbench .language=${this.effectiveLanguage} .pattern=${this.revisionPattern} .flags=${this.revisionFlags} @pattern-change=${(e:CustomEvent)=>{this.revisionPattern=e.detail.pattern;this.revisionQuery=e.detail.pattern;this.revisionFlags=e.detail.flags;void this.filterRevisionRegex();}}></regex-workbench>`:nothing}
-            <div class="row"><label>${this.l("From date (UTC)","開始日期（UTC）")}<input type="date" .value=${this.revisionFrom} @input=${(e:Event)=>{this.revisionFrom=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><label>${this.l("Through date (UTC)","結束日期（UTC）")}<input type="date" .value=${this.revisionTo} @input=${(e:Event)=>{this.revisionTo=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><md-text-button @click=${()=>{this.revisionFrom=this.revisionTo="";this.requestUpdate();}}>${this.l("Clear dates","清除日期")}</md-text-button></div>
-            ${this.revisionFrom&&this.revisionTo&&this.revisionFrom>this.revisionTo?html`<p role="alert">${this.l("End date must not precede start date.","結束日期唔可以早過開始日期。")}</p>`:nothing}
+            <div class="row"><label>${this.l("From date (UTC)","開始日期（UTC）",true)}<input type="date" .value=${this.revisionFrom} @input=${(e:Event)=>{this.revisionFrom=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><label>${this.l("Through date (UTC)","結束日期（UTC）",true)}<input type="date" .value=${this.revisionTo} @input=${(e:Event)=>{this.revisionTo=(e.target as HTMLInputElement).value;this.requestUpdate();}}></label><md-text-button @click=${()=>{this.revisionFrom=this.revisionTo="";this.requestUpdate();}}>${this.l("Clear dates","清除日期",true)}</md-text-button></div>
+            ${this.revisionFrom&&this.revisionTo&&this.revisionFrom>this.revisionTo?html`<p role="alert">${this.l("End date must not precede start date.","結束日期唔可以早過開始日期。",true)}</p>`:nothing}
             <div class="row">${[...new Set(this.revisionRows.map(row=>row.action))].map(action=>html`<md-outlined-button aria-pressed=${this.revisionActions.has(action)} @click=${()=>{this.revisionActions.has(action)?this.revisionActions.delete(action):this.revisionActions.add(action);this.requestUpdate();}}>${this.activityName(action,this.effectiveLanguage==="zh-HK")} (${this.revisionRows.filter(row=>row.action===action).length})</md-outlined-button>`)}</div>
-            ${this.revisionFilterError?html`<p role="alert">${this.revisionFilterError}</p>`:nothing}<p>${this.filteredRevisionRows.length} / ${this.revisionRows.length} ${this.l("loaded revisions match","個已載入版本符合篩選")}</p>
-            ${this.filteredRevisionRows.map(row=>html`<div class="row" data-appearance-key=${"history:"+row.revision}><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態")} · ${row.plans} ${this.l("plans","個計劃")} · ${row.labels.join(" · ")}</span><md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.compare",row.revision)}>${this.l("Compare with current","比較目前版本")}</md-outlined-button><md-outlined-button ?disabled=${this.historyBusy||!this.revisionLabel.trim()} @click=${()=>this.historyAction("history.label",row.revision)}>${this.l("Append label","新增標籤")}</md-outlined-button><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本")}</md-outlined-button></div>`)}
-            ${this.revisionCursor!==null?html`<md-text-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions(true)}>${this.l("More revisions","更多版本")}</md-text-button>`:nothing}
-            ${this.revisionComparison?html`<h4>${this.l("Selected revision versus current workspace","所選版本與目前工作區比較")}</h4><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${this.revisionComparison}</pre><md-text-button @click=${()=>{this.revisionComparison="";this.requestUpdate();}}>${this.l("Close comparison","關閉比較")}</md-text-button>`:nothing}
-            <h3>${this.l("Revision cache retention","版本快取保留")}</h3>
-            <p>${this.l("History stays local in an isolated repository beside application data. No automatic pruning or synchronization runs. This action only removes redundant cached copies after byte-for-byte comparison with preserved history; all recorded revisions remain restorable. Protected stores are excluded.","歷史保留喺應用程式資料旁嘅獨立本機儲存庫，唔會自動刪減或同步。呢個動作只會喺逐位元組核對已保留歷史之後移除重複快取，全部已記錄版本仍可還原。受保護儲存資料不包含在內。")}</p>
-            <md-outlined-select .label=${this.l("Recent cached copies to keep","保留最近快取數目")} .value=${String(this.retentionKeep)} @change=${(e:Event)=>{this.retentionKeep=Number((e.target as HTMLSelectElement).value) as 25|100|500;this.requestUpdate();}}>${[25,100,500].map(count=>html`<md-select-option .value=${String(count)}><div slot="headline">${count}</div></md-select-option>`)}</md-outlined-select>
-            <md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>this.openDialog("history-retention-dialog",e)}>${this.l("Review cache pruning","檢視快取刪減")}</md-outlined-button>
-            <md-dialog id="history-retention-dialog"><div slot="headline">${this.l("Remove redundant revision caches?","移除重複版本快取？")}</div><div slot="content">${this.l(`Keep the newest ${this.retentionKeep} recorded revisions cached. Older cache files are deleted only when identical bytes exist in local history. History commits and restore access are preserved.`, `保留最近 ${this.retentionKeep} 個已記錄版本快取。只有本機歷史保留完全相同內容時，先會刪除較舊快取。歷史提交同還原存取保持不變。`)}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("history-retention-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.retain")}>${this.l("Remove redundant caches","移除重複快取")}</md-filled-button></div></md-dialog>
-            <h3>${this.l("Native project history","原生專案歷史")}</h3>
-            <p>${this.l("Project catalogue and options have independent revisions. Paths are retained only in local recovery records and omitted from these views and exports. Restoring metadata grants no filesystem authority; reopen through the project picker.","專案目錄同選項有獨立版本。路徑只保留喺本機復原記錄，唔會顯示或匯出。還原資料唔會授予檔案權限，請經專案選擇器重新開啟。")}</p>
-            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="catalogue";this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read catalogue history","讀取目錄歷史")}</md-outlined-button>
-            ${this.nativeHistory?.projects?.map((project:any)=>html`<md-outlined-button data-appearance-key=${"native-project:"+project.id} ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="options";this.nativeProjectId=project.id;this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read options history","讀取選項歷史")}: ${project.name}</md-outlined-button>`)}
-            ${this.nativeHistory?html`<p>${this.l("Current metadata revision","目前資料版本")}: ${this.nativeHistory.revision}</p>${this.nativeHistory.records.map((record:any)=>html`<section data-appearance-key=${"native-history:"+this.nativeKind+":"+this.nativeProjectId+":"+record.revision}><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(record,null,2)}</pre><md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>{this.nativeRestoreRevision=record.revision;this.openDialog("native-history-restore-dialog",e);}}>${this.l("Restore metadata as new revision","還原資料為新版本")}</md-outlined-button></section>`)}<md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.export")}>${this.l("Export this metadata history without paths","匯出此資料歷史，不含路徑")}</md-outlined-button>`:nothing}
-            <md-dialog id="native-history-restore-dialog"><div slot="headline">${this.l("Restore native metadata?","還原原生資料？")}</div><div slot="content">${this.l("Replace the current metadata with the selected historical state as a new revision. This may remove later catalogue entries or change saved runtime and external-tree choices. Source and output files are not changed. Reopen affected projects after restoration.","將目前資料取代為所選歷史狀態並建立新版本，可能移除較後目錄項目或變更執行環境同外部樹選擇。來源同輸出檔案保持不變，還原後請重新開啟受影響專案。")} ${this.nativeRestoreRevision}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("native-history-restore-dialog")}>${this.l("Cancel","取消")}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.restore")}>${this.l("Restore metadata","還原資料")}</md-filled-button></div></md-dialog>
-            <h3>${this.l("Export scope","匯出範圍")}</h3>
-            <md-outlined-select .label=${this.l("Include","包含")} .value=${this.exportScope} @change=${(e:Event)=>{this.exportScope=(e.target as HTMLSelectElement).value as typeof this.exportScope;this.requestUpdate();}}>
-              <md-select-option value="workspace"><div slot="headline">${this.l("Current workspace, re-importable","目前工作區，可重新匯入")}</div></md-select-option>
-              <md-select-option value="plans"><div slot="headline">${this.l("Selected saved plans","已選儲存計劃")}</div></md-select-option>
-              <md-select-option value="revision-page"><div slot="headline">${this.l("Last 25 matching loaded revisions","最後 25 個符合篩選嘅已載入版本")}</div></md-select-option>
-              <md-select-option value="revisions"><div slot="headline">${this.l("All complete recorded revisions (maximum 32 MiB)","全部完整已記錄版本（最大 32 MiB）")}</div></md-select-option>
-              <md-select-option value="history"><div slot="headline">${this.l("Complete recorded activity","全部已記錄活動")}</div></md-select-option>
+            ${this.revisionFilterError?html`<p role="alert">${this.revisionFilterError}</p>`:nothing}<p>${this.filteredRevisionRows.length} / ${this.revisionRows.length} ${this.l("loaded revisions match","個已載入版本符合篩選",true)}</p>
+            ${this.filteredRevisionRows.map(row=>html`<div class="row" data-appearance-key=${"history:"+row.revision}><span>${row.revision} · ${this.activityName(row.action,this.effectiveLanguage==="zh-HK")} · ${row.timestamp?this.date(row.timestamp):this.l("Initial state","初始狀態",true)} · ${row.plans} ${this.l("plans","個計劃",true)} · ${row.labels.join(" · ")}</span><md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.compare",row.revision)}>${this.l("Compare with current","比較目前版本",true)}</md-outlined-button><md-outlined-button ?disabled=${this.historyBusy||!this.revisionLabel.trim()} @click=${()=>this.historyAction("history.label",row.revision)}>${this.l("Append label","新增標籤",true)}</md-outlined-button><md-outlined-button ?disabled=${!this.canEditWorkspace||this.dirty} @click=${(e:Event)=>{this.restoreId=`revision:${row.revision}`;this.openDialog("restore-dialog",e);}}>${this.l("Restore as new revision","還原為新版本",true)}</md-outlined-button></div>`)}
+            ${this.revisionCursor!==null?html`<md-text-button ?disabled=${this.historyBusy} @click=${()=>this.readRevisions(true)}>${this.l("More revisions","更多版本",true)}</md-text-button>`:nothing}
+            ${this.revisionComparison?html`<h4>${this.l("Selected revision versus current workspace","所選版本與目前工作區比較",true)}</h4><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${this.revisionComparison}</pre><md-text-button @click=${()=>{this.revisionComparison="";this.requestUpdate();}}>${this.l("Close comparison","關閉比較",true)}</md-text-button>`:nothing}
+            <h3>${this.l("Revision cache retention","版本快取保留",true)}</h3>
+            <p>${this.l("History stays local in an isolated repository beside application data. No automatic pruning or synchronization runs. This action only removes redundant cached copies after byte-for-byte comparison with preserved history; all recorded revisions remain restorable. Protected stores are excluded.","歷史保留喺應用程式資料旁嘅獨立本機儲存庫，唔會自動刪減或同步。呢個動作只會喺逐位元組核對已保留歷史之後移除重複快取，全部已記錄版本仍可還原。受保護儲存資料不包含在內。",true)}</p>
+            <md-outlined-select .label=${this.l("Recent cached copies to keep","保留最近快取數目",true)} .value=${String(this.retentionKeep)} @change=${(e:Event)=>{this.retentionKeep=Number((e.target as HTMLSelectElement).value) as 25|100|500;this.requestUpdate();}}>${[25,100,500].map(count=>html`<md-select-option .value=${String(count)}><div slot="headline">${count}</div></md-select-option>`)}</md-outlined-select>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>this.openDialog("history-retention-dialog",e)}>${this.l("Review cache pruning","檢視快取刪減",true)}</md-outlined-button>
+            <md-dialog id="history-retention-dialog"><div slot="headline">${this.l("Remove redundant revision caches?","移除重複版本快取？",true)}</div><div slot="content">${this.l(`Keep the newest ${this.retentionKeep} recorded revisions cached. Older cache files are deleted only when identical bytes exist in local history. History commits and restore access are preserved.`, `保留最近 ${this.retentionKeep} 個已記錄版本快取。只有本機歷史保留完全相同內容時，先會刪除較舊快取。歷史提交同還原存取保持不變。`)}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("history-retention-dialog")}>${this.l("Cancel","取消",true)}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.historyAction("history.retain")}>${this.l("Remove redundant caches","移除重複快取",true)}</md-filled-button></div></md-dialog>
+            <h3>${this.l("Native project history","原生專案歷史",true)}</h3>
+            <p>${this.l("Project catalogue and options have independent revisions. Paths are retained only in local recovery records and omitted from these views and exports. Restoring metadata grants no filesystem authority; reopen through the project picker.","專案目錄同選項有獨立版本。路徑只保留喺本機復原記錄，唔會顯示或匯出。還原資料唔會授予檔案權限，請經專案選擇器重新開啟。",true)}</p>
+            <md-outlined-button ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="catalogue";this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read catalogue history","讀取目錄歷史",true)}</md-outlined-button>
+            ${this.nativeHistory?.projects?.map((project:any)=>html`<md-outlined-button data-appearance-key=${"native-project:"+project.id} ?disabled=${this.historyBusy} @click=${()=>{this.nativeKind="options";this.nativeProjectId=project.id;this.nativeHistory=null;void this.nativeHistoryAction("native.history");}}>${this.l("Read options history","讀取選項歷史",true)}: ${project.name}</md-outlined-button>`)}
+            ${this.nativeHistory?html`<p>${this.l("Current metadata revision","目前資料版本",true)}: ${this.nativeHistory.revision}</p>${this.nativeHistory.records.map((record:any)=>html`<section data-appearance-key=${"native-history:"+this.nativeKind+":"+this.nativeProjectId+":"+record.revision}><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(record,null,2)}</pre><md-outlined-button ?disabled=${this.historyBusy} @click=${(e:Event)=>{this.nativeRestoreRevision=record.revision;this.openDialog("native-history-restore-dialog",e);}}>${this.l("Restore metadata as new revision","還原資料為新版本",true)}</md-outlined-button></section>`)}<md-outlined-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.export")}>${this.l("Export this metadata history without paths","匯出此資料歷史，不含路徑",true)}</md-outlined-button>`:nothing}
+            <md-dialog id="native-history-restore-dialog"><div slot="headline">${this.l("Restore native metadata?","還原原生資料？",true)}</div><div slot="content">${this.l("Replace the current metadata with the selected historical state as a new revision. This may remove later catalogue entries or change saved runtime and external-tree choices. Source and output files are not changed. Reopen affected projects after restoration.","將目前資料取代為所選歷史狀態並建立新版本，可能移除較後目錄項目或變更執行環境同外部樹選擇。來源同輸出檔案保持不變，還原後請重新開啟受影響專案。",true)} ${this.nativeRestoreRevision}</div><div slot="actions"><md-text-button ?disabled=${this.historyBusy} @click=${()=>this.closeDialog("native-history-restore-dialog")}>${this.l("Cancel","取消",true)}</md-text-button><md-filled-button ?disabled=${this.historyBusy} @click=${()=>this.nativeHistoryAction("native.restore")}>${this.l("Restore metadata","還原資料",true)}</md-filled-button></div></md-dialog>
+            <h3>${this.l("Export scope","匯出範圍",true)}</h3>
+            <md-outlined-select .label=${this.l("Include","包含",true)} .value=${this.exportScope} @change=${(e:Event)=>{this.exportScope=(e.target as HTMLSelectElement).value as typeof this.exportScope;this.requestUpdate();}}>
+              <md-select-option value="workspace"><div slot="headline">${this.l("Current workspace, re-importable","目前工作區，可重新匯入",true)}</div></md-select-option>
+              <md-select-option value="plans"><div slot="headline">${this.l("Selected saved plans","已選儲存計劃",true)}</div></md-select-option>
+              <md-select-option value="revision-page"><div slot="headline">${this.l("Last 25 matching loaded revisions","最後 25 個符合篩選嘅已載入版本",true)}</div></md-select-option>
+              <md-select-option value="revisions"><div slot="headline">${this.l("All complete recorded revisions (maximum 32 MiB)","全部完整已記錄版本（最大 32 MiB）",true)}</div></md-select-option>
+              <md-select-option value="history"><div slot="headline">${this.l("Complete recorded activity","全部已記錄活動",true)}</div></md-select-option>
             </md-outlined-select>
-            ${this.exportScope==="plans"?html`<md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.map(p=>p.id));this.requestUpdate();}}>${this.l("Select all saved plans","選擇全部儲存計劃")}</md-text-button><md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.filter(p=>!this.exportPlanIds.has(p.id)).map(p=>p.id));this.requestUpdate();}}>${this.l("Invert selection","反轉選擇")}</md-text-button>${this.plans.map(p=>html`<md-outlined-button data-appearance-key=${"export-plan:"+p.id} aria-pressed=${this.exportPlanIds.has(p.id)} @click=${()=>{this.exportPlanIds.has(p.id)?this.exportPlanIds.delete(p.id):this.exportPlanIds.add(p.id);this.requestUpdate();}}>${this.exportPlanIds.has(p.id)?"✓ ":""}${p.name}</md-outlined-button>`)}`:nothing}
-            <p>${this.l("Exports exclude protected credentials, personal wording data and file metadata, custom images, service enrollments, project paths and build output. Plan names and notes are included: review for sensitive text. Only workspace JSON supports import. Encoding: UTF-8, LF line endings.","匯出唔包括受保護憑證、個人用字資料同檔案資料、自訂圖片、服務登記、專案路徑同建置輸出。計劃名稱同備註會包含在內，請檢查敏感文字。只有工作區 JSON 支援匯入，使用 UTF-8 同 LF 換行。")}</p>
-            <md-filled-tonal-button ?disabled=${!this.canEditWorkspace||this.dirty||(this.exportScope==="plans"&&!this.plans.some(p=>this.exportPlanIds.has(p.id)))} @click=${this.exportPlans}>${materialIcon("download","icon")}${this.l("Export chosen scope","匯出所選範圍")}</md-filled-tonal-button>
+            ${this.exportScope==="plans"?html`<md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.map(p=>p.id));this.requestUpdate();}}>${this.l("Select all saved plans","選擇全部儲存計劃",true)}</md-text-button><md-text-button @click=${()=>{this.exportPlanIds=new Set(this.plans.filter(p=>!this.exportPlanIds.has(p.id)).map(p=>p.id));this.requestUpdate();}}>${this.l("Invert selection","反轉選擇",true)}</md-text-button>${this.plans.map(p=>html`<md-outlined-button data-appearance-key=${"export-plan:"+p.id} aria-pressed=${this.exportPlanIds.has(p.id)} @click=${()=>{this.exportPlanIds.has(p.id)?this.exportPlanIds.delete(p.id):this.exportPlanIds.add(p.id);this.requestUpdate();}}>${this.exportPlanIds.has(p.id)?"✓ ":""}${p.name}</md-outlined-button>`)}`:nothing}
+            <p>${this.l("Exports exclude protected credentials, personal wording data and file metadata, custom images, service enrollments, project paths and build output. Plan names and notes are included: review for sensitive text. Only workspace JSON supports import. Encoding: UTF-8, LF line endings.","匯出唔包括受保護憑證、個人用字資料同檔案資料、自訂圖片、服務登記、專案路徑同建置輸出。計劃名稱同備註會包含在內，請檢查敏感文字。只有工作區 JSON 支援匯入，使用 UTF-8 同 LF 換行。",true)}</p>
+            <md-filled-tonal-button ?disabled=${!this.canEditWorkspace||this.dirty||(this.exportScope==="plans"&&!this.plans.some(p=>this.exportPlanIds.has(p.id)))} @click=${this.exportPlans}>${materialIcon("download","icon")}${this.l("Export chosen scope","匯出所選範圍",true)}</md-filled-tonal-button>
             <input id="workspace-import-file" hidden style="display:none" type="file"
               accept="application/json,.json" tabindex="-1"
               ?disabled=${!this.canEditWorkspace || this.dirty}
               @change=${this.readImport}
             />`
         : html`<p>
-            ${this.l(
-              "Durable workspace storage is required for snapshots and importing.",
-              "快照同匯入需要持久工作區儲存。",
-            )}
+            ${this.l("Durable workspace storage is required for snapshots and importing.","快照同匯入需要持久工作區儲存。",true)}
           </p>`}
     </section>`;
   }
@@ -1216,7 +1184,7 @@ class MaterialBuildroot extends LitElement {
     const plan = {
       ...this.selected,
       id: crypto.randomUUID(),
-      name: this.selected.name.slice(0, 70) + this.l(" (copy)", "（副本）"),
+      name: this.selected.name.slice(0, 70) + this.l(" (copy)","（副本）",true),
       createdAt: at,
       updatedAt: at,
     };
@@ -1365,21 +1333,21 @@ class MaterialBuildroot extends LitElement {
     return html`<section class="panel editor" aria-labelledby="editor-heading">
       <div class="row">
         <h2 id="editor-heading" tabindex="-1">
-          ${this.l("Plan details", "計劃詳情")}
+          ${this.l("Plan details","計劃詳情",true)}
         </h2>
         <span class="badge"
           >${this.dirty
-            ? this.l("Pending changes", "待套用變更")
+            ? this.l("Pending changes","待套用變更",true)
             : this.workspaceMode === "durable"
-              ? this.l("Saved locally", "已儲存喺本機")
-              : this.l("Session only", "只限今次工作階段")}</span
+              ? this.l("Saved locally","已儲存喺本機",true)
+              : this.l("Session only","只限今次工作階段",true)}</span
         >
       </div>
       <div class="fields">
         <md-outlined-text-field
           id="plan-name"
           class="wide"
-          label=${this.l("Plan name", "計劃名稱")}
+          label=${this.l("Plan name","計劃名稱",true)}
           .value=${this.edit.name}
           maxlength="80"
           required
@@ -1390,7 +1358,7 @@ class MaterialBuildroot extends LitElement {
             )}
         ></md-outlined-text-field
         ><md-outlined-select
-          label=${this.l("Intended runtime", "預定執行環境")}
+          label=${this.l("Intended runtime","預定執行環境",true)}
           id="plan-runtime"
           .value=${this.edit.runtime}
           .displayText=${this.runtimeName(this.edit.runtime)}
@@ -1401,41 +1369,41 @@ class MaterialBuildroot extends LitElement {
             ["docker", "Docker"],
           ])}</md-outlined-select
         ><md-outlined-select
-          label=${this.l("Intended output", "預定輸出")}
+          label=${this.l("Intended output","預定輸出",true)}
           id="plan-target"
           .value=${this.edit.target}
           .displayText=${this.edit.target === "image"
-            ? this.l("System image", "系統映像")
+            ? this.l("System image","系統映像",true)
             : this.edit.target === "sdk"
               ? "SDK"
-              : this.l("Toolchain", "工具鏈")}
+              : this.l("Toolchain","工具鏈",true)}
           @change=${(e: Event) =>
             this.updateEdit("target", (e.target as HTMLSelectElement).value)}
           >${this.options([
-            ["image", this.l("System image", "系統映像")],
+            ["image", this.l("System image","系統映像",true)],
             ["sdk", "SDK"],
-            ["toolchain", this.l("Toolchain", "工具鏈")],
+            ["toolchain", this.l("Toolchain","工具鏈",true)],
           ])}</md-outlined-select
         ><md-outlined-select
           class="wide"
-          label=${this.l("Planning status", "計劃狀態")}
+          label=${this.l("Planning status","計劃狀態",true)}
           id="plan-status"
           .value=${this.edit.status}
           .displayText=${this.edit.status === "draft"
-            ? this.l("Draft", "草稿")
-            : this.l("Ready for review", "可供檢視")}
+            ? this.l("Draft","草稿",true)
+            : this.l("Ready for review","可供檢視",true)}
           @change=${(e: Event) =>
             this.updateEdit("status", (e.target as HTMLSelectElement).value)}
           >${this.options([
-            ["draft", this.l("Draft", "草稿")],
-            ["ready-for-review", this.l("Ready for review", "可供檢視")],
+            ["draft", this.l("Draft","草稿",true)],
+            ["ready-for-review", this.l("Ready for review","可供檢視",true)],
           ])}</md-outlined-select
         ><md-outlined-text-field
           id="plan-notes"
           class="wide"
           type="textarea"
           rows="4"
-          label=${this.l("Notes", "備註")}
+          label=${this.l("Notes","備註",true)}
           maxlength="4000"
           .value=${this.edit.notes}
           @input=${(e: Event) =>
@@ -1446,23 +1414,20 @@ class MaterialBuildroot extends LitElement {
         ></md-outlined-text-field>
       </div>
       <p class="muted">
-        ${this.l(
-          "Runtime and output are planning choices. No host has been checked and no build has started.",
-          "執行環境同輸出只係計劃選項，未檢查主機，亦未開始建置。",
-        )}
+        ${this.l("Runtime and output are planning choices. No host has been checked and no build has started.","執行環境同輸出只係計劃選項，未檢查主機，亦未開始建置。",true)}
       </p>
       <div class="row">
         <md-filled-button
           ?disabled=${!this.dirty || !this.canEditWorkspace}
           @click=${() => this.applyPlan()}
-          >${actionIcon('Apply changes')}${this.l("Apply changes", "套用變更")}</md-filled-button
+          >${actionIcon('Apply changes')}${this.l("Apply changes","套用變更",true)}</md-filled-button
         ><md-text-button
           ?disabled=${!this.dirty || !this.canEditWorkspace}
           @click=${this.discardPlan}
-          >${actionIcon('Discard changes')}${this.l("Discard changes", "放棄變更")}</md-text-button
+          >${actionIcon('Discard changes')}${this.l("Discard changes","放棄變更",true)}</md-text-button
         ><md-outlined-button
           @click=${(e: Event) => this.openDialog("details-dialog", e)}
-          >${actionIcon('Details')}${this.l("Details", "詳細資料")}</md-outlined-button
+          >${actionIcon('Details')}${this.l("Details","詳細資料",true)}</md-outlined-button
         >
       </div>
       <div class="row">
@@ -1471,10 +1436,10 @@ class MaterialBuildroot extends LitElement {
           this.dirty ||
           !this.canEditWorkspace}
           @click=${this.duplicatePlan}
-          >${actionIcon('Duplicate')}${this.l("Duplicate", "複製")}</md-text-button
+          >${actionIcon('Duplicate')}${this.l("Duplicate","複製",true)}</md-text-button
         ><md-text-button
           @click=${(e: Event) => this.openDialog("remove-dialog", e)}
-          >${actionIcon('Remove plan')}${this.l("Remove plan", "移除計劃")}</md-text-button
+          >${actionIcon('Remove plan')}${this.l("Remove plan","移除計劃",true)}</md-text-button
         >
       </div>
     </section>`;
@@ -1482,26 +1447,26 @@ class MaterialBuildroot extends LitElement {
   private details() {
     return this.selected
       ? html`<dl>
-          <dt>${this.l("Name", "名稱")}</dt>
+          <dt>${this.l("Name","名稱",true)}</dt>
           <dd>${this.selected.name}</dd>
-          <dt>${this.l("Runtime", "執行環境")}</dt>
+          <dt>${this.l("Runtime","執行環境",true)}</dt>
           <dd>${this.runtimeName(this.selected.runtime)}</dd>
-          <dt>${this.l("Created", "建立時間")}</dt>
+          <dt>${this.l("Created","建立時間",true)}</dt>
           <dd>${this.date(this.selected.createdAt)}</dd>
-          <dt>${this.l("Updated", "更新時間")}</dt>
+          <dt>${this.l("Updated","更新時間",true)}</dt>
           <dd>${this.date(this.selected.updatedAt)}</dd>
-          <dt>${this.l("Storage", "儲存")}</dt>
+          <dt>${this.l("Storage","儲存",true)}</dt>
           <dd>${this.scope()}</dd>
         </dl>`
       : html`<p>
-          ${this.l("Select a plan to inspect it.", "選擇計劃以檢視資料。")}
+          ${this.l("Select a plan to inspect it.","選擇計劃以檢視資料。",true)}
         </p>`;
   }
   private plansView() {
     return html`<div class="workspace view">
       <section
         class="panel records"
-        aria-label=${this.l("Session plans", "工作階段計劃")}
+        aria-label=${this.l("Session plans","工作階段計劃",true)}
       >
         ${this.plans.length
           ? this.plans.map(
@@ -1521,33 +1486,24 @@ class MaterialBuildroot extends LitElement {
             )
           : html`<div class="empty">
               <span class="empty-symbol" aria-hidden="true">▦</span>
-              <h2>${this.l("No plans yet", "未有計劃")}</h2>
+              <h2>${this.l("No plans yet","未有計劃",true)}</h2>
               <p class="muted">
-                ${this.l(
-                  "Create a plan to organize your next Buildroot project.",
-                  "建立計劃，整理下一個 Buildroot 專案。",
-                )}
+                ${this.l("Create a plan to organize your next Buildroot project.","建立計劃，整理下一個 Buildroot 專案。",true)}
               </p>
               <md-filled-button @click=${(e: Event) => this.beginNew(e)}
-                >${actionIcon('New plan')}${this.l("New plan", "新增計劃")}</md-filled-button
+                >${actionIcon('New plan')}${this.l("New plan","新增計劃",true)}</md-filled-button
               >
             </div>`}
       </section>
       ${this.edit
         ? this.planForm()
         : html`<section class="panel empty">
-            <h2>${this.l("Plan your project", "規劃專案")}</h2>
+            <h2>${this.l("Plan your project","規劃專案",true)}</h2>
             <p>
-              ${this.l(
-                "Choose an intended runtime and output, add notes, then export your plans.",
-                "選擇預定執行環境同輸出、加入備註，再匯出計劃。",
-              )}
+              ${this.l("Choose an intended runtime and output, add notes, then export your plans.","選擇預定執行環境同輸出、加入備註，再匯出計劃。",true)}
             </p>
             <p class="muted">
-              ${this.l(
-                "Project execution is not connected. Session plans do not create project files.",
-                "專案執行尚未連接，工作階段計劃唔會建立專案檔案。",
-              )}
+              ${this.l("Project execution is not connected. Session plans do not create project files.","專案執行尚未連接，工作階段計劃唔會建立專案檔案。",true)}
             </p>
           </section>`}
     </div>`;
@@ -1555,21 +1511,18 @@ class MaterialBuildroot extends LitElement {
   private settingsView() {
     return html`<div class="settings-grid view">
       <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;this.requestUpdate();}}}></settings-search>
-      ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。')}</p>`:nothing}
+      ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。',true)}</p>`:nothing}
       ${!this.restricted?html`<section
         class="panel stack" ?hidden=${!this.settingIds.includes("language")}
         aria-busy=${this.connection === "loading" || this.busy}
       >
         <h2>${this.owned("Language", "語言")}</h2>
         <p>
-          ${this.l(
-            "Bilingual is the default. A successful save persists across application restarts.",
-            "預設使用雙語。成功儲存後，重新啟動都會保留。",
-          )}
+          ${this.l("Bilingual is the default. A successful save persists across application restarts.","預設使用雙語。成功儲存後，重新啟動都會保留。",true)}
         </p>
         ${this.confirmedPreference()}<md-outlined-select
           id="language-select" data-experience-id="settings:language"
-          .label=${this.l("Interface language", "介面語言")}
+          .label=${this.l("Interface language","介面語言",true)}
           .value=${this.draft}
           .displayText=${this.languageName(this.draft)}
           ?disabled=${!this.canSave}
@@ -1591,55 +1544,50 @@ class MaterialBuildroot extends LitElement {
         <div
           class="row"
           role="group"
-          aria-label=${this.l("Language actions", "語言操作")}
+          aria-label=${this.l("Language actions","語言操作",true)}
           aria-describedby="save-feedback"
         >
           <md-filled-button
             ?disabled=${!this.canSave}
             @click=${this.saveLanguage}
             >${this.busy
-              ? this.l("Saving…", "儲存中…")
-              : this.l("Save language", "儲存語言")}</md-filled-button
+              ? this.l("Saving…","儲存中…",true)
+              : this.l("Save language","儲存語言",true)}</md-filled-button
           ><md-text-button
             ?disabled=${!this.canDiscard}
             @click=${this.discardLanguage}
-            >${actionIcon('Discard choice')}${this.l("Discard choice", "放棄選擇")}</md-text-button
+            >${actionIcon('Discard choice')}${this.l("Discard choice","放棄選擇",true)}</md-text-button
           >
         </div>
         <p class="muted">${this.storageMessage()}</p>
         <p id="save-feedback">${this.statusMessage()}</p>
+        <language-wording-panel .language=${this.effectiveLanguage}></language-wording-panel>
       </section>`:nothing}
       <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
         <h2>${this.owned("Appearance", "外觀")}</h2>
         <md-outlined-select
           .label=${this.workspaceMode === "durable"
-            ? this.l("Theme", "主題")
-            : this.l("Theme for this session", "今次工作階段嘅主題")}
+            ? this.l("Theme","主題",true)
+            : this.l("Theme for this session","今次工作階段嘅主題",true)}
           .value=${this.theme}
           .displayText=${this.theme === "light"
-            ? this.l("Light", "淺色")
+            ? this.l("Light","淺色",true)
             : this.theme === "dark"
-              ? this.l("Dark", "深色")
-              : this.l("Follow system", "跟隨系統")}
+              ? this.l("Dark","深色",true)
+              : this.l("Follow system","跟隨系統",true)}
           @change=${(e: Event) => {
             void this.setTheme((e.target as HTMLSelectElement).value);
           }}
           >${this.options([
-            ["system", this.l("Follow system", "跟隨系統")],
-            ["light", this.l("Light", "淺色")],
-            ["dark", this.l("Dark", "深色")],
+            ["system", this.l("Follow system","跟隨系統",true)],
+            ["light", this.l("Light","淺色",true)],
+            ["dark", this.l("Dark","深色",true)],
           ])}</md-outlined-select
         >
         <p class="muted">
           ${this.workspaceMode === "durable"
-            ? this.l(
-                "Theme is saved on this device after a confirmed update.",
-                "確認更新後，主題會儲存喺呢部電腦。",
-              )
-            : this.l(
-                "Theme resets to the system preference on restart.",
-                "重新啟動後，主題會跟隨系統。",
-              )}
+            ? this.l("Theme is saved on this device after a confirmed update.","確認更新後，主題會儲存喺呢部電腦。",true)
+            : this.l("Theme resets to the system preference on restart.","重新啟動後，主題會跟隨系統。",true)}
         </p>
       </section>
       <section class="panel stack" ?hidden=${!this.settingIds.includes('experience')}><experience-policy-panel .language=${this.effectiveLanguage}></experience-policy-panel></section>
@@ -1651,7 +1599,7 @@ class MaterialBuildroot extends LitElement {
   }
   private setupView() {
     return html`<span class="step"
-        >${this.l("Step", "步驟")} ${this.setupStep + 1} / 3</span
+        >${this.l("Step","步驟",true)} ${this.setupStep + 1} / 3</span
       >
       <div class="progress" aria-hidden="true">
         ${[0, 1, 2].map(
@@ -1661,17 +1609,14 @@ class MaterialBuildroot extends LitElement {
       </div>
       ${this.setupStep === 0
         ? html`<h2>
-              ${this.l("Choose your intended runtime", "選擇預定執行環境")}
+              ${this.l("Choose your intended runtime","選擇預定執行環境",true)}
             </h2>
             <p>
-              ${this.l(
-                "Buildroot needs Linux. Record how you intend to run it; the optional check inspects installed runtimes without installing them.",
-                "Buildroot 需要 Linux。記錄你打算使用嘅環境，選填檢查會檢視已安裝執行環境，唔會安裝。",
-              )}
+              ${this.l("Buildroot needs Linux. Record how you intend to run it; the optional check inspects installed runtimes without installing them.","Buildroot 需要 Linux。記錄你打算使用嘅環境，選填檢查會檢視已安裝執行環境，唔會安裝。",true)}
             </p>
-            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定")}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源")}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。")}</p>`:nothing}`:nothing}
+            ${window.studio?.operations ? html`<div class="row"><md-outlined-button ?disabled=${this.setupChecking} @click=${async()=>{this.setupChecking=true;try{const r=await window.studio.operations!({action:"runtime.discover"});this.setupRuntime=r.ok?r.result:{code:r.code};}catch{this.setupRuntime={code:"RUNTIME_DISCOVERY_UNAVAILABLE"};}finally{this.setupChecking=false;}}}>${actionIcon('Check installed runtimes')}${this.l("Check installed runtimes","檢查已安裝執行環境",true)}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="runtime";}}>${actionIcon('Open trusted project setup')}${this.l("Open trusted project setup","開啟可信專案設定",true)}</md-outlined-button><md-outlined-button @click=${async()=>{this.closeDialog("setup-dialog",true);await this.navigate("operations");const panel=this.activeOperations() as any;if(panel)panel.tab="source";}}>${actionIcon('Clone source in workspace')}${this.l("Clone source in workspace","喺工作區複製來源",true)}</md-outlined-button></div>${this.setupRuntime?html`<p role="status">${this.setupRuntime.code||this.l("Runtime discovery completed. Inspect the project runtime workspace for distribution and container details.","已完成執行環境探索，請喺專案執行環境工作區檢視發行版同容器詳情。",true)}</p>`:nothing}`:nothing}
             <md-outlined-select
-              label=${this.l("Intended runtime", "預定執行環境")}
+              label=${this.l("Intended runtime","預定執行環境",true)}
               .value=${this.newRuntime}
               .displayText=${this.runtimeName(this.newRuntime)}
               @change=${(e: Event) =>
@@ -1684,45 +1629,39 @@ class MaterialBuildroot extends LitElement {
               ])}</md-outlined-select
             >`
         : this.setupStep === 1
-          ? html`<h2>${this.l("Create your first plan", "建立第一個計劃")}</h2>
+          ? html`<h2>${this.l("Create your first plan","建立第一個計劃",true)}</h2>
               <p>
-                ${this.l(
-                  "Create an editable project plan.",
-                  "建立可編輯嘅專案計劃。",
-                ) +
+                ${this.l("Create an editable project plan.","建立可編輯嘅專案計劃。",true) +
                 " " +
                 this.scope()}
               </p>
               ${this.nameField()}`
           : html`<h2>
-                ${this.l(
-                  "Review preferences and start planning",
-                  "檢視偏好設定並開始規劃",
-                )}
+                ${this.l("Review preferences and start planning","檢視偏好設定並開始規劃",true)}
               </h2>
               <p>
                 ${this.l(
-                  this.restricted?"Your plan is ready to edit. Choose a theme below.":"Your plan is ready to edit. Review language in Settings and choose a theme below.",
-                  "計劃已可編輯。你可以喺設定檢視語言，並喺下面選擇主題。",
+                  this.restricted?"Your plan is ready to edit. Choose a theme below.":"Your plan is ready to edit. Review language in Settings and choose a theme below. English and Cantonese humor each default to level 5 and style all messages, including errors and warnings. Reset either level in Settings.",
+                  "計劃已可編輯。你可以喺設定檢視語言，並喺下面選擇主題。英文同粵語幽默預設各為第 5 級，會調整所有訊息、錯誤同警告嘅語氣。兩種語言可喺設定分開重設。",
                 )}
               </p>
               <md-outlined-select
                 label=${this.workspaceMode === "durable"
-                  ? this.l("Theme", "主題")
-                  : this.l("Theme for this session", "今次工作階段嘅主題")}
+                  ? this.l("Theme","主題",true)
+                  : this.l("Theme for this session","今次工作階段嘅主題",true)}
                 .value=${this.theme}
                 .displayText=${this.theme === "light"
-                  ? this.l("Light", "淺色")
+                  ? this.l("Light","淺色",true)
                   : this.theme === "dark"
-                    ? this.l("Dark", "深色")
-                    : this.l("Follow system", "跟隨系統")}
+                    ? this.l("Dark","深色",true)
+                    : this.l("Follow system","跟隨系統",true)}
                 @change=${(e: Event) => {
                   void this.setTheme((e.target as HTMLSelectElement).value);
                 }}
                 >${this.options([
-                  ["system", this.l("Follow system", "跟隨系統")],
-                  ["light", this.l("Light", "淺色")],
-                  ["dark", this.l("Dark", "深色")],
+                  ["system", this.l("Follow system","跟隨系統",true)],
+                  ["light", this.l("Light","淺色",true)],
+                  ["dark", this.l("Dark","深色",true)],
                 ])}</md-outlined-select
               >${!this.restricted?html`<md-text-button
                 @click=${() => {
@@ -1730,22 +1669,17 @@ class MaterialBuildroot extends LitElement {
                   this.closeDialog("setup-dialog", true);
                   void this.navigate("settings");
                 }}
-                >${actionIcon('Review language settings')}${this.l("Review language settings",
-                  "檢視語言設定",
-                )}</md-text-button
+                >${actionIcon('Review language settings')}${this.l("Review language settings","檢視語言設定",true)}</md-text-button
               >`:nothing}`}`;
   }
   private nameField() {
     return html`<md-outlined-text-field
-      label=${this.l("Plan name", "計劃名稱")}
+      label=${this.l("Plan name","計劃名稱",true)}
       .value=${this.newName}
       required
       maxlength="80"
       ?error=${this.nameError}
-      error-text=${this.l(
-        "Enter a name of 1–80 characters. Maximum 100 plans.",
-        "名稱須為 1–80 個字元，最多 100 個計劃。",
-      )}
+      error-text=${this.l("Enter a name of 1–80 characters. Maximum 100 plans.","名稱須為 1–80 個字元，最多 100 個計劃。",true)}
       @input=${(e: Event) => {
         this.newName = (e.composedPath()[0] as HTMLInputElement).value;
         this.nameError = false;
@@ -1762,7 +1696,7 @@ class MaterialBuildroot extends LitElement {
       ><div slot="headline">${title}</div>
       <div slot="content" class="dialog-content stack">
         ${content}${this.notice
-          ? html`<p class="feedback" role="status">${this.restricted?this.noticeEnglish:this.notice}</p>`
+          ? html`<p class="feedback" role="status">${localizedCopy(this.noticeEnglish,this.noticeCantonese,this.effectiveLanguage,true)}</p>`
           : nothing}
       </div>
       <div slot="actions">${actions}</div></md-dialog
@@ -1791,7 +1725,7 @@ class MaterialBuildroot extends LitElement {
   }
   private closeButton(id: string) {
     return html`<md-text-button @click=${() => this.closeDialog(id)}
-      >${actionIcon('Close')}${this.l("Close", "關閉")}</md-text-button
+      >${actionIcon('Close')}${this.l("Close","關閉",true)}</md-text-button
     >`;
   }
   render() {
@@ -1800,22 +1734,19 @@ class MaterialBuildroot extends LitElement {
       <header>
         <md-text-button
           class="menu"
-          aria-label=${this.l("Open navigation", "開啟導覽")}
+          aria-label=${this.l("Open navigation","開啟導覽",true)}
           @click=${(e: Event) => this.openDialog("navigation-dialog", e)}
           >${materialIcon("menu")}</md-text-button
         >
         <div class="brand">
-          <strong>Material Buildroot</strong
-          ><small>${this.l("Desktop workspace", "桌面工作區")}</small>
+          <strong>${wording.productName()}</strong
+          ><small>${this.l("Desktop workspace","桌面工作區",true)}</small>
         </div>
         <md-text-button
-          aria-label=${this.l(
-            "Open actions, Control Shift F",
-            "開啟操作，Control Shift F",
-          )}
+          aria-label=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)}
           @click=${(e: Event) => this.openDialog("actions-dialog", e)}
           >${materialIcon("search","icon")}<span class="palette-label">
-            ${this.l("Actions", "操作")} · Ctrl+Shift+F</span
+            ${this.l("Actions","操作",true)} · Ctrl+Shift+F</span
           ></md-text-button
         >
         <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
@@ -1823,9 +1754,9 @@ class MaterialBuildroot extends LitElement {
             (command, index) =>
               html`<md-text-button
                 aria-label=${[
-                  this.l("Minimize", "最小化"),
-                  this.l("Maximize or restore", "最大化或還原"),
-                  this.l("Close application", "關閉應用程式"),
+                  this.l("Minimize","最小化",true),
+                  this.l("Maximize or restore","最大化或還原",true),
+                  this.l("Close application","關閉應用程式",true),
                 ][index]}
                 ?disabled=${!window.studio}
                 @click=${() => void this.controlWindow(command)}
@@ -1835,14 +1766,14 @@ class MaterialBuildroot extends LitElement {
         </div>
       </header>
       <div class="body">
-        <nav aria-label=${this.l("Workspace navigation", "工作區導覽")}>
+        <nav aria-label=${this.l("Workspace navigation","工作區導覽",true)}>
           ${this.navigation()}
           <div class="spacer"></div>
           <md-text-button
-            aria-label=${this.l("Resume setup", "繼續設定")}
+            aria-label=${this.l("Resume setup","繼續設定",true)}
             @click=${(e: Event) => this.openDialog("setup-dialog", e)}
             ><span class="navsymbol" aria-hidden="true">${materialIcon("tune")}</span><span class="navlabel"
-              >${actionIcon('Setup')}${this.l("Setup", "開始設定")}</span
+              >${actionIcon('Setup')}${this.l("Setup","開始設定",true)}</span
             ></md-text-button
           >
         </nav>
@@ -1856,17 +1787,11 @@ class MaterialBuildroot extends LitElement {
               </h1>
               <p class="muted">
                 ${this.route === "projects"
-                  ? `${this.plans.length} ${this.l("plans", "個計劃")} · ${this.scope()}`
+                  ? `${this.plans.length} ${this.l("plans","個計劃",true)} · ${this.scope()}`
                   : this.route === "activity"
                     ? this.workspaceMode === "durable"
-                      ? this.l(
-                          "Saved workspace changes, up to 100 events.",
-                          "已儲存嘅工作區變更，最多保留 100 項。",
-                        )
-                      : this.l(
-                          "Actual actions from this session, up to 200 events.",
-                          "今次工作階段嘅實際操作，最多保留 200 項。",
-                        )
+                      ? this.l("Saved workspace changes, up to 100 events.","已儲存嘅工作區變更，最多保留 100 項。",true)
+                      : this.l("Actual actions from this session, up to 200 events.","今次工作階段嘅實際操作，最多保留 200 項。",true)
                     : this.route === "settings"
                       ? this.workspaceMode === "durable"
                         ? this.l(
@@ -1878,27 +1803,21 @@ class MaterialBuildroot extends LitElement {
                             "語言會儲存喺呢部電腦，外觀只限今次工作階段。",
                           )
                       : this.route === "operations"
-                        ? this.l(
-                            "Trusted projects, configuration, builds and outputs.",
-                            "可信專案、設定、建置同輸出。",
-                          )
-                        : this.l(
-                            "Installed application provenance",
-                            "已安裝應用程式嘅來源資料",
-                          )}
+                        ? this.l("Trusted projects, configuration, builds and outputs.","可信專案、設定、建置同輸出。",true)
+                        : this.l("Installed application provenance","已安裝應用程式嘅來源資料",true)}
               </p>
             </div>
-            ${!this.setupDone && this.route!=="projects"?html`<md-outlined-button @click=${(e:Event)=>this.openDialog("setup-dialog",e)}>${actionIcon('Start setup')}${this.l("Start setup","開始設定")}</md-outlined-button>`:nothing}
+            ${!this.setupDone && this.route!=="projects"?html`<md-outlined-button @click=${(e:Event)=>this.openDialog("setup-dialog",e)}>${actionIcon('Start setup')}${this.l("Start setup","開始設定",true)}</md-outlined-button>`:nothing}
             ${this.route === "projects"
               ? html`<md-outlined-button
                     ?disabled=${!this.plans.length}
                     @click=${this.exportPlans}
-                    >${actionIcon('Export plans')}${this.l("Export plans", "匯出計劃")}</md-outlined-button
+                    >${actionIcon('Export plans')}${this.l("Export plans","匯出計劃",true)}</md-outlined-button
                   ><md-filled-button
                     ?disabled=${this.plans.length >= 100 ||
                     !this.canEditWorkspace}
                     @click=${(e: Event) => this.beginNew(e)}
-                    >${actionIcon('New plan')}${this.l("New plan", "新增計劃")}</md-filled-button
+                    >${actionIcon('New plan')}${this.l("New plan","新增計劃",true)}</md-filled-button
                   >`
               : nothing}
           </div>
@@ -1906,22 +1825,19 @@ class MaterialBuildroot extends LitElement {
             ? html`<section class="onboarding">
                 <div class="heading">
                   <strong
-                    >${this.l("Set up a project plan", "設定專案計劃")}</strong
+                    >${this.l("Set up a project plan","設定專案計劃",true)}</strong
                   >
                   <p>
-                    ${this.l(
-                      "Choose a runtime, create a plan and review preferences.",
-                      "選擇執行環境、建立計劃，同埋檢視偏好設定。",
-                    )}
+                    ${this.l("Choose a runtime, create a plan and review preferences.","選擇執行環境、建立計劃，同埋檢視偏好設定。",true)}
                   </p>
                 </div>
                 <md-filled-tonal-button
                   @click=${(e: Event) => this.openDialog("setup-dialog", e)}
                   >${this.setupStep
-                    ? this.l("Resume setup", "繼續設定")
-                    : this.l("Start setup", "開始設定")}</md-filled-tonal-button
+                    ? this.l("Resume setup","繼續設定",true)
+                    : this.l("Start setup","開始設定",true)}</md-filled-tonal-button
                 ><md-text-button @click=${this.skipSetup}
-                  >${actionIcon('Skip for now')}${this.l("Skip for now", "暫時略過")}</md-text-button
+                  >${actionIcon('Skip for now')}${this.l("Skip for now","暫時略過",true)}</md-text-button
                 >
               </section>`
             : nothing}${this.route === "settings"
@@ -1944,35 +1860,29 @@ class MaterialBuildroot extends LitElement {
                                 </li>`,
                             )}
                           </ul>`
-                        : html`<h2>${this.l("No activity yet", "未有活動")}</h2>
+                        : html`<h2>${this.l("No activity yet","未有活動",true)}</h2>
                             <p>
-                              ${this.l(
-                                "Creating, editing and exporting plans will appear here.",
-                                "建立、編輯同匯出計劃嘅操作會顯示喺呢度。",
-                              )}
+                              ${this.l("Creating, editing and exporting plans will appear here.","建立、編輯同匯出計劃嘅操作會顯示喺呢度。",true)}
                             </p>`}
                     </section>`
                   : html`<section class="panel view">
-                      <h2>Material Buildroot</h2><details><summary>${this.l("Material Icons license", "Material Icons 授權")}</summary><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></details>
+                      <h2>${wording.productName()}</h2><details><summary>${this.l("Material Icons license","Material Icons 授權",true)}</summary><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></details>
                       <dl>
-                        <dt>${this.l("Version", "版本")}</dt>
+                        <dt>${this.l("Version","版本",true)}</dt>
                         <dd>
                           ${this.state?.version ??
-                          this.l("Unavailable", "未能取得")}
+                          this.l("Unavailable","未能取得",true)}
                         </dd>
-                        <dt>${this.l("Source", "來源")}</dt>
+                        <dt>${this.l("Source","來源",true)}</dt>
                         <dd>
                           ${this.state?.source ??
-                          this.l("Unavailable", "未能取得")}
+                          this.l("Unavailable","未能取得",true)}
                         </dd>
-                        <dt>${this.l("Updated", "更新時間")}</dt>
+                        <dt>${this.l("Updated","更新時間",true)}</dt>
                         <dd>${this.buildTime()}</dd>
                       </dl>
                       <p class="notice">
-                        ${this.l(
-                          "Project execution is not connected to these planning controls.",
-                          "呢啲計劃控制項尚未連接專案執行。",
-                        ) +
+                        ${this.l("Project execution is not connected to these planning controls.","呢啲計劃控制項尚未連接專案執行。",true) +
                         " " +
                         this.scope()}
                       </p>
@@ -1983,7 +1893,7 @@ class MaterialBuildroot extends LitElement {
             .language=${this.effectiveLanguage} .restricted=${this.restricted}
             @workspace-adopted=${this.adoptedProject}
           ></operations-panel>`)}${this.notice
-            ? html`<p class="notice" role="status">${this.restricted?this.noticeEnglish:this.notice}</p>`
+            ? html`<p class="notice" role="status">${localizedCopy(this.noticeEnglish,this.noticeCantonese,this.effectiveLanguage,true)}</p>`
             : nothing}
         </main></workspace-tabs>
       </div>
@@ -1993,16 +1903,16 @@ class MaterialBuildroot extends LitElement {
       <personal-vocabulary-drop .language=${this.effectiveLanguage}></personal-vocabulary-drop>
       ${this.dialog(
         "navigation-dialog",
-        this.l("Navigation", "導覽"),
+        this.l("Navigation","導覽",true),
         html`<div class="dialog-nav">${this.navigation(true)}</div>`,
         this.closeButton("navigation-dialog"),
       )}
       ${this.dialog(
         "new-plan-dialog",
-        this.l("New project plan", "新增專案計劃"),
+        this.l("New project plan","新增專案計劃",true),
         html`<p>${this.scope()}</p>
           ${this.nameField()}<md-outlined-select
-            label=${this.l("Intended runtime", "預定執行環境")}
+            label=${this.l("Intended runtime","預定執行環境",true)}
             .value=${this.newRuntime}
             .displayText=${this.runtimeName(this.newRuntime)}
             @change=${(e: Event) =>
@@ -2017,62 +1927,53 @@ class MaterialBuildroot extends LitElement {
         html`${this.closeButton("new-plan-dialog")}<md-filled-button
             ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
             @click=${() => this.createPlan()}
-            >${actionIcon('Create plan')}${this.l("Create plan", "建立計劃")}</md-filled-button
+            >${actionIcon('Create plan')}${this.l("Create plan","建立計劃",true)}</md-filled-button
           >`,
       )}
       ${this.dialog(
         "details-dialog",
-        this.l("Plan details", "計劃詳情"),
+        this.l("Plan details","計劃詳情",true),
         this.details(),
         this.closeButton("details-dialog"),
       )}
       ${this.dialog(
         "remove-dialog",
-        this.l("Remove this plan?", "移除呢個計劃？"),
+        this.l("Remove this plan?","移除呢個計劃？",true),
         html`<p>${this.selected?.name}</p>
           <p>
             ${this.workspaceMode === "durable"
-              ? this.l(
-                  "This removes the saved plan and pending edits. Existing snapshots may still contain this plan.",
-                  "呢個操作會移除已儲存嘅計劃同待套用變更，現有快照可能仍包含呢個計劃。",
-                )
-              : this.l(
-                  "This removes the session plan and its pending edits. Its name remains in session activity.",
-                  "呢個操作會移除工作階段計劃同待套用變更，活動記錄仍保留其名稱。",
-                )}
+              ? this.l("This removes the saved plan and pending edits. Existing snapshots may still contain this plan.","呢個操作會移除已儲存嘅計劃同待套用變更，現有快照可能仍包含呢個計劃。",true)
+              : this.l("This removes the session plan and its pending edits. Its name remains in session activity.","呢個操作會移除工作階段計劃同待套用變更，活動記錄仍保留其名稱。",true)}
           </p>`,
         html`${this.closeButton("remove-dialog")}<md-filled-button
             @click=${this.removePlan}
-            >${actionIcon('Remove plan')}${this.l("Remove plan", "移除計劃")}</md-filled-button
+            >${actionIcon('Remove plan')}${this.l("Remove plan","移除計劃",true)}</md-filled-button
           >`,
       )}
       ${this.dialog(
         "leave-dialog",
-        this.l("Pending plan changes", "計劃有待套用變更"),
+        this.l("Pending plan changes","計劃有待套用變更",true),
         html`<p>
-          ${this.l(
-            "Apply your edits before continuing, or discard them and use the last applied version.",
-            "繼續之前，請套用變更，或者放棄變更並使用上次套用嘅版本。",
-          )}
+          ${this.l("Apply your edits before continuing, or discard them and use the last applied version.","繼續之前，請套用變更，或者放棄變更並使用上次套用嘅版本。",true)}
         </p>`,
         html`<md-text-button @click=${() => this.closeDialog("leave-dialog")}
-            >${actionIcon('Stay')}${this.l("Stay", "留喺呢度")}</md-text-button
+            >${actionIcon('Stay')}${this.l("Stay","留喺呢度",true)}</md-text-button
           ><md-outlined-button @click=${() => this.finishLeave(false)}
-            >${actionIcon('Discard and continue')}${this.l("Discard and continue", "放棄並繼續")}</md-outlined-button
+            >${actionIcon('Discard and continue')}${this.l("Discard and continue","放棄並繼續",true)}</md-outlined-button
           ><md-filled-button @click=${() => this.finishLeave(true)}
-            >${actionIcon('Apply and continue')}${this.l("Apply and continue", "套用並繼續")}</md-filled-button
+            >${actionIcon('Apply and continue')}${this.l("Apply and continue","套用並繼續",true)}</md-filled-button
           >`,
       )}
       ${this.dialog(
         "setup-dialog",
-        this.l("Workspace setup", "工作區設定"),
+        this.l("Workspace setup","工作區設定",true),
         this.setupView(),
         html`<md-text-button @click=${this.skipSetup}
-            >${actionIcon('Skip for now')}${this.l("Skip for now", "暫時略過")}</md-text-button
+            >${actionIcon('Skip for now')}${this.l("Skip for now","暫時略過",true)}</md-text-button
           >${this.setupStep > 0
             ? html`<md-text-button
                 @click=${() => this.saveSetup(this.setupStep - 1)}
-                >${actionIcon('Back')}${this.l("Back", "上一步")}</md-text-button
+                >${actionIcon('Back')}${this.l("Back","上一步",true)}</md-text-button
               >`
             : nothing}<md-filled-button
             @click=${() => {
@@ -2081,54 +1982,45 @@ class MaterialBuildroot extends LitElement {
               else void this.completeSetup();
             }}
             >${this.setupStep === 0
-              ? this.l("Next", "下一步")
+              ? this.l("Next","下一步",true)
               : this.setupStep === 1
-                ? this.l("Create plan", "建立計劃")
-                : this.l("Open workspace", "開啟工作區")}</md-filled-button
+                ? this.l("Create plan","建立計劃",true)
+                : this.l("Open workspace","開啟工作區",true)}</md-filled-button
           >`,
       )}
       ${this.dialog(
         "restore-dialog",
-        this.l("Restore workspace snapshot?", "還原工作區快照？"),
+        this.l("Restore workspace snapshot?","還原工作區快照？",true),
         html`<p>${this.restoreId.startsWith("revision:")?this.restoreId:this.snapshots.find((s) => s.id === this.restoreId)?.name}</p>
           <p>
-            ${this.l(
-              "This creates a new revision with the selected plans, theme and setup completion. Recorded earlier revisions remain available. Language settings are unchanged.",
-              "呢個操作會以快照取代目前計劃、主題同設定完成狀態，語言設定維持不變。",
-            )}
+            ${this.l("This creates a new revision with the selected plans, theme and setup completion. Recorded earlier revisions remain available. Language settings are unchanged.","呢個操作會以快照取代目前計劃、主題同設定完成狀態，語言設定維持不變。",true)}
           </p>`,
         html`${this.closeButton("restore-dialog")}<md-filled-button
             ?disabled=${!this.canEditWorkspace || this.dirty}
             @click=${this.restoreSnapshot}
-            >${actionIcon('Restore snapshot')}${this.l("Restore snapshot", "還原快照")}</md-filled-button
+            >${actionIcon('Restore snapshot')}${this.l("Restore snapshot","還原快照",true)}</md-filled-button
           >`,
       )}
       ${this.dialog(
         "import-dialog",
-        this.l("Replace workspace from file?", "以檔案取代工作區？"),
+        this.l("Replace workspace from file?","以檔案取代工作區？",true),
         html`<p>${this.importSummary}</p>
           <p>
-            ${this.l(
-              "The host validates the complete document before any change. Existing snapshots remain available.",
-              "主機會喺變更之前驗證完整文件，現有快照仍可使用。",
-            )}
+            ${this.l("The host validates the complete document before any change. Existing snapshots remain available.","主機會喺變更之前驗證完整文件，現有快照仍可使用。",true)}
           </p>`,
         html`${this.closeButton("import-dialog")}<md-filled-button
             ?disabled=${!this.canEditWorkspace ||
             this.dirty ||
             !this.importText}
             @click=${this.applyImport}
-            >${actionIcon('Import and replace')}${this.l("Import and replace", "匯入並取代")}</md-filled-button
+            >${actionIcon('Import and replace')}${this.l("Import and replace","匯入並取代",true)}</md-filled-button
           >`,
       )}
       ${this.dialog(
         "actions-dialog",
-        this.l("Workspace actions", "工作區操作"),
+        this.l("Workspace actions","工作區操作",true),
         html`<p class="muted">
-            ${this.l(
-              "Choose an action. Use Tab to move between actions and Enter to activate.",
-              "選擇操作，按 Tab 切換操作，按 Enter 執行。",
-            )}
+            ${this.l("Choose an action. Use Tab to move between actions and Enter to activate.","選擇操作，按 Tab 切換操作，按 Enter 執行。",true)}
           </p>
           <div class="commands stack" @keydown=${this.commandKeys}>
             ${["projects", "operations", "activity", "settings", "about"].map(
@@ -2140,26 +2032,26 @@ class MaterialBuildroot extends LitElement {
                   }}
                   >${this.routeLabel(route)}</md-text-button
                 >`,
-            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好')}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程')}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.activeOperations() as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件")}</md-text-button><md-text-button
+            )}<md-text-button @click=${this.sharedPreferenceAction}>${materialIcon('security','icon')}${this.l('Shared preference','共用偏好',true)}</md-text-button><md-text-button @click=${this.scheduledPreferenceAction}>${materialIcon('history','icon')}${this.l('Scheduled preferences','偏好排程',true)}</md-text-button>${vocabulary.school()==='inactive'?(['upload','status','clear'] as const).map(action=>html`<md-text-button @click=${()=>this.vocabularyAction(action)}>${materialIcon(action==='upload'?'upload':action==='clear'?'delete':'info','icon')}${action==='upload'?this.owned('Import personal vocabulary','匯入個人詞彙'):action==='clear'?this.owned('Clear personal vocabulary','清除個人詞彙'):this.owned('Personal vocabulary status','個人詞彙狀態')}</md-text-button>`):nothing}<md-text-button @click=${async()=>{this.closeDialog("actions-dialog",true);await this.navigate("operations");await this.updateComplete;const panel=this.activeOperations() as any;if(panel)panel.tab="documentation";}}>${materialIcon("help_outline","icon")}${this.l("Help & documentation","說明同文件",true)}</md-text-button><md-text-button
               ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace}
               @click=${() => {
                 this.closeDialog("actions-dialog");
                 this.beginNew();
               }}
-              >${actionIcon('New plan')}${this.l("New plan", "新增計劃")}</md-text-button
+              >${actionIcon('New plan')}${this.l("New plan","新增計劃",true)}</md-text-button
             ><md-text-button
               ?disabled=${!this.plans.length}
               @click=${() => {
                 this.closeDialog("actions-dialog");
                 this.exportPlans();
               }}
-              >${actionIcon('Export plans')}${this.l("Export plans", "匯出計劃")}</md-text-button
+              >${actionIcon('Export plans')}${this.l("Export plans","匯出計劃",true)}</md-text-button
             ><md-text-button
               @click=${() => {
                 this.closeDialog("actions-dialog");
                 this.openDialog("setup-dialog");
               }}
-              >${actionIcon('Resume setup')}${this.l("Resume setup", "繼續設定")}</md-text-button
+              >${actionIcon('Resume setup')}${this.l("Resume setup","繼續設定",true)}</md-text-button
             >
           </div>`,
         this.closeButton("actions-dialog"),

@@ -1,3 +1,4 @@
+import {localizedCopy} from './language-wording';
 import { LitElement, html, css } from 'lit';
 import '@material/web/dialog/dialog.js';
 import '@material/web/checkbox/checkbox.js';
@@ -28,7 +29,7 @@ export class DestructiveConfirmation extends LitElement {
     :focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:3px}
     @media(prefers-reduced-motion:reduce){.fill{transition:none}.complete{animation:none}}
   `;
-  private l(en:string,zh:string){return this.language==='en'?en:this.language==='zh-HK'?zh:en+' / '+zh;}
+  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   async request(origin?:HTMLElement):Promise<DestructiveProof|null>{
     this.origin=origin;
     const result=new Promise<DestructiveProof|null>(resolve=>this.finish=resolve);
@@ -57,19 +58,19 @@ export class DestructiveConfirmation extends LitElement {
     if(!this.challenge)return html``;
     const ready=this.first&&this.second&&!this.expired;
     return html`<md-dialog @cancel=${(event:Event)=>{event.preventDefault();void this.close();}} @closed=${()=>this.settle(this.outcome)}>
-      <div slot="headline">${this.l('Confirm clean build output','確認清除建置輸出')}</div>
+      <div slot="headline">${this.l('Confirm clean build output','確認清除建置輸出',true)}</div>
       <div slot="content" class="content">
-        <p>${this.l('Operation','操作')}: <code>${this.challenge.operation}</code></p>
-        <p>${this.l('Exact affected output directory','確切受影響輸出目錄')}: <code>${this.challenge.destination}</code></p>
-        <p>${this.l('This runs the fixed Buildroot clean target in this output directory. Generated build output is removed. Source files and configuration are retained by the clean target. Removed output cannot be restored by undo.','此操作會喺此輸出目錄執行固定嘅 Buildroot clean 目標，移除產生嘅建置輸出。clean 目標會保留原始碼同設定。已移除輸出無法復原。')}</p>
-        <label><md-checkbox ?checked=${this.first} ?disabled=${this.expired} @change=${(e:Event)=>this.key('first',e)} aria-label=${this.l('Key one: affected destination reviewed','第一把鎖：已核對受影響位置')}></md-checkbox>${this.l('Key one: I reviewed the exact destination.','第一把鎖：已核對確切位置。')}</label>
-        <label><md-checkbox ?checked=${this.second} ?disabled=${this.expired} @change=${(e:Event)=>this.key('second',e)} aria-label=${this.l('Key two: output removal authorized','第二把鎖：授權移除輸出')}></md-checkbox>${this.l('Key two: I authorize removal of generated output.','第二把鎖：授權移除產生嘅輸出。')}</label>
-        <label><md-checkbox ?checked=${this.rebuild} ?disabled=${this.expired} @change=${(e:Event)=>{this.rebuild=(e.target as HTMLInputElement).checked;this.progress=0;}} aria-label=${this.l('Acknowledge separate rebuild consent','確認另行授權重建')}></md-checkbox>${this.l('I consent to cleaning this output and understand the next build must rebuild it. This action never starts that rebuild automatically.','同意清除此輸出，並明白下次建置需要重新產生輸出。此操作絕不會自動啟動重建。')}</label>
-        <md-slider min="0" max="100" step="1" .value=${this.progress} ?disabled=${!ready||!this.rebuild} labeled aria-label=${this.l('Move confirmation to one hundred percent','將確認滑桿移至百分之一百')} @input=${(e:Event)=>{if(ready&&this.rebuild)this.progress=Number((e.target as HTMLInputElement).value);}}></md-slider>
+        <p>${this.l('Operation','操作',true)}: <code>${this.challenge.operation}</code></p>
+        <p>${this.l('Exact affected output directory','確切受影響輸出目錄',true)}: <code>${this.challenge.destination}</code></p>
+        <p>${this.l('This runs the fixed Buildroot clean target in this output directory. Generated build output is removed. Source files and configuration are retained by the clean target. Removed output cannot be restored by undo.','此操作會喺此輸出目錄執行固定嘅 Buildroot clean 目標，移除產生嘅建置輸出。clean 目標會保留原始碼同設定。已移除輸出無法復原。',true)}</p>
+        <label><md-checkbox ?checked=${this.first} ?disabled=${this.expired} @change=${(e:Event)=>this.key('first',e)} aria-label=${this.l('Key one: affected destination reviewed','第一把鎖：已核對受影響位置',true)}></md-checkbox>${this.l('Key one: I reviewed the exact destination.','第一把鎖：已核對確切位置。',true)}</label>
+        <label><md-checkbox ?checked=${this.second} ?disabled=${this.expired} @change=${(e:Event)=>this.key('second',e)} aria-label=${this.l('Key two: output removal authorized','第二把鎖：授權移除輸出',true)}></md-checkbox>${this.l('Key two: I authorize removal of generated output.','第二把鎖：授權移除產生嘅輸出。',true)}</label>
+        <label><md-checkbox ?checked=${this.rebuild} ?disabled=${this.expired} @change=${(e:Event)=>{this.rebuild=(e.target as HTMLInputElement).checked;this.progress=0;}} aria-label=${this.l('Acknowledge separate rebuild consent','確認另行授權重建',true)}></md-checkbox>${this.l('I consent to cleaning this output and understand the next build must rebuild it. This action never starts that rebuild automatically.','同意清除此輸出，並明白下次建置需要重新產生輸出。此操作絕不會自動啟動重建。',true)}</label>
+        <md-slider min="0" max="100" step="1" .value=${this.progress} ?disabled=${!ready||!this.rebuild} labeled aria-label=${this.l('Move confirmation to one hundred percent','將確認滑桿移至百分之一百',true)} @input=${(e:Event)=>{if(ready&&this.rebuild)this.progress=Number((e.target as HTMLInputElement).value);}}></md-slider>
         <div class="meter" aria-hidden="true"><div class=${this.progress===100?'fill complete':'fill'} style=${'width:'+this.progress+'%'}></div></div>
-        <p role="status">${this.expired?this.l('Confirmation expired. Cancel and request again.','確認已過期，請取消並重新要求。'):this.progress===100?this.l('Authorization ready. Confirm to queue the clean target.','授權準備完成，按確認以排入清除目標。'):this.l('Both keys and the full slider are required.','必須操作兩把鎖並完成滑桿。')}</p>
+        <p role="status">${this.expired?this.l('Confirmation expired. Cancel and request again.','確認已過期，請取消並重新要求。',true):this.progress===100?this.l('Authorization ready. Confirm to queue the clean target.','授權準備完成，按確認以排入清除目標。',true):this.l('Both keys and the full slider are required.','必須操作兩把鎖並完成滑桿。',true)}</p>
       </div>
-      <div slot="actions"><md-text-button @click=${()=>this.close()}>${this.l('Emergency exit','緊急退出')}</md-text-button><md-filled-button ?disabled=${!ready||!this.rebuild||this.progress!==100} @click=${()=>this.close(true)}>${this.l('Queue clean target','排入清除目標')}</md-filled-button></div>
+      <div slot="actions"><md-text-button @click=${()=>this.close()}>${this.l('Emergency exit','緊急退出',true)}</md-text-button><md-filled-button ?disabled=${!ready||!this.rebuild||this.progress!==100} @click=${()=>this.close(true)}>${this.l('Queue clean target','排入清除目標',true)}</md-filled-button></div>
     </md-dialog>`;
   }
 }
