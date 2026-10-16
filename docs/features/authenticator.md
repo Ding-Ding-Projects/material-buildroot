@@ -1,5 +1,7 @@
 # Local authenticator and pairing
 
+[香港粵語](authenticator.zh-HK.md)
+
 The Authenticator destination adds local TOTP enrollment and code display. It is registered in the existing workspace destination catalog and command provider, using the same shell navigation consumer. It does not contact an account service, synchronize entries or check time over the network.
 
 ## Enrollment

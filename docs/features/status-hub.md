@@ -1,5 +1,7 @@
 # Authenticated status integration
 
+[香港粵語](status-hub.zh-HK.md)
+
 The trusted desktop process references the maintained Status Hub JavaScript client
 from the maintainer-managed local client installation. It does not copy the private
 emission implementation or credentials into the application package. Without that

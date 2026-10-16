@@ -1,5 +1,7 @@
 # Image presets and target account plans
 
+[香港粵語](README.zh-HK.md)
+
 ## Presets
 
 The configuration workspace offers additive minimal, desktop, server and appliance presets. Minimal requests BusyBox; server also requests Dropbear; appliance also requests SquashFS. Minimal does not strip an existing configuration. Desktop selects Weston, Cage or X.Org when its Boolean symbol exists and is assignable in the selected source's semantic Kconfig tree. X.Org is a display server, not a complete desktop shell.
