@@ -360,6 +360,7 @@ export class OperationsPanel extends LitElement {
       trust: true,
     });
     if (result !== undefined) {
+      if(!this.dispatchEvent(new CustomEvent('workspace-adopted',{bubbles:true,composed:true,cancelable:true,detail:result}))) { this.selection=undefined;this.trust=false;return; }
       this.workspace = result;
       this.configTrustPreview = undefined; this.configTrustAccepted = false;
       this.config = undefined;
@@ -1406,6 +1407,7 @@ export class OperationsPanel extends LitElement {
         .workspaceId=${this.workspace?.workspaceId ?? ""}
         .language=${this.language}
         @source-adopted=${(event: CustomEvent) => {
+          if(!this.dispatchEvent(new CustomEvent('workspace-adopted',{bubbles:true,composed:true,cancelable:true,detail:event.detail})))return;
           this.workspace = event.detail;
           this.config = undefined;
           this.artifacts = [];

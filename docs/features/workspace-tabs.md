@@ -1,0 +1,15 @@
+# Project workspace tabs
+
+The desktop shell retains one operations-panel instance for each adopted project. Its key is the stable workspace ID returned by the trusted project-registration service. Selecting the same project again focuses that instance. Different projects retain separate configuration edits, source state, output and tool forms. Closing navigation does not destroy the instance or delete project data. Native title-bar controls are unchanged.
+
+Use **New tab** to choose a destination. The catalog contains the existing root pages, each operations workspace, each settings category and setup. Regular navigation changes the current working surface without automatically creating utility tabs. Catalog search defaults to literal matching and uses the existing adjacent regex workbench with worker timeout and expression validation.
+
+The strip defaults to the left and can dock to all four edges through its management surface or context menu. Layout metadata is stored locally: open identities, pin state, order, group names, group order, membership, collapse state and docking. This data is not execution authority. After restarting, a saved project must be opened through the native folder picker to renew trusted access. Re-adoption reuses its stable tab identity.
+
+Pinned tabs have a separate scrolling region. Drag tabs to reorder or move between groups; use Alt plus the orientation-appropriate arrow key to reorder and Alt+P to pin. Arrow keys move focus, Home/End select an edge, and Enter/Space activates. The management surface also offers named buttons for these actions. All labels remain horizontal at every edge. Narrow side strips retain icon buttons with accessible full names.
+
+The searchable tab manager remains available regardless of overflow. It provides separate searches for all open tabs, groups and each group's members. Each search owns its independent regex state. Matching and nonmatching close actions require a valid nonempty search, preview their selected labels and exclude pins unless explicitly included. Existing unsaved language and scheduled-preference decisions remain in the owning shell; retained project instances preserve their drafts when hidden or closed.
+
+## Verification and limits
+
+This implementation was prepared in the speed-focused release mode. Runtime interaction, accessibility acceptance, display-scale geometry, persisted restart behavior and screenshots were deliberately not exercised. A successful production build is compilation evidence only. Per-tab and per-group appearance controls are supplied by the separate appearance integration through stable target identities; this change does not claim that integration's runtime acceptance. The catalog lists destinations, not arbitrary executable commands, and never authorizes execution from persisted metadata.
