@@ -61,7 +61,7 @@ function embeddedZip(setup) {
       const name=central.toString('utf8',p+46,p+46+nameLength),bytes=central.readUInt32LE(p+24),compressed=central.readUInt32LE(p+20),localOffset=central.readUInt32LE(p+42);
       if(!/^[A-Za-z0-9_.-]+$/.test(name)||entries.some(entry=>entry.name.toLowerCase()===name.toLowerCase()))throw Error('Setup embedded ZIP has an unsafe or duplicate filename.');
       const local=read(zip.offset+localOffset,30);
-      if(local.readUInt32LE(0)!==0x04034b50||local.readUInt16LE(8)!==method)throw Error('Setup embedded ZIP local record differs.');
+      if(local.readUInt32LE(0)!==0x04034b50||local.readUInt16LE(8)!==method||local.readUInt16LE(6)!==flags||read(zip.offset+localOffset+30,local.readUInt16LE(26)).toString('utf8')!==name)throw Error('Setup embedded ZIP local record differs.');
       const data=localOffset+30+local.readUInt16LE(26)+local.readUInt16LE(28);
       if(data+compressed>centralOffset||bytes===0)throw Error('Setup embedded ZIP member escapes its data range.');
       entries.push({name,bytes,compressed,method,offset:zip.offset+data});p+=46+nameLength+extra+comment;
