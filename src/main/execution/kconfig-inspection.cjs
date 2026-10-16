@@ -6,6 +6,8 @@ const { boundedProcess } = require("./index.cjs");
 const { resolveConfigurationScripts } = require("../configuration/kconfig-adapter.cjs");
 const fail = code => { throw Object.assign(new Error(code), { code }); };
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
+const sameBinding = (left, right) => left && right &&
+  ["admissionId", "sourceRevision", "configRevision"].every(key => left[key] === right[key]);
 const inside = (root, file) => {
   const relative = path.relative(root, file);
   return relative === "" || (!path.isAbsolute(relative) && relative !== ".." && !relative.startsWith(`..${path.sep}`));
@@ -58,13 +60,17 @@ function createKconfigInspection({ execution, resolveContext, onOwnership } = {}
       fail("INVALID_KCONFIG_OPERATION");
     const context = await resolveContext(operation.admissionId);
     const grant = execution.grants.get(context?.grantId);
-    if (!grant || !context.runtime || JSON.stringify(context.binding) !== JSON.stringify(operation.request?.binding))
+    if (!grant || !context.runtime || !sameBinding(context.binding, operation.request?.binding))
       fail("KCONFIG_ADMISSION_CHANGED");
+    const lockRoots = [...new Set([grant.source, grant.output])];
+    if (lockRoots.some(root => execution.locks.has(root))) fail("KCONFIG_PROJECT_BUSY");
+    for (const root of lockRoots) execution.locks.add(root);
+    try {
     const validate = async () => {
       if (operation.signal?.aborted) fail("KCONFIG_CANCELLED");
       const current = await resolveContext(operation.admissionId);
       if (execution.grants.get(context.grantId) !== grant ||
-          JSON.stringify(current?.binding) !== JSON.stringify(context.binding) ||
+          !sameBinding(current?.binding, context.binding) ||
           JSON.stringify(current?.runtime) !== JSON.stringify(context.runtime) ||
           current?.sourceRoot !== context.sourceRoot || current?.outputRoot !== context.outputRoot)
         fail("KCONFIG_ADMISSION_CHANGED");
@@ -201,6 +207,9 @@ function createKconfigInspection({ execution, resolveContext, onOwnership } = {}
       return response;
     } finally {
       operation.signal?.removeEventListener("abort",cancel);
+    }
+    } finally {
+      for (const root of lockRoots) execution.locks.delete(root);
     }
   };
 }

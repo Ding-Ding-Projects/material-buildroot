@@ -178,7 +178,7 @@ function createKconfigAdapter({
           fail("KCONFIG_ADMISSION_CHANGED");
         if (!result || result.available !== true || result.adapter !== "kconfiglib" ||
             result.version !== "14.1.0" || result.evaluationMode !== "trusted-linux-runtime-v1" ||
-            JSON.stringify(result.binding) !== JSON.stringify(binding) ||
+            !result.binding || ["admissionId", "sourceRevision", "configRevision"].some(key => result.binding[key] !== binding[key]) ||
             !result.tree || typeof result.tree !== "object" ||
             Buffer.byteLength(JSON.stringify(result)) > 16 * 1024 * 1024)
           fail("KCONFIG_INVALID_RESPONSE");
