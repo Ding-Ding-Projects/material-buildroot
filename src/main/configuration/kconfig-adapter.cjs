@@ -30,12 +30,19 @@ function createKconfigAdapter({
   pythonExecutable,
   admitted = false,
   timeoutMs = 30000,
+  executeInspection,
+  resolveAdmission,
 } = {}) {
-  if (admitted !== true || !path.isAbsolute(pythonExecutable || ""))
+  const runtimeMode = typeof executeInspection === "function";
+  if (runtimeMode && typeof resolveAdmission !== "function")
+    fail("KCONFIG_SOURCE_TRUST_REQUIRED");
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 120000)
+    fail("INVALID_KCONFIG_TIMEOUT");
+  if (!runtimeMode && (admitted !== true || !path.isAbsolute(pythonExecutable || "")))
     fail("PYTHON_NOT_ADMITTED");
   return async function inspect(roots) {
-    const python = await fs.realpath(pythonExecutable);
-    if (!(await fs.stat(python)).isFile()) fail("PYTHON_NOT_ADMITTED");
+    const python = runtimeMode ? null : await fs.realpath(pythonExecutable);
+    if (!runtimeMode && !(await fs.stat(python)).isFile()) fail("PYTHON_NOT_ADMITTED");
     const sourceRoot = await fs.realpath(roots.sourceRoot),
       outputRoot = await fs.realpath(roots.outputRoot);
     const metadata = roots.kconfig || {};
@@ -123,6 +130,63 @@ function createKconfigAdapter({
       if (createHash("sha256").update(bytes).digest("hex") !== digest)
         fail("KCONFIG_INTEGRITY_FAILED");
     }
+    const request = {
+      sourceRoot,
+      sourceReference: kconfigPath(sourceRoot),
+      outputRoot,
+      outputReference: kconfigPath(outputRoot),
+      externalRoots,
+      externalTrees,
+      buildroot,
+      entrypoint,
+      environment,
+      prefix,
+    };
+    if (runtimeMode) {
+      const admission = await resolveAdmission(roots);
+      const binding = runtimeBinding(admission);
+      const helperBytes = await fs.readFile(helper);
+      const moduleBytes = await fs.readFile(path.join(vendor, "kconfiglib.py"));
+      const controller = new AbortController();
+      let timer;
+      const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          controller.abort();
+          reject(Object.assign(new Error("KCONFIG_TIMEOUT"), { code: "KCONFIG_TIMEOUT" }));
+        }, timeoutMs);
+      });
+      try {
+        // A fixed host operation, never a command or executable from the renderer.
+        // The transport maps admitted paths to Linux paths and owns the child.
+        const result = await Promise.race([timeout, executeInspection(Object.freeze({
+          operation: "inspect-kconfig-v1",
+          admissionId: binding.admissionId,
+          runtime: admission.runtime,
+          request: { ...request, evaluationMode: "trusted-linux-runtime-v1", binding },
+          bundle: {
+            helper: helperBytes.toString("base64"),
+            helperSha256: createHash("sha256").update(helperBytes).digest("hex"),
+            module: moduleBytes.toString("base64"),
+            moduleSha256: receipt.files["kconfiglib.py"],
+            version: "14.1.0",
+          },
+          signal: controller.signal,
+        }))]);
+        if (controller.signal.aborted) fail("KCONFIG_TIMEOUT");
+        const current = runtimeBinding(await resolveAdmission(roots));
+        if (JSON.stringify(current) !== JSON.stringify(binding))
+          fail("KCONFIG_ADMISSION_CHANGED");
+        if (!result || result.available !== true || result.adapter !== "kconfiglib" ||
+            result.version !== "14.1.0" || result.evaluationMode !== "trusted-linux-runtime-v1" ||
+            JSON.stringify(result.binding) !== JSON.stringify(binding) ||
+            !result.tree || typeof result.tree !== "object" ||
+            Buffer.byteLength(JSON.stringify(result)) > 16 * 1024 * 1024)
+          fail("KCONFIG_INVALID_RESPONSE");
+        return result;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
     return new Promise((resolve, reject) => {
       const child = spawn(python, ["-I", "-B", helper], {
         cwd: sourceRoot,
@@ -183,20 +247,21 @@ function createKconfigAdapter({
       });
       child.stdin.on("error", () => {});
       child.stdin.end(
-        JSON.stringify({
-          sourceRoot,
-          sourceReference: kconfigPath(sourceRoot),
-          outputRoot,
-          outputReference: kconfigPath(outputRoot),
-          externalRoots,
-          externalTrees,
-          buildroot,
-          entrypoint,
-          environment,
-          prefix,
-        }),
+        JSON.stringify(request),
       );
     });
+  };
+}
+function runtimeBinding(admission) {
+  if (!admission || admission.sourceTrusted !== true ||
+      !["wsl2", "docker"].includes(admission.runtime) ||
+      !["admissionId", "sourceRevision", "configRevision"].every(key =>
+        typeof admission[key] === "string" && /^[A-Za-z0-9._:-]{1,256}$/.test(admission[key])))
+    fail("KCONFIG_SOURCE_TRUST_REQUIRED");
+  return {
+    admissionId: admission.admissionId,
+    sourceRevision: admission.sourceRevision,
+    configRevision: admission.configRevision,
   };
 }
 module.exports = {

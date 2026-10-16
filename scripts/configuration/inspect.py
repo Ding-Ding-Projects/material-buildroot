@@ -1,8 +1,19 @@
 """Read-only Kconfig bridge. Input is supplied by the admitted host adapter."""
-import sys, os, json, io
+import sys, os, json, io, contextlib
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'vendor'))
 import kconfiglib as k
 request = json.load(sys.stdin)
+trusted_runtime = request.get('evaluationMode') == 'trusted-linux-runtime-v1'
+if trusted_runtime:
+    if sys.platform != 'linux' or not hasattr(os, 'geteuid') or os.geteuid() == 0:
+        raise PermissionError('Trusted Kconfig evaluation requires a non-root Linux runtime')
+    binding = request.get('binding', {})
+    if not all(isinstance(binding.get(key), str) and binding[key] for key in
+               ('admissionId', 'sourceRevision', 'configRevision')):
+        raise PermissionError('Missing source-specific Kconfig admission')
+    # Load standard subprocess machinery before installing the read-only audit
+    # hook. Source commands are allowed only in the separately admitted runtime.
+    import subprocess
 source = os.path.realpath(request['sourceRoot'])
 output = os.path.realpath(request['outputRoot'])
 allowed = [source, output] + request.get('externalRoots', [])
@@ -18,6 +29,10 @@ def inside(filename):
 # Restrict file reads, including Kconfig source statements, to admitted trees and
 # the vendored module. Python audit hooks run before the underlying open.
 def audit(event, args):
+    if trusted_runtime:
+        # This is execution of explicitly trusted source, not a Python sandbox.
+        # Runtime isolation, process ownership and cancellation belong to the host.
+        return
     if event in ('subprocess.Popen', 'os.system', 'os.exec', 'os.posix_spawn', 'exec'):
         raise PermissionError('Kconfig command evaluation requires a separate admitted adapter')
     if event == 'open' and isinstance(args[0], (str, bytes)):
@@ -31,6 +46,8 @@ sys.addaudithook(audit)
 os.chdir(source)
 os.environ.clear()
 os.environ.update(request.get('environment', {}))
+# Do not import source-provided Python extensions as a side effect of parsing.
+os.environ['KCONFIG_FUNCTIONS'] = '_material_buildroot_no_source_python_plugins_'
 os.environ['srctree'] = request.get('sourceReference', source)
 os.environ['objtree'] = request.get('outputReference', output)
 os.environ['CONFIG_'] = request.get('prefix', '')
@@ -67,7 +84,11 @@ class ReadOnlyKconfig(k.Kconfig):
         if mode == 'r' and canonical in virtual:
             return io.StringIO(virtual[canonical])
         return super()._open(filename, mode)
-conf = ReadOnlyKconfig(request.get('entrypoint', 'Config.in'), warn_to_stderr=False, suppress_traceback=True)
+# Kconfig's info function prints to stdout. Keep the protocol stream exclusively
+# JSON while retaining bounded diagnostics separately.
+diagnostics = io.StringIO()
+with contextlib.redirect_stdout(diagnostics):
+    conf = ReadOnlyKconfig(request.get('entrypoint', 'Config.in'), warn_to_stderr=False, suppress_traceback=True)
 config = os.path.join(output, '.config')
 if os.path.isfile(config):
     conf.load_config(config)
@@ -95,7 +116,7 @@ def node_json(node, depth=0):
         children.append(node_json(child, depth + 1)); child = child.next
     result['children'] = children
     return result
-result = {'available': True, 'adapter': 'kconfiglib', 'version': '14.1.0', 'externalTrees': [{'name': tree['name'], 'description': tree['description']} for tree in request.get('externalTrees', [])], 'tree': node_json(conf.top_node), 'warnings': conf.warnings[:1000]}
+result = {'available': True, 'adapter': 'kconfiglib', 'version': '14.1.0', 'evaluationMode': 'trusted-linux-runtime-v1' if trusted_runtime else 'read-only-host', 'binding': request.get('binding') if trusted_runtime else None, 'reconciliationAuthority': 'source-native-conf-required', 'externalTrees': [{'name': tree['name'], 'description': tree['description']} for tree in request.get('externalTrees', [])], 'tree': node_json(conf.top_node), 'warnings': conf.warnings[:1000], 'diagnostics': diagnostics.getvalue()[:8192]}
 encoded = json.dumps(result)
 if len(encoded) > 16 * 1024 * 1024:
     raise ValueError('Kconfig JSON limit exceeded')
