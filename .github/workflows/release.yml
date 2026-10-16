@@ -39,7 +39,12 @@ jobs:
       - name: Build genuine unsigned Squirrel installer
         shell: cmd
         run: build-installer.bat /s
+      - name: Determine exact-source publication eligibility
+        id: publication
+        shell: powershell
+        run: .\scripts\ci\publication-eligibility.ps1
       - name: Publish exact-source normal release
+        if: ${{ steps.publication.outputs.eligible == 'true' }}
         shell: powershell
         run: |
           & .\.cache\toolchains\node-24.22.0\active\node.exe scripts/release/publish.cjs
@@ -60,4 +65,5 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
           compression-level: 0
+
 
