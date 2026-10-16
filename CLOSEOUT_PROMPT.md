@@ -1,21 +1,13 @@
-# Active isolated implementation handoff
+# Active implementation continuation
 
-## Objective and boundary
+Complete the finite roadmap implementation with one worker per leaf. All tests, reviews, audits, static analysis and captures remain deliberately deferred, including VM and Docker tests. No full completion is claimed.
 
-Complete the finite Material Buildroot roadmap implementation with one worker per unfinished implementation leaf, isolated ownership, prompt main integration and normal release delivery. All tests, reviews, audits, static analysis and captures are intentionally deferred, including VM and Docker tests. Acceptance-only tasks remain open. No full product completion is claimed.
+Verified remote main before this record: fb3dcdf3d782a7807d4ece621dea99d652f1f62e. It includes history/evidence, appearance and shared command destinations, experience permissions, background updates and retained project tabs in addition to earlier foundational work. The cumulative desktop build at this source is running. Release v0.1.0-build.88.1 was read back at source02acf2ad674a1bc36360677a2704d38eeb1aa93b with five expected nonempty assets and normal release flags. This is not complete offline packaging evidence.
 
-## Integration and production
+Full offline assembly: 10 tools, 30972 files,3760387226 raw bytes. Packaging producer bd0a4fce58cc69cd9ec19b30ba86a9ec7d166720 uses source-bound short private staging after NuGet path limits; final package size/result pending. Never publish local version0.1.1000. Preserve packaging merge d29a4ce6c9d49131a802593988e2c88d2676a42f with its known message metadata deviation, no history rewrite.
 
-Initial baseline cb88af0c006b62f5ab300630d4093f63ec8714d7. Verified remote main before this record: 88de056deadb40858b868296af6b39c24b1d0cc6. It includes file grants, project migrations, bootstrap repair, scoped vault, consumer dispositions, guest/container controls, search/provider interfaces, configuration semantics and clean-build consent.
-Exact root builds produced the individual candidates. A cumulative unsigned Squirrel installer at f1489c2f5a1a439208eb33352a3f81cd7e735ca2 has receipt SHA-256 2849191ecfdd1148d281b42d841064c79f0d97c5ca73b947e1103b3f559225c0. Later changes require their own production proof.
-Normal releases v0.1.0-build.56.1 and v0.1.0-build.58.1 were verified against exact source tags and expected nonempty assets. Later releases are asynchronous; do not infer their results.
+Active branches: task/project-workflows, task/workspace-tabs, task/source-lifecycle, task/build-queues, task/configuration-controls, task/defconfig-workflows, task/package-editors, task/squirrel-packaging. WSL49bd3f2 is built and incorporated into project-workflows. Preserve prerequisite ancestry when integrating. Queue records are in docs/planning/implementation-queue.json.
 
-## Active queue
+Continue independent implementation and candidate-bound production, preserve each owning branch, integrate coherent built contributions, push main and verify exact remote refs. Update shared records after each meaningful integration. Runtime and evidence acceptance remain open, never tick them from compilation alone.
 
-History/export 9e689cf9f63dd94b4ddd34ae2e36b66b13976d1c and evidence admission 38044fd6f3f6378e3baaf707883382fecaf8c8f8 have successful pinned desktop builds and await integration. Appearance, experience policies, updater, genuine package version/delta production and workspace tabs remain active. Their owning branches are listed in docs/planning/implementation-queue.json; inspect current branch tips and producer receipts before resuming. Do not change any active producer's source, index or refs.
-Consumer mapping has 436 dispositions and 45 bounded current maps; exhaustive current admission remains incomplete. Missing native-handle protection, complete dynamic control identities and advanced appearance requirements remain explicit source gaps. Runtime proof is deferred everywhere in this pass.
-
-## Next steps and preservation
-
-Integrate built coherent contributions independently, preserve each owning branch first, push main and verify exact remote refs. Update documentation indexes and source-bound handoff records. Continue queued roadmap leaves with one worker each, preserving path ownership. Do not relabel old packages as newer-source proof.
-No cleanup has occurred. Preserve every active/unfinished checkout and all ignored private announcement variants. Before deleting exact owned inactive merged candidates, verify the required archive and remote ancestry. No force-push, unrelated deletion, host power/login action, security weakening or private publication is authorized. The goal remains active and incomplete.
+No cleanup has occurred. Preserve all active/unfinished checkouts and private ignored announcement variants. Only delete task-owned inactive merged candidates after verified archive and remote ancestry. No force push, unrelated deletion, host power/login action or private publication. Goal remains active. Latest account allowance reading was83 percent remaining; no battery-preservation trigger was observed.
