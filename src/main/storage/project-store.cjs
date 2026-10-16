@@ -3,6 +3,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const MAX_BYTES = 8 * 1024 * 1024;
+const STORAGE_IDENTITY = Object.freeze({
+  applicationId: "com.dingdingprojects.materialbuildroot",
+  surface: "desktop",
+});
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 function fail(code) {
@@ -102,10 +106,22 @@ function parse(serialized) {
     }
   }
   const state = JSON.parse(serialized);
-  exact(state, ["format", "version", "revision", "projects"]);
+  // Reads migrate only known formats in memory; successful mutations persist v2.
+  if (state && state.version === 1) {
+    exact(state, ["format", "version", "revision", "projects"]);
+    if (state.format !== "material-buildroot-projects") fail("STORAGE_UNAVAILABLE");
+    state.version = 2;
+    state.storage = { ...STORAGE_IDENTITY };
+  }
+  exact(state, ["format", "version", "storage", "revision", "projects"]);
+  exact(state.storage, ["applicationId", "surface"]);
+  if (
+    state.storage.applicationId !== STORAGE_IDENTITY.applicationId ||
+    state.storage.surface !== STORAGE_IDENTITY.surface
+  ) fail("STORAGE_UNAVAILABLE");
   if (
     state.format !== "material-buildroot-projects" ||
-    state.version !== 1 ||
+    state.version !== 2 ||
     !Number.isSafeInteger(state.revision) ||
     state.revision < 0 ||
     !Array.isArray(state.projects) ||
@@ -156,7 +172,8 @@ function createProjectStore({ filePath }) {
           }
           return {
             format: "material-buildroot-projects",
-            version: 1,
+            version: 2,
+            storage: { ...STORAGE_IDENTITY },
             revision: 0,
             projects: [],
           };
