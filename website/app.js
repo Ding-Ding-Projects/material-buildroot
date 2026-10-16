@@ -1,4 +1,5 @@
 import { mountCompanionConsumers } from './companion-consumers.js';
+import {createPairingIdentity, pairingHeaders} from './pairing-client.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
@@ -423,6 +424,8 @@ if (visitor) {
       } catch(error){active.sequenceUnknown=true;throw error;}
       finally{consumerBusy=false;}
     }});
+  let pairingIdentity = null;
+  let pairingPending = false;
 
   function parseIPv6(value) {
     if (!/^[0-9a-f:]+$/i.test(value) || value.includes(':::')) return null;
@@ -450,12 +453,12 @@ if (visitor) {
       const loopback = words.slice(0,7).every(part=>part===0) && words[7]===1;
       const local = (words[0] & 0xfe00)===0xfc00 || (words[0] & 0xffc0)===0xfe80;
       const mappedV4 = words.slice(0,5).every(part=>part===0) && words[5]===0xffff;
-      if ((!loopback && !local) || mappedV4) throw new Error('endpoint');
+      if (!loopback || mappedV4) throw new Error('endpoint');
     } else {
       const octets=hostText.split('.').map(Number);
       if (octets.some(part=>part>255)) throw new Error('endpoint');
       const [a,b]=octets;
-      if (!(a===127 || a===10 || (a===172&&b>=16&&b<=31) || (a===192&&b===168) || (a===169&&b===254))) throw new Error('endpoint');
+      if (!(a===127 || a===10 || (a===172&&b>=16&&b<=31) || (a===192&&b===168))) throw new Error('endpoint');
     }
     const parsed = new URL(value);
     if (parsed.protocol!=='https:' || parsed.username || parsed.password || parsed.pathname!=='/' || parsed.search || parsed.hash || !parsed.port) throw new Error('endpoint');
@@ -491,10 +494,10 @@ if (visitor) {
     const endpoint = path === '/pair' ? endpointForRequest() : companion?.endpoint;
     if (!endpoint) throw new Error('endpoint-changed');
     const headers = {'Content-Type':'application/json'};
-    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+    if (csrfToken) { headers['X-CSRF-Token'] = csrfToken; Object.assign(headers,pairingHeaders(companion?.session.clientId)); }
     const response = await fetch(new URL(path,endpoint+'/'), {
       method:'POST', mode:'cors', credentials:'include', redirect:'error', cache:'no-store', referrerPolicy:'no-referrer',
-      headers, body:JSON.stringify(body)
+      headers, body:JSON.stringify(body), signal:AbortSignal.timeout(path === '/pair' ? 120000 : 30000)
     });
     let payload;
     try { payload = await response.json(); } catch { throw new Error('response-invalid'); }
@@ -523,14 +526,17 @@ if (visitor) {
     const title=visitor.querySelector('#companion-session-state');
     title.textContent=copy(`Paired · expires ${new Date(session.expiresAt).toLocaleString()}`,`已配對 · 到期時間 ${new Date(session.expiresAt).toLocaleString()}`);
     const details=visitor.querySelector('#companion-session-details');details.replaceChildren();
-    const rows=[[copy('Website origin','網站來源'),session.origin],[copy('Granted capabilities','已授予權限'),session.scopes.join(', ')]];
+
+    const rows=[[copy('Approved device','已批准裝置'),session.deviceName],[copy('Browser','瀏覽器'),session.browser],[copy('Website origin','網站來源'),session.origin],[copy('Granted capabilities','已授予權限'),session.scopes.join(', ')]];
     for(const [labelText,value] of rows){const term=document.createElement('dt');term.textContent=labelText;const description=document.createElement('dd');description.textContent=value;details.append(term,description);}
     for(const button of visitor.querySelectorAll('[data-companion-action]')) button.disabled=!session.scopes.includes(actionScope[button.dataset.companionAction]);
   }
   function validSession(session) {
     return session && Object.getPrototypeOf(session)===Object.prototype
-      && Object.keys(session).sort().join(',')==='expiresAt,id,origin,scopes,status'
+      && Object.keys(session).sort().join(',')==='browser,clientId,deviceName,expiresAt,id,origin,scopes,status'
       && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(session.id)
+      && ['edge','chrome'].includes(session.browser) && typeof session.deviceName==='string' && session.deviceName.length<=80
+      && session.clientId===pairingIdentity?.clientNonce && session.browser===pairingIdentity?.browser
       && session.origin===location.origin && Array.isArray(session.scopes) && session.scopes.length>0
       && session.scopes.every(scope=>typeof scope==='string') && Number.isSafeInteger(session.expiresAt)
       && session.status==='active';
@@ -544,15 +550,20 @@ if (visitor) {
     } catch { companionMessage.textContent=copy('Enter an HTTPS loopback or private IP address with a port. Public hosts and hostnames are not allowed.','請輸入含連接埠嘅 HTTPS 本機或私人 IP 位址。唔允許公用主機或主機名稱。'); }
   });
   visitor.querySelector('#companion-pair').addEventListener('click', async () => {
+    if(pairingPending || companion)return;
     let endpoint;
     try { endpoint=endpointForRequest(); } catch { companionMessage.textContent=copy('Enter a valid HTTPS private IP endpoint first.','請先輸入有效嘅 HTTPS 私人 IP 位址。');return; }
     const challenge=challengeField.value.trim();
     if(!/^[A-Za-z0-9_-]{43}$/.test(challenge)){companionMessage.textContent=copy('Paste the current one-time challenge from the desktop app.','請貼上桌面程式提供嘅有效一次性挑戰碼。');return;}
     save(endpointStorageKey,endpoint);
     companionMessage.textContent=copy('Pairing request sent. Review and approve it on the desktop. Do not submit it again while approval is pending.','配對要求已送出。請喺桌面查看同批准。等待批准時請勿重複提交。');
-    const clientNonce=makeUUID();
+    pairingPending=true;visitor.querySelector('#companion-pair').disabled=true;
     try {
-      const {response,payload}=await companionFetch('/pair',{challenge,clientNonce});
+      pairingIdentity=createPairingIdentity();
+      const {clientNonce,browser}=pairingIdentity;
+      companionMessage.textContent=copy(`Compare browser instance ${clientNonce} with the native desktop approval before accepting.`,`批准前，請比對原生桌面顯示嘅瀏覽器實例 ${clientNonce}。`);
+      challengeField.value='';
+      const {response,payload}=await companionFetch('/pair',{challenge,clientNonce,browser});
       if(!response.ok){companionMessage.textContent=companionError(payload.code);return;}
       if(Object.keys(payload).sort().join(',')!=='csrfToken,nextSequence,session'||typeof payload.csrfToken!=='string'||!payload.csrfToken||!Number.isSafeInteger(payload.nextSequence)||payload.nextSequence<1||!validSession(payload.session))throw new Error('response-invalid');
       const broader=payload.session.scopes.some(scope=>!readOnlyScopes.has(scope));
@@ -570,7 +581,7 @@ if (visitor) {
       companionMessage.textContent=copy('Paired. The desktop approved the listed capabilities for this browser session.','配對成功。桌面已批准此瀏覽器連線列出嘅權限。');
     } catch {
       companionMessage.textContent=copy('The browser could not complete pairing. Check the trusted TLS certificate, exact website origin, CORS/private-network permission and local network policy. No certificate bypass or automatic retry was used.','瀏覽器未能完成配對。請檢查受信任嘅 TLS 憑證、網站來源、CORS／私人網絡權限同本機網絡政策。頁面無繞過憑證檢查，亦無自動重試。');
-    }
+    } finally {pairingPending=false;visitor.querySelector('#companion-pair').disabled=false;}
   });
   visitor.querySelector('#companion-refresh').addEventListener('click', async () => {
     if(!companion)return;
@@ -709,6 +720,7 @@ document.querySelectorAll('time[data-local]').forEach(time => {
   if (Number.isNaN(date.valueOf())) return;
   time.textContent = new Intl.DateTimeFormat(undefined, {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
 });
+
 
 
 
