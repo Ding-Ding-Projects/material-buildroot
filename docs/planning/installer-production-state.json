@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-10-16T23:58:02.798Z",
+  "recordedAt": "2026-10-17T02:30:09.035Z",
   "status": "incomplete",
   "limitBytes": 1400000000,
   "failedRuns": [
@@ -32,12 +32,18 @@
   "changedSourceRun": {
     "id": 38982993840,
     "source": "d8a6489821657ae6fa4a6ae893130127ab1175f9",
-    "status": "pending",
+    "status": "completed",
     "jobs": [],
     "createdAt": "2026-10-16T23:44:22Z",
     "observationDeadline": "2026-10-17T00:44:22Z",
-    "verdict": "unverified",
-    "lastObservedAt": "2026-10-17T00:14:59Z"
+    "verdict": "failed",
+    "lastObservedAt": "2026-10-17T02:30:09.031Z",
+    "conclusion": "failure",
+    "completedAt": "2026-10-17T00:30:17Z",
+    "url": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38982993840",
+    "reason": "Invoke-FlashingBuild: Source and destination path must have identical roots. Move will not work across volumes.",
+    "exitCode": 1,
+    "publication": "skipped"
   },
   "sourceCorrection": {
     "kind": "Fixed previously trusted official-selected mirror, unchanged archive pin and bounded rejection diagnostics",
@@ -52,9 +58,12 @@
   "activePredecessor": {
     "id": 38980674305,
     "source": "c6d5532178e65eaa35b16d8db54e95058753b9e5",
-    "status": "in_progress",
+    "status": "completed",
     "startedAt": "2026-10-16T23:37:54Z",
-    "lastObservedAt": "2026-10-17T00:14:59Z",
-    "terminalVerdict": "unavailable"
+    "lastObservedAt": "2026-10-17T02:30:09.035Z",
+    "terminalVerdict": "failed",
+    "completedAt": "2026-10-17T00:24:47Z",
+    "reason": "Setup must contain one genuine embedded package ZIP resource.",
+    "exitCode": 1
   }
 }

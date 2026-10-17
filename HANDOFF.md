@@ -1,3 +1,17 @@
+# Closeout revalidation, 2026-10-17
+
+This chat remains stopped at the owner's requested preservation closeout. Its unfinished implementation goal is being paused, not marked complete. A later session advanced remote main by 388 commits; this local checkout fast-forwarded without rewriting or discarding work to e60ea1775f692091ee75b218bc891f0acfecb45c. The detailed later-session handoff below is preserved. This record does not adopt or delete that session's branches or change its verification scope.
+
+The previously pending installer run 38982993840 is now terminal: failed at 2026-10-17T00:30:17Z, source d8a6489821657ae6fa4a6ae893130127ab1175f9. The installer step reports Invoke-FlashingBuild / IOException: Source and destination path must have identical roots. Move will not work across volumes. The build returned exit 1 and publication was skipped. Predecessor run 38980674305 also failed, at 2026-10-17T00:24:47Z, with Setup must contain one genuine embedded package ZIP resource. Neither run is still waiting; no duplicate dispatch or repair was started during this closeout.
+
+The existing public historical gallery was independently rechecked anonymously: 59 endpoints returned HTTP 200 and all 52 image SHA-256 values matched the current manifest. The repository is public and its stored homepage exactly matches https://ding-ding-projects.github.io/material-buildroot/. The gallery is https://ding-ding-projects.github.io/material-buildroot/gallery/. This proves HTTP/byte delivery only. The older live-delivery receipt still counts 51 images, and historical/current per-record wording remains unresolved. Capture dates exist for 36 records and remain unavailable for 16; no dates were inferred. No current-build capture or recording was created.
+
+Local inventory contains one primary checkout, one local main branch and no stashes or uncommitted source. Other-session remote branches remain retained. This chat has no eligible redundant cleanup candidate, so no archive or deletion pass was started. Four earlier isolated profiles remain after automatic approval review rejected deletion with the reason blocked by policy. Private original evidence and recovery material remain intact.
+
+Next work requires the owner to resume implementation. Start with the terminal installer diagnostics, exact preserved source/branch inventory and the detailed remaining work below. Never treat this closeout, historical captures, production receipts or published release metadata as complete runtime, installer or feature acceptance. Preserve the original full objective and the separate completion criteria of each session.
+
+---
+
 # Preservation handoff, 2026-10-16
 
 ## Objective and current boundary
