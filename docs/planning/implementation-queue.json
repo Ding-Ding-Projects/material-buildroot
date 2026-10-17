@@ -633,6 +633,9 @@
     "newProducersStopped": true,
     "goalComplete": false,
     "testsAndRuntimeAcceptance": "Deferred by owner",
-    "cleanup": "Not performed; source workspaces retained"
+    "cleanup": "Not performed; source workspaces retained",
+    "goalStatus": "blocked",
+    "consecutiveBoundaryTurns": 3,
+    "stateObservedAt": "2026-10-17T00:14:59Z"
   }
 }

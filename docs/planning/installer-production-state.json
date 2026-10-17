@@ -36,7 +36,8 @@
     "jobs": [],
     "createdAt": "2026-10-16T23:44:22Z",
     "observationDeadline": "2026-10-17T00:44:22Z",
-    "verdict": "unverified"
+    "verdict": "unverified",
+    "lastObservedAt": "2026-10-17T00:14:59Z"
   },
   "sourceCorrection": {
     "kind": "Fixed previously trusted official-selected mirror, unchanged archive pin and bounded rejection diagnostics",
@@ -47,5 +48,13 @@
   },
   "latestNativeSource": "37bc9da1e590d3696da3649898cb4721b865f420",
   "latestNativeSourceCompiled": false,
-  "runtimeVerified": false
+  "runtimeVerified": false,
+  "activePredecessor": {
+    "id": 38980674305,
+    "source": "c6d5532178e65eaa35b16d8db54e95058753b9e5",
+    "status": "in_progress",
+    "startedAt": "2026-10-16T23:37:54Z",
+    "lastObservedAt": "2026-10-17T00:14:59Z",
+    "terminalVerdict": "unavailable"
+  }
 }

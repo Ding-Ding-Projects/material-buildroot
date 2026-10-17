@@ -2,7 +2,7 @@
 
 ## Objective and current boundary
 
-Implement and release the finite Material Buildroot roadmap, one implementation worker per leaf, with completed source integrated into main. All tests, reviews, audits, static analysis, runtime exercises and screenshots remain explicitly deferred, including VM and Docker tests. The configured account-preservation threshold was reached. New implementation and producer launches stopped; already assigned work settled and recoverable source was preserved. The goal remains active and incomplete. No fixed token budget was requested.
+Implement and release the finite Material Buildroot roadmap, one implementation worker per leaf, with completed source integrated into main. All tests, reviews, audits, static analysis, runtime exercises and screenshots remain explicitly deferred, including VM and Docker tests. The configured account-preservation threshold was reached. New implementation and producer launches stopped; already assigned work settled and recoverable source was preserved. The goal is blocked and incomplete. The configured account-preservation boundary persisted for three consecutive goal turns. Source preservation is complete; new implementation requires an allowance change, and existing installer operations still require an external terminal result. This is not a completion verdict. No fixed token budget was requested.
 
 ## Integrated source and actual production
 
