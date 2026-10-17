@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-16T23:58:02.798Z",
+  "status": "incomplete",
+  "limitBytes": 1400000000,
+  "failedRuns": [
+    {
+      "id": 38972521474,
+      "source": "1271e06b139875442f3a5850cfd2cacae2c8cfcb",
+      "reason": "Setup must contain one genuine embedded package ZIP resource.",
+      "fullBytes": 1375477453,
+      "deltaBytes": 1316896276,
+      "setupBytes": 193024,
+      "setupDataResource": false
+    },
+    {
+      "id": 38976198284,
+      "source": "8efc504fe46b5f5cc682e5a6069aff3b8e1c4f0b",
+      "reason": "Setup must contain one genuine embedded package ZIP resource.",
+      "reportedAt": "2026-10-16T23:33:17.1780569Z"
+    },
+    {
+      "id": 38979123512,
+      "source": "714cd3d2ca7d5857b1cc5cfbe84658db25c48666",
+      "reason": "Untrusted payload source or redirect.",
+      "reportedAt": "2026-10-16T23:37:45Z",
+      "rejectedToolAndHost": "Unknown; prior diagnostics did not record identity",
+      "nativeCompilationReached": false,
+      "squirrelReached": false
+    }
+  ],
+  "changedSourceRun": {
+    "id": 38982993840,
+    "source": "d8a6489821657ae6fa4a6ae893130127ab1175f9",
+    "status": "pending",
+    "jobs": [],
+    "createdAt": "2026-10-16T23:44:22Z",
+    "observationDeadline": "2026-10-17T00:44:22Z",
+    "verdict": "unverified"
+  },
+  "sourceCorrection": {
+    "kind": "Fixed previously trusted official-selected mirror, unchanged archive pin and bounded rejection diagnostics",
+    "archiveBytes": 374870016,
+    "sha256": "c6298b10cfa1748bcbedad94c62ce771e240e5021bfd6d7a967cd571b04b5312",
+    "host": "ftp.osuosl.org",
+    "hostedCauseConfirmed": false
+  },
+  "latestNativeSource": "37bc9da1e590d3696da3649898cb4721b865f420",
+  "latestNativeSourceCompiled": false,
+  "runtimeVerified": false
+}

@@ -337,6 +337,54 @@
       "exitCodeEvidence": "Direct numeric exit receipt independently read back by integration owner.",
       "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
       "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH08-T01",
+      "sourceCommit": "b8b98ff1f811d578068e111a2188373aec79d8a7",
+      "receiptSha256": "0cda8af5f35d2f716d60b2eebd639d7dfec76887dde175bd4229a3452a452598",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by the owning producer and source-bound receipt independently read back.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH08-T02",
+      "sourceCommit": "49df30e82c4388ee77d92becfa85a712e57c658e",
+      "receiptSha256": "f0dc477521ae4796329bdad8e91159ecab929da45ecccc9f55e45b777e86d819",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by the owning producer and source-bound receipt independently read back.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH09-T03/PH09-T05/PH08-T02",
+      "sourceCommit": "1777cd7024fcde736d14ee22e14ffb0d552a1e72",
+      "receiptSha256": "b5579aa7768b86aeac983217e3fa49a1c923c485f95ece2f9a304c2a4d130d1b",
+      "target": "desktop",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by the owning producer and source-bound receipt independently read back.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
+    },
+    {
+      "item": "PH09-T01/PH09-T03/PH09-T04/PH09-T05",
+      "sourceCommit": "c5e501acfeb02bdbcc8e1a2ad1c54c0540306155",
+      "receiptSha256": "d876e62a36e1e5be9ea316131ec5ddacbfaa896ff030f5cc263f632ecd8cab47",
+      "target": "documentation",
+      "installer": false,
+      "runtimeVerified": false,
+      "exitCode": 0,
+      "exitCodeEvidence": "Direct numeric zero exit reported by the owning producer and source-bound receipt independently read back.",
+      "receiptReadback": "Exact source and SHA-256 independently read back by integration owner.",
+      "testsReviewsAuditsAndCaptures": "Deferred by owner"
     }
   ]
 }

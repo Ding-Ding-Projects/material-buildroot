@@ -120,10 +120,10 @@
     {
       "id": "PH02-T03",
       "description": "[A+R] Implement canonical file capabilities with picker/import grants, revalidation, path translation and symlink/reparse/case escape rejection.",
-      "state": "owned-implementation-in-progress",
+      "state": "preserved-native-source-uncompiled",
       "owner": "task/file-capabilities",
       "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
-      "sourceCommit": "08cf7b42215ecf2018329971c3f82da4d5516c29"
+      "sourceCommit": "37bc9da1e590d3696da3649898cb4721b865f420"
     },
     {
       "id": "PH02-T04",
@@ -447,18 +447,18 @@
     {
       "id": "PH08-T01",
       "description": "[A+D-native+R] Implement all eight converter categories and PDF operations with packaged offline adapters, searchable rich controls and unlimited disk-backed paged queues; validate genuine outputs.",
-      "state": "preserved-source-integration-pending",
+      "state": "preserved-built-source-integration-pending",
       "owner": "task/converter-workflows",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
-      "sourceCommit": "030c97f4ebe5116e403825f3f08a41a3667f2ff0"
+      "sourceCommit": "b8b98ff1f811d578068e111a2188373aec79d8a7"
     },
     {
       "id": "PH08-T02",
       "description": "[A+D-native+R] Implement Java/Bedrock version/flavour/plugin discovery and rich Minecraft server creation/configuration/lifecycle across local process, local container, SSH process and SSH container.",
-      "state": "integrated-source-acceptance-deferred",
+      "state": "integrated-partial-source-acceptance-deferred",
       "owner": "task/minecraft-manager",
       "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
-      "sourceCommit": "078b592119f9d233c6c7b40f20c1f4a42f514090",
+      "sourceCommit": "49df30e82c4388ee77d92becfa85a712e57c658e",
       "productionReceiptSha256": "6ce85d8ee83a00a8d099000f1c26a01f2cb5ac6d17bd6dd1d5a31130c96ae5bf"
     },
     {
@@ -504,15 +504,15 @@
     {
       "id": "PH09-T01",
       "description": "[A+D+C+R (through-PH09 scope)] Complete D browser-native implementations for every applicable identity, with local visitor state, reset/export explanations and truthful unavailable/offline behavior.",
-      "state": "integrated-partial-source-implementation-continues",
+      "state": "integrated-partial-source-remaining-work-preserved",
       "owner": "task/browser-native",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
-      "sourceCommit": "f1ee6423ecd827bf5e5f491f45a9b1a0ae9b7311"
+      "sourceCommit": "c5e501acfeb02bdbcc8e1a2ad1c54c0540306155"
     },
     {
       "id": "PH09-T02",
       "description": "[A+D+C+R (through-PH09 scope)] Implement reviewed explicit Edge/Chrome pairing and authenticated LAN capability grants/revocation with origin, TLS, CSRF/replay and browser private-network handling; no internet control exposure.",
-      "state": "preserved-source-integration-pending",
+      "state": "integrated-source-acceptance-deferred",
       "owner": "task/pairing-security",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
       "sourceCommit": "e840d9113ff15ea61d26f4b75bfa274b39363b39"
@@ -520,25 +520,27 @@
     {
       "id": "PH09-T03",
       "description": "[A+D+C+R (through-PH09 scope)] Complete C typed broker consumers and independent client state for every applicable identity; revocation stops new authority and settles owned jobs truthfully.",
-      "state": "owned-combined-production-in-progress",
+      "state": "latest-atomic-source-preserved-unbuilt",
       "owner": "task/companion-consumers",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
-      "sourceCommit": "e1b3918cd1d27c7fe24a4e36ae2f63edcac18dcc"
+      "sourceCommit": "89c7fad3f1bf37f6a6ac72eac16a691d9b34cdce",
+      "integratedSourceCommit": "1777cd7024fcde736d14ee22e14ffb0d552a1e72"
     },
     {
       "id": "PH09-T04",
       "description": "[A+D+C+R (through-PH09 scope)] Complete detailed categorized feature articles and Cantonese twins, rendered source wiki, search/offline navigation and actual API Postman category/master collections; distinguish non-HTTP IPC.",
-      "state": "integrated-partial-source-implementation-continues",
+      "state": "integrated-partial-source-remaining-translations-listed",
       "owner": "task/complete-articles",
       "verification": "deferred",
-      "sourceCommit": "cf590128682e0e6e15756000a66f16f4ce5482f7"
+      "sourceCommit": "b01f17ae425b417fe459bb56b369cf5879d9586b"
     },
     {
       "id": "PH09-T05",
       "description": "[A+D+C+R (through-PH09 scope)] Complete vendored licensed/hashed fonts, safe shared-link metadata, genuine screenshot/gallery/recording presentation and current source-bound front provenance.",
-      "state": "queued",
-      "owner": null,
-      "verification": "deferred"
+      "state": "integrated-source-font-production-only",
+      "owner": "task/presentation-provenance",
+      "verification": "deferred",
+      "sourceCommit": "f8af2f026907ebd583aa3565f6ec366f7006270c"
     },
     {
       "id": "PH09-T06",
@@ -565,18 +567,18 @@
     {
       "id": "PH10-T01",
       "description": "[A+D+C+R (final applicable acceptance)] Assemble one complete Windows x64 installer with all required capability payloads, original installed icons, valid license disclosures and actual offline bundled-first discovery.",
-      "state": "preserved-source-integration-pending",
-      "owner": "task/offline-payload-host-classification",
+      "state": "preserved-source-changed-producer-pending",
+      "owner": "task/offline-payload-source-origin",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
-      "sourceCommit": "524a7767edda7a358df0e93f41437bcdc3699919"
+      "sourceCommit": "d8a6489821657ae6fa4a6ae893130127ab1175f9"
     },
     {
       "id": "PH10-T02",
       "description": "[A+D+C+R (final applicable acceptance)] Produce real unsigned Squirrel.Windows Setup.exe, RELEASES, full packages and deltas; apply only required project-owned signing without claiming public trust.",
-      "state": "preserved-source-integration-pending",
+      "state": "preserved-source-installer-embedding-unverified",
       "owner": "task/squirrel-native",
       "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
-      "sourceCommit": "714cd3d2ca7d5857b1cc5cfbe84658db25c48666"
+      "sourceCommit": "6a537ba009162c2a9281c0df61bcd271030e5a19"
     },
     {
       "id": "PH10-T03",
@@ -624,5 +626,13 @@
     }
   ],
   "updatedAt": "2026-10-16T18:35:07.7280332Z",
-  "integrationCommit": "de833ef29f68ba80c017af1018e7e90bbe0a026e"
+  "integrationCommit": "26e3f4264ebd049cb21e1358e63533321d485377",
+  "preservationBoundary": {
+    "reason": "Configured account-preservation threshold reached",
+    "implementationStopped": true,
+    "newProducersStopped": true,
+    "goalComplete": false,
+    "testsAndRuntimeAcceptance": "Deferred by owner",
+    "cleanup": "Not performed; source workspaces retained"
+  }
 }

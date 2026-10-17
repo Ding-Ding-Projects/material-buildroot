@@ -1,5 +1,13 @@
 # Phased implementation roadmap
 
+## Preservation boundary, 2026-10-16
+
+- [x] Preserve the current source units and integrate the completed desktop/documentation candidates with remote proof. This is source preservation, not complete feature acceptance.
+- [ ] Complete genuine full-installer embedding and the changed-source production retry.
+- [ ] Complete the source gaps retained in the assignment queue and feature articles, including the remaining translation inventory.
+- [ ] Run the explicitly deferred acceptance work in a later authorized pass, including VM and Docker tests.
+- [ ] Finish the final normal release and proven task-owned cleanup.
+
 ## Current execution boundary, 2026-10-16
 
 The owner selected isolated per-item implementation and release delivery. This supersedes the historical main-only source-writer rule below for the current pass: each implementation worker owns a separate branch and checkout, and completed contributions are integrated into main. The finite assignment inventory is [implementation-queue.json](docs/planning/implementation-queue.json).
