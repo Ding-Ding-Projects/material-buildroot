@@ -22,15 +22,15 @@ test("ISO inspection rejects malformed descriptors and invalid boot catalogs wit
   assert.equal(inspectIso(file, 2048), null);
 });
 test("ISO plan is revision-bound, requires an x86 kernel and reports dropped Kconfig requests", async () => {
-  const symbols = ["BR2_x86_64", "BR2_LINUX_KERNEL", "BR2_TARGET_SYSLINUX", "BR2_TARGET_SYSLINUX_ISOLINUX", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_ISOLINUX", "BR2_TARGET_ROOTFS_ISO9660_INITRD"];
+  const symbols = ["BR2_x86_64", "BR2_LINUX_KERNEL", "BR2_TARGET_GRUB2", "BR2_TARGET_GRUB2_I386_PC", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_GRUB2", "BR2_TARGET_ROOTFS_ISO9660_INITRD", "BR2_TARGET_GRUB2_BOOT_PARTITION", "BR2_TARGET_GRUB2_BUILTIN_MODULES_PC"];
   let revision = "one", kernel = true, applied;
   const service = createImagePresets({ configuration: {
-    inspect: async () => ({ revision, semantics: { available: true, tree: { children: symbols.map(symbol => ({ symbol, type: "bool", value: symbol === "BR2_x86_64" || (symbol === "BR2_LINUX_KERNEL" && kernel) })) } } }),
+    inspect: async () => ({ revision, semantics: { available: true, tree: { children: symbols.map(symbol => ({ symbol, type: symbol.includes("BOOT_PARTITION") || symbol.includes("BUILTIN_MODULES") ? "string" : "bool", value: symbol === "BR2_x86_64" || (symbol === "BR2_LINUX_KERNEL" && kernel) })) } } }),
     apply: async input => { applied = input; return { revision: "two", values: { BR2_TARGET_SYSLINUX: true } }; }
   } });
   assert.equal((await service.isoPlan({ workspaceId: "w", revision })).applicable, true);
   await assert.rejects(service.isoPlan({ workspaceId: "w", revision: "stale" }), { code: "REVISION_CONFLICT" });
-  const result = await service.isoApply({ workspaceId: "w", revision }); assert.equal(result.effective, false); assert.equal(result.bootVerified, false); assert.equal(Object.keys(applied.changes).length, 5);
+  const result = await service.isoApply({ workspaceId: "w", revision }); assert.equal(result.effective, false); assert.equal(result.bootVerified, false); assert.equal(Object.keys(applied.changes).length, 7);
   kernel = false; assert.equal((await service.isoPlan({ workspaceId: "w", revision })).applicable, false); await assert.rejects(service.isoApply({ workspaceId: "w", revision }), { code: "PRESET_REQUIREMENTS_UNAVAILABLE" });
 });
 test("ISO export preserves exact bytes and rejects existing destinations, stale input and raw disks", async t => {
@@ -46,4 +46,23 @@ test("ISO export preserves exact bytes and rejects existing destinations, stale 
   await assert.rejects(virtual.previewConversion({ artifact: "disk.raw", format: "iso", outputName: "raw.iso" }), /conversion-iso-requires-existing-iso/);
   const stale = await virtual.previewConversion({ artifact: "rootfs.iso9660", format: "iso", outputName: "stale.iso" }); fs.appendFileSync(path.join(root, "rootfs.iso9660"), "changed");
   await assert.rejects(virtual.executeConversion({ id: stale.id }), /conversion-preview-stale/); assert.equal(fs.existsSync(path.join(root, "stale.iso")), false);
+});
+test("guided ISO submission rejects stale applied revisions and removed profile flags", async () => {
+  const names = ["BR2_x86_64", "BR2_LINUX_KERNEL", "BR2_TARGET_GRUB2", "BR2_TARGET_GRUB2_I386_PC", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_GRUB2", "BR2_TARGET_ROOTFS_ISO9660_INITRD", "BR2_TARGET_GRUB2_BOOT_PARTITION", "BR2_TARGET_GRUB2_BUILTIN_MODULES_PC"];
+  let revision = "initial", values = { BR2_x86_64: true, BR2_LINUX_KERNEL: true };
+  const inspect = async () => ({ revision, values: { ...values }, semantics: { available: true, tree: { children: names.map(symbol => ({ symbol, type: symbol.includes("BOOT_PARTITION") || symbol.includes("BUILTIN_MODULES") ? "string" : "bool", value: values[symbol] })) } } });
+  const service = createImagePresets({ configuration: { inspect, apply: async input => { values = { ...values, ...Object.fromEntries(Object.entries(input.changes).map(([symbol, change]) => [symbol, change.value])) }; revision = "applied"; return { revision, values }; } } });
+  const applied = await service.isoApply({ workspaceId: "w", revision }); assert.equal(applied.effective, true);
+  const request = { workspaceId: "w", revision, profile: applied.profile };
+  assert.equal((await service.assertIsoBuild(request)).revision, "applied");
+  let submissions = 0;
+  const submit = () => { submissions++; return { id: "recorded-job", capturedRevision: revision }; };
+  assert.deepEqual(await service.isoBuild(request, submit), { id: "recorded-job", capturedRevision: "applied" });
+  revision = "undo"; values.BR2_TARGET_ROOTFS_ISO9660 = false;
+  await assert.rejects(service.assertIsoBuild(request), { code: "REVISION_CONFLICT" });
+  await assert.rejects(service.isoBuild(request, submit), { code: "REVISION_CONFLICT" });
+  assert.equal(submissions, 1);
+  revision = "applied";
+  await assert.rejects(service.assertIsoBuild(request), { code: "ISO_PROFILE_NOT_EFFECTIVE" });
+  await assert.rejects(service.assertIsoBuild({ ...request, profile: "other" }), { code: "ISO_APPLY_REQUIRED" });
 });

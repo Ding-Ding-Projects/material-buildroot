@@ -13,9 +13,11 @@ const DESKTOPS = Object.freeze([
   { id: "cage", symbol: "BR2_PACKAGE_CAGE", label: "Cage kiosk (Wayland)" },
   { id: "xorg", symbol: "BR2_PACKAGE_XSERVER_XORG_SERVER", label: "X.Org server (no desktop shell)" },
 ]);
-const ISO_SYMBOLS = Object.freeze(["BR2_TARGET_SYSLINUX", "BR2_TARGET_SYSLINUX_ISOLINUX", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_ISOLINUX", "BR2_TARGET_ROOTFS_ISO9660_INITRD"]);
+const ISO_SYMBOLS = Object.freeze(["BR2_TARGET_GRUB2", "BR2_TARGET_GRUB2_I386_PC", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_GRUB2", "BR2_TARGET_ROOTFS_ISO9660_INITRD"]);
+const ISO_STRINGS = Object.freeze({ BR2_TARGET_GRUB2_BOOT_PARTITION: "cd", BR2_TARGET_GRUB2_BUILTIN_MODULES_PC: "boot linux iso9660 normal biosdisk" });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function createImagePresets({ configuration }) {
+  const approvedIso = new Map();
   function symbols(snapshot) {
     if (!snapshot.semantics?.available || !snapshot.semantics.tree) fail("KCONFIG_SEMANTICS_UNAVAILABLE");
     const map = new Map();
@@ -26,6 +28,13 @@ function createImagePresets({ configuration }) {
   function capability(map, symbol) {
     const spec = map.get(symbol);
     return { symbol, present: !!spec, selectable: !!spec && spec.type === "bool" && (spec.value === true || spec.value === "y" || spec.assignable?.includes(2)), reason: !spec ? "NOT_IN_SELECTED_SOURCE" : spec.type !== "bool" ? "UNSUPPORTED_SYMBOL_TYPE" : spec.value === true || spec.value === "y" || spec.assignable?.includes(2) ? null : "DEPENDENCIES_NOT_SATISFIED" };
+  }
+  function isoEffective(snapshot, changes) {
+    const map = snapshot.semantics?.available ? symbols(snapshot) : new Map();
+    return Object.entries(changes).every(([symbol, change]) => {
+      const value = snapshot.values[symbol] ?? map.get(symbol)?.value;
+      return value === change.value || (change.type === "bool" && value === (change.value ? "y" : "n"));
+    });
   }
   async function catalog({ workspaceId }) {
     const snapshot = await configuration.inspect({ workspaceId, domain: "buildroot" });
@@ -59,23 +68,42 @@ function createImagePresets({ configuration }) {
     const enabled = symbol => map.get(symbol)?.value === true || map.get(symbol)?.value === "y";
     // These dependencies must already be configured. Related ISO choices are
     // reconciled together, so their current visibility is not a prerequisite.
-    const requirements = ["BR2_x86_64", "BR2_LINUX_KERNEL", ...ISO_SYMBOLS].map(symbol => {
-      const present = map.has(symbol), prerequisite = !ISO_SYMBOLS.includes(symbol);
-      const selectable = present && map.get(symbol).type === "bool" && (!prerequisite || enabled(symbol));
+    const requirements = ["BR2_x86_64", "BR2_LINUX_KERNEL", ...ISO_SYMBOLS, ...Object.keys(ISO_STRINGS)].map(symbol => {
+      const present = map.has(symbol), prerequisite = ["BR2_x86_64", "BR2_LINUX_KERNEL"].includes(symbol);
+      const selectable = present && map.get(symbol).type === (Object.hasOwn(ISO_STRINGS, symbol) ? "string" : "bool") && (!prerequisite || enabled(symbol));
       return { symbol, present, selectable, reason: !present ? "NOT_IN_SELECTED_SOURCE" : selectable ? null : prerequisite ? "ENABLE_X86_64_KERNEL_FIRST" : "UNSUPPORTED_SYMBOL_TYPE" };
     });
-    return { revision: snapshot.revision, profile: "x86_64-bios-isolinux-initrd", firmware: "bios", bootVerified: false,
-      requirements, changes: Object.fromEntries(ISO_SYMBOLS.map(symbol => [symbol, { type: "bool", value: true }])),
+    const changes = Object.fromEntries(ISO_SYMBOLS.map(symbol => [symbol, { type: "bool", value: true }]));
+    for (const [symbol, value] of Object.entries(ISO_STRINGS)) changes[symbol] = { type: "string", value };
+    for (const symbol of ["BR2_TARGET_SYSLINUX", "BR2_TARGET_ROOTFS_ISO9660_ISOLINUX", "BR2_TARGET_GRUB2_I386_EFI", "BR2_TARGET_GRUB2_X86_64_EFI"]) if (map.has(symbol)) changes[symbol] = { type: "bool", value: false };
+    return { revision: snapshot.revision, profile: "x86_64-bios-grub2-initrd", firmware: "bios", bootVerified: false,
+      requirements, changes,
       applicable: requirements.every(row => row.selectable), previewKind: "configuration-plan", requiresBuild: true,
-      defaults: { architecture: "x86_64", firmware: "bios", bootloader: "isolinux", rootFilesystem: "initrd", output: "images/rootfs.iso9660" }, constraints: { requiresExistingKernel: true, requiresFullBuild: true, uefiConfigured: false, hybridConfigured: false }, output: "images/rootfs.iso9660", warning: "Configures a BIOS-only initrd ISO. Run a full build and inspect its output. Configuration and an El Torito catalog do not prove that the image boots. UEFI support is not configured." };
+      defaults: { architecture: "x86_64", firmware: "bios", bootloader: "grub2", rootFilesystem: "initrd", output: "images/rootfs.iso9660" }, constraints: { requiresExistingKernel: true, requiresFullBuild: true, uefiConfigured: false, hybridConfigured: false }, output: "images/rootfs.iso9660", warning: "Configures a BIOS-only initrd ISO. Run a full build and inspect its output. Configuration and an El Torito catalog do not prove that the image boots. UEFI support is not configured." };
   }
   async function isoApply(input) {
+    approvedIso.delete(input.workspaceId);
     const preview = await isoPlan(input);
     if (!preview.applicable) fail("PRESET_REQUIREMENTS_UNAVAILABLE");
     const result = await configuration.apply({ workspaceId: input.workspaceId, domain: "buildroot", revision: input.revision, changes: preview.changes });
-    return { ...result, profile: preview.profile, firmware: preview.firmware, bootVerified: false, requiresBuild: true,
-      effective: ISO_SYMBOLS.every(symbol => result.values[symbol] === true || result.values[symbol] === "y"), output: preview.output };
+    const effective = isoEffective(result, preview.changes);
+    if (effective) approvedIso.set(input.workspaceId, { revision: result.revision, profile: preview.profile });
+    return { ...result, profile: preview.profile, firmware: preview.firmware, bootVerified: false, requiresBuild: true, effective, output: preview.output };
   }
-  return { catalog, plan, apply, isoPlan, isoApply };
+  async function assertIsoBuild(input) {
+    const approved = approvedIso.get(input.workspaceId);
+    if (!approved || approved.revision !== input.revision || approved.profile !== input.profile) fail("ISO_APPLY_REQUIRED");
+    const preview = await isoPlan(input);
+    if (!preview.applicable) fail("PRESET_REQUIREMENTS_UNAVAILABLE");
+    const snapshot = await configuration.inspect({ workspaceId: input.workspaceId, domain: "buildroot" });
+    if (snapshot.revision !== input.revision) fail("REVISION_CONFLICT");
+    if (!isoEffective(snapshot, preview.changes)) fail("ISO_PROFILE_NOT_EFFECTIVE");
+    return approved;
+  }
+  async function isoBuild(input, submit) {
+    await assertIsoBuild(input);
+    return submit();
+  }
+  return { catalog, plan, apply, isoPlan, isoApply, assertIsoBuild, isoBuild };
 }
 module.exports = { createImagePresets };
