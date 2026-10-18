@@ -531,7 +531,7 @@ export class OperationsPanel extends LitElement {
   private async grantConfigTrust() {
     if (!this.workspace || !this.configTrustPreview || !this.configTrustAccepted||this.pending) return;
     const preview=this.configTrustPreview,workspaceId=this.workspace.workspaceId,domain=this.configDomain,epoch=this.configTrustEpoch,context=this.isoPermission;
-    const result = await this.run("config.trustGrant", { workspaceId, domain, challengeId: preview.id, trusted: true });
+    const result = await this.run("config.trustGrant", { workspaceId, domain:preview.domain, challengeId: preview.id, trusted: true });
     if(epoch!==this.configTrustEpoch||this.workspace?.workspaceId!==workspaceId||this.configDomain!==domain||this.configTrustPreview!==preview)return;
     const discoveryOnly = preview.discoveryOnly;
     this.configTrustAccepted = false;
