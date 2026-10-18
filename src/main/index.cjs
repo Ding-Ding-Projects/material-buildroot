@@ -10,6 +10,7 @@ const {
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
+const { recordRendererExit } = require("./renderer-exit-diagnostics.cjs");
 const { createVocabularyDropSound } = require("./vocabulary-drop-sound.cjs");
 const { pathToFileURL } = require("node:url");
 const { createCapabilityRegistry } = require("./security/capabilities.cjs");
@@ -335,7 +336,10 @@ else {
           if (isMainFrame) desktop.revoke();
         },
       );
-      window.webContents.on("render-process-gone", () => desktop.revoke());
+      window.webContents.on("render-process-gone", (_event, details) => {
+        desktop.revoke();
+        recordRendererExit({ directory: path.join(app.getPath("userData"), "diagnostics"), metadata, details });
+      });
       window.webContents.on("destroyed", () => desktop.revoke());
       window.once("ready-to-show", () => window.show());
       await window.loadURL(url);
