@@ -8,6 +8,7 @@
 - [Local scheduled-preference draft recovery](schedule-draft-recovery.md)
 - [Workspace state and persistence](workspace-state.md)
 - [Jobs and recovery](jobs-and-recovery.md)
+- [Isolated source-service global configuration](source-global-config.md)
 - [Shared-mode restrictions](shared-mode.md)
 - [Personal wording import and privacy](personal-vocabulary.md)
 - [Offline documentation admission](offline-documentation.md)

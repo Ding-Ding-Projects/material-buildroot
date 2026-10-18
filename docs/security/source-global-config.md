@@ -1,0 +1,9 @@
+# Isolated source-service global configuration
+
+The source service supplies Git with an application-owned regular empty global configuration file instead of a platform device path. The file is created exclusively with restrictive file permissions inside the service's existing private temporary hooks directory and removed with that directory at disposal. This makes the configuration route portable without reading or modifying the user's global configuration.
+
+Before and after each native command, the service checks the directory identity, regular-file type, absence of aliases or extra hard links, exact file identity and empty content. Replacement, nonempty content or a linked file fails closed with `SOURCE_GLOBAL_CONFIG_CHANGED`. Disposal also refuses a replaced or linked directory. These checks do not claim atomic protection against arbitrary concurrent host mutation.
+
+The existing `GIT_CONFIG_NOSYSTEM`, empty credential helper, application-owned hooks path, protocol restrictions, noninteractive credentials and source mutation leases remain unchanged. The repair adds no ownership exception, `safe.directory`, PATH change or host setting. A valid synthetic repository previously failed adoption with native exit 128 before reaching the mutation lease. The independent diagnostic classified that as a global-config-open failure; it did not establish a specific platform device-path error message. The new regular-file candidate must be judged by real adoption and lease checks, separately from WSL, container, GUI or firmware acceptance.
+
+The [official Git configuration environment documentation](https://git-scm.com/docs/git#Documentation/git.txt-GITCONFIGGLOBAL) defines `GIT_CONFIG_GLOBAL` as an explicit global configuration file override. This implementation always supplies the verified empty file and never falls back to the user's global configuration. The current-host failure does not establish that a device path is broken on every Windows host.
