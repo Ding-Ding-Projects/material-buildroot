@@ -86,3 +86,8 @@ Legacy reference articles without a linked Cantonese twin remain untranslated ga
 - [Authenticated companion consumers](companion-consumers.md) · [已驗證伴隨連線消費端](companion-consumers.zh-HK.md)
 
 - [Browser-native visitor consumers](browser-native.md) · [瀏覽器原生訪客功能](browser-native.zh-HK.md)
+
+## Current workflow translations
+
+- [Visitor acceptance and narrow navigation](visitor-acceptance.md) · [訪客驗收同窄畫面導覽](visitor-acceptance.zh-HK.md)
+- [Article source-language metadata](article-source-language.md) · [文章來源語言資料](article-source-language.zh-HK.md)

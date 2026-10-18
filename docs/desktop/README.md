@@ -33,3 +33,9 @@ The [task-oriented catalog](../features/README.md) connects project, build, outp
 - [Built-in tool services](built-in-tools.md) · [內置工具服務](built-in-tools.zh-HK.md)
 
 - [Project execution adapter](execution.md) · [項目執行適配器](execution.zh-HK.md)
+
+## Current workflow translations
+
+- [Personal wording drop sounds](personal-vocabulary-drop-sounds.md) · [個人用語拖放提示音](personal-vocabulary-drop-sounds.zh-HK.md)
+- [Native drop feedback](vocabulary-drop-sound.md) · [原生拖放提示](vocabulary-drop-sound.zh-HK.md)
+- [Package build targets](package-targets.md) · [套件建置目標](package-targets.zh-HK.md)

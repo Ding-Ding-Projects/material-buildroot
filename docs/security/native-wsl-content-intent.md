@@ -1,5 +1,7 @@
 # Native WSL content intent and configuration consent
 
+[香港粵語](native-wsl-content-intent.zh-HK.md)
+
 WSL projects capture content inside the admitted non-root Linux filesystem. Host traversal of UNC paths is unsuitable for native Linux links and can report a valid link as an unreadable directory. The fixed application-owned Python helper executes in memory, without copying the selected source to Windows or writing helper files into the source or output tree. Only aggregate digests, counts and bounded disposition metadata return to the application.
 
 Version 3 receipts retain the existing shared limits: 50,000 entries, 512 MiB combined bytes, 64 MiB per source file, 10 seconds of capture work and depth 64. Source and configuration bytes are read without following file-open links, hard links and special files are rejected, and identities are checked before and after reading. Every traversed link component must belong to the captured namespace. Existing referent content must be captured; missing targets must remain absent. An external intermediate alias is rejected even if its final destination returns inside. Chains and saved identities are checked again before a receipt is issued.
