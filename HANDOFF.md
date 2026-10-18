@@ -525,3 +525,9 @@ Public target: `Ding-Ding-Projects/material-buildroot`, provided by the reposito
 ## Installer startup repair, 2026-10-17
 
 Repair preserved in c7d132d: removed duplicated source inside component-discovery enablement regex and added prepackaging syntax validation. Configuration checks: 12 passed, 3 skipped; dedicated discovery regression: 1 passed. Initial installer attempt stopped on a stale maintainer-local currency lock after verified tool acquisition, before packaging. Replacement installer and installed launch remain pending. Docker server 29.8.2 responds; WSL lists docker-desktop. No separate Buildroot distribution is verified.
+
+## Native drop and performance continuation
+
+Packaged source `a479b0c` passed neutral synthetic valid/invalid drop dispatch, applied wording, invalid preservation, audio-queue completion and clear restoration with zero observed renderer errors. This is actual packaged DOM interaction, not native drag delivery or human audibility proof. The process closed normally and its process/listener absence was verified.
+
+Appearance repair `8a17693` preserves 7,803 identities while reducing the bounded real-DOM diagnostic from 3,981.4 ms to 22.4 ms at the actual 3,263-package scale. Four focused checks passed, including every option/headline identity. Rebuilt native acceptance remains pending. Release eligibility repair `c52a648` passed all seven real Windows PowerShell cases: eligible and legitimate deferred decisions exit zero, genuine admission faults remain nonzero. Hosted verification remains pending.

@@ -23,3 +23,7 @@ This change is source-only under the owner-selected fast delivery mode. Tests, l
 Every branch still builds through the installer entrypoint. After a successful build, `publication-eligibility.ps1` fetches `origin/main` and resolves the exact `GITHUB_SHA`. Only exit code 1 from `git merge-base --is-ancestor` grants `eligible=false`: the source does not yet belong to main, so publication is explicitly deferred. A step summary and `publication-eligibility.json` record that this preservation build produced no release. Fetch, authentication, source-resolution, and ancestry-command errors fail admission rather than being misclassified as a deferred release.
 
 An eligible source invokes the existing publisher unchanged. Its own strict main-ancestry and exact-source admission remain authoritative, including when main changes between the workflow admission step and publication. The early eligibility result never authorizes unfinished source or overrides the publisher. Workflow execution of this new path remains unverified until an integrated run exercises it.
+
+## Publication admission
+
+[Exact-source release eligibility](publication-eligibility.md) documents successful deferral and fail-closed admission errors, including actual Windows PowerShell caller exit propagation.
