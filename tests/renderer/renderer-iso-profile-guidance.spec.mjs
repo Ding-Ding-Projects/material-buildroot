@@ -1,5 +1,11 @@
 import {test,expect} from '@playwright/test';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,mkdtempSync} from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
+import {indexedSources,admittedSource} from '../../website/source-boundary.mjs';
+const {createDocumentationService,renderMarkdown,FORMAT}=createRequire(import.meta.url)('../../src/main/documentation/service.cjs');
 async function relations(panel,kind='profile'){
  const button=panel.locator(`#iso-${kind}-info`).getByRole('button');
  await expect.poll(()=>button.evaluate((element,kind)=>{const root=element.getRootNode().host.getRootNode();return {controls:element.ariaControlsElements?.length===1&&element.ariaControlsElements[0]===root.querySelector(`#iso-${kind}-guide`),description:element.ariaDescribedByElements?.length===1&&element.ariaDescribedByElements[0]===root.querySelector(`#iso-${kind}-tooltip`)};},kind)).toEqual({controls:true,description:true});
@@ -108,10 +114,45 @@ test('runtime guidance keeps unknown access honest and opens the admitted locali
  }
  await panel.evaluate(element=>element.addEventListener('open-documentation',event=>window.__runtimeArticle=event.detail.title));await panel.getByRole('button',{name:'Read runtime guide',exact:true}).click();expect(await page.evaluate(()=>window.__runtimeArticle)).toBe('ISO runtime and resources');
  await page.setViewportSize({width:480,height:900});
- for(const language of ['en','zh-HK','bilingual']){
-  await panel.evaluate(async(element,language)=>{element.language=language;await element.updateComplete;},language);
+ for(const level of [1,5])for(const language of ['en','zh-HK','bilingual']){
+  await page.evaluate(async({level,language})=>{const {wording}=await import('/src/renderer/language-wording-state.ts');wording.save({englishHumor:level,cantoneseHumor:level});const element=document.querySelector('image-presets-panel');element.language=language;await element.updateComplete;},{level,language});
   await expect(panel.locator('#iso-runtime-info').getByRole('button')).toHaveAccessibleName(language==='en'?'Explain saved execution runtime':language==='zh-HK'?'說明已儲存執行環境':'Explain saved execution runtime · 說明已儲存執行環境');await relations(panel,'runtime');
   expect(await panel.locator('#iso-runtime-guide').evaluate(element=>element.scrollWidth<=element.clientWidth+1)).toBe(true);
  }
  const guide=panel.locator('#iso-runtime-guide');await page.setViewportSize({width:480,height:Math.ceil(await guide.evaluate(element=>element.getBoundingClientRect().height))+200});await guide.screenshot({path:testInfo.outputPath('runtime-guidance-fixture.png')});
+});
+
+test('runtime help traverses the real admitted article reader and rejects an omitted destination',async({page},testInfo)=>{
+ const outputRoot=path.resolve(testInfo.project.outputDir);mkdirSync(outputRoot,{recursive:true});const directory=path.join(mkdtempSync(path.join(outputRoot,'reader-')),'docs');
+ // A bounded reader fixture, not a packaged-documentation build. Admit exact
+ // tracked article bytes through the real source boundary and host service.
+ const root=fileURLToPath(new URL('../../',import.meta.url)),tracked=indexedSources(root),hash=value=>createHash('sha256').update(value).digest('hex'),aggregate=createHash('sha256');
+ const documents=[];mkdirSync(path.join(directory,'articles'),{recursive:true});
+ for(const source of ['docs/desktop/iso-fields/runtime-and-resources.md','docs/desktop/iso-fields/runtime-and-resources.zh-HK.md']){
+  const bytes=readFileSync(admittedSource(root,source,tracked)),id='doc-'+hash(source),markdown=bytes.toString('utf8'),rendered=renderMarkdown(markdown,{source,documents:[]});
+  const record={id,source,file:`articles/${id}.md`,title:markdown.split('\n')[0].replace(/^# /,'').trim(),category:'Desktop',language:source.endsWith('.zh-HK.md')?'zh-HK':'en',summary:'',sha256:hash(bytes),bytes:bytes.length,anchors:rendered.headings.map(item=>item.id)};
+  documents.push(record);writeFileSync(path.join(directory,record.file),bytes);aggregate.update(source+'\0').update(bytes).update('\0');
+ }
+ writeFileSync(path.join(directory,'index.json'),JSON.stringify({format:FORMAT,version:1,sourceSnapshot:aggregate.digest('hex'),documents,assets:[],issues:[]}));
+ const service=createDocumentationService({directory});
+ const index=service.list(),article=index.articles.find(item=>item.title==='ISO runtime and resources');expect(article).toBeTruthy();
+ const document=service.read({id:article.id});expect(document.html).toContain('Optional guide at the saved runtime control');
+ const calls=[];
+ await page.exposeFunction('__admittedRuntimeDocumentation',request=>{calls.push(request);return request.action==='documentation.list'?{ok:true,result:service.list()}:request.action==='documentation.read'?{ok:true,result:service.read({id:request.id})}:{ok:false,code:'FIXTURE_UNAVAILABLE'};});
+ await open(page);
+ await page.evaluate(async()=>{
+  await import('/src/renderer/operations-panel.ts');const previous=window.studio.operations;window.__omitRuntimeArticle=true;
+  window.studio.operations=async request=>{
+   if(request.action.startsWith('documentation.')){const reply=await window.__admittedRuntimeDocumentation(request);if(request.action==='documentation.list'&&window.__omitRuntimeArticle)reply.result.articles=reply.result.articles.filter(item=>item.title!=='ISO runtime and resources');return reply;}
+   return previous(request);
+  };
+  const operations=document.createElement('operations-panel');operations.workspace={workspaceId:'reader-fixture',name:'Reader fixture'};operations.language='en';operations.tab='config';document.body.replaceChildren(operations);await operations.updateComplete;
+ });
+ const operations=page.locator('operations-panel'),iso=operations.locator('image-presets-panel');await expect.poll(()=>operations.evaluate(element=>!element.pending&&!element.shadowRoot.querySelector('image-presets-panel')?.isoBusy)).toBe(true);
+ await iso.getByRole('button',{name:'Explain saved execution runtime',exact:true}).click();await iso.getByRole('button',{name:'Read runtime guide',exact:true}).click();
+ await expect(operations).toContainText('This field guide is not available in the bundled documentation.');await expect(operations).toHaveJSProperty('tab','config');expect(calls.filter(call=>call.action==='documentation.read')).toHaveLength(0);
+ await page.evaluate(()=>{window.__omitRuntimeArticle=false;});await iso.getByRole('button',{name:'Read runtime guide',exact:true}).click();
+ await expect(operations).toHaveJSProperty('tab','documentation');const reader=operations.locator('documentation-panel');await expect(reader).toBeVisible();await expect(reader.locator('.article')).toContainText('Optional guide at the saved runtime control');await expect(reader.locator('.article')).toContainText('two running and two waiting');
+ expect(calls.some(call=>call.action==='documentation.read'&&call.id===article.id)).toBe(true);
+ expect(await reader.evaluate(element=>element.document.article.id)).toBe(article.id);
 });
