@@ -10,6 +10,7 @@ import time
 
 ARCHIVE_SHA256 = "33ba6d3f5907e18041a5ed079776cc9269df59703700427f93dc61c3387801c0"
 ARCHIVE_ROOT = "buildroot-buildroot-aa2d7ca"
+SOURCE_UMASK = 0o022
 
 
 def file_hash(file, maximum=512 * 1024 * 1024):
@@ -113,6 +114,7 @@ def tree_receipt(root, maximum=64 * 1024 * 1024):
 
 
 def prepare():
+    os.umask(SOURCE_UMASK)
     if file_hash("/archive.tar.gz", 64 * 1024 * 1024)[0] != ARCHIVE_SHA256:
         raise ValueError("native-source-archive-mismatch")
     for root in ("/source", "/output"):
@@ -202,7 +204,7 @@ def readmit(expected):
                 if not stat.S_ISLNK(info.st_mode) or os.readlink(file) != member.linkname:
                     raise ValueError("native-source-content-mismatch")
             elif member.isfile():
-                if member.size > 64 * 1024 * 1024 or not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != member.mode & 0o777:
+                if member.size > 64 * 1024 * 1024 or not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != member.mode & 0o777 & ~SOURCE_UMASK:
                     raise ValueError("native-source-content-mismatch")
                 digest = hashlib.sha256()
                 with archive.extractfile(member) as stream:
