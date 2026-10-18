@@ -107,6 +107,26 @@ test("guided ISO jobs persist exact host output intent while renderer injection 
   assert.equal(Object.hasOwn(submitted.result, "freshnessVerified"), false);
 });
 
+test("source preservation failure settles without skipping independent disposal and repeated calls share one promise", {timeout:5000}, async t => {
+  const {SourceService}=require('../src/main/execution/source.cjs');let sourceService,stops=0,cancels=0,release;
+  function load(file,overrides){const localRequire=require('node:module').createRequire(file),loaded={exports:{}};require('node:vm').runInThisContext(require('node:module').wrap(fs.readFileSync(file,'utf8')),{filename:file})(loaded.exports,name=>Object.hasOwn(overrides,name)?overrides[name]:localRequire(name),loaded,file,path.dirname(file));return loaded.exports;}
+  const sourceOperations=load(require.resolve('../src/main/source-operations.cjs'),{'./execution/source.cjs':{SourceService:class extends SourceService{constructor(...args){super(...args);sourceService=this;}}}});
+  const operations=load(require.resolve('../src/main/operations-service.cjs'),{'./source-operations.cjs':sourceOperations,'./security/companion-controller.cjs':{createCompanionController:()=>({request:async action=>{assert.equal(action,'companion.stop');stops++;return {stopped:true};}})}});
+  const f=fixture(t,{createService:input=>operations.createOperationsService({...input,dialog:{...input.dialog,showMessageBox:async()=>({response:0})}})});
+  let started;const ready=new Promise(resolve=>started=resolve);
+  f.execution.start=async()=>{started();return {completion:new Promise(resolve=>release=resolve),cancel:async()=>{cancels++;release({state:'cancelled',code:null});return {state:'cancelled'};}};};
+  const chosen=await f.request({action:'project.choose'}),adopted=await f.request({action:'project.adopt',selectionId:chosen.result.selectionId,trust:true});
+  const submitted=await f.request({action:'build.submit',workspaceId:adopted.result.workspaceId,target:'all',runtime:{kind:'wsl',distribution:'Fixture'},jobs:1});assert.equal(submitted.ok,true);await ready;
+  const original=sourceService.hooks+'-original';fs.renameSync(sourceService.hooks,original);fs.mkdirSync(sourceService.hooks);const marker=path.join(sourceService.hooks,'foreign-marker');fs.writeFileSync(marker,'public foreign fixture');
+  try{
+    let first;assert.doesNotThrow(()=>{first=f.service.dispose();});assert.equal(typeof first.then,'function');assert.equal(f.service.dispose(),first);
+    const results=await first;assert.ok(results.some(result=>result.status==='rejected'&&result.reason.message==='source-global-config-changed'));
+    assert.equal(stops,1);assert.ok(cancels>=1);assert.equal(fs.readFileSync(marker,'utf8'),'public foreign fixture');
+    assert.equal((await f.request({action:'scheduler.status'})).code,'UNAVAILABLE');
+    const cancellations=cancels;await f.service.dispose();assert.equal(stops,1);assert.equal(cancels,cancellations);
+  }finally{release?.({state:'cancelled',code:null});fs.rmSync(sourceService.hooks,{recursive:true});fs.renameSync(original,sourceService.hooks);sourceService.dispose();}
+});
+
 test("operations reject arbitrary actions, fields, paths and source execution without consent", async (t) => {
   const f = fixture(t);
   for (const request of [

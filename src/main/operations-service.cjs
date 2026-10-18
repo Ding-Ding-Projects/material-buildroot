@@ -2361,12 +2361,15 @@ function createOperationsService({
       toolFiles.dispose();
       externalFiles.dispose();
       externalWorkspaces.clear();
-      sources.dispose();
+      // A source-preservation failure remains visible without skipping other
+      // independent cleanup or escaping the shared disposal promise.
+      const settle = action => Promise.resolve().then(action);
       disposal = Promise.allSettled([
-        scheduler.awaitIdle(),
-        tools.dispose?.(),
-        companion?.request("companion.stop", {}),
-        ...[...running].map((job) => job.cancel()),
+        settle(() => sources.dispose()),
+        settle(() => scheduler.awaitIdle()),
+        settle(() => tools.dispose?.()),
+        settle(() => companion?.request("companion.stop", {})),
+        ...[...running].map((job) => settle(() => job.cancel())),
       ]);
       return disposal;
     },
