@@ -15,6 +15,17 @@ export class ProjectWorkflowPanel extends LitElement {
   workspaceId = "";
   revision = 0;
   private mode = "open";
+  /** Presentation-only entry point. Existing drafts survive; consent is never reused. */
+  async openProjectWorkflow(mode: 'create' | 'open') {
+    if (this.pending || !['create','open'].includes(mode)) return;
+    this.mode = mode;
+    this.trust = false;
+    this.code = '';
+    this.changed();
+    if (mode === 'open') await this.run(() => this.refresh());
+    await this.updateComplete;
+    this.renderRoot.querySelector<HTMLElement>('#project-workflow-heading')?.focus();
+  }
   private pending = false;
   private code = "";
   private projects: any[] = [];
@@ -66,7 +77,7 @@ export class ProjectWorkflowPanel extends LitElement {
     const cloning = this.mode === "create" || this.mode === "clone";
     const current = this.projects.find(item => item.id === this.workspaceId);
     return html`<section class="panel stack" aria-busy=${this.pending}>
-      <h2>${this.l("Project workflows","專案流程",true)}</h2>
+      <h2 id="project-workflow-heading" tabindex="-1">${this.l("Project workflows","專案流程",true)}</h2>
       <div class="row" role="group" aria-label=${this.l("Project action","專案操作",true)}>
         ${[["open","Open","開啟"],["create","Create","建立"],["adopt","Adopt","接入"],["import","Import descriptor","匯入描述檔"],["extracted","Import extracted source","匯入已解壓來源"],["clone","Clone","複製"]].map(([mode,en,zh])=>html`<md-outlined-button ?disabled=${this.pending} aria-pressed=${this.mode===mode} @click=${()=>{this.mode=mode;this.selection=undefined;this.portable=undefined;this.trust=false;this.code="";if(mode==="create"){this.url="https://gitlab.com/buildroot.org/buildroot.git";this.ref="2025.02.18";}this.changed();if(mode==="open")void this.run(()=>this.refresh());}}>${actionIcon(en)}${this.l(en,zh)}</md-outlined-button>`)}
       </div>
