@@ -19,6 +19,8 @@ const {
   renderMarkdown,
   headingMetadata,
   imageMime,
+  jsonReferenceText,
+  referencePages,
   MAX_ARTICLE,
   MAX_ASSET,
   MAX_TOTAL,
@@ -84,7 +86,7 @@ export async function bundleDocumentation({ root, output }) {
     contents = new Map(),
     parsed = new Map();
   const md = new MarkdownIt({ html: false, linkify: false });
-  let total = 0;
+  let total = 0, referenceViews = 0;
   for (const source of sources) {
     const bytes = boundedRead(admittedSource(root, source, index), MAX_ARTICLE);
     total += bytes.length;
@@ -113,9 +115,26 @@ export async function bundleDocumentation({ root, output }) {
     contents.set(source, bytes);
     parsed.set(source, tokens);
   }
-  const assets = [],
+  const assets = [], references = [],
     assetSources = new Set(),
+    referenceSources = new Set(),
     issues = [];
+  function admitImage(selected) {
+    if (!/\.(png|jpe?g|webp)$/i.test(selected)) throw Error("Unsupported image format");
+    if (assetSources.has(selected)) return assets.find((asset) => asset.source === selected);
+    const bytes = boundedRead(admittedSource(root, selected, index), MAX_ASSET);
+    const extension = /\.jpe?g$/i.test(selected) ? "jpg" : selected.split(".").at(-1).toLowerCase();
+    const mime = imageMime(bytes, extension);
+    if (!mime) throw Error("Invalid image signature");
+    total += bytes.length;
+    if (total > MAX_TOTAL) throw Error("Documentation bundle exceeds its total size limit.");
+    const sha256 = hash(bytes);
+    const asset = { source: selected, file: `assets/${sha256}.${extension}`, sha256, bytes: bytes.length, mime };
+    assetSources.add(selected);
+    assets.push(asset);
+    contents.set(selected, bytes);
+    return asset;
+  }
   for (const document of documents) {
     const walk = (tokens) => {
       for (const token of tokens) {
@@ -124,31 +143,7 @@ export async function bundleDocumentation({ root, output }) {
           let selected;
           try {
             selected = resolveDocumentLink(document.source, reference);
-            if (!/\.(png|jpe?g|webp)$/i.test(selected))
-              throw Error("Unsupported image format");
-            if (assetSources.has(selected)) continue;
-            const bytes = boundedRead(
-              admittedSource(root, selected, index),
-              MAX_ASSET,
-            );
-            const extension = /\.jpe?g$/i.test(selected)
-              ? "jpg"
-              : selected.split(".").at(-1).toLowerCase();
-            const mime = imageMime(bytes, extension);
-            if (!mime) throw Error("Invalid image signature");
-            total += bytes.length;
-            if (total > MAX_TOTAL)
-              throw Error("Documentation bundle exceeds its total size limit.");
-            assetSources.add(selected);
-            const sha256 = hash(bytes);
-            assets.push({
-              source: selected,
-              file: `assets/${sha256}.${extension}`,
-              sha256,
-              bytes: bytes.length,
-              mime,
-            });
-            contents.set(selected, bytes);
+            admitImage(selected);
           } catch (error) {
             if (
               error.message ===
@@ -163,17 +158,52 @@ export async function bundleDocumentation({ root, output }) {
             });
           }
         }
+        if (token.type === "link_open") {
+          const reference = token.attrGet("href") || "";
+          try {
+            const selected = resolveDocumentLink(document.source, reference.split("#")[0]);
+            if (!/\.(?:json|png|jpe?g|webp)$/i.test(selected) || referenceSources.has(selected)) continue;
+            const id = `doc-${hash(selected)}`;
+            let record;
+            if (/\.json$/i.test(selected)) {
+              const bytes = boundedRead(admittedSource(root, selected, index), MAX_ASSET);
+              const pageCount = referencePages(jsonReferenceText(bytes)).length;
+              referenceViews += pageCount;
+              total += bytes.length;
+              if (total > MAX_TOTAL) throw Error("Documentation bundle exceeds its total size limit.");
+              record = { source: selected, file: `references/${id}.json`, sha256: hash(bytes), bytes: bytes.length, kind: "json" };
+              contents.set(selected, bytes);
+            } else {
+              const asset = admitImage(selected);
+              record = { source: selected, file: asset.file, sha256: asset.sha256, bytes: asset.bytes, kind: "image" };
+              referenceViews++;
+            }
+            references.push({
+              id, ...record,
+              title: normalizedText(path.posix.basename(selected), 240),
+              category: "Source references", language: "en",
+              summary: record.kind === "json" ? "Bundled JSON source reference, shown in complete numbered pages." : "Bundled image source reference.",
+            });
+            referenceSources.add(selected);
+          } catch (error) {
+            if (error.message === "Documentation bundle exceeds its total size limit.") throw error;
+            // The normal renderer records the unresolved link without admitting unsafe bytes.
+          }
+        }
         if (token.children) walk(token.children);
       }
     };
     walk(parsed.get(document.source));
   }
   if (assets.length > 1000) throw Error("Documentation image limit exceeded.");
+  if (documents.length + references.length > 1000) throw Error("Documentation article limit exceeded.");
+  if (documents.length + referenceViews > 1000) throw Error("Documentation reader page limit exceeded.");
   for (const document of documents) {
     const rendered = renderMarkdown(utf8(contents.get(document.source)), {
       source: document.source,
       documents,
       assets,
+      references,
     });
     issues.push(...rendered.issues);
   }
@@ -182,13 +212,14 @@ export async function bundleDocumentation({ root, output }) {
   ];
   if (uniqueIssues.length > 10000)
     throw Error("Documentation issue limit exceeded.");
-  const admitted = [...sources, ...assetSources].sort();
+  const admitted = [...new Set([...sources, ...assetSources, ...referenceSources])].sort();
   const manifest = {
     format: FORMAT,
     version: 1,
     sourceSnapshot: sourceSnapshot(root, admitted, index),
     documents,
     assets,
+    references,
     issues: uniqueIssues,
   };
   const captured = createHash("sha256");
@@ -208,7 +239,7 @@ export async function bundleDocumentation({ root, output }) {
   const staging = `${output}.${randomUUID()}.tmp`;
   try {
     fs.mkdirSync(staging, { recursive: true, mode: 0o700 });
-    for (const record of [...documents, ...assets]) {
+    for (const record of [...documents, ...assets, ...references.filter((record) => record.kind === "json")]) {
       const destination = containedPath(staging, record.file);
       fs.mkdirSync(path.dirname(destination), { recursive: true, mode: 0o700 });
       fs.writeFileSync(destination, contents.get(record.source), {
@@ -227,6 +258,7 @@ export async function bundleDocumentation({ root, output }) {
   return {
     documents: documents.length,
     assets: assets.length,
+    references: references.length,
     issues: uniqueIssues.length,
     complete: uniqueIssues.length === 0,
     sourceSnapshot: manifest.sourceSnapshot,
