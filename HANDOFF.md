@@ -1,8 +1,20 @@
+## Verification update, 2026-10-18, source 646e297
+
+The combined documentation build passed through root `build.bat --target documentation /s`: 404 HTML pages, 10,510 internal references, 79 task identities, 109 feature identities and 372 documents. Receipt SHA-256: `e0a6ef20bbea2cc6a27b69ccb5880b9cbfdaba1a2a4f68c766dc22a94b698042`. This is local generated-output validation, not deployed interaction or accepted release evidence.
+
+Native desktop source `24697b5` passed actual background navigation through workspace, About, Builds and queue inspection without a debugger or browser-debugging connection. Its renderer then crashed at 10:23:19.161 UTC with `0xC0000005`, approximately 176.535 seconds after launch. Exact-owned teardown completed at 10:28:47.536 UTC. No active verification GUI remains. This refutes sustained repair; setup, current native Easy PC reconciliation and GUI ISO production remain unverified. A separate brief visible-check decision is pending, with no visible launch performed.
+
+Docker native-volume backend `92763f4` completed the corrected isolated autoreconf reproduction, then its third and final full firmware attempt stopped at `host-gcc-initial 13.3.0`, `generic-match.cc:16611`, with `internal compiler error: Segmentation fault`. The attempt ran 10:19:35.759 to 10:22:52.904 UTC; exact-owned container absence was verified. Log SHA-256: `b2b4a184fbfd134cc766c56545910780aced6899ade8abad40988af202cf6542`. No fourth firmware attempt or speculative source patch is authorized. Producer source, output and cache remain preserved. This backend extension is not yet integrated into the product GUI.
+
+A later WSL faulthandler diagnostic completed six workers and a seventh non-success without JSON. Reconciliation of all seven saved ownership receipts remains `unknown/runtime-namespace-changed`, latest observation 10:33:34.791 UTC. A changed runtime namespace is not process-absence proof. No new WSL capture, configuration or build retry is running; no host power or service action occurred.
+
+The previously produced 12,357,632-byte WSL BIOS ISO and its bounded QEMU boot remain valid for their exact recorded bytes/profile. They do not establish a current GUI or Docker ISO. Main integration, deployment, accepted release, matching installed update, full source-to-GUI/Easy acceptance and cleanup remain incomplete. Goal active, no fixed budget; latest verified account allowance is 19 percent remaining.
+
 ## Manual containment integration, 2026-10-18
 
 Repair f5e66ae is integrated after independent source review. Root regenerated the selected actual source inventory and checked it, then passed11focused tests. Counts remain2245records/91sourcefiles; the combined renderer reference hashes were refreshed. Source/app root aliases and linked manual/package/src/docs parents are rejected before outside reads/enumeration. Producer identity and component chains are rechecked; no atomic snapshot against arbitrary concurrent mutation is claimed. Full GUI/Easy/topic acceptance remains unfinished.
 
-## Current combined verification, 2026-10-18, source24697b5
+## Earlier combined verification, 2026-10-18, source24697b5
 
 Combined desktop build24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960 passed root build.bat, receipt c349171a0a494a97986863562f4d7561f3cb802606e94503e2eda3156f978fc7. It integrates source-discovered Easy PC presets c7028b4, bilingual permission/diagnostic guidance9720218 and pinned runtime46538c0. Native permission approval37571 succeeded. Runtime46538c0 passed75.794seconds cold observation, but later crashed09:42:14.386UTC with exit-36861. The bounded success is retained; sustained startup is not repaired. Owned process40888 and listener9376 are absent after exact held-identity teardown, recovery0. Earlier375 cold startup crashed0x80000003 with raw_hash_map::at fatal; no source cause established.
 

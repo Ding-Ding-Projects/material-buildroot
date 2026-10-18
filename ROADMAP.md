@@ -1,6 +1,15 @@
 # Phased implementation roadmap
 
-## Current combined verification, 2026-10-18, source 24697b5
+## Latest bounded outcomes, 2026-10-18
+
+- [x] Validate combined documentation source646e297 through the exact root entrypoint:404pages/10510internal references/372documents. Deployed interaction remains separate.
+- [x] Preserve source646e297 and containment repairf5e66ae with exact remote-ref readback. These are preservation branches, not default-branch delivery.
+- [ ] Repair sustained native operation. Candidate24697 completed basic native navigation, then renderer0xC0000005 at10:23:19.161UTC; exact-owned teardown verified. Brief visible-check decision pending.
+- [ ] Complete native-volume Docker firmware production. Final attempt3 stopped at host-gcc-initial13.3.0 internal compiler segmentation fault; exact container absence verified. No fourth unchanged attempt.
+- [ ] Reconcile seven WSL diagnostic ownership receipts. Latest10:33:34.791UTC:all unknown/runtime-namespace-changed. Keep cleanup unverified and producer data preserved.
+- [ ] Complete current GUI ISO production and native Easy PC/setup/wording acceptance. Earlier immutable WSL ISO/boot remains separate evidence.
+
+## Earlier combined verification, 2026-10-18, source 24697b5
 
 - [x] Build combined Easy PC, bilingual permission guide and verified44.9.0 runtime candidate through exact root build.bat. Source24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960; receipt c349171a0a494a97986863562f4d7561f3cb802606e94503e2eda3156f978fc7.
 - [x] Verify actual37571d3 permission grant after adding the required domain; retain two real-dispatcher scope/revocation checks and native approval receipt.
