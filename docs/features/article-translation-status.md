@@ -30,13 +30,14 @@ These translations preserve the originals’ historical verification boundaries.
 - [HTTPS companion boundary](../security/companion.zh-HK.md)
 - [Persistent workspace state](../security/workspace-state.zh-HK.md)
 
+- [Configuration service](../desktop/configuration.zh-HK.md)
+
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
 
 - `docs/features/browser-native.md`
 - `docs/features/companion-consumers.md`
-- `docs/desktop/configuration.md`
 - `docs/desktop/execution.md`
 - `docs/desktop/built-in-tools.md`
 - `docs/desktop/minecraft-manager.md`

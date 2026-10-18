@@ -25,3 +25,5 @@ The [task-oriented catalog](../features/README.md) connects project, build, outp
 - [Managed hypervisor controls](../deployment/hypervisor-controls.md) · [受管理虛擬機控制](../deployment/hypervisor-controls.zh-HK.md)
 
 - [Artifacts and deployment](deployment.md) · [產物與部署](deployment.zh-HK.md)
+
+- [Configuration service](configuration.md) · [配置服務](configuration.zh-HK.md)
