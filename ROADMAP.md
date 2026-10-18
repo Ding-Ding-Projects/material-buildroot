@@ -1,5 +1,15 @@
 # Phased implementation roadmap
 
+## Guided workspace remake, 2026-10-18
+
+- [ ] Replace the editor-first shell with Images, Builds, Tools, Help and Settings while preserving all destination identifiers and mounted project drafts.
+- [ ] Deliver a resumable five-stage image flow with one shared Easy/Advanced draft, contextual guidance and fresh host validation on resume.
+- [ ] Move queue and selected logs into the dedicated Builds workspace; remove the permanent dock from the guided presentation.
+- [ ] Organize specialized tools and settings into focused, searchable destinations without removing existing workflows.
+- [ ] Independently review design and implementation, verify complete destination preservation and exercise beginner, advanced and recovery journeys.
+- [ ] Build and inspect current-source captures across supported language, theme, viewport and scale tuples; replace current presentation images with verified captures.
+- [ ] Verify current-GUI ISO production, sustained native startup, normal release and matching installed update. Earlier bounded results do not satisfy this item.
+
 ## Current preservation boundary
 
 - [x] Preserve existing task branches and exact remote tips at the verified account boundary; active and unfinished work retained.

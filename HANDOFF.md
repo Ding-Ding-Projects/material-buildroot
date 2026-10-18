@@ -1,5 +1,13 @@
 ## Integrated guidance and source isolation, 2026-10-18
 
+## Guided workspace remake resumed, 2026-10-18
+
+The user approved implementation of the whole-application guided workspace plan. Fresh account data reports 86% remaining, clearing the previous allowance boundary. The goal tool returned no existing goal; a successor was created with the accepted remake and the unfinished runtime/ISO delivery requirements retained. The starting source is 457b51ae4ead511a9be30857e93c289c0e9f3aad, clean and equal to the fetched integration branch.
+
+Three isolated frontend lanes own the shell/settings, image flow, and operations/builds/tools. Read-only design inventory and independent review preserve all existing destination identifiers, project instances and host authority. See `design/guided-workspace.md` for the shared contract. Baseline capture uses the unchanged built renderer through an isolated hidden browser, explicitly separating fixture host replies from native acceptance. No native application launch or firmware attempt is authorized by that renderer evidence.
+
+Implementation, integration, current built captures, release and installed-update verification remain in progress. Historical limitations below remain until superseded by specific evidence.
+
 ## Second consecutive account-boundary audit, 2026-10-18
 
 Fresh account data still shows 90% used and 10% remaining. The preceding goal turn made concrete progress through implementation, verification, publication and preservation. This continuation revalidated the clean primary checkout, exact remote integration/main refs and the completed gallery lane. No live verification process is being awaited, and no new implementation, test, product launch or firmware operation is permitted under the unchanged boundary. The goal remains active and incomplete because only two consecutive boundary turns have occurred. This is a no-progress product turn with preservation recorded, not a completion claim.
