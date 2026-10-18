@@ -37,9 +37,15 @@ export async function open(page,{language='en',theme='light'}={}) {
    }
   };
  },{language,oldRevision,newRevision});
- await page.goto('/');await expect(page.locator('.toolbar')).toContainText(/Project operations|專案操作/);
- await page.locator('nav').getByRole('button',{name:/^Project operations|^專案操作/}).click();
- await page.locator('operations-panel').evaluate(panel=>panel.workspace={workspaceId:'project-1',name:'Appliance source'});
- await page.getByRole('tab',{name:language==='en'?'Source':language==='zh-HK'?'來源':'Source · 來源',exact:true}).click();
+ await page.goto('/',{waitUntil:'domcontentloaded',timeout:45000});
+ await expect(page.locator('#workspace-heading')).toContainText(/Images|映像/);
+ await page.locator('[data-image-action="open"]').click();
+ const operations=page.locator('operations-panel:not([hidden])');
+ await operations.evaluate(panel=>panel.workspace={workspaceId:'project-1',name:'Appliance source'});
+ const tabs=page.locator('workspace-tabs');
+ await tabs.locator('[data-control="new-tab"]').click();
+ await tabs.locator('md-dialog').getByRole('button',{name:language==='en'?'Source':language==='zh-HK'?'來源':'Source · 來源',exact:true}).click();
+ await expect(tabs.locator('md-dialog')).not.toBeVisible();
+ await expect(operations.locator('source-panel')).toBeVisible();
  return {errors,close:()=>fs.rmSync(directory,{recursive:true,force:true})};
 }

@@ -106,9 +106,8 @@ async function fixture(page, options = {}) {
     },
     { metadata: options.bundle?.metadata || metadata, navigation, documents: options.bundle?.documents || documents },
   );
-  await page
-    .locator("operations-panel")
-    .evaluate((p) => (p.tab = "documentation"));
+  await page.locator('nav [data-primary="help"]:visible').click();
+  await expect(page.locator("documentation-panel .tasks")).toBeVisible();
   await expect(page.locator("documentation-panel .tasks")).toContainText(
     "Build your first image",
   );
@@ -221,12 +220,13 @@ test("offline reader uses host rendered articles, safe navigation, history and o
     f.close();
   }
 });
-test("documentation regex builder stays anchored, isolates query and rejects invalid expressions", async ({
+test("documentation regex builder synchronizes its query, isolates other searches and rejects invalid expressions", async ({
   page,
 }) => {
   const f = await fixture(page);
   try {
     const p = page.locator("documentation-panel");
+    const otherPattern = await page.locator('operations-panel').evaluate(el=>el.shadowRoot.querySelector('regex-workbench').pattern);
     await p
       .getByRole("textbox", { name: "Search documentation", exact: true })
       .fill("image");
@@ -235,12 +235,12 @@ test("documentation regex builder stays anchored, isolates query and rejects inv
       .getByRole("button", { name: "Documentation regex builder", exact: true })
       .click();
     await p
-      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .getByRole("textbox", { name: "Pattern", exact: true })
       .fill("^Author");
     await expect(p.locator(".topics .topic")).toHaveCount(1);
     await expect(p.locator(".topics")).toContainText("Author a package");
     await p
-      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .getByRole("textbox", { name: "Pattern", exact: true })
       .fill("[");
     await expect(p).toContainText("Invalid expression.");
     await expect(p.locator(".topics .topic")).toHaveCount(0);
@@ -248,16 +248,19 @@ test("documentation regex builder stays anchored, isolates query and rejects inv
       (el) => (el.index.articles[0].summary = "a".repeat(100) + "!"),
     );
     await p
-      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .getByRole("textbox", { name: "Pattern", exact: true })
       .fill("(a+)+$");
     await expect(p).toContainText("Expression timed out.");
     await p
-      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .getByRole("textbox", { name: "Pattern", exact: true })
       .press("Escape");
     await expect(p.locator(".builder")).toHaveCount(0);
     await expect(
       p.getByRole("textbox", { name: "Search documentation", exact: true }),
-    ).toHaveValue("image");
+    ).toHaveValue("(a+)+$");
+    expect(await page.locator('operations-panel').evaluate(el=>el.shadowRoot.querySelector('regex-workbench').pattern)).toBe(otherPattern);
+    await p.getByRole('button',{name:'Documentation regex builder',exact:true}).click();
+    await p.getByRole('button',{name:'Use literal query',exact:true}).click();
     await p
       .getByRole("textbox", { name: "Search documentation", exact: true })
       .fill("Build");
@@ -337,11 +340,11 @@ test("command launcher opens help and a stale article cannot replace documentati
       (await ax.send("Accessibility.getFullAXTree")).nodes
         .filter((n) => n.role?.value === "dialog" && !n.ignored)
         .map((n) => n.name?.value),
-    ).toContain("Workspace actions");
+    ).toContain("Commands and workspace controls");
     await ax.detach();
     await page
-      .locator("#actions-dialog")
-      .getByRole("button", { name: "Help & documentation", exact: true })
+      .locator("command-surfaces md-dialog")
+      .locator('[data-action="registered-workspace:operation:documentation"]')
       .click();
     const p = page.locator("documentation-panel");
     await expect(p).toBeVisible();
