@@ -59,6 +59,19 @@ async function openVisitorControl(selector){
  assert.equal(await page.locator('#'+section.id).getAttribute('role'),'tabpanel');
  return control;
 }
+async function confirmVisitorImport(){
+ await page.locator('#visitor-import').click();
+ const dialog=page.locator('md-dialog[open]').filter({has:page.locator('[slot="headline"]').filter({hasText:/Confirm local change|確認本機變更/})});
+ assert.equal(await dialog.count(),1,'Import must present its local replacement confirmation');
+ const confirm=dialog.getByRole('button',{name:/^Confirm this change/});
+ assert.equal(await confirm.isDisabled(),true,'Confirmation starts disabled');
+ await dialog.getByRole('checkbox',{name:/^I reviewed the exact affected data/}).check();
+ await dialog.getByRole('checkbox',{name:/^I authorize this replacement or reset/}).check();
+ const slider=dialog.getByRole('slider',{name:/^Move confirmation to 100 percent/});
+ await slider.focus();await slider.press('End');
+ await confirm.click();
+ await page.waitForFunction(()=>![...document.querySelectorAll('md-dialog[open]')].some(d=>d.querySelector('[slot="headline"]')?.textContent.includes('Confirm local change')));
+}
 async function ready(){await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('*')].filter(e=>e.localName.startsWith('md-')).map(e=>customElements.whenDefined(e.localName)));await Promise.all([...document.querySelectorAll('*')].filter(e=>e.updateComplete).map(e=>e.updateComplete));await document.fonts.ready;});}
 async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:path.relative(root,file).split(path.sep).join('/'),sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
 try{
@@ -308,12 +321,12 @@ try{
  assert.equal(await page.locator('#visitor-notes').locator('textarea').inputValue(),'Keep this note in the browser profile.');
  await openVisitorControl('#visitor-import-json');
  await page.locator('#visitor-import-json').locator('textarea').fill('{invalid');
- await page.locator('#visitor-import').click();
+ await confirmVisitorImport();
  assert.match(await page.locator('#visitor-message').innerText(),/not valid/);
  assert.equal((await page.evaluate(()=>JSON.parse(localStorage.getItem('mb-visitor-workspace-v1')))).goal,'Review the visitor roadmap','Invalid backup must leave current local work unchanged');
  const validBackup={version:1,goal:'Read the phase record',notes:'Restore verified content.',checks:{'read-roadmap':true,'check-evidence':false,'write-notes':true},updatedAt:null,exportedAt:new Date().toISOString()};
  await page.locator('#visitor-import-json').locator('textarea').fill(JSON.stringify(validBackup));
- await page.locator('#visitor-import').click();
+ await confirmVisitorImport();
  assert.match(await page.locator('#visitor-message').innerText(),/validated and imported/);
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),validBackup.goal);
  const [backupDownload]=await Promise.all([page.waitForEvent('download'),page.locator('#visitor-export').click()]);
