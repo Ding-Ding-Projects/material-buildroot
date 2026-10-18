@@ -2629,6 +2629,16 @@
         "reason": "Byte-identical to the receipt-listed docs/evidence native dialog capture; represented once."
       }
     ],
-    "rawCapturePolicy": "The six receipt-listed PPM captures remain unchanged in source evidence; the gallery publishes only their matching validated PNG renditions."
+    "rawCapturePolicy": "The six receipt-listed PPM captures remain unchanged in source evidence; the gallery publishes only their matching validated PNG renditions.",
+    "notReviewedCategories": [
+      {
+        "category": "Native crash investigation cache material",
+        "reason": "Outside the bounded image inventory and not reviewed for public gallery use; retained privately."
+      },
+      {
+        "category": "User-provided installer dialog image",
+        "reason": "Withheld because it contains machine details and has no source-bound capture receipt."
+      }
+    ]
   }
 }
