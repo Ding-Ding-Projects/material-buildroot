@@ -1,4 +1,4 @@
-# Current Material workspace gallery
+# Historical Material workspace gallery at e8f9beb
 
 Twenty-four genuine, unretouched Linux Chromium captures show twelve workflows at application source `e8f9bebf2b96397b00000be485870a61c16cb3e2`. The capture began at `2026-10-15T21:31:33.702Z` and completed at `2026-10-15T21:31:45.687Z`. All 24 originals were decoded and visually reviewed; each copied PNG was verified byte-for-byte against its recorded SHA-256.
 

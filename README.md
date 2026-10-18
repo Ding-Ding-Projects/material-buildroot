@@ -2,17 +2,17 @@
 
 A Material Design 3 desktop workspace for configuring and building embedded Linux systems through WSL 2 or Docker.
 
-[Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Capture provenance](docs/evidence/modern-workspace/README.md) · [Roadmap](ROADMAP.md)
+[Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Historical capture provenance](docs/evidence/ARCHIVE.md) · [Roadmap](ROADMAP.md)
 
-Current integrated source includes a source-backed ISO profile guide, a saved-runtime guide and an internal ISO file lifecycle helper. The guides have independent reviews and bounded browser evidence; the helper passed fifteen synthetic Linux cases after witnessed FIFO and missing-identity regressions. It remains unexposed and grants no real job, producer, cleanup or boot authority. See [runtime guidance](docs/desktop/iso-fields/runtime-and-resources.md) and [lifecycle limits](docs/security/iso-output-lifecycle.md).
+Current integrated source includes the [guided image creation journey](docs/features/guided-image-creation.md), a source-backed ISO profile guide, a saved-runtime guide and an internal ISO file lifecycle helper. The guides have independent reviews and bounded browser evidence; the helper passed fifteen synthetic Linux cases after witnessed FIFO and missing-identity regressions. It remains unexposed and grants no real job, producer, cleanup or boot authority. See [runtime guidance](docs/desktop/iso-fields/runtime-and-resources.md) and [lifecycle limits](docs/security/iso-output-lifecycle.md).
 
-Candidate `8db4e85` passed the exact root desktop and documentation builds. Its local documentation output contains 411 HTML pages and 10,704 checked internal references. The focused browser pass verified three changed articles and ten layout tuples before a final keyboard-locator timeout; that overall run remains failed, and the corrected keyboard check is pending. Earlier nine-route proof remains bound to a12c936. Native desktop candidate `24697b5` completed basic navigation before a later renderer crash; sustained current native operation and GUI ISO production remain incomplete. The final Docker firmware attempt stopped at compiler segmentation faults. Earlier [produced ISO evidence](docs/evidence/iso-production/README.md) and [bounded BIOS boot evidence](docs/evidence/iso-boot/README.md) remain valid only for their recorded bytes and profile. See the [current handoff](HANDOFF.md) for separate source, runtime and delivery states.
+Candidate `d02fd59` passed the exact root desktop build. The126 selected renderer cases have passing verdicts across focused runs; host documentation checks passed 20 cases with 3 symbolic-link cases unverified. One actual hidden native launch reached Images and Purpose without fixtures and closed through its real titlebar control, with owned processes and listener verified absent. Continuous stability, the full layout matrix, normal installed startup, current-GUI ISO production and release/update acceptance remain incomplete. Earlier [ISO production](docs/evidence/iso-production/README.md) and [bounded BIOS boot](docs/evidence/iso-boot/README.md) remain valid only for their recorded bytes and profile. The final Docker firmware attempt stopped at compiler segmentation faults. Historical documentation candidate `8db4e85` retains its incomplete keyboard verification. See the [current handoff](HANDOFF.md) for exact evidence and boundaries.
 
 The public screenshot gallery now retains 67 reviewed originals across 13 source-bound groups, including bounded native startup, dialog, documentation-preview and ISO guest evidence. All 67 original image URLs and hashes were checked. Capture limits, unsuccessful guest profiles and the incomplete documentation-browser run remain explicit; gallery publication does not complete current desktop or ISO-production acceptance. See [gallery delivery](docs/gallery/live-delivery.json).
 
 ## A productive desktop workspace
 
-An activity rail, project explorer, editor tabs and resizable output dock keep projects and their results together. Bundled Material icons identify navigation and editor actions. Package dependencies and guest topology have interactive canvases with pan, zoom, fit, keyboard movement and separate layout history.
+Images, Builds, Tools, Help and Settings provide five main destinations. Creation starts with a saved purpose and target before project selection; Easy and Advanced share the same draft through the five-stage image guide. Advanced project controls remain available without a permanent output dock. Project tabs and existing utility destinations retain their work. Bundled Material icons identify navigation and actions. Package dependencies and guest topology retain interactive canvases with pan, zoom, fit, keyboard movement and separate layout history.
 
 Practical onboarding creates a saved plan and preserves setup progress. Native folder selection connects trusted sources and separate outputs. Package discovery reads actual source declarations; reviewed imports preserve unsupported recipes. Runtime choices and ordered external trees persist, while filesystem and execution authority must be renewed after restart.
 
@@ -28,7 +28,7 @@ The current candidate keeps complete source-package inventories accessible throu
 
 The integration candidate adds ordered native feedback for valid and invalid personal-wording file drops. Focused backend checks passed 4/4 and renderer checks passed 23/23; native playback calls were accepted, while audibility and the combined installed update remain unverified. See [drop feedback](docs/desktop/personal-vocabulary-drop-sounds.md).
 
-The [native Kconfig inventory](docs/planning/buildroot-coverage/native-kconfig.md) enumerates 11,464 definition nodes from 3,367 hashed inputs for the recorded Buildroot 2025.02 invocation. Seven completeness and help-fidelity checks pass. Every definition retains separate GUI, Easy-mode and runtime gaps. Actual candidate launch, About and catalog closure passed bounded checks, but entering Builds after Linux project adoption left the renderer unresponsive. GUI-driven ISO production remains incomplete despite separate product execution and ISO boot evidence.
+The [native Kconfig inventory](docs/planning/buildroot-coverage/native-kconfig.md) enumerates 11,464 definition nodes from 3, 367 hashed inputs for the recorded Buildroot 2025.02 invocation. Seven completeness and help-fidelity checks pass. Every definition retains separate GUI, Easy-mode and runtime gaps. Actual candidate launch, About and catalog closure passed bounded checks, but entering Builds after Linux project adoption left the renderer unresponsive. GUI-driven ISO production remains incomplete despite separate product execution and ISO boot evidence.
 
 The owner resumed completion and actual acceptance on 2026-10-18, including focused tests and built-interface verification. Earlier blanket test and screenshot deferrals are historical. Successful builds and available installers still do not establish complete runtime acceptance. Follow the [finite implementation queue](docs/planning/implementation-queue.json), [roadmap](ROADMAP.md) and [handoff](HANDOFF.md) for the separate source, build, release and acceptance states.
 
@@ -36,69 +36,15 @@ Recent source additions include [versioned project storage](docs/workspace/proje
 
 See [presentation provenance](docs/features/presentation-provenance.md) for source-update and build clocks, local font byte inventories, share metadata and the separate current-capture gap.
 
-## Source-bound historical interface captures
+## Guided interface evidence
+
+The guided workspace organizes Images, Builds, Tools, Help and Settings around the image workflow. See [Create and resume an image](docs/features/guided-image-creation.md) for purpose and target selection, saved project access, the five-stage guide and recovery boundaries.
+
+The current browser capture run uses renderer files extracted from the exact built application archive after checking its SHA-256. Host-facing operations use explicit fixtures. These are captures of built renderer bytes, not source previews or proof of native Windows execution. Current native capture and interaction acceptance remain pending. The capture inventory must retain the producing archive, source, individual image hashes, state tuples and fixture boundaries before any image is presented as reviewed evidence.
+
+[Historical interface screenshots and original provenance](docs/evidence/ARCHIVE.md) are retained separately. Earlier native startup, dialogs and ISO console images do not depict the current guided interface.
 
 The [feature delivery source audit](docs/evidence/tasks/PH01-delivery-audit.md) accounts for all 109 required identities and 436 surface rows, with one [audit article per identity](docs/evidence/tasks/feature-delivery/README.md). It finds no whole feature with complete current acceptance. The overview retains seven unresolved applicability records, shared-trace limits and the gap between 427 public requirement IDs and 1,908 detailed audit rows. It is a source inventory, not an implementation-completeness claim.
-
-### Earlier native dialog evidence
-
-The Windows build at `e722cf1b91ccc46465eb449df4abd84d9d6df2a1` shows the settled unsaved-preference dialog with all three bilingual actions contained and the final action wrapped onto a second row. This is one light-theme state at 1280×752 logical pixels and observed 150% scale, not full product acceptance. The [native receipt and limits](docs/evidence/native-windows-20261016/README.md#settled-dialog-actions-at-e722cf1) retain source, executable and capture hashes, measured geometry and bounded observation.
-
-![Native Windows unsaved preference drafts dialog with all three bilingual actions contained at 1280 by 752 and 150 percent scale](docs/evidence/native-windows-20261016/dialog-actions-e722cf1.png)
-
-### Historical workspace coverage
-
-These are genuine, unretouched Linux Chromium captures of renderer source `e8f9beb`. Workspace storage and the offline documentation service are real; native-operation boundaries use explicit fixtures. Later shared-preference and queue/catalogue controls are not shown in this retained set. The [capture manifest](docs/evidence/modern-workspace/README.md) records exact source and image hashes, capture clocks, language/theme/viewport and each workflow's verification limit. The [public gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) also preserves reviewed historical application and website originals. These captures do not establish current packaged Windows acceptance.
-
-### Package dependency canvas
-
-![Material package dependency editor with source discovery and typed inspectors](docs/evidence/modern-workspace/current/package-canvas-en-light-1440.png)
-
-### Guest topology
-
-![Guest topology canvas with hardware, network and storage inspectors](docs/evidence/modern-workspace/current/guest-canvas-en-light-1440.png)
-
-### Source management
-
-![Source clone, revision and reviewed update controls](docs/evidence/modern-workspace/current/source-en-light-1440.png)
-
-### Configuration
-
-![Bilingual configuration controls with typed values and contextual help](docs/evidence/modern-workspace/current/configuration-bilingual-dark-960.png)
-
-### Runtime and project setup
-
-![Trusted project and Linux runtime setup workspace](docs/evidence/modern-workspace/current/runtime-en-light-1440.png)
-
-### Builds and output
-
-![Build controls and an empty jobs and output dock](docs/evidence/modern-workspace/current/jobs-en-light-1440.png)
-
-### Built-in tools
-
-![Conversion and PDF controls with Material icons](docs/evidence/modern-workspace/current/tools-en-light-1440.png)
-
-### Local assistant
-
-![Local assistant and managed runtime controls without an invented running model](docs/evidence/modern-workspace/current/assistant-en-light-1440.png)
-
-### Read-only companion
-
-![Explicit HTTPS browser pairing and read-only session controls](docs/evidence/modern-workspace/current/companion-en-light-1440.png)
-
-### Offline documentation
-
-![Bilingual offline help showing the actual packaged article inventory](docs/evidence/modern-workspace/current/offline-help-bilingual-dark-960.png)
-
-### Settings and recovery
-
-![Appearance, language and workspace recovery controls](docs/evidence/modern-workspace/current/settings-en-light-1440.png)
-
-### Resumable onboarding
-
-![Practical resumable workspace setup wizard](docs/evidence/modern-workspace/current/onboarding-en-light-1440.png)
-
-[Historical screenshots and their original provenance](docs/evidence/ARCHIVE.md) are retained separately.
 
 ## Scope and verification
 
@@ -124,8 +70,6 @@ The documentation target validates isolated generated output before promotion in
 
 Execution tests: 20 passed, 0 failed, 6 skipped. Startup regression: 1 passed. Real non-root WSL 2 and Docker `olddefconfig`/`show-info` checks passed as UID 1000 through the execution service with independent ownership cleanup. The retained runtime receipt binds these checks to application source `00bca0993c22a30c6c5071458489c01331c67d2e`, Buildroot 2025.02 source `aa2d7ca53f704af901f6c33c13e4bb1591886700` and an official digest-pinned environment image. These are configuration and package-metadata checks. No ISO, full firmware-image build or boot proof was produced. Windows bind-mounted source symbolic-link preservation still limits Docker acceptance to the exercised targets. See [runtime evidence](docs/evidence/startup-repair/runtime-smoke.json), [capture inventory](docs/evidence/startup-repair/inventory.json) and [the handoff](HANDOFF.md) for exact scope and remaining broader interface work.
 
-![Installed Material Buildroot 0.1.1 workspace after startup repair](docs/evidence/startup-repair/installed-workspace-011.png)
-
 ## Active verification, 2026-10-18
 
 The package-authoring design update at source `79f0de3` built successfully; visual design parity remains unverified. The local catalog-layout candidate at `feb8e30` also built. In the actual hidden desktop at 1440×960, bilingual mode and scale 1, the catalog grid track changed from 1632.234375px with 885px content overflow to 837px without horizontal overflow. Its Close control closed the catalog and restored focus to New tab. A 960×640 CSS viewport also had no horizontal overflow; this is not native DPI evidence or a complete layout matrix.
@@ -140,8 +84,6 @@ Start the supported image path with the [Easy ISO workflow](docs/desktop/iso-wor
 
 ## Verified BIOS ISO production and boot, 2026-10-18
 
-A real non-root full build completed and exported a 12,357,632-byte BIOS GRUB2 ISO with SHA-256 `1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba`. The owned build session stopped successfully. On the documented QEMU 10.0.13/Cirrus/RTL8139 profile, the unchanged image reached Linux 6.12.9 x86_64, accepted console commands, completed temporary-file read/write, DHCP and two internal gateway replies, and shut down normally. See [production evidence](docs/evidence/iso-production/README.md) and [boot evidence](docs/evidence/iso-boot/README.md).
+A real non-root full build completed and exported a 12, 357,632-byte BIOS GRUB2 ISO with SHA-256 `1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba`. The owned build session stopped successfully. On the documented QEMU 10.0.13/Cirrus/RTL8139 profile, the unchanged image reached Linux 6.12.9 x86_64, accepted console commands, completed temporary-file read/write, DHCP and two internal gateway replies, and shut down normally. See [production evidence](docs/evidence/iso-production/README.md) and [boot evidence](docs/evidence/iso-boot/README.md).
 
 The combined source-preview frontend checks passed 16/16 after the named-control and stale-readiness repairs. Actual combined native desktop, installer, deployed documentation, other hypervisors and broader hardware compatibility remain pending. The older native-tool consumer failures are retained explicitly. This is bounded ISO acceptance, not complete-roadmap acceptance.
-
-![Verified generated ISO Linux console](docs/evidence/iso-boot/shell-identity.png)

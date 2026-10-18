@@ -2,10 +2,13 @@
 
 ## Guided workspace remake, 2026-10-18
 
+- [x] Build reviewed candidate d02fd59 through the exact root entrypoint; verify the 126 selected renderer cases across focused runs and20 host documentation cases, with 3 symbolic-link cases explicitly unverified.
+- [x] Observe one real hidden native d02 launch reaching Images and Purpose; verify actual titlebar Close and owned teardown. Continuous stability, the complete matrix and installed startup remain open.
+
 - [x] Build and inspect the first combined guided candidate4c41de12;80 combined renderer checks passed. Twelve built-renderer captures identified remaining small-window spacing and complete-journey gaps; this is bounded intermediate evidence.
-- [ ] Start Create image at Purpose before project setup, preserve an unbound resumable draft through adoption, and show the real saved project catalogue after restart.
+- [ ] Start Create image at Purpose before project setup, preserve an unbound resumable draft through adoption, and show the real saved project catalogue after restart. Implemented and source-fixture verified; native adoption/restart acceptance remains pending.
 - [ ] Reduce repeated heading/navigation rows so image choices are initially reachable at the documented minimum size; replace missing icon identifiers with admitted assets.
-- [ ] Resolve all72 current bundled-help JSON/PNG reference gaps through bounded indexed source admission, preserving integrity and unavailable states.
+- [ ] Resolve all72 original bundled-help JSON/PNG reference gaps through bounded indexed source admission, preserving integrity and unavailable states. Current source inventory has0 unresolved links and the built reader is complete; full native link navigation remains pending.
 
 - [ ] Replace the editor-first shell with Images, Builds, Tools, Help and Settings while preserving all destination identifiers and mounted project drafts.
 - [ ] Deliver a resumable five-stage image flow with one shared Easy/Advanced draft, contextual guidance and fresh host validation on resume.
@@ -61,7 +64,7 @@
 
 - [x] Build combined Easy PC, bilingual permission guide and verified44.9.0 runtime candidate through exact root build.bat. Source24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960; receipt c349171a0a494a97986863562f4d7561f3cb802606e94503e2eda3156f978fc7.
 - [x] Verify actual37571d3 permission grant after adding the required domain; retain two real-dispatcher scope/revocation checks and native approval receipt.
-- [x] Retain bounded46538c0 cold startup:75.794seconds,16aggregate samples,34steps and zero observed console/exception/page events. The later renderer crash at09:42:14.386UTC, exit-36861, means sustained startup remains unfinished.
+- [x] Retain bounded46538c0 cold startup:75.794seconds,16aggregate samples, 34steps and zero observed console/exception/page events. The later renderer crash at09:42:14.386UTC, exit-36861, means sustained startup remains unfinished.
 - [ ] Complete actual native Easy PC preset reconciliation and current GUI ISO production. Source unit c7028b4 passed28browser cases; this is not native Buildroot acceptance.
 - [ ] Diagnose the independent WSL intent worker exit139/noJSON. Instrumented service captured three successful workers and a fourth native failure; all owned sessions stopped. Boot identity differs from the earlier idle-stability observation, with timing/cause unknown.
 - [ ] Complete native-volume Docker firmware production. Preparation, configuration and separate hash-verified acquisition succeeded. Firmware attempts stopped at daemon EOF and host-fakeroot autoreconf; isolated autoconf-child reproduction succeeded. Preserve the exact bindings and do not claim complete output.
@@ -405,7 +408,7 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 - [ ] Complete actual GUI ISO permission, plan, apply, queue, build and inspection after a fresh stable-runtime run.
 - [ ] Complete fresh-project source-backed PC defaults and the remaining Easy-mode interpretation without requiring manual symbol research.
 
-- [x] Preserve complete MenuNode enumeration for the recorded native Buildroot 2025.02 parser invocation: 11,464 definitions, 3,367 input hashes and negative omission/help-fidelity checks. Other invocations and production GUI acceptance remain separate.
+- [x] Preserve complete MenuNode enumeration for the recorded native Buildroot 2025.02 parser invocation: 11,464 definitions, 3, 367 input hashes and negative omission/help-fidelity checks. Other invocations and production GUI acceptance remain separate.
 - [ ] Complete the native GUI path from Linux project adoption through ISO build and inspection; investigate observed Builds renderer unresponsiveness.
 - [ ] Verify combined native drop sounds after independently checked backend and renderer changes. Audibility and installed-update acceptance remain unverified.
 
