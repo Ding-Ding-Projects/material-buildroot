@@ -10,3 +10,18 @@ test('an adapter cannot hide failed outcome recording and report success',async 
 test('unverified runtime cleanup remains durably interrupted even after cancellation',async t=>{
  let finish, began;const ready=new Promise(resolve=>began=resolve);const {directory,manager:m}=setup(t,{work:async()=>{began();await new Promise(resolve=>finish=resolve);return {state:'runtime-cleanup-failed',code:null,cleanup:{state:'unknown',reason:'runtime-unavailable'}};}});const job=m.enqueue({kind:'work',ownerId:'owner',payload:{}}),running=m.run(job.id,'owner',job.sequence);await ready;m.cancel(job.id,'owner',m.get(job.id).sequence);finish();const result=await running;assert.equal(result.state,'interrupted');assert.equal(result.error.code,'RUNTIME_CLEANUP_UNVERIFIED');assert.equal(result.result.cleanup.state,'unknown');const restored=createJobManager({directory});assert.equal(restored.get(job.id).state,'interrupted');assert.equal(restored.get(job.id).result.state,'runtime-cleanup-failed');
 });
+test('ISO output intent survives restart while malformed persisted policies fail closed', t => {
+ const {createIsoOutputPolicy}=require('../src/main/jobs/iso-output-policy.cjs');
+ const {directory,manager}=setup(t,{build:async()=>({})});
+ const policy=createIsoOutputPolicy({revision:'b'.repeat(64),profile:'x86_64-bios-grub2-initrd'});
+ const job=manager.enqueue({kind:'build',ownerId:'owner',payload:{target:'all',isoOutputPolicy:policy}});
+ assert.deepEqual(createJobManager({directory}).get(job.id).payload.isoOutputPolicy,policy);
+ const file=path.join(directory,'jobs.json'),original=JSON.parse(fs.readFileSync(file,'utf8'));
+ for(const mutate of [p=>p.path='../other.iso',p=>p.profile='other',p=>p.version=2,p=>p.appliedConfigurationRevision='stale',p=>p.appliedConfigurationRevision=['b'.repeat(64)],p=>p.freshness='verified',p=>p.state='produced',p=>p.extra=true]){
+  const corrupt=structuredClone(original);mutate(corrupt.jobs[0].payload.isoOutputPolicy);fs.writeFileSync(file,JSON.stringify(corrupt));
+  assert.throws(()=>createJobManager({directory}),{code:'BLOCKED_INVALID_INTENT'});
+ }
+ for(const policyValue of [null,[],{}]){const corrupt=structuredClone(original);corrupt.jobs[0].payload.isoOutputPolicy=policyValue;fs.writeFileSync(file,JSON.stringify(corrupt));assert.throws(()=>createJobManager({directory}),{code:'BLOCKED_INVALID_INTENT'});}
+ const wrongTarget=structuredClone(original);wrongTarget.jobs[0].payload.target='show-info';fs.writeFileSync(file,JSON.stringify(wrongTarget));assert.throws(()=>createJobManager({directory}),{code:'BLOCKED_INVALID_INTENT'});
+ fs.writeFileSync(file,JSON.stringify(original));assert.deepEqual(createJobManager({directory}).get(job.id).payload.isoOutputPolicy,policy);
+});
