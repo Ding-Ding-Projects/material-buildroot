@@ -123,3 +123,11 @@ A separate batch-close race was reproduced when closing Plans and Activity with 
 The [Buildroot 2025.02 inventory](docs/planning/buildroot-coverage/README.md) records 992 details from 168 content-hashed source files with separate GUI, Easy-mode, contextual-help and runtime dispositions. It makes concrete omissions actionable, including filesystem options, bootloader options, package fields and source make-rule candidates. It is a partial inventory; it does not claim exhaustive Kconfig parsing, all-version compatibility or complete interface delivery.
 
 Start the supported image path with the [Easy ISO workflow](docs/desktop/iso-workflow.md) and its [field explanations](docs/desktop/iso-fields/README.md). The [beginner documentation walkthrough](docs/features/guided-documentation.md) teaches the same concepts while keeping visitor progress separate from real build results. Combined built-interface and deployment verification remains pending.
+
+## Verified BIOS ISO production and boot, 2026-10-18
+
+A real non-root full build completed and exported a 12,357,632-byte BIOS GRUB2 ISO with SHA-256 `1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba`. The owned build session stopped successfully. On the documented QEMU 10.0.13/Cirrus/RTL8139 profile, the unchanged image reached Linux 6.12.9 x86_64, accepted console commands, completed temporary-file read/write, DHCP and two internal gateway replies, and shut down normally. See [production evidence](docs/evidence/iso-production/README.md) and [boot evidence](docs/evidence/iso-boot/README.md).
+
+The combined source-preview frontend checks passed 16/16 after the named-control and stale-readiness repairs. Actual combined native desktop, installer, deployed documentation, other hypervisors and broader hardware compatibility remain pending. The older native-tool consumer failures are retained explicitly. This is bounded ISO acceptance, not complete-roadmap acceptance.
+
+![Verified generated ISO Linux console](docs/evidence/iso-boot/shell-identity.png)

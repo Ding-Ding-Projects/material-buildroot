@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-18T07:07:44.139Z",
+  "productRevision": "5431a6275d875428ae50335905107d5951cc6150",
+  "buildroot": {
+    "version": "2025.02",
+    "recordedRevision": "aa2d7ca53f704af901f6c33c13e4bb1591886700",
+    "archiveSha256": "33ba6d3f5907e18041a5ed079776cc9269df59703700427f93dc61c3387801c0",
+    "comparedEntries": 14709,
+    "mismatches": 0,
+    "independentUpstreamAuthentication": false
+  },
+  "configurationSha256": "0e33a58b7dfbe2099d0cc6027f18dbce99650168936ce56cb5f71934137db51f",
+  "runtime": {
+    "kind": "wsl",
+    "uid": 1000,
+    "target": "all",
+    "state": "succeeded",
+    "exitCode": 0,
+    "cleanup": "verified-stopped"
+  },
+  "iso": {
+    "output": "images/rootfs.iso9660",
+    "bytes": 12357632,
+    "sha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+    "format": "iso9660",
+    "firmware": "bios",
+    "bootloader": "grub2"
+  },
+  "export": {
+    "format": "iso",
+    "size": 12357632,
+    "sha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+    "sourceSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+    "contentVerified": true,
+    "overwritten": false
+  },
+  "bootEvidence": "../iso-boot/acceptance.json",
+  "scope": "One source-bound BIOS image; consumer compatibility remains limited to the documented accepted profile."
+}

@@ -321,3 +321,10 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 - [ ] Complete native Kconfig, source target and package-field enumeration with explicit dispositions for every supported detail.
 - [ ] Verify the combined Easy ISO workflow and beginner documentation in actual built surfaces, including contextual articles and saved progress.
 - [ ] Complete real ISO production and independent boot/use acceptance after PATH and verbose-output limit repairs.
+
+## Bounded ISO acceptance, 2026-10-18
+
+- [x] Complete real non-root full BIOS GRUB2 ISO production, structural inspection and byte-identical product export with exact source/configuration/output receipts.
+- [x] Boot the unchanged ISO on the documented QEMU 10.0.13/Cirrus/RTL8139 profile; verify console, temporary-file read/write, internal DHCP/gateway replies and guest shutdown.
+- [ ] Complete native desktop/installer delivery and broader VM/hardware compatibility. QEMU 7, standard VGA and VirtIO limitations remain recorded.
+- [ ] Complete UEFI, persistence, Internet and remaining roadmap acceptance independently.
