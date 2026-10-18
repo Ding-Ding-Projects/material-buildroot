@@ -2,11 +2,11 @@
 
 ## Purpose and recommended default
 
-The guided profile is x86-64 BIOS optical media using ISOLINUX and an initial RAM filesystem. The source must already enable x86-64 and Linux. Easy mode reads the live source and offers the profile only when its requirements are selectable. It does not invent supported Buildroot releases or alternate firmware.
+The guided profile is x86-64 BIOS optical media using GRUB2 and an initial RAM filesystem. The source must already enable x86-64 and Linux. Easy mode reads the live source and offers the profile only when its requirements are selectable. It does not invent supported Buildroot releases or alternate firmware.
 
 ## Example and constraints
 
-Expected profile: `x86_64-bios-isolinux-initrd`. Firmware: BIOS. Bootloader: ISOLINUX. Filesystem: initrd. Output format: ISO9660. UEFI and hybrid USB boot are not configured or verified by this profile. The kernel and existing package selection remain project choices.
+Expected profile: `x86_64-bios-grub2-initrd`. Firmware: BIOS. Bootloader: GRUB2. Filesystem: initrd. Output format: ISO9660. UEFI and hybrid USB boot are not configured or verified by this profile. The kernel and existing package selection remain project choices.
 
 ## Recovery and advanced controls
 

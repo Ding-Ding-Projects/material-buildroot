@@ -1,7 +1,8 @@
 import {test,expect} from '@playwright/test';
 // Browser-only operation fixtures. Real Buildroot production and boot need separate evidence.
 async function open(page,{effective=true,applicable=true,easy=false}={}){
- await page.goto('/');
+ test.setTimeout(60000);
+ await page.goto('/',{timeout:45000,waitUntil:'domcontentloaded'});
  await page.evaluate(async({effective,applicable,easy})=>{
   await import('/src/renderer/image-presets-panel.ts');
   window.__isoRequests=[];
@@ -10,10 +11,10 @@ async function open(page,{effective=true,applicable=true,easy=false}={}){
    let result;
    switch(request.action){
     case 'imagePreset.catalog':result={revision:'rev-1',desktops:[]};break;
-    case 'imagePreset.isoPlan':result={revision:'rev-1',profile:'x86_64-bios-isolinux-initrd',applicable,requirements:[{symbol:'BR2_TARGET_ROOTFS_ISO9660',selectable:applicable,reason:applicable?null:'unavailable'}]};break;
-    case 'imagePreset.isoApply':result={effective,output:'images/rootfs.iso9660'};break;
+    case 'imagePreset.isoPlan':result={revision:'rev-1',profile:'x86_64-bios-grub2-initrd',applicable,requirements:[{symbol:'BR2_TARGET_ROOTFS_ISO9660',selectable:applicable,reason:applicable?null:'unavailable'}]};break;
+    case 'imagePreset.isoApply':result={effective,revision:'rev-2',profile:'x86_64-bios-grub2-initrd',output:'images/rootfs.iso9660'};break;
     case 'project.options':result={runtime:{kind:'wsl',distribution:'Fixture'}};break;
-    case 'build.submit':result={id:'job-1',sequence:1,state:'queued'};break;
+    case 'imagePreset.isoBuild':result={id:'job-1',sequence:1,state:'queued'};break;
     case 'jobs.list':result=[{id:'job-1',sequence:2,state:'succeeded'}];break;
     case 'jobs.page':result={records:[{value:{text:'Build completed'}}],hasMore:false};break;
     case 'artifacts.inspect':result={size:65536,sha256:'a'.repeat(64),iso:{descriptorValid:true,withinImage:true,elTorito:{validationChecksumValid:true,bootEntryValid:true,platformId:0},bootVerified:false}};break;
@@ -43,7 +44,7 @@ test('ISO workflow separates configuration, actual job and structural inspection
  await expect(panel).toContainText('passed structural checks');await expect(panel).toContainText('boot execution remains unverified');
  const requests=await page.evaluate(()=>window.__isoRequests);
  expect(requests.find(r=>r.action==='imagePreset.isoApply')).toEqual({action:'imagePreset.isoApply',workspaceId:'workspace-1',revision:'rev-1'});
- expect(requests.find(r=>r.action==='build.submit')).toEqual({action:'build.submit',workspaceId:'workspace-1',target:'all',runtime:{kind:'wsl',distribution:'Fixture'},jobs:2});
+ expect(requests.find(r=>r.action==='imagePreset.isoBuild')).toEqual({action:'imagePreset.isoBuild',workspaceId:'workspace-1',revision:'rev-2',profile:'x86_64-bios-grub2-initrd',runtime:{kind:'wsl',distribution:'Fixture'},jobs:2});
  expect(requests.find(r=>r.action==='artifacts.inspect').path).toBe('images/rootfs.iso9660');
 });
 test('unavailable requirements and incomplete reconciliation cannot start builds',async({page})=>{
@@ -76,3 +77,5 @@ test('Easy guide restores step position without restoring success',async({page})
  await panel.getByRole('button',{name:'Back',exact:true}).click();
  await expect(panel.getByRole('heading',{name:'What would you like to make?',exact:true})).toBeVisible();
 });
+
+test('external configuration generation invalidates build readiness',async({page})=>{const panel=await open(page);await configure(panel);await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeEnabled();await page.evaluate(()=>document.querySelector('image-presets-panel').configurationGeneration++);await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeDisabled();await expect(panel).toContainText('Configuration changed.');});

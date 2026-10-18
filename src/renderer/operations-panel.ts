@@ -46,6 +46,7 @@ type Job = {
 /** Typed task controls. Host operations remain the authority for paths and execution. */
 export class OperationsPanel extends LitElement {
   static properties = {
+    configurationGeneration:{state:true},
     restricted:{type:Boolean},
     language: { type: String },
     tab: { state: true },
@@ -85,6 +86,7 @@ export class OperationsPanel extends LitElement {
     dockHeight: { state: true },
     dockOpen: { state: true },
   };
+  configurationGeneration=0;
   restricted=false;
   language = "bilingual";
   tab = "runtime";
@@ -288,6 +290,7 @@ export class OperationsPanel extends LitElement {
       return undefined;
     }
     if (this.pending) return undefined;
+    if(["config.apply","config.undo","config.defconfig"].includes(action))this.configurationGeneration++;
     this.pending = true;
     this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
     try {
@@ -908,7 +911,7 @@ export class OperationsPanel extends LitElement {
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`<image-presets-panel @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></account-provisioning-panel><defconfig-panel .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
+    return html`<image-presets-panel .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
       <div class="row">
         <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
         <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
@@ -948,8 +951,8 @@ export class OperationsPanel extends LitElement {
                   (this.config.semantics?.reason ?? "")}
             </p>
             <configuration-panel .config=${this.config} .api=${this.api} .language=${this.language} .workspaceId=${this.workspace.workspaceId} .domain=${this.configDomain}
-              @configuration-queue=${(event: CustomEvent) => { this.pending=event.detail.pending; this.changes=event.detail.blocked ? {__retained:{type:'raw',value:true}} : {}; }}
-              @configuration-result=${(event: CustomEvent) => { this.config=event.detail; }}></configuration-panel>`
+              @configuration-queue=${(event: CustomEvent) => { if(event.detail.pending)this.configurationGeneration++;this.pending=event.detail.pending; this.changes=event.detail.blocked ? {__retained:{type:'raw',value:true}} : {}; }}
+              @configuration-result=${(event: CustomEvent) => { this.config=event.detail;this.configurationGeneration++; }}></configuration-panel>`
         : html`<p>
             ${this.l("Inspect the active output configuration before editing.","編輯之前，請先檢視目前輸出設定。",true)}
           </p>`}${this.defconfigs.length
