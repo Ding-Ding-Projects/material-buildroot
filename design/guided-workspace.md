@@ -38,6 +38,15 @@ The shell lane owns the primary shell, shared styling and focused settings prese
 
 ## Verification and truthful delivery
 
+The inspected pre-remake baseline contains twelve captures: workspace, configuration, builds, tools, documentation and settings at 1440 by 960 and 960 by 640, English/light at scale 1. It uses the unchanged packaged renderer produced at `8db4e8519a27e1a3878d96714717f68432af7ed1`, compared with `457b51ae4ead511a9be30857e93c289c0e9f3aad`. The renderer bundle SHA-256 is `8e62ad0f0cbd1299443d454ebb3ceb242766b67f21e2579b4860df73ee3bb4f1`. The local capture receipt SHA-256 is `250f5a74bca995e8b3d7ea754b684b91491969827e77370a4886d2380d77169f`.
+
+| Baseline viewport | Editor left edge | Editor width | Operations height | Empty dock height |
+| --- | ---: | ---: | ---: | ---: |
+| 1440 by 960 | 499 px | 940 px | 526.5625 px | 140 px |
+| 960 by 640 | 443 px | 516 px | 206.5625 px | 140 px |
+
+These measurements explain the duplicate-navigation and permanent-dock removal. The route used a hidden desktop parent and isolated headless browser, a real local workspace service and explicit synthetic native replies. Documentation was captured in its unavailable-fixture state. The captures prove renderer pixels and raw geometry, not native startup, host operations, native display scaling or a validated layout-probe acceptance result. Both attempts and their profiles are retained privately; this document does not publish the captures or relabel them as the redesigned interface.
+
 The baseline is 1440 by 960 CSS pixels and the existing documented minimum is 960 by 640. Verify English, Hong Kong Cantonese and bilingual modes, both themes and 100%, 125%, 150% and 200% display scales. Measure overflow, focus, accessible names, readable labels and reachable actions. Reference and production comparisons use matching tuples and source-bound captures.
 
 Exercise first launch, create/open/resume, preset changes, contextual explanations, mode changes, saved drafts, reviewed configuration, actual authorized build and output location. Include unavailable runtimes, stale revisions, invalid inputs, cancellation, uncertain results, active work and unsaved changes. Cover every retained destination and the explicit New tab catalog.
