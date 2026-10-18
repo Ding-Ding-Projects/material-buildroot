@@ -2,7 +2,15 @@
 
 ## Objective and stopping boundary
 
-The goal remains active and incomplete. Account allowance is verified at 10% remaining. This is the second consecutive goal turn observing the same account boundary. The preceding turn made concrete progress; this turn revalidated preserved state and found no permitted product work. The three-turn blocked threshold has not yet been met. Preserve work and start no new implementation, product launch, WSL query or firmware operation until allowance is freshly above 10%. Do not manufacture blocked turns, pause/completion states or a replacement goal.
+The owner explicitly approved implementation of the whole-application guided workspace remake. Fresh allowance recovered to 86% remaining and a later reading showed 83% remaining. The tool returned no existing goal, so a successor goal was created with the accepted redesign and unfinished runtime/ISO requirements retained. The goal is active and incomplete. The earlier blocked audit is historical; do not apply it to this resumed run.
+
+The accepted primary destinations are Images, Builds, Tools, Help and Settings. Keep Lit, registered Material components, typed host operations, existing project identities, settings and drafts. See design/guided-workspace.md for the reviewed preservation contract and measured pre-remake baseline.
+
+Current integration tip before this record is e14608904db248de471e36042113c99af7aa3591, verified on the remote. Internal WSL transport165b51a integrated as c590a13 after fresh mocked9/9 proof with eight matching before/after input hashes; no real WSL operation occurred. Shell candidatecfa95a9babfd17b23617268ad9a7e87637e3451a and image candidate72adecceb3866076c6c9f7234ff8ce178bc4984b are separately preserved on their task branches, not integrated. Follow-up repairs remain in progress: attention feedback and keyboard return; unavailable saved-job recovery and one primary action in Easy mode. Do not integrate their earlier candidate as though those findings were resolved.
+
+Shell ownership is codex/guided-shell; image ownership is codex/guided-image-workflow. The initial codex/guided-operations task produced no implementation and its write assignment was withdrawn; retain its checkout. The replacement owns ai/feature/20261018-guided-operations-recovery with a fresh isolated checkout. It implements the guided operations presentation and narrowly required public project-workflow adapter. Do not allow concurrent writes across those owners.
+
+Twelve real pre-remake renderer captures are retained privately. The follow-up capture harness is prepared but has not launched; it requires exact integrated source, build receipt and package hashes. Fixture and raster-density evidence cannot prove native startup, physical display scaling, real image production or boot.
 
 Preserve settings, authentication, source/output trees, the immutable ISO and unrelated work. No host power/login action, force push, security weakening, public private-data disclosure, fourth unchanged Docker firmware attempt or alternate route around rejected actions.
 
@@ -49,9 +57,9 @@ Browser process/listener/desktop teardown is verified. Automatic approval reject
 
 Progress and gallery handoff: https://github.com/Ding-Ding-Projects/material-buildroot/issues/1#issuecomment-6250270754 . Exact private evidence paths remain in the private continuation record.
 
-## Next safe steps after allowance recovery
+## Next safe steps
 
-- Obtain bound transport-test proof and review it before integration.
+- Finish the three guided implementation lanes, independent reviews and combined regression checks, then build through the exact root entrypoints and inspect genuine current-source captures.
 - Complete owned job/output lifecycle wiring and durable receipt enforcement.
 - Resolve native startup using the pending exact visible decision or a supported hidden route.
 - Finish only the remaining documentation keyboard check, preserving its failed original.
