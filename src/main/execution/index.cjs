@@ -7,6 +7,7 @@ const { createDockerRuntime } = require("./docker-runtime.cjs");
 const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs");
 const { isBuildTarget, assertPackage } = require("../build/target-actions.cjs");
 const { LINUX_BUILD_PATH_SCRIPT } = require("./linux-build-path.cjs");
+const { createWslIsoOutputLifecycle } = require("./wsl-iso-output-lifecycle.cjs");
 const TARGETS = Object.freeze([
   "all",
   "sdk",
@@ -283,7 +284,9 @@ class ExecutionService {
     this.dockerRuntime = createDockerRuntime({ run: (args) => boundedProcess(this.executables.docker, args, { timeoutMs: 10000, maxBytes: 262144 }).completion, identity: () => this.dockerIdentity() });
     this.grants = new Map();
     this.locks = new Set();
+    this.wslIsoOutputLifecycle = createWslIsoOutputLifecycle({ execution: this, run: boundedProcess, checkpoint: checkpointOwnership, signalScript: WSL_SIGNAL_SCRIPT });
   }
+  runIsoOutputLifecycle(request, options) { return this.wslIsoOutputLifecycle(request, options); }
   grantProject({
     root,
     source,
