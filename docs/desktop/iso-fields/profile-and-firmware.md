@@ -25,3 +25,5 @@ Control inventory for this bounded guidance item: `iso-profile-info` owns target
 ## Recovery and advanced controls
 
 An unavailable requirement keeps Apply disabled. For an empty or unsuitable processor configuration, use the [source-discovered PC starting points](beginner-board-presets.md), review replacement consent and renew the changed configuration's permission, then check again. Advanced mode retains package presets and the full configuration editor for remaining unsupported cases; manually enabling UEFI is not proof that this BIOS workflow supports it.
+
+Accessibility adapter: the pinned `@material/web` 2.5.0 icon button does not forward host ID references. After rendering, the native button receives `ariaControlsElements` and `ariaDescribedByElements` pointing to this instance’s actual guide and tooltip. The adapter feature-detects both APIs, clears references on disconnect and rebinds after rendering/reconnection. Older engines without these APIs retain the name, expanded state and keyboard controls, but the two relationships remain unavailable. Native acceptance is still pending.

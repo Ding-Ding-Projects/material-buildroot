@@ -23,8 +23,27 @@ export class ImagePresetsPanel extends LitElement {
  private isoPlan:any; private isoOutcome:any; private isoApproved=false; private isoJob:any; private isoInspection:any; private isoLogs:any[]=[]; private isoBusy=false; private isoMessage='';
  private isoEpoch=0; private isoMode='easy'; private isoRuntime:any; private isoStep=0; private isoResumed=false;
  private profileGuideOpen=false;private profileExample:'ram'|'disc'='ram';private profileExampleResult:'ram'|'disc'|null=null;
+ // Adapter for the pinned @material/web 2.5.0 icon-button shadow DOM. Its
+ // ARIA delegation excludes ID references; bind real elements across the root.
+ private profileRelationGeneration=0;
+ private profileRelationButton:(HTMLButtonElement & {ariaControlsElements:Element[]|null;ariaDescribedByElements:Element[]|null})|null=null;
+ private clearProfileRelations(){this.profileRelationGeneration++;if(this.profileRelationButton){this.profileRelationButton.ariaControlsElements=null;this.profileRelationButton.ariaDescribedByElements=null;this.profileRelationButton=null;}}
+ private async bindProfileRelations(){
+  const generation=++this.profileRelationGeneration;
+  const host=this.renderRoot.querySelector<LitElement>('#iso-profile-info');
+  if(!host){this.clearProfileRelations();return;}
+  await host.updateComplete;
+  if(!this.isConnected||generation!==this.profileRelationGeneration||host!==this.renderRoot.querySelector('#iso-profile-info'))return;
+  const button=host.shadowRoot?.querySelector('button#button');
+  const guide=this.renderRoot.querySelector('#iso-profile-guide'),tooltip=this.renderRoot.querySelector('#iso-profile-tooltip');
+  if(!(button instanceof HTMLButtonElement)||!guide||!tooltip||!('ariaControlsElements' in button)||!('ariaDescribedByElements' in button))return;
+  const target=button as typeof this.profileRelationButton & HTMLButtonElement;
+  if(this.profileRelationButton&&this.profileRelationButton!==target)this.clearProfileRelations();
+  target.ariaControlsElements=[guide];target.ariaDescribedByElements=[tooltip];this.profileRelationButton=target;
+ }
+ connectedCallback(){super.connectedCallback();this.requestUpdate();}
  private resetProfileGuide(){this.profileGuideOpen=false;this.profileExample='ram';this.profileExampleResult=null;}
- disconnectedCallback(){this.resetProfileGuide();this.revision++;super.disconnectedCallback();}
+ disconnectedCallback(){this.clearProfileRelations();this.resetProfileGuide();this.revision++;super.disconnectedCallback();}
  private async toggleProfileGuide(open:boolean){
   this.resetProfileGuide();this.profileGuideOpen=open;this.revision++;const epoch=this.isoEpoch;
   await this.updateComplete;if(!this.isConnected||epoch!==this.isoEpoch||this.profileGuideOpen!==open)return;
@@ -35,7 +54,7 @@ export class ImagePresetsPanel extends LitElement {
  private clearBoards(){this.isoBoards=undefined;this.isoBoardId='';this.isoBoardApproved=false;this.isoBoardResult=undefined;}
  private resetIso(){this.isoEpoch++;this.resetProfileGuide();this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
  protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
- protected updated(changed:PropertyValues){if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
+ protected updated(changed:PropertyValues){void this.bindProfileRelations();if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
  private saveIso(){try{localStorage.setItem('iso-workflow-'+this.workspaceId,JSON.stringify({version:1,step:this.isoStep,mode:this.isoMode,jobId:this.isoJob?.id??null}));}catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);}}
  private restoreIso(){try{const saved=JSON.parse(localStorage.getItem('iso-workflow-'+this.workspaceId)||'null');if(saved?.version===1&&Number.isInteger(saved.step)&&saved.step>=0&&saved.step<=2){this.isoStep=saved.step;this.isoMode=saved.mode==='advanced'?'advanced':'easy';this.isoResumed=true;if(typeof saved.jobId==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(saved.jobId))this.isoJob={id:saved.jobId,state:'unverified',sequence:0};}}catch{/* Untrusted local progress never restores configuration success. */}}
  private moveIso(step:number){this.isoStep=Math.max(0,Math.min(2,step));this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>('[data-step]:not([hidden]) h4')?.focus());}

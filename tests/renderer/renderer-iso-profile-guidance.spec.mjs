@@ -1,4 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+async function relations(panel){
+ const button=panel.locator('#iso-profile-info').getByRole('button');
+ await expect.poll(()=>button.evaluate(element=>{const root=element.getRootNode().host.getRootNode();return {controls:element.ariaControlsElements?.length===1&&element.ariaControlsElements[0]===root.querySelector('#iso-profile-guide'),description:element.ariaDescribedByElements?.length===1&&element.ariaDescribedByElements[0]===root.querySelector('#iso-profile-tooltip')};})).toEqual({controls:true,description:true});
+}
 async function open(page){
  await page.addInitScript(()=>localStorage.setItem('material-buildroot.wording.v1',JSON.stringify({schemaVersion:1,englishHumor:1,cantoneseHumor:1,displayName:''})));
  await page.goto('/');
@@ -12,6 +17,7 @@ async function open(page){
 }
 test('profile control owns a keyboard-operable info entry and optional source explanation',async({page})=>{
  const panel=await open(page),info=panel.getByRole('button',{name:'Explain detected image profile',exact:true});
+ await relations(panel);
  await expect(info).toBeVisible();await expect(panel.locator('#iso-profile-info')).toHaveAttribute('aria-controls','iso-profile-guide');await expect(panel.locator('#iso-profile-info')).toHaveAttribute('data-guidance-target','iso-profile-control');await expect(info).toHaveAttribute('aria-expanded','false');
  const bounds=await info.boundingBox();expect(bounds.width).toBeGreaterThanOrEqual(44);expect(bounds.height).toBeGreaterThanOrEqual(44);
  await info.focus();await expect(panel.getByRole('tooltip')).toBeVisible();const count=await page.evaluate(()=>window.__profileRequests.length);
@@ -50,4 +56,19 @@ test('localized profile guidance fits narrow layout at both wording extremes',as
  const guide=panel.locator('#iso-profile-guide');
  await page.setViewportSize({width:480,height:Math.ceil(await guide.evaluate(element=>element.getBoundingClientRect().height))+200});
  await guide.scrollIntoViewIfNeeded();await guide.screenshot({path:testInfo.outputPath('profile-guidance-fixture.png')});
+});
+
+test('native profile relationships reject removed and wrong targets and rebind after rendering',async({page})=>{
+ expect(JSON.parse(readFileSync(new URL('../../package.json',import.meta.url),'utf8')).dependencies['@material/web']).toBe('2.5.0');
+ const panel=await open(page);await relations(panel);
+ for(const property of ['ariaControlsElements','ariaDescribedByElements'])for(const wrong of [false,true]){
+  const button=panel.locator('#iso-profile-info').getByRole('button');await button.focus();await expect(button).toBeFocused();
+  expect(await button.evaluate((element,{property,wrong})=>{const root=element.getRootNode().host.getRootNode();const expected=root.querySelector(property==='ariaControlsElements'?'#iso-profile-guide':'#iso-profile-tooltip');element[property]=wrong?[root.querySelector('#iso-profile-control')]:[];return element[property]?.length===1&&element[property][0]===expected;},{property,wrong})).toBe(false);
+  await panel.evaluate(async element=>{element.requestUpdate();await element.updateComplete;});await relations(panel);
+ }
+ await panel.getByRole('button',{name:'Explain detected image profile',exact:true}).click();await relations(panel);
+ await panel.getByRole('button',{name:'Close profile guide',exact:true}).click();await relations(panel);
+ await panel.getByRole('button',{name:'Explain detected image profile',exact:true}).click();await relations(panel);
+ await panel.evaluate(async element=>{const button=element.shadowRoot.querySelector('#iso-profile-info').shadowRoot.querySelector('button');element.remove();if(button.ariaControlsElements!==null||button.ariaDescribedByElements!==null)throw Error('Detached relationships retained');document.body.append(element);await element.updateComplete;});await relations(panel);
+ await page.evaluate(async()=>{const second=document.createElement('image-presets-panel');second.workspaceId='other';document.body.append(second);await second.updateComplete;});await relations(page.locator('image-presets-panel').nth(1));await relations(panel);
 });

@@ -31,3 +31,5 @@ ISO 係一個光碟映像檔案。引導嘅 `initrd` 選項會喺電腦啟動時
 ## 建議下一篇
 
 [執行環境與資源](runtime-and-resources.zh-HK.md) · [配置與復原](configuration-and-recovery.zh-HK.md)
+
+無障礙適配：固定版本 `@material/web` 2.5.0 圖示按鈕唔會轉送主元素嘅 ID 關聯。渲染後會用 `ariaControlsElements` 同 `ariaDescribedByElements` 將原生按鈕連到本實例嘅說明卡同提示。適配器先檢查兩個 API，移除元件時清除關聯，重新渲染或連接後再綁定。舊引擎如果冇呢啲 API，名稱、展開狀態同鍵盤操作仍然保留，但兩項關聯未能提供。原生驗收仍然待完成。
