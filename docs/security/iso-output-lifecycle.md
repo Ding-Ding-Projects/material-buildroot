@@ -20,6 +20,8 @@ Independent review then identified blocking FIFO substitution between the regula
 
 The pinned old-source run at `98368df7c979ca3a36b1677375f31a4ef0a42f85` recorded 9 passing cases and both FIFO cases failing after their owned-child watchdogs. Repaired source `f52f32e2c32a6b7f24e7b2db43f841534e0f77c4` passed all 11 cases in 0.015 seconds; both FIFO swaps rejected with `ISO_LIFECYCLE_UNVERIFIED` before the watchdog. Both runs used the same offline/non-root synthetic-only container route and independently verified exact owned-container absence. No unchanged-source retries or production mounts were used.
 
+The mandatory root-identity baseline at `6b55842bd7adef9169c3e3e6ed92db4469615cac` recorded 11 passing cases and the missing-identity negative failing. Repaired helper/test source `f644da13b0619d52143474554742e5da9c15e6cd` passed all 15 cases in 0.026 seconds. New checks cover malformed identity fields, independent device/inode/UID mismatch before any `mkdir`, absence of newly created directories and preservation of earlier ISO bytes/capture state. Both bounded runs used UID/GID 1000, no network, read-only container root and synthetic tmpfs only, with exact owned-container absence verified. These values were derived from synthetic test roots, not from a real admitted runtime grant; host authentication and runtime wiring remain unfinished.
+
 The fixture expects the fixed helper to be preloaded and writes only below `/fixture`. A synthetic Linux environment with that directory can load the checked-in sources without installing packages:
 
 ```sh
