@@ -14,6 +14,7 @@ export function newImageDraft():ImageWorkflowDraft {
 }
 export function readImageDraft(raw:string|null):ImageWorkflowDraft|null {
  if(!raw||raw.length>IMAGE_DRAFT_LIMIT)return null;
+ if(new TextEncoder().encode(raw).byteLength>IMAGE_DRAFT_LIMIT)return null;
  try {
   const value=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return null;
   if(value.version===1&&Number.isInteger(value.step)&&value.step>=0&&value.step<=2){

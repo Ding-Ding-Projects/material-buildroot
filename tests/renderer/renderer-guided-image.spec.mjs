@@ -119,6 +119,18 @@ test('bounded parser strips payloads and rejects malformed records',async({page}
  expect(result.oversize).toBeNull();expect(result.invalid).toBeNull();expect(result.unknown).toBeNull();expect(result.safe).not.toHaveProperty('runtime');expect(result.safe).not.toHaveProperty('approved');expect(result.legacy).toMatchObject({step:1,jobId:'legacy-job',version:2});
 });
 
+test('draft size limit counts UTF-8 bytes before stripping unknown fields',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async()=>{
+  const m=await import('/src/renderer/image-workflow-draft.ts');
+  const raw=JSON.stringify({...m.newImageDraft(),unknown:'界'.repeat(700)});
+  return {units:raw.length,bytes:new TextEncoder().encode(raw).byteLength,limit:m.IMAGE_DRAFT_LIMIT,draft:m.readImageDraft(raw)};
+ });
+ expect(result.units).toBeLessThan(result.limit);
+ expect(result.bytes).toBeGreaterThan(result.limit);
+ expect(result.draft).toBeNull();
+});
+
 test('an accepted late build survives a draft conflict without restoring readiness',async({page})=>{
  const panel=await open(page,{mode:'advanced'});await configure(panel);
  await page.evaluate(()=>{const previous=window.studio.operations;window.studio.operations=async request=>{if(request.action==='imagePreset.isoBuild')await new Promise(resolve=>window.releaseBuild=resolve);return previous(request);};});
