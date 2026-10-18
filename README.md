@@ -106,4 +106,4 @@ The documentation target validates isolated generated output before promotion in
 
 ## Installer startup repair, 2026-10-17
 
-Removed duplicated source embedded in the component-discovery enablement expression. Desktop production now checks syntax in all main/shared JavaScript modules before packaging. Focused configuration checks passed (12 passed, 3 skipped); packaged launch and replacement installer verification remain pending. Docker server 29.8.2 responds, and WSL lists docker-desktop; a separate Buildroot WSL distribution has not been verified.
+The component-discovery syntax repair is available in [v0.1.0-build.230.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.230.1). Production now checks all main/shared JavaScript syntax before packaging. Installed workspace launch remains under investigation in [issue #6](https://github.com/Ding-Ding-Projects/material-buildroot/issues/6); a successful package does not prove installed startup acceptance.

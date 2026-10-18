@@ -284,4 +284,5 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 
 - [x] Repair corrupted component-discovery expression and check all 134 production JavaScript modules.
 - [x] Add component enablement regression coverage.
-- [ ] Verify replacement installer and installed launch.
+- [x] Produce, publish and download-verify the repaired normal installer release v0.1.0-build.230.1.
+- [ ] Verify the normal installed workspace launch, tracked in issue #6; redirected-cache readback and hidden diagnostic copies do not satisfy this item.
