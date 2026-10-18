@@ -1,0 +1,3674 @@
+[
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEINA",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEINA",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5511
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libeina package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libeina is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libeina package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEET",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEET",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5518
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libeet package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libeet is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libeet package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEVAS",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEVAS",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5525
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libevas package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libevas is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libevas package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBECORE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBECORE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5532
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libecore package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libecore is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libecore package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEDBUS",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEDBUS",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5539
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libedbus package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libedbus is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libedbus package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEFREET",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEFREET",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5546
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libefreet package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libefreet is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libefreet package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEIO",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEIO",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5553
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libeio package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libeio is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libeio package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEMBRYO",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEMBRYO",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5560
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libembryo package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libembryo is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libembryo package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBEDJE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBEDJE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5567
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libedje package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libedje is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libedje package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBETHUMB",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBETHUMB",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5574
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libethumb package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "With EFL 1.15, libethumb is now provided by the efl package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_EFL",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libethumb package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_INFOZIP",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_INFOZIP",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5581
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "infozip option has been renamed to zip",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Info-Zip's Zip package has been renamed from infozip to zip,\nto avoid ambiguities with Info-Zip's UnZip which has been\nadded in the unzip package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_ZIP",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "infozip option has been renamed to zip",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BR2_PACKAGE_NODEJS_0_10_X",
+    "kind": "symbol",
+    "name": "BR2_BR2_PACKAGE_NODEJS_0_10_X",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5590
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "nodejs 0.10.x option removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "nodejs 0.10.x option has been removed.  0.10.x is now\nautomatically chosen for ARMv5 architectures only and the\nlatest nodejs for all other supported architectures. The\ncorrect nodejs version has been automatically selected in your\nconfiguration.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_NODEJS",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "nodejs 0.10.x option removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BR2_PACKAGE_NODEJS_0_12_X",
+    "kind": "symbol",
+    "name": "BR2_BR2_PACKAGE_NODEJS_0_12_X",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5601
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "nodejs version 0.12.x has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "nodejs version 0.12.x has been removed.  As an alternative,\nthe latest nodejs version has been automatically selected in\nyour configuration.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_NODEJS",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "nodejs version 0.12.x has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BR2_PACKAGE_NODEJS_4_X",
+    "kind": "symbol",
+    "name": "BR2_BR2_PACKAGE_NODEJS_4_X",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5610
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "nodejs version 4.x has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "nodejs version 4.x has been removed.  As an alternative,\nthe latest nodejs version has been automatically selected in\nyour configuration.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_NODEJS",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "nodejs version 4.x has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "comment:source/Config.in.legacy:Legacy options removed in 2015.11",
+    "kind": "comment",
+    "name": null,
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5620
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "Legacy options removed in 2015.11",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": null,
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "Legacy options removed in 2015.11",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_GST1_PLUGINS_BAD_PLUGIN_REAL",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_GST1_PLUGINS_BAD_PLUGIN_REAL",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5622
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "gst1-plugins-bad real plugin has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The real plugin from GStreamer 1 bad plugins has been\nremoved.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "gst1-plugins-bad real plugin has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_MEDIA_CTL",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_MEDIA_CTL",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5629
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "media-ctl package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "media-ctl source and developement have been moved to v4l-utils\nsince June 2014. For an up-to-date media-ctl version select\nBR2_PACKAGE_LIBV4L and BR2_PACKAGE_LIBV4L_UTILS.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_LIBV4L",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_LIBV4L_UTILS",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "media-ctl package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_SCHIFRA",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_SCHIFRA",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5639
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "schifra package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Schifra package has been maked broken since 2014.11 release\nand haven't been fixed since then.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "schifra package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_ZXING",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_ZXING",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5646
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "zxing option has been renamed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "ZXing no longer provides the cpp bindings, it has been renamed\nto BR2_PACKAGE_ZXING_CPP which uses a new upstream.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_ZXING_CPP",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "zxing option has been renamed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_FREERDP_CLIENT",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_FREERDP_CLIENT",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5656
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "freerdp client option renamed",
+    "promptCondition": "BR2_PACKAGE_FREERDP && !BR2_SKIP_LEGACY",
+    "help": null,
+    "dependency": "BR2_PACKAGE_FREERDP && !BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": false,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "BR2_PACKAGE_FREERDP && !BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_FREERDP_CLIENT_X11",
+        "condition": "BR2_PACKAGE_FREERDP && !BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "freerdp client option renamed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": null,
+    "effective": "n",
+    "assignable": [],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_BLACKBOX",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_BLACKBOX",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5662
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "blackbox package has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Upstream is dead and the package has been deprecated for\nsome time. There are other alternative maintained WMs.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "blackbox package has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_KERNEL_HEADERS_3_0",
+    "kind": "symbol",
+    "name": "BR2_KERNEL_HEADERS_3_0",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5669
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "kernel headers version 3.0.x are no longer supported",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Version 3.0.x of the Linux kernel headers have been deprecated\nfor more than four buildroot releases and are now removed.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "kernel headers version 3.0.x are no longer supported",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_KERNEL_HEADERS_3_11",
+    "kind": "symbol",
+    "name": "BR2_KERNEL_HEADERS_3_11",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5676
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "kernel headers version 3.11.x are no longer supported",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Version 3.11.x of the Linux kernel headers have been\ndeprecated for more than four buildroot releases and are now\nremoved.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "kernel headers version 3.11.x are no longer supported",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_KERNEL_HEADERS_3_13",
+    "kind": "symbol",
+    "name": "BR2_KERNEL_HEADERS_3_13",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5684
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "kernel headers version 3.13.x are no longer supported",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Version 3.13.x of the Linux kernel headers have been\ndeprecated for more than four buildroot releases and are now\nremoved.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "kernel headers version 3.13.x are no longer supported",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_KERNEL_HEADERS_3_15",
+    "kind": "symbol",
+    "name": "BR2_KERNEL_HEADERS_3_15",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5692
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "kernel headers version 3.15.x are no longer supported",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Version 3.15.x of the Linux kernel headers have been\ndeprecated for more than four buildroot releases and are now\nremoved.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "kernel headers version 3.15.x are no longer supported",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_ANDI",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_ANDI",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5700
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_andi has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_andi has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_BLTLOAD",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_BLTLOAD",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5709
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_bltload has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_bltload has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_CPULOAD",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_CPULOAD",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5718
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_cpuload has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_cpuload has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_DATABUFFER",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_DATABUFFER",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5727
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_databuffer has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_databuffer has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_DIOLOAD",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_DIOLOAD",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5736
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_dioload has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_dioload has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_DOK",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_DOK",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5745
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_dok has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_dok has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_DRIVERTEST",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_DRIVERTEST",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5754
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_drivertest has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_drivertest has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_FIRE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_FIRE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5763
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_fire has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_fire has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_FLIP",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_FLIP",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5772
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_flip has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_flip has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_FONTS",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_FONTS",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5781
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_fonts has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_fonts has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_INPUT",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_INPUT",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5790
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_input has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_input has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_JOYSTICK",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_JOYSTICK",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5799
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_joystick has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_joystick has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_KNUCKLES",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_KNUCKLES",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5808
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_knuckles has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_knuckles has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_LAYER",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_LAYER",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5817
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_layer has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_layer has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_MATRIX",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_MATRIX",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5826
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_matrix has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_matrix has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_MATRIX_WATER",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_MATRIX_WATER",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5835
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_matrix_water has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_matrix_water has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_NEO",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_NEO",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5844
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_neo has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_neo has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_NETLOAD",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_NETLOAD",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5853
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_netload has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_netload has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_PALETTE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_PALETTE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5862
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_palette has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_palette has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_PARTICLE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_PARTICLE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5870
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_particle has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_particle has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_PORTER",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_PORTER",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5879
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_porter has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_porter has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_STRESS",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_STRESS",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5888
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_stress has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_stress has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_TEXTURE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_TEXTURE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5896
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_texture has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_texture has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_VIDEO",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_VIDEO",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5905
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_video has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_video has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_VIDEO_PARTICLE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_VIDEO_PARTICLE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5914
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_video_particle has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_video_particle has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIRECTFB_EXAMPLES_WINDOW",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIRECTFB_EXAMPLES_WINDOW",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5923
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "DirectFB example df_window has been removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The per-DirectFB example options have been removed. The\nBR2_PACKAGE_DIRECTFB_EXAMPLES option now installs all\nexamples.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_DIRECTFB_EXAMPLES",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "DirectFB example df_window has been removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_KOBS_NG",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_KOBS_NG",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5932
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "kobs-ng was replaced by imx-kobs",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The outdated kobs-ng has been replaced by the Freescale-\nmaintained imx-kobs package.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_IMX_KOBS",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "kobs-ng was replaced by imx-kobs",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_SAWMAN",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_SAWMAN",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5940
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "sawman package removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "This option has been removed because the sawman package no\nlonger exists: it was merged inside DirectFB itself. This\nfeature can now be enabled using the\nBR2_PACKAGE_DIRECTFB_SAWMAN option.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "sawman package removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_DIVINE",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_DIVINE",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5949
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "divine package removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "This option has been removed because the divine package no\nlonger exists: it was merged inside DirectFB itself. This\nfeature can now be enabled using the\nBR2_PACKAGE_DIRECTFB_DIVINE option.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "divine package removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "comment:source/Config.in.legacy:Legacy options removed in 2015.08",
+    "kind": "comment",
+    "name": null,
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5959
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "Legacy options removed in 2015.08",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": null,
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "Legacy options removed in 2015.08",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_KODI_PVR_ADDONS",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_KODI_PVR_ADDONS",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5961
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "Kodi PVR addon was split",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Kodi PVR addon was split into separate modules",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_ARGUSTV",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_DVBLINK",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_DVBVIEWER",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_FILMON",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_HTS",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_IPTVSIMPLE",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_MEDIAPORTAL_TVSERVER",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_MYTHTV",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_NEXTPVR",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_NJOY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_PCTV",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_STALKER",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_VBOX",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_VDR_VNSI",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_VUPLUS",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_KODI_PVR_WMC",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "Kodi PVR addon was split",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BINUTILS_VERSION_2_23_2",
+    "kind": "symbol",
+    "name": "BR2_BINUTILS_VERSION_2_23_2",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5983
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "binutils 2.23 option renamed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Binutils 2.23.2 has been removed, using a newer version is\nrecommended.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "binutils 2.23 option renamed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BINUTILS_VERSION_2_24",
+    "kind": "symbol",
+    "name": "BR2_BINUTILS_VERSION_2_24",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5990
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "binutils 2.24 option renamed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The binutils version option has been renamed to match the\nsame patchlevel logic used by gcc. The new option is now\nBR2_BINUTILS_VERSION_2_24_X.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_BINUTILS_VERSION_2_24_X",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "binutils 2.24 option renamed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BINUTILS_VERSION_2_25",
+    "kind": "symbol",
+    "name": "BR2_BINUTILS_VERSION_2_25",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 5999
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "binutils 2.25 option renamed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The binutils version option has been renamed to match the\nsame patchlevel logic used by gcc. The new option is now\nBR2_BINUTILS_VERSION_2_25_X.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_BINUTILS_VERSION_2_25_X",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "binutils 2.25 option renamed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_PERF",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_PERF",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 6008
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "perf option has been renamed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "The perf package has been moved as a Linux tools package,\nand the option to enable it is now\nBR2_LINUX_KERNEL_TOOL_PERF.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_LINUX_KERNEL_TOOL_PERF",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "perf option has been renamed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_BINUTILS_VERSION_2_22",
+    "kind": "symbol",
+    "name": "BR2_BINUTILS_VERSION_2_22",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 6017
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "binutils 2.22 removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Binutils 2.22 has been removed, using a newer version is\nrecommended.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "binutils 2.22 removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_GPU_VIV_BIN_MX6Q",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_GPU_VIV_BIN_MX6Q",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 6024
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "gpu-viv-bin-mx6q",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "Vivante graphics libraries have been renamed to\nBR2_PACKAGE_IMX_GPU_VIV to be aligned with upstream package\nname.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      },
+      {
+        "symbol": "BR2_PACKAGE_IMX_GPU_VIV",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "gpu-viv-bin-mx6q",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_PACKAGE_LIBSEMANAGE_PYTHON_BINDINGS",
+    "kind": "symbol",
+    "name": "BR2_PACKAGE_LIBSEMANAGE_PYTHON_BINDINGS",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 6033
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "libsemanage python bindings removed",
+    "promptCondition": "BR2_PACKAGE_PYTHON && !BR2_SKIP_LEGACY",
+    "help": "This option has been removed, since the libsemanage Python\nbindings on the target were not useful.",
+    "dependency": "BR2_PACKAGE_PYTHON && !BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": false,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "BR2_PACKAGE_PYTHON && !BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "libsemanage python bindings removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": null,
+    "effective": "n",
+    "assignable": [],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  },
+  {
+    "id": "symbol:source/Config.in.legacy:BR2_TARGET_UBOOT_NETWORK",
+    "kind": "symbol",
+    "name": "BR2_TARGET_UBOOT_NETWORK",
+    "source": {
+      "path": "source/Config.in.legacy",
+      "line": 6041
+    },
+    "parent": "menu:source/Config.in.legacy:Legacy config options",
+    "prompt": "U-Boot custom network settings removed",
+    "promptCondition": "!BR2_SKIP_LEGACY",
+    "help": "U-Boot's custom network settings options have been removed.",
+    "dependency": "!BR2_SKIP_LEGACY",
+    "promptless": false,
+    "visible": true,
+    "defaults": [],
+    "ranges": [],
+    "selects": [
+      {
+        "symbol": "BR2_LEGACY",
+        "condition": "!BR2_SKIP_LEGACY"
+      }
+    ],
+    "implies": [],
+    "gui": {
+      "state": "partial",
+      "consumer": "src/renderer/configuration-panel.ts",
+      "reason": "Generic controls exist; this definition has no independent interaction acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "U-Boot custom network settings removed",
+      "prefill": "Use the effective native value; explain a differing requested value before applying changes.",
+      "control": "Discover type, choices, ranges and prerequisites before selecting a labeled control.",
+      "help": "Explain default, visibility, dependency reasons, architecture limits and interactions; retain source help."
+    },
+    "roadmap": [
+      "PH06-T01",
+      "PH06-T02",
+      "PH01-T02-C02"
+    ],
+    "runtime": "unverified",
+    "protectedValues": false,
+    "type": "bool",
+    "effectiveType": "bool",
+    "requested": "n",
+    "effective": "n",
+    "assignable": [
+      "n",
+      "y"
+    ],
+    "reverseDependencyState": "unavailable",
+    "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
+  }
+]
