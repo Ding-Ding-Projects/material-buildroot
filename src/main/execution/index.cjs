@@ -6,6 +6,7 @@ const { spawn } = require("node:child_process");
 const { createDockerRuntime } = require("./docker-runtime.cjs");
 const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs");
 const { isBuildTarget, assertPackage } = require("../build/target-actions.cjs");
+const { LINUX_BUILD_PATH_SCRIPT } = require("./linux-build-path.cjs");
 const TARGETS = Object.freeze([
   "all",
   "sdk",
@@ -176,6 +177,7 @@ function canonicalDirectory(value) {
   return real;
 }
 const LINUX_SCRIPT =
+  LINUX_BUILD_PATH_SCRIPT +
   'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; if [ "$4" = material-config-domains ]; then printf "MATERIAL_CONFIG_OUTPUT=%s\n" "$2"; exec make -s --no-print-directory -C "$1" "O=$2" "BR2_EXTERNAL=$5" printvars "VARS=LINUX_DIR BUSYBOX_DIR UBOOT_DIR"; fi; if [ "$4" = material-save-defconfig ]; then test ! -e "$2/material-minimal-defconfig" && test ! -L "$2/material-minimal-defconfig" || exit 78; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "BR2_DEFCONFIG=$2/material-minimal-defconfig" savedefconfig; fi; case "$4" in linux-olddefconfig) set -- "$@" "LINUX_KCONFIG_EDITORS=olddefconfig" ;; uboot-olddefconfig) set -- "$@" "UBOOT_KCONFIG_EDITORS=olddefconfig" ;; busybox-oldconfig) yes "" | make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "BUSYBOX_KCONFIG_EDITORS=oldconfig" "$4"; exit $? ;; *) set -- "$@" "MATERIAL_CONFIG_UNUSED=1" ;; esac; exec make -C "$1" "O=$2" "-j$3" "BR2_EXTERNAL=$5" "${7:-$6}" "$4"';
 const ENVIRONMENT_SCRIPT =
   'set -eu; test "$(id -u)" -ne 0 || { echo non-root-required >&2; exit 77; }; gcc -dumpmachine; gcc -dumpfullversion -dumpversion';

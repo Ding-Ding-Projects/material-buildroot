@@ -67,7 +67,7 @@ function createImagePresets({ configuration }) {
     return { revision: snapshot.revision, profile: "x86_64-bios-isolinux-initrd", firmware: "bios", bootVerified: false,
       requirements, changes: Object.fromEntries(ISO_SYMBOLS.map(symbol => [symbol, { type: "bool", value: true }])),
       applicable: requirements.every(row => row.selectable), previewKind: "configuration-plan", requiresBuild: true,
-      output: "images/rootfs.iso9660", warning: "Configures a BIOS-only initrd ISO. Run a full build and inspect its output. Configuration and an El Torito catalog do not prove that the image boots. UEFI support is not configured." };
+      defaults: { architecture: "x86_64", firmware: "bios", bootloader: "isolinux", rootFilesystem: "initrd", output: "images/rootfs.iso9660" }, constraints: { requiresExistingKernel: true, requiresFullBuild: true, uefiConfigured: false, hybridConfigured: false }, output: "images/rootfs.iso9660", warning: "Configures a BIOS-only initrd ISO. Run a full build and inspect its output. Configuration and an El Torito catalog do not prove that the image boots. UEFI support is not configured." };
   }
   async function isoApply(input) {
     const preview = await isoPlan(input);
