@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { documentSources } from './inventory.mjs';
 import { verifyBeginnerDestinations } from './beginner-guide.js';
+import { verifyArticleLanguage } from './article-language.mjs';
 import { containedPath, sourceSnapshot, indexedSources, admittedSource } from './source-boundary.mjs';
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const outputIndex=process.argv.indexOf('--output');
@@ -33,6 +34,10 @@ for(const doc of inventory)if(!htmlFiles.includes(doc.url.slice(base.length)))fa
 for(const phase of roadmap.phases)if(!htmlFiles.includes('site/phases/'+phase.id.toLowerCase()+'.html'))failures.push(`${phase.id}: dedicated phase page missing.`);
 const htmlByFile=new Map();
 for(const file of htmlFiles)htmlByFile.set(file,await fs.readFile(path.join(docs,file),'utf8'));
+for(const doc of inventory) {
+  try { verifyArticleLanguage(doc.source, htmlByFile.get(doc.url.slice(base.length)) || ''); }
+  catch(error) { failures.push(error.message); }
+}
 let checkedLinks=0;
 for(const [file,html] of htmlByFile){
   if (/<(?:button|select|input|details|summary)\b/i.test(html)) failures.push(`${file}: native interactive control substitutes are not allowed; use the admitted Material component.`);

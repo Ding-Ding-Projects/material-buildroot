@@ -81,6 +81,7 @@ Legacy reference articles without a linked Cantonese twin remain untranslated ga
 ## Presentation reference
 
 - [Presentation provenance](presentation-provenance.md) · [展示來源證明](presentation-provenance.zh-HK.md)
+- [Article source-language metadata](article-source-language.md): source-derived labels and body language independent of the interface language choice.
 
 - [Authenticated companion consumers](companion-consumers.md) · [已驗證伴隨連線消費端](companion-consumers.zh-HK.md)
 
