@@ -27,7 +27,9 @@ function inspectIso(file, size) {
     if (catalog) for (let i = 0; i < 32; i += 2) checksum = (checksum + catalog.readUInt16LE(i)) & 0xffff;
     const validationChecksumValid = !!catalog && catalog[0] === 1 && catalog[30] === 0x55 && catalog[31] === 0xaa && checksum === 0;
     const bootImageLba = catalog ? catalog.readUInt32LE(40) : null;
-    const bootEntryValid = validationChecksumValid && catalog[32] === 0x88 && bootImageLba > 0 && bootImageLba * SECTOR < size;
+    const loadSectors = catalog ? catalog.readUInt16LE(38) : 0;
+    const mediaType = catalog?.[33] ?? null;
+    const bootEntryValid = validationChecksumValid && catalog[32] === 0x88 && mediaType <= 4 && loadSectors > 0 && bootImageLba > 0 && bootImageLba * SECTOR + loadSectors * 512 <= size;
     return { descriptorValid, volumeSectors, logicalBlockBytes, declaredBytes, withinImage: descriptorValid && declaredBytes <= size,
       elTorito: { present: catalogLba !== null, catalogLba, validationChecksumValid, bootEntryValid, platformId: catalog?.[1] ?? null, bootImageLba }, bootVerified: false };
   } finally { fs.closeSync(fd); }

@@ -7,13 +7,15 @@ function image() {
   const descriptor = (sector, type) => { const b = data.subarray(sector * 2048, (sector + 1) * 2048); b[0] = type; b.write("CD001", 1); b[6] = 1; return b; };
   const p = descriptor(16, 1); p.writeUInt32LE(25, 80); p.writeUInt32BE(25, 84); p.writeUInt16LE(2048, 128); p.writeUInt16BE(2048, 130);
   const b = descriptor(17, 0); b.write("EL TORITO SPECIFICATION", 7); b.writeUInt32LE(20, 71); descriptor(18, 255);
-  const c = data.subarray(20 * 2048); c[0] = 1; c[30] = 0x55; c[31] = 0xaa; c.writeUInt16LE((-0xaa56) & 0xffff, 28); c[32] = 0x88; c.writeUInt32LE(21, 40);
+  const c = data.subarray(20 * 2048); c[0] = 1; c[30] = 0x55; c[31] = 0xaa; c.writeUInt16LE((-0xaa56) & 0xffff, 28); c[32] = 0x88; c.writeUInt16LE(4, 38); c.writeUInt32LE(21, 40);
   return data;
 }
 test("ISO inspection rejects malformed descriptors and invalid boot catalogs without claiming boot", t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "iso-inspect-")); t.after(() => fs.rmSync(root, { recursive: true })); const file = path.join(root, "test.iso");
   const data = image(); fs.writeFileSync(file, data); const valid = inspectIso(file, data.length);
   assert.equal(valid.descriptorValid, true); assert.equal(valid.elTorito.bootEntryValid, true); assert.equal(valid.bootVerified, false);
+  data.writeUInt16LE(65535, 20 * 2048 + 38); fs.writeFileSync(file, data); assert.equal(inspectIso(file, data.length).elTorito.bootEntryValid, false);
+  data.writeUInt16LE(4, 20 * 2048 + 38);
   data[20 * 2048 + 28] ^= 1; fs.writeFileSync(file, data); assert.equal(inspectIso(file, data.length).elTorito.bootEntryValid, false);
   data.writeUInt32LE(9999, 17 * 2048 + 71); fs.writeFileSync(file, data); assert.equal(inspectIso(file, data.length).elTorito.validationChecksumValid, false);
   data[16 * 2048 + 84] ^= 1; fs.writeFileSync(file, data); assert.equal(inspectIso(file, data.length).descriptorValid, false);
