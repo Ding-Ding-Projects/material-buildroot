@@ -7,6 +7,7 @@ const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
+const { captureWslBuildIntent, validateNativeIntent } = require("./jobs/wsl-build-intent.cjs");
 const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
 const { createJobManager } = require("./jobs/manager.cjs");
@@ -305,16 +306,16 @@ function createOperationsService({
       if(item.storage||external.length)reject("REMOTE_SOURCE_SHAPE_UNSUPPORTED");
       const release=acquirePathLeases([item.source,item.output]);
       try {
-        const before=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+        const before=await captureProjectIntent(item, {source:item.source,output:item.output,externalTrees:[]});
         const archive=makeArchive({source:item.source,output:item.output,revalidate:()=>project(workspaceId)});
-        const after=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+        const after=await captureProjectIntent(item, {source:item.source,output:item.output,externalTrees:[]});
         if(before.sourceRevision!==after.sourceRevision||before.configRevision!==after.configRevision)reject("REMOTE_SOURCE_CHANGED");
         return {...archive,source:item.source,output:item.output,intent:{sourceRevision:before.sourceRevision,configRevision:before.configRevision}};
       } finally {release();}
     },
     async revalidateSource(workspaceId,intent) {
       const item=project(workspaceId);if(item.storage||authorizedExternalPaths(workspaceId,item).length)reject("REMOTE_SOURCE_SHAPE_UNSUPPORTED");
-      const current=await captureBuildIntent({source:item.source,output:item.output,externalTrees:[]});
+      const current=await captureProjectIntent(item, {source:item.source,output:item.output,externalTrees:[]});
       if(current.sourceRevision!==intent.sourceRevision||current.configRevision!==intent.configRevision)reject("REMOTE_SOURCE_CHANGED");
     }
   }); }
@@ -624,7 +625,7 @@ function createOperationsService({
           payload.workspaceId,
           item,
         );
-        const current = await captureBuildIntent({
+        const current = await captureProjectIntent(item, {
           source: item.source,
           output: item.output,
           externalTrees,
@@ -909,6 +910,10 @@ function createOperationsService({
       !/^[a-f0-9]{64}$/.test(payload.intent.configRevision)
     )
       reject("BLOCKED_INVALID_INTENT");
+    if (payload.snapshot?.version === 3) {
+      try { validateNativeIntent({ sourceRevision: payload.intent.sourceRevision, configRevision: payload.intent.configRevision, snapshot: payload.snapshot }); }
+      catch { reject("BLOCKED_INVALID_INTENT"); }
+    } else {
     exact(payload.snapshot, [
       "version",
       "entries",
@@ -937,6 +942,7 @@ function createOperationsService({
       payload.snapshot.bytes > 512 * 1024 * 1024
     )
       reject("BLOCKED_INVALID_INTENT");
+    }
     return {
       ...payload,
       runtime: selectedRuntime,
@@ -946,7 +952,7 @@ function createOperationsService({
   async function checkDispatchIntent(payload, signal) {
     const item = project(payload.workspaceId);
     if (!item.externalStateVerified) reject("EXTERNAL_TREES_NOT_AUTHORIZED");
-    const current = await captureBuildIntent({
+    const current = await captureProjectIntent(item, {
       source: item.source,
       output: item.output,
       externalTrees: authorizedExternalPaths(payload.workspaceId, item),
@@ -968,7 +974,13 @@ function createOperationsService({
     for (const roots of Object.values(domains)) { roots.workspaceId = id; roots.kconfig.externalRoots = item.externalTrees; }
     return domains;
   }
-  const configurationConsent = createConfigurationConsent({ resolveProject: project, discoverDomains: configurationDomains });
+  async function captureProjectIntent(item, options) {
+    if (item.storage?.kind === "wsl") return captureWslBuildIntent({ execution, grantId: item.grantId, runtime: item.runtime, ...options });
+    return captureBuildIntent(options);
+  }
+  const configurationConsent = createConfigurationConsent({ resolveProject: project, discoverDomains: configurationDomains,
+    captureIntent: (item, roots) => captureProjectIntent(item, { source: roots.sourceRoot, output: roots.outputRoot, externalTrees: item.externalTrees }),
+  });
   async function inspectConfigurationSemantics(roots) {
     try { await configurationConsent.requireTrust(roots.workspaceId, roots.domain, roots); }
     catch (error) {
@@ -1290,13 +1302,13 @@ function createOperationsService({
       if(!item.externalStateVerified)reject('EXTERNAL_TREES_NOT_AUTHORIZED');
       const selectedRuntime=runtime(item.runtime);
       const resources=reservations(undefined,selectedRuntime,request.jobs);
-      const captured=await captureBuildIntent({source:item.source,output:item.output,externalTrees:authorizedExternalPaths(request.workspaceId,item)});
+      const captured=await captureProjectIntent(item, {source:item.source,output:item.output,externalTrees:authorizedExternalPaths(request.workspaceId,item)});
       // Recheck at the enqueue boundary after every asynchronous preparation step.
       authorize();project(request.workspaceId);
       if(disposed||updateInstalling)reject('UNAVAILABLE');
       const job=jobs.enqueue({kind:'build',ownerId:owner,payload:{workspaceId:request.workspaceId,target:request.target,runtime:selectedRuntime,jobs:request.jobs,resources,
         intent:{projectId:request.workspaceId,sourceRevision:captured.sourceRevision,configRevision:captured.configRevision},
-        snapshot:{version:captured.snapshot.version,entries:captured.snapshot.entries,bytes:captured.snapshot.bytes,excludesGitObjectHistory:true,symlinkPolicy:captured.snapshot.symlinkPolicy,symlinks:captured.snapshot.symlinks,limitations:[...captured.snapshot.limitations]}}});
+        snapshot:{version:captured.snapshot.version,entries:captured.snapshot.entries,bytes:captured.snapshot.bytes,excludesGitObjectHistory:true,symlinkPolicy:captured.snapshot.symlinkPolicy,symlinks:captured.snapshot.symlinks,limitations:[...captured.snapshot.limitations],...(captured.snapshot.version===3?{limits:captured.snapshot.limits,downloadCache:captured.snapshot.downloadCache}:{})}}});
       const observer=setInterval(()=>{try{const current=ownJob(job.id);if(!['queued','running','dispatching','cancelling'].includes(current.state)){clearInterval(observer);return;}try{authorize();if(disposed)throw Error('closed');}catch{if(current.state!=='cancelling')jobs.cancel(current.id,owner,current.sequence);void scheduler.pump().catch(()=>{});clearInterval(observer);}}catch{clearInterval(observer);}},250);observer.unref?.();
       void scheduler.pump().catch(()=>{});return job;
     },
@@ -1761,7 +1773,7 @@ function createOperationsService({
           selectedRuntime,
           request.jobs,
         );
-        const captured = await captureBuildIntent({
+        const captured = await captureProjectIntent(item, {
           source: item.source,
           output: item.output,
           externalTrees: authorizedExternalPaths(request.workspaceId, item),
@@ -1793,6 +1805,7 @@ function createOperationsService({
               symlinkPolicy: captured.snapshot.symlinkPolicy,
               symlinks: captured.snapshot.symlinks,
               limitations: [...captured.snapshot.limitations],
+              ...(captured.snapshot.version === 3 ? { limits: captured.snapshot.limits, downloadCache: captured.snapshot.downloadCache } : {}),
             },
           },
         });
@@ -1984,12 +1997,12 @@ function createOperationsService({
       case "artifacts.manifest": {
         const item = project(request.workspaceId);
         const hasConfiguration = fs.existsSync(path.join(item.output, ".config"));
-        const before = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        const before = await captureProjectIntent(item, { source: item.source, output: item.output, externalTrees: item.externalTrees });
         const manifest = await deployment(request.workspaceId).createManifest({
           paths: request.paths,
           locks: { sourceRevision: before.sourceRevision, ...(hasConfiguration ? { configurationSha256: before.configRevision } : {}) },
         });
-        const after = await captureBuildIntent({ source: item.source, output: item.output, externalTrees: item.externalTrees });
+        const after = await captureProjectIntent(item, { source: item.source, output: item.output, externalTrees: item.externalTrees });
         if (hasConfiguration !== fs.existsSync(path.join(item.output, ".config")) || before.sourceRevision !== after.sourceRevision || before.configRevision !== after.configRevision) reject("REPRODUCIBILITY_INPUTS_CHANGED");
         return { ...manifest, provenance: { ...provenance.bind(manifest, item, request.workspaceId), limitations: before.snapshot.limitations } };
       }

@@ -105,6 +105,16 @@ function createKconfigInspection({ execution, resolveContext, onOwnership } = {}
     const mappedRoots = new Map();
     const translate = async native => {
       if (mappedRoots.has(native)) return mappedRoots.get(native);
+      if (grant.wslReceipt) {
+        for (const [root, linux] of [[grant.wslReceipt.paths.source, grant.wslReceipt.storage.sourceLinux], [grant.wslReceipt.paths.output, grant.wslReceipt.storage.outputLinux]]) {
+          if (inside(root, native)) {
+            const relative = path.relative(root, native).replace(/\\/g, "/");
+            const value = linux + (relative ? "/" + relative : "");
+            mappedRoots.set(native, value); return value;
+          }
+        }
+        fail("KCONFIG_ROOT_NOT_GRANTED");
+      }
       const translated = await boundedProcess(execution.executables.wsl,
         ["--distribution", runtime.distribution, "--exec", "wslpath", "-a", "-u", native],
         { maxBytes: 4096 }).completion;
@@ -133,7 +143,7 @@ function createKconfigInspection({ execution, resolveContext, onOwnership } = {}
         fail("INVALID_KCONFIG_RUNTIME");
       for (const root of [grant.source, grant.output, ...grant.external.map(item => item.path)]) await translate(root);
       file = execution.executables.wsl;
-      args = ["--distribution", runtime.distribution, "--exec", "setsid", "python3", "-I", "-B", "-c", LAUNCHER];
+      args = ["--distribution", runtime.distribution, "--exec", "setsid", "--wait", "python3", "-I", "-B", "-c", LAUNCHER];
     } else fail("KCONFIG_RUNTIME_UNAVAILABLE");
     const mapPath = native => {
       const root = [...mappedRoots.keys()].sort((a,b) => b.length-a.length).find(root => inside(root,native));

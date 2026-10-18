@@ -5,7 +5,9 @@ const fail = code => { throw Object.assign(new Error(code), { code }); };
 const digest = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const DOMAINS = new Set(["buildroot", "linux", "busybox", "uboot"]);
 /** Session-only consent binds source bytes, configuration, native roots and runtime. */
-function createConfigurationConsent({ resolveProject, discoverDomains, now = Date.now }) {
+function createConfigurationConsent({ resolveProject, discoverDomains, now = Date.now,
+  captureIntent = (project, roots) => captureBuildIntent({ source: roots.sourceRoot, output: roots.outputRoot, externalTrees: project.externalTrees }),
+}) {
   const challenges = new Map(), grants = new Map();
   function prune() {
     for (const [id, item] of challenges) if (item.expires <= now()) challenges.delete(id);
@@ -14,10 +16,11 @@ function createConfigurationConsent({ resolveProject, discoverDomains, now = Dat
   async function snapshot(workspaceId, domain, roots) {
     const project = resolveProject(workspaceId);
     if (!project.runtime || !project.externalStateVerified) fail("KCONFIG_RUNTIME_UNAVAILABLE");
-    const parent = await captureBuildIntent({ source: project.source, output: project.output, externalTrees: project.externalTrees });
+    const parent = await captureIntent(project, { sourceRoot: project.source, outputRoot: project.output });
     if (!roots) roots = { sourceRoot: project.source, outputRoot: project.output };
-    const component = domain === "buildroot" ? parent : await captureBuildIntent({ source: roots.sourceRoot, output: roots.outputRoot, externalTrees: project.externalTrees });
-    if (parent.snapshot.symlinks || component.snapshot.symlinks) fail("KCONFIG_UNBOUND_SYMLINK_SOURCE");
+    const component = domain === "buildroot" ? parent : await captureIntent(project, roots);
+    const bound = snapshot => !snapshot.symlinks || (snapshot.version === 3 && snapshot.symlinkPolicy === "internal-content-and-missing-targets" && JSON.stringify(snapshot.limitations) === "[]");
+    if (!bound(parent.snapshot) || !bound(component.snapshot)) fail("KCONFIG_UNBOUND_SYMLINK_SOURCE");
     resolveProject(workspaceId);
     const value = {
       workspaceId, domain, grantId: project.grantId, runtime: project.runtime,
@@ -25,6 +28,7 @@ function createConfigurationConsent({ resolveProject, discoverDomains, now = Dat
       externalTrees: project.externalTrees,
       sourceRevision: digest({ parent: parent.sourceRevision, component: component.sourceRevision, roots: [roots.sourceRoot, roots.outputRoot] }),
       configRevision: digest({ parent: parent.configRevision, component: component.configRevision }),
+      contentEvidence: parent.snapshot,
     };
     return { ...structuredClone(value), revision: digest(value) };
   }
@@ -62,7 +66,7 @@ function createConfigurationConsent({ resolveProject, discoverDomains, now = Dat
       challenges.set(id, { snapshot: current, expires });
       return { id, expires, domain: actualDomain, requestedDomain: domain, sourceRoot: current.sourceRoot,
         outputRoot: current.outputRoot, sourceRevision: current.sourceRevision, configRevision: current.configRevision,
-        runtime: current.runtime, externalRoots: current.externalTrees, discoveryOnly: actualDomain !== domain };
+        runtime: current.runtime, externalRoots: current.externalTrees, discoveryOnly: actualDomain !== domain, contentEvidence: current.contentEvidence };
     },
     async grant({ workspaceId, challengeId, trusted }, authority = null) {
       if (authority !== null && typeof authority !== "function") fail("KCONFIG_AUTHORITY_INVALID");
