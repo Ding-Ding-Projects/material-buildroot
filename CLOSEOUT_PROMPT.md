@@ -2,13 +2,13 @@
 
 ## Objective and stopping boundary
 
-The goal remains active and incomplete. Account allowance is verified at 10% remaining. This is the first account-boundary goal turn. Preserve work and start no new implementation, product launch, WSL query or firmware operation until allowance is freshly above 10%. Do not manufacture blocked turns, pause/completion states or a replacement goal.
+The goal remains active and incomplete. Account allowance is verified at 10% remaining. This is the second consecutive goal turn observing the same account boundary. The preceding turn made concrete progress; this turn revalidated preserved state and found no permitted product work. The three-turn blocked threshold has not yet been met. Preserve work and start no new implementation, product launch, WSL query or firmware operation until allowance is freshly above 10%. Do not manufacture blocked turns, pause/completion states or a replacement goal.
 
 Preserve settings, authentication, source/output trees, the immutable ISO and unrelated work. No host power/login action, force push, security weakening, public private-data disclosure, fourth unchanged Docker firmware attempt or alternate route around rejected actions.
 
 ## Source and publication
 
-- Product integration branch: ai/integration/20261018-roadmap-combined. Current preserved tip before this record: 45c3ca0d1c9f14934e4c616fde1e21e71c0b2c4a. This record is committed next; the private chat adds its own exact commit and remote proof.
+- Product integration branch: ai/integration/20261018-roadmap-combined. Current preserved tip before this record: 84937fb380667eade58ca5f67b4edd10c9b9925f. This record is committed next; the private chat adds its own exact commit and remote proof.
 - Gallery-only main and gallery task branch: b9447cf5cceaf45355f744dfd402470af2c4a5e0. Those changes are merged into the product integration branch without activating its unfinished application code on main.
 - The public gallery has 67 entries in 13 groups: https://ding-ding-projects.github.io/material-buildroot/gallery/ . All 67 image URLs returned HTTP 200 with matching hashes; static resources matched immutable Git blobs. Content verification binds 71bb94dd2d8482a55a0bea51061a7f154c2ad92a and Pages run 39129688606.
 - Final receipt-only deployment b9447cf5cceaf45355f744dfd402470af2c4a5e0 passed run 39129911796. The normal live receipt URL matched its committed 14,975 bytes, SHA-256 12b3389b5a5e6a21b1ba1f3a556e23221e80e1d6ce5b88e255e1fa41da1af6e8.

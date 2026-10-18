@@ -1,5 +1,12 @@
 ## Integrated guidance and source isolation, 2026-10-18
 
+## Second consecutive account-boundary audit, 2026-10-18
+
+Fresh account data still shows 90% used and 10% remaining. The preceding goal turn made concrete progress through implementation, verification, publication and preservation. This continuation revalidated the clean primary checkout, exact remote integration/main refs and the completed gallery lane. No live verification process is being awaited, and no new implementation, test, product launch or firmware operation is permitted under the unchanged boundary. The goal remains active and incomplete because only two consecutive boundary turns have occurred. This is a no-progress product turn with preservation recorded, not a completion claim.
+
+The existing gallery publication is already verified; no duplicate publication lane was created. Resume product work only after fresh allowance above 10% or explicit new user direction changing this boundary. Existing native, WSL, compiler and approval limits remain recorded below.
+
+
 ## Published gallery and preserved product continuation, 2026-10-18
 
 The finite product goal remains active and incomplete at the verified 10% account preservation boundary. Completed gallery work is on main `b9447cf5cceaf45355f744dfd402470af2c4a5e0`; it changes gallery files only. The productive candidate is still on `ai/integration/20261018-roadmap-combined`. Local integration `b807cee0b4a78f2e7858f53fcbee1c9e296d728f` preserves the gallery alongside that inactive candidate; this record is committed next. Application source and build/package inputs remain unchanged from the last built8db4e85 candidate. No new product launch or firmware operation occurred.
