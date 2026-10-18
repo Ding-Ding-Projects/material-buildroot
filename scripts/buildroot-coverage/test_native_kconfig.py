@@ -11,7 +11,7 @@ HERE = Path(__file__).resolve().parent
 APP = HERE.parent.parent
 sys.path.insert(0, str(APP/'scripts/configuration/vendor'))
 import kconfiglib as k
-from native_kconfig import collect, validate, portable_bytes
+from native_kconfig import collect, validate, portable_bytes, redact_local_paths
 
 
 class NativeInventoryTests(unittest.TestCase):
@@ -37,6 +37,8 @@ config VALUE
  default 3
  help
    A bounded number.
+   https://example.org/project and http://example.org/home/manual
+   Documented example: /home/example/source and C:/Users/example/source
 config SELECTOR
  bool "Selector"
  select HIDDEN
@@ -120,6 +122,18 @@ config ENABLE
     def test_generated_text_normalizes_checkout_newlines_only(self):
         self.assertEqual(portable_bytes(b'{\r\n  "nodes": []\r\n}\r\n'), b'{\n  "nodes": []\n}\n')
         self.assertEqual(portable_bytes(b'preserve\rstandalone'), b'preserve\rstandalone')
+
+    def test_official_urls_remain_exact_while_actual_drive_paths_are_redacted(self):
+        for url in ('https://osslugaru.gitlab.io/', 'http://example.org/project', 'https://example.org/a?q=1', 'https://example.org/home/manual'):
+            self.assertEqual(redact_local_paths(url), url)
+        for location in ('C:/Users/example/work', r'C:\Users\example\work', r'd:\private\file'):
+            self.assertEqual(redact_local_paths(location), '<local-path>')
+        self.assertEqual(redact_local_paths('URL https://example.org/ and C:/Users/example/file'), 'URL https://example.org/ and <local-path>')
+
+    def test_source_help_is_a_faithful_quote_including_urls_and_documented_paths(self):
+        for node in self.conf.node_iter(unique_syms=False):
+            record = next(item for item in self.data['nodes'] if item['source']['line'] == node.linenr)
+            self.assertEqual(record['help'], getattr(node, 'help', None))
 
 
 if __name__ == '__main__':

@@ -25,6 +25,14 @@ def portable_bytes(data):
     return data.replace(b'\r\n', b'\n')
 
 
+def redact_local_paths(value, roots=()):
+    """Normalize runtime values without interpreting URI scheme suffixes as drives."""
+    for root, label in roots:
+        value = value.replace(root, label)
+    pieces = re.split(r'((?:https?|ftp)://[^\s"\']+)', value)
+    return ''.join(piece if index % 2 else re.sub(r'(?:/home/|/Users/|(?<![A-Za-z0-9_+.-])[A-Za-z]:[/\\](?![/\\]))[^\s"\']+', '<local-path>', piece) for index, piece in enumerate(pieces))
+
+
 def collect(namespace, source, output, adapter):
     """Retain every MenuNode, including hidden and repeated symbol definitions."""
     k, conf = namespace['k'], namespace['conf']
@@ -39,9 +47,7 @@ def collect(namespace, source, output, adapter):
         if isinstance(value, dict):
             return {key: safe(item) for key, item in value.items()}
         value = str(value)
-        for root, label in roots:
-            value = value.replace(root, label)
-        return re.sub(r'(?:/home/|/Users/|[A-Za-z]:[/\\])[^\s"\']+', '<local-path>', value)
+        return redact_local_paths(value, roots)
 
     def location(filename):
         file = Path(filename)
@@ -77,7 +83,9 @@ def collect(namespace, source, output, adapter):
             'parent': ids.get(id(node.parent)),
             'prompt': safe(node.prompt[0]) if node.prompt else None,
             'promptCondition': expression(node.prompt[1]) if node.prompt else None,
-            'help': safe(getattr(node, 'help', None)), 'dependency': expression(node.dep),
+            # Source help is a quotation, not a runtime path value. Preserve its
+            # URLs and documented path examples exactly as the parser exposes them.
+            'help': getattr(node, 'help', None), 'dependency': expression(node.dep),
             'promptless': node.prompt is None,
             'visible': bool(node.prompt and k.expr_value(node.prompt[1])),
             'defaults': [] if protected else [{'value': expression(value), 'condition': expression(cond)} for value, cond in node.defaults],
@@ -107,6 +115,8 @@ def collect(namespace, source, output, adapter):
     choice_nodes = sum(len(choice.nodes) for choice in conf.unique_choices)
     if sum(node['kind'] == 'symbol' for node in nodes) != symbol_nodes or sum(node['kind'] == 'choice' for node in nodes) != choice_nodes:
         raise ValueError('Parser node enumeration disagrees with definition lists')
+    if any(record['help'] != getattr(node, 'help', None) for record, node in zip(nodes, all_nodes)):
+        raise ValueError('Source help quotation was modified')
     files = []
     virtual = namespace.get('virtual', {})
     for filename in sorted(set(conf.kconfig_filenames)):
@@ -125,7 +135,8 @@ def collect(namespace, source, output, adapter):
                         'applicationCodeHashNormalization': 'CRLF-to-LF; selected Linux source and configuration hashes remain exact bytes'},
             'enumeration': {'nodes': len(nodes), 'uniqueSymbols': len(conf.unique_defined_syms), 'uniqueChoices': len(conf.unique_choices),
                             'symbolDefinitions': symbol_nodes, 'choiceDefinitions': choice_nodes,
-                            'hiddenNodes': sum(not node['visible'] for node in nodes), 'promptlessNodes': sum(node['promptless'] for node in nodes)},
+                            'hiddenNodes': sum(not node['visible'] for node in nodes), 'promptlessNodes': sum(node['promptless'] for node in nodes),
+                            'sourceHelpQuotationsCompared': sum(bool(getattr(node, 'help', None)) for node in all_nodes)},
             'scope': {'state': 'partial', 'meaning': 'Complete MenuNode enumeration for this parser invocation, not all versions, configurations, external trees or native conf semantic parity.',
                       'limitations': ['No external trees selected.', 'Source-provided Kconfig commands may execute only for the explicitly trusted non-root Linux source.',
                                       'Existing parser synthesizes external include files; their virtual bytes are hashed separately.',

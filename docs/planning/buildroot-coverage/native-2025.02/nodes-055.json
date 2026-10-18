@@ -5870,7 +5870,7 @@
     "parent": "menu:source/Config.in.legacy:Legacy config options",
     "prompt": "expedite package has been removed",
     "promptCondition": "!BR2_SKIP_LEGACY",
-    "help": "expedite is not actively maintained anymore.\nhttp<local-path>",
+    "help": "expedite is not actively maintained anymore.\nhttps://sourceforge.net/p/enlightenment/mailman/message/36428571",
     "dependency": "!BR2_SKIP_LEGACY",
     "promptless": false,
     "visible": true,

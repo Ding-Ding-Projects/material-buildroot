@@ -3299,7 +3299,7 @@
     "parent": "menu:source/Config.in:Mirrors and Download locations",
     "prompt": "Primary download site",
     "promptCondition": "y",
-    "help": "Primary site to download from. If this option is set then\nbuildroot will try to download package source first from this\nsite and try the default if the file is not found.\nValid URIs are:\n  - URIs recognized by $(WGET)\n  - local URIs of the form fil<local-path>\n  - scp URIs of the form sc<local-path>",
+    "help": "Primary site to download from. If this option is set then\nbuildroot will try to download package source first from this\nsite and try the default if the file is not found.\nValid URIs are:\n  - URIs recognized by $(WGET)\n  - local URIs of the form file://absolutepath\n  - scp URIs of the form scp://[user@]host:path.",
     "dependency": "y",
     "promptless": false,
     "visible": true,
@@ -3402,7 +3402,7 @@
     "visible": true,
     "defaults": [
       {
-        "value": "\"http<local-path>\"",
+        "value": "\"https://sources.buildroot.net\"",
         "condition": "!BR2_PRIMARY_SITE_ONLY"
       }
     ],
@@ -3430,8 +3430,8 @@
     "protectedValues": false,
     "type": "string",
     "effectiveType": "string",
-    "requested": "http<local-path>",
-    "effective": "http<local-path>",
+    "requested": "https://sources.buildroot.net",
+    "effective": "https://sources.buildroot.net",
     "assignable": [],
     "reverseDependencyState": "unavailable",
     "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
@@ -3447,13 +3447,13 @@
     "parent": "menu:source/Config.in:Mirrors and Download locations",
     "prompt": "Kernel.org mirror",
     "promptCondition": "!BR2_PRIMARY_SITE_ONLY",
-    "help": "kernel.org is mirrored on a number of servers around the\nworld. The following allows you to select your preferred\nmirror. By default, a CDN is used, which automatically\nredirects to a mirror geographically close to you.\n\nHave a look on the kernel.org site for a list of mirrors, then\nenter the URL to the base directory. Examples:\n\n   htt<local-path> (XX = country code)\n   htt<local-path>",
+    "help": "kernel.org is mirrored on a number of servers around the\nworld. The following allows you to select your preferred\nmirror. By default, a CDN is used, which automatically\nredirects to a mirror geographically close to you.\n\nHave a look on the kernel.org site for a list of mirrors, then\nenter the URL to the base directory. Examples:\n\n   http://www.XX.kernel.org/pub (XX = country code)\n   http://mirror.aarnet.edu.au/pub/ftp.kernel.org",
     "dependency": "!BR2_PRIMARY_SITE_ONLY",
     "promptless": false,
     "visible": true,
     "defaults": [
       {
-        "value": "\"http<local-path>\"",
+        "value": "\"https://cdn.kernel.org/pub\"",
         "condition": "!BR2_PRIMARY_SITE_ONLY"
       }
     ],
@@ -3481,8 +3481,8 @@
     "protectedValues": false,
     "type": "string",
     "effectiveType": "string",
-    "requested": "http<local-path>",
-    "effective": "http<local-path>",
+    "requested": "https://cdn.kernel.org/pub",
+    "effective": "https://cdn.kernel.org/pub",
     "assignable": [],
     "reverseDependencyState": "unavailable",
     "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
@@ -3498,13 +3498,13 @@
     "parent": "menu:source/Config.in:Mirrors and Download locations",
     "prompt": "GNU Software mirror",
     "promptCondition": "!BR2_PRIMARY_SITE_ONLY",
-    "help": "GNU has multiple software mirrors scattered around the\nworld. The following allows you to select your preferred\nmirror. By default, a generic address is used, which\nautomatically selects an up-to-date and local mirror.\n\nHave a look on the gnu.org site for a list of mirrors, then\nenter the URL to the base directory. Examples:\n\n   htt<local-path>\n   htt<local-path>",
+    "help": "GNU has multiple software mirrors scattered around the\nworld. The following allows you to select your preferred\nmirror. By default, a generic address is used, which\nautomatically selects an up-to-date and local mirror.\n\nHave a look on the gnu.org site for a list of mirrors, then\nenter the URL to the base directory. Examples:\n\n   http://ftp.gnu.org/pub/gnu\n   http://mirror.aarnet.edu.au/pub/gnu",
     "dependency": "!BR2_PRIMARY_SITE_ONLY",
     "promptless": false,
     "visible": true,
     "defaults": [
       {
-        "value": "\"http<local-path>\"",
+        "value": "\"https://ftpmirror.gnu.org\"",
         "condition": "!BR2_PRIMARY_SITE_ONLY"
       }
     ],
@@ -3532,8 +3532,8 @@
     "protectedValues": false,
     "type": "string",
     "effectiveType": "string",
-    "requested": "http<local-path>",
-    "effective": "http<local-path>",
+    "requested": "https://ftpmirror.gnu.org",
+    "effective": "https://ftpmirror.gnu.org",
     "assignable": [],
     "reverseDependencyState": "unavailable",
     "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
@@ -3549,13 +3549,13 @@
     "parent": "menu:source/Config.in:Mirrors and Download locations",
     "prompt": "LuaRocks mirror",
     "promptCondition": "!BR2_PRIMARY_SITE_ONLY",
-    "help": "LuaRocks repository.\n\nSee htt<local-path>",
+    "help": "LuaRocks repository.\n\nSee http://luarocks.org",
     "dependency": "!BR2_PRIMARY_SITE_ONLY",
     "promptless": false,
     "visible": true,
     "defaults": [
       {
-        "value": "\"htt<local-path>\"",
+        "value": "\"http://rocks.moonscript.org\"",
         "condition": "!BR2_PRIMARY_SITE_ONLY"
       }
     ],
@@ -3583,8 +3583,8 @@
     "protectedValues": false,
     "type": "string",
     "effectiveType": "string",
-    "requested": "htt<local-path>",
-    "effective": "htt<local-path>",
+    "requested": "http://rocks.moonscript.org",
+    "effective": "http://rocks.moonscript.org",
     "assignable": [],
     "reverseDependencyState": "unavailable",
     "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
@@ -3600,13 +3600,13 @@
     "parent": "menu:source/Config.in:Mirrors and Download locations",
     "prompt": "CPAN mirror (Perl packages)",
     "promptCondition": "!BR2_PRIMARY_SITE_ONLY",
-    "help": "CPAN (Comprehensive Perl Archive Network) is a repository of\nPerl packages. It has multiple software mirrors scattered\naround the world. This option allows you to select a mirror.\n\nThe list of mirrors is available at:\nhtt<local-path>          (tabular)\nhtt<local-path>  (clickable world map)",
+    "help": "CPAN (Comprehensive Perl Archive Network) is a repository of\nPerl packages. It has multiple software mirrors scattered\naround the world. This option allows you to select a mirror.\n\nThe list of mirrors is available at:\nhttp://mirrors.cpan.org/          (tabular)\nhttp://mirrors.cpan.org/map.html  (clickable world map)",
     "dependency": "!BR2_PRIMARY_SITE_ONLY",
     "promptless": false,
     "visible": true,
     "defaults": [
       {
-        "value": "\"http<local-path>\"",
+        "value": "\"https://cpan.metacpan.org\"",
         "condition": "!BR2_PRIMARY_SITE_ONLY"
       }
     ],
@@ -3634,8 +3634,8 @@
     "protectedValues": false,
     "type": "string",
     "effectiveType": "string",
-    "requested": "http<local-path>",
-    "effective": "http<local-path>",
+    "requested": "https://cpan.metacpan.org",
+    "effective": "https://cpan.metacpan.org",
     "assignable": [],
     "reverseDependencyState": "unavailable",
     "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."
@@ -5716,7 +5716,7 @@
     "parent": "menu:source/Config.in:Build options",
     "prompt": "Stack Smashing Protection",
     "promptCondition": "BR2_TOOLCHAIN_HAS_SSP",
-    "help": "Enable stack smashing protection support using GCC's\n-fstack-protector option family.\n\nSee\nhtt<local-path>\nfor details.\n\nNote that this requires the toolchain to have SSP support.\nThis is always the case for glibc and eglibc toolchain, but is\noptional in uClibc toolchains.",
+    "help": "Enable stack smashing protection support using GCC's\n-fstack-protector option family.\n\nSee\nhttp://www.linuxfromscratch.org/hints/downloads/files/ssp.txt\nfor details.\n\nNote that this requires the toolchain to have SSP support.\nThis is always the case for glibc and eglibc toolchain, but is\noptional in uClibc toolchains.",
     "dependency": "BR2_TOOLCHAIN_HAS_SSP",
     "promptless": false,
     "visible": true,
@@ -7707,7 +7707,7 @@
     "parent": "choice:source/system/Config.in:Init system",
     "prompt": "tini",
     "promptCondition": "BR2_USE_MMU && <choice>",
-    "help": "Tini - A tiny but valid init for containers\n\nTini is the simplest init you could think of.\n\nAll Tini does is spawn a single child (Tini is meant to be run\nin a container), and wait for it to exit all the while reaping\nzombies and performing signal forwarding.\n\nhttp<local-path>",
+    "help": "Tini - A tiny but valid init for containers\n\nTini is the simplest init you could think of.\n\nAll Tini does is spawn a single child (Tini is meant to be run\nin a container), and wait for it to exit all the while reaping\nzombies and performing signal forwarding.\n\nhttps://github.com/krallin/tini",
     "dependency": "BR2_USE_MMU && <choice>",
     "promptless": false,
     "visible": true,
@@ -8119,7 +8119,7 @@
     "parent": "menu:source/system/Config.in:System configuration",
     "prompt": "The default unit systemd starts at bootup",
     "promptCondition": "BR2_INIT_SYSTEMD",
-    "help": "Specify the name of the unit configuration file to be started\nat bootup by systemd. Should end in \".target\".\nex: multi-user.target\n\nhttp<local-path>",
+    "help": "Specify the name of the unit configuration file to be started\nat bootup by systemd. Should end in \".target\".\nex: multi-user.target\n\nhttps://www.freedesktop.org/software/systemd/man/systemd.special.html#default.target",
     "dependency": "BR2_INIT_SYSTEMD",
     "promptless": false,
     "visible": false,
@@ -10032,11 +10032,11 @@
     "visible": true,
     "defaults": [
       {
-        "value": "\"/usr/bi<local-path>\"",
+        "value": "\"/usr/bin:/usr/sbin\"",
         "condition": "BR2_ROOTFS_MERGED_USR"
       },
       {
-        "value": "\"/bi<local-path>\"",
+        "value": "\"/bin:/sbin:/usr/bin:/usr/sbin\"",
         "condition": "!BR2_ROOTFS_MERGED_USR"
       }
     ],
@@ -10064,8 +10064,8 @@
     "protectedValues": false,
     "type": "string",
     "effectiveType": "string",
-    "requested": "/bi<local-path>",
-    "effective": "/bi<local-path>",
+    "requested": "/bin:/sbin:/usr/bin:/usr/sbin",
+    "effective": "/bin:/sbin:/usr/bin:/usr/sbin",
     "assignable": [],
     "reverseDependencyState": "unavailable",
     "reverseDependencyReason": "Per-definition select/imply edges are retained; aggregate reverse expressions are not formatted because real source exceeds the vendored recursive formatter depth."

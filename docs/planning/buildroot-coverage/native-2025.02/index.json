@@ -20210,7 +20210,7 @@
     ],
     "parserSha256": "d81c16ca77a451e52e93c99d39ad9451d645506450766c9a6b7193d55c439103",
     "adapterSha256": "8dc2cd592ab4cf5cc607be55deedca84a89a59446b994e7219d4bb4b2f1a9e89",
-    "inventorySha256": "7d0e6aa6c30f7a59bdf21e1478d39204c2e06964dafb9d76a0ff85f656aa70be",
+    "inventorySha256": "d79804f62281a7329750ffff928cabf897aa69b925102d95a8c8522e30af30aa",
     "applicationCodeHashNormalization": "CRLF-to-LF; selected Linux source and configuration hashes remain exact bytes",
     "environment": {
       "SKIP_LEGACY": "",
@@ -20227,7 +20227,8 @@
     "symbolDefinitions": 9117,
     "choiceDefinitions": 165,
     "hiddenNodes": 8299,
-    "promptlessNodes": 832
+    "promptlessNodes": 832,
+    "sourceHelpQuotationsCompared": 7189
   },
   "scope": {
     "state": "partial",
@@ -20274,287 +20275,287 @@
   "shards": [
     {
       "path": "nodes-000.json",
-      "sha256": "6c1b96f1a7ef0cd9d9fe864c9e2de25b7615a3b6d7204fe51461a9df64941ec1",
+      "sha256": "63e3953fe0c4731b33f608103a36cb6a2837d2ee2d504109202544bb6ad866a6",
       "nodes": 200
     },
     {
       "path": "nodes-001.json",
-      "sha256": "0d3eb80b5db4399a70ac4e2118bb2b7d3d08d88c48c488ff365da36c90390ae6",
+      "sha256": "5a4c5ccdef5833db260b41cc4b9e0890c936caef33ca2500d609dc557baa096d",
       "nodes": 200
     },
     {
       "path": "nodes-002.json",
-      "sha256": "3054b55412e06cb360cc65a19b6a8beb48f728c58e39496ec201685f9f10aa59",
+      "sha256": "6cf56cd67e1254b7374de39095321dd5134946e6aaa1324375373946861a49e2",
       "nodes": 200
     },
     {
       "path": "nodes-003.json",
-      "sha256": "495ddd4fa8f7c341a5034346d25dbfb10a80178543f9eaad71e81899950bc9c6",
+      "sha256": "f216d88fb21183bf2b5e9a67bfffb18c61b9fe974224db6921dfc13a73366dd7",
       "nodes": 200
     },
     {
       "path": "nodes-004.json",
-      "sha256": "23f599b72a5b0f3812a7e91f0c3b336b87fafb3c248aab6e4d40297828f36c82",
+      "sha256": "8b12f0fb79fa54121dd63672eb476d326e90335d2f40cf0c9f0e90a2aade949e",
       "nodes": 200
     },
     {
       "path": "nodes-005.json",
-      "sha256": "5df4e62d3958bc7ed2719ee075c86e53b88e6935f0a4314a6a6a8da378e55dd7",
+      "sha256": "6c1cd069f4da3a9e0337585f2f15065278db65ac717209621edcf289821dc954",
       "nodes": 200
     },
     {
       "path": "nodes-006.json",
-      "sha256": "b6c274e574f619bbad4f734d93cbdccec4b9a0a9f456349013899898f0d153cf",
+      "sha256": "eb2dddd62f0d827dbd6c2c49427f12d37e7aa96090cab2d8de5971e270c95f45",
       "nodes": 200
     },
     {
       "path": "nodes-007.json",
-      "sha256": "9c683655c5706055b50fb28e0ed93152711bfa1c28b270e261c117ef9f6e82aa",
+      "sha256": "79388b7cbbeb97fa152afb45794ebca7ce260dcf305732f8308eff6be0eed232",
       "nodes": 200
     },
     {
       "path": "nodes-008.json",
-      "sha256": "14e09fa78b66a6f919d76d315a3e366f940b02e0451524837df8d8d27133e85c",
+      "sha256": "bb278d4b4b409e09f94c33a4bef837c66a1917222ac110145f8e7580220fb206",
       "nodes": 200
     },
     {
       "path": "nodes-009.json",
-      "sha256": "9c3cae3c3491a7057743f90e30dcd345e0fa582dcbf1c84898dbb526bd7ec77d",
+      "sha256": "02d6d79df707a8345f8936df8485662548b0cd1b7ece071f61219438b95e6ab5",
       "nodes": 200
     },
     {
       "path": "nodes-010.json",
-      "sha256": "6365142e5ac4fee0bf398483231136aedbcbd221b355504457257b67a8d401f0",
+      "sha256": "e33bfb5e5d732adedd38192a21a03d288a956c2d8b2d083fa4b2c4b9e088bc96",
       "nodes": 200
     },
     {
       "path": "nodes-011.json",
-      "sha256": "464d20a96a7f751881878fd7aa47e153a5620adf7226512849f781f8ec8b00b0",
+      "sha256": "bb318621ea783872edb2ba52d3ad53f83803d20e4dd9871d9706b3b3aa5078cf",
       "nodes": 200
     },
     {
       "path": "nodes-012.json",
-      "sha256": "ce01c0dde55b071cb66523eedad508c430f99a60ec8ed093e285e98adf34d07a",
+      "sha256": "ff9394735af762c530b0f0ac38cf4d7966d2dc7c565227db677e0469d08088c3",
       "nodes": 200
     },
     {
       "path": "nodes-013.json",
-      "sha256": "9d4dde1fbf8fbb95555d21d77a8d7bb0539576c795f194494c9ad6bb2e42841f",
+      "sha256": "e883d6af28f8710d8c0256a0685bf41e1b7951732a4b0a8a561b2a059ac6956a",
       "nodes": 200
     },
     {
       "path": "nodes-014.json",
-      "sha256": "39090ef044b0a2b130073b71893c42fe5fb8c81469b11e741d692176e8a68ae0",
+      "sha256": "c9823d0940e759cec4b50dd17d42dc65af2888e0092b8e3e666164a67c87385f",
       "nodes": 200
     },
     {
       "path": "nodes-015.json",
-      "sha256": "2ebfdeffa1e9a9ab1bb304bc204baa80f116a81bd612b191cf66f37c05b6c261",
+      "sha256": "7b29f3e80fad9682c41ff8e2fb8684e65b98691723dc8b490fcff3d78f0ac102",
       "nodes": 200
     },
     {
       "path": "nodes-016.json",
-      "sha256": "f1f209043bc36989d83576787a7c7a633cbe42769809262a6fbbbb309bc80e97",
+      "sha256": "e3fee441d04d676d547496d1991c82402b92d8455f49ac56a42893369ab8b06c",
       "nodes": 200
     },
     {
       "path": "nodes-017.json",
-      "sha256": "7486622558939e28f2ec4215ff2ad3155696aa7ba6ad14ab174ef53f71a8bc30",
+      "sha256": "97da4d4d5107908322cc3256c0df8c1daefc021f9c4497fd7297e9cd8cd6e3db",
       "nodes": 200
     },
     {
       "path": "nodes-018.json",
-      "sha256": "9e7f267143027987680e9d2cd9164cc495e0351b7188a93435fc71c8d1aedc70",
+      "sha256": "319c537ebd005b3c98d429e66d33527342b701aeca870a95c6875252f253e46b",
       "nodes": 200
     },
     {
       "path": "nodes-019.json",
-      "sha256": "fdb75c710a0f7ded94a29ae0a23b83fab03ab1a205770660da0adef6bb0ffe29",
+      "sha256": "44eab056461af634c707aead6dae525ce466cffe9ed4acb4f64b17d6ae44fb39",
       "nodes": 200
     },
     {
       "path": "nodes-020.json",
-      "sha256": "80522b6e4610f2385545bde6d32968778c0e283b7e9590e9ab801a04a3e23bc1",
+      "sha256": "29702081209b33744c3535d095aaa585b82849b8207720f45f9b322579ec0a4a",
       "nodes": 200
     },
     {
       "path": "nodes-021.json",
-      "sha256": "a0f11cb7f958442a12631ae9a3279422125fda1a1f689faddc6d7bbd6033abca",
+      "sha256": "f1378e9663de5dd585f229384f7276a7f0085fa1858b34d7b92bb06783d0669c",
       "nodes": 200
     },
     {
       "path": "nodes-022.json",
-      "sha256": "c7b533c121ce0d9ae49162787477984cb445243b9c7834f2c8d5607f0a0453b5",
+      "sha256": "d6116be282aadb1ff252746c31666e2b63a64bca1fc0898f32b48b86b56e8a64",
       "nodes": 200
     },
     {
       "path": "nodes-023.json",
-      "sha256": "dc7291a598f99a2efed930542dccc72f19d8dd690d644447f7607dc87e0da2da",
+      "sha256": "5358a53575642d287a88e587613bfe44b4a5dfa6210703ccf69eaa6be6a6925a",
       "nodes": 200
     },
     {
       "path": "nodes-024.json",
-      "sha256": "1bb22888809979064858c664c78b8484088f3bf61a9880ff698c84f270e0603f",
+      "sha256": "842cb103040918a73304189e97029af8f47a4e0f2c8ce9914ddd4dcc2b06adfa",
       "nodes": 200
     },
     {
       "path": "nodes-025.json",
-      "sha256": "dda511dfa313d2c8955b4cbee4d5297c35c1e509a2bde96f6f2f19fe052ad848",
+      "sha256": "0fbc3a6c8e8ebd9c6aa0238ed5c9b47326304d3e2ddd46ee4b937b4c58dfff63",
       "nodes": 200
     },
     {
       "path": "nodes-026.json",
-      "sha256": "af0d4a688f0e8cd66cd9d0facf7bd637d15cb5720b1782c425ac5b0ca898ca86",
+      "sha256": "3570a73c1c1d526a187c77653e1c8e1a59bb31d5322f68dc7842a83e83ad7fad",
       "nodes": 200
     },
     {
       "path": "nodes-027.json",
-      "sha256": "3d6f6edc6e861f70d47feec4b493ab1ae98c3c8819710b83a77831c214457dbb",
+      "sha256": "467c84323f350ad73b2b9e4f8c19f04f5a8f0764f1e56c03aa7e36d37d74db20",
       "nodes": 200
     },
     {
       "path": "nodes-028.json",
-      "sha256": "8d326255b48d8870a0b32cbfd9ef8eb4872a34747feaa3cf176d401ddf6875fd",
+      "sha256": "504999bd55c9bb2bb65700e4f394567388b73dab818f2c6f0793e85b1f846132",
       "nodes": 200
     },
     {
       "path": "nodes-029.json",
-      "sha256": "ef3c9f65059b1e231f0cf11a69425c2998ac3ae6a0ca3b1d3a049ecc934be0a7",
+      "sha256": "df3d599e0bd309dfb66c530641d64a13df99ad2243e62964362a6c22b8731ef6",
       "nodes": 200
     },
     {
       "path": "nodes-030.json",
-      "sha256": "f193031ef9e540407f2963d55412f118ad507141f37ed1a72e3b43cbf2026465",
+      "sha256": "b081b970b25147a2db42d4157fc11a9d085662aa4bd437619f76bad2cd15f03f",
       "nodes": 200
     },
     {
       "path": "nodes-031.json",
-      "sha256": "6a719ab161b4117de3ac784b910ba872a88160a26828ddec6dd46fad8b47c01d",
+      "sha256": "066d1f7d7f78952701374bbc944afeb73559dda5d747da55f73001000c4b5e70",
       "nodes": 200
     },
     {
       "path": "nodes-032.json",
-      "sha256": "2e10c1aacc18ab6d92527d1526f3cca46505e0a2a36245bc9a42ee172ee6e2a1",
+      "sha256": "33e60f12ec297613f2b12ddc8a099b611923d214461346e776021141578e0634",
       "nodes": 200
     },
     {
       "path": "nodes-033.json",
-      "sha256": "5be3ad70e2d0bed6b9e02fb8d8497e1ac87e1be2745a012acd3fb0f02020932b",
+      "sha256": "6118be530617d40e27ad67501f24be8df22bb56fb4eccddf4cbd3654e3de52f8",
       "nodes": 200
     },
     {
       "path": "nodes-034.json",
-      "sha256": "1bf91c21e214bf5a5ff66feddda7651c101ac5de2febdd6298fb1ce903641446",
+      "sha256": "5f61db7c7291bc84d0a02c40b0ce8fcc33408ff880aa2486df9134c57c13b13a",
       "nodes": 200
     },
     {
       "path": "nodes-035.json",
-      "sha256": "0bc636fdbb065f332575e689fdc7b9e012d786d14334e5ca280de709b2fade07",
+      "sha256": "52ecf25b72168c7e420295cc89b0e4450f0b08c57255fe24cde62bbf7637f9c3",
       "nodes": 200
     },
     {
       "path": "nodes-036.json",
-      "sha256": "9b29ebb5ff0351591e15675e8b3bc6869e79da7f17e1ac7e74fa3c283e8fc03d",
+      "sha256": "4fd3e7396e93e2bc1d417e681d6b790574435fe88188e557b3a2cfd3263170c9",
       "nodes": 200
     },
     {
       "path": "nodes-037.json",
-      "sha256": "af871953e7f23e443539787b45c3a7e3c94eda756809e704ea48c54952271ca1",
+      "sha256": "f36ea2169bc2f1c21b7896020ec5b82d08d40bcf4a7ce7222ecab2f7535ee043",
       "nodes": 200
     },
     {
       "path": "nodes-038.json",
-      "sha256": "137405fddfc39273aceaf566bfb712c3543e88d1eec36aed9198d50f501b0e9d",
+      "sha256": "89f40aae9a3ebd2481307b90fc9628825dc61b9707f02ef330e2616ca85b2594",
       "nodes": 200
     },
     {
       "path": "nodes-039.json",
-      "sha256": "7b8d8b822f3ebff04aaf26676540f824a90b4ae93b0961ecd5b914287014ce99",
+      "sha256": "06b0743690bdfd59791e73269a29b921a2cb54edc27466f2b8ade26040e37110",
       "nodes": 200
     },
     {
       "path": "nodes-040.json",
-      "sha256": "b9b4bb1013338b3f4ede900a2146d08458c0638d832d3350c19390c044a1b68d",
+      "sha256": "bde9101e2b31435bb84266364c480fb371ae89885a2a63b851eac0317656a8d7",
       "nodes": 200
     },
     {
       "path": "nodes-041.json",
-      "sha256": "9d008df65012b4402da9a1841cf8823ee4bb7e0ffa16f573d8fd996dcac45edc",
+      "sha256": "f8f0991a9816b3ac3b7bdafead9a6fc257e209c1ef8c01b5aec84b48d8294452",
       "nodes": 200
     },
     {
       "path": "nodes-042.json",
-      "sha256": "50ce4465b6778bad99054c28c0feb225acf28e087fe3c9e125ed1efdc1575cfb",
+      "sha256": "8a9971a5b8cb6f21ee18827dccc38f23299dc74fa93e7d8e2eefafe9dbd12b7d",
       "nodes": 200
     },
     {
       "path": "nodes-043.json",
-      "sha256": "f67e8e510ed8ffe13de0d449b31ebf222963d659af0f4e50aed6847f9380c0bf",
+      "sha256": "2708e78acab52209e33b6da4ff3aa81d921c366b987bf8fff883599d9cd7003e",
       "nodes": 200
     },
     {
       "path": "nodes-044.json",
-      "sha256": "a7fb55891310f231b136a8e6310ea99b14f86a45f1f3423346f1cdd2a2bf8dfb",
+      "sha256": "c5af89ca3e9c19b324d34fbb7cf8e467816eb832f2729ab2dcb0af9df8786a86",
       "nodes": 200
     },
     {
       "path": "nodes-045.json",
-      "sha256": "60345c1f1868fd4a5d7d8fe8bf0a76d613acac3ff817464a8578a81e674edc71",
+      "sha256": "844e231ebe6d33fb23e7f07993e39ccf2850d6c8539b2fdaaf5a74ea9646fb13",
       "nodes": 200
     },
     {
       "path": "nodes-046.json",
-      "sha256": "a34c79cffaa5fa5368af0487c7396ad7c69e955f265a02335f83c2c2ce82228d",
+      "sha256": "f6ef3e067a5d5c10ea218b906bc28d6bd8ee0720f63de6c3a051985bad293b52",
       "nodes": 200
     },
     {
       "path": "nodes-047.json",
-      "sha256": "3dfe6cc2dd2ebfe2d9966378ed931430b23349c415034615430c9828e1e017ce",
+      "sha256": "8c9038466f6b28023cd51f563e51a5ea8e7600bc9631d54442e2be3bc57118a0",
       "nodes": 200
     },
     {
       "path": "nodes-048.json",
-      "sha256": "fe4074dcc53cc00538cdec9603c616f63aa6af4b0b16e03c90c192c9c1713519",
+      "sha256": "e7d5f3052e8465c48c1ab2c9d7b6d551bda17885ed9dbfb8597f43384f1228d6",
       "nodes": 200
     },
     {
       "path": "nodes-049.json",
-      "sha256": "d7d0bcc27ddd41b9157f1a824468f2605bc7c4d74cb74a0df6d6939a249e5893",
+      "sha256": "261742f945926d9552f0a093edff637fa37121614b961138ad26e7bec9603f5b",
       "nodes": 200
     },
     {
       "path": "nodes-050.json",
-      "sha256": "85caf0e717904dc997bff64cde48dccada87709ce0120a4948cb25de1178a5ce",
+      "sha256": "1f1c45be82d90793938c5afb4120b5de74b4a11cd33b436666e4b12f7a683ed8",
       "nodes": 200
     },
     {
       "path": "nodes-051.json",
-      "sha256": "0e46b3e578273ceaff7f64c13b6bca4a6a15e9a8687cc4d47ea2ba879f0e3290",
+      "sha256": "6d78820a57462bb229c9e4d923f4a624f9c9e4af44f80d45e04f6e38a2c847da",
       "nodes": 200
     },
     {
       "path": "nodes-052.json",
-      "sha256": "6fcf78884e94ae11a0ba748ca0820c3da3622d227a55b497d81a4bc03abb66b5",
+      "sha256": "3f5167a1bcf5aac37ad3d6de237527fffe2c7aa6e7d75d2b82f576c5f915f8f8",
       "nodes": 200
     },
     {
       "path": "nodes-053.json",
-      "sha256": "0a42c4d1ff423aabcfe6380e00aeee3b860009471193ce9423befdabb4ffd6de",
+      "sha256": "8c1eb59415033e2e5b3132ee67e9645cf7290c7fca20cb01b8624031ea3f25e6",
       "nodes": 200
     },
     {
       "path": "nodes-054.json",
-      "sha256": "f70c8c1ee0295c4d0dee64e3778087bf1a1755bec2b35cafd48e45a940ccdfe6",
+      "sha256": "6275e7ad7d85d95fb190b16db75e4c47af332ba7cf269432ee2016c743869c37",
       "nodes": 200
     },
     {
       "path": "nodes-055.json",
-      "sha256": "c76681b4d793664da41c7dcc27e65198ddde11e58bd1b5ed1f3e0e1c9b580bc0",
+      "sha256": "aeb2986b77ba8761cba3446f6eaa52bd31e5449ad537712870aea92b0cbd19f4",
       "nodes": 200
     },
     {
       "path": "nodes-056.json",
-      "sha256": "571d5c3de4034c16862b4990d4c8de461f13573e9bf5e5eac2e094522e1d9871",
+      "sha256": "d97f61f7d09e0e280131c3cc8debd339cde98eb84e263acf32e310d539d930a6",
       "nodes": 200
     },
     {
