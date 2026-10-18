@@ -46,7 +46,15 @@ Related help articles are candidates only. Each exact topic still needs purpose,
 
 The generator has a hand-written category list and required core article list. Against the actual source, it removes one record from every category, observes rejection and accepts the restored inventory. Exact identities and outcomes are stored in `completenessProof`.
 
-The nine focused coverage tests retain the earlier source-inventory checks and add manual fixtures. They remove every fixture detail and every category, change an otherwise unextracted prose paragraph, alter a GUI disposition and corrupt a shard. Each relevant omission/change is rejected. Ordinary URL fragment labels are not mistaken for block anchors. Unchanged shards with ordinary checkout CRLF conversion still pass. The restored source-derived inventory passes `--check`.
+The eleven focused coverage tests retain the earlier source-inventory checks and add manual fixtures. They remove every fixture detail and every category, change an otherwise unextracted prose paragraph, alter a GUI disposition and corrupt a shard. Each relevant omission/change is rejected. Ordinary URL fragment labels are not mistaken for block anchors. Unchanged shards with ordinary checkout CRLF conversion still pass. The restored source-derived inventory passes `--check`.
+
+## Source and application path containment
+
+An independent review confirmed that checking only a final file's `lstat` allowed a linked `docs/manual` or `package` ancestor to admit outside text. The repair rejects aliased selected roots and every symbolic-link/junction component before enumeration or file access. Every component's resolved path must match the selected spelling (case-insensitively on Windows) and remain inside the selected root. Application renderer/backend/help candidates use the same checks, rather than trusting the application-root parameter.
+
+File reads open a descriptor with no-follow behavior where supported, compare its identity before reading and again afterward, and revalidate the checked component chain. Directory enumeration checks and revalidates its component chain. A changed or aliased path rejects the inventory instead of emitting partial source records. This is not a claim of an atomic filesystem snapshot against arbitrary concurrent host mutation.
+
+Harmless negative fixtures cover selected source/application root aliases, linked manual/package parents and linked application `src`/`docs` parents. Outside payloads contain only a known public marker. The tests assert rejection before outside file opens or directory enumeration, then restore normal paths and observe a passing inventory. No real private outside data is read. The generated producer binding was refreshed after this repair; the earlier parent-link-admitting candidate is not accepted output.
 
 ```text
 node scripts/buildroot-coverage/manual-inventory.cjs --source <selected-source> --output docs/planning/buildroot-coverage/manual-2025.02

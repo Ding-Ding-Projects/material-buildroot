@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "producer": {
     "path": "scripts/buildroot-coverage/manual-inventory.cjs",
-    "sha256": "5f952ddda67d64d25d83cbf1b7f421963bc412f512b9dce398edd76ab6e5e403",
+    "sha256": "b4f1d5ae0d8a9fa74fc667f5765e9917b0a583cc684d4facb650669344c069fe",
     "normalization": "CRLF-to-LF for producer only; selected source hashes retain exact bytes"
   },
   "source": {

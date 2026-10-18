@@ -1,6 +1,28 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+const samePath=(left,right)=>process.platform==='win32'?path.normalize(left).toLowerCase()===path.normalize(right).toLowerCase():left===right;
+const identity=info=>[info.dev,info.ino,info.mode,info.nlink,info.size,info.mtimeMs,info.ctimeMs].join(':');
+function strictPath(root,relative='',kind='directory'){
+ if(typeof root!=='string'||!path.isAbsolute(root)||typeof relative!=='string'||path.isAbsolute(relative)||relative.includes('\\')||relative.split('/').some(part=>relative&&(!part||part==='.'||part==='..')))throw Error('Unsafe selected path');
+ root=path.resolve(root);const snapshots=[];let current=root;
+ const parts=relative?relative.split('/'):[];
+ for(let index=0;index<=parts.length;index++){
+  if(index)current=path.join(current,parts[index-1]);
+  const info=fs.lstatSync(current),resolved=fs.realpathSync.native(current),outside=path.relative(root,resolved);
+  if(info.isSymbolicLink()||!samePath(resolved,current)||path.isAbsolute(outside)||outside==='..'||outside.startsWith('..'+path.sep)||
+    (index<parts.length||kind==='directory'?!info.isDirectory():!info.isFile()))throw Error('Unsafe selected root or linked path component');
+  snapshots.push({file:current,identity:identity(info)});
+ }
+ return {full:current,snapshots};
+}
+function revalidate(checked){for(const item of checked.snapshots){const info=fs.lstatSync(item.file);if(info.isSymbolicLink()||identity(info)!==item.identity||!samePath(fs.realpathSync.native(item.file),item.file))throw Error('Selected path changed');}}
+function readStrict(root,relative){
+ const checked=strictPath(root,relative,'file');let descriptor;
+ try{descriptor=fs.openSync(checked.full,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW||0));if(identity(fs.fstatSync(descriptor))!==checked.snapshots.at(-1).identity)throw Error('Selected file changed');const bytes=fs.readFileSync(descriptor);if(identity(fs.fstatSync(descriptor))!==checked.snapshots.at(-1).identity)throw Error('Selected file changed');revalidate(checked);return bytes;}
+ finally{if(descriptor!==undefined)fs.closeSync(descriptor);}
+}
+function listStrict(root,relative){const checked=strictPath(root,relative);const names=fs.readdirSync(checked.full);revalidate(checked);return names;}
 const CATEGORIES=Object.freeze(['manual-article','manual-anchor','manual-heading','manual-topic','manual-table-row','manual-table-cell','manual-identifier','manual-include']);
 const REQUIRED_ARTICLES=Object.freeze(['manual.adoc','configure.adoc','customize.adoc','adding-packages.adoc','adding-packages-generic.adoc','package-make-target.adoc','makeusers-syntax.adoc','makedev-syntax.adoc']);
 const WORKFLOWS=Object.freeze({
@@ -38,13 +60,13 @@ function disposition(file,title,name=''){
 }
 function inventory(source,{applicationRoot=path.resolve(__dirname,'../..')}={}){
  const files=new Map(),entries=[],seen=new Map();
- const read=(root,file,registry=files)=>{const full=path.join(root,file),s=fs.lstatSync(full);if(!s.isFile()||s.isSymbolicLink())throw Error(`Unsafe source: ${file}`);const bytes=fs.readFileSync(full);registry.set(file,{path:file,sha256:hash(bytes),bytes:bytes.length});return bytes.toString('utf8');};
+ const read=(root,file,registry=files)=>{const bytes=readStrict(root,file);registry.set(file,{path:file,sha256:hash(bytes),bytes:bytes.length});return bytes.toString('utf8');};
  const make=read(source,'Makefile'),version=make.match(/^export BR2_VERSION\s*:?=\s*(\S+)/m)?.[1];if(!version)throw Error('Missing Buildroot version');
  const references=new Map();
- for(const file of ['Makefile',...fs.readdirSync(path.join(source,'package')).filter(name=>/^pkg-.*\.mk$/.test(name)).sort().map(name=>'package/'+name)]){
+ for(const file of ['Makefile',...listStrict(source,'package').filter(name=>/^pkg-.*\.mk$/.test(name)).sort().map(name=>'package/'+name)]){
   const text=read(source,file);text.split(/\r?\n/).forEach((line,index)=>{for(const match of line.matchAll(/\b[A-Z][A-Z0-9_]{2,}\b|[)}]_([A-Z][A-Z0-9_]+)/g)){const key=match[1]||match[0];if(!references.has(key))references.set(key,[]);references.get(key).push({path:file,line:index+1});}});
  }
- const articleNames=fs.readdirSync(path.join(source,'docs/manual')).filter(name=>name.endsWith('.adoc')).sort();
+ const articleNames=listStrict(source,'docs/manual').filter(name=>name.endsWith('.adoc')).sort();
  const add=(category,file,line,name,title,detail={})=>{const base=`${category}:${file}:${name}`,ordinal=seen.get(base)||0;seen.set(base,ordinal+1);const id=ordinal?`${base}:definition:${ordinal+1}`:base;entries.push({id,category,title,source:{path:file,line,sha256:files.get(file).sha256},detail,...disposition(file,title,name)});};
  for(const article of articleNames){
   const file='docs/manual/'+article,text=read(source,file),lines=text.split(/\r?\n/),title=lines.find(line=>/^=+\s+/.test(line))?.replace(/^=+\s+/,'')||article;
