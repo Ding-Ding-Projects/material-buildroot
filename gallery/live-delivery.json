@@ -1,187 +1,58 @@
 {
   "schemaVersion": 1,
-  "status": "verified",
+  "status": "pending",
   "deployment": {
     "url": "https://ding-ding-projects.github.io/material-buildroot/gallery/",
-    "sourceCommit": "838befc311ab12d17eca744445331b53f2c3b25f",
-    "pagesWorkflowRunId": 38822061871,
-    "routeHttpStatus": 200,
-    "httpCheckedAtUtc": "2026-10-15T23:12:13Z",
-    "browserCheckedAtUtc": "2026-10-15T23:13:11.581Z",
-    "cacheBustQuery": "838befc311ab12d17eca744445331b53f2c3b25f"
+    "sourceCommit": null,
+    "pagesWorkflowRunId": null,
+    "routeHttpStatus": null,
+    "httpCheckedAtUtc": null,
+    "browserCheckedAtUtc": null,
+    "cacheBustQuery": null
+  },
+  "sourceCandidate": {
+    "baseCommit": "79f0de311430271bd195d4f16952de636f041209",
+    "branch": "ai/docs/20261018-public-capture-gallery",
+    "captureCount": 67,
+    "newCaptureCount": 16,
+    "status": "not-yet-integrated"
   },
   "httpVerification": {
-    "successfulResponses": 58,
-    "routeAndIndex": {
-      "route": {
-        "sha256": "0ac5becf0b152a6faee4e28aa59fe683b59381d15e94c317a2e32452872f755a",
-        "bytes": 9261,
-        "contentType": "text/html; charset=utf-8",
-        "status": 200
-      },
-      "indexHtml": {
-        "sha256": "0ac5becf0b152a6faee4e28aa59fe683b59381d15e94c317a2e32452872f755a",
-        "bytes": 9261,
-        "contentType": "text/html; charset=utf-8",
-        "status": 200
-      },
-      "sameBytes": true
-    },
-    "siteAssets": {
-      "styles.css": {
-        "sha256": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
-        "bytes": 8290,
-        "contentType": "text/css; charset=utf-8",
-        "status": 200
-      },
-      "gallery.js": {
-        "sha256": "498dd1609f666567b70349d250fa6e995eb9948734b66b862f215a16ca7c84dc",
-        "bytes": 14232,
-        "contentType": "application/javascript; charset=utf-8",
-        "status": 200
-      },
-      "captures.json": {
-        "sha256": "ad958bd307f0bfba22654523a2d0ae4bc182ba13931919db494e1d080e131d87",
-        "bytes": 97530,
-        "contentType": "application/json; charset=utf-8",
-        "status": 200
-      },
-      "assets/material-components.js": {
-        "sha256": "db0399aa3ce6453c305144f4808f18c6349354e3fb1eb0871c38f1a90f47b9c5",
-        "bytes": 223177,
-        "contentType": "application/javascript; charset=utf-8",
-        "status": 200
-      },
-      "assets/THIRD_PARTY_NOTICES.txt": {
-        "sha256": "44286cae3767340d7a992501f6d149361450dd96099edf21549917b6ea9159fb",
-        "bytes": 11524,
-        "contentType": "text/plain; charset=utf-8",
-        "status": 200
-      }
-    },
-    "siteAssetHashMismatches": 0,
-    "imageCount": 51,
-    "imageHashMismatches": 0,
-    "imageSha256ByCaptureId": {
-      "current-app-001": "83512679e16507517f18f936b6e150310c59d48bdfe306443abe5025d7169b83",
-      "current-app-002": "62821b66b1ab2dc88af89fe35ca30efbd1b06e63822b80cde1f8ed49875a5ec0",
-      "current-app-003": "e2dcc3e375d548c572da91964ade2cf42598cffc0481fd6fc2d8aa7930b12aa2",
-      "current-app-004": "a27a10a17c6d282354eb8aba559a43391cf4ca7fd9de9367a494765bed127fa2",
-      "current-app-005": "0288454c9e8dc575f10f50b794b4445a669103ee81f21b7620ba050333984776",
-      "current-app-006": "331198bdafe6b93c4fa37aaf0c5583a4903512d21381f157b7c8d4fcab231748",
-      "current-app-007": "5bf519c600c41024cc2d1c812460bd3f970c253b28f32fb39b99daa0b830829a",
-      "current-app-008": "08fdf8e98d178d52693199b503bb81643228f6895bbde661d023e11680c05fa5",
-      "current-app-009": "6cef9b0e8dd8452437e7b2bdf1d490c49016fa4df409f9318e3b5818498f772d",
-      "current-app-010": "267d1394f12011a3793c3c9e88f08f47c8f4577da0de9739eaff5074d042c160",
-      "current-app-011": "fa062fa9af8b1181b58e37b7850d8465c5fcc915e75ac174402d64998c50df04",
-      "current-app-012": "8a63a05ef8a8c84def84e0d8ea7fb1ebb28eb3fb3f90e297942fda3dff3958f1",
-      "current-app-013": "f1055fe1b50181d847788addbd79aa195c54e6b6163a424899cdbd08f6e9bc52",
-      "current-app-014": "89c8ff4846cd760a714741f4a0182fb22891f06b6b59f163453141ae2fe2985b",
-      "current-app-015": "283ed189d72401f2c5301f73291eb7881dd6c3ede6509d7faa156f2f101ea4dc",
-      "current-app-016": "d1b113570b92d3cf79e652dc43f6ff08cafede138301531990704ee8e05b516c",
-      "current-app-017": "0d464b36ede6bd43ae80dd238e5acc7264ba3db002c52eabb8145676d2ab72cf",
-      "current-app-018": "10f09c7cfb2a6d175d6351d743c620de9f159e4e816d993a48506f0bf0bd6a09",
-      "current-app-019": "b6258a050bad1f9673b260fc93f6e7aa981cbfe780c65f45027c2f7a2f7eaf59",
-      "current-app-020": "871031e4777a7927cf736b896622981d467a52d66ca688c63e8c0732a177bd45",
-      "current-app-021": "6e49d63a43617eed40d8cbc3c7f26d2f0c2a4efcb3c8c3bd7c5ecefe23732b0c",
-      "current-app-022": "cbfd9917c70315558f87926f4196ba596bd0923a88d5ee7ea069b2bb2d6a35f1",
-      "current-app-023": "db3220352ffd07daa9b33c29de74ccc0bd57b1081ceffa66f5424de5059757e5",
-      "current-app-024": "2610bc9fbffd591da885a5df2f6a4fa991811a47a23648c0399c02934900a94a",
-      "historical-workspace-025": "3b1660b89bbbffe957ad447de4b3059f6ade2c84d87259d8d5f72e93f133a12e",
-      "historical-workspace-026": "260307ce6018382bed26d3c83709ea1f1c795983c7980a584d81062d40dc3cf5",
-      "historical-workspace-027": "640c5f9cadcbc64cd66c25e12db86a58f11b1b5c12e8a05911ceb5355792bc1e",
-      "historical-workspace-028": "dba718f8018aee390b6bd611cd05da7e6493e6a51bb50c0b4356630adf8bd769",
-      "historical-workspace-029": "9d93723c9ec32581900c3cffcb8491d5be9fe5d361e62c7699a41d5b91617d77",
-      "historical-workspace-030": "9879e3a5d02070d85a3f52311d7815ff00c1b2298e3ea0cea1cb4a30da4151c9",
-      "historical-workspace-031": "9c84e74eca83fc08b34ebf7a1043f57c09a4486452d860721efc2c5887ad2aba",
-      "historical-workspace-032": "9ad8333e951ef6a1db40101dd356ad5f0a7ebe530f1823ef7a4c1ed0f65d40e5",
-      "historical-workspace-033": "82b2947d2b5f0cb90b10c6237dccc6c606781bcb557673f46ca4d36413fe3b9d",
-      "website-historical-preview-034": "0b58791d61dce44bbdfc9ccd3e561c24c4f286739a6c8487464611e47a97673a",
-      "website-historical-preview-035": "54fc417b7c64527ae580df85e39465c596622e5a7f4289e563fd603cf9bdb03f",
-      "website-historical-preview-036": "be82ed311392f756a30038f988f95ff3850342711bd05ee6e4d3d0b154c27ece",
-      "website-historical-preview-037": "d7be379ece9a4bc1c2ac26c05befe3d8e96b367f75220babe027f7dad06e82d8",
-      "website-historical-preview-038": "eaf19c9c499fc23d99f251f16ff504964d8b03368713e47b1f69250bc9156a35",
-      "website-historical-landing-039": "d1fa90076901b4ad992f1f0702d5257a3e78f0381f3f1fbfa62222b88aec9d0b",
-      "website-historical-landing-040": "0e414f25b9f4c9fd3253f15304b54a9e2a44fb3a19a38eb5a83e9ac27e0f85a0",
-      "website-historical-landing-041": "df62979da89baf9ea14683ad7a897f63a5c900e93e30ac2607dc5869f0caef64",
-      "website-historical-landing-042": "44373ef9f43350a8a34520ad116c13fe15550b9d56bbe52eebb40dcc7e3834a8",
-      "website-historical-landing-043": "01d8064b225063acdcdf7c2bd3ff4b0be786ed45df9ac7c7bc9cc942f9354320",
-      "website-current-044": "d9de805baaa334f0ccc9b316c6de32de824fbf2ae1dc942de700aa07475a2d82",
-      "website-current-045": "f0c583d2eb5cfcb3343f749204eccf046fe3edee005c484c4d9f3fbbcaa1bbe9",
-      "website-current-046": "3abfe66345e65bdd59ff4f6491057b202de921392bb2aa21d87b5de23a471639",
-      "website-current-047": "8f987dc688b5de7f2f04c0e01a4baddb29ee6fff56e1156b38583607467e8edd",
-      "website-current-048": "0819a19c65aad0304c11dc0fd634b2794e9ae7df2e1a6a49e67294f10f79ffa4",
-      "website-current-049": "3d817fd79e64d97386b53a03d8b2ce4416a752585a111b6368ac54382e48572c",
-      "legacy-shell-050": "66c2d311d1dcc49bd8a4ca9c80b5ac0d6defb2b36044153276aa5581cd8c8cd9",
-      "legacy-shell-051": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968"
-    }
+    "expectedImageCount": 67,
+    "successfulResponses": null,
+    "routeAndIndex": null,
+    "siteAssets": null,
+    "siteAssetHashMismatches": null,
+    "imageCount": null,
+    "imageHashMismatches": null,
+    "imageSha256ByCaptureId": null
   },
   "browserVerification": {
-    "engine": "Chromium",
-    "version": "154.0.8037.57",
+    "status": "pending",
+    "engine": "Microsoft Edge",
     "headless": true,
-    "viewportChecks": [
-      {
-        "width": 320,
-        "height": 900,
-        "documentWidth": 320,
-        "bodyWidth": 320
-      },
-      {
-        "width": 390,
-        "height": 900,
-        "documentWidth": 390,
-        "bodyWidth": 390
-      },
-      {
-        "width": 768,
-        "height": 900,
-        "documentWidth": 768,
-        "bodyWidth": 768
-      },
-      {
-        "width": 1440,
-        "height": 900,
-        "documentWidth": 1440,
-        "bodyWidth": 1440
-      }
-    ],
-    "reducedMotionPreference": "reduce",
+    "route": "cheap-lowlevel-headless",
+    "viewportChecks": [],
+    "reducedMotionPreference": null,
     "checks": {
-      "reviewedCaptureCount": 51,
-      "allRegisteredControls": true,
-      "bilingualChipLabels": [
-        "All captures / 全部截圖",
-        "Workspace / 工作區",
-        "Historical workspace / 歷史工作區",
-        "Legacy shell / 舊版介面",
-        "Interactive website / 互動網站",
-        "Earlier website / 早期網站",
-        "Early preview / 早期預覽"
-      ],
-      "legacyCollectionVisible": 2,
-      "searchNoMatchState": true,
-      "clearFilterCount": 51,
-      "provenanceDisclosure": {
-        "expanded": true,
-        "accessibleExpandedState": "true"
-      },
-      "keyboardSpaceActivatesCollection": true,
-      "languageChange": {
-        "lang": "zh-HK",
-        "dataset": "zh",
-        "chip": "全部截圖"
-      },
-      "themeChanged": "dark",
-      "languageAndThemePersisted": {
-        "lang": "zh-HK",
-        "theme": "dark"
-      },
-      "allImageElementsDecoded": 51,
-      "reducedMotionComputedScrollBehavior": "auto",
-      "consoleOrPageErrors": []
+      "reviewedCaptureCount": 67,
+      "allRegisteredControls": null,
+      "allImageElementsDecoded": null,
+      "keyboardActivation": null,
+      "languageChange": null,
+      "themeChange": null,
+      "languageAndThemePersisted": null,
+      "provenanceDisclosure": null,
+      "bodyOverflow": null,
+      "consoleOrPageErrors": null
     },
     "errors": []
   },
-  "scopeNote": "This verifies the published browser gallery bytes and interactions in Chromium. It does not establish native desktop, Windows, installer, guest, build, or LAN-companion acceptance."
+  "previousVerifiedReceipt": {
+    "path": "archive/live-delivery-20261015.json",
+    "sha256": "f4892e5142b6eb86457957b216f56ca587aaaf54e848fb63f403b72258e7f10d",
+    "sourceCommit": "838befc311ab12d17eca744445331b53f2c3b25f",
+    "imageCount": 51
+  },
+  "scopeNote": "This record describes a pending 67-image candidate. It does not claim integration, publication, current image delivery, or browser interaction until exact source and live-page results are read back. The archived receipt applies only to the prior 51-image revision."
 }
