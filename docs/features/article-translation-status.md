@@ -36,12 +36,13 @@ These translations preserve the originals’ historical verification boundaries.
 
 - [Built-in tool services](../desktop/built-in-tools.zh-HK.md)
 
+- [Project execution adapter](../desktop/execution.zh-HK.md)
+
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
 
 - `docs/features/browser-native.md`
-- `docs/desktop/execution.md`
 - `docs/desktop/minecraft-manager.md`
 
 The feature root index, security root index and documentation root index still need complete translated index pages. The retained remote-runtime and documentation-notification changelog articles also remain without twins. Future source integrations can add or change articles; preserve their exact source history and update the corresponding twins before claiming full inventory completion. This bounded list does not claim that historical evidence/planning/design material has been translated.

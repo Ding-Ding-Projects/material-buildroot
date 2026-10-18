@@ -29,3 +29,5 @@ The [task-oriented catalog](../features/README.md) connects project, build, outp
 - [Configuration service](configuration.md) · [配置服務](configuration.zh-HK.md)
 
 - [Built-in tool services](built-in-tools.md) · [內置工具服務](built-in-tools.zh-HK.md)
+
+- [Project execution adapter](execution.md) · [項目執行適配器](execution.zh-HK.md)
