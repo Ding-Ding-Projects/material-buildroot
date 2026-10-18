@@ -9,6 +9,7 @@
 - [Workspace state and persistence](workspace-state.md)
 - [Jobs and recovery](jobs-and-recovery.md)
 - [Isolated source-service global configuration](source-global-config.md)
+- [Internal Linux ISO output lifecycle](iso-output-lifecycle.md)
 - [Shared-mode restrictions](shared-mode.md)
 - [Personal wording import and privacy](personal-vocabulary.md)
 - [Offline documentation admission](offline-documentation.md)
