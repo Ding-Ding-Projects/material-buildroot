@@ -20209,8 +20209,9 @@
       }
     ],
     "parserSha256": "d81c16ca77a451e52e93c99d39ad9451d645506450766c9a6b7193d55c439103",
-    "adapterSha256": "ea68344788b06a02547533d070ec53f8f35c47ca568ca8e8917f435dcd767fa0",
-    "inventorySha256": "c37c39c0de209944226ad8b65ec9ac8dfa7b0923ef47af0df0569a7a010f06fd",
+    "adapterSha256": "8dc2cd592ab4cf5cc607be55deedca84a89a59446b994e7219d4bb4b2f1a9e89",
+    "inventorySha256": "7d0e6aa6c30f7a59bdf21e1478d39204c2e06964dafb9d76a0ff85f656aa70be",
+    "applicationCodeHashNormalization": "CRLF-to-LF; selected Linux source and configuration hashes remain exact bytes",
     "environment": {
       "SKIP_LEGACY": "",
       "BR2_VERSION_FULL": "2025.02",

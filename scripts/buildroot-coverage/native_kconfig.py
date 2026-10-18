@@ -20,6 +20,11 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def portable_bytes(data):
+    """Generated planning text and application code tolerate checkout EOL conversion."""
+    return data.replace(b'\r\n', b'\n')
+
+
 def collect(namespace, source, output, adapter):
     """Retain every MenuNode, including hidden and repeated symbol definitions."""
     k, conf = namespace['k'], namespace['conf']
@@ -116,7 +121,8 @@ def collect(namespace, source, output, adapter):
             'binding': {'version': version.group(1).decode() if version else 'fixture', 'makefileSha256': digest(makefile),
                         'configurationSha256': digest((output / '.config').read_bytes()) if (output / '.config').exists() else None,
                         'files': files, 'parserSha256': digest((adapter / 'vendor/kconfiglib.py').read_bytes()),
-                        'adapterSha256': digest((adapter / 'inspect.py').read_bytes()), 'inventorySha256': digest(Path(__file__).read_bytes())},
+                        'adapterSha256': digest(portable_bytes((adapter / 'inspect.py').read_bytes())), 'inventorySha256': digest(portable_bytes(Path(__file__).read_bytes())),
+                        'applicationCodeHashNormalization': 'CRLF-to-LF; selected Linux source and configuration hashes remain exact bytes'},
             'enumeration': {'nodes': len(nodes), 'uniqueSymbols': len(conf.unique_defined_syms), 'uniqueChoices': len(conf.unique_choices),
                             'symbolDefinitions': symbol_nodes, 'choiceDefinitions': choice_nodes,
                             'hiddenNodes': sum(not node['visible'] for node in nodes), 'promptlessNodes': sum(node['promptless'] for node in nodes)},
@@ -207,7 +213,7 @@ def main():
         for shard in stored['shards']:
             if not re.fullmatch(r'nodes-\d{3}\.json', shard['path']):
                 raise ValueError('Unsafe shard path')
-            data = (destination/shard['path']).read_bytes()
+            data = portable_bytes((destination/shard['path']).read_bytes())
             if digest(data) != shard['sha256']:
                 raise ValueError('Changed shard hash')
             actual['nodes'].extend(json.loads(data))

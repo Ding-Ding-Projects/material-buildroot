@@ -11,7 +11,7 @@ HERE = Path(__file__).resolve().parent
 APP = HERE.parent.parent
 sys.path.insert(0, str(APP/'scripts/configuration/vendor'))
 import kconfiglib as k
-from native_kconfig import collect, validate
+from native_kconfig import collect, validate, portable_bytes
 
 
 class NativeInventoryTests(unittest.TestCase):
@@ -116,6 +116,10 @@ config ENABLE
         protected = next(n for n in self.data['nodes'] if n['name'] == 'TEST_SECRET')
         self.assertIsNone(protected['requested'])
         self.assertIsNone(protected['effective'])
+
+    def test_generated_text_normalizes_checkout_newlines_only(self):
+        self.assertEqual(portable_bytes(b'{\r\n  "nodes": []\r\n}\r\n'), b'{\n  "nodes": []\n}\n')
+        self.assertEqual(portable_bytes(b'preserve\rstandalone'), b'preserve\rstandalone')
 
 
 if __name__ == '__main__':

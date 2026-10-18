@@ -25,7 +25,7 @@ The inspected configuration SHA-256 is `0e33a58b7dfbe2099d0cc6027f18dbce99650168
 
 ## Completeness checks and limitations
 
-The real-source run deliberately removed one symbol, choice, menu, comment and hidden node. Each omission was rejected and the restored inventory passed; exact selected identities are stored in `completenessProof`. Four focused Python fixture tests additionally remove every fixture node and each required semantic field, reject optimistic GUI acceptance, preserve hidden/repeated definitions and check requested/effective values, ranges, defaults and select/imply edges.
+The real-source run deliberately removed one symbol, choice, menu, comment and hidden node. Each omission was rejected and the restored inventory passed; exact selected identities are stored in `completenessProof`. Five focused Python fixture tests additionally remove every fixture node and each required semantic field, reject optimistic GUI acceptance, preserve hidden/repeated definitions and check requested/effective values, ranges, defaults, select/imply edges and checkout-newline normalization. Generated shard and application-code hashes normalize CRLF to LF, so a normal Windows checkout does not invalidate unchanged planning content. Linux source and configuration hashes retain exact bytes.
 
 Aggregate reverse-dependency expression text is explicitly unavailable. Formatting a real aggregate exceeded the vendored formatter's recursive depth during the first implementation attempts. Per-definition `select` and `imply` edges are retained without truncation. The production parser is unchanged. Optional help attributes on non-symbol nodes are handled as absent rather than inventing text.
 
