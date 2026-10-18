@@ -35,8 +35,12 @@ The retained [ISO production](../../evidence/iso-production/production.json) and
 ## Integrity and omission witnesses
 
 ```text
-node docs/planning/buildroot-coverage/iso9660-control-map.cjs --source <retained-source>
+node docs/planning/buildroot-coverage/iso9660-control-map.cjs --source <retained-source> --application-baseline 47d5c935917dfa71bb87a86f194dea2ad0346aee
 node docs/planning/buildroot-coverage/iso9660-control-map.cjs --source <retained-source> --check
 ```
 
-The checker reads only strict non-aliased selected paths, binds source and current consumer hashes, compares the handwritten nine-symbol inventory with the exact source declarations and requires one choice plus one prerequisite comment. It deliberately removes each of the eleven records, observes rejection, then accepts the restored map. No native runtime, build, source macro or GUI executes. This finite lexical map is not a general Kconfig evaluator.
+Regeneration requires an explicitly supplied full lowercase 40-hex commit identity. It never infers the current HEAD or silently preserves an older label while reading newer consumers. Ordinary `--check` defaults to the saved map's `applicationBaseline`; an explicit different baseline does not relabel the saved map and must still match it.
+
+Before generation or checking, literal `git` CLI calls verify that the baseline is a commit and read each of the five fixed consumer/help blobs from that exact commit. Every current consumer must match its selected committed content. Only this comparison normalizes CRLF to LF to accommodate checkout conversion; retained current-file SHA-256 values remain exact and can still require an explicit refresh after checkout-byte changes. A real semantic change rejects the command before writing a map. To refresh after a merged frontend change, supply that reviewed candidate's full commit identity explicitly and retain the new exact consumer hashes.
+
+The checker reads only strict non-aliased selected paths, binds source and current consumer hashes, compares the handwritten nine-symbol inventory with the exact source declarations and requires one choice plus one prerequisite comment. It deliberately removes each of the eleven records, observes rejection, then accepts the restored map. It also accepts a known CRLF/LF-equivalent fixture and rejects both changed public fixture content and a deliberately changed in-memory consumer against the actual selected commit blob. No working file is altered for these witnesses. No native runtime, build, source macro or GUI executes. This finite lexical map is not a general Kconfig evaluator.

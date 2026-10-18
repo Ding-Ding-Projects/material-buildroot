@@ -1,5 +1,5 @@
 'use strict';
-const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),cp=require('node:child_process');
 const hash=data=>crypto.createHash('sha256').update(data).digest('hex');
 const ROOT=path.resolve(__dirname,'../../..');
 const SYMBOLS=Object.freeze(['BR2_TARGET_ROOTFS_ISO9660','BR2_TARGET_ROOTFS_ISO9660_GRUB2','BR2_TARGET_ROOTFS_ISO9660_ISOLINUX','BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER','BR2_TARGET_ROOTFS_ISO9660_EFI_BOOTLOADER','BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU','BR2_TARGET_ROOTFS_ISO9660_INITRD','BR2_TARGET_ROOTFS_ISO9660_TRANSPARENT_COMPRESSION','BR2_TARGET_ROOTFS_ISO9660_HYBRID']);
@@ -22,10 +22,17 @@ function read(root,relative){
  try{const opened=fs.fstatSync(descriptor);if(opened.dev!==before.dev||opened.ino!==before.ino)throw Error('Map input replaced');bytes=fs.readFileSync(descriptor);}finally{fs.closeSync(descriptor);}
  for(const [selected,dev,ino,size,mtime,ctime]of snapshots){const now=fs.lstatSync(selected);if(now.isSymbolicLink()||now.dev!==dev||now.ino!==ino||now.size!==size||now.mtimeMs!==mtime||now.ctimeMs!==ctime)throw Error('Map input changed');}return bytes;
 }
-function generate(source){
+function assertConsumerMatches(current,committed,file){
+ const normalize=bytes=>bytes.toString('utf8').replace(/\r\n/g,'\n');
+ if(normalize(current)!==normalize(committed))throw Error('Consumer/baseline mismatch: '+file);
+}
+function generate(source,applicationBaseline){
+ if(typeof applicationBaseline!=='string'||!/^[a-f0-9]{40}$/.test(applicationBaseline))throw Error('A full lowercase 40-hex --application-baseline is required');
+ const git=args=>cp.execFileSync('git',['-C',ROOT,...args],{windowsHide:true,maxBuffer:4*1024*1024,stdio:['ignore','pipe','pipe']});
+ if(git(['cat-file','-t',applicationBaseline]).toString().trim()!=='commit')throw Error('Application baseline must identify a commit');
  const sourceFile='fs/iso9660/Config.in',bytes=read(source,sourceFile),text=bytes.toString('utf8'),lines=text.split(/\r?\n/),sourceSha256=hash(bytes),version=read(source,'Makefile').toString().match(/^export BR2_VERSION\s*:?=\s*(\S+)/m)?.[1];if(version!=='2025.02')throw Error('This reviewed map is limited to Buildroot 2025.02');
  const references=['src/main/configuration/image-presets.cjs','src/renderer/image-presets-panel.ts','src/renderer/configuration-panel.ts','docs/desktop/iso-fields/profile-and-firmware.md','docs/desktop/iso-fields/configuration-and-recovery.md'];
- const code=Object.fromEntries(references.map(file=>[file,read(ROOT,file).toString('utf8')]));
+ const code=Object.fromEntries(references.map(file=>{const current=read(ROOT,file),committed=git(['show',applicationBaseline+':'+file]);assertConsumerMatches(current,committed,file);return[file,current.toString('utf8')];}));
  const ref=(file,needle)=>{const index=code[file].split(/\r?\n/).findIndex(line=>line.includes(needle));if(index<0)throw Error('Missing current consumer reference: '+needle);return{path:file,line:index+1,sha256:hash(Buffer.from(code[file]))};};
  const shared=[ref('src/renderer/image-presets-panel.ts',"Configuration mode"),ref('src/renderer/image-presets-panel.ts',"Configure BIOS ISO"),ref('src/renderer/configuration-panel.ts',"entry.type==='bool'"),ref('src/renderer/configuration-panel.ts','Help and dependencies')];
  const entries=[];
@@ -33,8 +40,20 @@ function generate(source){
  const choice=lines.findIndex(line=>line==='choice'),choiceEnd=lines.findIndex((line,index)=>index>choice&&line==='endchoice');if(choice<0||choiceEnd<0||lines.filter(line=>line==='choice').length!==1)throw Error('Missing or unexpected ISO bootloader choice');entries.push({id:'choice:iso9660-bootloader',kind:'choice',source:{path:sourceFile,line:choice+1,sha256:sourceSha256,raw:lines.slice(choice,choiceEnd+1).join('\n')},members:SYMBOLS.filter(symbol=>['BR2_TARGET_ROOTFS_ISO9660_GRUB2','BR2_TARGET_ROOTFS_ISO9660_ISOLINUX'].includes(symbol)),guided:{state:'fixed-profile',selection:'BR2_TARGET_ROOTFS_ISO9660_GRUB2',references:shared},advanced:{state:'dedicated-choice-workflow-unverified',reason:'Generic per-symbol controls are not proof of a labeled source-derived mutually exclusive choice group.'},easyMode:{state:'missing-or-deliberately-unavailable',needed:'Only offer alternatives after source/architecture capability discovery; do not describe the sole guided profile as complete choice parity.'},nativeAcceptance:'pending'});
  const comment=lines.findIndex(line=>line.startsWith('comment "iso image needs'));if(comment<0)throw Error('Missing ISO prerequisite comment');entries.push({id:'comment:iso9660-prerequisites',kind:'comment',source:{path:sourceFile,line:comment+1,sha256:sourceSha256,raw:lines.slice(comment).join('\n')},guided:{state:'partial-contextual-replacement',references:[ref('src/main/configuration/image-presets.cjs','ENABLE_X86_64_KERNEL_FIRST'),ref('src/renderer/image-presets-panel.ts','Use an adopted x86-64 project')]},easyMode:{state:'partial',needed:'Explain each source dependency and what can safely be changed; fixed-profile requirement summaries do not display the exact upstream comment.'},nativeAcceptance:'pending'});
  const actualSymbols=lines.filter(line=>/^config\s/.test(line)).map(line=>line.split(/\s+/)[1]);assert.deepEqual(actualSymbols,SYMBOLS);
- return{schemaVersion:1,source:{version,path:sourceFile,sha256:sourceSha256,makefileSha256:hash(read(source,'Makefile'))},applicationBaseline:'47d5c935917dfa71bb87a86f194dea2ad0346aee',scope:'Nine source symbols, one choice and one dependency comment; documentation mapping only, not native acceptance, all-version support or complete ISO capability.',relatedEvidence:['docs/planning/buildroot-coverage/2025.02.json','docs/planning/buildroot-coverage/native-kconfig.md','docs/evidence/iso-production/production.json','docs/evidence/iso-boot/acceptance.json'],entries};
+ return{schemaVersion:1,source:{version,path:sourceFile,sha256:sourceSha256,makefileSha256:hash(read(source,'Makefile'))},applicationBaseline,scope:'Nine source symbols, one choice and one dependency comment; documentation mapping only, not native acceptance, all-version support or complete ISO capability.',relatedEvidence:['docs/planning/buildroot-coverage/2025.02.json','docs/planning/buildroot-coverage/native-kconfig.md','docs/evidence/iso-production/production.json','docs/evidence/iso-boot/acceptance.json'],entries};
 }
 function validate(actual,expected){assert.deepEqual(actual.entries.filter(entry=>entry.kind==='symbol').map(entry=>entry.id),SYMBOLS);assert.equal(actual.entries.filter(entry=>entry.kind==='choice').length,1);assert.equal(actual.entries.filter(entry=>entry.kind==='comment').length,1);assert.deepEqual(actual,expected);}
-module.exports={generate,validate,SYMBOLS};
-if(require.main===module){const args=process.argv.slice(2),index=args.indexOf('--source');if(index<0||!args[index+1])throw Error('Use --source <retained-source> [--check]');const expected=generate(args[index+1]),file=path.join(__dirname,'iso9660-control-map.json');if(args.includes('--check'))validate(JSON.parse(fs.readFileSync(file,'utf8')),expected);else fs.writeFileSync(file,JSON.stringify(expected,null,2)+'\n');let rejected=0;for(const entry of expected.entries){const missing=structuredClone(expected);missing.entries=missing.entries.filter(candidate=>candidate.id!==entry.id);assert.throws(()=>validate(missing,expected));rejected++;}validate(expected,expected);console.log(`PASS: Buildroot 2025.02 ISO9660 map, ${SYMBOLS.length} symbols + choice + comment; ${rejected} omission witnesses rejected; restored map passed.`);}
+module.exports={generate,validate,assertConsumerMatches,SYMBOLS};
+if(require.main===module){
+ const args=process.argv.slice(2),index=args.indexOf('--source'),baselineIndex=args.indexOf('--application-baseline'),check=args.includes('--check'),file=path.join(__dirname,'iso9660-control-map.json');
+ if(index<0||!args[index+1])throw Error('Use --source <retained-source> --application-baseline <40-hex-commit> for regeneration, or --check to retain the saved baseline');
+ const saved=check?JSON.parse(fs.readFileSync(file,'utf8')):null;
+ const baseline=baselineIndex<0?(check?saved.applicationBaseline:null):args[baselineIndex+1];
+ const expected=generate(args[index+1],baseline);
+ if(check)validate(saved,expected);else fs.writeFileSync(file,JSON.stringify(expected,null,2)+'\n');
+ let rejected=0;for(const entry of expected.entries){const missing=structuredClone(expected);missing.entries=missing.entries.filter(candidate=>candidate.id!==entry.id);assert.throws(()=>validate(missing,expected));rejected++;}validate(expected,expected);
+ const fixture=Buffer.from('public consumer fixture\n');assertConsumerMatches(Buffer.from('public consumer fixture\r\n'),fixture,'public-fixture');assert.throws(()=>assertConsumerMatches(Buffer.from('changed consumer fixture\n'),fixture,'public-fixture'),/Consumer\/baseline mismatch/);
+ // Compare a deliberately changed in-memory consumer with the actual selected blob.
+ const consumer='src/main/configuration/image-presets.cjs',blob=cp.execFileSync('git',['-C',ROOT,'show',baseline+':'+consumer],{windowsHide:true,maxBuffer:4*1024*1024,stdio:['ignore','pipe','pipe']});assert.throws(()=>assertConsumerMatches(Buffer.concat([read(ROOT,consumer),Buffer.from('\n// public mismatch fixture\n')]),blob,consumer),/Consumer\/baseline mismatch/);
+ console.log(`PASS: Buildroot 2025.02 ISO9660 map, ${SYMBOLS.length} symbols + choice + comment; ${rejected} omission witnesses rejected; restored map passed. Consumer baseline ${baseline} verified; newline-equivalence and changed-consumer rejection witnessed.`);
+}
