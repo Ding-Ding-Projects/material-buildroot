@@ -1,6 +1,6 @@
 # Article translation and production boundary
 
-[é¦™æ¸¯ç²µèªž](article-translation-status.zh-HK.md) Â· [Task catalog](README.md)
+[香港粵語](article-translation-status.zh-HK.md) · [Task catalog](README.md)
 
 The current documentation lane preserves 49 detailed Cantonese reference twins, the source wiki twins, API workflow twins and translated category indexes. Existing English articles retain their twin links. Seven new complete Cantonese twins cover the four ISO field articles, ISO workflow, ISO production and beginner documentation. Their English originals and twins are linked together from the [ISO field index](../desktop/iso-fields/README.md). These are authored translations of behavior, permission, recovery, limits and evidence boundaries; short summaries in older articles are not counted as complete twins. This is an authoring inventory, not a translation review, build, runtime or accessibility verdict.
 
@@ -17,6 +17,8 @@ The current documentation lane preserves 49 detailed Cantonese reference twins, 
 These are full authored translations, not the older short Cantonese summary. The three Cantonese wiki twins are synchronized with their current English originals, including installed build 233.1, publication-only build 234.1 and bounded ISO consumer evidence. This is source translation equivalence, not new runtime acceptance.
 
 ## Additional complete reference twins
+
+Twelve of the thirteen previously listed reference twins are now authored. The remaining server-manager article is still listed below. Documentation at source `382373f97c9b915d051dd1cf94667eb131a4c372` passed a bounded browser check, but that earlier result does not cover these later translations.
 
 - [Presentation provenance](presentation-provenance.zh-HK.md)
 - [Ollama workspace](../desktop/ollama-workspace.zh-HK.md)

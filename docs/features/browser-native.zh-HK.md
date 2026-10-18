@@ -108,7 +108,7 @@ Serializer只bounded JSON-representable，depth32、JSON4MiB，unsupported/overs
 
 無fixed record-count cap，每頁20，browser quota真限制。Search明示current page，generation binding防舊page回覆覆新。Metadata exports排source/output bytes，範圍current selected/matching page。Original names係local records，唔外部status。
 
-一 `navigator.locks` 跨tab producer lease，API欠則production不可用，唔無排他照做。Claim/terminal publish IndexedDB transaction比exact attempt。新exclusive lease見舊running就interrupted，唔success/autoreplay。Explicit retry只failed/interrupted/cancelled轉pending，只有Start先convert。
+一 `navigator.locks` 跨tab producer lease，API欠則production不可用，唔無排他照做。Claim/terminal publish IndexedDB transaction比exact attempt。新exclusive lease見舊 `running` 就 `interrupted`，唔success/autoreplay。Explicit retry只failed/interrupted/cancelled轉pending，只有Start先convert。
 
 Worker15秒，報真admitted/decoded。Cancel publication前terminate，已publish開始就說不可撤。Stop-after-current阻next claim。只有storage publication後可download，Blob request唔證final save。Page exit可留interrupted，保source/options供明確復原。
 

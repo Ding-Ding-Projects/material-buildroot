@@ -46,7 +46,7 @@ Artifact download驗屬observed run、exact compressed size、caller SHA-256（�
 
 ## Host來源操作整合
 
-`src/main/source-operations.cjs` 嘅 `createSourceOperations` 用exact fields/bounded public errors。Host callbacks：`chooseDirectory()`、`resolveWorkspace(workspaceId)`、`onSourceAdopted({root, source, revision, branch})`、`acquireSourceLock(canonicalSource)`。Picker回native existing parent或cancel；resolver只authorized trusted `{source}`。Registration用selected parent作root、保留outputs，可回 `code: "ADOPTION_REQUIRED"` 並保留clone，host project store保存後回 `{workspaceId}`。Lock原子排除build/config/source，欠時 `code: "SOURCE_BUSY"`。`sourceOptions`只host dependencies。
+`src/main/source-operations.cjs` 嘅 `createSourceOperations` 用exact fields/bounded public errors。Host callbacks：`chooseDirectory()`、`resolveWorkspace(workspaceId)`、`onSourceAdopted({root, source, revision, branch})`、`acquireSourceLock(canonicalSource)`。Picker回native existing parent或cancel；resolver只authorized trusted `{source}`。Registration用selected parent作 `root`、保留outputs，可回 `code: "ADOPTION_REQUIRED"` 並保留clone，host project store保存後回 `{workspaceId}`。Lock原子排除build/config/source，欠時 `code: "SOURCE_BUSY"`。`sourceOptions`只host dependencies。
 
 `handle` 各action除 `action` 外欄位如下：
 
@@ -83,7 +83,7 @@ Docker同cached digest/non-root，無project mounts、read-only root、無networ
 
 Host `resolveAdmission(job)`核原intent同current content，回 `{projectId, source, output, externalTrees?, resourceDomain, storageDomain, cpuSlots, memoryBytes, storageBytes, intent: {sourceRevision, configRevision}}`。Scheduler比較intent/驗canonical dirs，持source/output/external leases及可選host `acquireLease(admission)`後再resolve，防stale觀察。Host配置/package/source mutations必須用同leases。Root dispatch另整合。
 
-`observeResources(admission)` 回 `{resourceDomain, storageDomain, cpuSlots, memoryAvailableBytes, storageAvailableBytes}`，未知null。Domain代表shared capacity，唔係job：同runtime共享resource domain，同filesystem outputs共享storage domain。Unknown保持queued `BLOCKED_RESOURCE_UNKNOWN`。Explicit `limits`有global `{maxConcurrent, cpuSlots, memoryBytes, storageBytes}`，positive CPU/RAM、nonnegative storage係host reservations，唔係measured needs/future promises。Observed capacity亦限制每runtime/filesystem，active builds已佔memory同reservations保守合併，觀察後usage仍會變。
+`observeResources(admission)` 回 `{resourceDomain, storageDomain, cpuSlots, memoryAvailableBytes, storageAvailableBytes}`，未知 `null`。Domain代表shared capacity，唔係job：同runtime共享resource domain，同filesystem outputs共享storage domain。Unknown保持queued `BLOCKED_RESOURCE_UNKNOWN`。Explicit `limits`有global `{maxConcurrent, cpuSlots, memoryBytes, storageBytes}`，positive CPU/RAM、nonnegative storage係host reservations，唔係measured needs/future promises。Observed capacity亦限制每runtime/filesystem，active builds已佔memory同reservations保守合併，觀察後usage仍會變。
 
 `pump()` 最多 `maxScan`，每次rotate window。只每project最早queued有資格，獨立project可並行。Project/source/output/external leases跨project排除ancestor/descendant overlap。`acquireMutationLease({projectId, source, output, externalTrees?})` 回idempotent release或 `SOURCE_BUSY`。Leases/reservations保留到真completion，包括async cancel cleanup；release mutation會再要求排程。Capacity/external變更要host再pump，唔無限poll。Callbacks預設15秒，`callbackTimeoutMs`最多60；timeout保持queued `BLOCKED_ADMISSION_TIMEOUT`，late lease即釋放。
 
@@ -97,7 +97,7 @@ Docker同cached digest/non-root、fixed2CPU/4GiB、drop caps/no network，只rea
 
 ## 桌面佇列整合
 
-Operations用durable scheduler。`build.submit` 收exact `{workspaceId,target,runtime,jobs}` 同可選exact `resources:{cpuSlots,memoryBytes,storageBytes}`，回accepted durable queued job，唔claim started。Scheduling查native authority、original intent、actual probes、leases，再content recheck。Unavailable runtime/unknown capacity留queue有reason，冇direct-start fallback。
+Operations用durable scheduler。`build.submit` 收exact `{workspaceId,target,runtime,jobs}` 同可選exact `resources:{cpuSlots,memoryBytes,storageBytes}`，回accepted durable queued job，唔claim started。Scheduling查native authority、original intent、actual `probeResources` observations、leases，再content recheck。Unavailable runtime/unknown capacity留queue有reason，冇direct-start fallback。
 
 Legacy至少2CPU/4GiB RAM/8GiB storage。WSL default `max(2,jobs)` CPU，explicit要cover make parallelism。Docker至少完整fixed2CPU/4GiB，不受make jobs改變。Explicit CPU最多64，WSL RAM256MiB–256GiB，Docker4–256GiB，storage0–1TiB。拒invalid/extra fields。係admission budgets，唔係measured requirement/output estimate/new runtime args。Zero storage只移除free-space floor，唔代表無寫入；source/output保留同filesystem失敗獨立。
 
