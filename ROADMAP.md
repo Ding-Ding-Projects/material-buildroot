@@ -279,3 +279,9 @@ The bounded PH02-T02-C02 desktop-shell child is verified against the source and 
 The initial documentation deployment remains historical in [its hosting evidence](docs/evidence/hosting/initial-live.json). The current desktop articles and captures were delivered at `ae1951d18a29ea3ba5aab726cee20e896ad89cc2`, built from `53a37011c04e46536c882bc79dae751ff56f9757`: all 103 live files matched expected and published-source bytes, and deployment [38679631020](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38679631020) succeeded. This bounded delivery does not close broad phase or per-surface requirements.
 
 The owner directed continuation while skipping blocker tasks. Five guest profiles remain retained, and strict browser audit acceptance remains 0 accepted / 20 rejected at `cleanup.completed`. Cleanup and that strict acceptance are skipped, not passed; no deletion retry or profile write is part of this continuation. Unsupported native per-scale DPI proof and the broader product backlog remain open. That earlier bounded closeout objective is historical. The current owner request covers the full roadmap, with Windows runtime testing deferred.
+
+## Installer startup repair, 2026-10-17
+
+- [x] Repair corrupted component-discovery expression and check all 134 production JavaScript modules.
+- [x] Add component enablement regression coverage.
+- [ ] Verify replacement installer and installed launch.

@@ -453,3 +453,7 @@ Three linked planning/implementation lanes were created before the owner require
 ## Publication dependency
 
 Public target: `Ding-Ding-Projects/material-buildroot`, provided by the repository owner. The generated site is prepared in `docs/` for Pages branch publishing from `main` → `/docs`, with `.nojekyll`. Owner settings access is needed to activate this route. Verify actual live routes/assets and the exact About homepage before checking PH00-T05. The intended home URL is `https://ding-ding-projects.github.io/material-buildroot/`.
+
+## Installer startup repair, 2026-10-17
+
+Repair preserved in c7d132d: removed duplicated source inside component-discovery enablement regex and added prepackaging syntax validation. Configuration checks: 12 passed, 3 skipped; dedicated discovery regression: 1 passed. Initial installer attempt stopped on a stale maintainer-local currency lock after verified tool acquisition, before packaging. Replacement installer and installed launch remain pending. Docker server 29.8.2 responds; WSL lists docker-desktop. No separate Buildroot distribution is verified.
