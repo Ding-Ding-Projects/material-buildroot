@@ -1,6 +1,6 @@
 {
   "name": "material-buildroot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Windows desktop workspace for Buildroot with WSL and Docker execution.",
   "author": "Ding-Ding Projects",
   "license": "GPL-3.0-or-later",

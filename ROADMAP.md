@@ -286,3 +286,11 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 - [x] Add component enablement regression coverage.
 - [x] Produce, publish and download-verify the repaired normal installer release v0.1.0-build.230.1.
 - [ ] Verify the normal installed workspace launch, tracked in issue #6; redirected-cache readback and hidden diagnostic copies do not satisfy this item.
+
+## Version 0.1.1 startup and runtime repair
+
+- [x] Verify source-preview startup registration and native element methods with a browser regression.
+- [x] Verify real non-root WSL olddefconfig/show-info execution and stopped-session cleanup.
+- [x] Verify real non-root Docker olddefconfig/show-info execution and absent-container cleanup.
+- [ ] Verify the packaged and normal installed 0.1.1 workspace.
+- [ ] Resolve the remaining broad execution-suite fixture failures without treating live smoke checks as a full-suite verdict.

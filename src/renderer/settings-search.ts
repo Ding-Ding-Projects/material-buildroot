@@ -16,9 +16,10 @@ export class SettingsSearch extends LitElement {
   reset(){this.query='';this.pattern='';this.flags='i';this.regex=false;this.error='';this.search();}
   focusQuery(){(this.renderRoot.querySelector('md-outlined-text-field') as HTMLElement|null)?.focus();}
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
-  disconnectedCallback(){this.generation++;this.worker?.terminate();clearTimeout(this.timer);super.disconnectedCallback();}
+  disconnectedCallback(){this.lastIds=null;this.generation++;this.worker?.terminate();clearTimeout(this.timer);super.disconnectedCallback();}
   protected updated(changed:Map<string,unknown>){if(['query','pattern','flags','regex','entries'].some(key=>changed.has(key)))this.search();}
-  private emit(ids:string[]){this.count=ids.length;this.dispatchEvent(new CustomEvent('settings-filter',{bubbles:true,composed:true,detail:ids}));}
+  private lastIds:string[]|null=null;
+  private emit(ids:string[]){this.count=ids.length;if(this.lastIds?.length===ids.length&&ids.every((id,index)=>this.lastIds![index]===id))return;this.lastIds=[...ids];this.dispatchEvent(new CustomEvent('settings-filter',{bubbles:true,composed:true,detail:ids}));}
   private search(){
     const generation=++this.generation;this.worker?.terminate();clearTimeout(this.timer);this.error='';
     if(!this.regex){this.emit(this.entries.filter(e=>e.text.toLocaleLowerCase().includes(this.query.toLocaleLowerCase())).map(e=>e.id));return;}

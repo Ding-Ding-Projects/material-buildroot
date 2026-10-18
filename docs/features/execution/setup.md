@@ -26,3 +26,7 @@ Device sign-in runs `gh auth login --hostname github.com --git-protocol https --
 
 Official behavior references: [GitHub CLI login](https://cli.github.com/manual/gh_auth_login) and [GitHub CLI environment](https://cli.github.com/manual/gh_help_environment). Actual device-flow behavior has not been exercised in this source-only implementation pass.
 
+
+## Live transport verification
+
+The 0.1.1 candidate was exercised against Buildroot 2025.02 source through both WSL 2 and Docker as a non-root user. The olddefconfig and show-info targets completed with independent ownership cleanup readback. These bounded checks cover configuration-tool compilation and package metadata, not a full firmware-image build. WSL session creation must retain its child until completion, using setsid --wait. The Windows source transfer did not preserve every Linux symbolic link, so the Docker result applies only to the exercised targets.

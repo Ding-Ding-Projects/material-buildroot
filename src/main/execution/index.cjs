@@ -529,7 +529,6 @@ class ExecutionService {
       throw new Error("invalid-environment-probe");
     const grant = this.grants.get(request.grantId);
     if (!grant) throw new Error("grant-unavailable");
-    assertPackage({source:grant.source,externalTrees:grant.external.map(entry => entry.path)}, target);
     await this.verifyWslGrant(grant, request?.runtime);
     const validate = () => {
       if (this.grants.get(request.grantId) !== grant)
@@ -857,6 +856,7 @@ class ExecutionService {
         runtime.distribution,
         "--exec",
         "setsid",
+        "--wait",
         "/bin/sh",
         "-c",
         (grant.wslReceipt ? wrapBuild : script => script)('echo MATERIAL_BUILDROOT_PID=$$ START=$(awk \'sub(/^.*[)] /, "") {print $20}\' /proc/$$/stat); read -r authorization; test "$authorization" = "$6" || exit 79; ' + LINUX_SCRIPT),

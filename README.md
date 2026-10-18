@@ -107,3 +107,5 @@ The documentation target validates isolated generated output before promotion in
 ## Installer startup repair, 2026-10-17
 
 The component-discovery syntax repair is available in [v0.1.0-build.230.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.230.1). Production now checks all main/shared JavaScript syntax before packaging. Installed workspace launch remains under investigation in [issue #6](https://github.com/Ding-Ding-Projects/material-buildroot/issues/6); a successful package does not prove installed startup acceptance.
+
+The 0.1.1 candidate also repairs renderer startup registration, native-method collisions, duplicate search notifications and WSL session waiting. Real non-root WSL and Docker configuration/metadata checks passed; packaged and normal installed 0.1.1 startup are still pending. See [the handoff](HANDOFF.md) for exact limits.
