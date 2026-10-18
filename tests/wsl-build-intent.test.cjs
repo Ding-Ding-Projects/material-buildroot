@@ -68,6 +68,27 @@ try:
  (output/'.config').write_text('BR2_DL_DIR="/unsupported"\n');blocked('BLOCKED_CACHE_DISPOSITION_UNSUPPORTED');checks.append('unsupported cache declaration rejected')
  (output/'.config').write_text('BR2_DL_DIR="$(TOPDIR)/dl"\n');cache.rmdir();cache.symlink_to(root,target_is_directory=True);blocked('BLOCKED_CONTENT_UNSAFE');cache.unlink();checks.append('cache alias rejected')
  (source/'hardlink').hardlink_to(source/'target');blocked('BLOCKED_CONTENT_UNSAFE');(source/'hardlink').unlink();checks.append('hardlink rejected')
+ request['limits']={'maxEntries':4}
+ original_scan=os.scandir;original_stat=os.lstat;observed={'next':0,'processed':0,'closed':False}
+ class BoundedDirectory:
+  def __enter__(self):return self
+  def __exit__(self,*args):observed['closed']=True
+  def __next__(self):
+   observed['next']+=1
+   if observed['next']>3:raise AssertionError('enumerated after first over-limit witness')
+   return type('Entry',(),{'name':('synthetic-'+str(observed['next'])).encode()})()
+ def bounded_scan(p):
+  if os.fsdecode(p)==str(source):return BoundedDirectory()
+  return original_scan(p)
+ def no_processing(p,*args,**kwargs):
+  if os.path.basename(os.fsdecode(p)).startswith('synthetic-'):
+   observed['processed']+=1;raise AssertionError('processed a truncated directory')
+  return original_stat(p,*args,**kwargs)
+ os.scandir=bounded_scan;os.lstat=no_processing
+ try:blocked('BLOCKED_CONTENT_LIMIT')
+ finally:os.scandir=original_scan;os.lstat=original_stat
+ assert observed=={'next':3,'processed':0,'closed':True},observed
+ checks.append('enumeration stops after bounded overflow witness before child processing')
  request['limits']={'maxEntries':1};blocked('BLOCKED_CONTENT_LIMIT');checks.append('entry bound')
  print(json.dumps({'ok':True,'checks':checks}))
 finally:
@@ -77,5 +98,5 @@ finally:
   const windows = process.platform === "win32";
   const result = spawnSync(windows ? "wsl.exe" : "python3", windows ? ["--distribution", process.env.MATERIAL_TEST_WSL_DISTRIBUTION, "--exec", "python3", "-I", "-B", "-"] : ["-I", "-B", "-"], { input: program, encoding: "utf8", windowsHide: true, timeout: 30000 });
   assert.equal(result.status, 0, result.stderr); const report = JSON.parse(result.stdout);
-  assert.equal(report.ok, true, report.skip); assert.equal(report.checks.length, 13);
+  assert.equal(report.ok, true, report.skip); assert.equal(report.checks.length, 14);
 });

@@ -33,7 +33,7 @@ def capture(request):
     absent = set()
     links = []
     content, configuration, cache_hash = (hashlib.sha256() for _ in range(3))
-    counts = dict(entries=0, bytes=0, symlinks=0, cacheEntries=0, cacheBytes=0)
+    counts = dict(entries=0, bytes=0, symlinks=0, cacheEntries=0, cacheBytes=0, pendingEntries=0)
 
     def check():
         if (time.monotonic() - started) * 1000 > limits["maxMs"] or counts["entries"] > limits["maxEntries"] or counts["bytes"] > limits["maxBytes"]:
@@ -157,14 +157,32 @@ def capture(request):
             links.append(file)
         elif stat.S_ISDIR(info.st_mode):
             update(content, ["directory", stat.S_IMODE(info.st_mode)])
-            children = sorted(os.listdir(os.fsencode(file)))
+            children = []
+            with os.scandir(os.fsencode(file)) as directory:
+                while True:
+                    check()
+                    try:
+                        entry = next(directory)
+                    except StopIteration:
+                        break
+                    raw = entry.name
+                    try:
+                        name = raw.decode("utf8", "strict")
+                    except UnicodeError:
+                        raise Blocked("BLOCKED_CONTENT_UNSAFE")
+                    if name == ".git" and not cached and not git_refs:
+                        continue
+                    # Reserve names across every active recursion frame. This
+                    # bounds allocation before sorting, without accepting a
+                    # truncated directory as a complete content snapshot.
+                    if counts["entries"] + counts["pendingEntries"] >= limits["maxEntries"]:
+                        raise Blocked("BLOCKED_CONTENT_LIMIT")
+                    counts["pendingEntries"] += 1
+                    children.append(raw)
+            children.sort()
             for raw in children:
-                try:
-                    name = raw.decode("utf8", "strict")
-                except UnicodeError:
-                    raise Blocked("BLOCKED_CONTENT_UNSAFE")
-                if name == ".git" and not cached and not git_refs:
-                    continue
+                name = raw.decode("utf8", "strict")
+                counts["pendingEntries"] -= 1
                 walk(root, os.path.join(relative, name), depth + 1, git_refs)
         elif stat.S_ISREG(info.st_mode):
             read_file(file, info, content, cached)
