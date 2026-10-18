@@ -29,36 +29,54 @@ let observer:MutationObserver|undefined;let scheduled=false;let rainbowSyncPendi
 function parent(el:Element):Element|null{return el.parentElement||(el.getRootNode() instanceof ShadowRoot?(el.getRootNode() as ShadowRoot).host:null);}
 function identityHash(parts:readonly string[]){let a=2166136261,b=5381;for(const char of JSON.stringify(parts)){a=Math.imul(a^char.charCodeAt(0),16777619);b=Math.imul(b,33)^char.charCodeAt(0);}return 'e'+(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
 /** Presentation identity only. The marker never grants an action or changes a permission. */
-function workspaceTabIdentity(target:HTMLElement):{key:string;durable:boolean}|null{
- const suffix:string[]=[];const WorkspaceTabs=customElements.get('workspace-tabs');if(!WorkspaceTabs)return null;
- for(let element:Element|null=target;element&&element!==app();element=parent(element)){
-  const key=element.getAttribute('data-appearance-key');
+export function createAppearanceIdentityLookup(){
+ // One synchronous discovery pass owns these caches. Never retain them across
+ // DOM mutations, route changes, or independent editor/command lookups.
+ const root=app(),route=root?.route||'global',WorkspaceTabs=customElements.get('workspace-tabs');
+ const positions=new WeakMap<Element,Map<Element,number>>();
+ const ancestry=new WeakMap<Element,{chain:string[];durable:boolean}>();
+ const owned=new WeakMap<Element,string[]|null>();
+ const explicit=(element:Element)=>element.getAttribute('data-appearance-key')||element.getAttribute('data-id')||element.id;
+ const segment=(element:Element)=>{
+  const key=explicit(element);let index=-1;
+  if(!key&&element.parentElement){
+   const container=element.parentElement;let siblings=positions.get(container);
+   if(!siblings){siblings=new Map();const counts=new Map<string,number>();for(const child of container.children){const position=counts.get(child.localName)||0;siblings.set(child,position);counts.set(child.localName,position+1);}positions.set(container,siblings);}
+   index=siblings.get(element)??-1;
+  }
+  return element.localName+':'+(key?'key:'+key:'position:'+index)+':'+(element.getAttribute('type')||'');
+ };
+ const ownedPath=(element:Element|null):string[]|null=>{
+  if(!element||element===root||!WorkspaceTabs)return null;
+  if(owned.has(element))return owned.get(element)!;
+  const key=element.getAttribute('data-appearance-key');let path:string[]|null=null;
   if(element.getAttribute('data-appearance-owner')==='workspace-tabs'&&key&&/^[a-zA-Z0-9:._-]{1,320}$/.test(key)&&/^(?:tab:(?:workspace|utility):|group:)/.test(key)){
    let owner:Element|null=element;while(owner&&!(owner instanceof WorkspaceTabs))owner=parent(owner);
-   if(owner){let scope:Element|null=owner;while(scope&&scope!==app())scope=parent(scope);if(scope===app())return {key:identityHash(['owned-presentation-v1','workspace-tabs',key,...suffix]),durable:true};}
+   if(owner){let scope:Element|null=owner;while(scope&&scope!==root)scope=parent(scope);if(scope===root)path=['owned-presentation-v1','workspace-tabs',key];}
   }
-  const localKey=element.getAttribute('data-appearance-key')||element.getAttribute('data-id')||element.id;
-  const siblings=element.parentElement?Array.from(element.parentElement.children).filter(sibling=>sibling.localName===element!.localName):[];
-  suffix.unshift(element.localName+':'+(localKey?'key:'+localKey:'position:'+siblings.indexOf(element))+':'+(element.getAttribute('type')||''));
- }
- return null;
+  if(!path){const prefix=ownedPath(parent(element));if(prefix)path=[...prefix,segment(element)];}
+  owned.set(element,path);return path;
+ };
+ const ordinaryPath=(element:Element|null):{chain:string[];durable:boolean}=>{
+  if(!element||element===root)return {chain:[],durable:true};
+  const cached=ancestry.get(element);if(cached)return cached;
+  const prefix=ordinaryPath(parent(element));
+  const result={chain:[...prefix.chain,segment(element)],durable:prefix.durable&&!!(explicit(element)||!element.matches('tr,li,[role=row],[role=listitem],[data-record]'))};
+  ancestry.set(element,result);return result;
+ };
+ return (target:HTMLElement):{key:string;durable:boolean}=>{
+  const path=ownedPath(target);if(path)return {key:identityHash(path),durable:true};
+  const {chain,durable}=ordinaryPath(target);let a=2166136261,b=5381;
+  for(const char of [route,...chain].join('/')){a=Math.imul(a^char.charCodeAt(0),16777619);b=Math.imul(b,33)^char.charCodeAt(0);}
+  return {key:'e'+(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0'),durable};
+ };
 }
-function stableKey(target:HTMLElement):{key:string;durable:boolean}{
- const ownedIdentity=workspaceTabIdentity(target);if(ownedIdentity)return ownedIdentity;
- const chain:string[]=[];let durable=true;
- for(let el:Element|null=target;el&&el!==app();el=parent(el)){
-  const explicit=el.getAttribute('data-appearance-key')||el.getAttribute('data-id')||el.id;
-  if(!explicit&&el.matches('tr,li,[role=row],[role=listitem],[data-record]'))durable=false;
-  const siblings=el.parentElement?Array.from(el.parentElement.children).filter(p=>p.localName===el!.localName):[];
-  chain.unshift(el.localName+':'+(explicit?'key:'+explicit:'position:'+siblings.indexOf(el))+':'+(el.getAttribute('type')||''));
- }
- chain.unshift(app()?.route||'global');let a=2166136261,b=5381;for(const char of chain.join('/')){a=Math.imul(a^char.charCodeAt(0),16777619);b=Math.imul(b,33)^char.charCodeAt(0);}return {key:'e'+(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0'),durable};
-}
+function stableKey(target:HTMLElement):{key:string;durable:boolean}{return createAppearanceIdentityLookup()(target);}
 function attach(root:ShadowRoot){if(roots.has(root))return;const style=document.createElement('style');style.dataset.appearanceStyles='true';root.append(style);roots.set(root,style);observer?.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['data-appearance-owner','data-appearance-key','data-id','id']});}
-function scan(root:ShadowRoot){attach(root);for(const el of root.querySelectorAll<HTMLElement>('*')){
+function scan(root:ShadowRoot,identify=createAppearanceIdentityLookup()){attach(root);for(const el of root.querySelectorAll<HTMLElement>('*')){
  if(el.matches('style,script,link'))continue;
- const identity=stableKey(el);const owner=el.closest('[data-experience-id]');if(owner&&!el.hasAttribute('data-experience-id')&&el.localName.startsWith('md-'))el.setAttribute('data-experience-id',owner.getAttribute('data-experience-id')!);if(el!==previewBefore&&el.dataset.appearanceTarget!==identity.key)el.dataset.appearanceTarget=identity.key;bindAppearanceMotion(el,identity.key);
- if(el.shadowRoot&&!el.localName.startsWith('md-'))scan(el.shadowRoot);
+ const identity=identify(el);const owner=el.closest('[data-experience-id]');if(owner&&!el.hasAttribute('data-experience-id')&&el.localName.startsWith('md-'))el.setAttribute('data-experience-id',owner.getAttribute('data-experience-id')!);if(el!==previewBefore&&el.dataset.appearanceTarget!==identity.key)el.dataset.appearanceTarget=identity.key;bindAppearanceMotion(el,identity.key);
+ if(el.shadowRoot&&!el.localName.startsWith('md-'))scan(el.shadowRoot,identify);
 }}
 function apply(){
  const root=app()?.shadowRoot;if(!root)return;scan(root);
