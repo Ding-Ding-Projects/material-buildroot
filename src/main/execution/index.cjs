@@ -30,6 +30,7 @@ function boundedProcess(
     cwd,
     timeoutMs = 10000,
     maxBytes = 65536,
+    maxCapturedCharacters = maxBytes,
     onLog,
     onTerminate,
     env,
@@ -107,8 +108,8 @@ function boundedProcess(
         return;
       }
       const text = chunk.toString("utf8");
-      if (stream === "stdout") stdout += text;
-      else stderr += text;
+      if (stream === "stdout") stdout = (stdout + text).slice(-maxCapturedCharacters);
+      else stderr = (stderr + text).slice(-maxCapturedCharacters);
       try {
         onLog?.({ stream, text });
       } catch {
@@ -942,7 +943,8 @@ class ExecutionService {
     processJob = boundedProcess(file, args, {
       cwd: grant.root,
       timeoutMs: 24 * 60 * 60 * 1000,
-      maxBytes: 16 * 1024 * 1024,
+      maxBytes: 256 * 1024 * 1024,
+      maxCapturedCharacters: 1024 * 1024,
       onLog: receiveLog,
       onTerminate: cancelExtra,
       inputPipe: ownership?.kind === "wsl",
