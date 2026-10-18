@@ -177,6 +177,35 @@ test('attention respects Escape already consumed by a nested control',async({pag
   await expect(attention.locator('.settings')).toHaveCount(0);
 });
 
+for(const pendingAction of ['catalog','photo'])test('restriction cancellation permits retry after pending '+pendingAction,async({page})=>{
+  const app=await open(page),attention=app.locator('guided-shell-attention'),catalogue=attention.locator('guided-shell-dim-sum');
+  await page.evaluate(pendingAction=>{
+    const oldDish={id:'old',en:'Old dish',zh:'舊點心',photo:'fixture'};
+    const freshDish={id:'fresh',en:'Fresh dish',zh:'新點心',photo:'fixture'};
+    let deferredOld=false;
+    window.studio.dimSum=async request=>{
+      if(request.action===pendingAction&&!deferredOld){deferredOld=true;return new Promise(resolve=>window.__resolveOldCatalogue=()=>resolve({ok:true,dishes:[oldDish],dish:oldDish}));}
+      if(request.action==='catalog'&&deferredOld)return new Promise(resolve=>window.__resolveFreshCatalogue=()=>resolve({ok:true,dishes:[freshDish]}));
+      return {ok:true,dishes:[oldDish],dish:oldDish};
+    };
+  },pendingAction);
+  await app.locator('#attention-button').click();
+  await catalogue.getByRole('button',{name:'Dim sum catalogue',exact:true}).click();
+  if(pendingAction==='photo')await catalogue.getByRole('button',{name:'Old dish',exact:true}).click();
+  await expect.poll(()=>page.evaluate(()=>typeof window.__resolveOldCatalogue)).toBe('function');
+  await attention.evaluate(async panel=>{panel.restricted=true;await panel.updateComplete;});
+  await expect.poll(()=>catalogue.evaluate(panel=>panel.busy)).toBe(false);
+  await expect(catalogue.getByRole('button',{name:'Dim sum catalogue',exact:true})).toHaveCount(0);
+  await attention.evaluate(async panel=>{panel.restricted=false;await panel.updateComplete;});
+  await catalogue.getByRole('button',{name:'Dim sum catalogue',exact:true}).click();
+  await expect.poll(()=>page.evaluate(()=>typeof window.__resolveFreshCatalogue)).toBe('function');
+  await page.evaluate(async()=>{window.__resolveOldCatalogue();await new Promise(requestAnimationFrame);});
+  expect(await catalogue.evaluate(panel=>({busy:panel.busy,selected:panel.selected,dishes:panel.dishes}))).toEqual({busy:true,selected:null,dishes:[]});
+  await page.evaluate(()=>window.__resolveFreshCatalogue());
+  await expect(catalogue.getByRole('button',{name:'Fresh dish',exact:true})).toBeVisible();
+  expect(await catalogue.evaluate(panel=>panel.busy)).toBe(false);
+});
+
 test('filtered settings jump reveals the intended personal wording panel',async({page})=>{
   const app=await open(page);await nav(app,'settings').click();
   await app.locator('.settings-page settings-search').getByRole('textbox').fill('Theme');
