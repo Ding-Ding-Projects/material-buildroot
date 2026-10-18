@@ -11,3 +11,17 @@ Capture returns `fresh-file-observed-unbound`, with `jobBound`, `producerVerifie
 Only future admitted host/runtime integration can connect preparation and capture to a successful exact owned producer, verified cleanup and its job record while retaining the execution lease. Until then this helper does not satisfy fresh job-bound ISO acceptance. It does not protect against arbitrary concurrent host writers as an atomic filesystem transaction or authenticate caller-supplied roots/state digests. All file identities use decimal strings to avoid cross-language integer truncation. Limits are 4 GiB per ISO, 16 KiB for state, a 60-second operation deadline and an 8 KiB CLI request. No commands or arbitrary relative paths are accepted.
 
 The handwritten Linux fixture uses only synthetic temporary data. It covers preservation with no new ISO, identical new bytes, wrong job, collision, directory/file aliases, hard links, state and directory tampering, incomplete output, asserted outcome rejection and preserved-byte tampering. Its result is helper-level filesystem evidence only. Real source/output/cache volumes, GUI behavior, producer success and boot remain separate and unverified by this unit.
+
+The eight fixture cases passed against helper/test source at `e551fae7479c3a7cb423350236e04dd779e9dac0` in the existing pinned builder image, with UID/GID 1000, no network, read-only container root and a synthetic 64 MiB `/fixture` tmpfs. Exact owned-container absence was verified afterward. An earlier transport attempt delivered no stdin and ran zero tests; that exit-zero result was not accepted. One corrected interactive-stdin replacement produced the eight-case result. No production volume was mounted.
+
+The fixture expects the fixed helper to be preloaded and writes only below `/fixture`. A synthetic Linux environment with that directory can load the checked-in sources without installing packages:
+
+```sh
+python3 -I -B - <<'PY'
+import pathlib, sys, types
+helper = types.ModuleType('iso_output_lifecycle')
+exec(compile(pathlib.Path('scripts/configuration/iso_output_lifecycle.py').read_bytes(), 'iso_output_lifecycle.py', 'exec'), helper.__dict__)
+sys.modules['iso_output_lifecycle'] = helper
+exec(compile(pathlib.Path('tests/test_iso_output_lifecycle.py').read_bytes(), 'test_iso_output_lifecycle.py', 'exec'), globals())
+PY
+```
