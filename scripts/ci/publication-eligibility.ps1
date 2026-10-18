@@ -35,3 +35,6 @@ try {
 } finally {
     $record | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $destination 'publication-eligibility.json') -Encoding UTF8
 }
+# Both completed decisions are successful. Do not propagate merge-base's
+# expected non-ancestor exit code to the invoking Windows PowerShell step.
+exit 0
