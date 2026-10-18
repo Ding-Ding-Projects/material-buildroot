@@ -208,24 +208,35 @@ try{
  await page.goto(target);await ready();
  receipt.checks.push('Interactive guides persist browser-owned progress and cover vocabulary import/replace/clear plus unavailable shared state, verified shared-preference exit/recovery, queued intent/reauthorization/runtime quarantine, and observed non-exhaustive catalogue refresh/cancel/unknown metadata in English and Cantonese. All examples are local visitor explanations with no secrets, private vocabulary payloads or desktop execution.');
  let companionSequence=1;const companionRequests=[];
+ // Protocol-only HTTPS page fixture. Built bytes are routed without changing the
+ // production secure-context requirement or claiming a real TLS certificate test.
+ const secureVisitorBase='https://127.0.0.1:9443/material-buildroot/';
+ let fixturePairing;
+ await context.route('https://127.0.0.1:9443/material-buildroot/**',async route=>{
+  const fixtureUrl=new URL(route.request().url());
+  const served=new URL(fixtureUrl.pathname,new URL(target).origin);
+  const response=await context.request.get(served.href);
+  await route.fulfill({response});
+ });
  await context.route('https://192.168.1.20:8443/**',async route=>{
-  const request=route.request(),url=new URL(request.url()),origin=new URL(target).origin;
+  const request=route.request(),url=new URL(request.url()),origin=new URL(secureVisitorBase).origin;
   const requestBody=request.postData()?request.postDataJSON():null;
   companionRequests.push({path:url.pathname,method:request.method(),body:requestBody,headers:request.headers()});
-  const cors={'access-control-allow-origin':origin,'access-control-allow-credentials':'true','access-control-allow-methods':'POST','access-control-allow-headers':'content-type,x-csrf-token','access-control-allow-private-network':'true','vary':'Origin'};
+  const cors={'access-control-allow-origin':origin,'access-control-allow-credentials':'true','access-control-allow-methods':'POST','access-control-allow-headers':'content-type,x-csrf-token,x-companion-client','access-control-allow-private-network':'true','vary':'Origin'};
   if(request.method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return;}
   const body=requestBody;let payload={};
-  if(url.pathname==='/pair')payload={csrfToken:'fixture-csrf-token-not-for-storage',nextSequence:1,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active'}};
-  else if(url.pathname==='/session')payload={nextSequence:companionSequence,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active'}};
+  if(url.pathname==='/pair'){fixturePairing={browser:body.browser,clientId:body.clientNonce,deviceName:'Fixture desktop'};payload={csrfToken:'fixture-csrf-token-not-for-storage',nextSequence:1,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active',...fixturePairing}};}
+  else if(url.pathname==='/session')payload={nextSequence:companionSequence,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active',...fixturePairing}};
   else if(url.pathname==='/actions'){
    companionSequence=body.sequence+1;
    const result=body.action==='workspace.read'?{ok:true,state:{plans:[{name:'Fixture plan',runtime:'wsl',target:'image',status:'draft',notes:'fixture-private-note'}],preferences:{theme:'dark'},onboardingCompleted:false}}:body.action==='projects.list'?[{id:'fixture-project',name:'Fixture project',root:'/private/host/path',authorized:true}]:[{id:'fixture-job',kind:'build',state:'running',updatedAt:new Date().toISOString(),logs:['fixture-private-log']}];
-   payload={nextSequence:companionSequence,operation:{action:body.action,state:'succeeded'},result};
+   payload={nextSequence:companionSequence,operation:{action:body.action,state:'succeeded',sessionId:'46ac4318-4a7e-4813-9d08-f2d61691bf90'},result};
   } else if(url.pathname==='/disconnect')payload={revoked:true,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',status:'revoked'}};
   else {await route.fulfill({status:404,headers:cors,body:'{}'});return;}
   await route.fulfill({status:200,headers:{...cors,'content-type':'application/json','set-cookie':'__Host-material-companion=fixture; Path=/; Secure; HttpOnly; SameSite=None'},body:JSON.stringify(payload)});
  });
- await page.goto(new URL('site/visitor.html',target).href);await ready();
+ await page.goto(new URL('site/visitor.html',secureVisitorBase).href);await ready();
+ assert.equal(await page.evaluate(()=>location.protocol),'https:');
  assert.equal(await page.locator('#visitor-workspace').count(),1);
  assert.match(await page.locator('#companion-title').innerText(),/Connect to your desktop/);
  await chooseLanguage('zh');
@@ -266,6 +277,8 @@ try{
  assert.ok(companionRequests.some(item=>item.path==='/pair'&&item.body?.challenge==='c'.repeat(43)));
  assert.ok(companionRequests.some(item=>item.path==='/actions'&&item.body?.args&&Object.keys(item.body.args).length===0));
  assert.ok(companionRequests.some(item=>item.path==='/disconnect'&&item.body&&Object.keys(item.body).length===0));
+ await page.goto(new URL('site/visitor.html',target).href);await ready();await chooseLanguage('both');
+ receipt.checks.push('Companion protocol fixture uses an intercepted HTTPS document origin with actual built bytes; it does not verify a TLS connection.');
  receipt.checks.push('Companion protocol fixture verifies private-IP validation, manual challenge pairing, bounded read-only request shapes, memory-only CSRF state, safe workspace/project/job summaries, session refresh and server-confirmed disconnect. This fixture does not establish real TLS/LAN acceptance.');
  await openVisitorControl('#visitor-goal');
  await page.locator('#visitor-goal').locator('input').fill('Review the visitor roadmap');
