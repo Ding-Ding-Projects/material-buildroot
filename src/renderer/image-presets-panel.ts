@@ -8,13 +8,14 @@ import '@material/web/progress/linear-progress.js';
 import {materialIcon} from './material-icons';
 import { workspaceStyles } from './workspace-styles';
 export class ImagePresetsPanel extends LitElement {
- static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true}};
+ static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number}};
  static styles=[workspaceStyles,css`[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}`];
- workspaceId=''; language='bilingual'; disabled=false; revision=0;
+ workspaceId=''; language='bilingual'; disabled=false; revision=0; configurationGeneration=0;
  private catalog:any; private preview:any; private outcome:any; private preset='minimal'; private desktop='none'; private ssh=false; private approved=false; private busy=false; private message='';
  private isoPlan:any; private isoOutcome:any; private isoApproved=false; private isoJob:any; private isoInspection:any; private isoLogs:any[]=[]; private isoBusy=false; private isoMessage='';
  private isoEpoch=0; private isoMode='easy'; private isoRuntime:any; private isoStep=0; private isoResumed=false;
  private resetIso(){this.isoEpoch++;this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
+ protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.isoEpoch++;this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
  protected updated(changed:PropertyValues){if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
  private saveIso(){try{localStorage.setItem('iso-workflow-'+this.workspaceId,JSON.stringify({version:1,step:this.isoStep,mode:this.isoMode,jobId:this.isoJob?.id??null}));}catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);}}
  private restoreIso(){try{const saved=JSON.parse(localStorage.getItem('iso-workflow-'+this.workspaceId)||'null');if(saved?.version===1&&Number.isInteger(saved.step)&&saved.step>=0&&saved.step<=2){this.isoStep=saved.step;this.isoMode=saved.mode==='advanced'?'advanced':'easy';this.isoResumed=true;if(typeof saved.jobId==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(saved.jobId))this.isoJob={id:saved.jobId,state:'unverified',sequence:0};}}catch{/* Untrusted local progress never restores configuration success. */}}
@@ -35,10 +36,11 @@ export class ImagePresetsPanel extends LitElement {
  }
  private async isoAction(action:'plan'|'apply'|'build'|'refresh'|'cancel'|'inspect'){
   if(this.isoBusy||this.busy||this.disabled||!this.workspaceId||!window.studio?.operations)return;
+  const api=window.studio.operations;
   const workspaceId=this.workspaceId,epoch=this.isoEpoch;
   const current=()=>workspaceId===this.workspaceId&&epoch===this.isoEpoch;
   const call=async(name:string,fields:Record<string,unknown>={})=>{
-   const reply=await window.studio.operations({action:name,...fields});
+   const reply=await api({action:name,...fields});
    if(!current())throw Error('STALE_WORKSPACE');
    if(!reply.ok)throw Error(reply.code);
    return reply.result as any;
@@ -61,7 +63,7 @@ export class ImagePresetsPanel extends LitElement {
     this.isoInspection=undefined;
     const options=await call('project.options',{workspaceId});
     if(!options.runtime)throw Error('RUNTIME_REQUIRED');
-    this.isoJob=await call('build.submit',{workspaceId,target:'all',runtime:options.runtime,jobs:2});
+    this.isoJob=await call('imagePreset.isoBuild',{workspaceId,revision:this.isoOutcome.revision,profile:this.isoOutcome.profile,runtime:options.runtime,jobs:2});
     this.isoLogs=[];
    }else if(action==='refresh'){
     if(!this.isoJob)return;
@@ -79,7 +81,7 @@ export class ImagePresetsPanel extends LitElement {
     this.isoInspection=await call('artifacts.inspect',{workspaceId,path:'images/rootfs.iso9660'});
    }
   }catch(error){if(current()){
-   if(action==='plan'||action==='apply'){this.isoPlan=undefined;this.isoApproved=false;this.isoOutcome=undefined;}
+   if(action==='plan'||action==='apply'||action==='build'){this.isoPlan=undefined;this.isoApproved=false;this.isoOutcome=undefined;}
    this.isoMessage=this.l('Operation not confirmed. Refresh the plan or job before retrying.','操作未確認，重試前請重新整理計劃或工作。',true)+' '+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:'');
   }}finally{this.isoBusy=false;if(current())this.saveIso();this.revision++;}
  }
@@ -97,15 +99,15 @@ export class ImagePresetsPanel extends LitElement {
    <div data-step ?hidden=${this.isoMode==='easy'&&this.isoStep!==0}>
    <h4 tabindex="-1">${this.l('What would you like to make?','想製作甚麼？',true)}</h4>
    <md-outlined-select label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value=""><div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select>
-   ${this.isoHelp('Profile and firmware help','Recommended supported route: x86-64, BIOS, ISOLINUX and an initial RAM filesystem. Example output: images/rootfs.iso9660. UEFI is unavailable in this profile; an unsupported source must be reconfigured before applying.','建議支援組合：x86-64、BIOS、ISOLINUX 同初始記憶體檔案系統。例如輸出 images/rootfs.iso9660。呢個組合唔支援 UEFI；來源唔支援時須先重新設定。','ISO profile and firmware')}
+   ${this.isoHelp('Profile and firmware help','Recommended supported route: x86-64, BIOS, GRUB2 and an initial RAM filesystem. Example output: images/rootfs.iso9660. UEFI is unavailable in this profile; an unsupported source must be reconfigured before applying.','建議支援組合：x86-64、BIOS、GRUB2 同初始記憶體檔案系統。例如輸出 images/rootfs.iso9660。呢個組合唔支援 UEFI；來源唔支援時須先重新設定。','ISO profile and firmware')}
    <h4>${this.l('Where will it be built?','喺邊度建置？',true)}</h4><p>${this.l('Use this project’s already selected Linux environment. No command or image name needs to be typed here.','使用專案已選擇嘅 Linux 環境，毋須喺呢度輸入指令或映像名稱。',true)}</p><md-outlined-select label=${this.l('Saved execution runtime','已儲存執行環境',true)} .value=${this.isoRuntime?'saved':''} disabled><md-select-option value=""><div slot="headline">${this.l('No runtime discovered','未偵測到執行環境',true)}</div></md-select-option>${this.isoRuntime?html`<md-select-option value="saved">${materialIcon('computer','start')}<div slot="headline">${this.isoRuntime.kind}: ${this.isoRuntime.distribution??this.isoRuntime.image??''}</div></md-select-option>`:nothing}</md-outlined-select>
    ${this.isoHelp('Runtime and resource help','The saved project runtime is selected automatically. Use Runtime settings to choose an actually discovered WSL distribution or admitted Docker image. This guided build uses two jobs; use the Build controls for custom resource reservations. Missing runtime access requires setup before retrying.','自動選擇專案已儲存執行環境。請喺執行環境設定選擇實際偵測到嘅 WSL 發行版或已授權 Docker 映像。導引建置使用兩個工作；自訂資源請用建置控制項。存取未就緒時請先完成設定。','ISO runtime and resources')}
 
-   <p>${this.l('Use an adopted x86-64 project with Linux enabled and a trusted configuration. This profile adds ISOLINUX and an initial RAM filesystem to the selected source. UEFI and other architectures are not supported by this profile. Existing package and kernel choices remain yours.','請使用已接入、啟用 Linux 同信任設定嘅 x86-64 專案。呢個組合會為所選來源加入 ISOLINUX 同初始記憶體檔案系統，唔支援 UEFI 或其他架構。現有套件同核心選擇會保留。',true)}</p>
+   <p>${this.l('Use an adopted x86-64 project with Linux enabled and a trusted configuration. This profile adds GRUB2 and an initial RAM filesystem to the selected source. UEFI and other architectures are not supported by this profile. Existing package and kernel choices remain yours.','請使用已接入、啟用 Linux 同信任設定嘅 x86-64 專案。呢個組合會為所選來源加入 GRUB2 同初始記憶體檔案系統，唔支援 UEFI 或其他架構。現有套件同核心選擇會保留。',true)}</p>
    <h4>${this.l('1. Check the selected source','1. 檢查所選來源',true)}</h4>
    <md-outlined-button ?disabled=${disabled||this.isoActive} @click=${()=>this.isoAction('plan')}>${this.l('Check ISO prerequisites','檢查 ISO 所需設定',true)}</md-outlined-button>
    ${this.isoPlan?html`<p>${this.isoPlan.profile} · BIOS</p><ul>${this.isoPlan.requirements.map((r:any)=>html`<li><code>${r.symbol}</code>: ${r.selectable?this.l('Available','可用',true):r.reason}</li>`)}</ul><p>${this.isoPlan.applicable?this.l('Configuration requests can be applied. No ISO has been built.','可以套用設定要求，尚未建立 ISO。',true):this.l('This configuration cannot use the profile. Select an x86-64 Linux board and resolve the unavailable requirements, then check again.','呢個設定未能使用此組合。請選擇 x86-64 Linux 板卡並處理不可用設定，再重新檢查。',true)}</p>
-   <label><md-checkbox ?disabled=${disabled||!this.isoPlan.applicable} .checked=${this.isoApproved} @change=${(e:Event)=>{this.isoApproved=(e.target as HTMLInputElement).checked;this.revision++;}}></md-checkbox>${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)}</label>
+   <label><md-checkbox aria-label=${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)} ?disabled=${disabled||!this.isoPlan.applicable} .checked=${this.isoApproved} @change=${(e:Event)=>{this.isoApproved=(e.target as HTMLInputElement).checked;this.revision++;}}></md-checkbox>${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)}</label>
    <md-outlined-button ?disabled=${disabled||!this.isoApproved||!this.isoPlan.applicable} @click=${()=>this.isoAction('apply')}>${this.l('Configure BIOS ISO','設定 BIOS ISO',true)}</md-outlined-button>`:nothing}
    ${this.isoHelp('Effective configuration help','Apply only after reviewing the live source requirements. Reconciliation must retain every required value. A rejected or stale revision needs a fresh check; configuration undo is available in the editor.','檢閱實際來源要求後先套用。協調必須保留全部所需值。版本過期或被拒絕時請重新檢查；編輯器提供設定復原。','ISO configuration and recovery')}
    </div><div data-step ?hidden=${this.isoMode==='easy'&&this.isoStep!==1}><h4 tabindex="-1">${this.l('Make the image file','製作映像檔案',true)}</h4>${!this.isoOutcome?.effective?html`<p>${this.l('Go Back to check and apply the configuration before starting a new build. An existing job can still be refreshed below.','開始新建置前請返回檢查同套用設定，現有工作仍可喺下方重新整理。',true)}</p>`:nothing}
