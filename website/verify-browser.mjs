@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+import MarkdownIt from 'markdown-it';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.dirname(here);
@@ -499,7 +500,14 @@ try{
   const destination=new URL(doc.url.slice(publicBase.length),target).href;
   const response=await page.goto(destination);await ready();
   assert.equal(response.status(),200);
-  assert.ok((await page.locator('article').innerText()).includes(doc.title));
+  assert.equal(await page.title(),doc.title+' · Material Buildroot',`${doc.source} document title`);
+  // An article without H1 uses its path as inventory title, not as body content.
+  // Compare its actual first source heading after Markdown inline rendering.
+  const markdown=await fs.readFile(path.join(root,doc.source),'utf8');
+  const firstHeading=markdown.match(/^#{1,6}\s+(.+)$/m)?.[1];
+  assert.ok(firstHeading,`${doc.source} must provide a content heading`);
+  const expectedHeading=await page.evaluate(html=>new DOMParser().parseFromString(html,'text/html').body.textContent.trim(),new MarkdownIt({html:false}).renderInline(firstHeading));
+  assert.equal((await page.locator('article h1,article h2,article h3,article h4,article h5,article h6').first().innerText()).trim(),expectedHeading,`${doc.source} rendered source heading`);
   const width=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:innerWidth}));
   assert.ok(width.document<=width.viewport,`${doc.source} article overflows at mobile width`);
   routes.push({source:doc.source,status:response.status()});
