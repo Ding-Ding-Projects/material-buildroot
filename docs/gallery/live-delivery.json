@@ -1,35 +1,33 @@
 {
   "schemaVersion": 1,
-  "status": "pending",
+  "status": "verified",
   "sourceVerification": {
     "status": "verified",
-    "branch": "main",
-    "sourceCommit": "1c844e400e806bb2cb78f316af9979187e094abc",
+    "sourceCommit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
     "taskBranch": "ai/docs/20261018-public-capture-gallery",
-    "taskCommit": "1c844e400e806bb2cb78f316af9979187e094abc",
+    "taskCommit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
     "taskBranchReadback": "verified",
     "mainReadback": "verified"
   },
   "deployment": {
     "status": "verified",
     "url": "https://ding-ding-projects.github.io/material-buildroot/gallery/",
-    "sourceCommit": "1c844e400e806bb2cb78f316af9979187e094abc",
-    "pagesWorkflowRunId": 39128444128,
-    "pagesWorkflowUrl": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/39128444128",
+    "sourceCommit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
+    "pagesWorkflowRunId": 39129688606,
+    "pagesWorkflowUrl": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/39129688606",
     "pagesWorkflowConclusion": "success",
     "routeHttpStatus": 200,
-    "httpCheckedAtUtc": "2026-10-18T12:44:51.798Z",
+    "httpCheckedAtUtc": "2026-10-18T13:02:07.428Z",
     "browserCheckedAtUtc": "2026-10-18T12:56:01.756Z",
-    "cacheBustQuery": "candidate=1c844e400e806bb2cb78f316af9979187e094abc"
+    "cacheBustQuery": "candidate=71bb94dd2d8482a55a0bea51061a7f154c2ad92a"
   },
   "sourceCandidate": {
     "baseCommit": "79f0de311430271bd195d4f16952de636f041209",
     "branch": "ai/docs/20261018-public-capture-gallery",
-    "commit": "1c844e400e806bb2cb78f316af9979187e094abc",
+    "commit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
     "captureCount": 67,
     "newCaptureCount": 16,
-    "status": "pending-redeployment",
-    "pendingChange": "The manifest now records two additional private-cache categories that were not included in the bounded capture review; the prior run still verifies the 67 image URLs and hashes at sourceCommit."
+    "status": "integrated"
   },
   "sourceLinks": {
     "readmeGalleryUrl": "https://ding-ding-projects.github.io/material-buildroot/gallery/",
@@ -74,6 +72,13 @@
         "bytes": 8290,
         "sha256": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
         "committedSourceSha256": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
+        "matchesCommittedSource": true
+      },
+      "captures.json": {
+        "status": 200,
+        "bytes": 139366,
+        "sha256": "c13228c6a4859885957a083a2364516cccd5e283c1549082c046b9b25691c81a",
+        "committedSourceSha256": "c13228c6a4859885957a083a2364516cccd5e283c1549082c046b9b25691c81a",
         "matchesCommittedSource": true
       },
       "assets/material-components.js": {
@@ -160,8 +165,8 @@
   "browserVerification": {
     "status": "verified",
     "engine": "Microsoft Edge",
-    "headless": true,
     "sourceRevision": "1c844e400e806bb2cb78f316af9979187e094abc",
+    "inventoryRevision": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
     "targetPreflight": {
       "status": "verified",
       "phase": "final",
@@ -221,19 +226,19 @@
       "languageModes": [
         {
           "mode": "en",
-          "language": "en",
+          "documentLanguage": "en",
           "persisted": "en",
           "labelsUpdated": true
         },
         {
           "mode": "zh",
-          "language": "zh-HK",
+          "documentLanguage": "zh-HK",
           "persisted": "zh",
           "labelsUpdated": true
         },
         {
           "mode": "both",
-          "language": "en",
+          "documentLanguage": "en",
           "persisted": "both",
           "labelsUpdated": true
         }
@@ -259,14 +264,15 @@
         "renderedCards": 67,
         "decodedImagesAtTopOfPage": 0,
         "lazyImageLoading": true,
-        "note": "A fresh reload at the top of the long page had not decoded below-fold lazy images yet. HTTP readback independently verified every original image URL and hash."
+        "note": "A fresh reload at the top of the long page had not decoded below-fold lazy images yet. The completed desktop and mobile viewport runs decoded all 67 images, and HTTP readback independently verified every original image URL and hash."
       }
     },
     "limits": [
-      "The earlier documentation preview browser receipt remains FAILED on status-navigation focus; its six captures remain source previews only.",
-      "The fresh mobile reload did not scroll through the full page; its zero decoded images at the top is recorded separately from the successful viewport passes and complete HTTP image verification.",
-      "Keyboard focus visibility was verified; activation of every control by keyboard was not exercised.",
-      "Capture-time values remain unavailable for the two source-fixture images and were not inferred."
+      "The earlier documentation source-preview browser receipt remains FAILED on status-navigation focus; its six captures remain source previews only.",
+      "On a fresh mobile reload at the top, below-fold lazy images were not decoded yet; completed viewport runs and HTTP hash verification are recorded separately.",
+      "Keyboard focus visibility was verified; keyboard activation of every control and provenance disclosure were not exercised.",
+      "Capture times remain unavailable for two source-fixture images and were not inferred.",
+      "Other private cache material remains outside the bounded review; the two unreviewed categories are listed in captures.json and README."
     ]
   },
   "previousVerifiedReceipt": {
@@ -280,5 +286,5 @@
     "captureCount": 52,
     "deliveryReceiptPath": "archive/live-delivery-20261015.json"
   },
-  "scopeNote": "This receipt separates the verified source revision, Pages deployment, static-byte readback, image delivery, and bounded browser checks. It does not claim complete product, installer, guest-hardware, or general compatibility acceptance."
+  "scopeNote": "This receipt separates the verified source revision, Pages run, static-byte readback, image delivery, and bounded browser checks. The receipt file is updated after those delivery checks; it does not claim complete product, installer, guest-hardware, or general compatibility acceptance."
 }

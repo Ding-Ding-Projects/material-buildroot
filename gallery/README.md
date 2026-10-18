@@ -26,7 +26,7 @@ Eight ignored source-preview images were inspected and published from exact imag
 
 ## Published delivery and verification
 
-The public gallery is deployed from revision `1c844e400e806bb2cb78f316af9979187e094abc` by [Pages run 39128444128](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/39128444128). The About homepage remains `https://ding-ding-projects.github.io/material-buildroot/`, and the project README links directly to `https://ding-ding-projects.github.io/material-buildroot/gallery/`.
+The interactive gallery and its reviewed captures were published from revision `1c844e400e806bb2cb78f316af9979187e094abc` by [Pages run 39128444128](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/39128444128). The 67-image inventory and the explicit unreviewed-cache exclusions were published from revision `71bb94dd2d8482a55a0bea51061a7f154c2ad92a` by [Pages run 39129688606](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/39129688606). The About homepage remains `https://ding-ding-projects.github.io/material-buildroot/`, and the project README links directly to `https://ding-ding-projects.github.io/material-buildroot/gallery/`.
 
 The live route, index, gallery script, stylesheet, Material bundle, and all 67 image URLs were read back. Static files match the immutable source revision byte-for-byte, and all 67 image responses returned HTTP 200 with SHA-256 values matching `captures.json`. The route and `index.html` returned identical bytes.
 
