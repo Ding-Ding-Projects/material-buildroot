@@ -135,11 +135,13 @@ test('close waits for a real opening animation before starting the closing anima
 
 test('disconnect invalidates a pending open continuation',async({page})=>{
  const tabs=await dialogFixture(page);
+ expect(await tabs.evaluate(tabs=>tabs.remove===Element.prototype.remove)).toBe(true);
  await tabs.evaluate(async tabs=>{
   await tabs.close();window.dialogEvents=[];window.detachedTabs=tabs;
-  tabs.show('manage');tabs.parentNode.removeChild(tabs);
+  tabs.show('manage');tabs.remove();
  });
  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  expect(await page.evaluate(()=>window.dialogEvents)).toEqual([]);
  expect(await page.evaluate(()=>window.detachedTabs.shadowRoot.querySelector('md-dialog').open)).toBe(false);
+ expect(await page.evaluate(()=>window.detachedTabs.isConnected)).toBe(false);
 });

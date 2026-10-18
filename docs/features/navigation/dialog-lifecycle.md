@@ -18,6 +18,10 @@ reopen the dialog. Cross-window refresh continuations also check the current
 request before starting. A transition rejection displays a localized notice and
 does not poison later queued requests.
 
+Tab-close requests use a separate `requestClose()` method. The host retains the
+native `Element.remove()` method so callers can safely disconnect it without
+accidentally invoking tab removal with a missing argument.
+
 ## Scope and preservation
 
 This lifecycle does not delete projects, alter drafts, change execution approval,
@@ -40,11 +44,12 @@ the corrected isolated preview configuration served those dependencies normally
 for the repaired run. Browser component evidence is not packaged Windows or
 native input acceptance. Integrated native verification remains separate.
 
-The repaired suite has ten passing case verdicts: the first expanded run passed
-nine cases; its disconnect fixture initially called the component's tab-removal
-method instead of DOM removal. After correcting that fixture, both the disconnect
-case and the real-animation case passed, with no page errors in the latter.
-Whitespace validation also passed. No production build was run in this lane.
+The disconnect case also asserts identity with `Element.prototype.remove`, calls
+that native method, and verifies the host is disconnected and no stale opening
+occurs. Before the method rename, native removal invoked the tab-close method and
+threw while reading an absent tab ID. No production build was run in this lane.
+The final focused renderer run passed all ten cases in 18.8 seconds, including
+real animation ordering without page errors. Whitespace validation passed.
 
 Intermittent disappearance of a native renderer process and stalled debugging
 connections have not been attributed to this lifecycle. This change makes no
