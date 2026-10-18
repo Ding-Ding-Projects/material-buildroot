@@ -1835,7 +1835,7 @@ class MaterialBuildroot extends LitElement {
             ${this.l("Actions","操作",true)} · Ctrl+Shift+F</span
           ></md-text-button
         >
-        <md-text-button aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('accessibility_new')}</md-text-button>
+        <md-text-button id="attention-button" aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('accessibility_new')}</md-text-button>
         <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
           ${(["minimize", "maximize-restore", "close"] as const).map(
             (command, index) =>

@@ -98,10 +98,83 @@ test('destination catalog preserves compatibility identifiers',async({page})=>{
 test('attention opens without a permanent utility row and Escape restores focus',async({page})=>{
   const app=await open(page);
   const button=app.locator('header').getByRole('button',{name:'Attention and narration',exact:true});
-  await expect(app.locator('guided-shell-attention .guided-attention')).toBeHidden();
-  await button.click();await expect(app.locator('guided-shell-attention .guided-attention')).toBeVisible();
-  await page.keyboard.press('Escape');await expect(app.locator('guided-shell-attention .guided-attention')).toBeHidden();
+  await expect(app.locator('guided-shell-attention .settings')).toHaveCount(0);
+  await button.click();await expect(app.locator('guided-shell-attention .guided-attention.is-open')).toBeVisible();
+  await page.keyboard.press('Escape');await expect(app.locator('guided-shell-attention .settings')).toHaveCount(0);
   expect(await button.evaluate(button=>button.getRootNode().activeElement===button)).toBe(true);
+});
+
+test('closed attention settings preserve enabled feedback and snooze',async({page})=>{
+  const app=await open(page),attention=app.locator('guided-shell-attention');
+  await page.evaluate(()=>{window.studio.attentionHistory=async()=>({ok:true});});
+  await attention.evaluate(async panel=>{
+    panel.preferences={...panel.preferences,modes:{...panel.preferences.modes,timeAwareness:true,oneThing:true,momentum:true},nextAction:'Review the selected configuration',snoozeUntil:0};
+    panel.lastActivity=Date.now()-21*60000;panel.now=Date.now();await panel.updateComplete;
+  });
+  await expect(attention.locator('.settings')).toHaveCount(0);
+  await expect(attention.locator('.attention-feedback')).toContainText('Session minutes');
+  await expect(attention.locator('.attention-feedback')).toContainText('Review the selected configuration');
+  await expect(attention.locator('.attention-feedback [role="status"]')).toBeVisible();
+  await attention.getByRole('button',{name:'Not now, for one hour',exact:true}).click();
+  expect(await attention.evaluate(panel=>panel.preferences.snoozeUntil>Date.now()+3500000)).toBe(true);
+  await expect(attention.getByRole('button',{name:'Not now, for one hour',exact:true})).toHaveCount(0);
+});
+
+test('startup presentation remains visible with attention settings closed',async({page})=>{
+  const app=await open(page),attention=app.locator('guided-shell-attention');
+  await app.evaluate(async app=>{
+    window.__surpriseCalls=0;
+    window.studio.dimSum=async request=>{if(request.action==='surprise')window.__surpriseCalls++;return {ok:true,dish:{id:'fixture',en:'Fixture dish',zh:'測試點心',photo:'fixture',image:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg=='}};};
+    app.state={...app.state,origin:'saved'};app.setupDone=true;await app.updateComplete;
+  });
+  await expect(attention.locator('.settings')).toHaveCount(0);
+  await expect(attention.locator('guided-shell-dim-sum .surprise')).toBeVisible();
+  expect(await page.evaluate(()=>window.__surpriseCalls)).toBe(1);
+  await expect(attention.locator('guided-shell-dim-sum').getByRole('button',{name:'Dim sum catalogue',exact:true})).toBeHidden();
+  await attention.evaluate(panel=>panel.restricted=true);
+  await expect(attention.locator('guided-shell-dim-sum .surprise')).toHaveCount(0);
+});
+
+test('New tab catalog attention action returns focus to the visible header',async({page})=>{
+  const app=await open(page),tabs=app.locator('workspace-tabs');
+  await tabs.locator('[data-control="new-tab"]').click();
+  await tabs.getByRole('button',{name:'Attention and narration',exact:true}).click();
+  await expect(app.locator('guided-shell-attention .guided-attention.is-open')).toBeVisible();
+  await expect(tabs.locator('md-dialog[open]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(app.locator('guided-shell-attention .settings')).toHaveCount(0);
+  expect(await app.locator('#attention-button').evaluate(button=>button.getRootNode().activeElement===button)).toBe(true);
+});
+
+test('closing attention cancels a deferred catalogue photo without creating a surprise',async({page})=>{
+  const app=await open(page),attention=app.locator('guided-shell-attention'),catalogue=attention.locator('guided-shell-dim-sum');
+  await page.evaluate(()=>{
+    const dish={id:'fixture',en:'Fixture dish',zh:'測試點心',photo:'fixture',image:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg=='};
+    window.studio.dimSum=async request=>request.action==='catalog'?{ok:true,dishes:[dish]}:new Promise(resolve=>window.__resolvePhoto=()=>resolve({ok:true,dish}));
+  });
+  await app.locator('#attention-button').click();
+  await catalogue.getByRole('button',{name:'Dim sum catalogue',exact:true}).click();
+  await catalogue.getByRole('button',{name:'Fixture dish',exact:true}).click();
+  await expect.poll(()=>page.evaluate(()=>typeof window.__resolvePhoto)).toBe('function');
+  await page.keyboard.press('Escape');
+  await expect(attention.locator('.settings')).toHaveCount(0);
+  await page.evaluate(()=>window.__resolvePhoto());
+  await expect.poll(()=>catalogue.evaluate(panel=>panel.busy)).toBe(false);
+  expect(await catalogue.evaluate(panel=>panel.selected)).toBeNull();
+  await expect(catalogue.locator('.surprise')).toHaveCount(0);
+});
+
+test('attention respects Escape already consumed by a nested control',async({page})=>{
+  const app=await open(page),attention=app.locator('guided-shell-attention');
+  await app.locator('#attention-button').click();
+  await attention.evaluate(panel=>{
+    const control=panel.shadowRoot.querySelector('.settings md-outlined-text-field');
+    control.addEventListener('keydown',event=>event.preventDefault(),{once:true});
+    control.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,composed:true,cancelable:true}));
+  });
+  await expect(attention.locator('.guided-attention.is-open')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(attention.locator('.settings')).toHaveCount(0);
 });
 
 test('filtered settings jump reveals the intended personal wording panel',async({page})=>{

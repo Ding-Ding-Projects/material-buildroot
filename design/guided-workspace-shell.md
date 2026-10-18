@@ -39,3 +39,11 @@ The focused guided-shell fixture suite passed 17 checks. It covers primary navig
 The candidate TypeScript diagnostic set is identical to the baseline: 23 diagnostics in unchanged sibling files, none in these shell files. This is not a whole-project typecheck pass. Computed WCAG text contrast ratios for the six principal light/dark foreground/background pairs are 15.50, 5.77, 6.44, 15.17, 9.06 and 7.67. Existing personal appearance overrides remain supported and require their own contrast checks.
 
 The operations adapter must be integrated before claiming the duplicate inner navigation and output dock are removed. Native project pickers, runtime acquisition/execution, ISO generation, boot validation, installation, and the integrated built layout matrix remain outside this renderer evidence. The retained original attention controller now renders as `guided-shell-attention`; shared test fixtures targeting the old element or Project operations heading need coordinated adaptation.
+
+## Attention preservation follow-up
+
+The initial drawer wrapper hid the existing attention feedback and could consume startup presentation invisibly. The base attention controller now exposes protected composition methods for settings, feedback, and the catalogue component. The guided composition keeps enabled time-awareness, next-action and idle feedback visible independently of the drawer. Default-off feedback adds no permanent utility row. The same mounted catalogue controller retains startup suppression, shared restrictions and dismissal behavior; its ordinary entry controls appear only in the open drawer.
+
+Escape restores a connected visible opener or the stable header control after catalog navigation. A nested control that already handles Escape keeps the drawer open. Closing while a catalogue-photo request is pending invalidates that presentation epoch; a late response cannot reappear as a startup surprise or overwrite a newer request's busy state.
+
+The final focused shell suite passed 22 checks in 33.8 seconds, including all five added attention preservation cases. All 103 recorded renderer input hashes remained unchanged across the run. Original output and before/after receipts are retained as local verification records. TypeScript still reports the identical 23 baseline diagnostics in unchanged sibling files. This remains renderer evidence only.
