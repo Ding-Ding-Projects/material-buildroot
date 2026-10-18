@@ -20,7 +20,14 @@ const filterLabels = {
   'legacy-shell': ['Legacy shell', '舊版介面'],
   'website-current': ['Interactive website', '互動網站'],
   'website-historical-landing': ['Earlier website', '早期網站'],
-  'website-historical-preview': ['Early preview', '早期預覽']
+  'website-historical-preview': ['Early preview', '早期預覽'],
+  'native-windows': ['Native dialog', '原生對話框'],
+  'startup-installed': ['Installed startup', '已安裝啟動畫面'],
+  'website-8db': ['Documentation preview', '文件預覽'],
+  'runtime-guidance-599d': ['Earlier runtime fixture', '較早執行環境測試畫面'],
+  'runtime-guidance-d6': ['Runtime reader fixture', '執行環境閱讀測試畫面'],
+  'iso-boot-profile': ['BIOS ISO profile', 'BIOS ISO 設定'],
+  'iso-boot-failures': ['QEMU profile faults', 'QEMU 設定故障']
 };
 
 const ui = {
@@ -57,6 +64,15 @@ const ui = {
   artifact: ['Packaged artifact SHA-256', '封裝程式 SHA-256'],
   archive: ['Release archive SHA-256', '版本封存檔 SHA-256'],
   buildReceipt: ['Build receipt SHA-256', '建置收據 SHA-256'],
+  evidenceReceipt: ['Source evidence receipt SHA-256', '來源證據收據 SHA-256'],
+  productionReceipt: ['Production receipt SHA-256', '製作收據 SHA-256'],
+  configuration: ['Configuration SHA-256', '設定 SHA-256'],
+  verificationStatus: ['Verification receipt status', '驗證收據狀態'],
+  verificationReceipt: ['Verification receipt SHA-256', '驗證收據 SHA-256'],
+  verificationFailure: ['Recorded verification failure', '記錄的驗證失敗'],
+  sourceBase: ['Source base revision', '來源基礎版本'],
+  firmware: ['Firmware', '韌體'],
+  bootloader: ['Bootloader', '啟動載入程式'],
   boundary: ['Evidence boundary', '證據限制'],
   openImage: ['Open original image', '開啟原始圖片'],
   metadata: ['Gallery metadata', '截圖集資料'],
@@ -135,7 +151,7 @@ function createCard(capture) {
   const card = document.createElement('article');
   card.className = 'capture-card';
   card.dataset.section = capture.section;
-  card.dataset.search = [capture.titleEn, capture.titleZh, capture.categoryEn, capture.categoryZh, capture.kindEn, capture.kindZh, capture.boundaryEn, capture.boundaryZh, capture.sourceRevision, capture.buildBaseCommit, capture.deliveredSourceCommit, capture.language, capture.theme].filter(Boolean).join(' ').toLocaleLowerCase();
+  card.dataset.search = [capture.titleEn, capture.titleZh, capture.categoryEn, capture.categoryZh, capture.kindEn, capture.kindZh, capture.boundaryEn, capture.boundaryZh, capture.sourceRevision, capture.sourceBaseRevision, capture.buildBaseCommit, capture.deliveredSourceCommit, capture.language, capture.theme, capture.verificationReceiptStatus, capture.verificationReceiptFailure, capture.firmware, capture.bootloader].filter(Boolean).join(' ').toLocaleLowerCase();
 
   const imgLink = document.createElement('a');
   imgLink.className = 'card-image-link';
@@ -209,6 +225,15 @@ function createCard(capture) {
   addDetail(list, ...ui.artifact, capture.artifactSha256);
   addDetail(list, ...ui.archive, capture.archiveSha256);
   addDetail(list, ...ui.buildReceipt, capture.buildReceiptSha256);
+  addDetail(list, ...ui.evidenceReceipt, capture.evidenceReceiptSha256);
+  addDetail(list, ...ui.productionReceipt, capture.productionReceiptSha256);
+  addDetail(list, ...ui.configuration, capture.configurationSha256);
+  addDetail(list, ...ui.verificationStatus, capture.verificationReceiptStatus);
+  addDetail(list, ...ui.verificationReceipt, capture.verificationReceiptSha256);
+  addDetail(list, ...ui.verificationFailure, capture.verificationReceiptFailure);
+  addDetail(list, ...ui.sourceBase, capture.sourceBaseRevision);
+  addDetail(list, ...ui.firmware, capture.firmware);
+  addDetail(list, ...ui.bootloader, capture.bootloader);
   addDetail(list, ...ui.boundary, `${capture.boundaryEn} / ${capture.boundaryZh}`);
   detailPanel.append(list);
   detailButton.addEventListener('click', () => {

@@ -1,66 +1,96 @@
 {
   "schemaVersion": 1,
   "status": "verified",
+  "sourceVerification": {
+    "status": "verified",
+    "sourceCommit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
+    "taskBranch": "ai/docs/20261018-public-capture-gallery",
+    "taskCommit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
+    "taskBranchReadback": "verified",
+    "mainReadback": "verified"
+  },
   "deployment": {
+    "status": "verified",
     "url": "https://ding-ding-projects.github.io/material-buildroot/gallery/",
-    "sourceCommit": "838befc311ab12d17eca744445331b53f2c3b25f",
-    "pagesWorkflowRunId": 38822061871,
+    "sourceCommit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
+    "pagesWorkflowRunId": 39129688606,
+    "pagesWorkflowUrl": "https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/39129688606",
+    "pagesWorkflowConclusion": "success",
     "routeHttpStatus": 200,
-    "httpCheckedAtUtc": "2026-10-15T23:12:13Z",
-    "browserCheckedAtUtc": "2026-10-15T23:13:11.581Z",
-    "cacheBustQuery": "838befc311ab12d17eca744445331b53f2c3b25f"
+    "httpCheckedAtUtc": "2026-10-18T13:02:07.428Z",
+    "browserCheckedAtUtc": "2026-10-18T12:56:01.756Z",
+    "cacheBustQuery": "candidate=71bb94dd2d8482a55a0bea51061a7f154c2ad92a"
+  },
+  "sourceCandidate": {
+    "baseCommit": "79f0de311430271bd195d4f16952de636f041209",
+    "branch": "ai/docs/20261018-public-capture-gallery",
+    "commit": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
+    "captureCount": 67,
+    "newCaptureCount": 16,
+    "status": "integrated"
+  },
+  "sourceLinks": {
+    "readmeGalleryUrl": "https://ding-ding-projects.github.io/material-buildroot/gallery/",
+    "readmeBacklinkVerified": true,
+    "aboutHomepageUrl": "https://ding-ding-projects.github.io/material-buildroot/",
+    "aboutHomepageVerified": true,
+    "repositoryVisibility": "PUBLIC"
   },
   "httpVerification": {
-    "successfulResponses": 58,
+    "expectedImageCount": 67,
+    "successfulResponses": 67,
     "routeAndIndex": {
       "route": {
-        "sha256": "0ac5becf0b152a6faee4e28aa59fe683b59381d15e94c317a2e32452872f755a",
-        "bytes": 9261,
-        "contentType": "text/html; charset=utf-8",
-        "status": 200
+        "status": 200,
+        "bytes": 11314,
+        "sha256": "d9aa6544a8494c1205fb1f301dedd0c5dbf2cc473202bf4ce298b298590130b3"
       },
       "indexHtml": {
-        "sha256": "0ac5becf0b152a6faee4e28aa59fe683b59381d15e94c317a2e32452872f755a",
-        "bytes": 9261,
-        "contentType": "text/html; charset=utf-8",
-        "status": 200
+        "status": 200,
+        "bytes": 11314,
+        "sha256": "d9aa6544a8494c1205fb1f301dedd0c5dbf2cc473202bf4ce298b298590130b3"
       },
       "sameBytes": true
     },
     "siteAssets": {
-      "styles.css": {
-        "sha256": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
-        "bytes": 8290,
-        "contentType": "text/css; charset=utf-8",
-        "status": 200
+      "index.html": {
+        "status": 200,
+        "bytes": 11314,
+        "sha256": "d9aa6544a8494c1205fb1f301dedd0c5dbf2cc473202bf4ce298b298590130b3",
+        "committedSourceSha256": "d9aa6544a8494c1205fb1f301dedd0c5dbf2cc473202bf4ce298b298590130b3",
+        "matchesCommittedSource": true
       },
       "gallery.js": {
-        "sha256": "498dd1609f666567b70349d250fa6e995eb9948734b66b862f215a16ca7c84dc",
-        "bytes": 14232,
-        "contentType": "application/javascript; charset=utf-8",
-        "status": 200
+        "status": 200,
+        "bytes": 16120,
+        "sha256": "1c38491f3aef3e0e54e48b19d08c4bddeb204a2af4c1e1b54ea087aa8adaa994",
+        "committedSourceSha256": "1c38491f3aef3e0e54e48b19d08c4bddeb204a2af4c1e1b54ea087aa8adaa994",
+        "matchesCommittedSource": true
+      },
+      "styles.css": {
+        "status": 200,
+        "bytes": 8290,
+        "sha256": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
+        "committedSourceSha256": "fb1a0d03c082b321700de65422e03e7a07988503cd92e9996addf625cb214fcd",
+        "matchesCommittedSource": true
       },
       "captures.json": {
-        "sha256": "ad958bd307f0bfba22654523a2d0ae4bc182ba13931919db494e1d080e131d87",
-        "bytes": 97530,
-        "contentType": "application/json; charset=utf-8",
-        "status": 200
+        "status": 200,
+        "bytes": 139366,
+        "sha256": "c13228c6a4859885957a083a2364516cccd5e283c1549082c046b9b25691c81a",
+        "committedSourceSha256": "c13228c6a4859885957a083a2364516cccd5e283c1549082c046b9b25691c81a",
+        "matchesCommittedSource": true
       },
       "assets/material-components.js": {
-        "sha256": "db0399aa3ce6453c305144f4808f18c6349354e3fb1eb0871c38f1a90f47b9c5",
+        "status": 200,
         "bytes": 223177,
-        "contentType": "application/javascript; charset=utf-8",
-        "status": 200
-      },
-      "assets/THIRD_PARTY_NOTICES.txt": {
-        "sha256": "44286cae3767340d7a992501f6d149361450dd96099edf21549917b6ea9159fb",
-        "bytes": 11524,
-        "contentType": "text/plain; charset=utf-8",
-        "status": 200
+        "sha256": "db0399aa3ce6453c305144f4808f18c6349354e3fb1eb0871c38f1a90f47b9c5",
+        "committedSourceSha256": "db0399aa3ce6453c305144f4808f18c6349354e3fb1eb0871c38f1a90f47b9c5",
+        "matchesCommittedSource": true
       }
     },
     "siteAssetHashMismatches": 0,
-    "imageCount": 51,
+    "imageCount": 67,
     "imageHashMismatches": 0,
     "imageSha256ByCaptureId": {
       "current-app-001": "83512679e16507517f18f936b6e150310c59d48bdfe306443abe5025d7169b83",
@@ -113,75 +143,148 @@
       "website-current-048": "0819a19c65aad0304c11dc0fd634b2794e9ae7df2e1a6a49e67294f10f79ffa4",
       "website-current-049": "3d817fd79e64d97386b53a03d8b2ce4416a752585a111b6368ac54382e48572c",
       "legacy-shell-050": "66c2d311d1dcc49bd8a4ca9c80b5ac0d6defb2b36044153276aa5581cd8c8cd9",
-      "legacy-shell-051": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968"
+      "legacy-shell-051": "25fbea30730b610638f4919570bb99db17f6cbecdd01b2c69f06c8acca292968",
+      "native-windows-052": "cf450358cc4ad6eb1c79cdbd192836ff1b77649ac25c6f4fcbe1c6dc26ee77ad",
+      "installed-workspace-053": "bd3f1d0577a9414ebf9397ee0d77d4e09f6bb74ac643a2e8d4490c64a7fb4aac",
+      "website-8db-054": "8b16a55ca0b4827e62f3863477e8ad71e0d0244aa4d459aeae211a7d2ecec63c",
+      "website-8db-055": "6fdd01eb1e823ad3056e73bb291166722a6f795b0e1d5a2b2b95277a9672b58d",
+      "website-8db-056": "6ca70875a958b6a920737e6a918f75d80548ddc98981de076916cb484837910b",
+      "website-8db-057": "143c996218f431f792c55f8b319729b459656179f7a0964ac07d87504e57035c",
+      "website-8db-058": "8c1d317d26edc300d3c7bfa809eab3bcc5b31b8c156edee57fb22cf6d7b97402",
+      "website-8db-059": "12adeae5673aacb660bb561f605506f566584d3feb9673923e70b8210294eb21",
+      "runtime-guide-060": "4e8abb1bfebdeb3050d71c581e2d32698f2cdd88d977fc7ac8f0a424c2f3c5c5",
+      "runtime-guide-061": "3966c609ab76ae345512d650f4e354ab8f2e06a724d21ad0dad233fd66ff8207",
+      "iso-boot-062": "f071b4ff242961f7ffffeb3c9ad0ee97ffdedc49946a3e9c8b96f7ab8e1a9812",
+      "iso-boot-063": "22e7d2790262704b967a32afa00351f4faada0e4b804715d9b471ab72875736a",
+      "iso-boot-064": "5c72ca9010aef894c11c78202fef7ac3d22325965e7f9c8d1179200a9924c6a6",
+      "iso-boot-065": "d0cda2df447d5d83ddd79482ae6e95e1607b67bea99ae9d8847bfe597edd6887",
+      "iso-boot-066": "198691a3500d2288cdb69d4e071eaf2e1343f71ed2244db205ee6a752619a08b",
+      "iso-boot-067": "78defc9e3d3c8c34b9b7b65d8e8cd730849a79fa50a8673e17d9cf43bba15273"
     }
   },
   "browserVerification": {
-    "engine": "Chromium",
-    "version": "154.0.8037.57",
-    "headless": true,
+    "status": "verified",
+    "engine": "Microsoft Edge",
+    "sourceRevision": "1c844e400e806bb2cb78f316af9979187e094abc",
+    "inventoryRevision": "71bb94dd2d8482a55a0bea51061a7f154c2ad92a",
+    "targetPreflight": {
+      "status": "verified",
+      "phase": "final",
+      "targetCount": 1,
+      "targetUrl": "https://ding-ding-projects.github.io/material-buildroot/gallery/?candidate=1c844e400e806bb2cb78f316af9979187e094abc",
+      "receiptSha256": "54cb711ac055f3cb4d833d98f67a068861c4a62ca30ffd38da2047f1c59ce350"
+    },
     "viewportChecks": [
       {
-        "width": 320,
-        "height": 900,
-        "documentWidth": 320,
-        "bodyWidth": 320
+        "viewport": {
+          "width": 1440,
+          "height": 1000,
+          "scale": 1,
+          "mobile": false
+        },
+        "routeLoaded": true,
+        "cardCount": 67,
+        "bodyOverflow": false,
+        "unnamedInteractiveCount": 0,
+        "captureSha256": "a753d3bd3ad3339d9f130985f1a97c6a9abe3a183b51c8c6b677d11d42b31bf4"
       },
       {
-        "width": 390,
-        "height": 900,
-        "documentWidth": 390,
-        "bodyWidth": 390
-      },
-      {
-        "width": 768,
-        "height": 900,
-        "documentWidth": 768,
-        "bodyWidth": 768
-      },
-      {
-        "width": 1440,
-        "height": 900,
-        "documentWidth": 1440,
-        "bodyWidth": 1440
+        "viewport": {
+          "width": 390,
+          "height": 844,
+          "scale": 1,
+          "mobile": true,
+          "touchEmulated": true
+        },
+        "routeLoaded": true,
+        "cardCount": 67,
+        "decodedImageCount": 67,
+        "bodyOverflow": false,
+        "unnamedInteractiveCount": 0,
+        "captureSha256": "deb17d21391f34803e2b7531136c990ead821c923d202245d6bc81e359f31d91"
       }
     ],
-    "reducedMotionPreference": "reduce",
-    "checks": {
-      "reviewedCaptureCount": 51,
-      "allRegisteredControls": true,
-      "bilingualChipLabels": [
-        "All captures / 全部截圖",
-        "Workspace / 工作區",
-        "Historical workspace / 歷史工作區",
-        "Legacy shell / 舊版介面",
-        "Interactive website / 互動網站",
-        "Earlier website / 早期網站",
-        "Early preview / 早期預覽"
-      ],
-      "legacyCollectionVisible": 2,
-      "searchNoMatchState": true,
-      "clearFilterCount": 51,
-      "provenanceDisclosure": {
-        "expanded": true,
-        "accessibleExpandedState": "true"
-      },
-      "keyboardSpaceActivatesCollection": true,
-      "languageChange": {
-        "lang": "zh-HK",
-        "dataset": "zh",
-        "chip": "全部截圖"
-      },
-      "themeChanged": "dark",
-      "languageAndThemePersisted": {
-        "lang": "zh-HK",
-        "theme": "dark"
-      },
-      "allImageElementsDecoded": 51,
-      "reducedMotionComputedScrollBehavior": "auto",
-      "consoleOrPageErrors": []
+    "reducedMotionPreference": {
+      "verified": true,
+      "reduce": true,
+      "reduceScrollBehavior": "auto",
+      "reduceTransitionDuration": "1e-05s",
+      "normalScrollBehavior": "smooth"
     },
-    "errors": []
+    "accessibility": {
+      "rootFound": true,
+      "nodeCount": 7360,
+      "interactiveNodeCount": 289,
+      "unnamedInteractiveCount": 0
+    },
+    "interactionChecks": {
+      "searchNoMatch": true,
+      "clearFiltersRestoredAll": true,
+      "isoFaultFilterCount": 2,
+      "themeChange": true,
+      "themePersisted": true,
+      "languageModes": [
+        {
+          "mode": "en",
+          "documentLanguage": "en",
+          "persisted": "en",
+          "labelsUpdated": true
+        },
+        {
+          "mode": "zh",
+          "documentLanguage": "zh-HK",
+          "persisted": "zh",
+          "labelsUpdated": true
+        },
+        {
+          "mode": "both",
+          "documentLanguage": "en",
+          "persisted": "both",
+          "labelsUpdated": true
+        }
+      ],
+      "keyboardVisibleFocus": {
+        "verified": true,
+        "shadowFocusVisible": true,
+        "captureSha256": "71eef18a273cd2776998a8468156d83a12b35a90a2c2488b8b2b8ef1a63d8ddc"
+      },
+      "provenanceDisclosure": "not exercised in this browser pass"
+    },
+    "pageRuntime": {
+      "consoleErrorCount": 0,
+      "resourceFailureCount": 0,
+      "thirdPartyResourceCount": 0,
+      "bodyOverflow": false,
+      "latestFreshMobileReload": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "readyState": "complete",
+        "renderedCards": 67,
+        "decodedImagesAtTopOfPage": 0,
+        "lazyImageLoading": true,
+        "note": "A fresh reload at the top of the long page had not decoded below-fold lazy images yet. The completed desktop and mobile viewport runs decoded all 67 images, and HTTP readback independently verified every original image URL and hash."
+      }
+    },
+    "limits": [
+      "The earlier documentation source-preview browser receipt remains FAILED on status-navigation focus; its six captures remain source previews only.",
+      "On a fresh mobile reload at the top, below-fold lazy images were not decoded yet; completed viewport runs and HTTP hash verification are recorded separately.",
+      "Keyboard focus visibility was verified; keyboard activation of every control and provenance disclosure were not exercised.",
+      "Capture times remain unavailable for two source-fixture images and were not inferred.",
+      "Other private cache material remains outside the bounded review; the two unreviewed categories are listed in captures.json and README."
+    ]
   },
-  "scopeNote": "This verifies the published browser gallery bytes and interactions in Chromium. It does not establish native desktop, Windows, installer, guest, build, or LAN-companion acceptance."
+  "previousVerifiedReceipt": {
+    "path": "archive/live-delivery-20261015.json",
+    "sha256": "f4892e5142b6eb86457957b216f56ca587aaaf54e848fb63f403b72258e7f10d",
+    "sourceCommit": "838befc311ab12d17eca744445331b53f2c3b25f",
+    "imageCount": 51
+  },
+  "previousServedSourceArchive": {
+    "manifestPath": "archive/gallery-captures-20261015.json",
+    "captureCount": 52,
+    "deliveryReceiptPath": "archive/live-delivery-20261015.json"
+  },
+  "scopeNote": "This receipt separates the verified source revision, Pages run, static-byte readback, image delivery, and bounded browser checks. The receipt file is updated after those delivery checks; it does not claim complete product, installer, guest-hardware, or general compatibility acceptance."
 }

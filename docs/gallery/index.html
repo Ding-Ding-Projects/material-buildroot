@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="A reviewed, provenance-bound gallery of Material Buildroot application and documentation screenshots.">
-  <title>Material Buildroot | Historical screenshot gallery</title><meta property="og:title" content="Material Buildroot historical screenshot gallery"><meta property="og:description" content="Unchanged historical captures with original source identities and explicit acceptance limits."><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Material Buildroot | Screenshot gallery</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:,">
   <script type="module" src="gallery.js"></script>
@@ -35,27 +35,33 @@
       <h1 id="page-title"><span class="en">Screenshots with their source and limits.</span><span class="zh" lang="zh-HK">每張截圖都附有來源與驗證限制。</span></h1>
       <p class="lede"><span class="en">Browse the retained workspace, historical interface captures and documentation-site previews. Every image is an unchanged original with its source identity and evidence boundary shown alongside it.</span><span class="zh" lang="zh-HK">瀏覽保留的工作區、歷史介面截圖與文件網站預覽。每張圖片都保留原始內容，並列出來源及驗證限制。</span></p>
       <div class="summary-row" aria-label="Gallery inventory / 截圖集目錄">
-        <div class="summary-card"><strong id="capture-count">52</strong><span><span class="en">reviewed original images</span><span class="zh" lang="zh-HK">張已檢視原始圖片</span></span></div>
-        <div class="summary-card"><strong>7</strong><span><span class="en">source-bound capture groups</span><span class="zh" lang="zh-HK">組綁定來源的截圖</span></span></div>
+        <div class="summary-card"><strong id="capture-count">67</strong><span><span class="en">reviewed original images</span><span class="zh" lang="zh-HK">張已檢視原始圖片</span></span></div>
+        <div class="summary-card"><strong>13</strong><span><span class="en">source-bound capture groups</span><span class="zh" lang="zh-HK">組綁定來源的截圖</span></span></div>
         <div class="summary-card"><strong>320–1440 px</strong><span><span class="en">recorded viewport widths</span><span class="zh" lang="zh-HK">有記錄的檢視區寬度</span></span></div>
       </div>
       <p class="boundary-note"><strong><span class="en">Evidence boundary:</span><span class="zh" lang="zh-HK">證據限制：</span></strong> <span class="en">Renderer and browser captures document visible interface states. Fixture-backed panels and unverified native operations are called out per image. This gallery does not claim Windows, installer, build, guest, or LAN acceptance.</span><span class="zh" lang="zh-HK">Renderer 與瀏覽器截圖只記錄可見介面狀態。每張圖片會註明測試資料或未驗證的原生操作。本截圖集不代表 Windows、安裝程式、建置、客體系統或區域網絡驗收。</span></p>
-      <p class="not-captured"><strong><span class="en">Not shown here:</span><span class="zh" lang="zh-HK">本截圖集未展示：</span></strong> <span class="en">newer shared-mode, queue/catalogue and schedule changes after source revision e8f9beb.</span><span class="zh" lang="zh-HK">來源版本 e8f9beb 之後新增的共用模式、工作佇列／目錄及排程功能。</span></p>
+      <p class="not-captured"><strong><span class="en">Not shown here:</span><span class="zh" lang="zh-HK">本截圖集未展示：</span></strong> <span class="en">complete workflows for later shared-mode, queue/catalogue and schedule changes. Separate images show one installed startup state, one native dialog, limited documentation routes, and one bounded guest profile.</span><span class="zh" lang="zh-HK">較新共用模式、工作佇列／目錄及排程功能的完整流程。其他圖片只記錄一個已安裝啟動畫面、一個原生對話框、有限文件路線，以及一個有邊界的客體設定。</span></p>
     </section>
 
-    <p class="boundary-note"><strong><span class="en">Historical evidence only.</span><span class="zh" lang="zh-HK">僅供歷史證據參考。</span></strong> <span class="en">No image here establishes the current build appearance. Current screenshots and timed workflow recordings are unavailable. Still images do not prove transitions, timing, interaction or persistence. Original timestamps and hashes remain unchanged.</span><span class="zh" lang="zh-HK">此處圖片不代表現行版本外觀。目前未有現行版本截圖或工作流程錄影。靜態圖片不能證明轉場、時間、互動或持久儲存。原有時間及雜湊保持不變。</span></p><section class="controls" aria-label="Filter screenshots / 篩選截圖">
+    <section class="controls" aria-label="Filter screenshots / 篩選截圖">
       <md-outlined-text-field id="search" type="search" label="Search screenshots / 搜尋截圖" placeholder="Try “companion”, “dark”, or “320px” / 試試輸入「companion」、「深色」或「320px」" autocomplete="off"></md-outlined-text-field>
       <div class="filters">
         <p class="control-label"><span class="en">Collection</span><span class="zh" lang="zh-HK">分類</span></p>
         <md-chip-set id="filter-row" aria-label="Choose a screenshot collection / 選擇截圖分類">
           <md-filter-chip data-filter="all" label="All captures / 全部截圖" selected></md-filter-chip>
           <md-filter-chip data-filter="current-app" label="Workspace / 工作區"></md-filter-chip>
-          <md-filter-chip data-filter="native-windows" label="Native desktop / 原生桌面"></md-filter-chip>
           <md-filter-chip data-filter="historical-workspace" label="Historical workspace / 歷史工作區"></md-filter-chip>
           <md-filter-chip data-filter="legacy-shell" label="Legacy shell / 舊版介面"></md-filter-chip>
           <md-filter-chip data-filter="website-current" label="Interactive website / 互動網站"></md-filter-chip>
           <md-filter-chip data-filter="website-historical-landing" label="Earlier website / 早期網站"></md-filter-chip>
           <md-filter-chip data-filter="website-historical-preview" label="Early preview / 早期預覽"></md-filter-chip>
+          <md-filter-chip data-filter="native-windows" label="Native dialog / 原生對話框"></md-filter-chip>
+          <md-filter-chip data-filter="startup-installed" label="Installed startup / 已安裝啟動畫面"></md-filter-chip>
+          <md-filter-chip data-filter="website-8db" label="Documentation preview / 文件預覽"></md-filter-chip>
+          <md-filter-chip data-filter="runtime-guidance-599d" label="Earlier runtime fixture / 較早執行環境測試畫面"></md-filter-chip>
+          <md-filter-chip data-filter="runtime-guidance-d6" label="Runtime reader fixture / 執行環境閱讀測試畫面"></md-filter-chip>
+          <md-filter-chip data-filter="iso-boot-profile" label="BIOS ISO profile / BIOS ISO 設定"></md-filter-chip>
+          <md-filter-chip data-filter="iso-boot-failures" label="QEMU profile faults / QEMU 設定故障"></md-filter-chip>
         </md-chip-set>
       </div>
     </section>
@@ -73,9 +79,9 @@
       <h2 id="method-title"><span class="en">Current and historical captures stay distinct.</span><span class="zh" lang="zh-HK">目前保留的截圖與歷史截圖會分開標示。</span></h2>
       <div class="method-grid">
         <article><h3><span class="en">Latest retained workspace captures</span><span class="zh" lang="zh-HK">最新保留的工作區截圖</span></h3><p><span class="en">Twenty-four captures from one source-bound renderer run. Each card records its typed-fixture and native-operation limits. Later shared-mode, queue/catalogue and schedule changes are not pictured.</span><span class="zh" lang="zh-HK">二十四張截圖來自同一次綁定來源的 Renderer 執行。每張卡片都註明型別化測試資料與原生操作限制。較後新增的共用模式、工作佇列／目錄及排程功能未有截圖。</span></p></article>
-        <article><h3><span class="en">Current native desktop capture</span><span class="zh" lang="zh-HK">目前原生桌面截圖</span></h3><p><span class="en">One inspected image records a specific dialog in the built desktop executable. Its card identifies the exact capture time and limits the claim to that visible state.</span><span class="zh" lang="zh-HK">一張已檢視圖片記錄已建置桌面程式中的指定對話框。圖片卡列出確切截圖時間，並把證明範圍限於可見狀態。</span></p></article>
         <article><h3><span class="en">Historical product images</span><span class="zh" lang="zh-HK">歷史產品截圖</span></h3><p><span class="en">Earlier interface states remain in their own collections with original source revisions and capture times. They are never labelled as the latest workspace.</span><span class="zh" lang="zh-HK">較早期介面會保留在獨立分類，並列出原始來源版本及截圖時間，不會標示成最新工作區。</span></p></article>
-        <article><h3><span class="en">Documentation-site images</span><span class="zh" lang="zh-HK">文件網站截圖</span></h3><p><span class="en">Website images are local Chromium source previews. Receipt check times are not used as screenshot times when the source did not record an individual capture clock.</span><span class="zh" lang="zh-HK">網站圖片是本機 Chromium 來源預覽。若來源沒有記錄個別截圖時間，收據檢查時間不會當作截圖時間。</span></p></article>
+        <article><h3><span class="en">Documentation source previews</span><span class="zh" lang="zh-HK">文件來源預覽</span></h3><p><span class="en">Six captures from source 8db4e85 show two article routes. Their overall browser receipt remains FAILED on status-navigation focus; the frames do not prove keyboard navigation or deployed delivery. Two runtime-guidance cards are source-test fixtures with unavailable capture times.</span><span class="zh" lang="zh-HK">六張綁定來源 8db4e85 的圖片展示兩條文章路線。整體瀏覽收據仍因狀態導覽焦點操作失敗；畫面不代表鍵盤導覽或部署已驗證。另兩張執行環境指南卡片屬來源測試資料，擷取時間未有記錄。</span></p></article>
+        <article><h3><span class="en">ISO guest-console evidence</span><span class="zh" lang="zh-HK">ISO 客體主控台證據</span></h3><p><span class="en">Four captures belong to one exact QEMU BIOS profile and ISO hash. Two separate alternate-profile captures show kernel faults. Successful guest evidence and failed trials remain distinct; neither group implies physical hardware or general compatibility.</span><span class="zh" lang="zh-HK">四張圖片綁定同一個 QEMU BIOS 設定及 ISO 雜湊；另外兩張分開記錄其他設定下的核心故障。成功客體證據與失敗測試分開保存，兩組都不代表實體硬件或普遍相容性。</span></p></article>
       </div>
     </section>
   </main>
