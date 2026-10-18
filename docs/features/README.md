@@ -13,6 +13,9 @@ Choose a task below and read its permission, recovery and verification boundarie
 
 ## Configure, build and recover
 
+- [Create and resume an image](guided-image-creation.md) · [建立及繼續製作映像](guided-image-creation.zh-HK.md)
+- [Read bundled JSON and image sources](bundled-source-links.md)
+
 - [Typed configuration and undo](../desktop/typed-configuration-controls.md) · [有型別控制](../desktop/typed-configuration-controls.zh-HK.md)
 - [Defconfig discovery and minimal save](../desktop/defconfig-workflows.md) · [defconfig 流程](../desktop/defconfig-workflows.zh-HK.md)
 - [Component configuration domains](../desktop/configuration-domains.md) · [元件範疇](../desktop/configuration-domains.zh-HK.md)

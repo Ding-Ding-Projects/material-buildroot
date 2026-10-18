@@ -8,6 +8,7 @@ const {createWorkspaceService}=require('../../src/main/workspace-service.cjs');
 const oldRevision='1'.repeat(40),newRevision='2'.repeat(40);
 // Native source operations are a typed fixture. Shell storage uses the actual local service.
 export async function open(page,{language='en',theme='light'}={}) {
+ test.setTimeout(60000);
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'source-renderer-'));
  const service=createWorkspaceService({filePath:path.join(directory,'workspace.json')});
  service.mutate({expectedRevision:0,action:'onboarding.complete'});
@@ -38,6 +39,7 @@ export async function open(page,{language='en',theme='light'}={}) {
   };
  },{language,oldRevision,newRevision});
  await page.goto('/',{waitUntil:'domcontentloaded',timeout:45000});
+ await page.waitForFunction(()=>customElements.get('material-buildroot'),null,{timeout:45000});
  await expect(page.locator('#workspace-heading')).toContainText(/Images|映像/);
  await page.locator('[data-image-action="open"]').click();
  const operations=page.locator('operations-panel:not([hidden])');

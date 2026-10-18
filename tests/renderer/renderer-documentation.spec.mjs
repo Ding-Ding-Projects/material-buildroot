@@ -389,15 +389,15 @@ test("documentation search matches article body text and reports a title-only fa
       .getByRole("button", { name: "Documentation regex builder", exact: true })
       .click();
     await p
-      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .getByRole("textbox", { name: "Pattern", exact: true })
       .fill("inspect the runtime\\.");
     await expect(p.locator(".topics .topic")).toHaveCount(1);
     await expect(p.locator(".topics")).toContainText("Build your first image");
     await p.evaluate(() => (window.__searchTextUnavailable = true));
     await p.evaluate((el) => el.refresh());
-    await expect(p.locator(".notice")).toContainText("article text is unavailable");
+    await expect(p.locator('.notice[role="status"]')).toContainText("article text is unavailable");
     await p
-      .getByRole("textbox", { name: "Documentation pattern", exact: true })
+      .getByRole("textbox", { name: "Pattern", exact: true })
       .fill("external-tree");
     await expect(p.locator(".topics .topic")).toHaveCount(0);
     expect(f.errors).toEqual([]);
