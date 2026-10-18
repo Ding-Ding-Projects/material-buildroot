@@ -6,9 +6,11 @@ test.afterEach(async()=>{expect(pageErrors).toEqual([]);});
 // separate packaged application acceptance with a neutral synthetic file.
 async function open(page,{mode='inactive',language='en'}={}){
  await page.addInitScript(({mode,language})=>{
+  localStorage.setItem('material-buildroot.wording.v1',JSON.stringify({schemaVersion:1,englishHumor:1,cantoneseHumor:1,displayName:''}));
+  window.__dropSounds=[];
   let listener;const snapshot=()=>({available:mode!=='unknown',watching:true,configured:true,active:mode==='unknown'?null:mode==='active',displayName:'Classroom',revision:'fixture',credentialKind:'pin'});
   window.__mode=next=>{mode=next;listener?.(snapshot());};
-  window.studio={bootstrap:async()=>({language,revision:'0'.repeat(40),projectId:'desktop-settings',capability:'fixture',storage:'ready',origin:'default',version:'fixture',source:null,updatedAt:null}),request:async()=>({ok:false,code:'UNAVAILABLE'}),windowControl:async()=>true,onEvent:()=>()=>{},sharedMode:async()=>({ok:true,result:snapshot()}),onSharedMode:callback=>{listener=callback;return()=>listener=undefined;}};
+  window.studio={vocabularyDropSound:async request=>{window.__dropSounds.push(request);if(window.__rejectSound)throw Error('fixture audio unavailable');return {ok:true};},bootstrap:async()=>({language,revision:'0'.repeat(40),projectId:'desktop-settings',capability:'fixture',storage:'ready',origin:'default',version:'fixture',source:null,updatedAt:null}),request:async()=>({ok:false,code:'UNAVAILABLE'}),windowControl:async()=>true,onEvent:()=>()=>{},sharedMode:async()=>({ok:true,result:snapshot()}),onSharedMode:callback=>{listener=callback;return()=>listener=undefined;}};
  },{mode,language});await page.goto('/');
  await expect(page.locator('personal-vocabulary-drop')).toHaveCount(1);
  await page.locator('nav[aria-label]').first().getByRole('button',{name:/^Settings|^設定/}).click();
@@ -46,7 +48,7 @@ for(const sample of [
 });
 test('a window drop applies, privately announces, permits input, persists and clears',async({page})=>{
  const p=await open(page);const requests=[];page.on('request',r=>requests.push(r.url()));
- const search=page.locator('settings-search').getByRole('textbox',{name:'Search settings',exact:true});await search.focus();
+ const search=page.locator('.settings-grid > settings-search').getByRole('textbox',{name:'Search settings',exact:true});await search.focus();
  expect(await drop(page,valid)).toBe(true);
  const overlay=page.locator('personal-vocabulary-feedback');
  await expect(page.locator('#workspace-heading')).toHaveText('Preferences');
@@ -141,4 +143,66 @@ test('maximum heading stays complete and can be keyboard-scrolled without trappi
  expect(await card.evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.left>=0&&r.bottom<=innerHeight&&r.right<=innerWidth&&el.scrollHeight>el.clientHeight;})).toBe(true);
  await card.focus();await page.keyboard.press('PageDown');await expect.poll(()=>card.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
  await input.focus();await input.fill('No focus trap');await expect(input).toHaveValue('No focus trap');await expect(dialog).toHaveJSProperty('open',true);
+});
+
+
+test('drop sound follows persisted outcome once and never replayed on restore',async({page})=>{
+ const panel=await open(page);await drop(page,valid);
+ await expect.poll(()=>page.evaluate(()=>window.__dropSounds)).toEqual([{kind:'applied'}]);
+ await expect(panel).toContainText('Local vocabulary loaded');
+ await page.reload();await expect(page.locator('personal-vocabulary-drop')).toHaveCount(1);
+ expect(await page.evaluate(()=>window.__dropSounds)).toEqual([]);
+});
+
+test('each invalid drop sounds once and preserves the existing wording',async({page})=>{
+ await open(page);await drop(page,valid);await expect.poll(()=>page.evaluate(()=>window.__dropSounds.length)).toBe(1);
+ for(const [text,options] of [['{}',{}],[valid,{name:'not-json.txt'}],['x'.repeat(256*1024+1),{}],[valid,{count:2}]])await drop(page,text,options);
+ await expect.poll(()=>page.evaluate(()=>window.__dropSounds)).toEqual([{kind:'applied'},...Array.from({length:4},()=>({kind:'invalid'}))]);
+ await expect(page.locator('#workspace-heading')).toHaveText('Preferences');
+});
+
+test('rapid serialized drops emit one sound per outcome even when playback rejects',async({page})=>{
+ await open(page);await page.evaluate(()=>window.__rejectSound=true);
+ await drop(page,valid);await drop(page,'{}');await drop(page,valid);
+ await expect.poll(()=>page.evaluate(()=>window.__dropSounds)).toEqual([{kind:'applied'},{kind:'invalid'},{kind:'applied'}]);
+ await expect(page.locator('personal-vocabulary-feedback[data-outcome=applied]')).toBeVisible();
+ await expect(page.locator('#workspace-heading')).toHaveText('Preferences');
+});
+
+test('restricted and unavailable outcomes never sound, and Settings import is silent',async({page})=>{
+ const panel=await open(page,{mode:'active'});await drop(page,valid);expect(await page.evaluate(()=>window.__dropSounds)).toEqual([]);
+ await page.evaluate(()=>window.__mode('inactive'));await expect(panel).toContainText('No local vocabulary selected');
+ await page.evaluate(()=>{File.prototype.arrayBuffer=async()=>{throw Error('fixture read unavailable');};});
+ await drop(page,valid);await expect(page.locator('personal-vocabulary-feedback[data-outcome=unavailable]')).toBeVisible();
+ expect(await page.evaluate(()=>window.__dropSounds)).toEqual([]);
+ await page.reload();await page.evaluate(()=>window.__mode('inactive'));await page.locator('nav[aria-label]').first().getByRole('button',{name:/^Settings/}).click();
+ const chooser=page.waitForEvent('filechooser');await panel.getByRole('button',{name:'Import local vocabulary',exact:true}).click();
+ await (await chooser).setFiles({name:'neutral.json',mimeType:'application/json',buffer:Buffer.from(valid)});
+ await expect(panel).toContainText('Local vocabulary loaded');expect(await page.evaluate(()=>window.__dropSounds)).toEqual([]);
+});
+
+test('a pending drop stays silent before validation and when restriction interrupts it',async({page})=>{
+ await open(page);await page.evaluate(()=>{const original=File.prototype.arrayBuffer;File.prototype.arrayBuffer=function(){return new Promise(resolve=>{window.__releaseSoundRead=async()=>resolve(await original.call(this));});};});
+ await drop(page,valid);await expect.poll(()=>page.evaluate(()=>typeof window.__releaseSoundRead)).toBe('function');
+ expect(await page.evaluate(()=>window.__dropSounds)).toEqual([]);
+ await page.evaluate(()=>{window.__mode('active');window.__releaseSoundRead();});
+ await expect(page.locator('personal-vocabulary-feedback')).toHaveCount(0);expect(await page.evaluate(()=>window.__dropSounds)).toEqual([]);
+});
+
+
+test('native playback is ordered without blocking imports and clear discards queued audio',async({page})=>{
+ const panel=await open(page);
+ await page.evaluate(()=>{window.studio.vocabularyDropSound=request=>{window.__dropSounds.push(request);return new Promise(resolve=>window.__releaseNativeSound=resolve);};});
+ await drop(page,valid);await expect.poll(()=>page.evaluate(()=>window.__dropSounds.length)).toBe(1);
+ await drop(page,'{}');await expect(page.locator('personal-vocabulary-feedback[data-outcome=invalid]')).toBeVisible();
+ await drop(page,valid);await expect(page.locator('personal-vocabulary-feedback[data-outcome=applied]')).toBeVisible();
+ expect(await page.evaluate(()=>window.__dropSounds)).toEqual([{kind:'applied'}]);
+ await page.evaluate(()=>window.__releaseNativeSound({ok:true,status:'requested'}));
+ await expect.poll(()=>page.evaluate(()=>window.__dropSounds)).toEqual([{kind:'applied'},{kind:'invalid'}]);
+ await panel.getByRole('button',{name:'Clear local vocabulary',exact:true}).click();
+ await expect(panel).toContainText('No local vocabulary selected');
+ await page.evaluate(()=>window.__releaseNativeSound({ok:true,status:'requested'}));
+ await page.evaluate(async()=>{await new Promise(resolve=>setTimeout(resolve,0));});
+ expect(await page.evaluate(()=>window.__dropSounds)).toEqual([{kind:'applied'},{kind:'invalid'}]);
+ await expect(page.locator('#workspace-heading')).toHaveText('Settings');
 });
