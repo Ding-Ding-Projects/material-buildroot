@@ -129,10 +129,11 @@ const progress = `<div class="progress-card"><div class="progress-number">${comp
 const home = `<div class="learning-home" id="learning-workspace">
   <section class="learning-intro" aria-labelledby="learning-title">
     <p class="eyebrow">${label('INTERACTIVE BUILDROOT FIELD GUIDE','互動式 Buildroot 實用指南')}</p>
-    <h1 id="learning-title">${label('Learn the workflow by working through it.','逐步操作，掌握整個工作流程。')}</h1>
-    <p class="learning-lead">${label('Trace a source-to-image workflow, preview a bounded package recipe, work through the newer vocabulary, shared-preference, queue and catalogue safety paths, or answer troubleshooting questions. These browser activities are examples only. They never inspect your computer, run Buildroot or control the desktop app.','了解由來源到映像檔嘅流程、預覽有限制嘅套件配方、逐步處理新加入嘅詞彙、共用偏好、佇列同目錄安全情況，或回答疑難排解問題。瀏覽器活動只作示例，不會檢查你嘅電腦、執行 Buildroot 或控制桌面程式。')}</p>
-    <div class="learning-actions"><md-filled-button href="#source-walkthrough">${label('Continue the walkthrough','繼續引導流程')}</md-filled-button><md-outlined-button href="${url('docs/desktop/modern-workspace.md')}">${label('Open the workspace guide','開啟工作區指南')}</md-outlined-button></div>
+    <h1 id="learning-title">${label('Build your understanding, one small step at a time.','一小步、一小步，認識建置流程。')}</h1>
+    <p class="learning-lead">${label('New to Buildroot? Start with four short questions. Learn what you need, what to choose and how to tell whether a build worked. These browser examples never inspect your computer, run Buildroot or control the desktop app.','第一次接觸 Buildroot？由四個簡單問題開始，了解需要乜、點樣揀，同點樣確認建置成功。瀏覽器示例唔會檢查你嘅電腦、執行 Buildroot 或控制桌面程式。')}</p>
+    <div class="learning-actions"><md-filled-button href="#beginner-guide">${label('Start with the basics','由基本概念開始')}</md-filled-button><md-outlined-button href="${url('docs/desktop/modern-workspace.md')}">${label('Open the workspace guide','開啟工作區指南')}</md-outlined-button></div>
   </section>
+  <section id="beginner-guide" class="learning-card"><h2>${label('A small first step','先行一小步')}</h2><p>${label('The interactive introduction needs JavaScript. The complete guides below remain available.','互動入門指南需要 JavaScript。下方完整指南仍可閱讀。')}</p></section>
   <section class="learning-progress-card" aria-labelledby="learning-progress-title">
     <div><p class="eyebrow">${label('YOUR BROWSER PROGRESS','你嘅瀏覽器進度')}</p><h2 id="learning-progress-title">${label('Pick up where you left off','繼續上次進度')}</h2><p id="learning-progress-label" class="small" role="status" aria-live="polite"></p><md-linear-progress id="learning-progress" value="0" aria-label="Personal walkthrough progress, stored in this browser only"></md-linear-progress></div>
     <div class="learning-progress-actions"><md-outlined-button id="learning-reset">${label('Reset learning progress','重設學習進度')}</md-outlined-button><md-text-button href="${base}site/visitor.html#offline-title">${label('Save guides for offline reading','保存指南供離線閱讀')}</md-text-button></div>
