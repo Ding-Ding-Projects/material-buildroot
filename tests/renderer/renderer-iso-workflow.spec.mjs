@@ -15,8 +15,8 @@ async function open(page,{effective=true,applicable=true,easy=false}={}){
     case 'imagePreset.isoApply':result={effective,revision:'rev-2',profile:'x86_64-bios-grub2-initrd',output:'images/rootfs.iso9660'};break;
     case 'project.options':result={runtime:{kind:'wsl',distribution:'Fixture'}};break;
     case 'imagePreset.isoBuild':result={id:'job-1',sequence:1,state:'queued'};break;
-    case 'jobs.list':result=[{id:'job-1',sequence:2,state:'succeeded'}];break;
-    case 'jobs.page':result={records:[{value:{text:'Build completed'}}],hasMore:false};break;
+    case 'jobs.project':result=[{id:'job-1',sequence:2,state:'succeeded'}];break;
+    case 'jobs.projectPage':result={records:[{value:{text:'Build completed'}}],hasMore:false};break;
     case 'artifacts.inspect':result={size:65536,sha256:'a'.repeat(64),iso:{descriptorValid:true,withinImage:true,elTorito:{validationChecksumValid:true,bootEntryValid:true,platformId:0},bootVerified:false}};break;
     default:return {ok:false,code:'FIXTURE_UNAVAILABLE'};
    }
@@ -27,7 +27,8 @@ async function open(page,{effective=true,applicable=true,easy=false}={}){
  return page.getByRole('region',{name:'BIOS ISO workflow',exact:true});
 }
 async function configure(panel){
- await panel.getByRole('button',{name:'Check ISO prerequisites',exact:true}).click();
+ if(await panel.getByRole('button',{name:'Check ISO prerequisites',exact:true}).isVisible())await panel.getByRole('button',{name:'Check ISO prerequisites',exact:true}).click();
+ else await panel.getByRole('button',{name:'Refresh review requirements',exact:true}).click();
  await panel.getByRole('checkbox',{name:'Apply the listed ISO configuration requests',exact:true}).check();
  await panel.getByRole('button',{name:'Configure BIOS ISO',exact:true}).click();
 }
@@ -66,16 +67,18 @@ test('changing workspace discards late planning replies',async({page})=>{
 test('Easy guide restores step position without restoring success',async({page})=>{
  const panel=await open(page,{easy:true});
  await expect(panel).toContainText('What would you like to make?');
+ await expect(panel.getByRole('button',{name:'Next',exact:true})).toBeEnabled();
+ for(let stage=0;stage<3;stage++)await panel.getByRole('button',{name:'Next',exact:true}).click();
  await expect(panel.getByRole('button',{name:'Next',exact:true})).toBeDisabled();
  await configure(panel);
  await panel.getByRole('button',{name:'Next',exact:true}).click();
  await expect(panel.getByRole('heading',{name:'Make the image file',exact:true})).toBeVisible();
- await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-workspace-1')).step)).toBe(1);
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-workspace-1')).step)).toBe(4);
  await page.evaluate(async()=>{const old=document.querySelector('image-presets-panel');const next=document.createElement('image-presets-panel');next.workspaceId='workspace-1';next.language='en';old.replaceWith(next);await next.updateComplete;});
  await expect(panel).toContainText('Saved progress restored');
  await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeDisabled();
  await panel.getByRole('button',{name:'Back',exact:true}).click();
- await expect(panel.getByRole('heading',{name:'What would you like to make?',exact:true})).toBeVisible();
+ await expect(panel.getByRole('heading',{name:'Review your image',exact:true})).toBeVisible();
 });
 
 test('external configuration generation invalidates build readiness',async({page})=>{const panel=await open(page);await configure(panel);await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeEnabled();await page.evaluate(()=>document.querySelector('image-presets-panel').configurationGeneration++);await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeDisabled();await expect(panel).toContainText('Configuration changed.');});
