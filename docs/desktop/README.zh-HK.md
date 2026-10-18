@@ -14,3 +14,7 @@
 - [Kconfig 求值及執行傳輸](kconfig-semantics.zh-HK.md)
 
 [依工作分類目錄](../features/README.md)連接專案、建置、輸出及偏好。桌面用 IPC，唔係 HTTP，呢個分類唔需要 Postman。來源翻譯同執行驗收分開。
+
+## 執行環境版本
+
+- [固定桌面執行環境更新至 44.9.0](runtime-refresh-44.9.0.zh-HK.md)：版本、校驗碼、來源綁定及原生驗收界線。
