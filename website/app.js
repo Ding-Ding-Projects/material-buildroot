@@ -1,4 +1,5 @@
 import { mountCompanionConsumers } from './companion-consumers.js';
+import { mountBeginnerGuide } from './beginner-guide.js';
 import {createPairingIdentity, pairingHeaders} from './pairing-client.js';
 import {mountBrowserNative} from './browser-native.js';
 import '@material/web/button/filled-button.js';
@@ -81,6 +82,7 @@ const taskGuides = {
 // The field guide is a browser-native learning aid. Its storage is personal,
 // bounded, and deliberately separate from the desktop companion session.
 const learning = document.querySelector('#learning-workspace');
+mountBeginnerGuide(learning);
 if (learning) {
   const key = 'mb-learning-workspace-v1';
   let storageAvailable = true;
