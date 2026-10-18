@@ -5,9 +5,11 @@
 - [x] Add independently reviewed ISO profile and saved-runtime guides with isolated examples; source-fixture verification only.
 - [x] Add unexposed ISO preservation/observation helper and repair FIFO waits with witnessed red/green synthetic checks (11/11).
 - [x] Refresh the ISO map against explicit consumer baseline 308d4545 and the unchanged 2,245-detail manual inventory.
-- [ ] Bind admitted output identity before helper mutation; implementation in progress.
+- [x] Require strict output-root identity comparison before helper mutation; 15/15 synthetic checks, with supplied identity explicitly unauthenticated.
+- [ ] Derive that identity from a real admitted native grant through fixed owned transport; internal source implementation in progress.
 - [ ] Wire owned transport, exact producer/cleanup and durable required ISO receipt inside the existing execution lease.
-- [ ] Verify current packaged/native guidance, runtime extreme-wording layouts and full document-reader navigation.
+- [x] Verify runtime wording levels 1/5 in all three language modes at 480 pixels and the English admitted two-article reader route (9/9 source-fixture checks).
+- [ ] Verify current packaged/native guidance, complete packaged and translated-reader navigation, native input and assistive technology.
 - [ ] Produce and inspect a fresh ISO through the current GUI, then prove bounded boot behavior.
 - [ ] Complete current-source deployment, normal release, matching installed update and remaining finite acceptance.
 
