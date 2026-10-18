@@ -24,6 +24,9 @@ These are full authored translations, not the older short Cantonese summary. The
 
 These translations preserve the originals’ historical verification boundaries. They do not refresh runtime evidence.
 
+- [Artifacts and deployment](../desktop/deployment.zh-HK.md)
+- [Unsigned Windows releases](../build/releases.zh-HK.md)
+
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
@@ -32,12 +35,10 @@ The following current reference articles still need their full Cantonese twin:
 - `docs/features/companion-consumers.md`
 - `docs/desktop/configuration.md`
 - `docs/desktop/execution.md`
-- `docs/desktop/deployment.md`
 - `docs/desktop/built-in-tools.md`
 - `docs/desktop/minecraft-manager.md`
 - `docs/security/workspace-state.md`
 - `docs/security/companion.md`
-- `docs/build/releases.md`
 
 The feature root index, security root index and documentation root index still need complete translated index pages. The retained remote-runtime and documentation-notification changelog articles also remain without twins. Future source integrations can add or change articles; preserve their exact source history and update the corresponding twins before claiming full inventory completion. This bounded list does not claim that historical evidence/planning/design material has been translated.
 
