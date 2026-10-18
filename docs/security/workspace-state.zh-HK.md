@@ -39,7 +39,7 @@
 
 ## 原生檔案能力
 
-`createFileGrants({now})` 係只供主機登記庫。使用者喺原生選擇器選正式現存檔案／目錄後，回呼可用 `grant({path,kind,access,owner})`。唔可以經渲染器 IPC 暴露 grant 或原始 path。結果係限定 owner 嘅不透明 UUID，五分鐘有效，程式重啟後失效，最多 1,024 grants。`resolve({id,owner,relative?,write?})` 驗證 owner、時間、權限同全部原祖先身分後，回主機限定正式 path、kind、access。`revoke({id,owner})` 同 `clear()` 撤銷授權。
+`createFileGrants({now})` 係只供主機登記庫。使用者喺原生選擇器選正式現存檔案／目錄後，回呼可用 `grant({path,kind,access,owner})`。唔可以經渲染器 IPC 暴露 `grant` 或原始 path。結果係限定 owner 嘅不透明 UUID，五分鐘有效，程式重啟後失效，最多 1,024 grants。`resolve({id,owner,relative?,write?})` 驗證 owner、時間、權限同全部原祖先身分後，回主機限定正式 path、kind、access。`revoke({id,owner})` 同 `clear()` 撤銷授權。
 
 解析拒絕越界、絕對 relative 路徑、其他分隔符、Windows stream／保留／含糊名稱、符號連結、非正式別名同多重硬連結檔案。會重查祖先 device/inode/creation 身分同 real path，偵測父目錄取代同改變正式路徑嘅 junction 導向。讀取要目標存在；寫入只可喺已檢查現存父目錄下建立最後一層新檔。真實操作要使用前即時 resolve、保留主機限定路徑，再加操作專用保護。同步路徑解析本身唔提供原子開檔 descriptor，亦唔消除檢查同使用間惡意取代。Windows reparse 同原生選擇器要另驗證。
 
@@ -85,7 +85,7 @@ layout 精確 `{nodes:[{id,x,y}],viewport:{x,y,scale}}`，最多 128 唯一節�
 
 Save 取得逐文件獨佔鎖、重讀預期修訂、flush 唯一 mode-0600 暫存，再原子取代；取代前重查目錄身分同目前狀態。過期修訂保留完整舊 layout。普通失敗刪自己暫存／鎖，別人鎖不動。中斷鎖要可信復原，唔自動到期。呢個係程式資料儲存，唔抵抗特權程序搶換目錄，亦唔保證所有斷電情況。
 
-清理錯誤代碼只用 `INVALID_REQUEST`、`REVISION_CONFLICT`、`STORAGE_BUSY`、`STORAGE_UNAVAILABLE`，訊息冇路徑。集中測試涵蓋重啟、工作區／畫布隔離、過期修訂、取代失敗、損壞／外來保留、幾何界限、128 節點、嚴格危險輸入拒絕、symlink/hardlink 同忙鎖。Windows 同即時編輯器驗收分開。
+清理錯誤嘅 `code` 只用 `INVALID_REQUEST`、`REVISION_CONFLICT`、`STORAGE_BUSY`、`STORAGE_UNAVAILABLE`，訊息冇路徑。集中測試涵蓋重啟、工作區／畫布隔離、過期修訂、取代失敗、損壞／外來保留、幾何界限、128 節點、嚴格危險輸入拒絕、symlink/hardlink 同忙鎖。Windows 同即時編輯器驗收分開。
 
 ## 持久項目選項
 

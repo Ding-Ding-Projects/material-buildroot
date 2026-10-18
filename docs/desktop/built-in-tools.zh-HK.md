@@ -40,15 +40,15 @@ Editor只啟動host `editorIds` 接納editor，加一個granted file argument。
 
 `ollama.chat` terminal後回 `{completed, message: {role: 'assistant', content}, doneReason, metrics}`；progress為 `{type: 'chat-token', message: {content}, done, ...}`，pull為 `{type: 'model-pull', status, completed, total, ...}`，沿Ollama fields。可即時render tokens，用final message持久化。
 
-`pdf.execute` 接 `operation`（`inspect`, `merge`, `split`, `extract`, `reorder`, `rotate`, `metadata`）、`sourceId`或bounded `sourceIds`、`destinationId`、integer `pages`、`degrees` 90/180/270或 `mode: 'remove'`。固定qpdf必需；寫前驗signature、qpdf integrity同bounded page count，output再驗integrity/exact count先atomic publication。Split每request一selected-page output，host整合後queue可排多次。內容/order/rotation/metadata semantic post-write仍未完，count過唔代表語意過。Executable protocol fixture只驗invoke/count拒絕，唔係native qpdf。
+`pdf.execute` 接 `operation`（`inspect`, `merge`, `split`, `extract`, `reorder`, `rotate`, `metadata`）、`sourceId`或bounded `sourceIds`、`destinationId`、integer `pages`、`degrees` 90/180/270或 `mode: 'remove'`。固定 `qpdf` 必需；寫前驗signature、qpdf integrity同bounded page count，output再驗integrity/exact count先atomic publication。Split每request一selected-page output，host整合後queue可排多次。內容/order/rotation/metadata semantic post-write仍未完，count過唔代表語意過。Executable protocol fixture只驗invoke/count拒絕，唔係native qpdf。
 
-Host install options：`ollamaInstallDirectory`, `ollamaCachedPayload`, `allowOllamaAcquisition`, `ollamaPayload`。Payload含exact `version`, `platform`, `arch`, `length`, `sha256`, `kind: 'executable' | 'tar' | 'zip'`, `executablePath`, `members: [{path, sha256}]`；online另要official `url`。優先cache。Tar要admitted tar，extract前拒traversal/unexpected files/links。驗全部members，保留舊version/model stores，唔改PATH/startup、唔要elevation或claim health。只reviewed Ollama release URLs同bounded official redirects。Provenance由host review，renderer唔供manifest/URL/destination。
+Host install options：`ollamaInstallDirectory`, `ollamaCachedPayload`, `allowOllamaAcquisition`, `ollamaPayload`。Payload含exact `version`, `platform`, `arch`, `length`, `sha256`, `kind: 'executable' | 'tar' | 'zip'`, `executablePath`, `members: [{path, sha256}]`；online另要official `url`。優先cache。Tar要admitted `tar`，extract前拒traversal/unexpected files/links。驗全部members，保留舊version/model stores，唔改PATH/startup、唔要elevation或claim health。只reviewed Ollama release URLs同bounded official redirects。Provenance由host review，renderer唔供manifest/URL/destination。
 
 Discovery actions：`minecraft.bedrock.discovery`、`minecraft.flavours`（`flavour: 'paper' | 'fabric'`，Paper可選version）、`minecraft.plugins`（`projectId`）、`minecraft.plugin.install`（`versionId`, granted `directoryId`, `acceptPluginCode: true`, `acceptLicense: true`）。Modrinth要supported loader、primary JAR、fixed CDN、exact length/SHA-512。只驗provenance/integrity唔係plugin safety；official page changed/unsupported metadata明確失敗，唔造版本。
 
 ## 原生執行檔接納
 
-`src/main/tools/payload-manager.cjs` 嘅 `createPayloadManager({directory, bundledManifest, dialog, parentWindow})` 提供host-only `list()`/`choose(toolId)`/`resolve(toolId)`，以 `payloadManager` 傳tools service。只接FFmpeg、ImageMagick、Pandoc、LibreOffice、ebook-convert、qpdf、Java、Docker、tar、Ollama。Renderer只known ID，path只native picker。預設Cancel notice顯示file/hash/account permission後先fixed bounded version probe。basename/version只識program family，唔證publisher或sandbox。
+`src/main/tools/payload-manager.cjs` 嘅 `createPayloadManager({directory, bundledManifest, dialog, parentWindow})` 提供host-only `list()`/`choose(toolId)`/`resolve(toolId)`，以 `payloadManager` 傳 `createToolsService`。只接FFmpeg、ImageMagick、Pandoc、LibreOffice、ebook-convert、qpdf、Java、Docker、tar、Ollama。Renderer只known ID，path只native picker。預設Cancel notice顯示file/hash/account permission後先fixed bounded version probe。basename/version只識program family，唔證publisher或sandbox。
 
 Bundled manifest優先，changed/invalid bytes拒絕。User-selected保留 `origin: 'user-selected'`, `bundled: false`，唔當bundled dependencies。Receipt原子存private app dir，每resolve再驗canonical path/regular file/SHA-256。Version mismatch/cancel/path/hash變化保留舊receipt。Static renderer-shaped records唔enable runtime。冇PATH search、arbitrary ID、network install或automatic execution task。
 
@@ -60,7 +60,7 @@ User tools係明確consented fallback，唔滿足完整bundled offline adapters�
 
 `dispose()` async拒新work、abort active、等queue取消持久化、停所屬server。Container generated name經fresh validated executable固定Docker stop；local children先termination，再bounded kill/wait。欠settlement報 `PROCESS_STOP_UNVERIFIED`，timer/signal唔係confirmed cleanup。唔收編／停無關process/container/queue/server。
 
-Minecraft start要write-capable dir grant同host-only `authorizeServerExecution(directoryId)` 嚴格true，綁explicit native consent執行server/plugin code。Renderer欄位唔授權，grant consent唔證user JAR安全。Converter/PDF仍要real sandbox receipt，native admission唔設 `isolationVerified`。集中fixtures另證effects前拒絕、queued PDF protocol、stream cancel持久queue同child exit，唔係gameplay/Docker/native qpdf/Windows acceptance。
+Minecraft start要write-capable dir grant同host-only `authorizeServerExecution(directoryId)` 嚴格 `true`，綁explicit native consent執行server/plugin code。Renderer欄位唔授權，grant consent唔證user JAR安全。Converter/PDF仍要real sandbox receipt，native admission唔設 `isolationVerified`。集中fixtures另證effects前拒絕、queued PDF protocol、stream cancel持久queue同child exit，唔係gameplay/Docker/native qpdf/Windows acceptance。
 
 ## 固定受管理Ollama安裝同復原
 
@@ -111,7 +111,7 @@ Identity明示 `identityConsistency: 'matching-tag-before-and-after'`。Show用m
 
 ## 官方觀察模型目錄
 
-`src/main/tools/ollama-catalogue.cjs` 嘅 `createOllamaCatalogue({directory, fetchImpl})` refresh/cache官方library。Host透過 `ollamaCatalogueDirectory` 給private `ollama-catalogue` dir，或trusted consumer注入 `ollamaCatalogue`。四actions：`ollama.catalogue.status`, `.refresh`, `.cancel`, `.page`，page可選 `family`、plain-text `query`、zero-based `offset`、`limit` 1–100。唔收renderer URL/header/credentials/cookies/source override。
+`src/main/tools/ollama-catalogue.cjs` 嘅 `createOllamaCatalogue({directory, fetchImpl})` refresh/cache官方library。Host透過 `ollamaCatalogueDirectory` 給private `ollama-catalogue` dir，或trusted consumer注入 `ollamaCatalogue`。四actions：`ollama.catalogue.status`, `ollama.catalogue.refresh`, `ollama.catalogue.cancel`, `ollama.catalogue.page`，page可選 `family`、plain-text `query`、zero-based `offset`、`limit` 1–100。唔收renderer URL/header/credentials/cookies/source override。
 
 Local assistant顯示status、official refresh同獨立cancel、cached name search、50-item pages、family drill-down。相鄰regex只bounded worker過濾loaded page。Status分observed counts、last success、last attempt、staleness；欠exact metadata Unknown，browse唔install/start。Late cancel報publishing，需final readback。Typed host actions真實，browser fixtures只驗presentation/request，唔混歷史live traversal。
 
