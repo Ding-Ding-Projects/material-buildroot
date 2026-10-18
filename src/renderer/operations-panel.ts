@@ -1,3 +1,4 @@
+import {validateImageIntent,type ImageCreationIntent,type ImageIntentTransfer} from './image-workflow-draft';
 import {localizedCopy} from './language-wording';
 import "./named-targets-panel";
 import "./account-provisioning-panel";
@@ -48,6 +49,7 @@ type Job = {
 export class OperationsPanel extends LitElement {
   static properties = {
     presentation: {type: String, reflect: true},
+    imageCreationIntent:{state:true},creationSetup:{type:Boolean,attribute:'creation-setup',reflect:true},
     guidedConfiguration: {state: true},
     guidedRuntime: {state: true},
     configurationGeneration:{state:true},
@@ -118,13 +120,25 @@ export class OperationsPanel extends LitElement {
     if (heading?.getClientRects().length) heading.focus({preventScroll:true});
   };
   /** Selects an existing project workflow without granting access or submitting work. */
-  async openProjectWorkflow(mode: 'create' | 'open') {
+  imageCreationIntent:ImageCreationIntent|null=null;creationSetup=false;
+  private workspaceOptionsReady:Promise<unknown>=Promise.resolve();
+  async openImageGuide(){this.guidedConfiguration='image';this.tab='config';await this.updateComplete;}
+  async continueImageCreation(input:unknown):Promise<ImageIntentTransfer>{
+    const intent=validateImageIntent(input),id=this.workspace?.workspaceId;
+    if(!intent||intent.workspaceId!==id)return {status:'invalid'};
+    const initialTab=this.tab,epoch=this.navigationEpoch;await this.workspaceOptionsReady;if(this.workspace?.workspaceId!==id||!this.isConnected||this.tab!==initialTab||epoch!==this.navigationEpoch)return {status:'unavailable'};
+    this.imageCreationIntent=intent;await this.openImageGuide();
+    const panel=this.renderRoot.querySelector<import('./image-presets-panel').ImagePresetsPanel>('image-presets-panel');await panel?.updateComplete;
+    if(this.workspace?.workspaceId!==id||!panel)return {status:'unavailable'};
+    return panel.receiveCreationIntent(intent);
+  }
+  async openProjectWorkflow(mode: 'create' | 'open',expectedWorkspaceId?:string,suggestedName?:string,creationContextId?:string) {
     if (!['create','open'].includes(mode)) return;
     this.guidedRuntime = 'projects';
     this.tab = 'runtime';
     await this.updateComplete;
     const panel = this.renderRoot.querySelector<import('./project-workflow-panel').ProjectWorkflowPanel>('project-workflow-panel');
-    await panel?.openProjectWorkflow(mode);
+    await panel?.openProjectWorkflow(mode,expectedWorkspaceId,suggestedName,creationContextId);
   }
   restricted=false;
   language = "bilingual";
@@ -179,7 +193,7 @@ export class OperationsPanel extends LitElement {
     const workspaceId = this.workspace?.workspaceId;
     this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
     if (!workspaceId) return;
-    void this.run("project.options", { workspaceId }).then(options => {
+    this.workspaceOptionsReady=this.run("project.options", { workspaceId }).then(options => {
       if (this.workspace?.workspaceId !== workspaceId || !options) return;
       if (options.runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = options.runtime.distribution; }
       if (options.runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = options.runtime.image; }
@@ -210,6 +224,8 @@ export class OperationsPanel extends LitElement {
         --md-sys-color-error: inherit;
       }
       :host([presentation="guided"]) .ide {border:0}
+      :host([creation-setup]) .document-toolbar{display:none}
+      .advanced-project-tools{position:relative;margin-left:auto;font-size:13px}.advanced-project-tools summary{min-height:44px;display:flex;align-items:center;cursor:pointer}.advanced-project-tools>div{position:absolute;right:0;top:100%;z-index:5;width:min(560px,70vw);max-height:50vh;overflow:auto;padding:16px;border:1px solid var(--md-sys-color-outline);border-radius:16px;background:var(--md-sys-color-surface-container)}
       :host([presentation="guided"]) .explorer,
       :host([presentation="guided"]) .operations > md-tabs,
       :host([presentation="guided"]) .dock,
@@ -800,7 +816,7 @@ export class OperationsPanel extends LitElement {
     return html`${this.presentation === 'guided' ? this.subnavigation('runtime', [['projects','Project','專案'],['execution','Execution setup','執行設定'],['folders','Existing folders','現有資料夾']]) : nothing}<div class="split runtime-layout">
       <project-workflow-panel ?hidden=${this.presentation === 'guided' && this.guidedRuntime !== 'projects'} .language=${this.language} .workspaceId=${this.workspace?.workspaceId || ""}
         @project-opened=${(event: CustomEvent) => {
-          if (!this.dispatchEvent(new CustomEvent("workspace-adopted", { bubbles: true, composed: true, cancelable: true, detail: event.detail }))) return;
+          if (!this.dispatchEvent(new CustomEvent("workspace-adopted", { bubbles: true, composed: true, cancelable: true, detail: {...event.detail,presentationCurrent:this.tab==='runtime'&&(this.presentation!=='guided'||this.guidedRuntime==='projects')} }))) return;
           this.workspace = event.detail;
           this.config = undefined; this.artifacts = []; this.artifact = undefined; this.changes = {};
           this.configTrustPreview = undefined; this.configTrustAccepted = false;
@@ -1056,7 +1072,7 @@ export class OperationsPanel extends LitElement {
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`${this.presentation === 'guided' ? this.subnavigation('config', [['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']]) : nothing}<image-presets-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'image'} @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${(event:CustomEvent) => { this.config=undefined;if(event.detail?.kind==="iso-board-preset"){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;} }}></image-presets-panel><account-provisioning-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'accounts'} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'presets'} @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack" ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'settings'}>
+    return html`${this.presentation === 'guided' && this.guidedConfiguration !== 'image' ? this.subnavigation('config', [['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']]) : nothing}<image-presets-panel .compactJourney=${this.presentation==='guided'} .creationIntent=${this.imageCreationIntent} ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'image'} @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${(event:CustomEvent) => { this.config=undefined;if(event.detail?.kind==="iso-board-preset"){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;} }}></image-presets-panel><account-provisioning-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'accounts'} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'presets'} @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack" ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'settings'}>
       <div class="row">
         <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
         <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
@@ -1149,7 +1165,7 @@ export class OperationsPanel extends LitElement {
   }
   render() {
     this.visitedViews.add(this.tab);
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.label(this.tab)}</h2><span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided' ? this.guidedNavigation() : nothing}<div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?this.l('Image guide','映像指南'):this.label(this.tab)}</h2>${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?html`<details class="advanced-project-tools"><summary>${this.l('Advanced project tools','進階專案工具')}</summary><div>${this.guidedNavigation()}${this.subnavigation('config',[['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']])}</div></details>`:nothing}<span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided'&&!(this.tab==='config'&&this.guidedConfiguration==='image')&&!this.creationSetup ? this.guidedNavigation() : nothing}<div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations","專案操作",true)}
         .activeTabIndex=${[

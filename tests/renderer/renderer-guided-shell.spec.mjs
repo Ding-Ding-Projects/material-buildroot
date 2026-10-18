@@ -8,7 +8,7 @@ async function open(page,{language='en',restricted=false}={}){
       sharedMode:async()=>({ok:true,result:{available:true,watching:true,configured:restricted,active:restricted,displayName:restricted?'Shared mode':null,revision:null,credentialKind:null}}),
       bootstrap:async()=>({language,revision:'0'.repeat(40),projectId:'settings',capability:'fixture',storage:'ready',origin:'default',version:'renderer fixture',source:null,updatedAt:null}),
       request:async()=>({ok:false,code:'UNAVAILABLE'}),onEvent:()=>()=>{},windowControl:async()=>true,
-      operations:async request=>{window.__requests.push(request);return {ok:false,code:'FIXTURE_UNAVAILABLE'};},
+      operations:async request=>{window.__requests.push(request);const app=document.querySelector('material-buildroot');if(request.action==='project.list')return {ok:true,result:(app?.projectSessions??[]).map(p=>({id:p.workspaceId,name:p.name,authorized:true}))};if(request.action==='project.open'){const p=app?.projectSessions.find(p=>p.workspaceId===request.workspaceId);if(p)return {ok:true,result:{workspaceId:p.workspaceId,name:p.name}};}return {ok:false,code:'FIXTURE_UNAVAILABLE'};},
     };
   },{language,restricted});
   await page.goto('/');
@@ -54,11 +54,12 @@ test('create and open use the public workflow adapter without claiming a build',
   const app=await open(page);
   await app.evaluate(app=>{window.__projectActions=[];app.shadowRoot.querySelector('[data-project-id=""]').openProjectWorkflow=async mode=>window.__projectActions.push(mode);});
   await app.locator('[data-image-action="create"]').click();
+  await app.locator('guided-image-creation').getByRole('button',{name:'Next: source and runtime',exact:true}).click();
   await nav(app,'images').click();
   await app.locator('[data-image-action="open"]').click();
   expect(await page.evaluate(()=>window.__projectActions)).toEqual(['create','open']);
   expect(await page.evaluate(()=>window.__requests.some(r=>r.action==='build.enqueue'))).toBe(false);
-  await expect(app.locator('.project-context')).toContainText('No project selected');
+  await expect(app.locator('.project-context')).toHaveCount(0);
 });
 
 test('hidden host events cannot change active project navigation',async({page})=>{

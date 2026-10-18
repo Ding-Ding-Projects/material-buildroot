@@ -1,3 +1,4 @@
+import {validImageName} from './image-workflow-draft';
 import {localizedCopy} from './language-wording';
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
@@ -16,13 +17,17 @@ export class ProjectWorkflowPanel extends LitElement {
   revision = 0;
   private mode = "open";
   /** Presentation-only entry point. Existing drafts survive; consent is never reused. */
-  async openProjectWorkflow(mode: 'create' | 'open') {
+  private creationContextId='';private expectedWorkspaceId='';private directoryEdited=false;private suggestedDirectory='';
+  async openProjectWorkflow(mode: 'create' | 'open', expectedWorkspaceId?:string,suggestedName?:string,creationContextId?:string) {
     if (this.pending || !['create','open'].includes(mode)) return;
-    this.mode = mode;
+    if(expectedWorkspaceId&&!/^[a-zA-Z0-9-]{1,64}$/.test(expectedWorkspaceId))return;
+    this.expectedWorkspaceId=expectedWorkspaceId??'';this.creationContextId=typeof creationContextId==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(creationContextId)?creationContextId:'';
+    this.mode = expectedWorkspaceId?'adopt':mode;
+    if(mode==='create'&&validImageName(suggestedName)&&!this.directoryEdited&&(this.directory==='buildroot'||this.directory===this.suggestedDirectory)){this.directory=suggestedName;this.suggestedDirectory=suggestedName;}
     this.trust = false;
     this.code = '';
     this.changed();
-    if (mode === 'open') await this.run(() => this.refresh());
+    if (mode === 'open'&&!expectedWorkspaceId) await this.run(() => this.refresh());
     await this.updateComplete;
     this.renderRoot.querySelector<HTMLElement>('#project-workflow-heading')?.focus();
   }
@@ -63,9 +68,10 @@ export class ProjectWorkflowPanel extends LitElement {
   }
   private async refresh() { this.projects = await this.request("project.list"); }
   private async adopt(result: any) {
+    if(!result||typeof result.workspaceId!=='string'||(this.expectedWorkspaceId&&result.workspaceId!==this.expectedWorkspaceId))throw Error('PROJECT_IDENTITY_MISMATCH');
     this.selection = undefined; this.trust = false; this.status = undefined;
     const options = await this.request("project.options", { workspaceId: result.workspaceId });
-    this.dispatchEvent(new CustomEvent("project-opened", { bubbles: true, composed: true, detail: { ...result, runtime: options.runtime } }));
+    this.dispatchEvent(new CustomEvent("project-opened", { bubbles: true, composed: true, detail: { ...result, runtime: options.runtime, creationContextId:this.creationContextId } }));
   }
   private button(en: string, zh: string, action: () => Promise<void>, disabled = false) {
     return html`<md-outlined-button ?disabled=${this.pending || disabled} @click=${() => this.run(action)}>${actionIcon(en)}${this.l(en, zh)}</md-outlined-button>`;
@@ -78,6 +84,7 @@ export class ProjectWorkflowPanel extends LitElement {
     const current = this.projects.find(item => item.id === this.workspaceId);
     return html`<section class="panel stack" aria-busy=${this.pending}>
       <h2 id="project-workflow-heading" tabindex="-1">${this.l("Project workflows","專案流程",true)}</h2>
+      ${this.expectedWorkspaceId?html`<p>${this.l("Renew access to the requested project by selecting its original folders. A different project will not replace it.","請選擇原有資料夾更新要求嘅專案存取權，另一個專案唔會取代佢。",true)}</p>`:nothing}
       <div class="row" role="group" aria-label=${this.l("Project action","專案操作",true)}>
         ${[["open","Open","開啟"],["create","Create","建立"],["adopt","Adopt","接入"],["import","Import descriptor","匯入描述檔"],["extracted","Import extracted source","匯入已解壓來源"],["clone","Clone","複製"]].map(([mode,en,zh])=>html`<md-outlined-button ?disabled=${this.pending} aria-pressed=${this.mode===mode} @click=${()=>{this.mode=mode;this.selection=undefined;this.portable=undefined;this.trust=false;this.code="";if(mode==="create"){this.url="https://gitlab.com/buildroot.org/buildroot.git";this.ref="2025.02.18";}this.changed();if(mode==="open")void this.run(()=>this.refresh());}}>${actionIcon(en)}${this.l(en,zh)}</md-outlined-button>`)}
       </div>
@@ -104,7 +111,7 @@ export class ProjectWorkflowPanel extends LitElement {
         <p>${this.l("Maintained LTS recommendation: 2025.02.18, verified 2026-10-16 against buildroot.org/download.html; series support ends March 2028. This dated recommendation is not a live latest-version claim.","維護中 LTS 建議：2025.02.18，於 2026-10-16 對照 buildroot.org/download.html 核實；系列支援至 2028 年 3 月。呢個係有日期嘅建議，唔代表即時最新版本。",true)}</p>
         ${this.field("HTTPS source repository","HTTPS 來源儲存庫",this.url,v=>this.url=v)}
         ${this.field("Initial branch or tag","初始分支或標籤",this.ref,v=>this.ref=v)}
-        ${this.field("New source folder name","新來源資料夾名稱",this.directory,v=>this.directory=v)}
+        ${this.field("New source folder name","新來源資料夾名稱",this.directory,v=>{this.directory=v;this.directoryEdited=true;})}
         ${this.button("Choose destination parent","選擇目的地上層資料夾",async()=>{this.selection=await this.request("source",{request:{action:"source.choose"}});this.trust=false;})}
       `:html`
         <p>${this.mode==="extracted"?this.l("Import an already extracted Buildroot tree with its existing output directory. Archive extraction is not performed. No source or output file is copied, deleted or overwritten.","匯入已解壓 Buildroot 來源樹同現有輸出目錄。此處唔會解壓封存檔，亦唔會複製、刪除或覆寫來源同輸出檔案。",true):this.l("Adopt a trusted existing Buildroot tree and separate output directory inside a chosen workspace. Existing contents remain in place.","接入所選工作區入面可信嘅現有 Buildroot 來源樹同獨立輸出目錄，現有內容會原位保留。",true)}</p>

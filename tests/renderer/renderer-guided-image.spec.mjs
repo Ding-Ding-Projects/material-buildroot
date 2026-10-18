@@ -46,7 +46,7 @@ test('five stages preserve metadata and separate configuration, build and result
  await panel.getByRole('textbox',{name:'Image name',exact:true}).fill('rescue-disc');
  await next(panel);await expect(panel.getByRole('heading',{name:'Where will it be built?',exact:true})).toBeVisible();
  await panel.getByRole('button',{name:'Set up runtime',exact:true}).click();
- expect(await page.evaluate(()=>window.routes)).toEqual([{detail:{destination:'runtime',workspaceId:'guided-a'},bubbles:true,composed:true}]);
+ await expect.poll(()=>page.evaluate(()=>window.routes)).toEqual([{detail:{destination:'runtime',workspaceId:'guided-a'},bubbles:true,composed:true}]);
  await next(panel);await expect(panel.getByRole('heading',{name:'Choose image contents',exact:true})).toBeVisible();
  await next(panel);await expect(panel.getByRole('heading',{name:'Review your image',exact:true})).toBeVisible();
  await expect(panel.locator('md-filled-button')).toHaveCount(1);await expect(panel.locator('md-filled-button')).toContainText('Configure BIOS ISO');
@@ -154,7 +154,7 @@ for(const version of [1,2])test(`version ${version} earlier-stage job resumes at
 });
 
 test('storage failure leaves visible unsaved state and never replaces the last valid record',async({page})=>{
- const panel=await open(page);await panel.getByRole('textbox',{name:'Image name',exact:true}).fill('saved-name');
+ const panel=await open(page);await panel.getByRole('textbox',{name:'Image name',exact:true}).fill('saved-name');await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-guided-a')).name)).toBe('saved-name');
  await page.evaluate(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='iso-workflow-guided-a')throw new DOMException('Full','QuotaExceededError');return original.call(this,key,value);};});
  await panel.getByRole('textbox',{name:'Image name',exact:true}).fill('unsaved-name');await expect(panel).toContainText('Current draft changes are not saved');
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-guided-a')).name)).toBe('saved-name');
@@ -190,7 +190,7 @@ test('clearing storage elsewhere raises a conflict without deleting the local dr
 test('successful complete scoped absence permits explicit local detach and fresh setup',async({page})=>{
  const panel=await open(page,{saved:{version:2,revision:1,step:2,mode:'easy',name:'keep-this-name',target:'bios-iso',preset:'server',desktop:'none',ssh:true,boardId:null,jobId:'missing-job'}});
  await expect(panel.getByRole('button',{name:'Detach unavailable saved job',exact:true})).toHaveCount(0);
- await panel.getByRole('button',{name:'Review project runtime',exact:true}).click();expect(await page.evaluate(()=>window.routes.at(-1).detail)).toEqual({destination:'runtime',workspaceId:'guided-a'});
+ await panel.getByRole('button',{name:'Review project runtime',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.routes.at(-1)?.detail)).toEqual({destination:'runtime',workspaceId:'guided-a'});
  await panel.getByRole('button',{name:'Refresh ISO job and log',exact:true}).click();
  await expect(panel).toContainText('does not prove process termination');
  await panel.getByRole('button',{name:'Detach unavailable saved job',exact:true}).click();
@@ -210,7 +210,7 @@ for(const reply of [{ok:false,code:'UNAUTHORIZED'},{ok:false,code:'NETWORK_UNAVA
  await expect(panel.getByRole('button',{name:'Detach unavailable saved job',exact:true})).toHaveCount(0);
  await panel.evaluate(el=>el.detachUnavailableJob());expect(await panel.evaluate(el=>el.isoJob.id)).toBe('missing-job');
  await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeDisabled();
- await panel.getByRole('button',{name:'Review project source',exact:true}).click();expect(await page.evaluate(()=>window.routes.at(-1).detail)).toEqual({destination:'source',workspaceId:'guided-a'});
+ await panel.getByRole('button',{name:'Review project source',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.routes.at(-1)?.detail)).toEqual({destination:'source',workspaceId:'guided-a'});
 });
 
 test('a failed retry revokes earlier absence evidence',async({page})=>{
