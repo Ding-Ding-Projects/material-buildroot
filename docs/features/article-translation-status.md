@@ -14,7 +14,7 @@ The current documentation lane preserves 49 detailed Cantonese reference twins, 
 - [ISO production](../desktop/iso-production.zh-HK.md)
 - [Beginner documentation](guided-documentation.zh-HK.md)
 
-These are full authored translations, not the older short Cantonese summary. Current English wiki updates describe installed release and bounded ISO evidence; existing wiki Cantonese twins have not been refreshed in this lane and may retain earlier statements. Their synchronization remains unfinished.
+These are full authored translations, not the older short Cantonese summary. The three Cantonese wiki twins are synchronized with their current English originals, including installed build 233.1, publication-only build 234.1 and bounded ISO consumer evidence. This is source translation equivalence, not new runtime acceptance.
 
 ## Additional complete reference twins
 
