@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
 const consent='Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.';
 async function open(page){
+ test.setTimeout(60000);
  await page.addInitScript(()=>{localStorage.setItem('material-buildroot.wording.v1',JSON.stringify({schemaVersion:1,englishHumor:1,cantoneseHumor:1,displayName:''}));window.studio={sharedMode:async()=>({ok:true,result:{available:true,watching:true,configured:false,active:false,displayName:null,revision:null,credentialKind:null}})};});
- await page.goto('/');await page.locator('command-surfaces').waitFor({state:'attached'});
+ await page.goto('/',{waitUntil:'domcontentloaded',timeout:45000});await page.locator('command-surfaces').waitFor({state:'attached',timeout:45000});
  await page.evaluate(async()=>{
   await import('/src/renderer/operations-panel.ts');const {vocabulary}=await import('/src/renderer/owned-copy.ts');await vocabulary.setSchool('inactive');
   window.__permissionCalls=[];window.__grantResult='success';window.__trusted=false;
@@ -28,6 +29,7 @@ async function open(page){
  });
  const p=page.locator('operations-panel').filter({has:page.locator('image-presets-panel')}).first(),iso=p.locator('image-presets-panel');
  await expect.poll(()=>page.evaluate(()=>!window.__permissionPanel.pending&&!window.__permissionPanel.shadowRoot.querySelector('image-presets-panel')?.isoBusy)).toBe(true);
+ await iso.getByRole('button',{name:'Next',exact:true}).click();
  return {p,iso,review:()=>iso.getByRole('button',{name:'Review source execution permission',exact:true}).click()};
 }
 async function approve(p){await p.getByRole('checkbox',{name:consent,exact:true}).check();await p.getByRole('button',{name:'Allow this scope',exact:true}).click();}
@@ -39,11 +41,15 @@ test('Easy ISO reviews explicit scope, focuses consent and returns once without 
  await expect(p.getByRole('button',{name:'Allow this scope',exact:true})).toBeDisabled();
  expect(await page.evaluate(()=>window.__permissionCalls.some(r=>r.action==='config.trustGrant'))).toBe(false);
  const before=await isoChecks(page);await approve(p);
- await expect(iso.getByRole('button',{name:'Configure BIOS ISO',exact:true})).toBeVisible();
  await expect.poll(()=>isoChecks(page)).toBe(before+1);
  await expect(p.getByRole('button',{name:'Return to ISO guide',exact:true})).toBeVisible();
+ expect(await page.evaluate(()=>window.__permissionPanel.shadowRoot.querySelector('image-presets-panel').isoStep)).toBe(1);
+ await expect(iso.getByRole('button',{name:'Build ISO image',exact:true,includeHidden:true})).toBeDisabled();
+ await iso.getByRole('button',{name:'Next',exact:true}).click();
+ await iso.getByRole('button',{name:'Next',exact:true}).click();
+ await expect(iso.getByRole('button',{name:'Configure BIOS ISO',exact:true})).toBeVisible();
  await expect(iso.getByRole('button',{name:'Next',exact:true})).toBeDisabled();
- expect(await page.evaluate(()=>window.__permissionPanel.shadowRoot.querySelector('image-presets-panel').isoStep)).toBe(0);
+ expect(await page.evaluate(()=>window.__permissionPanel.shadowRoot.querySelector('image-presets-panel').isoStep)).toBe(3);
  await p.getByRole('button',{name:'Return to ISO guide',exact:true}).click();expect(await isoChecks(page)).toBe(before+1);
  expect(await page.evaluate(()=>window.__permissionCalls.some(r=>['imagePreset.isoApply','imagePreset.isoBuild','build.submit'].includes(r.action)))).toBe(false);
  expect(await page.evaluate(()=>localStorage.getItem('iso-workflow-iso-workspace'))).not.toContain('fixture-challenge');

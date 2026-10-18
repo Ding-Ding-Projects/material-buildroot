@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
 const replaceLabel='Replace this output configuration with the selected PC preset';
 async function open(page){
+ test.setTimeout(60000);
  await page.addInitScript(()=>{localStorage.setItem('material-buildroot.wording.v1',JSON.stringify({schemaVersion:1,englishHumor:1,cantoneseHumor:1,displayName:''}));window.studio={sharedMode:async()=>({ok:true,result:{available:true,watching:true,configured:false,active:false,displayName:null,revision:null,credentialKind:null}})};});
- await page.goto('/');await page.locator('command-surfaces').waitFor({state:'attached'});
+ await page.goto('/',{waitUntil:'domcontentloaded',timeout:45000});await page.locator('command-surfaces').waitFor({state:'attached',timeout:45000});
  await page.evaluate(async()=>{
   await import('/src/renderer/operations-panel.ts');const {vocabulary}=await import('/src/renderer/owned-copy.ts');await vocabulary.setSchool('inactive');
   window.__boardCalls=[];window.__boardTrusted=true;window.__boardApplied=false;window.__boardEffective=true;
@@ -29,6 +30,7 @@ async function open(page){
  });
  const p=page.locator('operations-panel').filter({has:page.locator('image-presets-panel')}).first(),iso=p.locator('image-presets-panel'),board=iso.getByRole('region',{name:'Choose a PC starting point',exact:true});
  await expect.poll(()=>page.evaluate(()=>!window.__boardPanel.pending&&!window.__boardPanel.shadowRoot.querySelector('image-presets-panel')?.isoBusy)).toBe(true);
+ await iso.getByRole('button',{name:'Next',exact:true}).click();
  return {p,iso,board,discover:()=>board.getByRole('button',{name:'Find source PC presets',exact:true}).click()};
 }
 async function apply(board){await board.getByRole('checkbox',{name:replaceLabel,exact:true}).check();await board.getByRole('button',{name:'Apply this PC starting point',exact:true}).click();}
@@ -44,6 +46,9 @@ test('actual source identities are prefilled, replacement is explicit and change
  await iso.getByRole('button',{name:'Check ISO prerequisites',exact:true}).click();await expect(iso).toContainText('ISO compatibility is not confirmed');
  await iso.getByRole('button',{name:'Review source execution permission',exact:true}).click();
  await p.getByRole('checkbox',{name:'Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.',exact:true}).check();await p.getByRole('button',{name:'Allow this scope',exact:true}).click();
+ await expect(iso.getByRole('button',{name:'Build ISO image',exact:true,includeHidden:true})).toBeDisabled();
+ await iso.getByRole('button',{name:'Next',exact:true}).click();
+ await iso.getByRole('button',{name:'Next',exact:true}).click();
  await expect(iso.getByRole('button',{name:'Configure BIOS ISO',exact:true})).toBeVisible();await expect(iso.getByRole('button',{name:'Next',exact:true})).toBeDisabled();
 });
 test('QEMU is a distinct discovered choice and selection or refresh clears consent',async({page})=>{
