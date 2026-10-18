@@ -317,7 +317,7 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 
 ## Source-derived completion work, 2026-10-18
 
-- [x] Add and negatively test a partial992-detail Buildroot2025.02 source-to-GUI/Easy-mode/help inventory with168content-hashed source files.
+- [x] Add and negatively test a partial 992-detail Buildroot 2025.02 source-to-GUI/Easy-mode/help inventory with 168 content-hashed source files.
 - [ ] Complete native Kconfig, source target and package-field enumeration with explicit dispositions for every supported detail.
 - [ ] Verify the combined Easy ISO workflow and beginner documentation in actual built surfaces, including contextual articles and saved progress.
 - [ ] Complete real ISO production and independent boot/use acceptance after PATH and verbose-output limit repairs.

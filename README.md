@@ -120,6 +120,6 @@ A separate batch-close race was reproduced when closing Plans and Activity with 
 
 ## Source-to-interface coverage
 
-The [Buildroot2025.02 inventory](docs/planning/buildroot-coverage/README.md) records992details from168content-hashed source files with separate GUI, Easy-mode, contextual-help and runtime dispositions. It makes concrete omissions actionable, including filesystem options, bootloader options, package fields and source make-rule candidates. It is a partial inventory; it does not claim exhaustive Kconfig parsing, all-version compatibility or complete interface delivery.
+The [Buildroot 2025.02 inventory](docs/planning/buildroot-coverage/README.md) records 992 details from 168 content-hashed source files with separate GUI, Easy-mode, contextual-help and runtime dispositions. It makes concrete omissions actionable, including filesystem options, bootloader options, package fields and source make-rule candidates. It is a partial inventory; it does not claim exhaustive Kconfig parsing, all-version compatibility or complete interface delivery.
 
 Start the supported image path with the [Easy ISO workflow](docs/desktop/iso-workflow.md) and its [field explanations](docs/desktop/iso-fields/README.md). The [beginner documentation walkthrough](docs/features/guided-documentation.md) teaches the same concepts while keeping visitor progress separate from real build results. Combined built-interface and deployment verification remains pending.
