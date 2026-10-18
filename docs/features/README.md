@@ -83,3 +83,5 @@ Legacy reference articles without a linked Cantonese twin remain untranslated ga
 - [Presentation provenance](presentation-provenance.md) · [展示來源證明](presentation-provenance.zh-HK.md)
 
 - [Authenticated companion consumers](companion-consumers.md) · [已驗證伴隨連線消費端](companion-consumers.zh-HK.md)
+
+- [Browser-native visitor consumers](browser-native.md) · [瀏覽器原生訪客功能](browser-native.zh-HK.md)
