@@ -14,7 +14,7 @@ const DESKTOPS = Object.freeze([
   { id: "xorg", symbol: "BR2_PACKAGE_XSERVER_XORG_SERVER", label: "X.Org server (no desktop shell)" },
 ]);
 const ISO_SYMBOLS = Object.freeze(["BR2_TARGET_GRUB2", "BR2_TARGET_GRUB2_I386_PC", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_GRUB2", "BR2_TARGET_ROOTFS_ISO9660_INITRD"]);
-const ISO_STRINGS = Object.freeze({ BR2_TARGET_GRUB2_BOOT_PARTITION: "cd", BR2_TARGET_GRUB2_BUILTIN_MODULES_PC: "boot linux iso9660 normal biosdisk" });
+const ISO_STRINGS = Object.freeze({ BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU: "fs/iso9660/grub.cfg", BR2_TARGET_GRUB2_BUILTIN_CONFIG_PC: "", BR2_TARGET_GRUB2_BOOT_PARTITION: "cd", BR2_TARGET_GRUB2_BUILTIN_MODULES_PC: "boot linux iso9660 normal biosdisk" });
 function fail(code) { throw Object.assign(new Error(code), { code }); }
 function createImagePresets({ configuration }) {
   const approvedIso = new Map();
