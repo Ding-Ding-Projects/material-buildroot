@@ -30,6 +30,26 @@ Component inspection uses two stages: permission for the current Buildroot sourc
 
 The host recomputes admission before, during and after the fixed runtime interpreter transport. Native safe parsing remains a fallback when no execution permission exists. Every configuration mutation independently requires current domain permission. The UI discloses that source-defined commands execute with the selected WSL account's access, while the container inspection route uses read-only mounts and no network. Configuration reconciliation is a separate writable Buildroot operation. Inspection is not represented as a sandbox for hostile source.
 
-Content capture uses the existing bounded build-intent snapshotter. Sources exceeding its count/byte/time limits remain unavailable. Symlink-bearing source snapshots are rejected because the current snapshotter binds link text without binding all possible target content. This is an explicit implementation limitation rather than an implicit trust expansion.
+Content capture remains bounded by entry, byte and time limits. Legacy host receipts that bind only link text are insufficient for linked Kconfig sources. The current native WSL route admits links only after its stronger namespace, referent-content and identity checks succeed; see [native WSL content intent](../security/native-wsl-content-intent.md). Exceeding the capture limits or failing those checks remains unavailable, not an implicit trust expansion.
 
 Runtime inspection participates in disposal cancellation and records concrete process ownership in the existing recovery journal. Unconfirmed cleanup retains its recovery record. No renderer command, executable, environment map or filesystem root is accepted by these permission endpoints.
+
+## Review permission from the ISO guide
+
+Permission answers one question: may the selected source execute its configuration-inspection commands in this runtime? It is not an ISO build result. A source folder is like a recipe that can also contain executable steps; review whose source it is and the account that will run it.
+
+1. In the ISO guide, choose **Review source execution permission**. The Configuration workspace opens its **Source execution permission** section for that same workspace and Buildroot scope. Opening the section grants nothing.
+2. Read **Review exact scope** and the displayed source, configuration, external-source order and runtime. If the selection is wrong, return without approving it.
+3. Select the checkbox **Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.** Then choose **Allow this scope**. The checkbox alone is not approval, and the host must accept the current challenge before success is reported.
+4. Read the resulting permission status. Choose **Return to ISO guide** to resume. The guide checks ISO compatibility separately. Approval does not configure the image, submit a build or prove that semantic inspection is available.
+5. If the reviewed scope changed or expired, use **Review current scope again** and review the new facts. Do not treat a previously checked box as authority for a different source or runtime.
+
+For Linux, BusyBox or U-Boot inspection, component discovery is a separate first approval of the current Buildroot source/configuration. It permits only the fixed discovery operation. A second review then identifies the actual discovered component source/configuration before component execution permission is granted. Missing or unprepared components remain unavailable; discovery does not download or prepare them.
+
+**Revoke configuration permission** clears permission and pending challenges for the whole selected workspace, not only the visible component. Permission is session-local, expires after at most fifteen minutes and is invalidated by the bound source/configuration/root/runtime changes. A pending challenge expires after five minutes.
+
+## Interpret unavailable semantics separately
+
+`KCONFIG_SEMANTICS_UNAVAILABLE` means the host did not supply usable authoritative Kconfig semantics for that inspection. It does not, by itself, mean permission is still missing. Read the permission result and the separate inspection result as two facts. Approval cannot manufacture an interpreter, a valid source environment or a completed inspection. Do not mark configuration or ISO production successful from the permission message.
+
+In the native observation of candidate `37571d3`, opening the review, selecting the checkbox and choosing **Allow this scope** succeeded and reported permission approved. The automatic ISO recheck still returned `KCONFIG_SEMANTICS_UNAVAILABLE`. At `2026-10-18T09:25:32.580Z` the renderer subsequently exited with code `0xC0000005`; no source cause is established. A later intended `inspectConfig` operation did not execute because `Runtime.enable` timed out. The sequence does not prove that permission or inspection caused the exit, and the unexecuted operation supplies no result. See [renderer exit diagnostics](renderer-exit-diagnostics.md) for the receipt's limited meaning. No recovery command, native repair success or ISO success is inferred.
