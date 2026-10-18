@@ -40,7 +40,7 @@ const language = document.querySelector('#language');
 let browserScheduleApplying = false;
 const setLanguage = (mode) => {
   document.documentElement.dataset.language = mode;
-  document.documentElement.lang = 'en'; // Articles retain English; translated spans declare zh-HK.
+  document.documentElement.lang = 'en'; // The shell remains English; each article body and translated UI span declares its own language.
   document.querySelectorAll('[data-aria-en][data-aria-zh]').forEach(element => {
     element.setAttribute('aria-label', mode==='en' ? element.dataset.ariaEn : mode==='zh' ? element.dataset.ariaZh : `${element.dataset.ariaEn} · ${element.dataset.ariaZh}`);
   });

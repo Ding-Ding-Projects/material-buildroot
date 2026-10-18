@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { build } from 'esbuild';
 import { documentSources, categoryFor } from './inventory.mjs';
 import { parseRoadmap } from './roadmap.mjs';
+import { articleSourceLabel, articleBody } from './article-language.mjs';
 import { writeFontInventory } from './presentation-provenance.mjs';
 import { resolveDocumentLink, containedPath, sourceSnapshot, indexedSources, admittedSource } from './source-boundary.mjs';
 
@@ -203,7 +204,7 @@ await fs.writeFile(path.join(out,'document-inventory.json'),JSON.stringify(docum
 for (const doc of documents) {
   const headings=[]; const rendered=render(doc.content,doc.source,headings);
   const toc=`<aside class="toc" aria-label="On this page"><strong>On this page</strong>${headings.map(h=>`<a href="#${esc(h.id)}">${esc(h.text)}</a>`).join('')}</aside>`;
-  const article=`<article class="article"><div class="breadcrumb"><a href="${base}site/library.html">Reference library</a> / <a href="${base}site/categories/${doc.category.toLowerCase()}.html">${doc.category}</a></div><div class="article-meta"><span>Project record · English source</span><md-outlined-button class="article-bookmark" data-bookmark-url="${doc.url}" data-bookmark-title="${esc(doc.title)}">Save reference</md-outlined-button><a href="${repository}/blob/main/${doc.source}">View source <md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></a></div>${rendered}</article>`;
+  const article=`<article class="article"><div class="breadcrumb"><a href="${base}site/library.html">Reference library</a> / <a href="${base}site/categories/${doc.category.toLowerCase()}.html">${doc.category}</a></div><div class="article-meta">${articleSourceLabel(doc.source)}<md-outlined-button class="article-bookmark" data-bookmark-url="${doc.url}" data-bookmark-title="${esc(doc.title)}">Save reference</md-outlined-button><a href="${repository}/blob/main/${doc.source}">View source <md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></a></div>${articleBody(doc.source,rendered)}</article>`;
   const destination=path.join(out,'articles',doc.source.replace(/\.md$/,'.html'));
   await fs.mkdir(path.dirname(destination),{recursive:true});
   await fs.writeFile(destination,page(doc.title,article,{active:doc.category,toc}));
