@@ -103,3 +103,7 @@ Buildroot runs in a non-root Linux runtime. Docker requires an existing digest-p
 The root entrypoints acquire pinned portable tools and locked packages without administrator rights. `build.bat --run` explicitly builds and launches the application. The unsigned Squirrel.Windows installer can trigger publisher or SmartScreen warnings. Build scripts produce artifacts; publication is a separate workflow.
 
 The documentation target validates isolated generated output before promotion into `docs/`. GitHub Pages serves `main` → `/docs`. See [Windows entrypoints](docs/build/windows-entrypoints.md), [website authoring](website/README.md) and [the current handoff](HANDOFF.md).
+
+## Installer startup repair, 2026-10-17
+
+Removed duplicated source embedded in the component-discovery enablement expression. Desktop production now checks syntax in all main/shared JavaScript modules before packaging. Focused configuration checks passed (12 passed, 3 skipped); packaged launch and replacement installer verification remain pending. Docker server 29.8.2 responds, and WSL lists docker-desktop; a separate Buildroot WSL distribution has not been verified.

@@ -25,32 +25,7 @@ function resolveDomains(project, report) {
   const domains = {};
   for (const [domain, spec] of Object.entries(SPECS)) {
     const enabled = { linux: "BR2_LINUX_KERNEL", busybox: "BR2_PACKAGE_BUSYBOX", uboot: "BR2_TARGET_UBOOT" }[domain];
-    if (!new RegExp(`^${enabled}=y"use strict";
-const fs = require("node:fs");
-const path = require("node:path");
-const { createHash } = require("node:crypto");
-const SPECS = Object.freeze({
-  linux: { variable: "LINUX_DIR", entrypoint: "Kconfig", target: "linux-olddefconfig" },
-  busybox: { variable: "BUSYBOX_DIR", entrypoint: "Config.in", target: "busybox-oldconfig" },
-  uboot: { variable: "UBOOT_DIR", entrypoint: "Kconfig", target: "uboot-olddefconfig" },
-});
-const fail = (code) => { throw Object.assign(new Error(code), { code }); };
-function regular(file) {
-  const stat = fs.lstatSync(file);
-  if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || stat.size > 4 * 1024 * 1024)
-    fail("UNSAFE_COMPONENT_FILE");
-  return fs.readFileSync(file, "utf8");
-}
-/** Paths are derived from real Buildroot printvars, never renderer input or directory guesses. */
-function resolveDomains(project, report) {
-  if (typeof report !== "string" || report.length > 65536) fail("INVALID_DOMAIN_DISCOVERY");
-  const roots = [...report.matchAll(/^MATERIAL_CONFIG_OUTPUT=(\/[^\r\n]+)$/gm)];
-  if (roots.length !== 1) fail("INVALID_DOMAIN_DISCOVERY");
-  const runtimeOutput = roots[0][1].replace(/\/$/, "");
-  const buildrootConfig = regular(path.join(project.output, ".config"));
-  const architecture = buildrootConfig.match(/^BR2_ARCH="([A-Za-z0-9_+-]+)"$/m)?.[1];
-  const domains = {};
-, "m").test(buildrootConfig)) continue;
+    if (!new RegExp(`^${enabled}=y$`, "m").test(buildrootConfig)) continue;
     if (domain === "uboot" && !/^BR2_TARGET_UBOOT_BUILD_SYSTEM_KCONFIG=y$/m.test(buildrootConfig)) continue;
     const matches = [...report.matchAll(new RegExp(`^${spec.variable}=(.*)$`, "gm"))];
     if (!matches.length || (matches.length === 1 && !matches[0][1].trim())) continue;

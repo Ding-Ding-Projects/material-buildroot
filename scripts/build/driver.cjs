@@ -164,6 +164,13 @@ async function main() {
   }
   execute(node,[path.join(root,'scripts/check-vocabulary.cjs')]);
   const before = dependenciesOnly ? null : sourceIdentity(root,git,manifestBytes);
+  if (!dependenciesOnly && target.kind === 'desktop') {
+    for (const directory of ['src/main', 'src/shared']) {
+      for (const file of inventory(path.join(root, directory))) {
+        if (/\.(cjs|mjs|js)$/.test(file.path)) execute(node, ['--check', path.join(root, directory, file.path)]);
+      }
+    }
+  }
   console.log('Installing exact locked npm packages with lifecycle scripts disabled.');
   execute(node,[npm,'ci','--ignore-scripts','--no-audit','--no-fund'],{cwd:packageRoot});
   if (dependenciesOnly) { console.log('Locked dependencies acquired. No build or runtime verification is claimed.'); return; }
