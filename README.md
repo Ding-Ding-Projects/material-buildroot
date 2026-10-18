@@ -16,6 +16,8 @@ The host provides [separate local schedule draft recovery](docs/security/schedul
 
 ## Current delivery boundary
 
+The current candidate keeps complete source-package inventories accessible through 50-item pages, independent literal/regex search and retained selection. The source fixture covers all 3,263 discovered packages; combined native layout acceptance remains pending. Source-derived article language labels, twelve reference translations and the full local visitor workflow are verified separately from public deployment. See [package targets](docs/desktop/package-targets.md), [article language](docs/features/article-source-language.md), [visitor acceptance](docs/features/visitor-acceptance.md) and [native WSL admission](docs/security/native-wsl-content-intent.md) for the exact limits.
+
 The integration candidate adds ordered native feedback for valid and invalid personal-wording file drops. Focused backend checks passed 4/4 and renderer checks passed 23/23; native playback calls were accepted, while audibility and the combined installed update remain unverified. See [drop feedback](docs/desktop/personal-vocabulary-drop-sounds.md).
 
 The [native Kconfig inventory](docs/planning/buildroot-coverage/native-kconfig.md) enumerates 11,464 definition nodes from 3,367 hashed inputs for the recorded Buildroot 2025.02 invocation. Seven completeness and help-fidelity checks pass. Every definition retains separate GUI, Easy-mode and runtime gaps. Actual candidate launch, About and catalog closure passed bounded checks, but entering Builds after Linux project adoption left the renderer unresponsive. GUI-driven ISO production remains incomplete despite separate product execution and ISO boot evidence.

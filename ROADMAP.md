@@ -317,6 +317,13 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 
 ## Source-derived completion work, 2026-10-18
 
+- [x] Author twelve of thirteen previously missing reference twins and synchronize three Cantonese wiki articles; verify sixteen translated routes and thirty-two width checks. The automatically rejected server-manager translation remains unfinished.
+- [x] Verify the complete local visitor workflow at its recorded candidate: 22 interactions, 344 article routes and 12 responsive tuples. Public deployment remains separate.
+- [x] Correct source-derived article language labels and body language without changing interface-language choice or source URLs.
+- [ ] Verify the combined native package chooser and field sizing after source-backed paging and bounded search implementation.
+- [ ] Complete actual GUI ISO permission, plan, apply, queue, build and inspection after a fresh stable-runtime run.
+- [ ] Complete fresh-project source-backed PC defaults and the remaining Easy-mode interpretation without requiring manual symbol research.
+
 - [x] Preserve complete MenuNode enumeration for the recorded native Buildroot 2025.02 parser invocation: 11,464 definitions, 3,367 input hashes and negative omission/help-fidelity checks. Other invocations and production GUI acceptance remain separate.
 - [ ] Complete the native GUI path from Linux project adoption through ISO build and inspection; investigate observed Builds renderer unresponsiveness.
 - [ ] Verify combined native drop sounds after independently checked backend and renderer changes. Audibility and installed-update acceptance remain unverified.

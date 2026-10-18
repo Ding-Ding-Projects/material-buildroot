@@ -1,3 +1,7 @@
+## Latest combined candidate, 2026-10-18
+
+The combined source includes bounded package selection, reference translations, full visitor acceptance, article-language metadata and native WSL content admission. Source-bound results, exact candidate builds and remaining runtime limits are recorded in `CLOSEOUT_PROMPT.md`. Native Builds loaded 3,263 packages and returned to Configuration at `8f63abd`. The new native adapter still needs sustained GUI/queue acceptance after observed WSL service disconnects, worker exits and changing kernel boot identities. A later four-observation idle-stability check met the bounded retry condition. No host power or service-control action was used.
+
 ## Current integration continuation, 2026-10-18
 
 Integration branch `ai/integration/20261018-roadmap-combined` contains native drop-sound backend `89dab5a`, ordered renderer feedback `8e3d6e6` and native Kconfig inventory/help-fidelity repair `3f1f82b`. Backend checks passed 4/4, renderer lane 23/23 and native inventory checks 7/7. Native audio calls were accepted; audibility is unverified. The inventory retains 11,464 definitions and 3,367 hashed inputs with explicit GUI/Easy-mode/runtime gaps. The repaired scrubber preserves all 7,189 source-help quotations.
