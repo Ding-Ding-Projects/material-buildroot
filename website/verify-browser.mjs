@@ -44,6 +44,21 @@ async function chooseM3(locator,value){
  await Promise.all([locator.evaluate(element=>new Promise(resolve=>element.addEventListener('opened',()=>resolve(true),{once:true}))),locator.click()]);
  await Promise.all([locator.evaluate(element=>new Promise(resolve=>element.addEventListener('closed',()=>resolve(true),{once:true}))),page.locator('md-select-option[value="'+value+'"]').click()]);
 }
+/** Follow the visitor's real tab catalogue instead of interacting with hidden panels. */
+async function openVisitorControl(selector){
+ const control=page.locator(selector).first();
+ if(await control.isVisible())return control;
+ const section=await control.evaluate(element=>{const panel=element.closest('[role="tabpanel"]');return panel?{id:panel.id,title:panel.querySelector('h2')?.textContent.trim().replace(/\s+/g,' ')}:null;});
+ assert.ok(section?.id&&section.title,`Hidden visitor control has no catalogued panel: ${selector}`);
+ await page.locator('#browser-native-tabs').getByRole('button',{name:/^(New tab|新增分頁)(?: ·|$)/}).click();
+ const catalog=page.locator('md-dialog[open]').filter({has:page.locator('[slot="headline"]').filter({hasText:/Open a visitor tool tab|開啟訪客工具分頁/})});
+ assert.equal(await catalog.count(),1,'Exactly one visitor tab catalogue must be open');
+ await catalog.getByRole('button',{name:section.title,exact:true}).click();
+ await page.waitForFunction(id=>document.getElementById(id)?.hidden===false,section.id);
+ assert.equal(await control.isVisible(),true,`Selected visitor control must be visible: ${selector}`);
+ assert.equal(await page.locator('#'+section.id).getAttribute('role'),'tabpanel');
+ return control;
+}
 async function ready(){await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('*')].filter(e=>e.localName.startsWith('md-')).map(e=>customElements.whenDefined(e.localName)));await Promise.all([...document.querySelectorAll('*')].filter(e=>e.updateComplete).map(e=>e.updateComplete));await document.fonts.ready;});}
 async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:path.relative(root,file).split(path.sep).join('/'),sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
 try{
@@ -215,7 +230,8 @@ try{
  assert.match(await page.locator('#companion-title').innerText(),/Connect to your desktop/);
  await chooseLanguage('zh');
  assert.equal(await page.locator('#visitor-goal').evaluate(field=>field.label),'你想了解或完成啲乜？');
- await page.locator('[data-plan-prompt]').first().click();
+ await (await openVisitorControl('[data-plan-prompt]')).click();
+ await openVisitorControl('#visitor-goal');
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),'查看 PH09 訪客工作區工作');
  await chooseLanguage('both');
  await page.locator('#companion-endpoint').locator('input').fill('https://8.8.8.8:8443');
@@ -251,6 +267,7 @@ try{
  assert.ok(companionRequests.some(item=>item.path==='/actions'&&item.body?.args&&Object.keys(item.body.args).length===0));
  assert.ok(companionRequests.some(item=>item.path==='/disconnect'&&item.body&&Object.keys(item.body).length===0));
  receipt.checks.push('Companion protocol fixture verifies private-IP validation, manual challenge pairing, bounded read-only request shapes, memory-only CSRF state, safe workspace/project/job summaries, session refresh and server-confirmed disconnect. This fixture does not establish real TLS/LAN acceptance.');
+ await openVisitorControl('#visitor-goal');
  await page.locator('#visitor-goal').locator('input').fill('Review the visitor roadmap');
  await page.locator('#visitor-notes').locator('textarea').fill('Keep this note in the browser profile.');
  await page.locator('[data-check="read-roadmap"]').click();
@@ -259,6 +276,7 @@ try{
  await page.reload();await ready();
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),'Review the visitor roadmap');
  assert.equal(await page.locator('#visitor-notes').locator('textarea').inputValue(),'Keep this note in the browser profile.');
+ await openVisitorControl('#visitor-import-json');
  await page.locator('#visitor-import-json').locator('textarea').fill('{invalid');
  await page.locator('#visitor-import').click();
  assert.match(await page.locator('#visitor-message').innerText(),/not valid/);
@@ -270,7 +288,7 @@ try{
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),validBackup.goal);
  const [backupDownload]=await Promise.all([page.waitForEvent('download'),page.locator('#visitor-export').click()]);
  assert.equal(backupDownload.suggestedFilename(),'material-buildroot-visitor-workspace.json');
- await page.locator('#visitor-offline').click();
+ await (await openVisitorControl('#visitor-offline')).click();
  await page.waitForFunction(()=>document.querySelector('#visitor-offline-status').textContent.includes('saved for offline reading'),null,{timeout:30000});
  assert.match(await page.locator('#visitor-offline-status').innerText(),/saved for offline reading/);
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
@@ -279,6 +297,7 @@ try{
  assert.equal(offlineArticle.status(),200,'Cached article navigation should work without a network connection');
  assert.match(await page.locator('article').innerText(),/Public documentation visitor surface/);
  await context.setOffline(false);
+ receipt.checks.push('Visitor tool controls are selected through the actual New tab catalogue, with visible-panel assertions before interaction.');
  receipt.checks.push('Visitor workbench persists a private plan, checklist and notes; malformed imports preserve existing data, valid backups restore state, export downloads JSON, and opt-in offline caching serves an article after network disconnect. A separate protocol fixture covers the opted-in read-only companion contract but does not establish real TLS/LAN acceptance.');
  await page.goto(target);await ready();
  await page.locator('nav[aria-label="Main navigation"] md-list-item[href="'+publicBase+'site/roadmap.html"]').click();await ready();
