@@ -47,6 +47,9 @@ type Job = {
 /** Typed task controls. Host operations remain the authority for paths and execution. */
 export class OperationsPanel extends LitElement {
   static properties = {
+    presentation: {type: String, reflect: true},
+    guidedConfiguration: {state: true},
+    guidedRuntime: {state: true},
     configurationGeneration:{state:true},
     restricted:{type:Boolean},
     language: { type: String },
@@ -89,6 +92,40 @@ export class OperationsPanel extends LitElement {
     dockOpen: { state: true },
   };
   configurationGeneration=0;
+  presentation = 'legacy';
+  guidedConfiguration = 'image';
+  guidedRuntime = 'projects';
+  private visitedViews = new Set<string>();
+  private navigationEpoch = 0;
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('guided-workflow-navigate', this.onGuidedNavigate);
+  }
+  private onGuidedNavigate = async (event: Event) => {
+    const detail = (event as CustomEvent).detail;
+    if (this.presentation !== 'guided' || !this.workspace?.workspaceId || detail?.workspaceId !== this.workspace.workspaceId || !['runtime','source','config','artifacts'].includes(detail?.destination)) return;
+    event.stopPropagation();
+    const workspaceId = this.workspace.workspaceId, destination = detail.destination, epoch = ++this.navigationEpoch;
+    if (destination === 'config') {
+      this.configTrustEpoch++; this.configTrustPreview=undefined; this.configTrustAccepted=false; this.isoPermission=undefined;
+      this.guidedConfiguration='settings';
+    }
+    if (destination === 'runtime') this.guidedRuntime='execution';
+    this.tab = destination;
+    await this.updateComplete;
+    if (epoch !== this.navigationEpoch || this.workspace?.workspaceId !== workspaceId || this.tab !== destination || !this.isConnected) return;
+    const heading=this.renderRoot.querySelector<HTMLElement>('#operation-heading');
+    if (heading?.getClientRects().length) heading.focus({preventScroll:true});
+  };
+  /** Selects an existing project workflow without granting access or submitting work. */
+  async openProjectWorkflow(mode: 'create' | 'open') {
+    if (!['create','open'].includes(mode)) return;
+    this.guidedRuntime = 'projects';
+    this.tab = 'runtime';
+    await this.updateComplete;
+    const panel = this.renderRoot.querySelector<import('./project-workflow-panel').ProjectWorkflowPanel>('project-workflow-panel');
+    await panel?.openProjectWorkflow(mode);
+  }
   restricted=false;
   language = "bilingual";
   tab = "runtime";
@@ -129,7 +166,7 @@ export class OperationsPanel extends LitElement {
   private confirmingClean = false;
   private configTrustEpoch=0;
   private isoPermission?:IsoPermissionContext;
-  disconnectedCallback(){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;super.disconnectedCallback();}
+  disconnectedCallback(){this.navigationEpoch++;this.removeEventListener('guided-workflow-navigate',this.onGuidedNavigate);this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;super.disconnectedCallback();}
   protected willUpdate(changed:Map<string,unknown>){
     if(['workspace','configDomain','configurationGeneration','tab'].some(key=>changed.has(key))){
       this.configTrustEpoch++;this.configTrustPreview=undefined;this.configTrustAccepted=false;
@@ -137,6 +174,7 @@ export class OperationsPanel extends LitElement {
     }
   }
   protected updated(changed: Map<string, unknown>) {
+    if (changed.has('tab') && changed.get('tab') !== undefined) this.dispatchEvent(new CustomEvent('operation-destination-changed',{bubbles:true,composed:true,detail:{destination:this.tab}}));
     if (!changed.has("workspace")) return;
     const workspaceId = this.workspace?.workspaceId;
     this.runtimeKind = "docker"; this.image = ""; this.distribution = "";
@@ -171,6 +209,26 @@ export class OperationsPanel extends LitElement {
         --md-sys-color-on-secondary-container: inherit;
         --md-sys-color-error: inherit;
       }
+      :host([presentation="guided"]) .ide {border:0}
+      :host([presentation="guided"]) .explorer,
+      :host([presentation="guided"]) .operations > md-tabs,
+      :host([presentation="guided"]) .dock,
+      :host([presentation="guided"]) .dock-toggle {display:none}
+      :host([presentation="guided"]) .document-toolbar {padding:12px 24px;min-height:48px}
+      .document-toolbar h2 {font-size:24px;font-weight:500;line-height:1.3;margin:0 auto 0 0;overflow-wrap:anywhere}
+      .guided-navigation {display:flex;flex-direction:row;width:auto;align-items:center;flex-wrap:wrap;gap:8px;padding:0 24px 12px;border-right:0;background:transparent;border-bottom:1px solid var(--md-sys-color-outline-variant)}
+      .guided-navigation md-text-button {width:auto;min-height:40px;--md-text-button-container-height:40px}
+      .guided-navigation [aria-current="page"] {background:var(--md-sys-color-secondary-container);border-radius:20px}
+      .guided-navigation md-outlined-select {min-width:220px;max-width:100%;flex:1}
+      .guided-subnavigation {display:flex;flex-direction:row;width:auto;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding:0;border:0;background:transparent}
+      .guided-subnavigation [aria-pressed="true"] {background:var(--md-sys-color-secondary-container)}
+      :host([presentation="guided"]) .operations > .content {padding:20px 24px;gap:20px}
+      [hidden] {display:none!important}
+      :host([presentation="guided"]) .runtime-layout {display:block}
+      :host([presentation="guided"]) .build-admission {border:1px solid var(--md-sys-color-outline-variant);border-radius:16px;padding:16px}
+      .build-admission summary {cursor:pointer;font-weight:500;padding:8px;min-height:24px}
+      :host([presentation="guided"]) .record {overflow-wrap:anywhere}
+      @media(max-width:700px){:host([presentation="guided"]) .document-toolbar,:host([presentation="guided"]) .operations > .content,.guided-navigation{padding-inline:12px}}
       .guest-host[hidden],
       .regex-host[hidden] {
         display: none;
@@ -501,7 +559,7 @@ export class OperationsPanel extends LitElement {
   private async reviewIsoPermission(event:CustomEvent<{workspaceId:string;epoch:number}>){
     const panel=event.currentTarget as import('./image-presets-panel').ImagePresetsPanel;
     if(this.pending||Object.keys(this.changes).length||event.detail?.workspaceId!==this.workspace?.workspaceId||!panel.permissionReviewCurrent(event.detail.epoch))return;
-    this.configDomain='buildroot';this.tab='config';
+    this.configDomain='buildroot';this.tab='config';this.guidedConfiguration='settings';
     this.isoPermission={panel,workspaceId:event.detail.workspaceId,generation:this.configurationGeneration,isoEpoch:event.detail.epoch,status:'review'};
     const context=this.isoPermission;
     await this.updateComplete;
@@ -513,6 +571,8 @@ export class OperationsPanel extends LitElement {
   }
   private async returnToIso(recheck=false){
     const context=this.isoPermission;if(!context||!this.currentIsoPermission(context))return;
+    this.configTrustEpoch++;this.configTrustPreview=undefined;this.configTrustAccepted=false;
+    this.guidedConfiguration='image';
     await this.updateComplete;
     if(this.currentIsoPermission(context))await context.panel.returnFromPermission(context.isoEpoch,recheck);
   }
@@ -678,7 +738,52 @@ export class OperationsPanel extends LitElement {
       documentation: ["Help & documentation", "說明同文件"],
       guests: ["Virtual machines", "虛擬機"],
     };
-    return this.l(...labels[tab]);
+    return labels[tab] ? this.l(...labels[tab]) : this.l("Project operations","專案操作");
+  }
+  private viewFor(destination: string) {
+    switch (destination) {
+      case 'runtime': return this.runtimeView();
+      case 'builds': return this.buildsView();
+      case 'config': return this.configView();
+      case 'artifacts': return this.artifactsView();
+      case 'assistant': return this.assistantView();
+      case 'updates': return this.updatesView();
+      default: return nothing;
+    }
+  }
+  private subnavigation(kind: 'config' | 'runtime', entries: string[][]) {
+    const selected = kind === 'config' ? this.guidedConfiguration : this.guidedRuntime;
+    return html`<nav class="guided-subnavigation" aria-label=${kind === 'config' ? this.l('Configuration sections','設定分類') : this.l('Project setup sections','專案設定分類')}>
+      ${entries.map(([id,en,zh]) => html`<md-outlined-button aria-pressed=${selected === id} @click=${() => {
+        if (kind === 'config') {
+          // Leaving a review view must invalidate in-flight consent, even though
+          // the underlying image guide stays mounted for draft preservation.
+          this.configTrustEpoch++; this.configTrustPreview=undefined; this.configTrustAccepted=false; this.isoPermission=undefined;
+          this.guidedConfiguration=id;
+        } else this.guidedRuntime=id;
+      }}>${this.l(en,zh)}</md-outlined-button>`)}
+    </nav>`;
+  }
+  private guidedNavigation() {
+    const images = ['config','source','runtime','artifacts','package'];
+    const tools = ['tools','guests','assistant','regex','companion','authenticator'];
+    if (images.includes(this.tab)) return html`<nav class="guided-navigation" aria-label=${this.l('Image workspace','映像工作區')}>
+      ${images.map(destination => html`<md-text-button aria-current=${this.tab === destination ? 'page' : 'false'} @click=${() => this.tab=destination}>${destination === 'config' ? this.l('Image guide','映像指南') : destination === 'runtime' ? this.l('Project & runtime','專案同執行環境') : this.label(destination)}</md-text-button>`)}
+    </nav>`;
+    if (tools.includes(this.tab)) return html`<nav class="guided-navigation" aria-label=${this.l('Tool categories','工具分類')}>
+      <md-outlined-select .label=${this.l('Tool workspace','工具工作區')} .value=${this.tab} @change=${(event:Event) => {
+        const value=(event.target as HTMLSelectElement).value;
+        if (tools.includes(value)) this.tab=value;
+      }}>
+        <md-select-option disabled><div slot="headline">${this.l('Local utilities','本機工具')}</div></md-select-option>
+        ${['tools','regex'].map(id => html`<md-select-option value=${id}><div slot="headline">${this.label(id)}</div></md-select-option>`)}
+        <md-select-option disabled><div slot="headline">${this.l('Execution & assistance','執行同協助')}</div></md-select-option>
+        ${['guests','assistant'].map(id => html`<md-select-option value=${id}><div slot="headline">${this.label(id)}</div></md-select-option>`)}
+        <md-select-option disabled><div slot="headline">${this.l('Connections & security','連接同安全')}</div></md-select-option>
+        ${['companion','authenticator'].map(id => html`<md-select-option value=${id}><div slot="headline">${this.label(id)}</div></md-select-option>`)}
+      </md-outlined-select>
+    </nav>`;
+    return nothing;
   }
   private noProject() {
     return html`<section class="panel">
@@ -692,8 +797,8 @@ export class OperationsPanel extends LitElement {
     </section>`;
   }
   private runtimeView() {
-    return html`<div class="split">
-      <project-workflow-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId || ""}
+    return html`${this.presentation === 'guided' ? this.subnavigation('runtime', [['projects','Project','專案'],['execution','Execution setup','執行設定'],['folders','Existing folders','現有資料夾']]) : nothing}<div class="split runtime-layout">
+      <project-workflow-panel ?hidden=${this.presentation === 'guided' && this.guidedRuntime !== 'projects'} .language=${this.language} .workspaceId=${this.workspace?.workspaceId || ""}
         @project-opened=${(event: CustomEvent) => {
           if (!this.dispatchEvent(new CustomEvent("workspace-adopted", { bubbles: true, composed: true, cancelable: true, detail: event.detail }))) return;
           this.workspace = event.detail;
@@ -704,7 +809,7 @@ export class OperationsPanel extends LitElement {
           if (runtime?.kind === "wsl") { this.runtimeKind = "wsl"; this.distribution = runtime.distribution; }
           if (runtime?.kind === "docker") { this.runtimeKind = "docker"; this.image = runtime.image; }
         }}></project-workflow-panel>
-      <section class="panel stack">
+      <section class="panel stack" ?hidden=${this.presentation === 'guided' && this.guidedRuntime !== 'execution'}>
         <remote-runtime-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""}></remote-runtime-panel>
         <wsl-runtime-panel .language=${this.language} @wsl-project-adopted=${(event:CustomEvent) => { if(!this.dispatchEvent(new CustomEvent("workspace-adopted",{detail:event.detail,bubbles:true,composed:true,cancelable:true})))return; this.workspace=event.detail; this.runtimeKind="wsl"; this.distribution=event.detail.distribution; this.config=undefined; this.artifacts=[]; this.tab="builds"; }}></wsl-runtime-panel>
         <execution-setup-panel .language=${this.language}></execution-setup-panel>
@@ -744,7 +849,7 @@ export class OperationsPanel extends LitElement {
             </dl>`
           : nothing}
       </section>
-      <section class="panel stack">
+      <section class="panel stack" ?hidden=${this.presentation === 'guided' && this.guidedRuntime !== 'folders'}>
         <h2>${this.l("Existing Buildroot project","現有 Buildroot 專案",true)}</h2>
         <p>
           ${this.l("The native picker grants access to the source and output directories you choose. Existing files are preserved during adoption.","原生選擇器會授權存取你揀選嘅來源同輸出目錄，接入專案時會保留現有檔案。",true)}
@@ -784,7 +889,7 @@ export class OperationsPanel extends LitElement {
     </div>`;
   }
   private buildsView() {
-    return html`${this.workspace
+    return html`<details class="build-admission" ?open=${this.presentation !== 'guided'}><summary>${this.l("Configure a new build","設定新建置",true)}</summary>${this.workspace
         ? html`<section class="panel stack">
             <h2>${this.workspace.name}</h2>
             ${this.runtimeKind === "docker" ? html`<section class="panel stack" aria-label=${this.l("Container storage","容器儲存",true)}>
@@ -860,7 +965,7 @@ export class OperationsPanel extends LitElement {
               >${actionIcon('Start build')}${this.l("Start build","開始建置",true)}</md-filled-button
             >
           </section>`
-        : this.noProject()}
+        : this.noProject()}</details>
       <section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
       <section class="panel">
         <div class="row">
@@ -951,7 +1056,7 @@ export class OperationsPanel extends LitElement {
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`<image-presets-panel @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${(event:CustomEvent) => { this.config=undefined;if(event.detail?.kind==="iso-board-preset"){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;} }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
+    return html`${this.presentation === 'guided' ? this.subnavigation('config', [['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']]) : nothing}<image-presets-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'image'} @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${(event:CustomEvent) => { this.config=undefined;if(event.detail?.kind==="iso-board-preset"){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;} }}></image-presets-panel><account-provisioning-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'accounts'} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'presets'} @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack" ?hidden=${this.presentation === 'guided' && this.guidedConfiguration !== 'settings'}>
       <div class="row">
         <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
         <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
@@ -1043,7 +1148,8 @@ export class OperationsPanel extends LitElement {
     separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
   }
   render() {
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><strong>${this.label(this.tab)}</strong><span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div><div class="operations">
+    this.visitedViews.add(this.tab);
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.label(this.tab)}</h2><span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided' ? this.guidedNavigation() : nothing}<div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations","專案操作",true)}
         .activeTabIndex=${[
@@ -1103,7 +1209,7 @@ export class OperationsPanel extends LitElement {
               role="tab"
               aria-label=${this.label(tab)}
               id=${"operation-tab-" + tab}
-              aria-controls="operation-content"
+              aria-controls=${"operation-content-" + tab}
               >${this.label(tab)}</md-primary-tab
             >`,
         )}</md-tabs
@@ -1113,46 +1219,30 @@ export class OperationsPanel extends LitElement {
             aria-label=${this.l("Operation in progress","操作進行中",true)}
           ></md-linear-progress>`
         : nothing}
-      <div
+      ${['runtime','builds','config','artifacts','assistant','updates'].map(destination => html`<div
         class="content view"
-        ?hidden=${["guests","regex","tools","companion","authenticator","source","package","documentation"].includes(this.tab)}
-        id="operation-content"
-        role="tabpanel"
-        aria-labelledby=${"operation-tab-" + this.tab}
-      >
-        ${this.tab === "runtime"
-          ? this.runtimeView()
-          : this.tab === "builds"
-            ? this.buildsView()
-            : this.tab === "config"
-              ? this.configView()
-              : this.tab === "artifacts"
-                ? this.artifactsView()
-                : this.tab === "guests"
-                  ? nothing
-                  : this.tab === "assistant"
-                    ? this.assistantView()
-                    : ["regex", "tools", "companion", "authenticator", "source", "package", "documentation"].includes(this.tab)
-                      ? nothing
-                      : this.updatesView()}
-      </div>
-      <guest-panel
+        ?hidden=${this.tab !== destination}
+        id=${'operation-content-' + destination}
+        role=${this.presentation === 'guided' ? 'region' : 'tabpanel'}
+        aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-' + destination}
+      >${this.visitedViews.has(destination) ? this.viewFor(destination) : nothing}</div>`)}
+      <guest-panel id="operation-content-guests" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-guests'}
         class="guest-host"
         ?hidden=${this.tab !== "guests"}
         .workspaceId=${this.workspace?.workspaceId ?? ""}
         .language=${this.language}
       ></guest-panel
-      ><regex-workbench
+      ><regex-workbench id="operation-content-regex" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-regex'}
         class="regex-host"
         ?hidden=${this.tab !== "regex"}
         .language=${this.language}
       ></regex-workbench
-      ><package-panel
+      ><package-panel id="operation-content-package" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-package'}
         ?hidden=${this.tab !== "package"}
         .workspaceId=${this.workspace?.workspaceId ?? ""}
         .language=${this.language}
       ></package-panel
-      ><source-panel
+      ><source-panel id="operation-content-source" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-source'}
         ?hidden=${this.tab !== "source"}
         .workspaceId=${this.workspace?.workspaceId ?? ""}
         .language=${this.language}
@@ -1172,11 +1262,11 @@ export class OperationsPanel extends LitElement {
           this.changes = {};
         }}
       ></source-panel
-      ><tools-panel
+      ><tools-panel id="operation-content-tools" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-tools'}
         ?hidden=${this.tab !== "tools"}
         .language=${this.language}
       ></tools-panel
-      ><authenticator-panel ?hidden=${this.tab!=="authenticator"} .active=${this.tab==="authenticator"} .language=${this.language}></authenticator-panel><documentation-panel .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel
+      ><authenticator-panel id="operation-content-authenticator" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-authenticator'} ?hidden=${this.tab!=="authenticator"} .active=${this.tab==="authenticator"} .language=${this.language}></authenticator-panel><documentation-panel id="operation-content-documentation" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-documentation'} .restricted=${this.restricted} ?hidden=${this.tab!=="documentation"} .active=${this.tab==="documentation"} .language=${this.language}></documentation-panel><companion-panel id="operation-content-companion" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-companion'}
         ?hidden=${this.tab !== "companion"}
         .language=${this.language}
       ></companion-panel
