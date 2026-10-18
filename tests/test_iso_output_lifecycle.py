@@ -78,6 +78,11 @@ class Lifecycle(unittest.TestCase):
     def capture(self, prepared, **extra):
         return self.request("capture", preparationSha256=prepared["preparationSha256"], **extra)
 
+    def test_missing_admitted_identity_rejected_before_any_directory_creation(self):
+        with self.assertRaises(Exception):
+            run(dict(operation="prepare", outputRoot=str(self.root), jobId=self.job))
+        self.assertEqual(list(self.root.iterdir()), [])
+
     def fifo_check(self, request, target, occurrence):
         context = multiprocessing.get_context("fork")
         receiver, sender = context.Pipe(duplex=False)
