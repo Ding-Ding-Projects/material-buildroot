@@ -15,6 +15,7 @@ import { workspaceStyles } from './workspace-styles';
 import {captureOwnedStatus,displayOwnedStatus} from './owned-status';
 type IsoBoardEntry={id:string;name:string;origin:string;order:number;root:string;sha256:string};
 type IsoBoardCatalog={revision:string;outputRoot:string;entries:IsoBoardEntry[]};
+type GuideButton=HTMLButtonElement & {ariaControlsElements:Element[]|null;ariaDescribedByElements:Element[]|null};
 export class ImagePresetsPanel extends LitElement {
  static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number}};
  static styles=[workspaceStyles,css`:host{height:auto;flex-shrink:0}[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}.profile-info-entry{position:relative;align-self:flex-start}.profile-info-entry md-icon-button{width:44px;height:44px}.profile-info-entry [role=tooltip]{display:none;position:absolute;left:0;bottom:100%;width:max-content;max-width:calc(100vw - 64px);padding:8px;border-radius:8px;background:var(--md-sys-color-inverse-surface,#322f35);color:var(--md-sys-color-inverse-on-surface,#f5eff7);z-index:1;overflow-wrap:anywhere}.profile-info-entry:hover [role=tooltip],.profile-info-entry:focus-within [role=tooltip]{display:block}.profile-guide{padding:16px;max-width:100%;min-width:0}.profile-guide h4{margin-top:0}.profile-guide h4:focus-visible{outline:2px solid var(--md-sys-color-primary);outline-offset:4px}.profile-example-choices{display:flex;flex-wrap:wrap;gap:8px}.board-path{overflow-wrap:anywhere}md-outlined-button{max-width:100%;height:auto;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding-block:8px}`];
@@ -25,25 +26,36 @@ export class ImagePresetsPanel extends LitElement {
  private profileGuideOpen=false;private profileExample:'ram'|'disc'='ram';private profileExampleResult:'ram'|'disc'|null=null;
  // Adapter for the pinned @material/web 2.5.0 icon-button shadow DOM. Its
  // ARIA delegation excludes ID references; bind real elements across the root.
- private profileRelationGeneration=0;
- private profileRelationButton:(HTMLButtonElement & {ariaControlsElements:Element[]|null;ariaDescribedByElements:Element[]|null})|null=null;
- private clearProfileRelations(){this.profileRelationGeneration++;if(this.profileRelationButton){this.profileRelationButton.ariaControlsElements=null;this.profileRelationButton.ariaDescribedByElements=null;this.profileRelationButton=null;}}
- private async bindProfileRelations(){
-  const generation=++this.profileRelationGeneration;
-  const host=this.renderRoot.querySelector<LitElement>('#iso-profile-info');
-  if(!host){this.clearProfileRelations();return;}
-  await host.updateComplete;
-  if(!this.isConnected||generation!==this.profileRelationGeneration||host!==this.renderRoot.querySelector('#iso-profile-info'))return;
-  const button=host.shadowRoot?.querySelector('button#button');
-  const guide=this.renderRoot.querySelector('#iso-profile-guide'),tooltip=this.renderRoot.querySelector('#iso-profile-tooltip');
-  if(!(button instanceof HTMLButtonElement)||!guide||!tooltip||!('ariaControlsElements' in button)||!('ariaDescribedByElements' in button))return;
-  const target=button as typeof this.profileRelationButton & HTMLButtonElement;
-  if(this.profileRelationButton&&this.profileRelationButton!==target)this.clearProfileRelations();
-  target.ariaControlsElements=[guide];target.ariaDescribedByElements=[tooltip];this.profileRelationButton=target;
+ private guideRelationGeneration=0;
+ private guideRelationButtons=new Set<GuideButton>();
+ private clearGuideRelations(){this.guideRelationGeneration++;for(const button of this.guideRelationButtons){button.ariaControlsElements=null;button.ariaDescribedByElements=null;}this.guideRelationButtons.clear();}
+ private async bindGuideRelations(){
+  const generation=++this.guideRelationGeneration;
+  const entries=['profile','runtime'].map(kind=>({kind,host:this.renderRoot.querySelector<LitElement>(`#iso-${kind}-info`)}));
+  await Promise.all(entries.map(({host})=>host?.updateComplete));
+  if(!this.isConnected||generation!==this.guideRelationGeneration)return;
+  const current=new Set<GuideButton>();
+  for(const {kind,host} of entries){
+   if(!host||host!==this.renderRoot.querySelector(`#iso-${kind}-info`))continue;
+   const button=host.shadowRoot?.querySelector('button#button');
+   const guide=this.renderRoot.querySelector(`#iso-${kind}-guide`),tooltip=this.renderRoot.querySelector(`#iso-${kind}-tooltip`);
+   if(!(button instanceof HTMLButtonElement)||!guide||!tooltip||!('ariaControlsElements' in button)||!('ariaDescribedByElements' in button))continue;
+   const target=button as GuideButton;
+   target.ariaControlsElements=[guide];target.ariaDescribedByElements=[tooltip];current.add(target);
+  }
+  for(const button of this.guideRelationButtons)if(!current.has(button)){button.ariaControlsElements=null;button.ariaDescribedByElements=null;}
+  this.guideRelationButtons=current;
+ }
+ private runtimeGuideOpen=false;private runtimeExampleTried=false;
+ private resetRuntimeGuide(){this.runtimeGuideOpen=false;this.runtimeExampleTried=false;}
+ private async toggleRuntimeGuide(open:boolean){
+  this.resetRuntimeGuide();this.runtimeGuideOpen=open;this.revision++;const epoch=this.isoEpoch;
+  await this.updateComplete;if(!this.isConnected||epoch!==this.isoEpoch||this.runtimeGuideOpen!==open)return;
+  this.renderRoot.querySelector<HTMLElement>(open?'#iso-runtime-guide-heading':'#iso-runtime-info')?.focus();
  }
  connectedCallback(){super.connectedCallback();this.requestUpdate();}
  private resetProfileGuide(){this.profileGuideOpen=false;this.profileExample='ram';this.profileExampleResult=null;}
- disconnectedCallback(){this.clearProfileRelations();this.resetProfileGuide();this.revision++;super.disconnectedCallback();}
+ disconnectedCallback(){this.clearGuideRelations();this.resetProfileGuide();this.resetRuntimeGuide();this.revision++;super.disconnectedCallback();}
  private async toggleProfileGuide(open:boolean){
   this.resetProfileGuide();this.profileGuideOpen=open;this.revision++;const epoch=this.isoEpoch;
   await this.updateComplete;if(!this.isConnected||epoch!==this.isoEpoch||this.profileGuideOpen!==open)return;
@@ -52,9 +64,9 @@ export class ImagePresetsPanel extends LitElement {
  private isoBoards?:IsoBoardCatalog;private isoBoardId='';private isoBoardApproved=false;
  private isoBoardResult?:{name:string;ready:boolean;undoDepth:number};
  private clearBoards(){this.isoBoards=undefined;this.isoBoardId='';this.isoBoardApproved=false;this.isoBoardResult=undefined;}
- private resetIso(){this.isoEpoch++;this.resetProfileGuide();this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
+ private resetIso(){this.isoEpoch++;this.resetProfileGuide();this.resetRuntimeGuide();this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
  protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
- protected updated(changed:PropertyValues){void this.bindProfileRelations();if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
+ protected updated(changed:PropertyValues){void this.bindGuideRelations();if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
  private saveIso(){try{localStorage.setItem('iso-workflow-'+this.workspaceId,JSON.stringify({version:1,step:this.isoStep,mode:this.isoMode,jobId:this.isoJob?.id??null}));}catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);}}
  private restoreIso(){try{const saved=JSON.parse(localStorage.getItem('iso-workflow-'+this.workspaceId)||'null');if(saved?.version===1&&Number.isInteger(saved.step)&&saved.step>=0&&saved.step<=2){this.isoStep=saved.step;this.isoMode=saved.mode==='advanced'?'advanced':'easy';this.isoResumed=true;if(typeof saved.jobId==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(saved.jobId))this.isoJob={id:saved.jobId,state:'unverified',sequence:0};}}catch{/* Untrusted local progress never restores configuration success. */}}
  private moveIso(step:number){this.isoStep=Math.max(0,Math.min(2,step));this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>('[data-step]:not([hidden]) h4')?.focus());}
@@ -171,6 +183,23 @@ export class ImagePresetsPanel extends LitElement {
   </section>`;
  }
  private isoHelp(title:string,en:string,zh:string,article:string){return html`<details><summary>${materialIcon('help_outline')}${this.l(title,zh,true)}</summary><p>${this.l(en,zh,true)}</p><md-outlined-button @click=${()=>this.dispatchEvent(new CustomEvent('open-documentation',{bubbles:true,composed:true,detail:{title:article}}))}>${materialIcon('description','icon')}${this.l('Read the field guide','閱讀欄位指南',true)}</md-outlined-button></details>`;}
+ private runtimeGuidance(){
+  const label=this.l('Explain saved execution runtime','說明已儲存執行環境',true);
+  const runtime=this.isoRuntime;
+  const reference=runtime?.kind==='wsl'&&typeof runtime.distribution==='string'&&runtime.distribution?`WSL: ${runtime.distribution}`:runtime?.kind==='docker'&&typeof runtime.image==='string'&&runtime.image?`Docker: ${runtime.image}`:this.l('Runtime identity is unknown.','執行環境身分未明。',true);
+  return html`<div class="profile-info-entry"><md-icon-button id="iso-runtime-info" data-guidance-target="iso-runtime-control" aria-label=${label} aria-expanded=${this.runtimeGuideOpen} @click=${()=>this.toggleRuntimeGuide(!this.runtimeGuideOpen)}>${materialIcon('info')}</md-icon-button><span id="iso-runtime-tooltip" role="tooltip">${label}</span></div>
+   <md-filled-card id="iso-runtime-guide" class="profile-guide" role="region" aria-labelledby="iso-runtime-guide-heading" ?hidden=${!this.runtimeGuideOpen} @keydown=${(event:KeyboardEvent)=>{if(event.key==='Escape'){event.stopPropagation();void this.toggleRuntimeGuide(false);}}}>
+    ${this.runtimeGuideOpen?html`<h4 id="iso-runtime-guide-heading" tabindex="-1">${this.l('Where does the build run?','建置喺邊度執行？',true)}</h4>
+     <p>${this.l('The saved runtime is the Linux environment where this project builds. This guide reads the choice already returned by the project; opening it does not discover, select or authorize another environment.','已儲存執行環境就係專案建置使用嘅 Linux 環境。此說明只讀取專案已回傳嘅選擇；開啟說明唔會尋找、選取或授權其他環境。',true)}</p>
+     <p class="board-path" data-runtime-reference>${reference}</p>
+     <p>${this.l('A saved name is not proof of access or readiness. If the runtime is missing, unknown or inaccessible, open Projects & runtime, review the discovered environment and its permissions, then return and check ISO prerequisites again. No build has started here.','已儲存名稱唔代表有存取權或已就緒。如果環境欠缺、未明或無法存取，請開啟「專案同執行環境」，核對已偵測環境同權限，再返回重新檢查 ISO 所需設定。呢度未有開始建置。',true)}</p>
+     <p>${this.l('The guided build requests two parallel jobs. Think of two work spaces: up to two tasks can run at once while others wait. This is not a speed, memory or completion-time guarantee. Use the separate Build controls for custom resource reservations.','引導建置要求兩個並行工作，好似兩個工作位置：最多兩項工作同時執行，其他等候。呢個唔係速度、記憶體或完成時間保證。自訂資源預留請用另外嘅建置控制項。',true)}</p>
+     <p>${this.l('Worked example only: four pretend tasks share two work spaces. Try the example to see the first group. It does not read files, start jobs or change the saved runtime.','以下只係練習例子：四項模擬工作共用兩個位置。試行例子可以睇第一組分配，唔會讀取檔案、開始工作或更改已儲存環境。',true)}</p>
+     <div class="step-nav"><md-outlined-button @click=${()=>{this.runtimeExampleTried=true;this.revision++;}}>${materialIcon('play_arrow','icon')}${this.l('Try two-job example','試行兩工作例子',true)}</md-outlined-button><md-outlined-button @click=${()=>{this.runtimeExampleTried=false;this.revision++;}}>${materialIcon('refresh','icon')}${this.l('Reset runtime example','重設執行環境例子',true)}</md-outlined-button></div>
+     <p role="status" aria-live="polite">${this.runtimeExampleTried?this.l('Example only: 2 running, 2 waiting. No real job was started.','只係例子：2 項執行中，2 項等候，未有開始任何真實工作。',true):nothing}</p>
+     <div class="step-nav"><md-outlined-button @click=${()=>this.dispatchEvent(new CustomEvent('open-documentation',{bubbles:true,composed:true,detail:{title:'ISO runtime and resources'}}))}>${materialIcon('description','icon')}${this.l('Read runtime guide','閱讀執行環境指南',true)}</md-outlined-button><md-outlined-button @click=${()=>this.toggleRuntimeGuide(false)}>${materialIcon('close','icon')}${this.l('Close runtime guide','關閉執行環境說明',true)}</md-outlined-button></div>`:nothing}
+   </md-filled-card>`;
+ }
  private profileGuidance(){
   const label=this.l('Explain detected image profile','說明已偵測映像組合',true);
   return html`<div class="profile-info-entry"><md-icon-button id="iso-profile-info" data-guidance-target="iso-profile-control" aria-label=${label} aria-describedby="iso-profile-tooltip" aria-controls="iso-profile-guide" aria-expanded=${this.profileGuideOpen} @click=${()=>this.toggleProfileGuide(!this.profileGuideOpen)}>${materialIcon('info')}</md-icon-button><span id="iso-profile-tooltip" role="tooltip">${label}</span></div>
@@ -198,8 +227,7 @@ export class ImagePresetsPanel extends LitElement {
    <div data-step ?hidden=${this.isoMode==='easy'&&this.isoStep!==0}>
    <h4 tabindex="-1">${this.l('What would you like to make?','想製作甚麼？',true)}</h4>
    ${this.profileGuidance()}<md-outlined-select id="iso-profile-control" label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value=""><div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select>
-   <h4>${this.l('Where will it be built?','喺邊度建置？',true)}</h4><p>${this.l('Use this project’s already selected Linux environment. No command or image name needs to be typed here.','使用專案已選擇嘅 Linux 環境，毋須喺呢度輸入指令或映像名稱。',true)}</p><md-outlined-select label=${this.l('Saved execution runtime','已儲存執行環境',true)} .value=${this.isoRuntime?'saved':''} disabled><md-select-option value=""><div slot="headline">${this.l('No runtime discovered','未偵測到執行環境',true)}</div></md-select-option>${this.isoRuntime?html`<md-select-option value="saved">${materialIcon('computer','start')}<div slot="headline">${this.isoRuntime.kind}: ${this.isoRuntime.distribution??this.isoRuntime.image??''}</div></md-select-option>`:nothing}</md-outlined-select>
-   ${this.isoHelp('Runtime and resource help','The saved project runtime is selected automatically. Use Runtime settings to choose an actually discovered WSL distribution or admitted Docker image. This guided build uses two jobs; use the Build controls for custom resource reservations. Missing runtime access requires setup before retrying.','自動選擇專案已儲存執行環境。請喺執行環境設定選擇實際偵測到嘅 WSL 發行版或已授權 Docker 映像。導引建置使用兩個工作；自訂資源請用建置控制項。存取未就緒時請先完成設定。','ISO runtime and resources')}
+   <h4>${this.l('Where will it be built?','喺邊度建置？',true)}</h4><p>${this.l('Use this project’s already selected Linux environment. No command or image name needs to be typed here.','使用專案已選擇嘅 Linux 環境，毋須喺呢度輸入指令或映像名稱。',true)}</p>${this.runtimeGuidance()}<md-outlined-select id="iso-runtime-control" label=${this.l('Saved execution runtime','已儲存執行環境',true)} .value=${this.isoRuntime?'saved':''} disabled><md-select-option value=""><div slot="headline">${this.l('No runtime discovered','未偵測到執行環境',true)}</div></md-select-option>${this.isoRuntime?html`<md-select-option value="saved">${materialIcon('computer','start')}<div slot="headline">${this.isoRuntime.kind}: ${this.isoRuntime.distribution??this.isoRuntime.image??''}</div></md-select-option>`:nothing}</md-outlined-select>
 
    <p>${this.l('Use an adopted x86-64 project with Linux enabled and a trusted configuration. This profile adds GRUB2 and an initial RAM filesystem to the selected source. UEFI and other architectures are not supported by this profile. Existing package and kernel choices remain yours.','請使用已接入、啟用 Linux 同信任設定嘅 x86-64 專案。呢個組合會為所選來源加入 GRUB2 同初始記憶體檔案系統，唔支援 UEFI 或其他架構。現有套件同核心選擇會保留。',true)}</p>
    <h4>${this.l('1. Check the selected source','1. 檢查所選來源',true)}</h4>

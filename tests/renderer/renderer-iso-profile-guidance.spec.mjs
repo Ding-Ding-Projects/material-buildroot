@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
-async function relations(panel){
- const button=panel.locator('#iso-profile-info').getByRole('button');
- await expect.poll(()=>button.evaluate(element=>{const root=element.getRootNode().host.getRootNode();return {controls:element.ariaControlsElements?.length===1&&element.ariaControlsElements[0]===root.querySelector('#iso-profile-guide'),description:element.ariaDescribedByElements?.length===1&&element.ariaDescribedByElements[0]===root.querySelector('#iso-profile-tooltip')};})).toEqual({controls:true,description:true});
+async function relations(panel,kind='profile'){
+ const button=panel.locator(`#iso-${kind}-info`).getByRole('button');
+ await expect.poll(()=>button.evaluate((element,kind)=>{const root=element.getRootNode().host.getRootNode();return {controls:element.ariaControlsElements?.length===1&&element.ariaControlsElements[0]===root.querySelector(`#iso-${kind}-guide`),description:element.ariaDescribedByElements?.length===1&&element.ariaDescribedByElements[0]===root.querySelector(`#iso-${kind}-tooltip`)};},kind)).toEqual({controls:true,description:true});
 }
 async function open(page){
  await page.addInitScript(()=>localStorage.setItem('material-buildroot.wording.v1',JSON.stringify({schemaVersion:1,englishHumor:1,cantoneseHumor:1,displayName:''})));
@@ -71,4 +71,47 @@ test('native profile relationships reject removed and wrong targets and rebind a
  await panel.getByRole('button',{name:'Explain detected image profile',exact:true}).click();await relations(panel);
  await panel.evaluate(async element=>{const button=element.shadowRoot.querySelector('#iso-profile-info').shadowRoot.querySelector('button');element.remove();if(button.ariaControlsElements!==null||button.ariaDescribedByElements!==null)throw Error('Detached relationships retained');document.body.append(element);await element.updateComplete;});await relations(panel);
  await page.evaluate(async()=>{const second=document.createElement('image-presets-panel');second.workspaceId='other';document.body.append(second);await second.updateComplete;});await relations(page.locator('image-presets-panel').nth(1));await relations(panel);
+});
+
+test('saved runtime has its own optional keyboard explanation without side effects',async({page})=>{
+ const panel=await open(page),button=panel.getByRole('button',{name:'Explain saved execution runtime',exact:true});
+ await expect(button).toBeVisible();
+ const before=await page.evaluate(()=>({calls:window.__profileRequests.length,storage:JSON.stringify({...localStorage})}));
+ await button.focus();await page.keyboard.press('Enter');await expect(panel.locator('#iso-runtime-guide-heading')).toBeFocused();
+ await expect(panel.locator('#iso-runtime-guide')).toContainText('Fixture');
+ await panel.getByRole('button',{name:'Try two-job example',exact:true}).click();await expect(panel.locator('#iso-runtime-guide').getByRole('status')).toContainText('2 running, 2 waiting');
+ await page.keyboard.press('Escape');await expect(button).toBeFocused();await expect(panel.locator('#iso-runtime-guide')).toBeHidden();
+ expect(await page.evaluate(()=>({calls:window.__profileRequests.length,storage:JSON.stringify({...localStorage})}))).toEqual(before);
+});
+
+test('runtime guide binds independent native references across close reconnect and workspace changes',async({page})=>{
+ const panel=await open(page),button=panel.locator('#iso-runtime-info').getByRole('button');await relations(panel,'runtime');await relations(panel);
+ await expect(panel.locator('#iso-runtime-info')).not.toHaveAttribute('role');await expect(panel.locator('#iso-runtime-info')).not.toHaveAttribute('tabindex');
+ const bounds=await button.boundingBox();expect(bounds.width).toBeGreaterThanOrEqual(44);expect(bounds.height).toBeGreaterThanOrEqual(44);
+ expect(await panel.evaluate(element=>{const root=element.shadowRoot;return Boolean(root.querySelector('#iso-runtime-info').compareDocumentPosition(root.querySelector('#iso-runtime-control'))&Node.DOCUMENT_POSITION_FOLLOWING);})).toBe(true);
+ await button.click();await panel.getByRole('button',{name:'Try two-job example',exact:true}).click();await panel.getByRole('button',{name:'Reset runtime example',exact:true}).click();await expect(panel.locator('#iso-runtime-guide').getByRole('status')).toBeEmpty();
+ await panel.getByRole('button',{name:'Try two-job example',exact:true}).click();await panel.getByRole('button',{name:'Close runtime guide',exact:true}).click();await expect(button).toBeFocused();await relations(panel,'runtime');await button.click();await expect(panel.locator('#iso-runtime-guide').getByRole('status')).toBeEmpty();
+ await page.evaluate(async()=>{const second=document.createElement('image-presets-panel');second.workspaceId='second-runtime';second.language='en';document.body.append(second);await second.updateComplete;});const second=page.locator('image-presets-panel').nth(1);await relations(second,'runtime');await relations(panel,'runtime');
+ for(const property of ['ariaControlsElements','ariaDescribedByElements'])for(const wrong of [false,true]){
+  expect(await button.evaluate((element,{property,wrong})=>{const root=element.getRootNode().host.getRootNode();const expected=root.querySelector(property==='ariaControlsElements'?'#iso-runtime-guide':'#iso-runtime-tooltip');element[property]=wrong?[root.querySelector('#iso-profile-guide')]:[];return element[property]?.length===1&&element[property][0]===expected;},{property,wrong})).toBe(false);
+  await panel.evaluate(async element=>{element.requestUpdate();await element.updateComplete;});await relations(panel,'runtime');await relations(panel);
+ }
+ await panel.evaluate(async element=>{const button=element.shadowRoot.querySelector('#iso-runtime-info').shadowRoot.querySelector('button');element.remove();if(button.ariaControlsElements!==null||button.ariaDescribedByElements!==null)throw Error('Detached runtime references retained');document.body.prepend(element);await element.updateComplete;});await expect(panel.locator('#iso-runtime-guide')).toBeHidden();await relations(panel,'runtime');await button.click();await expect(panel.locator('#iso-runtime-guide').getByRole('status')).toBeEmpty();
+ await page.evaluate(async()=>{const prior=window.studio.operations;window.studio.operations=request=>request.action==='project.options'?new Promise(resolve=>{window.__resolveRuntime=resolve;}):prior(request);const element=document.querySelector('image-presets-panel');element.workspaceId='changed-runtime';await element.updateComplete;});await expect(panel.locator('#iso-runtime-guide')).toBeHidden();await button.click();await expect(panel.locator('[data-runtime-reference]')).toHaveText('Runtime identity is unknown.');await relations(panel,'runtime');
+ await page.evaluate(()=>window.__resolveRuntime({ok:true,result:{runtime:{kind:'docker',image:'example.invalid/build@sha256:'+'a'.repeat(64),uid:1000,gid:1000}}}));await expect(panel.locator('[data-runtime-reference]')).toHaveText('Docker: example.invalid/build@sha256:'+'a'.repeat(64));await expect(panel.locator('#iso-runtime-guide')).toContainText('not proof of access or readiness');
+});
+
+test('runtime guidance keeps unknown access honest and opens the admitted localized article',async({page},testInfo)=>{
+ const panel=await open(page);await panel.getByRole('button',{name:'Explain saved execution runtime',exact:true}).click();
+ for(const runtime of [undefined,{kind:'unknown'},{kind:'wsl',distribution:''},{kind:'docker',image:''}]){
+  await panel.evaluate(async(element,runtime)=>{element.isoRuntime=runtime;element.requestUpdate();await element.updateComplete;},runtime);await expect(panel.locator('[data-runtime-reference]')).toHaveText('Runtime identity is unknown.');
+ }
+ await panel.evaluate(element=>element.addEventListener('open-documentation',event=>window.__runtimeArticle=event.detail.title));await panel.getByRole('button',{name:'Read runtime guide',exact:true}).click();expect(await page.evaluate(()=>window.__runtimeArticle)).toBe('ISO runtime and resources');
+ await page.setViewportSize({width:480,height:900});
+ for(const language of ['en','zh-HK','bilingual']){
+  await panel.evaluate(async(element,language)=>{element.language=language;await element.updateComplete;},language);
+  await expect(panel.locator('#iso-runtime-info').getByRole('button')).toHaveAccessibleName(language==='en'?'Explain saved execution runtime':language==='zh-HK'?'說明已儲存執行環境':'Explain saved execution runtime · 說明已儲存執行環境');await relations(panel,'runtime');
+  expect(await panel.locator('#iso-runtime-guide').evaluate(element=>element.scrollWidth<=element.clientWidth+1)).toBe(true);
+ }
+ const guide=panel.locator('#iso-runtime-guide');await page.setViewportSize({width:480,height:Math.ceil(await guide.evaluate(element=>element.getBoundingClientRect().height))+200});await guide.screenshot({path:testInfo.outputPath('runtime-guidance-fixture.png')});
 });
