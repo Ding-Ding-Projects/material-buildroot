@@ -1,5 +1,14 @@
 # Phased implementation roadmap
 
+## Active completion continuation, 2026-10-18
+
+The owner resumed implementation and actual acceptance, including local tests and built-interface verification. This supersedes historical test-deferral paragraphs below without changing their historical results.
+
+- [x] Reproduce the existing tab-catalog overflow in the built desktop at source 79f0de3 and retain source-bound geometry and capture evidence.
+- [ ] Verify the constrained catalog layout in a fresh build, including narrow layouts and settled close behavior.
+- [ ] Reproduce and resolve the tab batch-close review candidate with draft-preservation checks.
+- [ ] Complete the existing implementation queue and remaining article translations without upgrading source-only records to runtime acceptance.
+
 ## Preservation boundary, 2026-10-16
 
 - [x] Preserve the current source units and integrate the completed desktop/documentation candidates with remote proof. This is source preservation, not complete feature acceptance.

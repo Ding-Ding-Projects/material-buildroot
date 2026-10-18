@@ -1,3 +1,13 @@
+## Product completion continuation, 2026-10-18
+
+The owner resumed implementation and acceptance. Historical test deferrals below are no longer the current execution boundary. Startup repair remains verified; broader product acceptance is incomplete.
+
+At source 79f0de311430271bd195d4f16952de636f041209, the exact root desktop build passed. Hidden-desktop inspection reproduced the catalog overflow at 1440 by 960, bilingual, scale 1: the dialog was 900 pixels wide, its content 885 pixels wide, and the implicit grid column 1632.234375 pixels wide. The proposed repair constrains the grid to one shrinkable track and bounds its children. Same-tuple rebuilt verification remains pending. Dialog transition and batch-close review candidates still need reproduction.
+
+Focused workspace service, store and IPC verification reported 15 passed, zero failed and one skipped file-symbolic-link privilege case after updating stale fixtures for idempotent setup retries and durable history directories. The pagination fixture now performs real preference changes. Further strengthened assertions are pending rerun. No production storage semantics were changed.
+
+Remaining scope includes the implementation queue, translation inventory, native consumers, full firmware production, and independently proved feature acceptance. Configuration and metadata checks through WSL and Docker do not establish a complete firmware build. Preserve existing data, runtime distributions, installed settings and unrelated applications.
+
 ## Verified startup repair and runtime checks, 2026-10-17
 
 Normal release [v0.1.1-build.232.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.232.1), source 00bca0993c22a30c6c5071458489c01331c67d2e, completed production successfully. The downloaded Setup.exe SHA-256 is 808cfce7b6662771d563793193df95f03d0bb98fca28a00ddae281c2e322f672. A user-scoped demand-only installer helper completed with exit zero. Independent native file-handle readback verified the physical normal installation, version 0.1.1 and exact embedded source, outside package-local redirection. The installed executable SHA-256 matches the producer inventory: 5700e24dbdfeeb5b718eb9bd316d16fdbf6c19956978d13fc355598c6b930e6c.
