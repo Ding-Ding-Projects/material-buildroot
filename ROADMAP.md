@@ -1,5 +1,17 @@
 # Phased implementation roadmap
 
+## Current guidance and source-isolation candidate, 2026-10-18
+
+- [x] Integrate source-backed RAM/disc profile guidance and repair actual HTML-button ARIA references after two independent reviews; five browser guidance cases passed. This source/browser item does not complete native acceptance.
+- [x] Preserve strict host-generated ISO output intent with real persistence and renderer-injection checks. Fresh production is explicitly not implemented by this metadata.
+- [x] Replace the isolated source service's platform-device global-config route with an owned verified empty regular file; bounded adoption and source checks passed13/13.
+- [x] Contain source-disposal rejection while preserving the foreign replacement directory and invoking independent shutdown actions; deterministic red/green and idempotence checks passed.
+- [x] Map every ISO9660 source symbol, choice and prerequisite comment with exact consumers/gaps, explicit baseline and11omission witnesses.
+- [x] Verify combined pinned d1bdf8f fixtures:28backend cases and10ISO renderer cases passed; ISO map check passed and the single stale manual consumer binding was refreshed and checked. This is focused fixture evidence.
+- [ ] Build this later integrated candidate through the exact root entrypoints. Earlier646documentation and246desktop artifacts remain separate.
+- [ ] Implement actual fresh-job ISO lifecycle/provenance and job-bound inspection for supported runtimes. Generic artifact inspection may still observe an earlier file.
+- [ ] Complete current native operation, GUI production, full source-to-GUI/Easy coverage, deployment, accepted release, matching installed update and proven cleanup.
+
 ## Latest bounded outcomes, 2026-10-18
 
 - [x] Validate combined documentation source646e297 through the exact root entrypoint:404pages/10510internal references/372documents. Deployed interaction remains separate.

@@ -20,6 +20,8 @@ The host provides [separate local schedule draft recovery](docs/security/schedul
 
 ## Current delivery boundary
 
+The integrated [ISO profile guide](docs/desktop/iso-fields/profile-and-firmware.md) now includes a source-backed, browser-tested RAM/disc explanation with controls that leave the real profile unchanged. [ISO job intent](docs/security/iso-job-output-policy.md) records the approved fixed route without claiming fresh output. [Source isolation](docs/security/source-global-config.md) uses an owned empty global Git configuration and preserves rejected cleanup while independent shutdown continues. These bounded source/fixture results do not complete current native operation or ISO production.
+
 The current candidate keeps complete source-package inventories accessible through 50-item pages, independent literal/regex search and retained selection. The source fixture covers all 3,263 discovered packages; combined native layout acceptance remains pending. Source-derived article language labels, twelve reference translations and the full local visitor workflow are verified separately from public deployment. See [package targets](docs/desktop/package-targets.md), [article language](docs/features/article-source-language.md), [visitor acceptance](docs/features/visitor-acceptance.md) and [native WSL admission](docs/security/native-wsl-content-intent.md) for the exact limits.
 
 The integration candidate adds ordered native feedback for valid and invalid personal-wording file drops. Focused backend checks passed 4/4 and renderer checks passed 23/23; native playback calls were accepted, while audibility and the combined installed update remain unverified. See [drop feedback](docs/desktop/personal-vocabulary-drop-sounds.md).
