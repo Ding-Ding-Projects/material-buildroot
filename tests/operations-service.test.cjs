@@ -7,7 +7,7 @@ const path = require("node:path");
 const {
   createOperationsService,
 } = require("../src/main/operations-service.cjs");
-function fixture(t, { cancelled = false, hold = false } = {}) {
+function fixture(t, { cancelled = false, hold = false, createService = createOperationsService } = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "operations-"));
   const root = path.join(directory, "project"),
     source = path.join(root, "source"),
@@ -45,7 +45,7 @@ function fixture(t, { cancelled = false, hold = false } = {}) {
       return { completion, cancel: async () => ({ state: "cancelled" }) };
     },
   };
-  const service = createOperationsService({
+  const service = createService({
     directory: path.join(directory, "state"),
     dialog: {
       showOpenDialog: async () => ({
@@ -76,6 +76,37 @@ function fixture(t, { cancelled = false, hold = false } = {}) {
     picks,
   };
 }
+test("guided ISO jobs persist exact host output intent while renderer injection and ordinary jobs stay separate", async t => {
+  // Keep the real dispatcher, project admission, ISO service and job store.
+  // Supply only an inert configuration adapter; no native command is executed.
+  const modulePath = require.resolve("../src/main/operations-service.cjs"), nativeRequire = require("node:module").createRequire(modulePath);
+  let revision = "a".repeat(64), values = { BR2_x86_64: true, BR2_LINUX_KERNEL: true };
+  const names = ["BR2_x86_64", "BR2_LINUX_KERNEL", "BR2_TARGET_GRUB2", "BR2_TARGET_GRUB2_I386_PC", "BR2_TARGET_ROOTFS_ISO9660", "BR2_TARGET_ROOTFS_ISO9660_GRUB2", "BR2_TARGET_ROOTFS_ISO9660_INITRD", "BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU", "BR2_TARGET_GRUB2_BUILTIN_CONFIG_PC", "BR2_TARGET_GRUB2_BOOT_PARTITION", "BR2_TARGET_GRUB2_BUILTIN_MODULES_PC"];
+  const configuration = {
+    inspect: async () => ({ revision, values, semantics: { available: true, tree: { children: names.map(symbol => ({ symbol, type: /BOOT_MENU|BUILTIN_CONFIG|BOOT_PARTITION|BUILTIN_MODULES/.test(symbol) ? "string" : "bool", value: values[symbol] })) } } }),
+    apply: async input => { values = { ...values, ...Object.fromEntries(Object.entries(input.changes).map(([name, change]) => [name, change.value])) }; revision = "b".repeat(64); return { revision, values }; },
+  };
+  const loaded = { exports: {} };
+  require("node:vm").runInThisContext(require("node:module").wrap(fs.readFileSync(modulePath, "utf8")), { filename: modulePath })(loaded.exports,
+    name => name === "./configuration/index.cjs" ? { createConfigurationService: () => configuration } : nativeRequire(name), loaded, modulePath, path.dirname(modulePath));
+  const f = fixture(t, { createService: loaded.exports.createOperationsService }), chosen = await f.request({ action: "project.choose" });
+  const adopted = await f.request({ action: "project.adopt", selectionId: chosen.result.selectionId, trust: true });
+  assert.equal(adopted.ok, true); const workspaceId = adopted.result.workspaceId, runtime = { kind: "wsl", distribution: "Fixture" };
+  const applied = await f.request({ action: "imagePreset.isoApply", workspaceId, revision });
+  assert.equal(applied.ok, true); assert.equal(applied.result.effective, true);
+  const request = { action: "imagePreset.isoBuild", workspaceId, revision: applied.result.revision, profile: applied.result.profile, runtime, jobs: 2 };
+  const policy = { version: 1, profile: "x86_64-bios-grub2-initrd", appliedConfigurationRevision: revision, path: "images/rootfs.iso9660", freshness: "required", state: "intent-only" };
+  for (const extra of [{ isoOutputPolicy: policy }, { path: "other.iso" }, { command: "anything" }]) assert.equal((await f.request({ ...request, ...extra })).code, "INVALID_REQUEST");
+  assert.equal((await f.request({ ...request, profile: "other" })).code, "INVALID_REQUEST");
+  const submitted = await f.request(request); assert.equal(submitted.ok, true); assert.deepEqual(submitted.result.payload.isoOutputPolicy, policy);
+  const file = path.join(f.directory, "state", "jobs", "jobs.json"), saved = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.deepEqual(saved.jobs.find(job => job.id === submitted.result.id).payload.isoOutputPolicy, policy);
+  const ordinary = { action: "build.submit", workspaceId, target: "all", runtime, jobs: 2 };
+  assert.equal((await f.request({ ...ordinary, isoOutputPolicy: policy })).code, "INVALID_REQUEST");
+  const normal = await f.request(ordinary); assert.equal(normal.ok, true); assert.equal(Object.hasOwn(normal.result.payload, "isoOutputPolicy"), false);
+  assert.equal(Object.hasOwn(submitted.result, "freshnessVerified"), false);
+});
+
 test("operations reject arbitrary actions, fields, paths and source execution without consent", async (t) => {
   const f = fixture(t);
   for (const request of [
@@ -228,6 +259,7 @@ test("running build blocks configuration before any file mutation", async (t) =>
   const result = await f.request({
     action: "config.apply",
     workspaceId: adopted.result.workspaceId,
+    domain: "buildroot",
     revision: "0".repeat(64),
     changes: { BR2_TEST: { type: "bool", value: false } },
   });
@@ -257,6 +289,7 @@ test("adopted directory identity is checked again before configuration reads", a
       await f.request({
         action: "config.inspect",
         workspaceId: adopted.result.workspaceId,
+        domain: "buildroot",
       })
     ).code,
     "PROJECT_PATH_CHANGED",
@@ -1009,6 +1042,7 @@ test("running leases deny same-source configuration, external/package and source
       await f.request({
         action: "config.apply",
         workspaceId: a.workspaceId,
+        domain: "buildroot",
         revision: "a".repeat(64),
         changes: [],
       })

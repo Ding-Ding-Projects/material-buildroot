@@ -7,6 +7,7 @@ const { createBuildScheduler } = require("./jobs/scheduler.cjs");
 const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
+const { createIsoOutputPolicy, assertIsoOutputPolicy } = require("./jobs/iso-output-policy.cjs");
 const { captureWslBuildIntent, validateNativeIntent } = require("./jobs/wsl-build-intent.cjs");
 const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
@@ -892,7 +893,9 @@ function createOperationsService({
       "resources",
       "intent",
       "snapshot",
+      ...(Object.hasOwn(payload, "isoOutputPolicy") ? ["isoOutputPolicy"] : []),
     ]);
+    if (Object.hasOwn(payload, "isoOutputPolicy")) assertIsoOutputPolicy(payload.isoOutputPolicy, payload.target);
     if (
       typeof payload.workspaceId !== "string" ||
       !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
@@ -1483,7 +1486,7 @@ function createOperationsService({
       release();
     }
   }
-  async function perform(request) {
+  async function perform(request, internalIsoOutputPolicy = null) {
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
@@ -1807,6 +1810,7 @@ function createOperationsService({
               limitations: [...captured.snapshot.limitations],
               ...(captured.snapshot.version === 3 ? { limits: captured.snapshot.limits, downloadCache: captured.snapshot.downloadCache } : {}),
             },
+            ...(internalIsoOutputPolicy ? { isoOutputPolicy: assertIsoOutputPolicy(internalIsoOutputPolicy, request.target) } : {}),
           },
         });
         void scheduler.pump().catch(() => {});
@@ -1919,7 +1923,7 @@ function createOperationsService({
       case "imagePreset.isoBuild": {
         if (typeof request.revision !== "string" || !/^[a-f0-9]{64}$/.test(request.revision) || request.profile !== "x86_64-bios-grub2-initrd") reject("INVALID_REQUEST");
         const job = await changeConfig(projectPaths(request.workspaceId), async () => {
-          return imagePresets.isoBuild(request, () => perform({ action: "build.submit", workspaceId: request.workspaceId, target: "all", runtime: request.runtime, jobs: request.jobs, resources: request.resources }));
+          return imagePresets.isoBuild(request, () => perform({ action: "build.submit", workspaceId: request.workspaceId, target: "all", runtime: request.runtime, jobs: request.jobs, resources: request.resources }, createIsoOutputPolicy(request)));
         });
         void scheduler.pump().catch(() => {});
         return job;

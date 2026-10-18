@@ -4,6 +4,7 @@ const fs = require("node:fs"),
   crypto = require("node:crypto"),
   storage = require("./storage.cjs");
 const copy = (x) => JSON.parse(JSON.stringify(x));
+const { assertIsoOutputPolicy } = require("./iso-output-policy.cjs");
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const text = (x) => typeof x === "string" && x.length > 0 && x.length <= 256;
 const count = (x) => Number.isSafeInteger(x) && x >= 0;
@@ -15,6 +16,7 @@ function validate(data) {
   const ids = new Set(),
     operations = new Set();
   for (const j of data.jobs) {
+    if (j?.kind === "build" && Object.hasOwn(j.payload || {}, "isoOutputPolicy")) assertIsoOutputPolicy(j.payload.isoOutputPolicy, j.payload.target);
     if (
       !j ||
       !uuid.test(j.id) ||

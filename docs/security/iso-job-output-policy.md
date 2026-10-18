@@ -1,0 +1,7 @@
+# ISO job output intent
+
+Guided `imagePreset.isoBuild` submission now persists host-generated `isoOutputPolicy` metadata on its owned build job. Its strict version-1 format records the fixed `x86_64-bios-grub2-initrd` profile, the exact successfully applied configuration revision, the fixed `images/rootfs.iso9660` path, `freshness: "required"` and `state: "intent-only"`. The existing approved-revision/profile check runs before submission. The applied revision is the configuration service's revision, distinct from the content hash in the ordinary build intent.
+
+Only the host's guided submission supplies this metadata. The renderer request schema accepts no policy, output path, command or additional profile value. Ordinary builds retain their existing payload shape. Job persistence and later dispatch validate the policy's complete exact shape, values and `all` target; malformed stored policies fail closed.
+
+This metadata is an unfinished output contract, not a production receipt. It performs no output inspection, move, deletion, rename or freshness check and changes no execution behavior. A successful job with this intent still does not establish that its ISO is new, belongs to that job or boots. The separate preservation-safe freshness helper, successful owned-producer/cleanup receipt and job-bound output inspection remain required before such acceptance can be claimed. Existing generic inspection retains its earlier-output limitation.
