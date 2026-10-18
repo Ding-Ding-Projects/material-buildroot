@@ -4,7 +4,7 @@ The home page starts with a four-step introduction. It asks what the visitor wan
 
 ## Choices and defaults
 
-The first-visit default is to understand the basics. WSL 2 is the initial explanation, not a detected or installed runtime. Visitors should prefer a suitable environment already configured for their project. Both runtime cards state their prerequisites. The ISO examples describe the supported x86_64 BIOS / ISOLINUX / initrd profile, two parallel jobs and the generated `images/rootfs.iso9660` output. UEFI and hybrid USB are explicitly unsupported for this profile. Separate output directories protect previous results from incremental production.
+The first-visit default is to understand the basics. WSL 2 is the initial explanation, not a detected or installed runtime. Visitors should prefer a suitable environment already configured for their project. Both runtime cards state their prerequisites. The ISO examples describe the x86_64 BIOS target, with exact bootloader and image settings taken from the installed app’s current plan, two parallel jobs and the generated `images/rootfs.iso9660` output. UEFI and hybrid USB are explicitly unsupported for this profile. Separate output directories protect previous results from incremental production.
 
 Each choice changes a contextual explanation or the final next action. Image-field buttons reveal explanations, examples and links to complete field articles. Back and Next preserve choices. The introduction offers English, Cantonese and bilingual copy through the existing language preference, registered Material buttons, decorative symbols with readable labels, responsive cards and reduced-motion styles. Moving between steps focuses the section heading; changing a choice restores focus to that choice.
 
@@ -16,7 +16,7 @@ Every activity is a browser learning example. No control runs Buildroot, probes 
 
 ## Verification
 
-`node website/test-beginner-guide.mjs` checks malformed persistence, invalid enum values, out-of-range steps, removal of unrelated fields and bilingual field inventory. This is source-level evidence only. The integrated documentation build must render the linked ISO articles and validate routes. Actual keyboard interaction, choices, Back/Next, reload persistence, reset isolation, language changes, unavailable storage and 320-pixel layouts require built-browser verification before completion. Capture and deployed-delivery evidence belong to that integrated run.
+`node website/test-beginner-guide.mjs` checks malformed persistence, invalid enum values, out-of-range steps, removal of unrelated fields and bilingual field inventory. The production documentation checker also enumerates every runtime, image-field and final-goal article destination, resolves its `.html` URL and requires an exact match in the generated document inventory. Missing and mismatched destinations fail verification. This is source-level evidence only. The integrated documentation build must render the linked ISO articles and validate routes. Actual keyboard interaction, choices, Back/Next, reload persistence, reset isolation, language changes, unavailable storage and 320-pixel layouts require built-browser verification before completion. Capture and deployed-delivery evidence belong to that integrated run.
 
 ## 入門指南
 

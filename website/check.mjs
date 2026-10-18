@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { documentSources } from './inventory.mjs';
+import { verifyBeginnerDestinations } from './beginner-guide.js';
 import { containedPath, sourceSnapshot, indexedSources, admittedSource } from './source-boundary.mjs';
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const outputIndex=process.argv.indexOf('--output');
@@ -12,6 +13,7 @@ const failures=[];
 const sourceIndex=indexedSources(root);
 const meta=JSON.parse(await fs.readFile(path.join(docs,'site/build-info.json'),'utf8'));
 const inventory=JSON.parse(await fs.readFile(path.join(docs,'site/document-inventory.json'),'utf8'));
+try { verifyBeginnerDestinations(inventory); } catch (error) { failures.push(error.message); }
 const expectedDocuments=await documentSources(root,sourceIndex);
 if(JSON.stringify(inventory.map(doc=>doc.source).sort())!==JSON.stringify(expectedDocuments))failures.push('Documentation inventory omits or duplicates current articles.');
 const assets=JSON.parse(await fs.readFile(path.join(docs,'site/asset-inventory.json'),'utf8'));
