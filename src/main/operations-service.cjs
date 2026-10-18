@@ -130,6 +130,7 @@ const fields = {
   "imagePreset.catalog": ["workspaceId"],
   "imagePreset.isoPlan": ["workspaceId", "revision"],
   "imagePreset.isoApply": ["workspaceId", "revision"],
+  "imagePreset.isoBuild": ["workspaceId", "revision", "profile", "runtime", "jobs"],
   "imagePreset.plan": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "imagePreset.apply": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "defconfig.catalog": ["workspaceId"],
@@ -1475,7 +1476,7 @@ function createOperationsService({
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
     const optional = action === "build.submit"
-      ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : [];
+      ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : action === "imagePreset.isoBuild" ? ["resources"].filter(key => Object.hasOwn(request,key)) : [];
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
@@ -1902,6 +1903,14 @@ function createOperationsService({
         return changeConfig(projectPaths(request.workspaceId), () => imagePresets.isoPlan(request));
       case "imagePreset.isoApply":
         return changeConfig(projectPaths(request.workspaceId), () => imagePresets.isoApply(request));
+      case "imagePreset.isoBuild": {
+        if (typeof request.revision !== "string" || !/^[a-f0-9]{64}$/.test(request.revision) || request.profile !== "x86_64-bios-grub2-initrd") reject("INVALID_REQUEST");
+        const job = await changeConfig(projectPaths(request.workspaceId), async () => {
+          return imagePresets.isoBuild(request, () => perform({ action: "build.submit", workspaceId: request.workspaceId, target: "all", runtime: request.runtime, jobs: request.jobs, resources: request.resources }));
+        });
+        void scheduler.pump().catch(() => {});
+        return job;
+      }
       case "imagePreset.plan":
         return changeConfig(projectPaths(request.workspaceId), () => imagePresets.plan(request));
       case "imagePreset.apply":
