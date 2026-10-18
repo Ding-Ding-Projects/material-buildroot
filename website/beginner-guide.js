@@ -55,6 +55,7 @@ export function mountBeginnerGuide(host) {
   const persist = () => { try { localStorage.setItem(beginnerStorageKey, JSON.stringify(state)); storageAvailable = true; } catch { storageAvailable = false; } };
   const link = (title, article, parent = section) => { const a = node('a', title, parent); a.href = beginnerArticleUrl(article); return a; };
   const action = (title, callback, parent, filled = false) => { const b = node(filled ? 'md-filled-button' : 'md-outlined-button', title, parent); b.addEventListener('click', callback); return b; };
+  const selection = (button, selected) => { button.dataset.selected = String(selected); button.updateComplete.then(() => button.shadowRoot.querySelector('button')?.setAttribute('aria-pressed', String(selected))); };
   function choices(items, key, parent) {
     const grid = node('div', null, parent); grid.className = 'beginner-choices'; grid.setAttribute('role', 'group');
     grid.setAttribute('aria-label', copy(key === 'goal' ? ['Choose your learning goal', '選擇學習目標'] : ['Compare runtime explanations', '比較執行環境說明']));
@@ -62,7 +63,7 @@ export function mountBeginnerGuide(host) {
       const card = node('div', null, grid); card.className = 'beginner-choice';
       const symbol = node('span', null, card); symbol.textContent = icon; symbol.className = 'beginner-symbol'; symbol.setAttribute('aria-hidden', 'true');
       const b = action(title, () => { state[key] = id; state.read = false; persist(); render(id); }, card);
-      b.dataset.choice = id; b.setAttribute('aria-pressed', String(state[key] === id));
+      b.dataset.choice = id; selection(b, state[key] === id);
       node('p', body, card);
     }
   }
@@ -85,7 +86,7 @@ export function mountBeginnerGuide(host) {
       const buttons = node('div'); buttons.className = 'learning-actions beginner-fields';
       for (const field of beginnerFields) {
         const b = action(field.title, () => { state.field = field.id; persist(); render(field.id); }, buttons);
-        b.dataset.choice = field.id; b.setAttribute('aria-pressed', String(state.field === field.id));
+        b.dataset.choice = field.id; selection(b, state.field === field.id);
       }
       const field = beginnerFields.find(item => item.id === state.field);
       const panel = node('div'); panel.className = 'learning-callout'; panel.id = 'beginner-field-detail'; panel.setAttribute('role', 'status');

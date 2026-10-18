@@ -1,8 +1,20 @@
 # Article translation and production boundary
 
-[香港粵語](article-translation-status.zh-HK.md) · [Task catalog](README.md)
+[é¦™æ¸¯ç²µèªž](article-translation-status.zh-HK.md) Â· [Task catalog](README.md)
 
-The current documentation lane preserves 49 detailed Cantonese reference twins, the source wiki twins, API workflow twins and translated category indexes. English articles link directly to their full twins. These are authored translations of behavior, permission, recovery, limits and evidence boundaries; short summaries in older articles are not counted as complete twins. This is an authoring inventory, not a translation review, build, runtime or accessibility verdict.
+The current documentation lane preserves 49 detailed Cantonese reference twins, the source wiki twins, API workflow twins and translated category indexes. Existing English articles retain their twin links. Seven new complete Cantonese twins cover the four ISO field articles, ISO workflow, ISO production and beginner documentation. Their English originals and twins are linked together from the [ISO field index](../desktop/iso-fields/README.md). These are authored translations of behavior, permission, recovery, limits and evidence boundaries; short summaries in older articles are not counted as complete twins. This is an authoring inventory, not a translation review, build, runtime or accessibility verdict.
+
+## Added ISO and beginner twins
+
+- [Profile and firmware](../desktop/iso-fields/profile-and-firmware.zh-HK.md)
+- [Runtime and resources](../desktop/iso-fields/runtime-and-resources.zh-HK.md)
+- [Configuration and recovery](../desktop/iso-fields/configuration-and-recovery.zh-HK.md)
+- [Output and validation](../desktop/iso-fields/output-and-validation.zh-HK.md)
+- [ISO workflow](../desktop/iso-workflow.zh-HK.md)
+- [ISO production](../desktop/iso-production.zh-HK.md)
+- [Beginner documentation](guided-documentation.zh-HK.md)
+
+These are full authored translations, not the older short Cantonese summary. Current English wiki updates describe installed release and bounded ISO evidence; existing wiki Cantonese twins have not been refreshed in this lane and may retain earlier statements. Their synchronization remains unfinished.
 
 ## Remaining reference twins
 
@@ -32,4 +44,4 @@ Category and master Postman JSON now derive the exact admitted action names/scop
 
 The earlier root documentation build remains bound exclusively to source `cf590128682e0e6e15756000a66f16f4ce5482f7`, with receipt SHA-256 `3c540c3dd92a2df8d33bb8234944abe21e5e9a49eb53c1937d04ab0b80d17ff1` and `runtimeVerified: false`. Later translations, collections and integrations require their own assigned producer. Source preservation is separate from generated-source promotion, deployment and live checks.
 
-Tests, reviews, audits, static analysis, browser/API/native runtime, accessibility acceptance and screenshots remain deferred. Keep PH09-T04 unchecked. Existing source wiki is rendered by the supported documentation generator, but external wiki synchronization and complete source-bound offline/search/navigation acceptance remain unverified.
+The earlier deferral described that historical authoring pass, not all current evidence. New ISO production and bounded QEMU boot evidence now exist, and build 233.1 has separately recorded installed startup evidence. None proves the new documentation translations or candidate native interface. Keep PH09-T04 unchecked until its own integrated browser, navigation, accessibility and deployed evidence is complete. Existing source wiki is rendered by the supported documentation generator, but external wiki synchronization and complete source-bound offline/search/navigation acceptance remain unverified.

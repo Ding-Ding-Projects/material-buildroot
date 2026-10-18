@@ -1,14 +1,14 @@
 # Common questions
 
-[香港粵語](FAQ.zh-HK.md) · [Wiki home](Home.md)
+[é¦™æ¸¯ç²µèªž](FAQ.zh-HK.md) Â· [Wiki home](Home.md)
 
 ## Can I download Material Buildroot now?
 
-Normal unsigned Squirrel.Windows installers are published in the [release history](https://github.com/Ding-Ding-Projects/material-buildroot/releases). Select an actual release and read its attached files and source information. A published package is not evidence of installation, update, Buildroot execution or complete feature acceptance. The [current handoff](../../HANDOFF.md) separates implementation, build and deferred acceptance.
+Normal unsigned Squirrel.Windows installers are published in the [release history](https://github.com/Ding-Ding-Projects/material-buildroot/releases). Select an actual release and read its attached files and source information. A published package alone is not installation proof. [Build 233.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.233.1), source `21bf4ad4c6e1fb19a8a48fae57cdca6d63777c6a`, has separately verified normal installed startup and About/workspace navigation, recorded in the [delivery boundary](../../README.md). Build 234.1 publication does not establish its installation. The current ISO candidate interface still needs its own native release acceptance.
 
 ## Does Buildroot run directly on Windows?
 
-The desktop application targets Windows. Buildroot itself runs in Linux through WSL 2 or Docker. The source implements per-project runtime selection; real runtime and restart acceptance remain separately tracked. See [project workflows](../features/projects/project-workflows.md) and [runtime setup](../features/execution/setup.md).
+The desktop application targets Windows. Buildroot itself runs in Linux through WSL 2 or Docker. Per-project runtime selection and real WSL/Docker checks exist. A full non-root BIOS GRUB2 ISO build also succeeded; see [production evidence](../evidence/iso-production/README.md). This does not establish every runtime, restart or target combination. See [project workflows](../features/projects/project-workflows.md) and [runtime setup](../features/execution/setup.md).
 
 ## Is this only a form for entering command-line options?
 
@@ -16,7 +16,7 @@ No. The required design includes typed controls, guided configuration, visual de
 
 ## Will VMware and VirtualBox be supported?
 
-Both are required initial guest targets. Image presets, hardware and networking controls, creation, import and launch are planned. Success requires real boot, login or console access, networking, disk persistence and graceful guest shutdown.
+Both remain required guest targets with their own acceptance requirements. The current demonstrated BIOS ISO consumer is QEMU 10.0.13 with Cirrus VGA and RTL8139, not proof of VMware or VirtualBox acceptance. Its unchanged image reached Linux 6.12.9, accepted console commands, read and wrote a temporary file, obtained DHCP, reached the internal gateway and shut down normally. The initial RAM filesystem is ephemeral. Other QEMU profiles had preserved display, driver or early kernel limitations. Read the [exact boot evidence and limits](../evidence/iso-boot/README.md).
 
 ## Is the browser companion available?
 

@@ -1,8 +1,12 @@
 # Project wiki
 
-[香港粵語](Home.zh-HK.md) · [Documentation index](../README.md)
+[é¦™æ¸¯ç²µèªž](Home.zh-HK.md) Â· [Documentation index](../README.md)
 
-Material Buildroot is a Windows desktop workspace in development. The source contains project and configuration workflows, execution adapters, a typed companion, history and personalization consumers. Their implementation and evidence are tracked independently. Normal downloadable installers exist, but source and package availability do not establish runtime acceptance. The current owner-selected pass deliberately defers tests, reviews, audits, static analysis and screenshots, including VM and Docker tests. Read the [current handoff](../../HANDOFF.md), [assignment queue](../planning/implementation-queue.json) and [source-bound runtime evidence](../evidence/desktop-shell/README.md) before inferring broader completion.
+Material Buildroot is a Windows desktop workspace with project, configuration and execution workflows. Start with the [beginner guide](../features/guided-documentation.md), then follow [Getting started](Getting-started.md).
+
+Normal unsigned Squirrel.Windows releases exist. [Build 233.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.233.1), source `21bf4ad4c6e1fb19a8a48fae57cdca6d63777c6a`, has verified normal installed startup, About navigation and return to the workspace. See the [recorded installed-release boundary](../../README.md). Build 234.1 was subsequently published, but its installation is not proved here. The current ISO interface candidate must not be treated as already included in an accepted installed release.
+
+Real WSL/Docker checks and a full non-root BIOS GRUB2 ISO production run are recorded. The unchanged 12,357,632-byte image booted on the documented QEMU 10.0.13/Cirrus/RTL8139 profile and completed console, temporary-file, DHCP, internal gateway and shutdown checks. Read the [production evidence](../evidence/iso-production/README.md) and [bounded boot evidence](../evidence/iso-boot/README.md). Other hardware, firmware, persistence, Internet connectivity and candidate native release acceptance are separate requirements. The [current handoff](../../HANDOFF.md) and [roadmap](../../ROADMAP.md) retain those unfinished states.
 
 - [Getting started with the plan](Getting-started.md)
 - [Common questions](FAQ.md)
