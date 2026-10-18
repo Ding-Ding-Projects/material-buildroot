@@ -5,6 +5,11 @@ import '@material/web/select/outlined-select.js';
 import '@material/web/select/select-option.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
+import '@material/web/iconbutton/icon-button.js';
+import '@material/web/labs/card/filled-card.js';
+import '@material/web/chips/chip-set.js';
+import '@material/web/chips/filter-chip.js';
+import {live} from 'lit/directives/live.js';
 import {materialIcon} from './material-icons';
 import { workspaceStyles } from './workspace-styles';
 import {captureOwnedStatus,displayOwnedStatus} from './owned-status';
@@ -12,17 +17,44 @@ type IsoBoardEntry={id:string;name:string;origin:string;order:number;root:string
 type IsoBoardCatalog={revision:string;outputRoot:string;entries:IsoBoardEntry[]};
 export class ImagePresetsPanel extends LitElement {
  static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number}};
- static styles=[workspaceStyles,css`:host{height:auto;flex-shrink:0}[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}.board-path{overflow-wrap:anywhere}md-outlined-button{max-width:100%;height:auto;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding-block:8px}`];
+ static styles=[workspaceStyles,css`:host{height:auto;flex-shrink:0}[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}.profile-info-entry{position:relative;align-self:flex-start}.profile-info-entry md-icon-button{width:44px;height:44px}.profile-info-entry [role=tooltip]{display:none;position:absolute;left:0;bottom:100%;width:max-content;max-width:calc(100vw - 64px);padding:8px;border-radius:8px;background:var(--md-sys-color-inverse-surface,#322f35);color:var(--md-sys-color-inverse-on-surface,#f5eff7);z-index:1;overflow-wrap:anywhere}.profile-info-entry:hover [role=tooltip],.profile-info-entry:focus-within [role=tooltip]{display:block}.profile-guide{padding:16px;max-width:100%;min-width:0}.profile-guide h4{margin-top:0}.profile-guide h4:focus-visible{outline:2px solid var(--md-sys-color-primary);outline-offset:4px}.profile-example-choices{display:flex;flex-wrap:wrap;gap:8px}.board-path{overflow-wrap:anywhere}md-outlined-button{max-width:100%;height:auto;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding-block:8px}`];
  workspaceId=''; language='bilingual'; disabled=false; revision=0; configurationGeneration=0;
  private catalog:any; private preview:any; private outcome:any; private preset='minimal'; private desktop='none'; private ssh=false; private approved=false; private busy=false; private message='';
  private isoPlan:any; private isoOutcome:any; private isoApproved=false; private isoJob:any; private isoInspection:any; private isoLogs:any[]=[]; private isoBusy=false; private isoMessage='';
  private isoEpoch=0; private isoMode='easy'; private isoRuntime:any; private isoStep=0; private isoResumed=false;
+ private profileGuideOpen=false;private profileExample:'ram'|'disc'='ram';private profileExampleResult:'ram'|'disc'|null=null;
+ // Adapter for the pinned @material/web 2.5.0 icon-button shadow DOM. Its
+ // ARIA delegation excludes ID references; bind real elements across the root.
+ private profileRelationGeneration=0;
+ private profileRelationButton:(HTMLButtonElement & {ariaControlsElements:Element[]|null;ariaDescribedByElements:Element[]|null})|null=null;
+ private clearProfileRelations(){this.profileRelationGeneration++;if(this.profileRelationButton){this.profileRelationButton.ariaControlsElements=null;this.profileRelationButton.ariaDescribedByElements=null;this.profileRelationButton=null;}}
+ private async bindProfileRelations(){
+  const generation=++this.profileRelationGeneration;
+  const host=this.renderRoot.querySelector<LitElement>('#iso-profile-info');
+  if(!host){this.clearProfileRelations();return;}
+  await host.updateComplete;
+  if(!this.isConnected||generation!==this.profileRelationGeneration||host!==this.renderRoot.querySelector('#iso-profile-info'))return;
+  const button=host.shadowRoot?.querySelector('button#button');
+  const guide=this.renderRoot.querySelector('#iso-profile-guide'),tooltip=this.renderRoot.querySelector('#iso-profile-tooltip');
+  if(!(button instanceof HTMLButtonElement)||!guide||!tooltip||!('ariaControlsElements' in button)||!('ariaDescribedByElements' in button))return;
+  const target=button as typeof this.profileRelationButton & HTMLButtonElement;
+  if(this.profileRelationButton&&this.profileRelationButton!==target)this.clearProfileRelations();
+  target.ariaControlsElements=[guide];target.ariaDescribedByElements=[tooltip];this.profileRelationButton=target;
+ }
+ connectedCallback(){super.connectedCallback();this.requestUpdate();}
+ private resetProfileGuide(){this.profileGuideOpen=false;this.profileExample='ram';this.profileExampleResult=null;}
+ disconnectedCallback(){this.clearProfileRelations();this.resetProfileGuide();this.revision++;super.disconnectedCallback();}
+ private async toggleProfileGuide(open:boolean){
+  this.resetProfileGuide();this.profileGuideOpen=open;this.revision++;const epoch=this.isoEpoch;
+  await this.updateComplete;if(!this.isConnected||epoch!==this.isoEpoch||this.profileGuideOpen!==open)return;
+  this.renderRoot.querySelector<HTMLElement>(open?'#iso-profile-guide-heading':'#iso-profile-info')?.focus();
+ }
  private isoBoards?:IsoBoardCatalog;private isoBoardId='';private isoBoardApproved=false;
  private isoBoardResult?:{name:string;ready:boolean;undoDepth:number};
  private clearBoards(){this.isoBoards=undefined;this.isoBoardId='';this.isoBoardApproved=false;this.isoBoardResult=undefined;}
- private resetIso(){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
+ private resetIso(){this.isoEpoch++;this.resetProfileGuide();this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
  protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
- protected updated(changed:PropertyValues){if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
+ protected updated(changed:PropertyValues){void this.bindProfileRelations();if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
  private saveIso(){try{localStorage.setItem('iso-workflow-'+this.workspaceId,JSON.stringify({version:1,step:this.isoStep,mode:this.isoMode,jobId:this.isoJob?.id??null}));}catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);}}
  private restoreIso(){try{const saved=JSON.parse(localStorage.getItem('iso-workflow-'+this.workspaceId)||'null');if(saved?.version===1&&Number.isInteger(saved.step)&&saved.step>=0&&saved.step<=2){this.isoStep=saved.step;this.isoMode=saved.mode==='advanced'?'advanced':'easy';this.isoResumed=true;if(typeof saved.jobId==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(saved.jobId))this.isoJob={id:saved.jobId,state:'unverified',sequence:0};}}catch{/* Untrusted local progress never restores configuration success. */}}
  private moveIso(step:number){this.isoStep=Math.max(0,Math.min(2,step));this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>('[data-step]:not([hidden]) h4')?.focus());}
@@ -139,6 +171,21 @@ export class ImagePresetsPanel extends LitElement {
   </section>`;
  }
  private isoHelp(title:string,en:string,zh:string,article:string){return html`<details><summary>${materialIcon('help_outline')}${this.l(title,zh,true)}</summary><p>${this.l(en,zh,true)}</p><md-outlined-button @click=${()=>this.dispatchEvent(new CustomEvent('open-documentation',{bubbles:true,composed:true,detail:{title:article}}))}>${materialIcon('description','icon')}${this.l('Read the field guide','閱讀欄位指南',true)}</md-outlined-button></details>`;}
+ private profileGuidance(){
+  const label=this.l('Explain detected image profile','說明已偵測映像組合',true);
+  return html`<div class="profile-info-entry"><md-icon-button id="iso-profile-info" data-guidance-target="iso-profile-control" aria-label=${label} aria-describedby="iso-profile-tooltip" aria-controls="iso-profile-guide" aria-expanded=${this.profileGuideOpen} @click=${()=>this.toggleProfileGuide(!this.profileGuideOpen)}>${materialIcon('info')}</md-icon-button><span id="iso-profile-tooltip" role="tooltip">${label}</span></div>
+   <md-filled-card id="iso-profile-guide" class="profile-guide" role="region" aria-labelledby="iso-profile-guide-heading" ?hidden=${!this.profileGuideOpen} @keydown=${(event:KeyboardEvent)=>{if(event.key==='Escape'){event.stopPropagation();void this.toggleProfileGuide(false);}}}>
+    ${this.profileGuideOpen?html`<h4 id="iso-profile-guide-heading" tabindex="-1">${this.l('What does this image profile do?','呢個映像組合會做甚麼？',true)}</h4>
+     <p>${this.l('This guide prepares one Linux disc file for an x86-64 PC using BIOS startup. GRUB2 is the loader that starts Linux. UEFI-only startup is not configured by this profile.','此指南為用 BIOS 啟動嘅 x86-64 電腦準備一個 Linux 光碟檔案。GRUB2 係啟動 Linux 嘅載入器，此組合唔會設定只用 UEFI 嘅啟動方式。',true)}</p>
+     <p>${this.l('The guided choice uses initrd: a copy of the Linux root files is loaded into memory when the computer starts. Programs can change that RAM copy while running. This does not rewrite the ISO file or prove that changes will survive a restart.','引導選項使用 initrd：電腦啟動時會將 Linux 根檔案副本載入記憶體。程式運行期間可以改動 RAM 副本，但唔會因此改寫 ISO 檔案，亦唔代表重新啟動後會保留改動。',true)}</p>
+     <p>${this.l('Worked example only: compare where a sample note could be changed. No file is created, no real profile is changed and no build or permission request runs. The example starts with the RAM choice used by this guide.','以下只係練習例子，比較範例筆記可以喺邊度改動。唔會建立檔案、更改真實組合、執行建置或要求權限。例子預先選取此指南使用嘅 RAM 選項。',true)}</p>
+     <md-chip-set aria-label=${this.l('Example root filesystem location','範例根檔案系統位置',true)}><md-filter-chip has-icon .label=${this.l('RAM copy example','RAM 副本例子',true)} .selected=${live(this.profileExample==='ram')} @click=${()=>{this.profileExample='ram';this.profileExampleResult=null;this.revision++;}}>${materialIcon('memory','icon')}</md-filter-chip><md-filter-chip has-icon .label=${this.l('Read-only disc example','唯讀光碟例子',true)} .selected=${live(this.profileExample==='disc')} @click=${()=>{this.profileExample='disc';this.profileExampleResult=null;this.revision++;}}>${materialIcon('inventory_2','icon')}</md-filter-chip></md-chip-set>
+     <div class="profile-example-choices"><md-outlined-button @click=${()=>{this.profileExampleResult=this.profileExample;this.revision++;}}>${materialIcon('play_arrow','icon')}${this.l('Try example','試用例子',true)}</md-outlined-button><md-outlined-button @click=${()=>{this.profileExample='ram';this.profileExampleResult=null;this.revision++;}}>${materialIcon('refresh','icon')}${this.l('Reset example','重設例子',true)}</md-outlined-button></div>
+     <p role="status" aria-live="polite">${this.profileExampleResult==='ram'?this.l('Example result: the note can change in the running RAM copy. This does not update the ISO file. Saving across restarts is not demonstrated.','例子結果：筆記可以喺運行中嘅 RAM 副本改動，但唔會更新 ISO 檔案。此例子未示範重新啟動後保存資料。',true):this.profileExampleResult==='disc'?this.l('Example result: a direct disc root is read-only. It is a source alternative shown for comparison; this Easy ISO guide still uses its fixed RAM profile.','例子結果：直接光碟根目錄係唯讀。呢個來源替代選項只用作比較；簡易 ISO 指南仍使用固定 RAM 組合。',true):nothing}</p>
+     <p>${this.l('For your real image, check the selected source, review the exact configuration requests, then use the separate Configure and Build actions. The expected generated name is images/rootfs.iso9660. A plan or this example is not proof of an image that boots.','真正製作映像時，請檢查所選來源、核對確切設定要求，再分別使用設定同建置操作。預期產生檔名為 images/rootfs.iso9660。計劃或此例子唔係映像可以開機嘅證明。',true)}</p>
+     <div class="profile-example-choices"><md-outlined-button @click=${()=>this.dispatchEvent(new CustomEvent('open-documentation',{bubbles:true,composed:true,detail:{title:'ISO profile and firmware'}}))}>${materialIcon('description','icon')}${this.l('Read the profile guide','閱讀組合指南',true)}</md-outlined-button><md-outlined-button @click=${()=>this.toggleProfileGuide(false)}>${materialIcon('close','icon')}${this.l('Close profile guide','關閉組合指南',true)}</md-outlined-button></div>`:nothing}
+   </md-filled-card>`;
+ }
  private isoWorkflow(){
   const disabled=this.disabled||this.busy||this.isoBusy||!this.workspaceId,iso=this.isoInspection?.iso;
   const structural=iso?.descriptorValid&&iso?.withinImage&&iso?.elTorito?.validationChecksumValid&&iso?.elTorito?.bootEntryValid&&iso?.elTorito?.platformId===0;
@@ -150,8 +197,7 @@ export class ImagePresetsPanel extends LitElement {
    ${this.isoMode==='easy'?html`<p role="status">${this.l('Step','步驟',true)} ${this.isoStep+1} / 3</p><md-linear-progress .value=${this.isoStep/3} aria-label=${this.l('Guide position, not build completion','指南位置，唔係建置完成度',true)}></md-linear-progress>`:nothing}
    <div data-step ?hidden=${this.isoMode==='easy'&&this.isoStep!==0}>
    <h4 tabindex="-1">${this.l('What would you like to make?','想製作甚麼？',true)}</h4>
-   <md-outlined-select label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value=""><div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select>
-   ${this.isoHelp('Profile and firmware help','Recommended supported route: x86-64, BIOS, GRUB2 and an initial RAM filesystem. Example output: images/rootfs.iso9660. UEFI is unavailable in this profile; an unsupported source must be reconfigured before applying.','建議支援組合：x86-64、BIOS、GRUB2 同初始記憶體檔案系統。例如輸出 images/rootfs.iso9660。呢個組合唔支援 UEFI；來源唔支援時須先重新設定。','ISO profile and firmware')}
+   ${this.profileGuidance()}<md-outlined-select id="iso-profile-control" label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value=""><div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select>
    <h4>${this.l('Where will it be built?','喺邊度建置？',true)}</h4><p>${this.l('Use this project’s already selected Linux environment. No command or image name needs to be typed here.','使用專案已選擇嘅 Linux 環境，毋須喺呢度輸入指令或映像名稱。',true)}</p><md-outlined-select label=${this.l('Saved execution runtime','已儲存執行環境',true)} .value=${this.isoRuntime?'saved':''} disabled><md-select-option value=""><div slot="headline">${this.l('No runtime discovered','未偵測到執行環境',true)}</div></md-select-option>${this.isoRuntime?html`<md-select-option value="saved">${materialIcon('computer','start')}<div slot="headline">${this.isoRuntime.kind}: ${this.isoRuntime.distribution??this.isoRuntime.image??''}</div></md-select-option>`:nothing}</md-outlined-select>
    ${this.isoHelp('Runtime and resource help','The saved project runtime is selected automatically. Use Runtime settings to choose an actually discovered WSL distribution or admitted Docker image. This guided build uses two jobs; use the Build controls for custom resource reservations. Missing runtime access requires setup before retrying.','自動選擇專案已儲存執行環境。請喺執行環境設定選擇實際偵測到嘅 WSL 發行版或已授權 Docker 映像。導引建置使用兩個工作；自訂資源請用建置控制項。存取未就緒時請先完成設定。','ISO runtime and resources')}
 
