@@ -2,6 +2,8 @@
 
 This inventory makes concrete Buildroot details actionable before broader product acceptance. It supplements PH01-T02-C02 and does not replace the roadmap, the feature ledger or runtime evidence.
 
+The later [native Kconfig milestone](native-kconfig.md) adds all 11,464 definition nodes returned by the current parser invocation, including hidden nodes and repeated definitions, with source locations and complete available per-definition semantics. It is separate from the lexical inventory below and retains its own native/configuration and GUI acceptance boundaries.
+
 The retained `2025.02.json` snapshot contains 992 details from 168 content-hashed source files: 157 filesystem options, 309 bootloader options, 144 documented package fields, 16 package-infrastructure topics, 351 lexical make-rule candidates and 15 application parser capabilities. The selected source declares Buildroot 2025.02. The declared revision `aa2d7ca53f704af901f6c33c13e4bb1591886700` comes from the existing runtime smoke record; this generator does not independently establish repository ancestry or verify a tarball against that revision. Its reproducible content binding is the hash of the listed file paths, hashes and byte counts.
 
 ## Reproduce and check
