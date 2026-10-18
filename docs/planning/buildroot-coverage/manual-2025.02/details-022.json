@@ -1,0 +1,2149 @@
+[
+  {
+    "id": "manual-topic:docs/manual/prerequisite.adoc:f64fb45c7e3377aa",
+    "category": "manual-topic",
+    "title": "** +perl+ (version 5.8.7 or any later)",
+    "source": {
+      "path": "docs/manual/prerequisite.adoc",
+      "line": 33,
+      "sha256": "f0e66c4ef39627828111c94eefea6eead5d13948864a0fcce1ab22ed2aece37f"
+    },
+    "detail": {
+      "heading": "Mandatory packages",
+      "excerpt": "** +perl+ (version 5.8.7 or any later)",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with ** perl (version 5.8.7 or any later)?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/prerequisite.adoc:f722628e1ed11a2e",
+    "category": "manual-topic",
+    "title": "** +diffutils+",
+    "source": {
+      "path": "docs/manual/prerequisite.adoc",
+      "line": 26,
+      "sha256": "f0e66c4ef39627828111c94eefea6eead5d13948864a0fcce1ab22ed2aece37f"
+    },
+    "detail": {
+      "heading": "Mandatory packages",
+      "excerpt": "** +diffutils+",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with ** diffutils?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/prerequisite.adoc:fd2b334dcff18f86",
+    "category": "manual-topic",
+    "title": "** +glib2+, +gtk2+ and +glade2+ to use the 'gconfig' interface",
+    "source": {
+      "path": "docs/manual/prerequisite.adoc",
+      "line": 65,
+      "sha256": "f0e66c4ef39627828111c94eefea6eead5d13948864a0fcce1ab22ed2aece37f"
+    },
+    "detail": {
+      "heading": "Optional packages",
+      "excerpt": "** +glib2+, +gtk2+ and +glade2+ to use the 'gconfig' interface",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with ** glib2, gtk2 and glade2 to use the 'gconfig' interface?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/prerequisite.adoc:ff7e6c8e1ee5f297",
+    "category": "manual-topic",
+    "title": "** +python-aiohttp+",
+    "source": {
+      "path": "docs/manual/prerequisite.adoc",
+      "line": 102,
+      "sha256": "f0e66c4ef39627828111c94eefea6eead5d13948864a0fcce1ab22ed2aece37f"
+    },
+    "detail": {
+      "heading": "Optional packages",
+      "excerpt": "** +python-aiohttp+",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with ** python-aiohttp?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:0a74757a57b2a56c",
+    "category": "manual-topic",
+    "title": "* download source files (as required);",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 70,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* download source files (as required);",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * download source files (as required);?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:2f36350544419d21",
+    "category": "manual-topic",
+    "title": "* +build/+ where all the components are built (this includes tools",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 85,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* +build/+ where all the components are built (this includes tools",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * build/ where all the components are built (this includes tools?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:33b729629eae2258",
+    "category": "manual-topic",
+    "title": "* +host/+ contains both the tools built for the host, and the sysroot",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 90,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* +host/+ contains both the tools built for the host, and the sysroot",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * host/ contains both the tools built for the host, and the sysroot?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:6bf476dbef1b771c",
+    "category": "manual-topic",
+    "title": "* +staging/+ is a symlink to the target toolchain sysroot inside",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 103,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* +staging/+ is a symlink to the target toolchain sysroot inside",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * staging/ is a symlink to the target toolchain sysroot inside?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:88d20baaf37e0674",
+    "category": "manual-topic",
+    "title": "* +target/+ which contains 'almost' the complete root filesystem for",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 106,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* +target/+ which contains 'almost' the complete root filesystem for",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * target/ which contains 'almost' the complete root filesystem for?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:8fca20da0b654e0e",
+    "category": "manual-topic",
+    "title": "* build a kernel image, if selected;",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 74,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* build a kernel image, if selected;",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * build a kernel image, if selected;?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:913a9acef1eca73a",
+    "category": "manual-topic",
+    "title": "* create a root filesystem in selected formats.",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 76,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* create a root filesystem in selected formats.",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * create a root filesystem in selected formats.?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:cf1e1b21cfabf58a",
+    "category": "manual-topic",
+    "title": "* configure, build and install selected target packages;",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 73,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* configure, build and install selected target packages;",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * configure, build and install selected target packages;?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:e5de35dde8e8ae3f",
+    "category": "manual-topic",
+    "title": "* configure, build and install the cross-compilation toolchain, or",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 71,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* configure, build and install the cross-compilation toolchain, or",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * configure, build and install the cross-compilation toolchain, or?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:e7b25e3aa12f12a3",
+    "category": "manual-topic",
+    "title": "* +images/+ where all the images (kernel image, bootloader and root",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 81,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* +images/+ where all the images (kernel image, bootloader and root",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * images/ where all the images (kernel image, bootloader and root?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/quickstart.adoc:e7f171647589eff6",
+    "category": "manual-topic",
+    "title": "* build a bootloader image, if selected;",
+    "source": {
+      "path": "docs/manual/quickstart.adoc",
+      "line": 75,
+      "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb"
+    },
+    "detail": {
+      "heading": "Buildroot quick start",
+      "excerpt": "* build a bootloader image, if selected;",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * build a bootloader image, if selected;?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:076d57bdcee08488",
+    "category": "manual-topic",
+    "title": "* When a package listed in +FOO_DEPENDENCIES+ is rebuilt or removed,",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 68,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When a package listed in +FOO_DEPENDENCIES+ is rebuilt or removed,",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When a package listed in FOO_DEPENDENCIES is rebuilt or removed,?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:5a07db539b12b4ce",
+    "category": "manual-topic",
+    "title": "* When a change to the root filesystem skeleton is made, a full",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 62,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When a change to the root filesystem skeleton is made, a full",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When a change to the root filesystem skeleton is made, a full?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:98ad3b28a8a5b962",
+    "category": "manual-topic",
+    "title": "* When the target architecture configuration is changed, a complete",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 19,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When the target architecture configuration is changed, a complete",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When the target architecture configuration is changed, a complete?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:a260cc0d643957c7",
+    "category": "manual-topic",
+    "title": "* When the sub-options of a package are changed, the package is not",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 54,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When the sub-options of a package are changed, the package is not",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When the sub-options of a package are changed, the package is not?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:d3cf650d8d1efdba",
+    "category": "manual-topic",
+    "title": "* When the toolchain configuration is changed, a complete rebuild",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 24,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When the toolchain configuration is changed, a complete rebuild",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When the toolchain configuration is changed, a complete rebuild?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:f7f0c6f2dd3de8d4",
+    "category": "manual-topic",
+    "title": "* When a package is removed from the configuration, Buildroot does",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 46,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When a package is removed from the configuration, Buildroot does",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When a package is removed from the configuration, Buildroot does?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/rebuilding-packages.adoc:fb0c6ad5580d9cf9",
+    "category": "manual-topic",
+    "title": "* When an additional package is added to the configuration, a full",
+    "source": {
+      "path": "docs/manual/rebuilding-packages.adoc",
+      "line": 30,
+      "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5"
+    },
+    "detail": {
+      "heading": "Understanding when a full rebuild is necessary",
+      "excerpt": " * When an additional package is added to the configuration, a full",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * When an additional package is added to the configuration, a full?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/using-buildroot-debugger.adoc:551fe1d0b8bf2304",
+    "category": "manual-topic",
+    "title": "* If you are using an _internal toolchain_ (built by Buildroot), you",
+    "source": {
+      "path": "docs/manual/using-buildroot-debugger.adoc",
+      "line": 12,
+      "sha256": "369fbec275eac8c010bcb398b350c1b8dd8e729759958b810d250a96efa4312b"
+    },
+    "detail": {
+      "heading": "Using +gdb+ in Buildroot",
+      "excerpt": "* If you are using an _internal toolchain_ (built by Buildroot), you",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * If you are using an _internal toolchain_ (built by Buildroot), you?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/using-buildroot-debugger.adoc:a6b878f85dfe6d79",
+    "category": "manual-topic",
+    "title": "* If you are using an _external toolchain_, you should enable",
+    "source": {
+      "path": "docs/manual/using-buildroot-debugger.adoc",
+      "line": 17,
+      "sha256": "369fbec275eac8c010bcb398b350c1b8dd8e729759958b810d250a96efa4312b"
+    },
+    "detail": {
+      "heading": "Using +gdb+ in Buildroot",
+      "excerpt": "* If you are using an _external toolchain_, you should enable",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "runtime",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/wsl-runtime-panel.ts",
+        "src/renderer/build-queue-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/index.cjs",
+        "src/main/jobs/scheduler.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * If you are using an _external toolchain_, you should enable?",
+      "discover": "Discover selected runtime, prerequisites, target availability, current results and resource limits.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/desktop/execution.md",
+        "docs/desktop/package-targets.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T02",
+      "PH05-T03",
+      "PH05-T05",
+      "PH06-T06"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/using-buildroot-development.adoc:6c2ae80fcb03eb64",
+    "category": "manual-topic",
+    "title": "* In the out-of-tree directory for out-of-tree builds (i.e., when",
+    "source": {
+      "path": "docs/manual/using-buildroot-development.adoc",
+      "line": 41,
+      "sha256": "d5718af452a6df8ec9d47cd332a3fbd74f24f5b3e5aa7106f8639b11a7c247cc"
+    },
+    "detail": {
+      "heading": "Using Buildroot during development",
+      "excerpt": "* In the out-of-tree directory for out-of-tree builds (i.e., when",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "source",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/source-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/source.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * In the out-of-tree directory for out-of-tree builds (i.e., when?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/features/source-lifecycle.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T01",
+      "PH05-T04"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/using-buildroot-development.adoc:c5295992181f230c",
+    "category": "manual-topic",
+    "title": "* In the top-level Buildroot source directory for in-tree builds",
+    "source": {
+      "path": "docs/manual/using-buildroot-development.adoc",
+      "line": 39,
+      "sha256": "d5718af452a6df8ec9d47cd332a3fbd74f24f5b3e5aa7106f8639b11a7c247cc"
+    },
+    "detail": {
+      "heading": "Using Buildroot during development",
+      "excerpt": "* In the top-level Buildroot source directory for in-tree builds",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "source",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "partial",
+      "consumers": [
+        "src/renderer/source-panel.ts"
+      ],
+      "operations": [
+        "src/main/execution/source.cjs"
+      ],
+      "reason": "Related workflow exists; this manual topic and its small details have not received independent acceptance."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * In the top-level Buildroot source directory for in-tree builds?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [
+        "docs/features/source-lifecycle.md"
+      ],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH05-T01",
+      "PH05-T04"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:1de7d5752b2b337c",
+    "category": "manual-topic",
+    "title": "** Prefer multi-line syntax.",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 91,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "** Prefer multi-line syntax.",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with ** Prefer multi-line syntax.?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:213618e8e30789e6",
+    "category": "manual-topic",
+    "title": "* Filename must at least begin with genimage prefix and have the .cfg",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 192,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* Filename must at least begin with genimage prefix and have the .cfg",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Filename must at least begin with genimage prefix and have the .cfg?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:30797dacb183c5ad",
+    "category": "manual-topic",
+    "title": "* The +bool+, +depends on+, +select+ and +help+ lines are indented",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 38,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "+Config.in+ file",
+      "excerpt": "* The +bool+, +depends on+, +select+ and +help+ lines are indented",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * The bool, depends on, select and help lines are indented?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:447077df9c02755f",
+    "category": "manual-topic",
+    "title": "* Header: The file starts with a header. It contains the module name,",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 56,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "* Header: The file starts with a header. It contains the module name,",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Header: The file starts with a header. It contains the module name,?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:52c45dee67e408ed",
+    "category": "manual-topic",
+    "title": "* Optional hooks: keep hook definition and assignment together in one",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 113,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "* Optional hooks: keep hook definition and assignment together in one",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Optional hooks: keep hook definition and assignment together in one?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:6b3232fc273fb1c6",
+    "category": "manual-topic",
+    "title": "** Keep configure options and dependencies close together.",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 111,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "** Keep configure options and dependencies close together.",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with ** Keep configure options and dependencies close together.?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:773c265b0111b468",
+    "category": "manual-topic",
+    "title": "* Optional dependency:",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 89,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "* Optional dependency:",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Optional dependency:?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:7a602407cde3a213",
+    "category": "manual-topic",
+    "title": "* Every +file+ or other +subnode+ must be indented with two tabs.",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 182,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* Every +file+ or other +subnode+ must be indented with two tabs.",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Every file or other subnode must be indented with two tabs.?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:7b1ae42ba0e72023",
+    "category": "manual-topic",
+    "title": "* Every +option+(i.e. +image+, +offset+, +size+) must have the +=+",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 189,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* Every +option+(i.e. +image+, +offset+, +size+) must have the +=+",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Every option(i.e. image, offset, size) must have the =?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:82c86b87a15f6afc",
+    "category": "manual-topic",
+    "title": "* Assignment: use +=+ preceded and followed by one space:",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 68,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "* Assignment: use +=+ preceded and followed by one space:",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Assignment: use = preceded and followed by one space:?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:8abdf2d3f90754a4",
+    "category": "manual-topic",
+    "title": "* either follow the potentially deprecated coding style used in this",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 12,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "Coding style",
+      "excerpt": "* either follow the potentially deprecated coding style used in this",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * either follow the potentially deprecated coding style used in this?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:8bb4cda9bee97c4c",
+    "category": "manual-topic",
+    "title": "* Allowed notations for +offset+ and +size+ options are: +G+, +M+, +K+",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 195,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* Allowed notations for +offset+ and +size+ options are: +G+, +M+, +K+",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Allowed notations for offset and size options are: G, M, K?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:8fc4f0d71294fdd6",
+    "category": "manual-topic",
+    "title": "* The help text itself should be indented with one tab and two",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 41,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "+Config.in+ file",
+      "excerpt": "* The help text itself should be indented with one tab and two",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * The help text itself should be indented with one tab and two?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:ca6e46a8b9c3cd1e",
+    "category": "manual-topic",
+    "title": "* Indentation: use tab only:",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 77,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +.mk+ file",
+      "excerpt": "* Indentation: use tab only:",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Indentation: use tab only:?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:d319b70e5bfa60a3",
+    "category": "manual-topic",
+    "title": "* Every node(+section+, +partition+, +file+, +subnode+) must have an open",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 184,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* Every node(+section+, +partition+, +file+, +subnode+) must have an open",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Every node(section, partition, file, subnode) must have an open?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:d4aaa272218f9bb7",
+    "category": "manual-topic",
+    "title": "* or entirely rework it in order to make it comply with these rules.",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 15,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "Coding style",
+      "excerpt": "* or entirely rework it in order to make it comply with these rules.",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * or entirely rework it in order to make it comply with these rules.?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:d64bf08c574e52cb",
+    "category": "manual-topic",
+    "title": "* For GPT partitions, the +partition-type-uuid+ value must be +U+ for",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 201,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* For GPT partitions, the +partition-type-uuid+ value must be +U+ for",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * For GPT partitions, the partition-type-uuid value must be U for?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:e59a141cf5cf6a34",
+    "category": "manual-topic",
+    "title": "* The help text should be wrapped to fit 72 columns, where tab counts",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 44,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "+Config.in+ file",
+      "excerpt": "* The help text should be wrapped to fit 72 columns, where tab counts",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * The help text should be wrapped to fit 72 columns, where tab counts?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  },
+  {
+    "id": "manual-topic:docs/manual/writing-rules.adoc:f6cad10fc33affff",
+    "category": "manual-topic",
+    "title": "* Every +section+(i.e. hdimage, vfat etc.), +partition+ must be indented",
+    "source": {
+      "path": "docs/manual/writing-rules.adoc",
+      "line": 179,
+      "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5"
+    },
+    "detail": {
+      "heading": "The +genimage.cfg+ file",
+      "excerpt": "* Every +section+(i.e. hdimage, vfat etc.), +partition+ must be indented",
+      "discovery": "List/admonition topic candidate; multiline detail remains in the bound source article."
+    },
+    "workflow": "unsupported",
+    "mapping": "provisional-topic-routing; candidate paths are not implementation evidence",
+    "gui": {
+      "state": "missing",
+      "consumers": [],
+      "operations": [],
+      "reason": "No product workflow is admitted for this manual topic; document applicability before implementing."
+    },
+    "easyMode": {
+      "state": "missing",
+      "question": "What would you like to do with * Every section(i.e. hdimage, vfat etc.), partition must be indented?",
+      "discover": "Review applicability and the existing project state before recommending an action.",
+      "prefill": "Use current discovered values or the selected source default; show uncertainty and never silently overwrite existing state.",
+      "control": "Use a labeled icon dropdown only for actually discovered choices; structured rows for fields/tables, browse controls for paths and explicit review for effects.",
+      "recommendedDefault": "Source-specific current/effective default only; no universal recommendation has been verified.",
+      "validation": "Explain constraints, hidden prerequisites, architecture limits and requested/effective differences before executing an admitted operation."
+    },
+    "help": {
+      "state": "missing",
+      "relatedArticles": [],
+      "needed": "A plain-language explanation for this exact topic: purpose, default, examples, dependencies, safety/permission effects, failure/recovery and interactions. Related articles do not prove this explanation exists."
+    },
+    "runtime": "unverified",
+    "roadmap": [
+      "PH01-T02-C02"
+    ]
+  }
+]
