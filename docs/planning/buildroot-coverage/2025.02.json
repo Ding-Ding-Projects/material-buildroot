@@ -848,7 +848,7 @@
     ]
   },
   "applicationConsumers": {
-    "contentSha256": "ad24f2bf2f2edc58c1ba1db65c399a874d8e9d0fbd21d06be32e9490f4c20a07",
+    "contentSha256": "4d320c88db40d45c7ba78f36328c2e436053a70e9ec1a2101a8af13293a4dbfd",
     "files": [
       {
         "path": "scripts/configuration/inspect.py",
@@ -887,8 +887,8 @@
       },
       {
         "path": "src/main/execution/index.cjs",
-        "sha256": "cebbaa3f39327b7b6c0e9190e4bddd5a84fb1559890b995b2fa1f5f4765517e4",
-        "bytes": 46231
+        "sha256": "d66f8168dcc6661637d0f84e3edb122a9e40188dff11c5171f1748b9e2769230",
+        "bytes": 46495
       },
       {
         "path": "src/renderer/build-queue-panel.ts",

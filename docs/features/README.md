@@ -8,6 +8,8 @@ Choose a task below and read its permission, recovery and verification boundarie
 - [Preserve, preview and apply source revisions](source-lifecycle.md) · [來源修訂](source-lifecycle.zh-HK.md)
 - [Workspace plans, history and scoped exports](workspace-history.md) · [工作區歷史](workspace-history.zh-HK.md)
 - [Retained project and utility tabs](workspace-tabs.md) · [工作區分頁](workspace-tabs.zh-HK.md)
+- [Dialog transitions and focus](navigation/dialog-lifecycle.md)
+- [Beginner documentation walkthrough](guided-documentation.md)
 
 ## Configure, build and recover
 

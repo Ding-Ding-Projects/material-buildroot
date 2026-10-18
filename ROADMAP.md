@@ -314,3 +314,10 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 - [ ] Produce and verify a complete firmware image, any required ISO and actual boot evidence. Configuration and package-metadata checks do not satisfy this item.
 - [ ] Resolve Windows bind-mounted source symbolic-link limitations before widening Docker target acceptance.
 - [ ] Complete all 109 identity dispositions and applicable A/D/C/R acceptance records. Documentation reconciliation, authored source and successful builds alone do not close this inventory.
+
+## Source-derived completion work, 2026-10-18
+
+- [x] Add and negatively test a partial992-detail Buildroot2025.02 source-to-GUI/Easy-mode/help inventory with168content-hashed source files.
+- [ ] Complete native Kconfig, source target and package-field enumeration with explicit dispositions for every supported detail.
+- [ ] Verify the combined Easy ISO workflow and beginner documentation in actual built surfaces, including contextual articles and saved progress.
+- [ ] Complete real ISO production and independent boot/use acceptance after PATH and verbose-output limit repairs.
