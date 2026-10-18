@@ -67,7 +67,13 @@ class Lifecycle(unittest.TestCase):
         self.iso = self.root / "images" / ISO
 
     def request(self, operation, **extra):
-        return run(dict(operation=operation, outputRoot=str(self.root), jobId=self.job, **extra))
+        request = dict(operation=operation, outputRoot=str(self.root), jobId=self.job, admittedOutputIdentity=self.output_identity())
+        request.update(extra)
+        return run(request)
+
+    def output_identity(self, root=None):
+        info = os.stat(root or self.root)
+        return dict(device=str(info.st_dev), inode=str(info.st_ino), uid=str(info.st_uid))
 
     def prepare(self, prior=None):
         if prior is not None:
@@ -82,6 +88,53 @@ class Lifecycle(unittest.TestCase):
         with self.assertRaises(Exception):
             run(dict(operation="prepare", outputRoot=str(self.root), jobId=self.job))
         self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_malformed_admitted_identity_rejected_without_creating_directories(self):
+        good = self.output_identity()
+        invalid = [None, [], {}, {**good, "extra": "1"}, {**good, "device": 1},
+                   {**good, "inode": "01"}, {**good, "uid": "-1"}, {**good, "uid": "4294967296"},
+                   {**good, "device": "1" * 21}, {**good, "inode": "1.0"}]
+        for value in invalid:
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "ISO_LIFECYCLE_UNVERIFIED"):
+                    self.request("prepare", admittedOutputIdentity=value)
+                self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_mismatched_opened_root_identity_rejects_before_any_mkdir(self):
+        original = os.mkdir
+        calls = []
+        def unexpected(*args, **kwargs):
+            calls.append(True)
+            raise AssertionError("root identity must be checked before mkdir")
+        os.mkdir = unexpected
+        try:
+            for field in ("device", "inode", "uid"):
+                value = self.output_identity()
+                value[field] = str(int(value[field]) + 1)
+                with self.assertRaisesRegex(ValueError, "ISO_LIFECYCLE_UNVERIFIED"):
+                    self.request("prepare", admittedOutputIdentity=value)
+                self.assertEqual(calls, [])
+                self.assertEqual(list(self.root.iterdir()), [])
+        finally:
+            os.mkdir = original
+
+    def test_wrong_identity_preserves_prior_bytes_and_capture_state(self):
+        self.iso.parent.mkdir()
+        self.iso.write_bytes(image())
+        wrong = self.output_identity()
+        wrong["inode"] = str(int(wrong["inode"]) + 1)
+        with self.assertRaisesRegex(ValueError, "ISO_LIFECYCLE_UNVERIFIED"):
+            self.request("prepare", admittedOutputIdentity=wrong)
+        self.assertEqual(self.iso.read_bytes(), image())
+        self.assertFalse((self.root / PRIVATE).exists())
+        prepared = self.request("prepare")
+        self.iso.write_bytes(image())
+        state = self.root / PRIVATE / self.job / "state.json"
+        before = state.read_bytes()
+        with self.assertRaisesRegex(ValueError, "ISO_LIFECYCLE_UNVERIFIED"):
+            self.capture(prepared, admittedOutputIdentity=wrong)
+        self.assertEqual(state.read_bytes(), before)
+        self.assertEqual(self.iso.read_bytes(), image())
 
     def fifo_check(self, request, target, occurrence):
         context = multiprocessing.get_context("fork")
@@ -107,7 +160,7 @@ class Lifecycle(unittest.TestCase):
         self.iso.parent.mkdir()
         self.iso.write_bytes(image())
         try:
-            self.fifo_check(dict(operation="prepare", outputRoot=str(self.root), jobId=self.job), ISO, 1)
+            self.fifo_check(dict(operation="prepare", outputRoot=str(self.root), jobId=self.job, admittedOutputIdentity=self.output_identity()), ISO, 1)
         finally:
             self.assertEqual(self.iso.with_name(ISO + ".fixture-original").read_bytes(), image())
 
@@ -117,7 +170,7 @@ class Lifecycle(unittest.TestCase):
         state = self.root / PRIVATE / self.job / "state.json"
         original = state.read_bytes()
         try:
-            self.fifo_check(dict(operation="capture", outputRoot=str(self.root), jobId=self.job, preparationSha256=prepared["preparationSha256"]), "state.json", 2)
+            self.fifo_check(dict(operation="capture", outputRoot=str(self.root), jobId=self.job, preparationSha256=prepared["preparationSha256"], admittedOutputIdentity=self.output_identity()), "state.json", 2)
         finally:
             self.assertEqual(state.with_name("state.json.fixture-original").read_bytes(), original)
             self.assertEqual(self.iso.read_bytes(), image())
@@ -197,7 +250,7 @@ class Lifecycle(unittest.TestCase):
         alias = self.root / "alias"
         alias.symlink_to(outside, target_is_directory=True)
         with self.assertRaises(Exception):
-            run(dict(operation="prepare", outputRoot=str(alias), jobId=self.job))
+            run(dict(operation="prepare", outputRoot=str(alias), jobId=self.job, admittedOutputIdentity=self.output_identity(alias)))
         self.assertEqual(list(outside.iterdir()), [])
 
     def test_state_tamper_and_changed_images_identity_rejected(self):

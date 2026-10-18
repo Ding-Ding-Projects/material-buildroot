@@ -26,16 +26,16 @@ def file_identity(info):
 
 
 class Directories:
-    def __init__(self, root):
+    def __init__(self, root, admitted):
         self.fds, self.chain = [], []
         self.started = time.monotonic()
         try:
-            self.initialize(root)
+            self.initialize(root, admitted)
         except Exception:
             self.close()
             raise
 
-    def initialize(self, root):
+    def initialize(self, root, admitted):
         if not isinstance(root, str) or len(root) > 4096 or not root.startswith("/") or os.path.normpath(root) != root or any(c in root for c in "\0\r\n"):
             fail()
         self.root = os.open("/", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
@@ -45,7 +45,8 @@ class Directories:
                 fail()
             self.root = self.child(self.root, part)
         info = os.fstat(self.root)
-        if info.st_uid != os.getuid():
+        actual = {"device": str(info.st_dev), "inode": str(info.st_ino), "uid": str(info.st_uid)}
+        if info.st_uid != os.getuid() or actual != admitted:
             fail()
         self.device = info.st_dev
 
@@ -153,12 +154,15 @@ def run(request):
     if os.getuid() == 0 or not isinstance(request, dict):
         fail()
     operation = request.get("operation")
-    keys = {"operation", "outputRoot", "jobId"} | ({"preparationSha256"} if operation == "capture" else set())
+    keys = {"operation", "outputRoot", "jobId", "admittedOutputIdentity"} | ({"preparationSha256"} if operation == "capture" else set())
     if set(request) != keys or operation not in ("prepare", "capture") or not isinstance(request["jobId"], str) or not re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", request["jobId"]):
         fail()
     if operation == "capture" and (not isinstance(request["preparationSha256"], str) or not re.fullmatch(r"[a-f0-9]{64}", request["preparationSha256"])):
         fail()
-    directories = Directories(request["outputRoot"])
+    admitted = request["admittedOutputIdentity"]
+    if type(admitted) is not dict or set(admitted) != {"device", "inode", "uid"} or any(type(value) is not str or not re.fullmatch(r"(?:0|[1-9][0-9]{0,19})", value) for value in admitted.values()) or int(admitted["uid"]) > 4294967295:
+        fail()
+    directories = Directories(request["outputRoot"], admitted)
     try:
         images = directories.child(directories.root, "images", operation == "prepare")
         private = directories.child(directories.root, PRIVATE, operation == "prepare")
