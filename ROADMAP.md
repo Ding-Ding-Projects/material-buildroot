@@ -5,8 +5,10 @@
 The owner resumed implementation and actual acceptance, including local tests and built-interface verification. This supersedes historical test-deferral paragraphs below without changing their historical results.
 
 - [x] Reproduce the existing tab-catalog overflow in the built desktop at source 79f0de3 and retain source-bound geometry and capture evidence.
-- [ ] Verify the constrained catalog layout in a fresh build, including narrow layouts and settled close behavior.
-- [ ] Reproduce and resolve the tab batch-close review candidate with draft-preservation checks.
+- [x] Verify the bounded catalog-layout candidate at `feb8e30` in the actual hidden desktop: bilingual, scale 1, 1440×960, 837px grid track and no horizontal overflow, with Close returning focus to New tab. The previous source `79f0de3` had a 1632.234375px track and 885px content overflow. The 960×640 CSS viewport also had no horizontal overflow. This does not establish native DPI or full-matrix acceptance.
+- [ ] Complete current catalog design parity and the remaining native language/theme/scale matrix; the package-authoring update at `79f0de3` built, but visual parity remains unverified.
+- [ ] Complete rebuilt native acceptance and release of the batch-close repair. Closing Plans and Activity with Plans active reproduced successor recreation. The local repair performs one owner decision and atomic removal; five source-preview startup/batch-close checks passed, but native draft-preservation and complete interaction acceptance remain pending.
+- [x] Run the bounded workspace service/store/IPC checks: 15 passed, zero failed, one skipped for symbolic-link privilege. Updated idempotent-history fixtures do not establish a production storage change.
 - [ ] Complete the existing implementation queue and remaining article translations without upgrading source-only records to runtime acceptance.
 
 ## Preservation boundary, 2026-10-16
@@ -14,14 +16,14 @@ The owner resumed implementation and actual acceptance, including local tests an
 - [x] Preserve the current source units and integrate the completed desktop/documentation candidates with remote proof. This is source preservation, not complete feature acceptance.
 - [ ] Complete genuine full-installer embedding and the changed-source production retry.
 - [ ] Complete the source gaps retained in the assignment queue and feature articles, including the remaining translation inventory.
-- [ ] Run the explicitly deferred acceptance work in a later authorized pass, including VM and Docker tests.
+- [ ] Complete the formerly deferred acceptance work under the current completion direction. Bounded WSL 2 and Docker configuration/metadata checks now pass; full firmware-image and boot acceptance remain open.
 - [ ] Finish the final normal release and proven task-owned cleanup.
 
-## Current execution boundary, 2026-10-16
+## Historical execution boundary, 2026-10-16
 
 The owner selected isolated per-item implementation and release delivery. This supersedes the historical main-only source-writer rule below for the current pass: each implementation worker owns a separate branch and checkout, and completed contributions are integrated into main. The finite assignment inventory is [implementation-queue.json](docs/planning/implementation-queue.json).
 
-All tests, reviews, audits, static analysis and screenshots are deliberately deferred for this pass, including virtual-machine and Docker tests. Builds, packaging and bounded release metadata readback remain enabled. Implementation, build, release and acceptance are separate states. No acceptance-dependent checkbox is completed by source changes or package production alone.
+At that historical stage, tests, reviews, audits, static analysis and screenshots were deliberately deferred, including virtual-machine and Docker tests. The 2026-10-18 completion direction supersedes that deferral. Builds, packaging and bounded release metadata readback remain enabled. Implementation, build, release and acceptance are separate states. No acceptance-dependent checkbox is completed by source changes or package production alone.
 
 - [ ] PH02-T03 follow-up: native handle-level broker and six-format consumer source is authored, but native compilation is recorded in run 38972521474; final setup embedding/package admission and runtime acceptance remain outstanding.
 - [ ] PH02-T04 follow-up: native privileged-operation routes remain outstanding after owner-scoped vault references; runtime acceptance remains deferred.
@@ -46,7 +48,7 @@ All tests, reviews, audits, static analysis and screenshots are deliberately def
 
 Windows runtime testing is now requested. This supersedes the historical deferral in the status text below. See [native continuation evidence](docs/evidence/native-windows-20261016/README.md).
 
-Status: complete-product implementation is active. The owner requested implementation across all phases, a practical in-application onboarding wizard, frequent checkpoints on main, and deferral of Windows runtime testing. New host services and Material workspace controls have local tests; authored code, browser fixtures, packaged builds, native runtime acceptance and A/D/C parity remain separate verdicts. The roadmap retains its complete scope.
+Status: complete-product implementation is active. The owner requested implementation across all phases, a practical in-application onboarding wizard, frequent checkpoints on main, and, historically, deferral of Windows runtime testing. Current completion direction includes actual runtime testing. New host services and Material workspace controls have local tests; authored code, browser fixtures, packaged builds, native runtime acceptance and A/D/C parity remain separate verdicts. The roadmap retains its complete scope.
 
 ## Execution and checkbox rules
 
@@ -83,7 +85,7 @@ Prerequisites: None. Historical PH00 scope was planning and the initial public d
 
 Exit proof: The recorded plan and initial website have reviewed source, focused checks, genuine browser captures and separate live publication/homepage readback; missing proof remains unchecked. Full production feature parity remains open.
 
-Current continuation: implementation resumed on 2026-10-15 across all roadmap phases. The former preservation pause is historical. Fresh hosting verification matched all 108 files at source e4202d9; see [current hosting evidence](docs/evidence/tasks/PH00-current-hosting.md). Windows runtime tests are deferred by owner instruction, not passed.
+Current continuation: implementation resumed on 2026-10-15 across all roadmap phases. The former preservation pause is historical. Fresh hosting verification matched all 108 files at source e4202d9; see [current hosting evidence](docs/evidence/tasks/PH00-current-hosting.md). Windows runtime tests were historically deferred, not passed; the current completion direction resumes them.
 
 ## PH01 Detailed contracts, evidence admission and dependencies
 
@@ -287,14 +289,14 @@ The bounded PH02-T02-C02 desktop-shell child is verified against the source and 
 
 The initial documentation deployment remains historical in [its hosting evidence](docs/evidence/hosting/initial-live.json). The current desktop articles and captures were delivered at `ae1951d18a29ea3ba5aab726cee20e896ad89cc2`, built from `53a37011c04e46536c882bc79dae751ff56f9757`: all 103 live files matched expected and published-source bytes, and deployment [38679631020](https://github.com/Ding-Ding-Projects/material-buildroot/actions/runs/38679631020) succeeded. This bounded delivery does not close broad phase or per-surface requirements.
 
-The owner directed continuation while skipping blocker tasks. Five guest profiles remain retained, and strict browser audit acceptance remains 0 accepted / 20 rejected at `cleanup.completed`. Cleanup and that strict acceptance are skipped, not passed; no deletion retry or profile write is part of this continuation. Unsupported native per-scale DPI proof and the broader product backlog remain open. That earlier bounded closeout objective is historical. The current owner request covers the full roadmap, with Windows runtime testing deferred.
+The owner directed continuation while skipping blocker tasks. Five guest profiles remain retained, and strict browser audit acceptance remains 0 accepted / 20 rejected at `cleanup.completed`. Cleanup and that strict acceptance are skipped, not passed; no deletion retry or profile write is part of this continuation. Unsupported native per-scale DPI proof and the broader product backlog remain open. That earlier bounded closeout objective is historical. The current owner request covers the full roadmap, including actual runtime testing and built-interface verification.
 
 ## Installer startup repair, 2026-10-17
 
 - [x] Repair corrupted component-discovery expression and check all 134 production JavaScript modules.
 - [x] Add component enablement regression coverage.
 - [x] Produce, publish and download-verify the repaired normal installer release v0.1.0-build.230.1.
-- [ ] Verify the normal installed workspace launch, tracked in issue #6; redirected-cache readback and hidden diagnostic copies do not satisfy this item.
+- [x] Verify the normal installed workspace launch in normal release `v0.1.1-build.233.1`, source `21bf4ad4c6e1fb19a8a48fae57cdca6d63777c6a`, including About navigation and return. The earlier issue #6 gap is superseded by this bounded result; redirected-cache readback and hidden diagnostic copies remain insufficient.
 
 ## Version 0.1.1 startup and runtime repair
 
@@ -303,3 +305,12 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 - [x] Verify real non-root Docker olddefconfig/show-info execution and absent-container cleanup.
 - [x] Verify the packaged and physical normal-installed 0.1.1 workspace, including About navigation and return, with inspected source-bound capture evidence.
 - [x] Resolve stale execution fixtures and retain explicit managed-cache refusal coverage: 20 passed, 0 failed, 6 skipped.
+
+
+## Runtime acceptance boundary, 2026-10-18
+
+- [x] Retain actual execution-service `olddefconfig` and `show-info` results on both WSL 2 and Docker as UID 1000, with owned-session/container cleanup. The [runtime receipt](docs/evidence/startup-repair/runtime-smoke.json) binds application source `00bca0993c22a30c6c5071458489c01331c67d2e`, Buildroot 2025.02 source `aa2d7ca53f704af901f6c33c13e4bb1591886700` and the official pinned image digest.
+- [x] Retain the bounded execution-suite result: 20 passed, zero failed, six skipped. Skipped cases remain unverified.
+- [ ] Produce and verify a complete firmware image, any required ISO and actual boot evidence. Configuration and package-metadata checks do not satisfy this item.
+- [ ] Resolve Windows bind-mounted source symbolic-link limitations before widening Docker target acceptance.
+- [ ] Complete all 109 identity dispositions and applicable A/D/C/R acceptance records. Documentation reconciliation, authored source and successful builds alone do not close this inventory.
