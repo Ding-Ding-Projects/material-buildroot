@@ -6,6 +6,12 @@ export interface Artifact {
   partitions: Array<Record<string, unknown>>;
   preview: string | null;
   previewTruncated: boolean;
+  iso: null | {
+    descriptorValid: boolean; volumeSectors: number; logicalBlockBytes: number;
+    declaredBytes: number; withinImage: boolean; bootVerified: false;
+    elTorito: { present: boolean; catalogLba: number | null; validationChecksumValid: boolean;
+      bootEntryValid: boolean; platformId: number | null; bootImageLba: number | null };
+  };
 }
 export interface Manifest {
   schemaVersion: 1;

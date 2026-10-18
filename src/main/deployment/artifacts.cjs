@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { inspectIso } = require("./iso-inspection.cjs");
 const { createRecord, readManifest, readBoundedText, compareRecords, parseLegalManifest } = require("./reproducibility.cjs");
 function fail(message) {
   throw new Error(message);
@@ -162,6 +163,7 @@ class ArtifactStore {
       size: stat.size,
       sha256: await hashFile(file),
       ...info,
+      iso: info.format === "iso9660" ? inspectIso(file, stat.size) : null,
       preview:
         info.format === "unknown" && !header.subarray(0, 8192).includes(0)
           ? header.subarray(0, 8192).toString("utf8")
