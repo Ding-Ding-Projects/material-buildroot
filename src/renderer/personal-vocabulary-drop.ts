@@ -59,11 +59,11 @@ export class PersonalVocabularyDrop extends LitElement{
  private motion=matchMedia('(prefers-reduced-motion: reduce)');
  private view=new PersonalVocabularyFeedback();private currentText='';private kind='applied';
  private observer=new MutationObserver(()=>{void this.syncBoundary();});
- private boundaryEpoch=0;
+ private boundaryEpoch=0;private soundEpoch=0;private soundQueue:Promise<void>=Promise.resolve();
  connectedCallback(){
   super.connectedCallback();this.view.setAttribute('popover','manual');
   window.addEventListener('dragover',this.dragover,true);window.addEventListener('drop',this.drop,true);window.addEventListener('focusin',this.focusChanged,true);
-  this.unsubscribe=vocabulary.subscribe(()=>{if(!vocabulary.available())this.reset();});
+  this.unsubscribe=vocabulary.subscribe(()=>{if(!vocabulary.available()){this.soundEpoch++;this.reset();}});
   this.unsubscribeOutcome=vocabulary.subscribeOutcome(outcome=>{void this.receive(outcome);});
   this.motion.addEventListener('change',this.motionChanged);
   const root=this.getRootNode();if(root instanceof ShadowRoot||root instanceof Document)this.observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['open']});
@@ -71,7 +71,7 @@ export class PersonalVocabularyDrop extends LitElement{
  disconnectedCallback(){
   window.removeEventListener('dragover',this.dragover,true);window.removeEventListener('drop',this.drop,true);window.removeEventListener('focusin',this.focusChanged,true);
   this.unsubscribe?.();this.unsubscribeOutcome?.();this.motion.removeEventListener('change',this.motionChanged);this.observer.disconnect();
-  this.reset();this.view.remove();super.disconnectedCallback();
+  this.soundEpoch++;this.reset();this.view.remove();super.disconnectedCallback();
  }
  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
  private presentationHeadline(headline:string|null){
@@ -100,7 +100,22 @@ export class PersonalVocabularyDrop extends LitElement{
  private later(action:()=>void,delay:number){this.timers.push(setTimeout(action,delay));}
  private hasFiles(event:DragEvent){return Array.from(event.dataTransfer?.types??[]).includes('Files');}
  private dragover=(event:DragEvent)=>{if(!this.hasFiles(event))return;event.preventDefault();if(event.dataTransfer)event.dataTransfer.dropEffect=vocabulary.available()?'copy':'none';};
- private drop=(event:DragEvent)=>{if(!this.hasFiles(event))return;event.preventDefault();event.stopImmediatePropagation();if(!vocabulary.available())return;const files=event.dataTransfer?.files;void vocabulary.importFile(files?.length===1?files[0]:null);};
+ private drop=(event:DragEvent)=>{if(!this.hasFiles(event))return;event.preventDefault();event.stopImmediatePropagation();if(!vocabulary.available())return;const files=event.dataTransfer?.files;void this.importDrop(files?.length===1?files[0]:null);};
+ /** Drop-only feedback: the import outcome follows validated local persistence. */
+ private async importDrop(file:File|null){
+  let outcome:VocabularyOutcome;
+  try{outcome=await vocabulary.importFile(file);}catch{return;}
+  if(!this.isConnected||!vocabulary.available()||(outcome.state!=='applied'&&outcome.state!=='invalid'))return;
+  const host=window.studio as typeof window.studio&{vocabularyDropSound?:(request:{kind:'applied'|'invalid'})=>Promise<unknown>};
+  // Audio failure cannot reverse or relabel a completed import. No file metadata,
+  // mapping, heading or storage content crosses this enum-only boundary.
+  const kind=outcome.state,version=this.soundEpoch;
+  this.soundQueue=this.soundQueue.then(async()=>{
+   if(!this.isConnected||!vocabulary.available()||version!==this.soundEpoch)return;
+   try{await host?.vocabularyDropSound?.({kind});}catch{/* Sound is optional feedback; the visible outcome remains authoritative. */}
+  });
+  await this.soundQueue;
+ }
  private focusChanged=()=>{void this.syncBoundary();};
  private motionChanged=()=>{if(this.currentText&&this.motion.matches){this.timers.forEach(clearTimeout);this.timers=[];this.view.phase='hold';this.later(()=>this.reset(),3000);}};
  private async syncBoundary(){
