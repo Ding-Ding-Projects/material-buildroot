@@ -4,7 +4,8 @@
 
 - [x] Preserve existing task branches and exact remote tips at the verified account boundary; active and unfinished work retained.
 - [ ] Finish corrected built-documentation keyboard home/status verification after allowance recovery; original partial pass remains overall failed.
-- [ ] Verify the single public capture-gallery publication lane separately from product delivery.
+- [x] Publish and verify the67-image/13-group public gallery, exact source/backlink/homepage, static bytes and all image hashes; bounded live browser checks recorded separately.
+- [ ] Exercise gallery keyboard activation of every control and provenance disclosure; visible focus alone does not complete those checks.
 
 ## Current bounded integration
 
