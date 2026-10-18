@@ -1,3 +1,11 @@
+## Current integration continuation, 2026-10-18
+
+Integration branch `ai/integration/20261018-roadmap-combined` contains native drop-sound backend `89dab5a`, ordered renderer feedback `8e3d6e6` and native Kconfig inventory/help-fidelity repair `3f1f82b`. Backend checks passed 4/4, renderer lane 23/23 and native inventory checks 7/7. Native audio calls were accepted; audibility is unverified. The inventory retains 11,464 definitions and 3,367 hashed inputs with explicit GUI/Easy-mode/runtime gaps. The repaired scrubber preserves all 7,189 source-help quotations.
+
+Packaged source `93c82943` reached its hidden-desktop workspace and About. Catalog open/close restored focus with zero observed console, exception and page-error events in those intervals. WSL discovery/readiness and native Linux source/output adoption succeeded. Entering Builds left the renderer unresponsive: Runtime evaluation and enable requests timed out while CPU grew. Performance investigation is active; no GUI-driven ISO success is claimed. The initial diagnostic plan also incorrectly sought the configuration-only ISO panel on Builds, separate from the later unresponsiveness.
+
+Guided documentation candidate `382373f` built 372 pages and checked 9,565 links. Bounded browser verification passed 340 article routes, saved progress, keyboard actions and nine language/width tuples. The full browser run still stops at a hidden visitor-workbench control. Seven Cantonese twins are ready; 13 older missing twins and stale wiki translations are being completed. Deployed proof remains pending. Issue 1 comment 6247350233 records progress. Default-branch integration, release and installed update remain pending.
+
 ## Verified BIOS ISO production and boot, 2026-10-18
 
 A real non-root full build completed and exported a 12,357,632-byte BIOS GRUB2 ISO with SHA-256 `1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba`. The owned build session stopped successfully. On the documented QEMU 10.0.13/Cirrus/RTL8139 profile, the unchanged image reached Linux 6.12.9 x86_64, accepted console commands, completed temporary-file read/write, DHCP and two internal gateway replies, and shut down normally. See [production evidence](docs/evidence/iso-production/README.md) and [boot evidence](docs/evidence/iso-boot/README.md).

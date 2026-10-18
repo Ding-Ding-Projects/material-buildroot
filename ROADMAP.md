@@ -317,6 +317,10 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 
 ## Source-derived completion work, 2026-10-18
 
+- [x] Preserve complete MenuNode enumeration for the recorded native Buildroot 2025.02 parser invocation: 11,464 definitions, 3,367 input hashes and negative omission/help-fidelity checks. Other invocations and production GUI acceptance remain separate.
+- [ ] Complete the native GUI path from Linux project adoption through ISO build and inspection; investigate observed Builds renderer unresponsiveness.
+- [ ] Verify combined native drop sounds after independently checked backend and renderer changes. Audibility and installed-update acceptance remain unverified.
+
 - [x] Add and negatively test a partial 992-detail Buildroot 2025.02 source-to-GUI/Easy-mode/help inventory with 168 content-hashed source files.
 - [ ] Complete native Kconfig, source target and package-field enumeration with explicit dispositions for every supported detail.
 - [ ] Verify the combined Easy ISO workflow and beginner documentation in actual built surfaces, including contextual articles and saved progress.

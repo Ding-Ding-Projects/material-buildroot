@@ -16,6 +16,10 @@ The host provides [separate local schedule draft recovery](docs/security/schedul
 
 ## Current delivery boundary
 
+The integration candidate adds ordered native feedback for valid and invalid personal-wording file drops. Focused backend checks passed 4/4 and renderer checks passed 23/23; native playback calls were accepted, while audibility and the combined installed update remain unverified. See [drop feedback](docs/desktop/personal-vocabulary-drop-sounds.md).
+
+The [native Kconfig inventory](docs/planning/buildroot-coverage/native-kconfig.md) enumerates 11,464 definition nodes from 3,367 hashed inputs for the recorded Buildroot 2025.02 invocation. Seven completeness and help-fidelity checks pass. Every definition retains separate GUI, Easy-mode and runtime gaps. Actual candidate launch, About and catalog closure passed bounded checks, but entering Builds after Linux project adoption left the renderer unresponsive. GUI-driven ISO production remains incomplete despite separate product execution and ISO boot evidence.
+
 The owner resumed completion and actual acceptance on 2026-10-18, including focused tests and built-interface verification. Earlier blanket test and screenshot deferrals are historical. Successful builds and available installers still do not establish complete runtime acceptance. Follow the [finite implementation queue](docs/planning/implementation-queue.json), [roadmap](ROADMAP.md) and [handoff](HANDOFF.md) for the separate source, build, release and acceptance states.
 
 Recent source additions include [versioned project storage](docs/workspace/project-model.md), [file capabilities](docs/security/file-capabilities.md), [owner-scoped vault access](docs/security/vault-boundaries.md), [container preparation](docs/features/runtime-containers.md), [guest controls](docs/deployment/hypervisor-controls.md), [search and command consumers](docs/features/navigation/search-commands.md), [component configuration](docs/desktop/configuration-domains.md) and [explicit clean-build confirmation](docs/features/destructive-confirmation.md). Their articles retain implementation limits and pending proof.
