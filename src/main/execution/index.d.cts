@@ -78,6 +78,7 @@ export class ExecutionService {
   };
   revoke(grantId: string): void;
   prepareNativeDockerProject(input: { archivePath: string; profile: "buildroot-2025.02-x86_64-bios"; consent: true; onProgress?(event: { workspaceId: string; daemonId: string; phase: "volume-created"; volumes: Record<string, {name:string;key:string}> }): void | Promise<void> }): Promise<NativeDockerProjectReceipt>;
+  readmitNativeDockerProject(input: { metadata: NativeDockerProjectReceipt; archivePath: string; configurationSha256: string; consent: true }): Promise<NativeDockerProjectReceipt>;
   grantNativeDockerProject(receipt: NativeDockerProjectReceipt): Promise<{ grantId: string; kind: "docker-native"; workspaceId: string; profile: string; runtime: ExecutionRuntime; sourceReceipt: { sha256: string; entries: number; bytes: number }; volumes: Record<string, string> }>;
   acquireNativeDockerCache(input: { grantId: string; consent: true; onLog?(event: ExecutionLog): void; onOwnership?(receipt: Readonly<OwnershipReceipt>): Promise<void> | void }): Promise<ExecutionJob>;
   inspectNativeDockerOutputs(input: { grantId: string }): Promise<{ workspace: unknown; files: Array<{ name: string; sha256: string; bytes: number }> }>;

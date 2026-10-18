@@ -290,6 +290,7 @@ class ExecutionService {
     });
   }
   prepareNativeDockerProject(input) { return this.nativeDocker.prepare(input); }
+  readmitNativeDockerProject(input) { return this.nativeDocker.readmit(input); }
   async grantNativeDockerProject(receipt) {
     const runtime = { kind: "docker", image: receipt?.image, uid: 1000, gid: 1000 };
     await this.nativeDocker.validate(receipt, runtime);

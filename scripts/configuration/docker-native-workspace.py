@@ -176,7 +176,54 @@ def snapshot():
     return dict(uid=os.getuid(), gid=os.getgid(), identities=roots, source=source, configurationSha256=config, configurationBytes=config_bytes)
 
 
-def verify(expected, reconciled=False):
+def readmit(expected):
+    if file_hash("/archive.tar.gz", 64 * 1024 * 1024)[0] != ARCHIVE_SHA256:
+        raise ValueError("native-source-archive-mismatch")
+    expected_names = set()
+    with tarfile.open("/archive.tar.gz", "r:gz") as archive:
+        for member in archive:
+            parts = pathlib.PurePosixPath(member.name).parts
+            if not parts or parts[0] != ARCHIVE_ROOT or any(part in ("", ".", "..") for part in parts):
+                raise ValueError("native-source-path-invalid")
+            if len(parts) == 1:
+                continue
+            relative = "/".join(parts[1:])
+            if relative in expected_names or len(expected_names) >= 50000:
+                raise ValueError("native-source-limit")
+            expected_names.add(relative)
+            file = pathlib.Path("/source").joinpath(*parts[1:])
+            if os.path.realpath(file.parent) != str(file.parent):
+                raise ValueError("native-source-parent-invalid")
+            info = os.lstat(file)
+            if member.isdir():
+                if not stat.S_ISDIR(info.st_mode) or stat.S_IMODE(info.st_mode) != member.mode & 0o777:
+                    raise ValueError("native-source-content-mismatch")
+            elif member.issym():
+                if not stat.S_ISLNK(info.st_mode) or os.readlink(file) != member.linkname:
+                    raise ValueError("native-source-content-mismatch")
+            elif member.isfile():
+                if member.size > 64 * 1024 * 1024 or not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != member.mode & 0o777:
+                    raise ValueError("native-source-content-mismatch")
+                digest = hashlib.sha256()
+                with archive.extractfile(member) as stream:
+                    while True:
+                        chunk = stream.read(65536)
+                        if not chunk:
+                            break
+                        digest.update(chunk)
+                if file_hash(file, 64 * 1024 * 1024)[0] != digest.hexdigest():
+                    raise ValueError("native-source-content-mismatch")
+            else:
+                raise ValueError("native-source-entry-invalid")
+    current = snapshot()
+    if current["source"] != expected["source"] or current["source"]["entries"] != len(expected_names) or current["configurationSha256"] != expected["configurationSha256"]:
+        raise ValueError("native-workspace-recovery-changed")
+    current = verify(current)
+    current["cache"] = tree_receipt("/cache", 256 * 1024 * 1024)
+    return current
+
+
+def verify(expected, reconciled=False, acquired=False):
     current = snapshot()
     if current["identities"] != expected["identities"] or current["source"] != expected["source"]:
         raise ValueError("native-workspace-changed")
@@ -188,6 +235,9 @@ def verify(expected, reconciled=False):
     lines = pathlib.Path("/output/.config").read_text().splitlines()
     if not all(line in lines for line in required):
         raise ValueError("native-profile-not-effective")
+    if expected.get("cache") is not None and not acquired:
+        if tree_receipt("/cache", 256 * 1024 * 1024) != expected["cache"]:
+            raise ValueError("native-cache-content-changed")
     return current
 
 
@@ -211,10 +261,14 @@ if __name__ == "__main__":
             result = verify(json.loads(sys.argv[2]))
         elif mode == "reconciled":
             result = verify(json.loads(sys.argv[2]), True)
+        elif mode == "readmit":
+            result = readmit(json.loads(sys.argv[2]))
         elif mode == "outputs":
             result = outputs(json.loads(sys.argv[2]))
         elif mode == "cache":
             result = dict(workspace=verify(json.loads(sys.argv[2])), cache=tree_receipt("/cache", 256 * 1024 * 1024))
+        elif mode == "acquired":
+            result = dict(workspace=verify(json.loads(sys.argv[2]), acquired=True), cache=tree_receipt("/cache", 256 * 1024 * 1024))
         else:
             raise ValueError("native-operation-unavailable")
         print(json.dumps(result, separators=(",", ":")), flush=True)

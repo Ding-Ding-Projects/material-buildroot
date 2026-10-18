@@ -9,7 +9,7 @@ const digest = value => crypto.createHash("sha256").update(value).digest("hex");
 function freeze(value) { if (value && typeof value === "object") { for (const child of Object.values(value)) freeze(child); Object.freeze(value); } return value; }
 function createNativeDockerProjects({ run, identity, cleanup, checkpoint }) {
   const configurations = new WeakMap();
-  const expected = receipt => ({ ...receipt.seal, configurationSha256: configurations.get(receipt)?.sha256 || receipt.seal.configurationSha256 });
+  const expected = receipt => ({ ...receipt.seal, configurationSha256: configurations.get(receipt)?.sha256 || receipt.seal.configurationSha256, ...(configurations.get(receipt)?.cache ? { cache: configurations.get(receipt).cache } : {}) });
   const helper = () => fs.readFileSync(path.resolve(__dirname, "../../../scripts/configuration/docker-native-workspace.py"), "utf8");
   async function checked(args, options) {
     const result = await run(args, options).completion;
@@ -75,16 +75,36 @@ function createNativeDockerProjects({ run, identity, cleanup, checkpoint }) {
     configurations.set(receipt, { sha256: receipt.seal.configurationSha256, reconciled: false });
     return freeze(receipt);
   }
+  async function readmit({ metadata, archivePath, configurationSha256, consent }) {
+    if (consent !== true || !metadata || Object.keys(metadata).sort().join() !== "archiveSha256,daemonId,gid,id,image,profile,seal,uid,volumes" || !/^[a-f0-9-]{36}$/.test(metadata.id || "") || metadata.image !== IMAGE || metadata.profile !== PROFILE || metadata.uid !== 1000 || metadata.gid !== 1000 || metadata.archiveSha256 !== ARCHIVE || !/^[a-f0-9]{64}$/.test(configurationSha256 || "")) fail("native-docker-recovery-consent-required");
+    if (typeof archivePath !== "string" || !path.isAbsolute(archivePath) || /[,\0\r\n]/.test(archivePath)) fail("native-docker-source-archive-mismatch");
+    const stat = fs.lstatSync(archivePath);
+    if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || stat.size > 64 * 1024 * 1024 || digest(fs.readFileSync(archivePath)) !== ARCHIVE) fail("native-docker-source-archive-mismatch");
+    const receipt = structuredClone(metadata), daemonId = await identity();
+    if (receipt.daemonId !== daemonId || Object.keys(receipt.volumes || {}).sort().join() !== "cache,output,source") fail("native-docker-volume-changed");
+    for (const [role, volume] of Object.entries(receipt.volumes)) {
+      if (volume.name !== `material-buildroot-native-${receipt.id}-${role}` || volume.key !== digest(JSON.stringify([receipt.id, role, daemonId, IMAGE, ARCHIVE, 1000, 1000]))) fail("native-docker-volume-changed");
+    }
+    admitted.add(receipt);
+    const job = await owned(receipt, [...isolation(), ...mounts(receipt), "--mount", `type=bind,src=${archivePath},dst=/archive.tar.gz,readonly`, "--entrypoint", "python3", IMAGE, "-I", "-B", "-c", helper(), "readmit", JSON.stringify({ source: receipt.seal.source, configurationSha256 })]);
+    const result = await job.completion;
+    if (result.state !== "succeeded" || result.cleanup.state !== "verified-stopped") fail("native-docker-recovery-verification-failed");
+    receipt.seal = JSON.parse(result.stdout);
+    if (receipt.seal.uid !== 1000 || receipt.seal.gid !== 1000 || receipt.seal.configurationSha256 !== configurationSha256 || JSON.stringify(receipt.seal.source) !== JSON.stringify(metadata.seal.source) || !/^[a-f0-9]{64}$/.test(receipt.seal.cache?.sha256 || "")) fail("native-docker-recovery-verification-failed");
+    configurations.set(receipt, { sha256: configurationSha256, reconciled: true, cache: receipt.seal.cache });
+    return freeze(receipt);
+  }
   async function start(receipt, runtime, target, jobs, options = {}) {
     if (!["all", "olddefconfig", "show-info"].includes(target) || !Number.isInteger(jobs) || jobs < 1 || jobs > 8) fail("native-docker-build-request-invalid");
     await validate(receipt, runtime); await inspect(receipt);
     if (target !== "olddefconfig" && !configurations.get(receipt)?.reconciled) fail("native-docker-configuration-required");
+    if (target === "all" && !configurations.get(receipt)?.cache) fail("native-docker-cache-acquisition-required");
     const script = 'set -eu; python3 -I -B -c "$1" verify "$2"; exec make -C /source O=/output DL_DIR=/cache "-j$3" "$4"';
     const job = await owned(receipt, [...isolation(), ...mounts(receipt), "--workdir", "/source", "--entrypoint", "/bin/sh", IMAGE, "-c", script, "native-build", helper(), JSON.stringify(expected(receipt)), String(jobs), target], { ...options, timeoutMs: 60 * 60 * 1000 });
     const completion = job.completion.then(async result => {
       if (result.state === "succeeded" && result.cleanup.state === "verified-stopped") {
         const current = await inspect(receipt, target === "olddefconfig" ? "reconciled" : "verify");
-        if (target === "olddefconfig") configurations.set(receipt, { sha256: current.configurationSha256, reconciled: true });
+        if (target === "olddefconfig") configurations.set(receipt, { ...configurations.get(receipt), sha256: current.configurationSha256, reconciled: true });
       }
       return result;
     });
@@ -98,8 +118,8 @@ function createNativeDockerProjects({ run, identity, cleanup, checkpoint }) {
     // This separately consented acquisition operation is the only networked
     // container. Firmware execution above remains network=none.
     const job = await owned(receipt, [...isolation("bridge"), ...mounts(receipt), "--workdir", "/source", "--entrypoint", "/bin/sh", IMAGE, "-c", script, "native-cache-acquire", helper(), JSON.stringify(expected(receipt))], { onLog, onOwnership, timeoutMs: 60 * 60 * 1000 });
-    return { ...job, completion: job.completion.then(async result => { if (result.state === "succeeded" && result.cleanup.state === "verified-stopped") await inspect(receipt); return result; }) };
+    return { ...job, completion: job.completion.then(async result => { if (result.state === "succeeded" && result.cleanup.state === "verified-stopped") { const current = await inspect(receipt, "acquired"); configurations.set(receipt, { ...configurations.get(receipt), cache: current.cache }); return { ...result, cacheReceipt: current.cache }; } return result; }) };
   }
-  return { prepare, validate, inspect, start, acquire, isReceipt: value => admitted.has(value) };
+  return { prepare, readmit, validate, inspect, start, acquire, isReceipt: value => admitted.has(value) };
 }
 module.exports = { createNativeDockerProjects, IMAGE, PROFILE, ARCHIVE };
