@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 // Browser-only operation fixtures. Real Buildroot production and boot need separate evidence.
-async function open(page,{effective=true,applicable=true}={}){
+async function open(page,{effective=true,applicable=true,easy=false}={}){
  await page.goto('/');
- await page.evaluate(async({effective,applicable})=>{
+ await page.evaluate(async({effective,applicable,easy})=>{
   await import('/src/renderer/image-presets-panel.ts');
   window.__isoRequests=[];
   window.studio={operations:async request=>{
@@ -21,8 +21,8 @@ async function open(page,{effective=true,applicable=true}={}){
    }
    return {ok:true,result};
   }};
-  const panel=document.createElement('image-presets-panel');panel.workspaceId='workspace-1';panel.language='en';document.body.replaceChildren(panel);
- },{effective,applicable});
+  const panel=document.createElement('image-presets-panel');panel.workspaceId='workspace-1';panel.language='en';panel.isoMode=easy?'easy':'advanced';document.body.replaceChildren(panel);
+ },{effective,applicable,easy});
  return page.getByRole('region',{name:'BIOS ISO workflow',exact:true});
 }
 async function configure(panel){
@@ -60,4 +60,19 @@ test('changing workspace discards late planning replies',async({page})=>{
  await page.evaluate(async()=>{const el=document.querySelector('image-presets-panel');el.workspaceId='workspace-2';await el.updateComplete;window.__releaseIso();});
  await expect(panel.getByRole('button',{name:'Check ISO prerequisites',exact:true})).toBeEnabled();
  await expect(panel.getByRole('button',{name:'Configure BIOS ISO',exact:true})).toHaveCount(0);
+});
+
+test('Easy guide restores step position without restoring success',async({page})=>{
+ const panel=await open(page,{easy:true});
+ await expect(panel).toContainText('What would you like to make?');
+ await expect(panel.getByRole('button',{name:'Next',exact:true})).toBeDisabled();
+ await configure(panel);
+ await panel.getByRole('button',{name:'Next',exact:true}).click();
+ await expect(panel.getByRole('heading',{name:'Make the image file',exact:true})).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-workspace-1')).step)).toBe(1);
+ await page.evaluate(async()=>{const old=document.querySelector('image-presets-panel');const next=document.createElement('image-presets-panel');next.workspaceId='workspace-1';next.language='en';old.replaceWith(next);await next.updateComplete;});
+ await expect(panel).toContainText('Saved progress restored');
+ await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeDisabled();
+ await panel.getByRole('button',{name:'Back',exact:true}).click();
+ await expect(panel.getByRole('heading',{name:'What would you like to make?',exact:true})).toBeVisible();
 });

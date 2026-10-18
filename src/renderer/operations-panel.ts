@@ -895,10 +895,20 @@ export class OperationsPanel extends LitElement {
           : nothing}
       </section>`;
   }
+  private async openIsoHelp(event:CustomEvent<{title:string}>) {
+    const titles=['ISO profile and firmware','ISO runtime and resources','ISO configuration and recovery','ISO output and validation'];
+    if(!titles.includes(event.detail?.title))return;
+    const index=await this.run('documentation.list');
+    const article=index?.articles?.find((item:any)=>item.title===event.detail.title);
+    if(!article){this.feedback=this.l('This field guide is not available in the bundled documentation.','內附文件未提供呢份欄位指南。',true);return;}
+    this.tab='documentation';await this.updateComplete;
+    const panel=this.renderRoot.querySelector('documentation-panel') as import('./documentation-panel').DocumentationPanel|null;
+    await panel?.openArticle(article.id);
+  }
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`<image-presets-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></account-provisioning-panel><defconfig-panel .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
+    return html`<image-presets-panel @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></account-provisioning-panel><defconfig-panel .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
       <div class="row">
         <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
         <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
