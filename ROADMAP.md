@@ -1,5 +1,17 @@
 # Phased implementation roadmap
 
+## Current combined verification, 2026-10-18, source 24697b5
+
+- [x] Build combined Easy PC, bilingual permission guide and verified44.9.0 runtime candidate through exact root build.bat. Source24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960; receipt c349171a0a494a97986863562f4d7561f3cb802606e94503e2eda3156f978fc7.
+- [x] Verify actual37571d3 permission grant after adding the required domain; retain two real-dispatcher scope/revocation checks and native approval receipt.
+- [x] Retain bounded46538c0 cold startup:75.794seconds,16aggregate samples,34steps and zero observed console/exception/page events. The later renderer crash at09:42:14.386UTC, exit-36861, means sustained startup remains unfinished.
+- [ ] Complete actual native Easy PC preset reconciliation and current GUI ISO production. Source unit c7028b4 passed28browser cases; this is not native Buildroot acceptance.
+- [ ] Diagnose the independent WSL intent worker exit139/noJSON. Instrumented service captured three successful workers and a fourth native failure; all owned sessions stopped. Boot identity differs from the earlier idle-stability observation, with timing/cause unknown.
+- [ ] Complete native-volume Docker firmware production. Preparation, configuration and separate hash-verified acquisition succeeded. Firmware attempts stopped at daemon EOF and host-fakeroot autoreconf; isolated autoconf-child reproduction succeeded. Preserve the exact bindings and do not claim complete output.
+- [ ] Repair manual-inventory parent containment before integration. Two independent reviews and a harmless junction fixture confirmed external synthetic article admission; no private outside data or public disclosure occurred.
+- [ ] Finish current combined documentation/deployment, normal accepted release, installed update and complete source-to-GUI/Easy coverage. The22percent allowance reading does not complete or block the active goal.
+
+
 ## Native acceptance update, 2026-10-18, source 8558894
 
 - [x] Build exact combined desktop source `855889426b76fc045170ca8cef2637486bf91f26` through root `build.bat`; workflow `39114591065` also completed successfully. This is branch build evidence, not an accepted release or installed update.

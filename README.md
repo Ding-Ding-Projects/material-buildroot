@@ -4,7 +4,9 @@ A Material Design 3 desktop workspace for configuring and building embedded Linu
 
 [Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Capture provenance](docs/evidence/modern-workspace/README.md) · [Roadmap](ROADMAP.md)
 
-Current native verification at `8558894` loaded all 3,263 source packages through a bounded 50-option chooser and restored 56px build fields. ISO permission review opens, but grant/revoke IPC repair and repeated renderer-exit diagnosis remain in progress. The existing [produced ISO evidence](docs/evidence/iso-production/README.md) and [bounded BIOS boot](docs/evidence/iso-boot/README.md) are separate from the still-unverified current GUI ISO workflow. See the [roadmap](ROADMAP.md) for remaining acceptance.
+Earlier native verification at `8558894` loaded all 3,263 source packages through a bounded 50-option chooser and restored 56px build fields. ISO permission review opens, but grant/revoke IPC repair and repeated renderer-exit diagnosis remain in progress. The existing [produced ISO evidence](docs/evidence/iso-production/README.md) and [bounded BIOS boot](docs/evidence/iso-boot/README.md) are separate from the still-unverified current GUI ISO workflow. See the [roadmap](ROADMAP.md) for remaining acceptance.
+
+The current combined source `24697b5` builds the source-discovered Easy PC selector, explicit-scope permission repair, bilingual guides and verified runtime refresh. Native permission approval succeeded, but sustained desktop startup and current GUI ISO production remain unverified after a later renderer crash. WSL intent inspection and full Docker firmware production also retain explicit native failure records. The existing bounded ISO production/boot proof is preserved separately; no complete product or installed-update result is claimed.
 
 ## A productive desktop workspace
 
