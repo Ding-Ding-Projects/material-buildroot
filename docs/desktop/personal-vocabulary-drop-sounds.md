@@ -1,5 +1,7 @@
 # Personal wording drop sounds
 
+[香港粵語](personal-vocabulary-drop-sounds.zh-HK.md)
+
 Actual window file drops request native feedback only after the serialized import returns its validated, persisted result. A successful drop requests the native completion sound once. Invalid JSON, a non-JSON filename, files over 256 KiB, and multiple-file drops request the native invalid-input sound once per drop. Existing wording and visible outcome messages retain their previous behavior.
 
 The renderer sends only `{kind: "applied"}` or `{kind: "invalid"}`. It never sends file contents, metadata, paths, imported headings or mappings to the sound endpoint. Imports remain serialized by the existing vocabulary controller. Rapid drops keep their separate outcomes; each drop continuation requests at most one sound. A separate renderer sound queue waits for each native response without blocking subsequent imports. Queued sounds are discarded when restricted mode or clear invalidates them. The native endpoint also serializes playback; an unavailable or busy response remains silent and is never retried automatically.

@@ -1,5 +1,7 @@
 # Native feedback for local wording-file drops
 
+[香港粵語](vocabulary-drop-sound.zh-HK.md)
+
 After a local wording-file drop finishes validation and persistence, the desktop renderer may request one native sound for its actual outcome. Successful application selects the operating system's local `Media\tada.wav`; invalid input selects the current native `SystemHand` sound alias. The endpoint never receives file content, filenames, paths, mappings or validation details.
 
 The sandboxed preload exposes `window.studio.vocabularyDropSound({kind: 'applied' | 'invalid'})`. Both preload and main process reject every other property or enum value. The main process also requires the admitted desktop sender and rechecks that authority before queued playback. Four pending requests are allowed, including the active request. Accepted requests play in order through synchronous native playback in hidden, bounded local child processes.

@@ -1,5 +1,7 @@
 # Visitor acceptance and narrow navigation
 
+[香港粵語](visitor-acceptance.zh-HK.md)
+
 The full browser acceptance workflow opens visitor tools through the actual New tab catalogue and verifies that their panels are visible before interacting. Backup imports complete the real two-checkbox and keyboard slider confirmation. The companion protocol fixture verifies HTTP rejection before challenge transmission, then uses an explicitly intercepted HTTPS document origin backed by the built files and current browser-bound session/public-projection schemas. This fixture is not real TLS or LAN acceptance.
 
 At 320 CSS pixels, standalone navigation and active-tab buttons previously retained unbounded, non-wrapping Material labels. The measured visitor document width was 523 pixels for a 320-pixel viewport. Scoped narrow-layout rules now constrain those controls and allow complete labels to wrap while retaining their 48-pixel minimum height. No page-wide overflow clipping hides content.

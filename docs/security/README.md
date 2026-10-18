@@ -21,3 +21,7 @@ The opt-in companion separately exposes authenticated HTTPS endpoints for pairin
 
 - [Persistent workspace state](workspace-state.md) · [持久工作區狀態](workspace-state.zh-HK.md)
 - [HTTPS companion boundary](companion.md) · [HTTPS 伴隨連線界線](companion.zh-HK.md)
+
+## Current workflow translations
+
+- [Native WSL content intent](native-wsl-content-intent.md) · [原生WSL內容意圖](native-wsl-content-intent.zh-HK.md)

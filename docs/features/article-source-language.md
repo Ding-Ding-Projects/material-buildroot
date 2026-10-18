@@ -1,5 +1,7 @@
 # Article source-language metadata
 
+[香港粵語](article-source-language.zh-HK.md)
+
 The documentation producer derives article language from the tracked source path. An exact `.zh-HK.md` suffix declares Cantonese (`zh-HK`); other admitted Markdown articles retain the English (`en`) default. This follows the existing translation filename convention. It does not inspect prose, translate content or certify that an article is a complete translation.
 
 The article metadata displays **Project record · Cantonese source** or **Project record · English source**, with corresponding Cantonese interface labels. Each label declares its own language. The rendered Markdown body has an explicit `lang` attribute independent of the visitor's English, Cantonese or bilingual heading preference. Changing that preference changes interface labels only, never the article contents or source identity. The surrounding shell remains English with individually marked translated spans.

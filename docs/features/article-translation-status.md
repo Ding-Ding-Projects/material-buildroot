@@ -42,6 +42,10 @@ These translations preserve the originals’ historical verification boundaries.
 
 - [Browser-native visitor consumers](browser-native.zh-HK.md)
 
+## Current workflow additions
+
+Five new source articles now have complete Cantonese twins: visitor acceptance, article source-language metadata, native WSL content intent, personal wording drop sounds and native drop feedback. The package-target guide is authored in both languages. Category indexes link each pair. Their source/fixture boundaries do not imply native or ISO acceptance. The server-manager twin remains unwritten.
+
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
