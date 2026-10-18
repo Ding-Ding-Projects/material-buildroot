@@ -211,7 +211,7 @@ try{
  // Protocol-only HTTPS page fixture. Built bytes are routed without changing the
  // production secure-context requirement or claiming a real TLS certificate test.
  const secureVisitorBase='https://127.0.0.1:9443/material-buildroot/';
- let fixturePairing;
+ let fixturePairing;let unsafeCompanionProjection=true;
  await context.route('https://127.0.0.1:9443/material-buildroot/**',async route=>{
   const fixtureUrl=new URL(route.request().url());
   const served=new URL(fixtureUrl.pathname,new URL(target).origin);
@@ -229,7 +229,10 @@ try{
   else if(url.pathname==='/session')payload={nextSequence:companionSequence,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active',...fixturePairing}};
   else if(url.pathname==='/actions'){
    companionSequence=body.sequence+1;
-   const result=body.action==='workspace.read'?{ok:true,state:{plans:[{name:'Fixture plan',runtime:'wsl',target:'image',status:'draft',notes:'fixture-private-note'}],preferences:{theme:'dark'},onboardingCompleted:false}}:body.action==='projects.list'?[{id:'fixture-project',name:'Fixture project',root:'/private/host/path',authorized:true}]:[{id:'fixture-job',kind:'build',state:'running',updatedAt:new Date().toISOString(),logs:['fixture-private-log']}];
+   const result=body.action==='workspace.read'
+    ?unsafeCompanionProjection?{ok:true,state:{plans:[{name:'Fixture plan',notes:'fixture-private-note'}]}}:{revision:1,onboardingCompleted:false,plans:[{id:'fixture-plan',name:'Fixture plan',runtime:'wsl',target:'image',status:'draft',updatedAt:new Date().toISOString()}]}
+    :body.action==='projects.list'?{projects:[{id:'fixture-project',name:'Fixture project',authorized:true}]}
+    :{jobs:[{id:'fixture-job',kind:'build',state:'running',sequence:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),logCount:0,itemCount:0}]};
    payload={nextSequence:companionSequence,operation:{action:body.action,state:'succeeded',sessionId:'46ac4318-4a7e-4813-9d08-f2d61691bf90'},result};
   } else if(url.pathname==='/disconnect')payload={revoked:true,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',status:'revoked'}};
   else {await route.fulfill({status:404,headers:cors,body:'{}'});return;}
@@ -266,6 +269,10 @@ try{
  assert.equal(await page.locator('#companion-connected').isVisible(),true);
  assert.equal(await page.evaluate(()=>localStorage.getItem('mb-companion-endpoint-v1')),'https://192.168.1.20:8443');
  assert.equal(await page.evaluate(()=>Object.values(localStorage).some(value=>value==='fixture-csrf-token-not-for-storage')),false);
+ await page.locator('[data-companion-action="workspace.read"]').click();
+ await page.waitForFunction(()=>document.querySelector('#companion-data').textContent.includes('did not match this read-only view'));
+ assert.doesNotMatch(await page.locator('#companion-data').innerText(),/fixture-private-note|Fixture plan/,'Raw workspace response must not be rendered');
+ unsafeCompanionProjection=false;
  await page.locator('[data-companion-action="workspace.read"]').click();
  await page.waitForFunction(()=>document.querySelector('#companion-data').textContent.includes('Fixture plan'));
  assert.doesNotMatch(await page.locator('#companion-data').innerText(),/fixture-private-note|raw JSON/i);
