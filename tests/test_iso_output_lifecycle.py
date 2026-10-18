@@ -1,5 +1,6 @@
 """Offline non-root synthetic filesystem checks for the fixed internal helper."""
 import hashlib
+import multiprocessing
 import os
 import pathlib
 import tempfile
@@ -35,6 +36,28 @@ def image():
     return bytes(data)
 
 
+def fifo_child(request, target, occurrence, sender):
+    original = os.open
+    seen = 0
+    def swapped(name, flags, *args, **kwargs):
+        nonlocal seen
+        if name == target:
+            seen += 1
+            if seen == occurrence:
+                parent = kwargs["dir_fd"]
+                os.rename(name, name + ".fixture-original", src_dir_fd=parent, dst_dir_fd=parent)
+                os.mkfifo(name, 0o600, dir_fd=parent)
+        return original(name, flags, *args, **kwargs)
+    os.open = swapped
+    try:
+        run(request)
+        sender.send("unexpected-acceptance")
+    except Exception as error:
+        sender.send(str(error))
+    finally:
+        sender.close()
+
+
 class Lifecycle(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="iso-lifecycle-", dir="/fixture")
@@ -54,6 +77,67 @@ class Lifecycle(unittest.TestCase):
 
     def capture(self, prepared, **extra):
         return self.request("capture", preparationSha256=prepared["preparationSha256"], **extra)
+
+    def fifo_check(self, request, target, occurrence):
+        context = multiprocessing.get_context("fork")
+        receiver, sender = context.Pipe(duplex=False)
+        process = context.Process(target=fifo_child, args=(request, target, occurrence, sender))
+        process.start()
+        sender.close()
+        process.join(1)
+        watchdog = process.is_alive()
+        if watchdog:
+            process.terminate()
+            process.join(2)
+            if process.is_alive():
+                process.kill()
+                process.join(2)
+        self.assertFalse(process.is_alive(), "owned synthetic child must be reaped")
+        outcome = receiver.recv() if receiver.poll() and not watchdog else None
+        receiver.close()
+        self.assertFalse(watchdog, "owned synthetic child required watchdog after FIFO swap")
+        self.assertEqual(outcome, "ISO_LIFECYCLE_UNVERIFIED")
+
+    def test_regular_iso_to_fifo_swap_rejects_before_blocking_read(self):
+        self.iso.parent.mkdir()
+        self.iso.write_bytes(image())
+        try:
+            self.fifo_check(dict(operation="prepare", outputRoot=str(self.root), jobId=self.job), ISO, 1)
+        finally:
+            self.assertEqual(self.iso.with_name(ISO + ".fixture-original").read_bytes(), image())
+
+    def test_second_state_open_fifo_swap_rejects_before_blocking_read(self):
+        prepared = self.prepare()
+        self.iso.write_bytes(image())
+        state = self.root / PRIVATE / self.job / "state.json"
+        original = state.read_bytes()
+        try:
+            self.fifo_check(dict(operation="capture", outputRoot=str(self.root), jobId=self.job, preparationSha256=prepared["preparationSha256"]), "state.json", 2)
+        finally:
+            self.assertEqual(state.with_name("state.json.fixture-original").read_bytes(), original)
+            self.assertEqual(self.iso.read_bytes(), image())
+
+    def test_structure_rejects_checksum_endian_platform_and_extent(self):
+        for kind in ("checksum", "endian", "platform", "extent"):
+            with self.subTest(kind=kind):
+                self.job = str(uuid.uuid4())
+                prepared = self.prepare()
+                data = bytearray(image())
+                c = 20 * 2048
+                if kind == "checksum":
+                    data[c+28] ^= 1
+                elif kind == "endian":
+                    data[16*2048+84] ^= 1
+                elif kind == "platform":
+                    data[c+1] = 0xef
+                    data[c+28:c+30] = b"\0\0"
+                    checksum = sum(int.from_bytes(data[c+i:c+i+2], "little") for i in range(0, 32, 2))
+                    data[c+28:c+30] = ((-checksum) & 0xffff).to_bytes(2, "little")
+                else:
+                    data[c+38:c+40] = (65535).to_bytes(2, "little")
+                self.iso.write_bytes(data)
+                with self.assertRaises(Exception):
+                    self.capture(prepared)
 
     def test_prior_preserved_and_no_new_file_rejected(self):
         prior = image()
