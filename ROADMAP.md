@@ -23,7 +23,7 @@
 - [x] Add unexposed ISO preservation/observation helper and repair FIFO waits with witnessed red/green synthetic checks (11/11).
 - [x] Refresh the ISO map against explicit consumer baseline 308d4545 and the unchanged 2,245-detail manual inventory.
 - [x] Require strict output-root identity comparison before helper mutation; 15/15 synthetic checks, with supplied identity explicitly unauthenticated.
-- [ ] Review and verify fixed admitted WSL transport candidate165b51a: source reviews dry, reported9/9 has no original run attestation; inactive pending bound proof.
+- [x] Reverify admitted WSL transport candidate165b51a with fresh original output and before/after input hashes:9/9 mocked cases passed; integrated as c590a13. This completes only the focused source-proof gap, not live WSL or producer integration.
 - [ ] Wire owned transport, exact producer/cleanup and durable required ISO receipt inside the existing execution lease.
 - [x] Verify runtime wording levels 1/5 in all three language modes at 480 pixels and the English admitted two-article reader route (9/9 source-fixture checks).
 - [ ] Verify current packaged/native guidance, complete packaged and translated-reader navigation, native input and assistive technology.

@@ -2,6 +2,8 @@
 
 ## Guided workspace remake resumed, 2026-10-18
 
+Fresh mocked WSL transport proof passed9/9 with exit0 at candidate165b51a74be2407167ebee77c08ad299d49a9b0e. Eight before/after input hashes matched; original output SHA-2567650db461498cc428cbafab372dc5dec503056be0d5d66d6f327235a42f2d6ea and receipt SHA-2565c30862588bbadb5ca9c26c303fc077ec6cea5340e87ac98f0425bfa364b24c7 are retained privately. The exact unit integrated as c590a13. No WSL, Docker, Python, native application or firmware execution occurred. This supersedes the historical missing-attestation state below only; the helper remains unexposed and scheduler/producer binding remains unfinished.
+
 The user approved implementation of the whole-application guided workspace plan. Fresh account data reports 86% remaining, clearing the previous allowance boundary. The goal tool returned no existing goal; a successor was created with the accepted remake and the unfinished runtime/ISO delivery requirements retained. The starting source is 457b51ae4ead511a9be30857e93c289c0e9f3aad, clean and equal to the fetched integration branch.
 
 Three isolated frontend lanes own the shell/settings, image flow, and operations/builds/tools. Read-only design inventory and independent review preserve all existing destination identifiers, project instances and host authority. See `design/guided-workspace.md` for the shared contract. Baseline capture uses the unchanged built renderer through an isolated hidden browser, explicitly separating fixture host replies from native acceptance. No native application launch or firmware attempt is authorized by that renderer evidence.
