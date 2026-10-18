@@ -169,8 +169,8 @@ export class OperationsPanel extends LitElement {
       .explorer md-text-button{display:flex;width:100%;justify-content:flex-start;--md-text-button-container-height:32px;--md-text-button-container-shape:4px;font-size:12px}
       .explorer .active{background:var(--md-sys-color-secondary-container)}
       .editor-frame{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
-      .document-toolbar{display:flex;gap:8px;align-items:center;padding:4px 8px;border-bottom:1px solid var(--md-sys-color-outline-variant);font-size:12px;min-height:36px}
-      .document-toolbar strong{margin-right:auto}.document-toolbar md-text-button{--md-text-button-container-height:28px}
+      .document-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:8px 24px;border-bottom:1px solid var(--md-sys-color-outline-variant);font-size:13px;min-height:56px}
+      .document-toolbar strong{margin-right:auto;font-size:22px;line-height:28px;font-weight:400}.document-toolbar md-text-button{--md-text-button-container-height:40px}
       .dock{flex-shrink:0;display:flex;flex-direction:column;border-top:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);overflow:hidden}
       .dock-resizer{height:5px;cursor:ns-resize;flex-shrink:0;background:var(--md-sys-color-outline-variant)}
       .dock-content{display:flex;min-height:0;flex:1;overflow:hidden}.dock-jobs{width:220px;overflow:auto;border-right:1px solid var(--md-sys-color-outline-variant)}
@@ -179,6 +179,7 @@ export class OperationsPanel extends LitElement {
       .operations > .content{overflow:auto;flex:1;min-height:0;padding:12px;gap:8px}
       .operations > [hidden]{display:none!important}
       .operations > guest-panel,.operations > source-panel,.operations > package-panel,.operations > tools-panel,.operations > authenticator-panel,.operations > companion-panel,.operations > regex-workbench,.operations > documentation-panel{flex:1;min-height:0;overflow:auto;padding:8px}
+      .operations > package-panel{padding:16px 24px;box-sizing:border-box}
       .operations > md-tabs{min-height:38px;--md-primary-tab-container-height:38px}
       .panel{border-radius:0;padding:12px;background:transparent;border-bottom:1px solid var(--md-sys-color-outline-variant)}
       .operations {

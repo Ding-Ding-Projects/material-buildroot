@@ -1740,10 +1740,12 @@ class MaterialBuildroot extends LitElement {
           >${materialIcon("menu")}</md-text-button
         >
         <div class="brand">
+          <span class="brand-mark" aria-hidden="true">MB</span>
           <strong>${wording.productName()}</strong
           ><small>${this.l("Desktop workspace","桌面工作區",true)}</small>
         </div>
         <md-text-button
+          class="command-search"
           aria-label=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)}
           @click=${(e: Event) => this.openDialog("actions-dialog", e)}
           >${materialIcon("search","icon")}<span class="palette-label">

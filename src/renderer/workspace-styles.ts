@@ -540,20 +540,26 @@ export const workspaceStyles = css`
       padding: 14px;
     }
   }
-  /* Dense desktop workspace; controls retain their Material component semantics. */
-  :host { --md-filled-button-container-height:32px;--md-outlined-button-container-height:32px;--md-text-button-container-height:32px;--md-filled-tonal-button-container-height:32px;--md-outlined-field-top-space:9px;--md-outlined-field-bottom-space:9px;--md-outlined-field-content-size:13px;--md-outlined-select-text-field-container-height:42px; }
-  header{min-height:40px;padding:2px 8px}.brand strong{font-size:13px}.brand small{display:none}
-  nav{width:54px;padding:6px 4px;gap:4px}nav .navlabel{display:none}nav .navsymbol{min-width:24px;margin:0}.selected{border-radius:8px}
-  nav md-text-button{min-width:40px;--md-text-button-container-shape:8px;--md-text-button-container-height:40px}
-  main{padding:8px;gap:8px}.toolbar .heading h1{font-size:16px}.toolbar p{margin:0;font-size:11px}
-  main:has(>.operations-host:not([hidden])){overflow:hidden}
+  /* Workspace proportions follow the package-authoring design reference. */
+  :host{--md-filled-button-container-height:40px;--md-outlined-button-container-height:40px;--md-text-button-container-height:40px;--md-filled-tonal-button-container-height:40px;--md-outlined-field-top-space:12px;--md-outlined-field-bottom-space:12px;--md-outlined-field-content-size:14px}
+  header{min-height:52px;padding:0 0 0 16px;flex-shrink:0}
+  .brand{display:flex;align-items:center;gap:10px;flex:0 1 auto}.brand strong{font-size:15px;font-weight:500;white-space:nowrap}.brand small{display:none}
+  .brand-mark{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:28px;height:28px;border-radius:8px;background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);font-size:13px;font-weight:700}
+  .command-search{flex:1;max-width:520px;margin-inline:auto;--md-text-button-container-height:36px;--md-text-button-container-shape:18px;background:var(--md-sys-color-surface-container-high);border-radius:18px;color:var(--md-sys-color-on-surface-variant)}
+  .window md-text-button{min-width:46px;--md-text-button-container-height:52px;--md-text-button-container-shape:0}
+  nav{width:80px;padding:12px;gap:4px}nav .navlabel{display:none}nav .navsymbol{min-width:24px;margin:0}.selected{border-radius:16px}
+  nav md-text-button{min-width:56px;--md-text-button-container-shape:16px;--md-text-button-container-height:56px}
+  main{padding:16px;gap:16px}.toolbar .heading h1{font-size:22px}.toolbar p{margin:0;font-size:13px}
+  main:has(>.operations-host:not([hidden])){overflow:hidden;padding:0;gap:0}
+  main:has(>.operations-host:not([hidden]))>.toolbar{padding:12px 24px}
   .operations-host:not([hidden]){flex:1;min-height:0;height:auto}
-  .panel{border-radius:4px;padding:12px}.fields,.editor,.settings-grid{gap:10px}.records md-text-button{min-height:42px}
-  h2{font-size:15px;margin-bottom:8px}p{font-size:13px;line-height:1.45}
-  md-filled-button,md-outlined-button,md-text-button,md-filled-tonal-button{--md-filled-button-container-shape:6px;--md-outlined-button-container-shape:6px;--md-text-button-container-shape:6px;--md-filled-tonal-button-container-shape:6px;font-size:12px}
-  .onboarding{padding:8px;border-radius:4px}.onboarding p{display:none}.onboarding strong{font-size:12px}
-  .status{font-size:11px;padding:4px 10px;min-height:24px}
-  @media(max-width:699px){nav{display:none}main{padding:4px}}
+  .panel{border-radius:16px;padding:16px 20px}.fields,.editor,.settings-grid{gap:16px}.records md-text-button{min-height:44px}
+  h2{font-size:18px;margin-bottom:8px}p{font-size:14px;line-height:1.45}
+  md-filled-button,md-outlined-button,md-text-button,md-filled-tonal-button{--md-filled-button-container-shape:20px;--md-outlined-button-container-shape:20px;--md-text-button-container-shape:20px;--md-filled-tonal-button-container-shape:20px;font-size:14px}
+  .onboarding{padding:16px;border-radius:16px}.onboarding strong{font-size:14px}
+  .status{font-size:12px;padding:8px 16px;min-height:32px}
+  @media(max-width:1100px){nav{width:64px;padding:8px 4px}.brand strong{max-width:180px;overflow:hidden;text-overflow:ellipsis}}
+  @media(max-width:699px){nav{display:none}main{padding:8px}header{padding-left:8px;gap:4px}.brand-mark{display:none}.brand strong{max-width:100px}.command-search{flex:0 0 auto}.window md-text-button{min-width:40px}.palette-label{display:none}}
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

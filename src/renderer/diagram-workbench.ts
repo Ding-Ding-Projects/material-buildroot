@@ -35,6 +35,13 @@ export class DiagramWorkbench extends LitElement {
     md-outlined-select{flex:1;min-width:0;--md-outlined-field-top-space:7px;--md-outlined-field-bottom-space:7px;font-size:12px}
     .hint{font-size:11px;color:var(--md-sys-color-on-surface-variant);margin:0;padding:4px 8px;background:var(--md-sys-color-surface-container)}
     .empty{padding:24px;color:var(--md-sys-color-on-surface-variant)}
+    :host([canvasid="package-dependencies"]) .tools{padding:6px 8px 6px 16px;gap:4px;background:var(--md-sys-color-surface)}
+    :host([canvasid="package-dependencies"]) .tools:first-child strong{flex:1 1 140px;padding:0;font-size:14px;font-weight:500}
+    :host([canvasid="package-dependencies"]) md-icon-button{width:40px;height:40px}
+    :host([canvasid="package-dependencies"]) .tools span{font-size:12px}
+    :host([canvasid="package-dependencies"]) .hint{padding:8px 16px;font-size:12px;line-height:16px;background:var(--md-sys-color-surface-container-low)}
+    :host([canvasid="package-dependencies"]) .footer{padding:8px 16px;background:var(--md-sys-color-surface-container-low)}
+
   `;
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   protected updated(changed:PropertyValues){

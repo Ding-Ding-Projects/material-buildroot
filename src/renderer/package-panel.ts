@@ -87,15 +87,27 @@ export class PackagePanel extends LitElement {
     pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:400px;margin:0;padding:16px;border-radius:12px;background:var(--md-sys-color-surface-container-high)}
     .consent span{flex:1;min-width:160px}.validation{color:var(--md-sys-color-error)}
     md-chip-set{max-width:100%}
-    .package-context{padding:6px!important;gap:6px!important}.package-context>h2{display:none}.package-context>p{font-size:11px;line-height:1.3;margin:0}.package-context details{font-size:12px}.package-workbench{display:grid;grid-template-columns:minmax(300px,1fr) minmax(330px,440px);height:480px;max-height:calc(100vh - 595px);min-height:320px;border:1px solid var(--md-sys-color-outline-variant)}
-    .canvas-pane{min-width:0;min-height:0}.package-inspector{overflow:auto;min-width:0;border-left:1px solid var(--md-sys-color-outline-variant)}
-    .package-inspector>.columns{display:contents}.package-inspector .panel{padding:12px;border-radius:0;background:transparent}
-    .package-inspector .panel[hidden]{display:none}.package-inspector>.row{padding:6px}
-    .package-inspector md-tabs{position:sticky;top:0;z-index:2;background:var(--md-sys-color-surface-container)}
+    .package-context{padding:16px 20px;gap:10px;border-radius:16px;background:var(--md-sys-color-surface-container-low)}
+    .package-context>h2{display:none}.package-context>p{font-size:13px;line-height:18px;margin:0}
+    .context-actions{display:flex;flex-wrap:wrap;gap:8px}.package-context details{font-size:13px;min-width:0}.package-context details[open]{flex-basis:100%}
+    .package-context summary{width:fit-content;max-width:100%;padding:6px 12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;cursor:pointer;font-weight:500}
+    .package-context details[open] summary{margin-bottom:12px;background:var(--md-sys-color-secondary-container)}
+    .package-context details>p{margin:8px 0}
+    .package-context .external-tree-row{align-items:stretch}
+    .external-tree-name{flex:1;min-width:180px;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:8px 16px;border:1px solid var(--md-sys-color-outline);border-radius:4px;background:var(--md-sys-color-surface);overflow-wrap:anywhere}
+    .external-tree-name small{font-size:12px;color:var(--md-sys-color-on-surface-variant)}
+    .external-tree-row md-outlined-button{--md-outlined-button-container-height:56px;--md-outlined-button-container-shape:28px}
+    .package-workbench{display:grid;grid-template-columns:minmax(280px,1fr) minmax(300px,360px);gap:16px;min-height:380px;height:clamp(380px,52vh,560px)}
+    .canvas-pane,.package-inspector{min-width:0;min-height:0;border:1px solid var(--md-sys-color-outline-variant);border-radius:16px;background:var(--md-sys-color-surface);overflow:hidden}
+    .package-inspector{overflow:auto}
+    .package-inspector>.columns{display:contents}.package-inspector .panel{padding:16px 20px;border-radius:0;background:transparent}
+    .package-inspector .panel[hidden]{display:none}.package-inspector>.row{padding:12px 20px}
+    .package-inspector md-tabs{position:sticky;top:0;z-index:2;background:var(--md-sys-color-surface);--md-secondary-tab-container-height:48px}
     .package-inspector md-secondary-tab{flex:0 0 auto;min-width:max-content}
     .package-inspector .columns{grid-template-columns:1fr}
-    @media(max-width:1100px){.package-workbench{grid-template-columns:minmax(240px,1fr) minmax(300px,360px)}}
-    @media(max-width:750px){.package-workbench{display:flex;flex-direction:column;height:auto;max-height:none}.canvas-pane{height:330px}.package-inspector{max-height:500px}}
+    :host{container-type:inline-size;--md-outlined-field-top-space:16px;--md-outlined-field-bottom-space:16px;--md-outlined-field-content-size:16px}
+    :host>.stack{gap:16px}.stack>[role=status]:empty{display:none}
+    @container(max-width:700px){.package-workbench{display:flex;flex-direction:column;height:auto}.canvas-pane{height:380px;flex-shrink:0}.package-inspector{max-height:500px}.package-context{padding:16px}.external-tree-name{min-width:0;flex-basis:100%}}
     @media(max-width:1000px){.columns{grid-template-columns:1fr}}
   `];
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
@@ -213,10 +225,10 @@ export class PackagePanel extends LitElement {
       <section class="panel stack package-context"><h2>${this.l("Author a Buildroot package","編寫 Buildroot 套件",true)}</h2>
         <p>${this.l("Choose a prepared BR2_EXTERNAL tree, or initialize an empty folder below. Package file review and build activation are separate approvals.","選擇已準備好嘅 BR2_EXTERNAL 樹，或喺下面初始化空白資料夾。套件檔案審核同建置啟用需要獨立批准。",true)}</p>
         ${!this.workspaceId?html`<p>${this.l("Adopt a project in Projects & runtime first. Your draft stays here while you select one.","請先喺專案同執行環境接入專案，選擇期間會保留草稿。",true)}</p>`:nothing}
-        <div class="row">${this.button("Choose prepared external tree","選擇已準備好外部樹",()=>this.choose(),!this.workspaceId)}<span>${this.external?.name||this.l("No external tree selected","未選擇外部樹",true)}</span></div>
-        <details><summary>${this.l("Discover and import source packages","探索同匯入來源套件",true)}</summary><package-discovery-panel .workspaceId=${this.workspaceId} .language=${this.language} .locked=${this.pending} @package-draft-imported=${(e:CustomEvent)=>{if(this.pending||e.detail.workspaceId!==this.workspaceId)return;this.model=structuredClone(e.detail.draft);if(e.detail.treeId!=="source")this.external={externalTreeId:e.detail.treeId,name:e.detail.name};this.editorTab="identity";this.edit();}}></package-discovery-panel></details>
+        <div class="row external-tree-row"><div class="external-tree-name"><small>BR2_EXTERNAL</small><span>${this.external?.name||this.l("No external tree selected","未選擇外部樹",true)}</span></div>${this.button("Choose prepared external tree","選擇已準備好外部樹",()=>this.choose(),!this.workspaceId)}</div>
+        <div class="context-actions"><details><summary>${this.l("Discover and import source packages","探索同匯入來源套件",true)}</summary><package-discovery-panel .workspaceId=${this.workspaceId} .language=${this.language} .locked=${this.pending} @package-draft-imported=${(e:CustomEvent)=>{if(this.pending||e.detail.workspaceId!==this.workspaceId)return;this.model=structuredClone(e.detail.draft);if(e.detail.treeId!=="source")this.external={externalTreeId:e.detail.treeId,name:e.detail.name};this.editorTab="identity";this.edit();}}></package-discovery-panel></details>
         <details><summary>${this.l("Start from example metadata","由範例中繼資料開始",true)}</summary><p class="note">${this.l("Replaces this draft with GNU Hello metadata. Hashes are deliberately empty; obtain and verify real source and license-file digests before previewing.","用 GNU Hello 中繼資料取代此草稿。摘要會保持空白，預覽前請取得並驗證真實來源同授權條款檔摘要。",true)}</p>${this.button("Use GNU Hello example","使用 GNU Hello 範例",()=>this.example())}</details>
-        <details><summary>${this.l("Initialize folders and activate external trees","初始化資料夾同啟用外部樹",true)}</summary><external-tree-panel .workspaceId=${this.workspaceId} .language=${this.language} @external-selected=${(e:CustomEvent)=>{this.external=e.detail;this.edit();}}></external-tree-panel></details>
+        <details><summary>${this.l("Initialize folders and activate external trees","初始化資料夾同啟用外部樹",true)}</summary><external-tree-panel .workspaceId=${this.workspaceId} .language=${this.language} @external-selected=${(e:CustomEvent)=>{this.external=e.detail;this.edit();}}></external-tree-panel></details></div>
       </section>
       <div class="package-workbench"><div class="canvas-pane"><diagram-workbench .language=${this.language} .title=${this.l("Package dependencies","套件相依圖",true)} .workspaceId=${this.workspaceId} canvasId="package-dependencies" .layoutKey=${this.workspaceId+":package-dependencies"} .nodes=${[{id:"package",label:m.name||this.l("Package draft","套件草稿",true),detail:m.buildSystem,kind:"package"},...m.dependencies.map(value=>({id:"dep:"+value,label:value,detail:this.l("Build dependency","建置相依",true),kind:"dependency",removable:true})),...m.configDependencies.map(value=>({id:"config:"+value,label:value,detail:this.l("Configuration constraint","設定限制",true),kind:"constraint",removable:true}))]} .edges=${[...m.dependencies.map(value=>({from:"package",to:"dep:"+value})),...m.configDependencies.map(value=>({from:"package",to:"config:"+value}))]} @diagram-select=${(e:CustomEvent)=>{this.editorTab=e.detail.id==="package"?"identity":"dependencies";}} @diagram-remove=${(e:CustomEvent)=>{const id=e.detail.id;if(id.startsWith("dep:"))m.dependencies=m.dependencies.filter(value=>"dep:"+value!==id);if(id.startsWith("config:"))m.configDependencies=m.configDependencies.filter(value=>"config:"+value!==id);this.edit();}}></diagram-workbench></div><div class="package-inspector">
       <md-tabs .activeTabIndex=${["identity","build","dependencies","hashes","files","review"].indexOf(this.editorTab)} @change=${(e:Event)=>{this.editorTab=["identity","build","dependencies","hashes","files","review"][(e.target as any).activeTabIndex];}}>${[["identity","Identity","識別"],["build","Build","建置"],["dependencies","Dependencies","相依"],["hashes","Hashes","摘要"],["files","Patches & files","修補同檔案"],["review","Review","審核"]].map(([id,en,zh])=>html`<md-secondary-tab role="tab" aria-label=${this.l(en,zh)}>${this.l(en,zh)}</md-secondary-tab>`)}</md-tabs>
