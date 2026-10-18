@@ -34,6 +34,11 @@ async function open(page){
   await action.click();
  }};
 }
+async function configurationSection(p,name){
+ const disclosure=p.locator('.advanced-project-tools');
+ if(await disclosure.isVisible()&&!await disclosure.evaluate(el=>el.open))await disclosure.locator('summary').click();
+ await p.locator('.guided-subnavigation').getByRole('button',{name,exact:true}).click();
+}
 async function approve(p){await p.getByRole('checkbox',{name:consent,exact:true}).check();await p.getByRole('button',{name:'Allow this scope',exact:true}).click();}
 const isoChecks=page=>page.evaluate(()=>window.__permissionCalls.filter(r=>r.action==='imagePreset.catalog').length);
 
@@ -43,15 +48,15 @@ test('guided presentation reclaims the explorer and dock space and labels the ac
   await page.setViewportSize({width,height:width===960?640:960});
   await expect(p.locator('.explorer')).toBeHidden();await expect(p.locator('.dock')).toBeHidden();await expect(p.locator('.operations > md-tabs')).toBeHidden();
   const geometry=await p.evaluate(el=>{const root=el.shadowRoot,host=el.getBoundingClientRect(),editor=root.querySelector('.editor-frame').getBoundingClientRect(),region=root.querySelector('#operation-content-config');return {left:editor.left-host.left,width:editor.width/host.width,height:region.getBoundingClientRect().height,overflow:region.scrollWidth-region.clientWidth,label:region.getAttribute('aria-labelledby'),heading:root.querySelector('#operation-heading').textContent};});
-  expect(geometry.left).toBeLessThan(2);expect(geometry.width).toBeGreaterThan(.98);expect(geometry.height).toBeGreaterThan(400);expect(geometry.overflow).toBeLessThanOrEqual(1);expect(geometry.label).toBe('operation-heading');expect(geometry.heading).toBe('Configuration');
+  expect(geometry.left).toBeLessThan(2);expect(geometry.width).toBeGreaterThan(.98);expect(geometry.height).toBeGreaterThan(400);expect(geometry.overflow).toBeLessThanOrEqual(1);expect(geometry.label).toBe('operation-heading');expect(geometry.heading).toBe('Image guide');
  }
 });
 test('configuration sections show one real surface and retain image identity through all destinations',async({page})=>{
  const {p,iso}=await open(page);
  await page.evaluate(()=>window.__retainedIso=window.__permissionPanel.shadowRoot.querySelector('image-presets-panel'));
- await expect(iso).toBeVisible();await expect(p.locator('account-provisioning-panel')).toBeHidden();await expect(p.locator('defconfig-panel')).toBeHidden();
- await p.getByRole('button',{name:'Accounts',exact:true}).click();await expect(p.locator('account-provisioning-panel')).toBeVisible();await expect(iso).toBeHidden();
- await p.getByRole('button',{name:'Image guide',exact:true}).last().click();
+ await expect(iso).toBeVisible();await expect(p.locator('.advanced-project-tools')).not.toHaveAttribute('open');await expect(p.getByRole('button',{name:'Accounts',exact:true})).toBeHidden();await expect(p.locator('account-provisioning-panel')).toBeHidden();await expect(p.locator('defconfig-panel')).toBeHidden();
+ await configurationSection(p,'Accounts');await expect(p.locator('account-provisioning-panel')).toBeVisible();await expect(iso).toBeHidden();
+ await configurationSection(p,'Image guide');
  for(const destination of ['source','runtime','builds','artifacts','guests','assistant','regex','tools','companion','authenticator','updates','documentation','package','config']){
   await p.evaluate(async(el,destination)=>{el.tab=destination;await el.updateComplete;},destination);
   expect(await page.evaluate(()=>window.__permissionPanel.shadowRoot.querySelector('image-presets-panel')===window.__retainedIso)).toBe(true);
@@ -81,8 +86,8 @@ test('guided permission review returns visible focus to the same image child and
  await review();await expect(p.locator('#source-execution-permission')).toBeVisible();await expect(iso).toBeHidden();
  await p.getByRole('button',{name:'Return to ISO guide',exact:true}).click();await expect(iso).toBeVisible();
  expect(await page.evaluate(()=>window.__permissionPanel.shadowRoot.querySelector('image-presets-panel')===window.__retainedIso)).toBe(true);
- await review();await p.getByRole('checkbox',{name:consent,exact:true}).check();await p.getByRole('button',{name:'Accounts',exact:true}).click();
- await p.getByRole('button',{name:'Configuration',exact:true}).click();await expect(p.locator('#source-execution-permission')).toHaveCount(0);
+ await review();await p.getByRole('checkbox',{name:consent,exact:true}).check();await configurationSection(p,'Accounts');
+ await configurationSection(p,'Configuration');await expect(p.locator('#source-execution-permission')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__permissionCalls.some(r=>r.action==='config.trustGrant'))).toBe(false);
 });
 test('builds retains the project queue, recovery and output while admission is collapsed',async({page})=>{
@@ -100,7 +105,7 @@ test('legacy remains the default with its existing navigation',async({page})=>{
 test('late grant after a configuration section change never resumes the hidden image guide',async({page})=>{
  const {p,review}=await open(page);await review();const before=await isoChecks(page);await page.evaluate(()=>window.__delayGrant=true);await approve(p);
  await expect.poll(()=>page.evaluate(()=>typeof window.__releaseGrant)).toBe('function');
- await p.getByRole('button',{name:'Accounts',exact:true}).click();await page.evaluate(()=>window.__releaseGrant());
+ await configurationSection(p,'Accounts');await page.evaluate(()=>window.__releaseGrant());
  await expect.poll(()=>page.evaluate(()=>window.__permissionPanel.pending)).toBe(false);
  expect(await isoChecks(page)).toBe(before);await expect(p.locator('account-provisioning-panel')).toBeVisible();await expect(p.locator('#source-execution-permission')).toHaveCount(0);
 });
@@ -108,8 +113,14 @@ test('localized navigation wraps within the minimum workspace and keeps configur
  const {p}=await open(page);await page.setViewportSize({width:960,height:640});
  for(const language of ['en','zh-HK','bilingual']){
   await p.evaluate(async(el,language)=>{el.language=language;await el.updateComplete;},language);
-  const geometry=await p.evaluate(el=>{const root=el.shadowRoot;return [...root.querySelectorAll('.guided-navigation,.guided-subnavigation,#operation-content-config')].map(e=>({width:e.clientWidth,overflow:e.scrollWidth-e.clientWidth,height:e.getBoundingClientRect().height}));});
+  const disclosure=p.locator('.advanced-project-tools');
+  await expect(disclosure).not.toHaveAttribute('open');
+  await expect(p.locator('.guided-subnavigation')).toBeHidden();
+  await disclosure.locator('summary').click();
+  await expect(p.locator('.guided-subnavigation')).toBeVisible();
+  const geometry=await p.evaluate(el=>{const root=el.shadowRoot;return [...root.querySelectorAll('.advanced-project-tools > div,.guided-navigation,.guided-subnavigation,#operation-content-config')].map(e=>({width:e.clientWidth,overflow:e.scrollWidth-e.clientWidth,height:e.getBoundingClientRect().height}));});
   expect(geometry.every(e=>e.width>0&&e.overflow<=1)).toBe(true);expect(await p.locator('#operation-content-config').evaluate(e=>e.getBoundingClientRect().height)).toBeGreaterThan(350);
+  await disclosure.locator('summary').click();
  }
 });
 test('tool categories route to the existing mounted controls',async({page})=>{
