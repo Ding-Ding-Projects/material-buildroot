@@ -206,10 +206,18 @@ class MaterialBuildroot extends LitElement {
     const livePresentation=(event.currentTarget?['operations','image-creation']:['operations','image-creation','images']).includes(this.route)&&workspace.presentationCurrent!==false&&(!event.currentTarget||event.currentTarget===this.activeOperations());
     const contextMatches=!workspace.creationContextId||workspace.creationContextId===this.creationDraft?.id;
     if(!livePresentation||!contextMatches){void this.refreshImageProjects();return;}
-    const continuing=this.creationActive&&!!this.creationDraft&&workspace.creationContextId===this.creationDraft.id;
-    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();void this.refreshImageProjects();
+    const generation=this.projectOpenGeneration,workspaceId=workspace.workspaceId,creationId=this.creationDraft?.id;
+    const continuing=this.creationActive&&!!creationId&&workspace.creationContextId===creationId;
+    const current=()=>this.isConnected&&generation===this.projectOpenGeneration&&this.activeProject===workspaceId&&this.route==='operations'&&this.creationActive&&this.creationDraft?.id===creationId;
+    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;if(generation!==this.projectOpenGeneration||this.activeProject!==workspaceId)return;this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();void this.refreshImageProjects();
     this.tabsHost()?.acknowledge(`project:${workspace.workspaceId}`,workspace.name,workspace.workspaceId);
-    if(continuing){if(this.creationDraft?.workspaceId!==workspace.workspaceId&&!(await this.persistCreation({workspaceId:workspace.workspaceId,stage:'source'})))return;await this.continueImageCreation();}
+    if(continuing){
+      const panel=this.activeOperations(),destination=panel?.tab;
+      if(!current())return;
+      if(this.creationDraft?.workspaceId!==workspaceId&&!(await this.persistCreation({workspaceId,stage:'source'})))return;
+      if(!current()||panel!==this.activeOperations()||panel?.tab!==destination)return;
+      await this.continueImageCreation(current);
+    }
   }
   protected firstUpdated(){
     try{if(!localStorage.getItem('material-buildroot.workspace-tabs.v1')){const tabs=this.tabsHost();if(tabs)tabs.edge='top';}}catch{const tabs=this.tabsHost();if(tabs)tabs.edge='top';}
@@ -1471,12 +1479,12 @@ class MaterialBuildroot extends LitElement {
     }catch{if(generation===this.projectOpenGeneration){this.creationNotice=this.l('Project access could not be renewed from saved metadata. Select its folders again.','儲存記錄無法更新專案存取權，請重新選擇資料夾。',true);await this.renewCatalogueProject(id);}}
     finally{if(generation===this.projectOpenGeneration)this.projectOpenBusy=false;void this.refreshImageProjects();}
   }
-  private async continueImageCreation(){
-    const intent=this.creationDraft;if(!intent||intent.workspaceId!==this.activeProject)return;
+  private async continueImageCreation(canContinue:()=>boolean=()=>true){
+    const intent=this.creationDraft;if(!canContinue()||!intent||intent.workspaceId!==this.activeProject)return;
     const panel=this.activeOperations();if(!panel)return;
-    if(intent.stage==='workspace'){await panel.openImageGuide();this.creationActive=false;return;}
+    if(intent.stage==='workspace'){if(!canContinue())return;await panel.openImageGuide();if(canContinue())this.creationActive=false;return;}
     this.creationBusy=true;
-    try{await panel.continueImageCreation(intent);}finally{this.creationBusy=false;}
+    try{if(canContinue())await panel.continueImageCreation(intent,canContinue);}finally{this.creationBusy=false;}
   }
   private async imageIntentResolved(event:CustomEvent<{creationId:string;workspaceId:string;status:string}>){
     if(event.currentTarget!==this.activeOperations()||event.detail?.creationId!==this.creationDraft?.id||event.detail.workspaceId!==this.activeProject||!['applied','existing'].includes(event.detail.status))return;

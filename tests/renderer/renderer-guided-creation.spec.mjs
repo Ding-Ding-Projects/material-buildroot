@@ -176,6 +176,32 @@ test('an old adoption never binds a newer image intent',async({page})=>{
  await expect(creation.getByRole('heading',{name:'Purpose and target',exact:true})).toBeVisible();
 });
 
+for(const [primary,tab] of [['help','documentation'],['tools','tools']])test('adoption continuation respects '+primary+' selected while intent persistence waits',async({page})=>{
+ const {app,creation}=await begin(page);await next(creation);
+ await expect(app.locator('operations-panel:not([hidden]) project-workflow-panel').getByRole('button',{name:'Choose destination parent',exact:true})).toBeVisible();
+ await page.evaluate(()=>{window.__creationLock=navigator.locks.request('material-buildroot.image-creation.v1',async()=>{window.__creationLockEntered=true;await new Promise(resolve=>window.__releaseCreationLock=resolve);});});
+ await expect.poll(()=>page.evaluate(()=>window.__creationLockEntered)).toBe(true);
+ await clone(app);
+ await expect.poll(()=>page.evaluate(async()=>(await navigator.locks.query()).pending.some(lock=>lock.name==='material-buildroot.image-creation.v1'))).toBe(true);
+ await app.locator('nav [data-primary="'+primary+'"]').click();
+ await page.evaluate(async()=>{window.__releaseCreationLock();await window.__creationLock;await document.querySelector('material-buildroot').creationWrites;await new Promise(requestAnimationFrame);});
+ await expect.poll(()=>app.evaluate(app=>app.activeOperations()?.tab)).toBe(tab);
+ expect(await app.evaluate(app=>app.projectSessions.map(project=>project.workspaceId))).toEqual(['project-1']);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('material-buildroot.image-creation.v1')))).toMatchObject({workspaceId:'project-1',stage:'source'});
+ expect(await page.evaluate(()=>localStorage.getItem('iso-workflow-project-1'))).toBeNull();
+});
+
+for(const [choice,heading] of [['Source','Source'],['Configuration','Configuration'],['Accounts','Accounts'],['Saved configurations','Saved configurations']])test('advanced disclosure restores visible heading focus after '+choice,async({page})=>{
+ const app=await open(page,{projects:[{id:'project-1',name:'Saved project',authorized:true}]});await app.locator('[data-resume-project="project-1"]').click();
+ const operations=app.locator('operations-panel:not([hidden])');await operations.evaluate(panel=>panel.openImageGuide());
+ const disclosure=operations.locator('.advanced-project-tools');await disclosure.locator('summary').focus();await page.keyboard.press('Enter');
+ await disclosure.getByRole('button',{name:choice,exact:true}).focus();await page.keyboard.press('Enter');
+ const target=operations.locator('#operation-heading');
+ await expect.poll(()=>target.evaluate(element=>element.checkVisibility()&&element.getRootNode().activeElement===element)).toBe(true);
+ await expect(target).toHaveText(heading);
+ await expect(disclosure).toHaveCount(0);
+});
+
 test('transfer waits for local saves and archives the latest choices under a held lock',async({page})=>{
  await open(page);
  await page.evaluate(async()=>{

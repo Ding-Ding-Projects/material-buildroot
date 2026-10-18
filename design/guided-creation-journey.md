@@ -41,3 +41,11 @@ The shared stylesheet's rail selectors now target only the shell navigation. A h
 The combined creation, image and shell fixture run passed 63 checks. After the final delayed-adoption changes, all 20 focused journey checks passed in 24.8 seconds with 131 recorded input hashes unchanged. Existing image navigation and persistence assertions now wait for serialized saves or emitted events before checking their original destination, identity and retained-data claims. Renderer checks do not prove native pickers, access renewal, runtime execution, ISO production or boot. The integrating task must repeat the identical built 960×640 tuple and full supported matrix.
 
 Integration fixture notes: guided operation headings now identify Image guide, and advanced configuration sections open through the Advanced project tools disclosure. Shared operation fixtures that expected an always-visible Accounts row must open that disclosure first; permission-review fixtures still enter the Source stage before requesting permission. No permission or workspace-ownership assertion should be removed during that adaptation.
+
+## Delayed continuation and disclosure focus
+
+Adoption captures its navigation generation, workspace ID and creation ID before awaiting rendering or durable intent persistence. After persistence it rechecks the same visible journey and project instance before continuing. The operations adapter receives the continuation predicate and checks it before changing destination and after each options/rendering wait. A completed save remains durable when superseded, but cannot reopen the image guide after the user chooses Help or Tools.
+
+Advanced project actions validate their destination/section pair, close the disclosure, and move focus after rendering only if the navigation epoch, workspace, destination and section still match and the host remains visible. Accounts and Saved configurations have matching destination headings. Superseded actions leave focus with the newer interaction.
+
+Six regressions reproduced these two defects before repair: two held-persistence navigation cases and four keyboard disclosure transitions. The final journey suite passed all 26 checks in 38.6 seconds. TypeScript retains the same 23 baseline diagnostic identities. This is renderer evidence; integrated built and native acceptance remain separate.

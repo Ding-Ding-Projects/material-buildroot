@@ -123,13 +123,16 @@ export class OperationsPanel extends LitElement {
   imageCreationIntent:ImageCreationIntent|null=null;creationSetup=false;
   private workspaceOptionsReady:Promise<unknown>=Promise.resolve();
   async openImageGuide(){this.guidedConfiguration='image';this.tab='config';await this.updateComplete;}
-  async continueImageCreation(input:unknown):Promise<ImageIntentTransfer>{
+  async continueImageCreation(input:unknown,canContinue:()=>boolean=()=>true):Promise<ImageIntentTransfer>{
     const intent=validateImageIntent(input),id=this.workspace?.workspaceId;
     if(!intent||intent.workspaceId!==id)return {status:'invalid'};
-    const initialTab=this.tab,epoch=this.navigationEpoch;await this.workspaceOptionsReady;if(this.workspace?.workspaceId!==id||!this.isConnected||this.tab!==initialTab||epoch!==this.navigationEpoch)return {status:'unavailable'};
+    if(!canContinue())return {status:'unavailable'};
+    const initialTab=this.tab,epoch=this.navigationEpoch;await this.workspaceOptionsReady;if(!canContinue()||this.workspace?.workspaceId!==id||!this.isConnected||this.tab!==initialTab||epoch!==this.navigationEpoch)return {status:'unavailable'};
+    if(!canContinue())return {status:'unavailable'};
     this.imageCreationIntent=intent;await this.openImageGuide();
+    if(!canContinue())return {status:'unavailable'};
     const panel=this.renderRoot.querySelector<import('./image-presets-panel').ImagePresetsPanel>('image-presets-panel');await panel?.updateComplete;
-    if(this.workspace?.workspaceId!==id||!panel)return {status:'unavailable'};
+    if(!canContinue()||this.workspace?.workspaceId!==id||!panel)return {status:'unavailable'};
     return panel.receiveCreationIntent(intent);
   }
   async openProjectWorkflow(mode: 'create' | 'open',expectedWorkspaceId?:string,suggestedName?:string,creationContextId?:string) {
@@ -767,24 +770,45 @@ export class OperationsPanel extends LitElement {
       default: return nothing;
     }
   }
-  private subnavigation(kind: 'config' | 'runtime', entries: string[][]) {
-    const selected = kind === 'config' ? this.guidedConfiguration : this.guidedRuntime;
-    return html`<nav class="guided-subnavigation" aria-label=${kind === 'config' ? this.l('Configuration sections','設定分類') : this.l('Project setup sections','專案設定分類')}>
-      ${entries.map(([id,en,zh]) => html`<md-outlined-button aria-pressed=${selected === id} @click=${() => {
-        if (kind === 'config') {
-          // Leaving a review view must invalidate in-flight consent, even though
-          // the underlying image guide stays mounted for draft preservation.
-          this.configTrustEpoch++; this.configTrustPreview=undefined; this.configTrustAccepted=false; this.isoPermission=undefined;
-          this.guidedConfiguration=id;
-        } else this.guidedRuntime=id;
-      }}>${this.l(en,zh)}</md-outlined-button>`)}
+  private operationHeadingLabel(){
+    if(this.presentation==='guided'&&this.tab==='config'){
+      const titles:Record<string,[string,string]>={image:['Image guide','映像指南'],settings:['Configuration','設定'],accounts:['Accounts','帳戶'],presets:['Saved configurations','已儲存設定']};
+      const title=titles[this.guidedConfiguration];if(title)return this.l(...title);
+    }
+    return this.label(this.tab);
+  }
+  private async chooseGuidedDestination(event:Event,destination:string,section?:string){
+    if(!['runtime','source','config','artifacts','package'].includes(destination))return;
+    if(section!==undefined&&!(destination==='config'?['image','settings','accounts','presets']:destination==='runtime'?['projects','execution','folders']:[]).includes(section))return;
+    const opener=event.currentTarget as HTMLElement|null,disclosure=opener?.closest<HTMLDetailsElement>('.advanced-project-tools');
+    const workspaceId=this.workspace?.workspaceId,epoch=++this.navigationEpoch;
+    disclosure?.removeAttribute('open');
+    if(section!==undefined){
+      if(destination==='config'){
+        this.configTrustEpoch++;this.configTrustPreview=undefined;this.configTrustAccepted=false;this.isoPermission=undefined;
+        this.guidedConfiguration=section;
+      }else this.guidedRuntime=section;
+    }
+    this.tab=destination;
+    const configuration=this.guidedConfiguration,runtime=this.guidedRuntime;
+    await this.updateComplete;
+    if(epoch!==this.navigationEpoch||workspaceId!==this.workspace?.workspaceId||this.tab!==destination||configuration!==this.guidedConfiguration||runtime!==this.guidedRuntime||!this.isConnected||!this.checkVisibility())return;
+    if(disclosure||!opener?.isConnected||!opener.checkVisibility()){
+      const heading=this.renderRoot.querySelector<HTMLElement>('#operation-heading');
+      if(heading?.isConnected&&heading.checkVisibility())heading.focus({preventScroll:true});
+    }
+  }
+  private subnavigation(kind:'config'|'runtime',entries:string[][]){
+    const selected=kind==='config'?this.guidedConfiguration:this.guidedRuntime;
+    return html`<nav class="guided-subnavigation" aria-label=${kind==='config'?this.l('Configuration sections','設定分類'):this.l('Project setup sections','專案設定分類')}>
+      ${entries.map(([id,en,zh])=>html`<md-outlined-button aria-pressed=${selected===id} @click=${(event:Event)=>this.chooseGuidedDestination(event,kind,id)}>${this.l(en,zh)}</md-outlined-button>`)}
     </nav>`;
   }
   private guidedNavigation() {
     const images = ['config','source','runtime','artifacts','package'];
     const tools = ['tools','guests','assistant','regex','companion','authenticator'];
     if (images.includes(this.tab)) return html`<nav class="guided-navigation" aria-label=${this.l('Image workspace','映像工作區')}>
-      ${images.map(destination => html`<md-text-button aria-current=${this.tab === destination ? 'page' : 'false'} @click=${() => this.tab=destination}>${destination === 'config' ? this.l('Image guide','映像指南') : destination === 'runtime' ? this.l('Project & runtime','專案同執行環境') : this.label(destination)}</md-text-button>`)}
+      ${images.map(destination => html`<md-text-button aria-current=${this.tab === destination ? 'page' : 'false'} @click=${(event:Event)=>this.chooseGuidedDestination(event,destination)}>${destination === 'config' ? this.l('Image guide','映像指南') : destination === 'runtime' ? this.l('Project & runtime','專案同執行環境') : this.label(destination)}</md-text-button>`)}
     </nav>`;
     if (tools.includes(this.tab)) return html`<nav class="guided-navigation" aria-label=${this.l('Tool categories','工具分類')}>
       <md-outlined-select .label=${this.l('Tool workspace','工具工作區')} .value=${this.tab} @change=${(event:Event) => {
@@ -1165,7 +1189,7 @@ export class OperationsPanel extends LitElement {
   }
   render() {
     this.visitedViews.add(this.tab);
-    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?this.l('Image guide','映像指南'):this.label(this.tab)}</h2>${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?html`<details class="advanced-project-tools"><summary>${this.l('Advanced project tools','進階專案工具')}</summary><div>${this.guidedNavigation()}${this.subnavigation('config',[['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']])}</div></details>`:nothing}<span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided'&&!(this.tab==='config'&&this.guidedConfiguration==='image')&&!this.creationSetup ? this.guidedNavigation() : nothing}<div class="operations">
+    return html`<div class="ide"><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.operationHeadingLabel()}</h2>${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?html`<details class="advanced-project-tools"><summary>${this.l('Advanced project tools','進階專案工具')}</summary><div>${this.guidedNavigation()}${this.subnavigation('config',[['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']])}</div></details>`:nothing}<span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided'&&!(this.tab==='config'&&this.guidedConfiguration==='image')&&!this.creationSetup ? this.guidedNavigation() : nothing}<div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations","專案操作",true)}
         .activeTabIndex=${[
