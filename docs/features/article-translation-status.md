@@ -16,20 +16,25 @@ The current documentation lane preserves 49 detailed Cantonese reference twins, 
 
 These are full authored translations, not the older short Cantonese summary. Current English wiki updates describe installed release and bounded ISO evidence; existing wiki Cantonese twins have not been refreshed in this lane and may retain earlier statements. Their synchronization remains unfinished.
 
+## Additional complete reference twins
+
+- [Presentation provenance](presentation-provenance.zh-HK.md)
+- [Ollama workspace](../desktop/ollama-workspace.zh-HK.md)
+- [Managed hypervisor controls](../deployment/hypervisor-controls.zh-HK.md)
+
+These translations preserve the originals’ historical verification boundaries. They do not refresh runtime evidence.
+
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
 
 - `docs/features/browser-native.md`
 - `docs/features/companion-consumers.md`
-- `docs/features/presentation-provenance.md`
 - `docs/desktop/configuration.md`
 - `docs/desktop/execution.md`
 - `docs/desktop/deployment.md`
 - `docs/desktop/built-in-tools.md`
-- `docs/desktop/ollama-workspace.md`
 - `docs/desktop/minecraft-manager.md`
-- `docs/deployment/hypervisor-controls.md`
 - `docs/security/workspace-state.md`
 - `docs/security/companion.md`
 - `docs/build/releases.md`
