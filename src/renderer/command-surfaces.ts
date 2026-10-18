@@ -200,11 +200,13 @@ class CommandSurfaces extends LitElement {
     if(!this.dialog().open)await this.dialog().show();await search?.updateComplete;search?.focusQuery();
   }
   async openPalette(origin?:Control){
+    this.language=this.currentLanguage();
     const modal=this.app?.shadowRoot?.querySelector('md-dialog[open]');
     if(modal&&modal.id!=='actions-dialog')return;
     const actions=[...this.registeredActions(),...this.settingActions(),...this.makeActions()];this.targetName=this.l('Commands and workspace controls','指令同工作區控制項',true);await this.present(actions.slice(0,1000),'palette',origin);this.paletteInventory(actions);const articles=await this.articleActions();if(this.mode==='palette'&&this.dialog().open&&articles.length){this.paletteInventory([...actions,...articles]);}
   }
   async openContext(target:Control){
+    this.language=this.currentLanguage();
     this.contextTarget=target;this.targetName=label(target)||target.localName;
     const actionTarget=ancestors(target).find(p=>p.matches(selector)) as Control|undefined;
     const actions:Action[]=[{id:'focus',label:this.l('Go to this element','前往呢個元素',true),context:this.targetName,target,run:async()=>{await this.dialog().close();await this.reveal(target);}}];
