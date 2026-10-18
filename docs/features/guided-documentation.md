@@ -28,3 +28,5 @@ Every activity is a browser learning example. No control runs Buildroot, probes 
 - [ISO field guide](../desktop/iso-fields/README.md)
 - [Workspace and source ownership](../desktop/modern-workspace.md)
 - [Execution and recovery](../desktop/execution.md)
+
+The [2026-10-18 local documentation verification](../evidence/documentation-20261018/README.md) records the source-bound combined browser run. Its local verdict does not establish deployment or complete feature acceptance; formal capture promotion remains pending.
