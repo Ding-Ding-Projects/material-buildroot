@@ -85,6 +85,7 @@ export interface WorkspaceTabSummary {id:string;label:string;group:string;pinned
 export type WorkspaceTabsRequest={action:'publish';tabs:WorkspaceTabSummary[]}|{action:'list'}|{action:'activate';windowId:string;tabId:string};
 export type WorkspaceTabsReply={ok:false;code:string}|{ok:true;windowId?:string;currentWindowId?:string;requested?:boolean;windows?:Array<{id:string;tabs:WorkspaceTabSummary[]}>};
 export interface StudioAPI {
+  vocabularyDropSound?(request: { kind: "applied" | "invalid" }): Promise<{ ok: true; status: "requested" } | { ok: false; status: "unavailable" | "invalid" | "unauthorized" | "busy"; code: string }>;
   notifications?(request:import('./notifications').NotificationRequest):Promise<import('./notifications').NotificationReply>;
   onNotificationsChanged?(listener:()=>void):()=>void;
   attentionHistory?(request:{action:string;[key:string]:unknown}):Promise<{ok:boolean;revision?:number;snapshot?:unknown;records?:Array<{revision:number;timestamp:string}>;hasMore?:boolean;code?:string}>;

@@ -156,6 +156,13 @@ function validEvent(value) {
 contextBridge.exposeInMainWorld(
   "studio",
   Object.freeze({
+    vocabularyDropSound: (request) => {
+      try {
+        const descriptor = request && Object.getOwnPropertyDescriptor(request, "kind");
+        if (!request || Object.getPrototypeOf(request) !== Object.prototype || Reflect.ownKeys(request).length !== 1 || !descriptor || !Object.hasOwn(descriptor, "value") || !["applied", "invalid"].includes(descriptor.value)) return Promise.resolve({ ok: false, status: "invalid", code: "INVALID_REQUEST" });
+        return ipcRenderer.invoke("studio:vocabulary-drop-sound", { kind: descriptor.value });
+      } catch { return Promise.resolve({ ok: false, status: "invalid", code: "INVALID_REQUEST" }); }
+    },
     notifications: request => {let value;try{value=JSON.stringify(request);}catch{return Promise.resolve({ok:false,code:'INVALID_REQUEST'});}return typeof value==='string'&&value.length<=16384?ipcRenderer.invoke('studio:notifications',value):Promise.resolve({ok:false,code:'INVALID_REQUEST'});},
     onNotificationsChanged: listener => {if(typeof listener!=='function')return ()=>{};const handler=()=>listener();ipcRenderer.on('studio:notifications:changed',handler);return ()=>ipcRenderer.removeListener('studio:notifications:changed',handler);},
     workspaceTabs: (request) => {let value;try{value=JSON.stringify(request);}catch{return Promise.resolve({ok:false,code:'INVALID_REQUEST'});}if(typeof value!=='string'||value.length>262144)return Promise.resolve({ok:false,code:'INVALID_REQUEST'});return ipcRenderer.invoke('studio:workspace-tabs',value);},

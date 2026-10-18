@@ -10,6 +10,7 @@ const {
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
+const { createVocabularyDropSound } = require("./vocabulary-drop-sound.cjs");
 const { pathToFileURL } = require("node:url");
 const { createCapabilityRegistry } = require("./security/capabilities.cjs");
 const { createBroker } = require("./broker.cjs");
@@ -128,6 +129,8 @@ else {
         storageReady: !!store,
       });
       workspaceTabs.register(window,desktop,url);
+      const vocabularyDropSound = createVocabularyDropSound({ admitted: event => desktop.admitted(event) });
+      ipcMain.handle("studio:vocabulary-drop-sound", (event, value) => vocabularyDropSound.request(event, value));
       ipcMain.handle('studio:workspace-tabs',(event,value)=>workspaceTabs.request(event,value));
       statusService = require("./status-hub/service.cjs").createStatusService({
         documentsDirectory: app.getPath("documents"),
