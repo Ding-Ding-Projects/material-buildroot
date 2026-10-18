@@ -1,3 +1,7 @@
+## Manual containment integration, 2026-10-18
+
+Repair f5e66ae is integrated after independent source review. Root regenerated the selected actual source inventory and checked it, then passed11focused tests. Counts remain2245records/91sourcefiles; the combined renderer reference hashes were refreshed. Source/app root aliases and linked manual/package/src/docs parents are rejected before outside reads/enumeration. Producer identity and component chains are rechecked; no atomic snapshot against arbitrary concurrent mutation is claimed. Full GUI/Easy/topic acceptance remains unfinished.
+
 ## Current combined verification, 2026-10-18, source24697b5
 
 Combined desktop build24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960 passed root build.bat, receipt c349171a0a494a97986863562f4d7561f3cb802606e94503e2eda3156f978fc7. It integrates source-discovered Easy PC presets c7028b4, bilingual permission/diagnostic guidance9720218 and pinned runtime46538c0. Native permission approval37571 succeeded. Runtime46538c0 passed75.794seconds cold observation, but later crashed09:42:14.386UTC with exit-36861. The bounded success is retained; sustained startup is not repaired. Owned process40888 and listener9376 are absent after exact held-identity teardown, recovery0. Earlier375 cold startup crashed0x80000003 with raw_hash_map::at fatal; no source cause established.

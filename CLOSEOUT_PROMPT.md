@@ -1,5 +1,7 @@
 # Material Buildroot continuation
 
+Latest update: manual containment repair f5e66ae is now integrated after independent review. Primary actual-source regeneration/--check and11focused tests passed;2245lexical records/91files unchanged, current renderer reference hashes refreshed. The earlier pending-manual paragraphs below are historical until this update; GUI/Easy acceptance remains pending. No native runtime fix is claimed.
+
 Goal active and incomplete. Continue the finite authorized roadmap with isolated gpt-6.1-sol backend and gpt-6-astra frontend workers. Preserve settings, authentication, source/output trees, immutable ISO, unrelated applications and other-owned work. No host power/login, force push, weakened security, private publication or speculative source repair.
 
 Current integration branch ai/integration/20261018-roadmap-combined. Source24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960 built through exact root build.bat; receipt c349171a0a494a97986863562f4d7561f3cb802606e94503e2eda3156f978fc7. This record follows that candidate. Integration37571d3 and its branch workflow39115175439 were verified remotely. Main, accepted release/deployment and matching installed update remain pending.

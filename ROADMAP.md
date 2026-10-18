@@ -8,7 +8,7 @@
 - [ ] Complete actual native Easy PC preset reconciliation and current GUI ISO production. Source unit c7028b4 passed28browser cases; this is not native Buildroot acceptance.
 - [ ] Diagnose the independent WSL intent worker exit139/noJSON. Instrumented service captured three successful workers and a fourth native failure; all owned sessions stopped. Boot identity differs from the earlier idle-stability observation, with timing/cause unknown.
 - [ ] Complete native-volume Docker firmware production. Preparation, configuration and separate hash-verified acquisition succeeded. Firmware attempts stopped at daemon EOF and host-fakeroot autoreconf; isolated autoconf-child reproduction succeeded. Preserve the exact bindings and do not claim complete output.
-- [ ] Repair manual-inventory parent containment before integration. Two independent reviews and a harmless junction fixture confirmed external synthetic article admission; no private outside data or public disclosure occurred.
+- [x] Repair manual-inventory parent containment at f5e66ae and integrate after independent review. Root regeneration/source-check and11focused tests passed;2245records/91sourcefiles remain lexical, with all GUI/Easy acceptance explicitly separate. No private outside data or public disclosure occurred.
 - [ ] Finish current combined documentation/deployment, normal accepted release, installed update and complete source-to-GUI/Easy coverage. The22percent allowance reading does not complete or block the active goal.
 
 
