@@ -208,6 +208,8 @@ export class OperationsPanel extends LitElement {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
       }
+      .build-fields { align-items: start; }
+      .build-fields > named-targets-panel { grid-column: 1 / -1; }
       .record {
         padding: 12px 0;
         border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -756,7 +758,7 @@ export class OperationsPanel extends LitElement {
               ${this.containerStorage ? html`<p role="status">${this.containerStorage.name}: ${this.l("Prepared. Write permissions remain unverified until execution.","已準備；寫入權限仍待執行時驗證。",true)}</p>` : nothing}
               <p>${this.l("If storage access fails, preserve the existing volume and correct the image directory ownership or output-folder permissions through your administrator. Retry preparation and then the failed job. Cancellation stops only an ownership-verified container; uncertain cleanup remains quarantined until job reconciliation proves it stopped.","如果儲存存取失敗，請保留現有磁碟區，經管理員修正映像目錄擁有權或輸出資料夾權限，再重新準備同重試工作。取消只會停止已確認擁有權嘅容器；未確認清理會繼續隔離，直到工作復核證明已停止。",true)}</p>
             </section>` : nothing}
-            <div class="fields">
+            <div class="fields build-fields">
               <md-outlined-select
                 label=${this.l("Runtime","執行環境",true)}
                 id="build-runtime"
