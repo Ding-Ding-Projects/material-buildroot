@@ -9,20 +9,20 @@ export const workspaceStyles = css`
       'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
     --md-ref-typeface-brand:
       'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
-    --md-sys-color-primary: #6750a4;
+    --md-sys-color-primary: #315da8;
     --md-sys-color-on-primary: #fff;
-    --md-sys-color-primary-container: #eaddff;
-    --md-sys-color-on-primary-container: #21005d;
-    --md-sys-color-surface: #fef7ff;
-    --md-sys-color-surface-container: #f3edf7;
-    --md-sys-color-surface-container-low: #f7f2fa;
-    --md-sys-color-surface-container-high: #ece6f0;
-    --md-sys-color-on-surface: #1d1b20;
-    --md-sys-color-on-surface-variant: #49454f;
-    --md-sys-color-outline: #79747e;
-    --md-sys-color-outline-variant: #cac4d0;
-    --md-sys-color-secondary-container: #e8def8;
-    --md-sys-color-on-secondary-container: #1d192b;
+    --md-sys-color-primary-container: #dce8ff;
+    --md-sys-color-on-primary-container: #142e57;
+    --md-sys-color-surface: #f8fafc;
+    --md-sys-color-surface-container: #f1f5f9;
+    --md-sys-color-surface-container-low: #ffffff;
+    --md-sys-color-surface-container-high: #e8edf3;
+    --md-sys-color-on-surface: #17212f;
+    --md-sys-color-on-surface-variant: #526174;
+    --md-sys-color-outline: #748093;
+    --md-sys-color-outline-variant: #d8e0e9;
+    --md-sys-color-secondary-container: #e2eaf5;
+    --md-sys-color-on-secondary-container: #24354e;
     --md-sys-color-error: #b3261e;
     color: var(--md-sys-color-on-surface);
   }
@@ -40,20 +40,20 @@ export const workspaceStyles = css`
     color: var(--md-sys-color-on-surface);
   }
   .dark {
-    --md-sys-color-primary: #d0bcff;
-    --md-sys-color-on-primary: #381e72;
-    --md-sys-color-primary-container: #4f378b;
-    --md-sys-color-on-primary-container: #eaddff;
-    --md-sys-color-surface: #141218;
-    --md-sys-color-surface-container: #211f26;
-    --md-sys-color-surface-container-low: #1d1b20;
-    --md-sys-color-surface-container-high: #2b2930;
-    --md-sys-color-on-surface: #e6e0e9;
-    --md-sys-color-on-surface-variant: #cac4d0;
-    --md-sys-color-outline: #938f99;
-    --md-sys-color-outline-variant: #49454f;
-    --md-sys-color-secondary-container: #4a4458;
-    --md-sys-color-on-secondary-container: #e8def8;
+    --md-sys-color-primary: #a8c7ff;
+    --md-sys-color-on-primary: #0a305f;
+    --md-sys-color-primary-container: #244779;
+    --md-sys-color-on-primary-container: #dce8ff;
+    --md-sys-color-surface: #111821;
+    --md-sys-color-surface-container: #192330;
+    --md-sys-color-surface-container-low: #151e29;
+    --md-sys-color-surface-container-high: #243143;
+    --md-sys-color-on-surface: #e7edf6;
+    --md-sys-color-on-surface-variant: #b8c5d6;
+    --md-sys-color-outline: #8e9db2;
+    --md-sys-color-outline-variant: #465367;
+    --md-sys-color-secondary-container: #34445c;
+    --md-sys-color-on-secondary-container: #e2eaf5;
     --md-sys-color-error: #f2b8b5;
     color-scheme: dark;
   }
@@ -560,6 +560,59 @@ export const workspaceStyles = css`
   .status{font-size:12px;padding:8px 16px;min-height:32px}
   @media(max-width:1100px){nav{width:64px;padding:8px 4px}.brand strong{max-width:180px;overflow:hidden;text-overflow:ellipsis}}
   @media(max-width:699px){nav{display:none}main{padding:8px}header{padding-left:8px;gap:4px}.brand-mark{display:none}.brand strong{max-width:100px}.command-search{flex:0 0 auto}.window md-text-button{min-width:40px}.palette-label{display:none}}
+  /* Scope shell layout to avoid changing nested workflow anatomy. */
+  .shell > .body > nav{width:192px;padding:16px 12px;gap:8px}
+  .shell > .body > nav .navlabel,.dialog-nav .navlabel{display:inline;white-space:normal;overflow-wrap:anywhere}
+  .shell > .body > nav md-text-button{width:100%;min-width:0;min-height:48px;height:auto;--md-text-button-container-height:48px;justify-content:flex-start}
+  .shell > .body > nav .navsymbol{margin-right:10px}
+  .shell > .body > workspace-tabs{flex:1;min-width:0;min-height:0}
+  .shell main{gap:20px;padding:24px;overflow:auto}
+  .shell main:has(>.operations-host:not([hidden])){padding:0;gap:0;overflow:hidden}
+  .shell main:has(>.operations-host:not([hidden]))>.toolbar{padding:20px 24px 12px}
+  .shell .toolbar .heading{min-width:0}
+  .shell .toolbar h1{font-size:28px;font-weight:500;line-height:1.25}
+  .shell .toolbar p{margin-top:6px;font-size:14px}
+  .shell .brand{min-width:0;flex:0 1 auto}.shell .brand strong{white-space:normal;max-width:none;overflow:visible}
+  .shell .settings-page[hidden]{display:none!important}
+  .shell .settings-grid{display:flex;flex-direction:column;gap:20px}
+  .settings-categories,.image-actions{display:flex;flex-wrap:wrap;gap:8px}
+  .settings-categories md-outlined-button[aria-pressed="true"]{background:var(--md-sys-color-secondary-container)}
+  .project-context{display:flex;flex-wrap:wrap;gap:8px 24px;padding:0 24px 16px;font-size:13px;color:var(--md-sys-color-on-surface-variant)}
+  .project-context span{overflow-wrap:anywhere;min-width:0}
+  .images-workspace{max-width:1040px;width:100%;min-width:0}
+  .image-projects{margin-top:24px;padding:24px}.image-projects h2{font-size:20px}
+  .project-list{list-style:none;padding:0;margin:0}
+  .project-list li{display:flex;align-items:center;gap:20px;padding:20px 0;border-top:1px solid var(--md-sys-color-outline-variant)}
+  .project-list li>div{flex:1;min-width:0;overflow-wrap:anywhere}
+  .project-list md-outlined-button{flex-shrink:0}
+  .shell md-filled-button,.shell md-outlined-button,.shell md-text-button,.shell md-filled-tonal-button{min-height:44px}
+  .shell.compact main{padding:16px;gap:12px}
+  .shell.compact main:has(>.operations-host:not([hidden])){padding:0;gap:0}
+  .shell.compact main:has(>.operations-host:not([hidden]))>.toolbar{padding:12px 20px 8px}
+  .shell.compact .image-projects{padding:16px;margin-top:16px}
+  .shell.compact .project-list li{padding:12px 0}
+  .shell.compact > .body > nav{gap:4px;padding:12px}
+  @media(max-width:900px){
+    .shell > .body{flex-direction:column}
+    .shell > .body > nav{display:flex;flex-direction:row;flex-wrap:wrap;width:auto;padding:8px;gap:4px;flex-shrink:0}
+    .shell > .body > nav md-text-button{width:auto;flex:1 1 100px;--md-text-button-container-height:44px}
+    .shell > .body > nav .spacer{display:none}
+    .shell > .body > nav .navsymbol{margin-right:6px}
+    .shell main{padding:16px}
+    .shell .toolbar h1{font-size:24px}
+  }
+  @media(max-width:480px){
+    .shell header{padding:8px;gap:4px;flex-wrap:wrap}
+    .shell .brand{flex:1 1 140px}.shell .brand strong{font-size:14px}
+    .shell > .body > nav md-text-button{flex:1 1 88px;font-size:13px}
+    .shell .toolbar{align-items:flex-start}
+    .shell main{padding:12px}
+    .shell main:has(>.operations-host:not([hidden]))>.toolbar{padding:16px 12px 8px}
+    .project-context{padding:0 12px 12px}
+    .project-list li{align-items:stretch;flex-direction:column;gap:8px}
+    .image-actions{align-items:stretch;flex-direction:column}
+    .image-projects{padding:16px}
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
