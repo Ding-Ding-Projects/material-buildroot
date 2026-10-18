@@ -10,15 +10,15 @@ async function relations(panel,kind='profile'){
  const button=panel.locator(`#iso-${kind}-info`).getByRole('button');
  await expect.poll(()=>button.evaluate((element,kind)=>{const root=element.getRootNode().host.getRootNode();return {controls:element.ariaControlsElements?.length===1&&element.ariaControlsElements[0]===root.querySelector(`#iso-${kind}-guide`),description:element.ariaDescribedByElements?.length===1&&element.ariaDescribedByElements[0]===root.querySelector(`#iso-${kind}-tooltip`)};},kind)).toEqual({controls:true,description:true});
 }
-async function open(page){
+async function open(page,advanced=false){
  await page.addInitScript(()=>localStorage.setItem('material-buildroot.wording.v1',JSON.stringify({schemaVersion:1,englishHumor:1,cantoneseHumor:1,displayName:''})));
  await page.goto('/');
- await page.evaluate(async()=>{
+ await page.evaluate(async(advanced)=>{
   await import('/src/renderer/image-presets-panel.ts');const {vocabulary}=await import('/src/renderer/owned-copy.ts');await vocabulary.setSchool('inactive');
   window.__profileRequests=[];
   window.studio={operations:async request=>{window.__profileRequests.push(request);if(request.action==='project.options')return {ok:true,result:{runtime:{kind:'wsl',distribution:'Fixture'}}};if(request.action==='imagePreset.catalog')return {ok:true,result:{revision:'fixture',desktops:[]}};if(request.action==='imagePreset.isoPlan')return {ok:true,result:{revision:'fixture',profile:'x86_64-bios-grub2-initrd',applicable:true,requirements:[]}};return {ok:false,code:'FIXTURE_UNAVAILABLE'};}};
-  const panel=document.createElement('image-presets-panel');panel.workspaceId='profile-fixture';panel.language='en';document.body.replaceChildren(panel);document.body.style.overflow='auto';document.documentElement.style.overflow='auto';await panel.updateComplete;
- });
+  const panel=document.createElement('image-presets-panel');panel.workspaceId='profile-fixture';panel.language='en';panel.isoMode=advanced?'advanced':'easy';document.body.replaceChildren(panel);document.body.style.overflow='auto';document.documentElement.style.overflow='auto';await panel.updateComplete;
+ },advanced);
  const panel=page.locator('image-presets-panel').first();await expect.poll(()=>panel.evaluate(element=>element.isoBusy)).toBe(false);return panel;
 }
 test('profile control owns a keyboard-operable info entry and optional source explanation',async({page})=>{
@@ -34,7 +34,7 @@ test('profile control owns a keyboard-operable info entry and optional source ex
 test('worked profile example changes only synthetic feedback and resets on close',async({page})=>{
  const panel=await open(page),stored=await page.evaluate(()=>JSON.stringify(Object.fromEntries(Object.keys(localStorage).sort().map(key=>[key,localStorage.getItem(key)]))));await panel.getByRole('button',{name:'Explain detected image profile',exact:true}).click();const guide=panel.locator('#iso-profile-guide'),count=await page.evaluate(()=>window.__profileRequests.length);
  await guide.getByRole('button',{name:'Read-only disc example',exact:true}).click();await guide.getByRole('button',{name:'Try example',exact:true}).click();await expect(guide.getByRole('status')).toContainText('read-only');
- await expect(panel.locator('#iso-profile-control')).toHaveJSProperty('value','bios-iso');await expect(panel.getByRole('button',{name:'Next',exact:true})).toBeDisabled();
+ await expect(panel.locator('#iso-profile-control')).toHaveJSProperty('value','bios-iso');await expect(panel.getByRole('button',{name:'Next',exact:true})).toBeEnabled();expect(await panel.evaluate(element=>element.isoOutcome)).toBeUndefined();
  await guide.getByRole('button',{name:'Reset example',exact:true}).click();await expect(guide.getByRole('button',{name:'RAM copy example',exact:true})).toHaveAttribute('aria-pressed','true');await expect(guide.getByRole('status')).toBeEmpty();
  await guide.getByRole('button',{name:'RAM copy example',exact:true}).click();await expect(guide.getByRole('button',{name:'RAM copy example',exact:true})).toHaveAttribute('aria-pressed','true');
  await guide.getByRole('button',{name:'Try example',exact:true}).click();await expect(guide.getByRole('status')).toContainText('does not update the ISO file');
@@ -80,7 +80,7 @@ test('native profile relationships reject removed and wrong targets and rebind a
 });
 
 test('saved runtime has its own optional keyboard explanation without side effects',async({page})=>{
- const panel=await open(page),button=panel.getByRole('button',{name:'Explain saved execution runtime',exact:true});
+ const panel=await open(page,true),button=panel.getByRole('button',{name:'Explain saved execution runtime',exact:true});
  await expect(button).toBeVisible();
  const before=await page.evaluate(()=>({calls:window.__profileRequests.length,storage:JSON.stringify({...localStorage})}));
  await button.focus();await page.keyboard.press('Enter');await expect(panel.locator('#iso-runtime-guide-heading')).toBeFocused();
@@ -91,13 +91,13 @@ test('saved runtime has its own optional keyboard explanation without side effec
 });
 
 test('runtime guide binds independent native references across close reconnect and workspace changes',async({page})=>{
- const panel=await open(page),button=panel.locator('#iso-runtime-info').getByRole('button');await relations(panel,'runtime');await relations(panel);
+ const panel=await open(page,true),button=panel.locator('#iso-runtime-info').getByRole('button');await relations(panel,'runtime');await relations(panel);
  await expect(panel.locator('#iso-runtime-info')).not.toHaveAttribute('role');await expect(panel.locator('#iso-runtime-info')).not.toHaveAttribute('tabindex');
  const bounds=await button.boundingBox();expect(bounds.width).toBeGreaterThanOrEqual(44);expect(bounds.height).toBeGreaterThanOrEqual(44);
  expect(await panel.evaluate(element=>{const root=element.shadowRoot;return Boolean(root.querySelector('#iso-runtime-info').compareDocumentPosition(root.querySelector('#iso-runtime-control'))&Node.DOCUMENT_POSITION_FOLLOWING);})).toBe(true);
  await button.click();await panel.getByRole('button',{name:'Try two-job example',exact:true}).click();await panel.getByRole('button',{name:'Reset runtime example',exact:true}).click();await expect(panel.locator('#iso-runtime-guide').getByRole('status')).toBeEmpty();
  await panel.getByRole('button',{name:'Try two-job example',exact:true}).click();await panel.getByRole('button',{name:'Close runtime guide',exact:true}).click();await expect(button).toBeFocused();await relations(panel,'runtime');await button.click();await expect(panel.locator('#iso-runtime-guide').getByRole('status')).toBeEmpty();
- await page.evaluate(async()=>{const second=document.createElement('image-presets-panel');second.workspaceId='second-runtime';second.language='en';document.body.append(second);await second.updateComplete;});const second=page.locator('image-presets-panel').nth(1);await relations(second,'runtime');await relations(panel,'runtime');
+ await page.evaluate(async()=>{const second=document.createElement('image-presets-panel');second.workspaceId='second-runtime';second.isoMode='advanced';second.language='en';document.body.append(second);await second.updateComplete;});const second=page.locator('image-presets-panel').nth(1);await relations(second,'runtime');await relations(panel,'runtime');
  for(const property of ['ariaControlsElements','ariaDescribedByElements'])for(const wrong of [false,true]){
   expect(await button.evaluate((element,{property,wrong})=>{const root=element.getRootNode().host.getRootNode();const expected=root.querySelector(property==='ariaControlsElements'?'#iso-runtime-guide':'#iso-runtime-tooltip');element[property]=wrong?[root.querySelector('#iso-profile-guide')]:[];return element[property]?.length===1&&element[property][0]===expected;},{property,wrong})).toBe(false);
   await panel.evaluate(async element=>{element.requestUpdate();await element.updateComplete;});await relations(panel,'runtime');await relations(panel);
@@ -108,7 +108,7 @@ test('runtime guide binds independent native references across close reconnect a
 });
 
 test('runtime guidance keeps unknown access honest and opens the admitted localized article',async({page},testInfo)=>{
- const panel=await open(page);await panel.getByRole('button',{name:'Explain saved execution runtime',exact:true}).click();
+ const panel=await open(page,true);await panel.getByRole('button',{name:'Explain saved execution runtime',exact:true}).click();
  for(const runtime of [undefined,{kind:'unknown'},{kind:'wsl',distribution:''},{kind:'docker',image:''}]){
   await panel.evaluate(async(element,runtime)=>{element.isoRuntime=runtime;element.requestUpdate();await element.updateComplete;},runtime);await expect(panel.locator('[data-runtime-reference]')).toHaveText('Runtime identity is unknown.');
  }
@@ -139,7 +139,7 @@ test('runtime help traverses the real admitted article reader and rejects an omi
  const document=service.read({id:article.id});expect(document.html).toContain('Optional guide at the saved runtime control');
  const calls=[];
  await page.exposeFunction('__admittedRuntimeDocumentation',request=>{calls.push(request);return request.action==='documentation.list'?{ok:true,result:service.list()}:request.action==='documentation.read'?{ok:true,result:service.read({id:request.id})}:{ok:false,code:'FIXTURE_UNAVAILABLE'};});
- await open(page);
+ await open(page,true);
  await page.evaluate(async()=>{
   await import('/src/renderer/operations-panel.ts');const previous=window.studio.operations;window.__omitRuntimeArticle=true;
   window.studio.operations=async request=>{
@@ -149,7 +149,7 @@ test('runtime help traverses the real admitted article reader and rejects an omi
   const operations=document.createElement('operations-panel');operations.workspace={workspaceId:'reader-fixture',name:'Reader fixture'};operations.language='en';operations.tab='config';document.body.replaceChildren(operations);await operations.updateComplete;
  });
  const operations=page.locator('operations-panel'),iso=operations.locator('image-presets-panel');await expect.poll(()=>operations.evaluate(element=>!element.pending&&!element.shadowRoot.querySelector('image-presets-panel')?.isoBusy)).toBe(true);
- await iso.getByRole('button',{name:'Explain saved execution runtime',exact:true}).click();await iso.getByRole('button',{name:'Read runtime guide',exact:true}).click();
+ await iso.getByRole('button',{name:'Next',exact:true}).click();await iso.getByRole('button',{name:'Explain saved execution runtime',exact:true}).click();await iso.getByRole('button',{name:'Read runtime guide',exact:true}).click();
  await expect(operations).toContainText('This field guide is not available in the bundled documentation.');await expect(operations).toHaveJSProperty('tab','config');expect(calls.filter(call=>call.action==='documentation.read')).toHaveLength(0);
  await page.evaluate(()=>{window.__omitRuntimeArticle=false;});await iso.getByRole('button',{name:'Read runtime guide',exact:true}).click();
  await expect(operations).toHaveJSProperty('tab','documentation');const reader=operations.locator('documentation-panel');await expect(reader).toBeVisible();await expect(reader.locator('.article')).toContainText('Optional guide at the saved runtime control');await expect(reader.locator('.article')).toContainText('two running and two waiting');
