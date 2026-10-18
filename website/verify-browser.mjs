@@ -48,6 +48,7 @@ async function ready(){await page.evaluate(async()=>{await Promise.all([...docum
 async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:path.relative(root,file).split(path.sep).join('/'),sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
 try{
  const homeResponse=await page.goto(target);assert.equal(homeResponse.status(),200);await ready();
+ assert.equal(sha(await homeResponse.body()),receipt.artifacts.html_sha256,'Served HTML must match the selected output');
  const beginner=page.locator('#beginner-guide');
  await beginner.locator('[data-choice="iso"]').click();
  await beginner.getByRole('button',{name:/^Next/}).click();
@@ -68,11 +69,11 @@ try{
  await chooseLanguage('both');
  await page.setViewportSize({width:320,height:900});await page.emulateMedia({reducedMotion:'reduce'});
  assert.equal(await beginner.evaluate(element=>element.scrollWidth<=element.clientWidth+1),true,'Beginner guidance must fit at 320px');
+ await capture('beginner-bilingual-320');
  await beginner.getByRole('button',{name:/^Start this introduction again/}).click();
  assert.equal(await beginner.locator('[data-choice="learn"]').getByRole('button').getAttribute('aria-pressed'),'true');
  await page.setViewportSize({width:1440,height:1100});await page.emulateMedia({reducedMotion:'no-preference'});
  receipt.checks.push('Beginner guidance: runtime/image explanations, keyboard reading action, local reload persistence, reset, Cantonese and bilingual copy, reduced-motion 320px container. No desktop execution claimed.');
- assert.equal(sha(await homeResponse.body()),receipt.artifacts.html_sha256,'Served HTML must match the selected output');
  for(const [key,relative] of Object.entries({javascript_sha256:'site/assets/app.js',css_sha256:'site/assets/app.css'})){
   const response=await context.request.get(new URL(relative,target).href);
   assert.equal(response.status(),200);
