@@ -11,6 +11,8 @@ const MAX_ARTICLE = 512 * 1024,
   MAX_SEARCH_TEXT = 32 * 1024,
   MAX_ASSET = 8 * 1024 * 1024,
   MAX_TOTAL = 64 * 1024 * 1024;
+// Escaping a page remains below MAX_ARTICLE, including UTF-8 and HTML overhead.
+const REFERENCE_PAGE_BYTES = 64 * 1024;
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 function fail(code) {
   const error = new Error("Offline documentation is unavailable.");
@@ -115,7 +117,7 @@ function headingMetadata(tokens) {
 /** Shared renderer for admitted prose. Raw HTML and all automatic network loads are disabled. */
 function renderMarkdown(
   markdown,
-  { source = "README.md", documents = [], assets = [] } = {},
+  { source = "README.md", documents = [], assets = [], references = [] } = {},
 ) {
   if (typeof markdown !== "string" || Buffer.byteLength(markdown) > MAX_ARTICLE)
     fail("INVALID_REQUEST");
@@ -128,7 +130,10 @@ function renderMarkdown(
   });
   const tokens = md.parse(markdown, {});
   const headings = headingMetadata(tokens);
-  const bySource = new Map(documents.map((item) => [item.source, item]));
+  const bySource = new Map([
+    ...documents,
+    ...references.map((item) => ({ ...item, anchors: [] })),
+  ].map((item) => [item.source, item]));
   if (!bySource.has(source))
     bySource.set(source, {
       id: `doc-${digest(source)}`,
@@ -235,6 +240,49 @@ function imageMime(bytes, extension) {
     return "image/webp";
   return null;
 }
+function jsonReferenceText(bytes) {
+  if (bytes.length > MAX_ASSET) fail("INVALID_BUNDLE");
+  const value = bytes.toString("utf8");
+  if (!Buffer.from(value).equals(bytes)) fail("CORRUPT_BUNDLE");
+  // JSON is data only. Do not evaluate it or discover additional references in it.
+  JSON.parse(value);
+  return value;
+}
+function referencePages(text) {
+  const bytes = Buffer.from(text);
+  const pages = [];
+  for (let offset = 0; offset < bytes.length;) {
+    let end = Math.min(bytes.length, offset + REFERENCE_PAGE_BYTES);
+    while (end < bytes.length && (bytes[end] & 0xc0) === 0x80) end--;
+    pages.push(bytes.subarray(offset, end).toString("utf8"));
+    offset = end;
+  }
+  return pages.length ? pages : [""];
+}
+function referencePageId(reference, page) {
+  return `doc-${digest(page === 0 ? reference.source : reference.source + "\0page:" + page)}`;
+}
+function renderReference(reference, value, page = 0, language = "en", verifiedPages) {
+  const esc = new MarkdownIt().utils.escapeHtml;
+  const copy = (en, zh) => language === "zh-HK" ? zh : language === "bilingual" ? `${en} / ${zh}` : en;
+  let html = `<h1>${esc(reference.title)}</h1>`;
+  if (reference.kind === "json") {
+    const pages = verifiedPages || referencePages(jsonReferenceText(value));
+    if (!Number.isSafeInteger(page) || page < 0 || page >= pages.length) fail("NOT_FOUND");
+    html += `<p>${esc(copy(`JSON source reference. Page ${page + 1} of ${pages.length}.`, `JSON 原始參考資料。第 ${page + 1} 頁，共 ${pages.length} 頁。`))}</p>`;
+    const link = (selected, label) => `<a href="#" data-document-id="${referencePageId(reference, selected)}">${label}</a>`;
+    html += `<nav aria-label="${esc(copy("Source reference pages", "原始參考資料分頁"))}">`;
+    if (page > 0) html += link(page - 1, esc(copy("Previous page", "上一頁")));
+    if (page > 0 && page + 1 < pages.length) html += " ";
+    if (page + 1 < pages.length) html += link(page + 1, esc(copy("Next page", "下一頁")));
+    html += `</nav><pre><code class="language-json">${esc(pages[page])}</code></pre>`;
+  } else {
+    if (page !== 0) fail("NOT_FOUND");
+    html += `<p>${esc(copy("Bundled image source reference.", "內附圖片原始參考資料。"))}</p><img src="documentation/${esc(reference.file)}" alt="${esc(reference.title)}" loading="lazy" decoding="async">`;
+  }
+  if (Buffer.byteLength(html) > MAX_ARTICLE) fail("INVALID_BUNDLE");
+  return { html, headings: [], links: [], issues: [] };
+}
 function createDocumentationService({ directory, openExternal } = {}) {
   if (
     typeof directory !== "string" ||
@@ -286,6 +334,7 @@ function createDocumentationService({ directory, openExternal } = {}) {
       "documents",
       "assets",
       "issues",
+      ...(Object.hasOwn(value, "references") ? ["references"] : []),
     ]);
     if (
       value.format !== FORMAT ||
@@ -365,6 +414,32 @@ function createDocumentationService({ directory, openExternal } = {}) {
       assetSources.add(asset.source);
       total += asset.bytes;
     }
+    const references = Object.hasOwn(value, "references") ? value.references : [];
+    if (!Array.isArray(references) || value.documents.length + references.length > 1000)
+      fail("INVALID_BUNDLE");
+    for (const reference of references) {
+      exact(reference, ["id", "source", "file", "title", "category", "language", "summary", "sha256", "bytes", "kind"]);
+      sourcePath(reference.source);
+      if (!DOC.test(reference.id) || reference.id !== `doc-${digest(reference.source)}` ||
+          ids.has(reference.id) || sources.has(reference.source) ||
+          !HASH.test(reference.sha256) || !Number.isSafeInteger(reference.bytes) ||
+          reference.bytes < 1 || reference.bytes > MAX_ASSET)
+        fail("INVALID_BUNDLE");
+      for (const key of ["title", "category", "language", "summary"])
+        text(reference[key], key === "summary" ? 500 : 240);
+      if (reference.kind === "json") {
+        if (!/\.json$/i.test(reference.source) || reference.file !== `references/${reference.id}.json` ||
+            files.has(reference.file) || assetSources.has(reference.source)) fail("INVALID_BUNDLE");
+        total += reference.bytes;
+      } else if (reference.kind === "image") {
+        const asset = value.assets.find((item) => item.source === reference.source);
+        if (!/\.(?:png|jpe?g|webp)$/i.test(reference.source) || !asset ||
+            ["file", "sha256", "bytes"].some((key) => asset[key] !== reference[key])) fail("INVALID_BUNDLE");
+      } else fail("INVALID_BUNDLE");
+      ids.add(reference.id);
+      sources.add(reference.source);
+      files.add(reference.file);
+    }
     if (total > MAX_TOTAL) fail("INVALID_BUNDLE");
     for (const item of value.issues) {
       exact(item, ["source", "reference", "reason"]);
@@ -380,25 +455,36 @@ function createDocumentationService({ directory, openExternal } = {}) {
       fail("CORRUPT_BUNDLE");
     return value;
   }
-  function articleText(article) {
-    const value = verify(article, MAX_ARTICLE);
+  function articleText(article, verified) {
+    const value = verified?.get(article.source)?.bytes || verify(article, MAX_ARTICLE);
     const selected = value.toString("utf8");
     if (!Buffer.from(selected).equals(value)) fail("CORRUPT_BUNDLE");
     return selected;
   }
   function verifySnapshot(index) {
     const entries = [];
+    const verified = new Map();
     for (const article of index.documents) {
       const value = verify(article, MAX_ARTICLE);
       const selected = value.toString("utf8");
       if (!Buffer.from(selected).equals(value)) fail("CORRUPT_BUNDLE");
       entries.push([article.source, value]);
+      verified.set(article.source, { bytes: value });
     }
     for (const asset of index.assets) {
       const value = verify(asset, MAX_ASSET);
       if (imageMime(value, asset.file.split(".").at(-1)) !== asset.mime)
         fail("CORRUPT_BUNDLE");
       entries.push([asset.source, value]);
+      verified.set(asset.source, { bytes: value });
+    }
+    for (const reference of index.references || []) {
+      if (reference.kind === "json") {
+        const value = verify(reference, MAX_ASSET);
+        const pages = referencePages(jsonReferenceText(value));
+        entries.push([reference.source, value]);
+        verified.set(reference.source, { bytes: value, pages });
+      }
     }
     const aggregate = createHash("sha256");
     for (const [source, value] of entries.sort((a, b) =>
@@ -411,6 +497,7 @@ function createDocumentationService({ directory, openExternal } = {}) {
     }
     if (aggregate.digest("hex") !== index.sourceSnapshot)
       fail("CORRUPT_BUNDLE");
+    return verified;
   }
   function metadata(article) {
     return {
@@ -421,9 +508,27 @@ function createDocumentationService({ directory, openExternal } = {}) {
       summary: article.summary,
     };
   }
-  function navigation(index, headings = []) {
+  function readerEntries(index, verified) {
+    const entries = [...index.documents];
+    for (const reference of index.references || []) {
+      const pageCount = reference.kind === "json"
+        ? verified.get(reference.source).pages.length
+        : 1;
+      if (entries.length + pageCount > 1000) fail("INVALID_BUNDLE");
+      for (let page = 0; page < pageCount; page++) {
+        entries.push({
+          ...reference,
+          id: referencePageId(reference, page),
+          title: reference.title + (pageCount > 1 ? ` [${page + 1}/${pageCount}]` : ""),
+          page,
+        });
+      }
+    }
+    return entries;
+  }
+  function navigation(index, headings, entries) {
     const categories = [];
-    for (const article of index.documents) {
+    for (const article of entries) {
       let category = categories.find((item) => item.name === article.category);
       if (!category) {
         category = { name: article.category, articles: [] };
@@ -434,24 +539,32 @@ function createDocumentationService({ directory, openExternal } = {}) {
     return { categories, headings };
   }
   function readInternal(input) {
-    exact(input, ["id"]);
+    exact(input, ["id", ...(Object.hasOwn(input || {}, "language") ? ["language"] : [])]);
+    const language = Object.hasOwn(input, "language") ? input.language : "en";
+    if (!["en", "zh-HK", "bilingual"].includes(language)) fail("INVALID_REQUEST");
     if (typeof input.id !== "string" || !DOC.test(input.id))
       fail("INVALID_REQUEST");
     const index = manifest();
-    verifySnapshot(index);
-    const article = index.documents.find((item) => item.id === input.id);
+    const verified = verifySnapshot(index);
+    const entries = readerEntries(index, verified);
+    const article = entries.find((item) => item.id === input.id);
     if (!article) fail("NOT_FOUND");
-    const rendered = renderMarkdown(articleText(article), {
+    if (article.kind) {
+      const source = verified.get(article.source);
+      return { index, entries, article, rendered: renderReference(article, source.bytes, article.page, language, source.pages) };
+    }
+    const rendered = renderMarkdown(articleText(article, verified), {
       source: article.source,
       documents: index.documents,
       assets: index.assets,
+      references: index.references || [],
     });
     if (
       JSON.stringify(rendered.headings.map((item) => item.id)) !==
       JSON.stringify(article.anchors)
     )
       fail("CORRUPT_BUNDLE");
-    return { index, article, rendered };
+    return { index, entries, article, rendered };
   }
   function codePoint(value, fallback) {
     return Number.isInteger(value) &&
@@ -475,11 +588,13 @@ function createDocumentationService({ directory, openExternal } = {}) {
       .replace(/\s+/g, " ")
       .trim();
   }
-  function searchEntry(index, article) {
-    const rendered = renderMarkdown(articleText(article), {
+  function searchEntry(index, article, verified) {
+    const source = verified.get(article.source);
+    const rendered = article.kind ? renderReference(article, source.bytes, article.page, "en", source.pages) : renderMarkdown(articleText(article, verified), {
       source: article.source,
       documents: index.documents,
       assets: index.assets,
+      references: index.references || [],
     });
     const characters = Array.from(plainText(rendered.html));
     return {
@@ -502,28 +617,29 @@ function createDocumentationService({ directory, openExternal } = {}) {
   return Object.freeze({
     list: safe(() => {
       const index = manifest();
-      verifySnapshot(index);
+      const verified = verifySnapshot(index);
+      const entries = readerEntries(index, verified);
       return {
-        articles: index.documents.map(metadata),
-        navigation: navigation(index),
+        articles: entries.map(metadata),
+        navigation: navigation(index, [], entries),
         issues: index.issues,
         complete: index.issues.length === 0,
       };
     }),
     searchText: safe(() => {
       const index = manifest();
-      verifySnapshot(index);
+      const verified = verifySnapshot(index);
       return {
-        entries: index.documents.map((article) => searchEntry(index, article)),
+        entries: readerEntries(index, verified).map((article) => searchEntry(index, article, verified)),
       };
     }),
     read: safe((input) => {
-      const { index, article, rendered } = readInternal(input);
+      const { index, entries, article, rendered } = readInternal(input);
       const issues = [...index.issues, ...rendered.issues];
       return {
         article: metadata(article),
         html: rendered.html,
-        navigation: navigation(index, rendered.headings),
+        navigation: navigation(index, rendered.headings, entries),
         issues,
         complete: issues.length === 0,
       };
@@ -555,6 +671,8 @@ module.exports = {
   renderMarkdown,
   headingMetadata,
   imageMime,
+  jsonReferenceText,
+  referencePages,
   MAX_ARTICLE,
   MAX_SEARCH_TEXT,
   MAX_ASSET,

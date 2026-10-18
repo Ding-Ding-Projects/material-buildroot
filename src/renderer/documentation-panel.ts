@@ -1,4 +1,5 @@
 import {localizedCopy} from './language-wording';
+import {vocabulary} from './owned-copy';
 import "./regex-workbench";
 import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -44,6 +45,7 @@ export class DocumentationPanel extends LitElement {
   revision = 0;
   private index?: Index;
   private document?: Document;
+  private requestedLanguage?: "en" | "zh-HK" | "bilingual";
   private loading = false;
   private feedback = "";
   private serial = 0;
@@ -311,10 +313,18 @@ export class DocumentationPanel extends LitElement {
     `,
   ];
   private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
+  private effectiveLanguage(): "en" | "zh-HK" | "bilingual" {
+    return this.restricted || vocabulary.school() !== "inactive" ? "en"
+      : this.language === "en" || this.language === "zh-HK" ? this.language : "bilingual";
+  }
   protected updated(changed: PropertyValues) {
     if(changed.has("restricted")){if(this.restricted)this.stopSearch();else if(this.index)this.search();}
     if ((changed.has("active")||changed.has("restricted")) && this.active && !this.restricted && !this.index && !this.loading)
       void this.refresh();
+    if (this.active && !this.restricted && !this.loading && this.document && this.requestedLanguage !== this.effectiveLanguage()) {
+      const location = this.history[this.cursor];
+      void this.open(location.id, location.anchor, this.cursor, true);
+    }
   }
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -338,6 +348,7 @@ export class DocumentationPanel extends LitElement {
     );
   }
   private async refresh() {
+    if (this.restricted) return;
     const token = ++this.serial;
     this.loading = true;
     this.feedback = "";
@@ -370,20 +381,30 @@ export class DocumentationPanel extends LitElement {
   }
   /** Context help accepts only a host-issued article identity. */
   async openArticle(id: string) {
+    if (this.restricted) return;
     if (!/^doc-[a-f0-9]{64}$/.test(id)) return;
     await this.refresh();
     if (!this.index?.articles.some(article => article.id === id)) return;
     await this.open(id);
   }
-  private async open(id: string, anchor = "", historyIndex?: number) {
+  private async open(id: string, anchor = "", historyIndex?: number, preserveScroll = false) {
+    if (this.restricted) return;
+    const language = this.effectiveLanguage();
+    this.requestedLanguage = language;
+    const scrollTop = this.renderRoot.querySelector<HTMLElement>(".article")?.scrollTop;
     const token = ++this.serial;
     this.loading = true;
     this.feedback = "";
     this.builder = false;
     this.revision++;
     try {
-      const document = await this.call<Document>("documentation.read", { id });
+      const document = await this.call<Document>("documentation.read", { id, language });
       if (token !== this.serial) return;
+      if (this.restricted) return;
+      if (language !== this.effectiveLanguage()) {
+        await this.open(id, anchor, historyIndex, preserveScroll);
+        return;
+      }
       this.document = document;
       try { localStorage.setItem('documentation-last-location', JSON.stringify({id,anchor})); } catch { /* Reading remains available without preference storage. */ }
       if (historyIndex === undefined) {
@@ -393,7 +414,11 @@ export class DocumentationPanel extends LitElement {
       } else this.cursor = historyIndex;
       this.revision++;
       await this.updateComplete;
-      this.anchor(anchor);
+      if (token !== this.serial) return;
+      if (preserveScroll) {
+        const body = this.renderRoot.querySelector<HTMLElement>(".article");
+        if (body && scrollTop !== undefined) body.scrollTop = scrollTop;
+      } else this.anchor(anchor);
     } catch (e) {
       if (token === this.serial) this.feedback = this.error(e);
     } finally {

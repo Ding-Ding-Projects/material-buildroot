@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { createRequire } from "node:module";
+import { createHash } from "node:crypto";
 import { open } from "./desktop-fixture.mjs";
 const require = createRequire(import.meta.url),
   { renderMarkdown } = require("../../src/main/documentation/service.cjs");
@@ -103,7 +104,7 @@ async function fixture(page, options = {}) {
         return previous(r);
       };
     },
-    { metadata, navigation, documents },
+    { metadata: options.bundle?.metadata || metadata, navigation, documents: options.bundle?.documents || documents },
   );
   await page
     .locator("operations-panel")
@@ -113,6 +114,67 @@ async function fixture(page, options = {}) {
   );
   return f;
 }
+
+test("reference page location survives reader recreation and image links retain Markdown history", async ({ page }) => {
+  const sourceId = (source) => "doc-" + createHash("sha256").update(source).digest("hex");
+  const jsonId = sourceId("docs/data.json"), pageId = sourceId("docs/data.json\0page:1"), imageId = sourceId("docs/image.png");
+  const reference = (id, title, html) => ({ article: { id, title, category: "Project workflows", language: "en", summary: "Bundled source reference" }, html, navigation, issues: [], complete: true });
+  const link = (id, text) => `<a href="#" data-document-id="${id}">${text}</a>`;
+  const extra = [
+    reference(jsonId, "Data page 1", `<h1>Data page 1</h1>${link(pageId, "Next page")}`),
+    reference(pageId, "Data page 2", `<h1>Data page 2</h1><pre>{"second":true}</pre>${link(jsonId, "Previous page")}${link(imageId, "View image")}`),
+    reference(imageId, "Image reference", '<h1>Image reference</h1><img alt="Bundled diagram" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=">'),
+  ];
+  const bundleDocuments = [{ ...documents[0], html: documents[0].html + link(jsonId, "Read source data") }, documents[1], ...extra];
+  const f = await fixture(page, { bundle: { metadata: bundleDocuments.map(d => d.article), documents: bundleDocuments } });
+  try {
+    let p = page.locator("documentation-panel");
+    await p.locator(".topics").getByRole("button", { name: "Build your first image", exact: true }).click();
+    await p.getByRole("link", { name: "Read source data", exact: true }).click();
+    await p.getByRole("link", { name: "Next page", exact: true }).click();
+    await expect(p.getByRole("heading", { name: "Data page 2", exact: true })).toBeVisible();
+    await p.getByRole("link", { name: "View image", exact: true }).click();
+    await expect(p.getByRole("img", { name: "Bundled diagram" })).toBeVisible();
+    await p.getByRole("button", { name: "Back in documentation", exact: true }).click();
+    await expect(p.locator("pre")).toHaveText('{"second":true}');
+    await p.evaluate(el => {
+      const replacement = document.createElement("documentation-panel");
+      replacement.language = el.language;
+      replacement.active = true;
+      el.replaceWith(replacement);
+    });
+    p = page.locator("documentation-panel");
+    await expect(p.getByRole("heading", { name: "Data page 2", exact: true })).toBeVisible();
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem("documentation-last-location")))).toEqual({ id: pageId, anchor: "" });
+    expect(f.errors).toEqual([]);
+  } finally { f.close(); }
+});
+
+test("documentation reads use effective language and language changes preserve location and history", async ({ page }) => {
+  const f = await fixture(page);
+  try {
+    const p = page.locator("documentation-panel");
+    await p.locator(".topics").getByRole("button", { name: "Build your first image", exact: true }).click();
+    await p.getByRole("link", { name: "Package workflow", exact: true }).click();
+    await expect(p.getByRole("heading", { name: "Author a package", exact: true })).toBeVisible();
+    const before = await p.evaluate(el => ({ history: el.history, cursor: el.cursor, location: localStorage.getItem("documentation-last-location") }));
+    for (const language of ["zh-HK", "bilingual", "en"]) {
+      const count = await page.evaluate(() => window.__documentationRequests.filter(r => r.action === "documentation.read").length);
+      await p.evaluate((el, language) => { el.language = language; }, language);
+      await expect.poll(() => page.evaluate(() => window.__documentationRequests.filter(r => r.action === "documentation.read").length)).toBe(count + 1);
+      await expect.poll(() => p.evaluate(el => el.loading)).toBe(false);
+      expect(await page.evaluate(() => window.__documentationRequests.filter(r => r.action === "documentation.read").at(-1))).toEqual({ action: "documentation.read", id: ids[1], language });
+      expect(await p.evaluate(el => ({ history: el.history, cursor: el.cursor, location: localStorage.getItem("documentation-last-location") }))).toEqual(before);
+    }
+    const count = await page.evaluate(() => window.__documentationRequests.filter(r => r.action === "documentation.read").length);
+    await p.evaluate(el => { el.restricted = true; el.language = "zh-HK"; });
+    await expect(p.getByRole("heading", { name: "Workspace help", exact: true })).toBeVisible();
+    expect(await p.evaluate(el => el.effectiveLanguage())).toBe("en");
+    await p.evaluate(el => el.openArticle("doc-" + "a".repeat(64)));
+    expect(await page.evaluate(() => window.__documentationRequests.filter(r => r.action === "documentation.read").length)).toBe(count);
+    expect(f.errors).toEqual([]);
+  } finally { f.close(); }
+});
 test("offline reader uses host rendered articles, safe navigation, history and opaque external links", async ({
   page,
 }) => {

@@ -1491,7 +1491,7 @@ function createOperationsService({
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
     const optional = action === "build.submit"
-      ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : action === "imagePreset.isoBuild" ? ["resources"].filter(key => Object.hasOwn(request,key)) : [];
+      ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : action === "imagePreset.isoBuild" ? ["resources"].filter(key => Object.hasOwn(request,key)) : action === "documentation.read" ? ["language"].filter(key => Object.hasOwn(request,key)) : [];
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
@@ -1542,7 +1542,7 @@ function createOperationsService({
         return documentation.searchText();
       case "documentation.read":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
-        return documentation.read({ id: request.id });
+        return documentation.read({ id: request.id, ...(Object.hasOwn(request, "language") ? { language: request.language } : {}) });
       case "documentation.open":
         if (!documentation) reject("DOCUMENTATION_UNAVAILABLE");
         return documentation.open({ id: request.id, linkId: request.linkId });
