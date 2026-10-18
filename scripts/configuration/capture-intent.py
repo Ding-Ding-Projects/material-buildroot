@@ -48,6 +48,9 @@ def capture(request):
         info = os.lstat(file)
         if stat.S_ISREG(info.st_mode) and info.st_nlink != 1:
             raise Blocked("BLOCKED_CONTENT_UNSAFE")
+        previous = evidence.get(file)
+        if previous is not None and previous != fingerprint(info):
+            raise Blocked("BLOCKED_CONTENT_CHANGED")
         evidence[file] = fingerprint(info)
         return info
 
@@ -188,9 +191,44 @@ def capture(request):
         walk(root)
     # Every existing referent must be among the fully read captured objects.
     # Missing referents are bound as absent and checked again before returning.
+    def resolve_bound_link(file):
+        pending = file.split(os.sep)
+        resolved = os.sep
+        chain = []
+        while pending:
+            check()
+            part = pending.pop(0)
+            if part in ("", "."):
+                continue
+            if part == "..":
+                resolved = os.path.dirname(resolved)
+                continue
+            selected = os.path.join(resolved, part)
+            try:
+                info = os.lstat(selected)
+            except FileNotFoundError:
+                return os.path.normpath(os.path.join(selected, *pending)), chain
+            if stat.S_ISLNK(info.st_mode):
+                if selected not in evidence or not any(selected.startswith(root + os.sep) for root in roots):
+                    raise Blocked("BLOCKED_CONTENT_UNBOUND_SYMLINK")
+                if fingerprint(info) != evidence[selected]:
+                    raise Blocked("BLOCKED_CONTENT_CHANGED")
+                target = os.readlink(selected)
+                chain.append([selected, target])
+                if len(chain) > 40:
+                    raise Blocked("BLOCKED_CONTENT_UNSAFE")
+                pending = target.split(os.sep) + pending
+                if os.path.isabs(target):
+                    resolved = os.sep
+            else:
+                resolved = selected
+        return resolved, chain
+
+    resolved_links = {}
     for file in links:
         check()
-        target = os.path.realpath(file)
+        target, chain = resolve_bound_link(file)
+        resolved_links[file] = (target, chain)
         if os.path.lexists(target):
             if target not in evidence or stat.S_ISLNK(os.lstat(target).st_mode) or not any(target == root or target.startswith(root + os.sep) for root in roots):
                 raise Blocked("BLOCKED_CONTENT_UNBOUND_SYMLINK")
@@ -207,6 +245,9 @@ def capture(request):
     for file in absent:
         check()
         if os.path.lexists(file):
+            raise Blocked("BLOCKED_CONTENT_CHANGED")
+    for file, original in resolved_links.items():
+        if resolve_bound_link(file) != original:
             raise Blocked("BLOCKED_CONTENT_CHANGED")
     if cache:
         cache.update(entries=counts["cacheEntries"], bytes=counts["cacheBytes"], contentRevision=cache_hash.hexdigest())

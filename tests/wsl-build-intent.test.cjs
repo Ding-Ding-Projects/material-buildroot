@@ -29,6 +29,18 @@ try:
  first=capture(request);assert first['snapshot']['symlinks']==1 and first['snapshot']['limitations']==[]
  (source/'target').write_text('two');assert capture(request)['sourceRevision']!=first['sourceRevision'];checks.append('referent content revalidation')
  (root/'outside').write_text('outside');(source/'escape').symlink_to(root/'outside');blocked('BLOCKED_CONTENT_UNBOUND_SYMLINK');(source/'escape').unlink();checks.append('existing outside referent rejected')
+ (root/'external-alias').symlink_to(source/'target');(source/'escape').symlink_to(root/'external-alias');blocked('BLOCKED_CONTENT_UNBOUND_SYMLINK');(source/'escape').unlink();(root/'external-alias').unlink();checks.append('outside intermediate returning inside rejected')
+ (source/'middle').symlink_to('target');(source/'link').unlink();(source/'link').symlink_to('middle')
+ saved_exists=os.path.lexists;mutated=[False]
+ def mutate_alias(p):
+  answer=saved_exists(p)
+  if str(p)==str(source/'target') and not mutated[0]:
+   mutated[0]=True;(source/'middle').unlink();(source/'middle').symlink_to('Config.in')
+  return answer
+ os.path.lexists=mutate_alias
+ try:blocked('BLOCKED_CONTENT_CHANGED')
+ finally:os.path.lexists=saved_exists
+ (source/'middle').unlink();(source/'link').unlink();(source/'link').symlink_to('target');checks.append('captured chain mutation after resolution rejected')
  (source/'dangling').symlink_to('appears')
  original=os.path.lexists;created=[False]
  def appearance(p):
@@ -65,5 +77,5 @@ finally:
   const windows = process.platform === "win32";
   const result = spawnSync(windows ? "wsl.exe" : "python3", windows ? ["--distribution", process.env.MATERIAL_TEST_WSL_DISTRIBUTION, "--exec", "python3", "-I", "-B", "-"] : ["-I", "-B", "-"], { input: program, encoding: "utf8", windowsHide: true, timeout: 30000 });
   assert.equal(result.status, 0, result.stderr); const report = JSON.parse(result.stdout);
-  assert.equal(report.ok, true, report.skip); assert.equal(report.checks.length, 11);
+  assert.equal(report.ok, true, report.skip); assert.equal(report.checks.length, 13);
 });
