@@ -1,5 +1,17 @@
 # Phased implementation roadmap
 
+## Current bounded integration
+
+- [x] Add independently reviewed ISO profile and saved-runtime guides with isolated examples; source-fixture verification only.
+- [x] Add unexposed ISO preservation/observation helper and repair FIFO waits with witnessed red/green synthetic checks (11/11).
+- [x] Refresh the ISO map against explicit consumer baseline 308d4545 and the unchanged 2,245-detail manual inventory.
+- [ ] Bind admitted output identity before helper mutation; implementation in progress.
+- [ ] Wire owned transport, exact producer/cleanup and durable required ISO receipt inside the existing execution lease.
+- [ ] Verify current packaged/native guidance, runtime extreme-wording layouts and full document-reader navigation.
+- [ ] Produce and inspect a fresh ISO through the current GUI, then prove bounded boot behavior.
+- [ ] Complete current-source deployment, normal release, matching installed update and remaining finite acceptance.
+
+
 ## Current guidance and source-isolation candidate, 2026-10-18
 
 - [x] Integrate source-backed RAM/disc profile guidance and repair actual HTML-button ARIA references after two independent reviews; five browser guidance cases passed. This source/browser item does not complete native acceptance.

@@ -6,7 +6,7 @@
     "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
     "makefileSha256": "801da8e5d6f9e5a5132fc1bbd1070432d2596a651669cd4d12c11e8cc3e03392"
   },
-  "applicationBaseline": "2ae93775f2165e75345b0d8387fc56036f0b9470",
+  "applicationBaseline": "308d4545e093e03a873f6b0570b9383a880a77dc",
   "scope": "Nine source symbols, one choice and one dependency comment; documentation mapping only, not native acceptance, all-version support or complete ISO capability.",
   "relatedEvidence": [
     "docs/planning/buildroot-coverage/2025.02.json",
@@ -40,13 +40,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -116,13 +116,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -192,13 +192,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -269,13 +269,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -346,13 +346,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -422,13 +422,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -498,13 +498,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -575,13 +575,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -652,13 +652,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -722,13 +722,13 @@
         "references": [
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 194,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 212,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -771,8 +771,8 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 204,
-            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
+            "line": 232,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
           }
         ]
       },

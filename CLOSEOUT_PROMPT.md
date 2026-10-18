@@ -1,5 +1,18 @@
 # Material Buildroot continuation
 
+## Combined helper and runtime guidance, 2026-10-18
+
+Integrated source `308d4545e093e03a873f6b0570b9383a880a77dc` combines reviewed helper `a5d7201783a81231c00461c8985749cc383ffdf1` and runtime guide `599d68a494cc9a177122f3f4ead4fbbae8b10da7`. Two independent reviews per unit are dry. Helper evidence: old source 9 passing/two FIFO watchdog failures, repaired source 11/11 in 0.015 seconds, exact synthetic-only container absence verified. No scheduler/renderer exposure, real producer or boot authority. Runtime guide: missing-entry red, then eight browser cases in 8.8 seconds, including all five profile cases. Native input, assistive technology, runtime extreme-wording layout and full document-reader navigation remain unverified.
+
+The ISO source map now explicitly binds its five consumers to `308d4545e093e03a873f6b0570b9383a880a77dc`; all nine symbols, choice and prerequisite comment remain accounted for, with eleven omission witnesses. The manual index remains 2,245 lexical details across 91 bound files; only consumer bindings changed. This is not complete semantic/all-version or GUI/Easy-mode acceptance.
+
+Earlier `a12c936` root desktop build passed: receipt `6116f71198003d3ed323202c529a77ccacce37b598c5d265697f7f00dfcd53bc`, executable SHA-256 `f3510c74ee6a0e2ead0d9cac226819efcb6faa71366377f62ccf3b9b4e4490a1`. Documentation build passed: 410 HTML pages, 378 documents, 10,675 internal references, receipt `d17119a1b884628d2badc87d12ea67666ac2e88299e7fbc8aa62e52f034cae19`. Its focused browser receipt `acad0aa299737275552fb6256e6fd5da45e82055f7837807bcdcafffa628dd88` covers nine changed routes, 37 links/anchors, 18 layout tuples and eight inspected captures. Those results do not prove later source or deployment. GitHub Actions run 39122844002 completed successfully for a12c936.
+
+Next backend prerequisite: compare an admitted native root identity with the helper's opened descriptor before any mutation. The helper currently validates confinement/ownership but does not authenticate caller-selected root authority. Fixed owned transport, job binding, required durable ISO receipt, verified cleanup and current GUI production remain incomplete. No fourth unchanged Docker firmware attempt or WSL owner-visibility retry is authorized by this source work. The brief visible-check decision remains pending.
+
+Progress: https://github.com/Ding-Ding-Projects/material-buildroot/issues/1#issuecomment-6249583910 . Integration-branch preservation is separate from main, deployment, release and installed-update acceptance.
+
+
 Goal active and incomplete. Continue the finite authorized roadmap with isolated backend and frontend ownership. Preserve settings, authentication, source/output trees, the immutable ISO and unrelated applications. No host power/login action, force push, security weakening, private publication, speculative Buildroot patch or fourth unchanged firmware attempt.
 
 Owning integration branch: ai/integration/20261018-roadmap-combined. Local combined source d1bdf8f65ceefa8595ab1d048aaa360aa71d11d2; latest remote proof at record preparation1f8166ab670a183ba734d67db45400adf95e20cf. This continuation record is being preserved after that merge; the chat handoff adds its own exact commit and remote proof. Main/release/deployment/installed-update acceptance remains pending.
