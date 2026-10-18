@@ -58,6 +58,20 @@ test('cancel and restart preserve the same pre-project intent and source stage',
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('material-buildroot.image-creation.v1')).id)).toBe(before.id);
 });
 
+test('invalid pre-project name is explicitly unsaved and Return retains the last valid choice',async({page})=>{
+ const {app,creation}=await begin(page);const name=creation.getByRole('textbox',{name:'Image name',exact:true});
+ await name.fill('retained-name');
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('material-buildroot.image-creation.v1')).name)).toBe('retained-name');
+ const before=await page.evaluate(()=>localStorage.getItem('material-buildroot.image-creation.v1'));
+ await name.fill('../invalid-name');
+ await expect(creation.locator('.name-save-warning')).toContainText('This name is not saved. The last valid name is retained');
+ await expect(creation.getByRole('button',{name:'Next: source and runtime',exact:true})).toBeDisabled();
+ expect(await page.evaluate(()=>localStorage.getItem('material-buildroot.image-creation.v1'))).toBe(before);
+ await creation.getByRole('button',{name:'Return to Images',exact:true}).click();await page.reload();
+ await app.locator('[data-image-action="resume-draft"]').click();
+ await expect(name).toHaveValue('retained-name');await expect(creation.locator('.name-save-warning')).toHaveCount(0);
+});
+
 test('adoption transfers intent and automatically continues the same guide at Source',async({page})=>{
  const {app,creation}=await begin(page);await creation.getByRole('textbox',{name:'Image name',exact:true}).fill('appliance-image');
  await next(creation);await clone(app);
