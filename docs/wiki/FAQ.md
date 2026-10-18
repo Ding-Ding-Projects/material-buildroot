@@ -1,6 +1,6 @@
 # Common questions
 
-[é¦™æ¸¯ç²µèªž](FAQ.zh-HK.md) Â· [Wiki home](Home.md)
+[香港粵語](FAQ.zh-HK.md) · [Wiki home](Home.md)
 
 ## Can I download Material Buildroot now?
 
