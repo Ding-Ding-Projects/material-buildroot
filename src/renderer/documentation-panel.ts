@@ -368,6 +368,13 @@ export class DocumentationPanel extends LitElement {
       }
     }
   }
+  /** Context help accepts only a host-issued article identity. */
+  async openArticle(id: string) {
+    if (!/^doc-[a-f0-9]{64}$/.test(id)) return;
+    await this.refresh();
+    if (!this.index?.articles.some(article => article.id === id)) return;
+    await this.open(id);
+  }
   private async open(id: string, anchor = "", historyIndex?: number) {
     const token = ++this.serial;
     this.loading = true;
