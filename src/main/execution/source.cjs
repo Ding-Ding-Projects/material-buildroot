@@ -35,6 +35,9 @@ function identity(value) {
   const stat = fs.statSync(value);
   return `${stat.dev}:${stat.ino}`;
 }
+function configIdentity(info) {
+  return [info.dev, info.ino, info.mode, info.nlink, info.size, info.mtimeNs, info.ctimeNs].map(String).join(":");
+}
 class SourceService {
   constructor({
     git = "git",
@@ -53,9 +56,27 @@ class SourceService {
     this.hooks = fs.mkdtempSync(
       path.join(os.tmpdir(), "material-empty-hooks-"),
     );
+    this.hooks = fs.realpathSync(this.hooks);
+    this.hooksIdentity = identity(this.hooks);
+    this.globalConfig = path.join(this.hooks, "empty-global-config");
+    fs.writeFileSync(this.globalConfig, "", { flag: "wx", mode: 0o600 });
+    this.globalConfigIdentity = configIdentity(fs.lstatSync(this.globalConfig, { bigint: true }));
   }
   dispose() {
+    if (!fs.existsSync(this.hooks)) return;
+    if (fs.lstatSync(this.hooks).isSymbolicLink() || fs.realpathSync(this.hooks) !== this.hooks || identity(this.hooks) !== this.hooksIdentity) throw Error("source-global-config-changed");
     fs.rmSync(this.hooks, { recursive: true, force: true });
+  }
+  verifyGlobalConfig() {
+    let descriptor;
+    try {
+      if (fs.lstatSync(this.hooks).isSymbolicLink() || fs.realpathSync(this.hooks) !== this.hooks || identity(this.hooks) !== this.hooksIdentity) throw Error();
+      const info = fs.lstatSync(this.globalConfig, { bigint: true });
+      if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1n || info.size !== 0n || configIdentity(info) !== this.globalConfigIdentity) throw Error();
+      descriptor = fs.openSync(this.globalConfig, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0));
+      if (configIdentity(fs.fstatSync(descriptor, { bigint: true })) !== this.globalConfigIdentity || fs.readSync(descriptor, Buffer.alloc(1), 0, 1, 0) !== 0 || configIdentity(fs.lstatSync(this.globalConfig, { bigint: true })) !== this.globalConfigIdentity) throw Error();
+    } catch { throw Object.assign(Error("source-global-config-changed"), { code: "SOURCE_GLOBAL_CONFIG_CHANGED" }); }
+    finally { if (descriptor !== undefined) fs.closeSync(descriptor); }
   }
   grantRoot(root) {
     root = directory(root);
@@ -109,6 +130,7 @@ class SourceService {
     return url.href;
   }
   async run(cwd, args) {
+    this.verifyGlobalConfig();
     const result = await boundedProcess(
       this.git,
       [
@@ -132,12 +154,13 @@ class SourceService {
           PATH: process.env.PATH,
           SystemRoot: process.env.SystemRoot,
           GIT_CONFIG_NOSYSTEM: "1",
-          GIT_CONFIG_GLOBAL: os.platform() === "win32" ? "NUL" : "/dev/null",
+          GIT_CONFIG_GLOBAL: this.globalConfig,
           GIT_TERMINAL_PROMPT: "0",
           GIT_LFS_SKIP_SMUDGE: "1",
         },
       },
     ).completion;
+    this.verifyGlobalConfig();
     if (result.state !== "succeeded") {
       const error = Error(`git-${result.state}`);
       error.result = { state: result.state, code: result.code };

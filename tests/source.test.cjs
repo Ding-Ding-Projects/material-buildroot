@@ -11,6 +11,37 @@ function fixture(t, options = {}) {
   fs.writeFileSync(path.join(origin, 'Makefile'), 'all:\n\t@echo second\n'); git('commit', '-am', 'second'); const second = git('rev-parse', 'HEAD');
   const service = new SourceService({ allowLocalFixture: true, acquireSourceLock: async () => () => {}, ...options }); t.after(() => service.dispose()); const grant = service.grantRoot(root); return { root, origin, first, second, service, grant };
 }
+test('valid synthetic repository adoption uses a bound private empty global configuration', async t => {
+  const { service, grant, second } = fixture(t);
+  const adopted = await service.adopt({ grantId: grant.grantId, directory: 'origin', trustedSource: true });
+  assert.equal(adopted.revision, second);
+  assert.equal(fs.lstatSync(service.globalConfig).isFile(), true);
+  assert.equal(fs.lstatSync(service.globalConfig).isSymbolicLink(), false);
+  assert.equal(fs.readFileSync(service.globalConfig).length, 0);
+  const hooks = service.hooks; service.dispose(); assert.equal(fs.existsSync(hooks), false);
+});
+test('empty source global configuration rejects content, replacement and aliases before native commands', async t => {
+  for (const kind of ['content', 'replacement', 'hardlink', 'junction']) {
+    const { service, grant, root } = fixture(t);
+    const target = path.join(root, 'harmless-empty-config'); fs.writeFileSync(target, '');
+    if (kind === 'content') fs.writeFileSync(service.globalConfig, '[alias]\nfixture = status\n');
+    else {
+      fs.renameSync(service.globalConfig, service.globalConfig + '-original');
+      if (kind === 'replacement') fs.writeFileSync(service.globalConfig, '');
+      else if (kind === 'hardlink') fs.linkSync(target, service.globalConfig);
+      else fs.symlinkSync(root, service.globalConfig, process.platform === 'win32' ? 'junction' : 'dir');
+    }
+    await assert.rejects(service.adopt({ grantId: grant.grantId, directory: 'origin', trustedSource: true }), { code: 'SOURCE_GLOBAL_CONFIG_CHANGED' });
+    assert.equal(fs.readFileSync(target).length, 0);
+  }
+});
+test('source disposal refuses a replaced hooks directory and preserves its replacement', t => {
+  const {service,root}=fixture(t),original=service.hooks+'-original';
+  fs.renameSync(service.hooks,original);fs.mkdirSync(service.hooks);const marker=path.join(service.hooks,'marker');fs.writeFileSync(marker,'public fixture');
+  try{assert.throws(()=>service.dispose(),/source-global-config-changed/);assert.equal(fs.readFileSync(marker,'utf8'),'public fixture');}
+  finally{fs.rmSync(service.hooks,{recursive:true});fs.renameSync(original,service.hooks);}
+});
+
 test('clone preserves destination and upgrades only reviewed clean immutable revision', async t => {
   const { origin, first, second, service, grant } = fixture(t);
   const clone = await service.clone({ grantId: grant.grantId, directory: 'checkout', url: origin, ref: first, trustedSource: true }); assert.equal(clone.revision, first); assert.equal(clone.dirty, false);
