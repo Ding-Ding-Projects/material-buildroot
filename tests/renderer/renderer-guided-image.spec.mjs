@@ -42,20 +42,25 @@ async function configure(panel){await panel.getByRole('checkbox',{name:'Apply th
 test('five stages preserve metadata and separate configuration, build and result',async({page})=>{
  const panel=await open(page);
  await expect(panel).toContainText('1 / 5');
+ await expect(panel.locator('md-filled-button')).toHaveCount(1);await expect(panel.locator('md-filled-button')).toContainText('Next');
  await panel.getByRole('textbox',{name:'Image name',exact:true}).fill('rescue-disc');
  await next(panel);await expect(panel.getByRole('heading',{name:'Where will it be built?',exact:true})).toBeVisible();
  await panel.getByRole('button',{name:'Set up runtime',exact:true}).click();
  expect(await page.evaluate(()=>window.routes)).toEqual([{detail:{destination:'runtime',workspaceId:'guided-a'},bubbles:true,composed:true}]);
  await next(panel);await expect(panel.getByRole('heading',{name:'Choose image contents',exact:true})).toBeVisible();
  await next(panel);await expect(panel.getByRole('heading',{name:'Review your image',exact:true})).toBeVisible();
+ await expect(panel.locator('md-filled-button')).toHaveCount(1);await expect(panel.locator('md-filled-button')).toContainText('Configure BIOS ISO');
  await expect(panel.getByRole('button',{name:'Next',exact:true})).toBeDisabled();
  expect(await page.evaluate(()=>window.calls.some(r=>r.action.endsWith('Apply')||r.action.endsWith('.apply')||r.action==='imagePreset.isoBuild'))).toBe(false);
- await configure(panel);await next(panel);
+ await configure(panel);await expect(panel.locator('md-filled-button')).toContainText('Next');await next(panel);
+ await expect(panel.locator('md-filled-button')).toHaveCount(1);await expect(panel.locator('md-filled-button')).toContainText('Build ISO image');
  await expect(panel).toContainText('rescue-disc.iso');
  await panel.getByRole('button',{name:'Build ISO image',exact:true}).click();
+ await expect(panel.locator('md-filled-button')).toHaveCount(1);await expect(panel.locator('md-filled-button')).toContainText('Refresh ISO job and log');
  expect(await page.evaluate(()=>window.calls.find(r=>r.action==='imagePreset.isoBuild'))).toEqual({action:'imagePreset.isoBuild',workspaceId:'guided-a',revision:'revision-3',profile:'x86_64-bios-grub2-initrd',runtime:{kind:'wsl',distribution:'Private-runtime-reference'},jobs:2});
  await panel.getByRole('button',{name:'Cancel ISO build',exact:true}).click();await expect(panel).toContainText('cancelling');
  await page.evaluate(()=>window.currentJobState='succeeded');await panel.getByRole('button',{name:'Refresh ISO job and log',exact:true}).click();
+ await expect(panel.locator('md-filled-button')).toHaveCount(1);await expect(panel.locator('md-filled-button')).toContainText('Inspect ISO output');
  await panel.getByRole('button',{name:'Inspect ISO output',exact:true}).click();
  await expect(panel).toContainText('has not passed BIOS ISO structural checks');await expect(panel).toContainText('boot execution remains unverified');
  expect(await page.evaluate(()=>window.calls.find(r=>r.action==='artifacts.inspect').path)).toBe('images/rootfs.iso9660');
@@ -168,4 +173,37 @@ test('clearing storage elsewhere raises a conflict without deleting the local dr
  await expect(panel.getByRole('alert')).toContainText('another window');await expect(panel.getByRole('textbox',{name:'Image name',exact:true})).toHaveValue('local-draft');
  await panel.getByRole('button',{name:'Keep this draft',exact:true}).click();expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-guided-a')).name)).toBe('local-draft');
  expect(await panel.evaluate(el=>[el.isoOutcome,el.isoApproved])).toEqual([undefined,false]);
+});
+
+test('successful complete scoped absence permits explicit local detach and fresh setup',async({page})=>{
+ const panel=await open(page,{saved:{version:2,revision:1,step:2,mode:'easy',name:'keep-this-name',target:'bios-iso',preset:'server',desktop:'none',ssh:true,boardId:null,jobId:'missing-job'}});
+ await expect(panel.getByRole('button',{name:'Detach unavailable saved job',exact:true})).toHaveCount(0);
+ await panel.getByRole('button',{name:'Review project runtime',exact:true}).click();expect(await page.evaluate(()=>window.routes.at(-1).detail)).toEqual({destination:'runtime',workspaceId:'guided-a'});
+ await panel.getByRole('button',{name:'Refresh ISO job and log',exact:true}).click();
+ await expect(panel).toContainText('does not prove process termination');
+ await panel.getByRole('button',{name:'Detach unavailable saved job',exact:true}).click();
+ await expect(panel.getByRole('heading',{name:'Where will it be built?',exact:true})).toBeVisible();await expect(panel).toContainText('No process was stopped');
+ await expect(panel.getByRole('heading',{name:'Where will it be built?',exact:true})).toBeFocused();
+ expect(await panel.evaluate(el=>[el.isoJob,el.isoApproved,el.approved,el.isoOutcome,el.isoRuntime])).toEqual([undefined,false,false,undefined,undefined]);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-guided-a')).jobId)).toBeNull();
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('iso-workflow-guided-a')))).toMatchObject({name:'keep-this-name',preset:'server',ssh:true,step:1});
+ await expect(panel.getByRole('button',{name:'Check ISO prerequisites',exact:true})).toBeEnabled();
+ expect(await page.evaluate(()=>window.calls.some(r=>r.action.includes('Cancel')||r.action==='imagePreset.isoBuild'))).toBe(false);
+});
+
+for(const reply of [{ok:false,code:'UNAUTHORIZED'},{ok:false,code:'NETWORK_UNAVAILABLE'},{ok:true,result:{jobs:[]}},{ok:true,result:[{}]}])test(`failed or malformed lookup cannot authorize detach: ${JSON.stringify(reply)}`,async({page})=>{
+ const panel=await open(page,{saved:{version:1,step:2,jobId:'missing-job'}});
+ await page.evaluate(reply=>{const previous=window.studio.operations;window.studio.operations=request=>request.action==='jobs.project'?Promise.resolve(reply):previous(request);},reply);
+ await panel.getByRole('button',{name:'Refresh ISO job and log',exact:true}).click();
+ await expect(panel.getByRole('button',{name:'Detach unavailable saved job',exact:true})).toHaveCount(0);
+ await panel.evaluate(el=>el.detachUnavailableJob());expect(await panel.evaluate(el=>el.isoJob.id)).toBe('missing-job');
+ await expect(panel.getByRole('button',{name:'Build ISO image',exact:true})).toBeDisabled();
+ await panel.getByRole('button',{name:'Review project source',exact:true}).click();expect(await page.evaluate(()=>window.routes.at(-1).detail)).toEqual({destination:'source',workspaceId:'guided-a'});
+});
+
+test('a failed retry revokes earlier absence evidence',async({page})=>{
+ const panel=await open(page,{saved:{version:1,step:2,jobId:'missing-job'}});await panel.getByRole('button',{name:'Refresh ISO job and log',exact:true}).click();
+ await expect(panel.getByRole('button',{name:'Detach unavailable saved job',exact:true})).toBeVisible();
+ await page.evaluate(()=>{const previous=window.studio.operations;window.studio.operations=request=>request.action==='jobs.project'?Promise.resolve({ok:false,code:'UNAUTHORIZED'}):previous(request);});
+ await panel.getByRole('button',{name:'Refresh ISO job and log',exact:true}).click();await expect(panel.getByRole('button',{name:'Detach unavailable saved job',exact:true})).toHaveCount(0);
 });
