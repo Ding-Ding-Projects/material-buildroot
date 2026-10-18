@@ -7,6 +7,7 @@ import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
 import {materialIcon} from './material-icons';
 import { workspaceStyles } from './workspace-styles';
+import {captureOwnedStatus,displayOwnedStatus} from './owned-status';
 export class ImagePresetsPanel extends LitElement {
  static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number}};
  static styles=[workspaceStyles,css`[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}`];
@@ -22,6 +23,17 @@ export class ImagePresetsPanel extends LitElement {
  private moveIso(step:number){this.isoStep=Math.max(0,Math.min(2,step));this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>('[data-step]:not([hidden]) h4')?.focus());}
  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
  private changed(){this.resetIso();this.preview=undefined;this.approved=false;this.outcome=undefined;this.revision++;}
+ permissionReviewCurrent(epoch:number){return this.isConnected&&epoch===this.isoEpoch;}
+ async returnFromPermission(epoch:number,recheck=false){
+  if(!this.permissionReviewCurrent(epoch))return;
+  if(recheck)await this.isoAction('plan');
+  await this.updateComplete;if(!this.permissionReviewCurrent(epoch))return;
+  const heading=this.renderRoot.querySelector<HTMLElement>('[data-step]:not([hidden]) h4');heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});
+ }
+ private reviewPermission(){
+  if(this.disabled||this.busy||this.isoBusy||this.isoActive||!this.workspaceId)return;
+  this.saveIso();this.dispatchEvent(new CustomEvent('review-iso-permission',{bubbles:true,composed:true,detail:{workspaceId:this.workspaceId,epoch:this.isoEpoch}}));
+ }
  private async run(action:string){
   if(this.busy||this.isoBusy||this.isoActive||this.disabled||!this.workspaceId||!window.studio?.operations)return;
   this.busy=true;this.message='';this.revision++;const workspaceId=this.workspaceId;
@@ -82,7 +94,8 @@ export class ImagePresetsPanel extends LitElement {
    }
   }catch(error){if(current()){
    if(action==='plan'||action==='apply'||action==='build'){this.isoPlan=undefined;this.isoApproved=false;this.isoOutcome=undefined;}
-   this.isoMessage=this.l('Operation not confirmed. Refresh the plan or job before retrying.','操作未確認，重試前請重新整理計劃或工作。',true)+' '+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:'');
+   const code=error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:'';
+   this.isoMessage=captureOwnedStatus(this,'isoMessage',this.l.bind(this),l=>(['KCONFIG_SEMANTICS_UNAVAILABLE','KCONFIG_SOURCE_TRUST_REQUIRED','KCONFIG_SOURCE_TRUST_CHANGED'].includes(code)?l('ISO compatibility is not confirmed. Choose Review source execution permission, review the exact source and runtime, then explicitly allow the scope if you trust it. Permission is not granted automatically.','ISO 相容性未確認。請選「核對來源執行權限」，核對確切來源同執行環境，信任後先明確批准範圍。唔會自動授權。'):['KCONFIG_RUNTIME_UNAVAILABLE','RUNTIME_REQUIRED'].includes(code)?l('A usable project runtime is required. Open Projects & runtime, select and authorize the project environment, then return and check ISO prerequisites again.','需要可用嘅專案執行環境。請開啟「專案同執行環境」，選擇同授權專案環境，再返回重新檢查 ISO 所需設定。'):l('Operation not confirmed. Refresh the plan or job before retrying.','操作未確認，重試前請重新整理計劃或工作。'))+' '+code);
   }}finally{this.isoBusy=false;if(current())this.saveIso();this.revision++;}
  }
  private get isoActive(){return this.isoJob&&['queued','running','dispatching','cancelling'].includes(this.isoJob.state);}
@@ -106,6 +119,8 @@ export class ImagePresetsPanel extends LitElement {
    <p>${this.l('Use an adopted x86-64 project with Linux enabled and a trusted configuration. This profile adds GRUB2 and an initial RAM filesystem to the selected source. UEFI and other architectures are not supported by this profile. Existing package and kernel choices remain yours.','請使用已接入、啟用 Linux 同信任設定嘅 x86-64 專案。呢個組合會為所選來源加入 GRUB2 同初始記憶體檔案系統，唔支援 UEFI 或其他架構。現有套件同核心選擇會保留。',true)}</p>
    <h4>${this.l('1. Check the selected source','1. 檢查所選來源',true)}</h4>
    <md-outlined-button ?disabled=${disabled||this.isoActive} @click=${()=>this.isoAction('plan')}>${this.l('Check ISO prerequisites','檢查 ISO 所需設定',true)}</md-outlined-button>
+   <md-outlined-button ?disabled=${disabled||this.isoActive} @click=${this.reviewPermission}>${materialIcon('security','icon')}${this.l('Review source execution permission','核對來源執行權限',true)}</md-outlined-button>
+   <p>${this.l('First-time setup may need permission to inspect this source. Review opens the exact source and runtime below; nothing is approved until you select the consent checkbox and Allow this scope.','首次設定可能需要來源檢視權限。核對會開啟下方確切來源同執行環境；只有勾選同意並按「批准此範圍」後先授權。',true)}</p>
    ${this.isoPlan?html`<p>${this.isoPlan.profile} · BIOS</p><ul>${this.isoPlan.requirements.map((r:any)=>html`<li><code>${r.symbol}</code>: ${r.selectable?this.l('Available','可用',true):r.reason}</li>`)}</ul><p>${this.isoPlan.applicable?this.l('Configuration requests can be applied. No ISO has been built.','可以套用設定要求，尚未建立 ISO。',true):this.l('This configuration cannot use the profile. Select an x86-64 Linux board and resolve the unavailable requirements, then check again.','呢個設定未能使用此組合。請選擇 x86-64 Linux 板卡並處理不可用設定，再重新檢查。',true)}</p>
    <label><md-checkbox aria-label=${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)} ?disabled=${disabled||!this.isoPlan.applicable} .checked=${this.isoApproved} @change=${(e:Event)=>{this.isoApproved=(e.target as HTMLInputElement).checked;this.revision++;}}></md-checkbox>${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)}</label>
    <md-outlined-button ?disabled=${disabled||!this.isoApproved||!this.isoPlan.applicable} @click=${()=>this.isoAction('apply')}>${this.l('Configure BIOS ISO','設定 BIOS ISO',true)}</md-outlined-button>`:nothing}
@@ -129,7 +144,7 @@ export class ImagePresetsPanel extends LitElement {
    </div>
    ${this.isoMode==='easy'?html`<nav class="step-nav" aria-label=${this.l('ISO guide steps','ISO 指南步驟',true)}><md-outlined-button ?disabled=${disabled||this.isoStep===0} @click=${()=>this.moveIso(this.isoStep-1)}>${materialIcon('arrow_back','icon')}${this.l('Back','返回',true)}</md-outlined-button>${this.isoStep<2?html`<md-outlined-button ?disabled=${disabled||(this.isoStep===0?!this.isoOutcome?.effective:!['succeeded','failed','cancelled','interrupted'].includes(this.isoJob?.state))} @click=${()=>this.moveIso(this.isoStep+1)}>${materialIcon('arrow_forward','icon')}${this.l('Next','下一步',true)}</md-outlined-button>`:nothing}</nav>`:nothing}
    ${this.isoBusy?html`<md-linear-progress indeterminate aria-label=${this.l('ISO operation in progress','ISO 操作進行中',true)}></md-linear-progress>`:nothing}
-   <p role="status" aria-live="polite">${this.isoMessage}</p>
+   <p role="status" aria-live="polite">${displayOwnedStatus(this,'isoMessage',this.isoMessage,this.language)}</p>
   </section>`;
  }
  render(){return html`${this.isoWorkflow()}<section ?hidden=${this.isoMode==='easy'} class="panel stack"><h3>${this.l('Image presets','映像預設組合',true)}</h3>

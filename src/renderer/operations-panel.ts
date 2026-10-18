@@ -34,6 +34,7 @@ import "./package-panel";
 import "./managed-ollama-panel";
 import { workspaceStyles } from "./workspace-styles";
 type Reply = { ok: true; result: any } | { ok: false; code: string };
+type IsoPermissionContext={panel:import('./image-presets-panel').ImagePresetsPanel;workspaceId:string;generation:number;isoEpoch:number;status:'review'|'approved'};
 type Job = {
   id: string;
   kind: string;
@@ -63,6 +64,7 @@ export class OperationsPanel extends LitElement {
     configDomain: { state: true },
     configTrustPreview: { state: true },
     configTrustAccepted: { state: true },
+    isoPermission: { state: true },
     changes: { state: true },
     defconfigs: { state: true },
     artifacts: { state: true },
@@ -125,6 +127,15 @@ export class OperationsPanel extends LitElement {
   private logCursor = 0;
   private logMore = false;
   private confirmingClean = false;
+  private configTrustEpoch=0;
+  private isoPermission?:IsoPermissionContext;
+  disconnectedCallback(){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;super.disconnectedCallback();}
+  protected willUpdate(changed:Map<string,unknown>){
+    if(['workspace','configDomain','configurationGeneration','tab'].some(key=>changed.has(key))){
+      this.configTrustEpoch++;this.configTrustPreview=undefined;this.configTrustAccepted=false;
+      if(this.isoPermission&&!this.currentIsoPermission(this.isoPermission))this.isoPermission=undefined;
+    }
+  }
   protected updated(changed: Map<string, unknown>) {
     if (!changed.has("workspace")) return;
     const workspaceId = this.workspace?.workspaceId;
@@ -486,27 +497,54 @@ export class OperationsPanel extends LitElement {
       this.logMore = result.hasMore;
     }
   }
-  private async previewConfigTrust() {
-    if (!this.workspace) return;
+  private currentIsoPermission(context:IsoPermissionContext){return this.isoPermission===context&&context.panel.isConnected&&context.panel.workspaceId===context.workspaceId&&context.panel.permissionReviewCurrent(context.isoEpoch)&&this.workspace?.workspaceId===context.workspaceId&&this.configurationGeneration===context.generation&&this.configDomain==='buildroot'&&this.tab==='config';}
+  private async reviewIsoPermission(event:CustomEvent<{workspaceId:string;epoch:number}>){
+    const panel=event.currentTarget as import('./image-presets-panel').ImagePresetsPanel;
+    if(this.pending||Object.keys(this.changes).length||event.detail?.workspaceId!==this.workspace?.workspaceId||!panel.permissionReviewCurrent(event.detail.epoch))return;
+    this.configDomain='buildroot';this.tab='config';
+    this.isoPermission={panel,workspaceId:event.detail.workspaceId,generation:this.configurationGeneration,isoEpoch:event.detail.epoch,status:'review'};
+    const context=this.isoPermission;
+    await this.updateComplete;
+    if(!this.currentIsoPermission(context))return;
+    await this.previewConfigTrust(true);
+    await this.updateComplete;
+    if(!this.currentIsoPermission(context))return;
+    const section=this.renderRoot.querySelector<HTMLElement>('#source-execution-permission');section?.focus();section?.scrollIntoView({block:'start',behavior:'auto'});
+  }
+  private async returnToIso(recheck=false){
+    const context=this.isoPermission;if(!context||!this.currentIsoPermission(context))return;
+    await this.updateComplete;
+    if(this.currentIsoPermission(context))await context.panel.returnFromPermission(context.isoEpoch,recheck);
+  }
+  private async previewConfigTrust(preserveIso=false) {
+    if (!this.workspace||this.pending) return;
+    if(!preserveIso)this.isoPermission=undefined;
+    const epoch=++this.configTrustEpoch;
     this.configTrustAccepted = false;
     this.configTrustPreview = undefined;
     const workspaceId = this.workspace.workspaceId, domain = this.configDomain;
     const result = await this.run("config.trustPreview", { workspaceId, domain });
-    if (this.workspace?.workspaceId === workspaceId && this.configDomain === domain && result !== undefined) this.configTrustPreview = result;
+    if(epoch!==this.configTrustEpoch||this.workspace?.workspaceId!==workspaceId||this.configDomain!==domain)return;
+    if(result!==undefined)this.configTrustPreview=result;
+    else if(preserveIso)this.feedback=captureOwnedStatus(this,'feedback',this.l.bind(this),l=>l('Permission review is unavailable. Check project runtime access in Projects & runtime, then review again. No permission was granted and ISO compatibility remains unconfirmed.','未能核對權限。請喺「專案同執行環境」檢查專案環境存取，再重新核對。未有授權，ISO 相容性仍未確認。'));
   }
   private async grantConfigTrust() {
-    if (!this.workspace || !this.configTrustPreview || !this.configTrustAccepted) return;
-    const result = await this.run("config.trustGrant", { workspaceId: this.workspace.workspaceId, challengeId: this.configTrustPreview.id, trusted: true });
-    const discoveryOnly = this.configTrustPreview?.discoveryOnly;
+    if (!this.workspace || !this.configTrustPreview || !this.configTrustAccepted||this.pending) return;
+    const preview=this.configTrustPreview,workspaceId=this.workspace.workspaceId,domain=this.configDomain,epoch=this.configTrustEpoch,context=this.isoPermission;
+    const result = await this.run("config.trustGrant", { workspaceId, challengeId: preview.id, trusted: true });
+    if(epoch!==this.configTrustEpoch||this.workspace?.workspaceId!==workspaceId||this.configDomain!==domain||this.configTrustPreview!==preview)return;
+    const discoveryOnly = preview.discoveryOnly;
     this.configTrustAccepted = false;
     this.configTrustPreview = undefined;
-    if (result !== undefined) {
+    if (result?.trusted===true&&result.domain===preview.domain) {
+      if(context){if(this.currentIsoPermission(context)&&result.domain==='buildroot'&&!discoveryOnly){this.isoPermission={...context,status:'approved'};await this.returnToIso(true);}return;}
       if (discoveryOnly) await this.previewConfigTrust();
       else await this.inspectConfig();
-    }
+    }else if(context&&this.currentIsoPermission(context))this.feedback=captureOwnedStatus(this,'feedback',this.l.bind(this),l=>l('Permission was not confirmed. It may have expired, changed or been declined. Review the current scope again; ISO compatibility has not been checked again.','未能確認權限，可能已過期、有變更或未獲批准。請重新核對目前範圍；尚未重新檢查 ISO 相容性。'));
   }
   private async revokeConfigTrust() {
     if (!this.workspace) return;
+    this.configTrustEpoch++;this.isoPermission=undefined;this.configurationGeneration++;
     await this.run("config.trustRevoke", { workspaceId: this.workspace.workspaceId });
     this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {};
   }
@@ -913,7 +951,7 @@ export class OperationsPanel extends LitElement {
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`<image-presets-panel .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
+    return html`<image-presets-panel @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
       <div class="row">
         <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
         <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
@@ -929,10 +967,12 @@ export class OperationsPanel extends LitElement {
       </div>
       <p>${this.l("Authoritative inspection can execute commands from the selected Make/Kconfig sources. Review the exact source and runtime before allowing it. WSL commands have your distribution account's access; the container route has read-only source mounts and no network. Configuration apply uses the admitted writable build route.","權威檢視可以執行所選 Make／Kconfig 來源入面嘅指令。批准前請核對確切來源同執行環境。WSL 指令具有發行版帳戶嘅存取權；容器路線使用唯讀來源掛載同停用網絡。套用設定會使用已授權嘅可寫建置路線。",true)}</p>
       <div class="row">
-        <md-outlined-button ?disabled=${this.pending} @click=${this.previewConfigTrust}>${this.l("Review source execution permission","核對來源執行權限",true)}</md-outlined-button>
+        <md-outlined-button ?disabled=${this.pending} @click=${()=>this.previewConfigTrust()}>${this.l("Review source execution permission","核對來源執行權限",true)}</md-outlined-button>
         <md-text-button ?disabled=${this.pending} @click=${this.revokeConfigTrust}>${this.l("Revoke configuration permission","撤銷設定權限",true)}</md-text-button>
       </div>
-      ${this.configTrustPreview ? html`<section class="panel stack" aria-label=${this.l("Source execution permission","來源執行權限",true)}>
+      ${this.configTrustPreview||this.isoPermission ? html`<section id="source-execution-permission" tabindex="-1" class="panel stack" aria-label=${this.l("Source execution permission","來源執行權限",true)}>
+        ${this.isoPermission?html`<p role="status">${this.isoPermission.status==='approved'?this.l("This scope was approved. ISO compatibility is checked separately in the guide; approval does not configure or build an image.","已批准此範圍。指南會另行檢查 ISO 相容性；批准唔代表已設定或建立映像。",true):this.l("Review this exact scope for the ISO guide. You can return without granting permission.","請為 ISO 指南核對此確切範圍。你可以唔授權而返回。",true)}</p><md-outlined-button ?disabled=${this.pending} @click=${()=>this.returnToIso()}>${materialIcon('arrow_back','icon')}${this.l("Return to ISO guide","返回 ISO 指南",true)}</md-outlined-button>${!this.configTrustPreview?html`<md-outlined-button ?disabled=${this.pending} @click=${()=>this.previewConfigTrust(true)}>${this.l("Review current scope again","重新核對目前範圍",true)}</md-outlined-button>`:nothing}`:nothing}
+        ${this.configTrustPreview?html`
         <h3>${this.configTrustPreview.domain} · ${this.l("Review exact scope","核對確切範圍",true)}</h3>
         <p>${this.configTrustPreview.discoveryOnly ? this.l("First allow this Buildroot revision to discover the selected component. A second review will name that component's actual source.","先批准呢個 Buildroot 修訂以尋找所選元件。第二次核對會列出該元件嘅實際來源。",true) : this.l("Permission lasts up to 15 minutes in this session and expires when source, configuration, roots or runtime change.","權限只喺本次工作階段維持最多 15 分鐘；來源、設定、目錄或執行環境一改就失效。",true)}</p>
         <dl><dt>${this.l("Source","來源",true)}</dt><dd class="symbol">${this.configTrustPreview.sourceRoot}</dd>
@@ -941,8 +981,9 @@ export class OperationsPanel extends LitElement {
         <dt>${this.l("Source revision","來源修訂",true)}</dt><dd class="symbol">${this.configTrustPreview.sourceRevision}</dd>
         <dt>${this.l("Configuration revision","設定修訂",true)}</dt><dd class="symbol">${this.configTrustPreview.configRevision}</dd>
         <dt>${this.l("External sources","外部來源",true)}</dt><dd class="symbol">${this.configTrustPreview.externalRoots.join(" · ") || this.l("None","無",true)}</dd></dl>
-        <label class="row"><md-checkbox ?disabled=${this.pending} .checked=${this.configTrustAccepted} @change=${(event: Event) => this.configTrustAccepted = (event.target as any).checked}></md-checkbox>${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.","批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。",true)}</label>
+        <label class="row"><md-checkbox aria-label=${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.","批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。",true)} ?disabled=${this.pending} .checked=${this.configTrustAccepted} @change=${(event: Event) => this.configTrustAccepted = (event.target as any).checked}></md-checkbox>${this.l("Allow execution of this exact source revision in this runtime for configuration inspection and reconciliation.","批准喺呢個執行環境執行呢個確切來源修訂，用作檢視同協調設定。",true)}</label>
         <md-filled-button ?disabled=${this.pending || !this.configTrustAccepted} @click=${this.grantConfigTrust}>${this.l("Allow this scope","批准此範圍",true)}</md-filled-button>
+        `:nothing}
       </section>` : nothing}
       ${this.config
         ? html`<p class="notice">
