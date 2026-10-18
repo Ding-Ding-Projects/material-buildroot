@@ -69,6 +69,7 @@ export class ExecutionService {
     externalTrees: string[];
   };
   revoke(grantId: string): void;
+  runIsoOutputLifecycle(request: { grantId: string; runtime: {kind:"wsl"; distribution:string}; operation:"prepare"; jobId:string } | { grantId:string; runtime:{kind:"wsl"; distribution:string}; operation:"capture"; jobId:string; preparationSha256:string }, options: { signal?:AbortSignal; onOwnership(receipt:Readonly<OwnershipReceipt>, stage:Readonly<{operation:"prepare"|"capture";jobId:string}>):void|Promise<void> }):Promise<{state:"succeeded"|"failed"|"cancelled"|"runtime-cleanup-failed";code:number|null;ownership:OwnershipReceipt|null;cleanup:CleanupVerdict;stage:Readonly<{operation:"prepare"|"capture";jobId:string}>;observation:unknown|null;errorCode?:string}>;
   validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
   reconcileCleanup(receipt: unknown): Promise<CleanupVerdict>;
   prepareDocker(request: { grantId: string; runtime: ExecutionRuntime }): Promise<{ name: string; daemonId: string; uid: number; gid: number; state: "prepared"; permissions: "unverified"; retained: true }>;
