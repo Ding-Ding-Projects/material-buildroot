@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+import MarkdownIt from 'markdown-it';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.dirname(here);
@@ -43,6 +44,34 @@ async function chooseM3(locator,value){
  if(await locator.evaluate(element=>element.value)===value)return;
  await Promise.all([locator.evaluate(element=>new Promise(resolve=>element.addEventListener('opened',()=>resolve(true),{once:true}))),locator.click()]);
  await Promise.all([locator.evaluate(element=>new Promise(resolve=>element.addEventListener('closed',()=>resolve(true),{once:true}))),page.locator('md-select-option[value="'+value+'"]').click()]);
+}
+/** Follow the visitor's real tab catalogue instead of interacting with hidden panels. */
+async function openVisitorControl(selector){
+ const control=page.locator(selector).first();
+ if(await control.isVisible())return control;
+ const section=await control.evaluate(element=>{const panel=element.closest('[role="tabpanel"]');return panel?{id:panel.id,title:panel.querySelector('h2')?.textContent.trim().replace(/\s+/g,' ')}:null;});
+ assert.ok(section?.id&&section.title,`Hidden visitor control has no catalogued panel: ${selector}`);
+ await page.locator('#browser-native-tabs').getByRole('button',{name:/^(New tab|新增分頁)(?: ·|$)/}).click();
+ const catalog=page.locator('md-dialog[open]').filter({has:page.locator('[slot="headline"]').filter({hasText:/Open a visitor tool tab|開啟訪客工具分頁/})});
+ assert.equal(await catalog.count(),1,'Exactly one visitor tab catalogue must be open');
+ await catalog.getByRole('button',{name:section.title,exact:true}).click();
+ await page.waitForFunction(id=>document.getElementById(id)?.hidden===false,section.id);
+ assert.equal(await control.isVisible(),true,`Selected visitor control must be visible: ${selector}`);
+ assert.equal(await page.locator('#'+section.id).getAttribute('role'),'tabpanel');
+ return control;
+}
+async function confirmVisitorImport(){
+ await page.locator('#visitor-import').click();
+ const dialog=page.locator('md-dialog[open]').filter({has:page.locator('[slot="headline"]').filter({hasText:/Confirm local change|確認本機變更/})});
+ assert.equal(await dialog.count(),1,'Import must present its local replacement confirmation');
+ const confirm=dialog.getByRole('button',{name:/^Confirm this change/});
+ assert.equal(await confirm.isDisabled(),true,'Confirmation starts disabled');
+ await dialog.getByRole('checkbox',{name:/^I reviewed the exact affected data/}).check();
+ await dialog.getByRole('checkbox',{name:/^I authorize this replacement or reset/}).check();
+ const slider=dialog.getByRole('slider',{name:/^Move confirmation to 100 percent/});
+ await slider.focus();await slider.press('End');
+ await confirm.click();
+ await page.waitForFunction(()=>![...document.querySelectorAll('md-dialog[open]')].some(d=>d.querySelector('[slot="headline"]')?.textContent.includes('Confirm local change')));
 }
 async function ready(){await page.evaluate(async()=>{await Promise.all([...document.querySelectorAll('*')].filter(e=>e.localName.startsWith('md-')).map(e=>customElements.whenDefined(e.localName)));await Promise.all([...document.querySelectorAll('*')].filter(e=>e.updateComplete).map(e=>e.updateComplete));await document.fonts.ready;});}
 async function capture(name){const file=path.join(out,name+'.png');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await page.screenshot({path:file,fullPage:true});receipt.captures.push({file:path.relative(root,file).split(path.sep).join('/'),sha256:sha(await fs.readFile(file)),route:new URL(page.url()).pathname,viewport:page.viewportSize(),theme:await page.getAttribute('html','data-theme'),language:await page.getAttribute('html','data-language')});}
@@ -193,29 +222,54 @@ try{
  await page.goto(target);await ready();
  receipt.checks.push('Interactive guides persist browser-owned progress and cover vocabulary import/replace/clear plus unavailable shared state, verified shared-preference exit/recovery, queued intent/reauthorization/runtime quarantine, and observed non-exhaustive catalogue refresh/cancel/unknown metadata in English and Cantonese. All examples are local visitor explanations with no secrets, private vocabulary payloads or desktop execution.');
  let companionSequence=1;const companionRequests=[];
+ // Protocol-only HTTPS page fixture. Built bytes are routed without changing the
+ // production secure-context requirement or claiming a real TLS certificate test.
+ const secureVisitorBase='https://127.0.0.1:9443/material-buildroot/';
+ let fixturePairing;let unsafeCompanionProjection=true;
+ await context.route('https://127.0.0.1:9443/material-buildroot/**',async route=>{
+  const fixtureUrl=new URL(route.request().url());
+  const served=new URL(fixtureUrl.pathname,new URL(target).origin);
+  const response=await context.request.get(served.href);
+  await route.fulfill({response});
+ });
  await context.route('https://192.168.1.20:8443/**',async route=>{
-  const request=route.request(),url=new URL(request.url()),origin=new URL(target).origin;
+  const request=route.request(),url=new URL(request.url()),origin=new URL(secureVisitorBase).origin;
   const requestBody=request.postData()?request.postDataJSON():null;
   companionRequests.push({path:url.pathname,method:request.method(),body:requestBody,headers:request.headers()});
-  const cors={'access-control-allow-origin':origin,'access-control-allow-credentials':'true','access-control-allow-methods':'POST','access-control-allow-headers':'content-type,x-csrf-token','access-control-allow-private-network':'true','vary':'Origin'};
+  const cors={'access-control-allow-origin':origin,'access-control-allow-credentials':'true','access-control-allow-methods':'POST','access-control-allow-headers':'content-type,x-csrf-token,x-companion-client','access-control-allow-private-network':'true','vary':'Origin'};
   if(request.method()==='OPTIONS'){await route.fulfill({status:204,headers:cors});return;}
   const body=requestBody;let payload={};
-  if(url.pathname==='/pair')payload={csrfToken:'fixture-csrf-token-not-for-storage',nextSequence:1,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active'}};
-  else if(url.pathname==='/session')payload={nextSequence:companionSequence,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active'}};
+  if(url.pathname==='/pair'){fixturePairing={browser:body.browser,clientId:body.clientNonce,deviceName:'Fixture desktop'};payload={csrfToken:'fixture-csrf-token-not-for-storage',nextSequence:1,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active',...fixturePairing}};}
+  else if(url.pathname==='/session')payload={nextSequence:companionSequence,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',origin,scopes:['workspace:read','projects:read','jobs:read'],expiresAt:Date.now()+3600000,status:'active',...fixturePairing}};
   else if(url.pathname==='/actions'){
    companionSequence=body.sequence+1;
-   const result=body.action==='workspace.read'?{ok:true,state:{plans:[{name:'Fixture plan',runtime:'wsl',target:'image',status:'draft',notes:'fixture-private-note'}],preferences:{theme:'dark'},onboardingCompleted:false}}:body.action==='projects.list'?[{id:'fixture-project',name:'Fixture project',root:'/private/host/path',authorized:true}]:[{id:'fixture-job',kind:'build',state:'running',updatedAt:new Date().toISOString(),logs:['fixture-private-log']}];
-   payload={nextSequence:companionSequence,operation:{action:body.action,state:'succeeded'},result};
+   const result=body.action==='workspace.read'
+    ?unsafeCompanionProjection?{ok:true,state:{plans:[{name:'Fixture plan',notes:'fixture-private-note'}]}}:{revision:1,onboardingCompleted:false,plans:[{id:'fixture-plan',name:'Fixture plan',runtime:'wsl',target:'image',status:'draft',updatedAt:new Date().toISOString()}]}
+    :body.action==='projects.list'?{projects:[{id:'fixture-project',name:'Fixture project',authorized:true}]}
+    :{jobs:[{id:'fixture-job',kind:'build',state:'running',sequence:1,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),logCount:0,itemCount:0}]};
+   payload={nextSequence:companionSequence,operation:{action:body.action,state:'succeeded',sessionId:'46ac4318-4a7e-4813-9d08-f2d61691bf90'},result};
   } else if(url.pathname==='/disconnect')payload={revoked:true,session:{id:'46ac4318-4a7e-4813-9d08-f2d61691bf90',status:'revoked'}};
   else {await route.fulfill({status:404,headers:cors,body:'{}'});return;}
   await route.fulfill({status:200,headers:{...cors,'content-type':'application/json','set-cookie':'__Host-material-companion=fixture; Path=/; Secure; HttpOnly; SameSite=None'},body:JSON.stringify(payload)});
  });
- await page.goto(new URL('site/visitor.html',target).href);await ready();
+ if(new URL(target).protocol==='http:'){
+  await page.goto(new URL('site/visitor.html',target).href);await ready();await chooseLanguage('en');
+  await page.locator('#companion-endpoint').locator('input').fill('https://192.168.1.20:8443');
+  await page.locator('#companion-save-endpoint').click();
+  await page.locator('#companion-challenge').locator('textarea').fill('c'.repeat(43));
+  await page.locator('#companion-pair').click();
+  await page.waitForFunction(()=>document.querySelector('#companion-message').textContent.includes('could not complete pairing'));
+  assert.equal(companionRequests.filter(request=>request.path==='/pair').length,0,'HTTP pairing must fail before transmitting the challenge');
+  receipt.checks.push('Real served HTTP document refuses companion pairing before network transmission.');
+ }
+ await page.goto(new URL('site/visitor.html',secureVisitorBase).href);await ready();
+ assert.equal(await page.evaluate(()=>location.protocol),'https:');
  assert.equal(await page.locator('#visitor-workspace').count(),1);
  assert.match(await page.locator('#companion-title').innerText(),/Connect to your desktop/);
  await chooseLanguage('zh');
  assert.equal(await page.locator('#visitor-goal').evaluate(field=>field.label),'你想了解或完成啲乜？');
- await page.locator('[data-plan-prompt]').first().click();
+ await (await openVisitorControl('[data-plan-prompt]')).click();
+ await openVisitorControl('#visitor-goal');
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),'查看 PH09 訪客工作區工作');
  await chooseLanguage('both');
  await page.locator('#companion-endpoint').locator('input').fill('https://8.8.8.8:8443');
@@ -229,6 +283,10 @@ try{
  assert.equal(await page.locator('#companion-connected').isVisible(),true);
  assert.equal(await page.evaluate(()=>localStorage.getItem('mb-companion-endpoint-v1')),'https://192.168.1.20:8443');
  assert.equal(await page.evaluate(()=>Object.values(localStorage).some(value=>value==='fixture-csrf-token-not-for-storage')),false);
+ await page.locator('[data-companion-action="workspace.read"]').click();
+ await page.waitForFunction(()=>document.querySelector('#companion-data').textContent.includes('did not match this read-only view'));
+ assert.doesNotMatch(await page.locator('#companion-data').innerText(),/fixture-private-note|Fixture plan/,'Raw workspace response must not be rendered');
+ unsafeCompanionProjection=false;
  await page.locator('[data-companion-action="workspace.read"]').click();
  await page.waitForFunction(()=>document.querySelector('#companion-data').textContent.includes('Fixture plan'));
  assert.doesNotMatch(await page.locator('#companion-data').innerText(),/fixture-private-note|raw JSON/i);
@@ -250,7 +308,10 @@ try{
  assert.ok(companionRequests.some(item=>item.path==='/pair'&&item.body?.challenge==='c'.repeat(43)));
  assert.ok(companionRequests.some(item=>item.path==='/actions'&&item.body?.args&&Object.keys(item.body.args).length===0));
  assert.ok(companionRequests.some(item=>item.path==='/disconnect'&&item.body&&Object.keys(item.body).length===0));
+ await page.goto(new URL('site/visitor.html',target).href);await ready();await chooseLanguage('both');
+ receipt.checks.push('Companion protocol fixture uses an intercepted HTTPS document origin with actual built bytes; it does not verify a TLS connection.');
  receipt.checks.push('Companion protocol fixture verifies private-IP validation, manual challenge pairing, bounded read-only request shapes, memory-only CSRF state, safe workspace/project/job summaries, session refresh and server-confirmed disconnect. This fixture does not establish real TLS/LAN acceptance.');
+ await openVisitorControl('#visitor-goal');
  await page.locator('#visitor-goal').locator('input').fill('Review the visitor roadmap');
  await page.locator('#visitor-notes').locator('textarea').fill('Keep this note in the browser profile.');
  await page.locator('[data-check="read-roadmap"]').click();
@@ -259,18 +320,19 @@ try{
  await page.reload();await ready();
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),'Review the visitor roadmap');
  assert.equal(await page.locator('#visitor-notes').locator('textarea').inputValue(),'Keep this note in the browser profile.');
+ await openVisitorControl('#visitor-import-json');
  await page.locator('#visitor-import-json').locator('textarea').fill('{invalid');
- await page.locator('#visitor-import').click();
+ await confirmVisitorImport();
  assert.match(await page.locator('#visitor-message').innerText(),/not valid/);
  assert.equal((await page.evaluate(()=>JSON.parse(localStorage.getItem('mb-visitor-workspace-v1')))).goal,'Review the visitor roadmap','Invalid backup must leave current local work unchanged');
  const validBackup={version:1,goal:'Read the phase record',notes:'Restore verified content.',checks:{'read-roadmap':true,'check-evidence':false,'write-notes':true},updatedAt:null,exportedAt:new Date().toISOString()};
  await page.locator('#visitor-import-json').locator('textarea').fill(JSON.stringify(validBackup));
- await page.locator('#visitor-import').click();
+ await confirmVisitorImport();
  assert.match(await page.locator('#visitor-message').innerText(),/validated and imported/);
  assert.equal(await page.locator('#visitor-goal').locator('input').inputValue(),validBackup.goal);
  const [backupDownload]=await Promise.all([page.waitForEvent('download'),page.locator('#visitor-export').click()]);
  assert.equal(backupDownload.suggestedFilename(),'material-buildroot-visitor-workspace.json');
- await page.locator('#visitor-offline').click();
+ await (await openVisitorControl('#visitor-offline')).click();
  await page.waitForFunction(()=>document.querySelector('#visitor-offline-status').textContent.includes('saved for offline reading'),null,{timeout:30000});
  assert.match(await page.locator('#visitor-offline-status').innerText(),/saved for offline reading/);
  await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
@@ -279,6 +341,7 @@ try{
  assert.equal(offlineArticle.status(),200,'Cached article navigation should work without a network connection');
  assert.match(await page.locator('article').innerText(),/Public documentation visitor surface/);
  await context.setOffline(false);
+ receipt.checks.push('Visitor tool controls are selected through the actual New tab catalogue, with visible-panel assertions before interaction.');
  receipt.checks.push('Visitor workbench persists a private plan, checklist and notes; malformed imports preserve existing data, valid backups restore state, export downloads JSON, and opt-in offline caching serves an article after network disconnect. A separate protocol fixture covers the opted-in read-only companion contract but does not establish real TLS/LAN acceptance.');
  await page.goto(target);await ready();
  await page.locator('nav[aria-label="Main navigation"] md-list-item[href="'+publicBase+'site/roadmap.html"]').click();await ready();
@@ -437,7 +500,14 @@ try{
   const destination=new URL(doc.url.slice(publicBase.length),target).href;
   const response=await page.goto(destination);await ready();
   assert.equal(response.status(),200);
-  assert.ok((await page.locator('article').innerText()).includes(doc.title));
+  assert.equal(await page.title(),doc.title+' · Material Buildroot',`${doc.source} document title`);
+  // An article without H1 uses its path as inventory title, not as body content.
+  // Compare its actual first source heading after Markdown inline rendering.
+  const markdown=await fs.readFile(path.join(root,doc.source),'utf8');
+  const firstHeading=markdown.match(/^#{1,6}\s+(.+)$/m)?.[1];
+  assert.ok(firstHeading,`${doc.source} must provide a content heading`);
+  const expectedHeading=await page.evaluate(html=>new DOMParser().parseFromString(html,'text/html').body.textContent.trim(),new MarkdownIt({html:false}).renderInline(firstHeading));
+  assert.equal((await page.locator('article h1,article h2,article h3,article h4,article h5,article h6').first().innerText()).trim(),expectedHeading,`${doc.source} rendered source heading`);
   const width=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:innerWidth}));
   assert.ok(width.document<=width.viewport,`${doc.source} article overflows at mobile width`);
   routes.push({source:doc.source,status:response.status()});
