@@ -90,7 +90,7 @@ export const workspaceStyles = css`
     flex: 1;
     min-height: 0;
   }
-  nav {
+  .shell > .body > nav {
     width: 200px;
     flex-shrink: 0;
     display: flex;
@@ -100,11 +100,11 @@ export const workspaceStyles = css`
     background: var(--md-sys-color-surface-container-low);
     border-right: 1px solid var(--md-sys-color-outline-variant);
   }
-  nav md-text-button {
+  .shell > .body > nav md-text-button {
     width: 100%;
     justify-content: flex-start;
   }
-  nav .spacer {
+  .shell > .body > nav .spacer {
     flex: 1;
   }
   .navsymbol {
@@ -408,7 +408,7 @@ export const workspaceStyles = css`
   }
   .shell,
   .panel,
-  nav,
+  .shell > .body > nav,
   header,
   .status,
   .badge,
@@ -454,7 +454,7 @@ export const workspaceStyles = css`
     }
   }
   @media (max-width: 1199px) {
-    nav {
+    .shell > .body > nav {
       width: 72px;
       padding: 12px 8px;
     }
@@ -501,7 +501,7 @@ export const workspaceStyles = css`
     }
   }
   @media (max-width: 699px) {
-    nav {
+    .shell > .body > nav {
       display: none;
     }
     .menu {
@@ -547,8 +547,8 @@ export const workspaceStyles = css`
   .brand-mark{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:28px;height:28px;border-radius:8px;background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);font-size:13px;font-weight:700}
   .command-search{flex:1;max-width:520px;margin-inline:auto;--md-text-button-container-height:36px;--md-text-button-container-shape:18px;background:var(--md-sys-color-surface-container-high);border-radius:18px;color:var(--md-sys-color-on-surface-variant)}
   .window md-text-button{min-width:46px;--md-text-button-container-height:52px;--md-text-button-container-shape:0}
-  nav{width:80px;padding:12px;gap:4px}nav .navlabel{display:none}nav .navsymbol{min-width:24px;margin:0}.selected{border-radius:16px}
-  nav md-text-button{min-width:56px;--md-text-button-container-shape:16px;--md-text-button-container-height:56px}
+  .shell > .body > nav{width:80px;padding:12px;gap:4px}.shell > .body > nav .navlabel{display:none}.shell > .body > nav .navsymbol{min-width:24px;margin:0}.selected{border-radius:16px}
+  .shell > .body > nav md-text-button{min-width:56px;--md-text-button-container-shape:16px;--md-text-button-container-height:56px}
   main{padding:16px;gap:16px}.toolbar .heading h1{font-size:22px}.toolbar p{margin:0;font-size:13px}
   main:has(>.operations-host:not([hidden])){overflow:hidden;padding:0;gap:0}
   main:has(>.operations-host:not([hidden]))>.toolbar{padding:12px 24px}
@@ -557,9 +557,10 @@ export const workspaceStyles = css`
   h2{font-size:18px;margin-bottom:8px}p{font-size:14px;line-height:1.45}
   md-filled-button,md-outlined-button,md-text-button,md-filled-tonal-button{--md-filled-button-container-shape:20px;--md-outlined-button-container-shape:20px;--md-text-button-container-shape:20px;--md-filled-tonal-button-container-shape:20px;font-size:14px}
   .onboarding{padding:16px;border-radius:16px}.onboarding strong{font-size:14px}
+  .front-provenance{margin-right:16px;overflow-wrap:anywhere}
   .status{font-size:12px;padding:8px 16px;min-height:32px}
-  @media(max-width:1100px){nav{width:64px;padding:8px 4px}.brand strong{max-width:180px;overflow:hidden;text-overflow:ellipsis}}
-  @media(max-width:699px){nav{display:none}main{padding:8px}header{padding-left:8px;gap:4px}.brand-mark{display:none}.brand strong{max-width:100px}.command-search{flex:0 0 auto}.window md-text-button{min-width:40px}.palette-label{display:none}}
+  @media(max-width:1100px){.shell > .body > nav{width:64px;padding:8px 4px}.brand strong{max-width:180px;overflow:hidden;text-overflow:ellipsis}}
+  @media(max-width:699px){.shell > .body > nav{display:none}main{padding:8px}header{padding-left:8px;gap:4px}.brand-mark{display:none}.brand strong{max-width:100px}.command-search{flex:0 0 auto}.window md-text-button{min-width:40px}.palette-label{display:none}}
   /* Scope shell layout to avoid changing nested workflow anatomy. */
   .shell > .body > nav{width:192px;padding:16px 12px;gap:8px}
   .shell > .body > nav .navlabel,.dialog-nav .navlabel{display:inline;white-space:normal;overflow-wrap:anywhere}
@@ -573,11 +574,11 @@ export const workspaceStyles = css`
   .shell .toolbar h1{font-size:28px;font-weight:500;line-height:1.25}
   .shell .toolbar p{margin-top:6px;font-size:14px}
   .shell .brand{min-width:0;flex:0 1 auto}.shell .brand strong{white-space:normal;max-width:none;overflow:visible}
-  .shell .settings-page[hidden]{display:none!important}
+  .shell main > [hidden]{display:none!important}.shell .settings-page[hidden]{display:none!important}
   .shell .settings-grid{display:flex;flex-direction:column;gap:20px}
   .settings-categories,.image-actions{display:flex;flex-wrap:wrap;gap:8px}
   .settings-categories md-outlined-button[aria-pressed="true"]{background:var(--md-sys-color-secondary-container)}
-  .project-context{display:flex;flex-wrap:wrap;gap:8px 24px;padding:0 24px 16px;font-size:13px;color:var(--md-sys-color-on-surface-variant)}
+  .project-context{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:4px 24px;font-size:13px;color:var(--md-sys-color-on-surface-variant)}
   .project-context span{overflow-wrap:anywhere;min-width:0}
   .images-workspace{max-width:1040px;width:100%;min-width:0}
   .image-projects{margin-top:24px;padding:24px}.image-projects h2{font-size:20px}

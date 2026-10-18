@@ -1,8 +1,8 @@
 /** Primary navigation and compatibility routes for the guided workspace. */
 export const guidedDestinations = [
-  {id:'images',en:'Images',zh:'映像',icon:'album'},
+  {id:'images',en:'Images',zh:'映像',icon:'inventory_2'},
   {id:'builds',en:'Builds',zh:'建置',icon:'build'},
-  {id:'tools',en:'Tools',zh:'工具',icon:'construction'},
+  {id:'tools',en:'Tools',zh:'工具',icon:'code'},
   {id:'help',en:'Help',zh:'說明',icon:'help_outline'},
   {id:'settings',en:'Settings',zh:'設定',icon:'settings'},
 ] as const;

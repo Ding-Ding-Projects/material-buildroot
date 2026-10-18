@@ -11,7 +11,7 @@ import '@material/web/labs/card/filled-card.js';
 import '@material/web/chips/chip-set.js';
 import '@material/web/chips/filter-chip.js';
 import '@material/web/textfield/outlined-text-field.js';
-import {newImageDraft,readImageDraft,writeImageDraft,validImageName,imageExportBasename,type ImageWorkflowDraft} from './image-workflow-draft';
+import {newImageDraft,readImageDraft,writeImageDraft,validImageName,imageExportBasename,imageDraftLock,transferImageIntent,validateImageIntent,type ImageCreationIntent,type ImageIntentTransfer,type ImageWorkflowDraft} from './image-workflow-draft';
 import {live} from 'lit/directives/live.js';
 import {materialIcon} from './material-icons';
 import { workspaceStyles } from './workspace-styles';
@@ -20,8 +20,11 @@ type IsoBoardEntry={id:string;name:string;origin:string;order:number;root:string
 type IsoBoardCatalog={revision:string;outputRoot:string;entries:IsoBoardEntry[]};
 type GuideButton=HTMLButtonElement & {ariaControlsElements:Element[]|null;ariaDescribedByElements:Element[]|null};
 export class ImagePresetsPanel extends LitElement {
- static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number}};
- static styles=[workspaceStyles,css`:host{height:auto;flex-shrink:0}[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}.profile-info-entry{position:relative;align-self:flex-start}.profile-info-entry md-icon-button{width:44px;height:44px}.profile-info-entry [role=tooltip]{display:none;position:absolute;left:0;bottom:100%;width:max-content;max-width:calc(100vw - 64px);padding:8px;border-radius:8px;background:var(--md-sys-color-inverse-surface,#322f35);color:var(--md-sys-color-inverse-on-surface,#f5eff7);z-index:1;overflow-wrap:anywhere}.profile-info-entry:hover [role=tooltip],.profile-info-entry:focus-within [role=tooltip]{display:block}.profile-guide{padding:16px;max-width:100%;min-width:0}.profile-guide h4{margin-top:0}.profile-guide h4:focus-visible{outline:2px solid var(--md-sys-color-primary);outline-offset:4px}.profile-example-choices{display:flex;flex-wrap:wrap;gap:8px}.board-path{overflow-wrap:anywhere}md-outlined-button,md-filled-button{max-width:100%;height:auto;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding-block:8px}`];
+ static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number},creationIntent:{attribute:false},compactJourney:{type:Boolean}};
+ static styles=[workspaceStyles,css`:host{height:auto;flex-shrink:0}[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px;width:auto;padding:0;background:transparent;border:0;flex-shrink:0}.step-nav md-outlined-button,.step-nav md-filled-button{width:auto;min-width:0;--md-outlined-button-container-height:48px;--md-filled-button-container-height:48px} summary md-icon{vertical-align:middle;margin-right:8px}.profile-info-entry{position:relative;align-self:flex-start}.profile-info-entry md-icon-button{width:44px;height:44px}.profile-info-entry [role=tooltip]{display:none;position:absolute;left:0;bottom:100%;width:max-content;max-width:calc(100vw - 64px);padding:8px;border-radius:8px;background:var(--md-sys-color-inverse-surface,#322f35);color:var(--md-sys-color-inverse-on-surface,#f5eff7);z-index:1;overflow-wrap:anywhere}.profile-info-entry:hover [role=tooltip],.profile-info-entry:focus-within [role=tooltip]{display:block}.profile-guide{padding:16px;max-width:100%;min-width:0}.profile-guide h4{margin-top:0}.profile-guide h4:focus-visible{outline:2px solid var(--md-sys-color-primary);outline-offset:4px}.profile-example-choices{display:flex;flex-wrap:wrap;gap:8px}.board-path{overflow-wrap:anywhere}.purpose-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.name-input{display:flex;align-items:center;gap:4px}.name-input md-outlined-text-field{min-width:0;flex:1}.compact-guide{gap:10px!important;padding:14px!important}.compact-guide h4{margin:4px 0 10px}.compact-guide>details>summary{min-height:36px}.compact-guide .purpose-fields details summary{min-height:32px}.compact-guide .step-nav{margin-top:8px}@media(max-width:600px){.purpose-fields{grid-template-columns:1fr}}md-outlined-button,md-filled-button{max-width:100%;height:auto;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding-block:8px}`];
+ compactJourney=false;
+ creationIntent:ImageCreationIntent|null=null;
+ private creationId:string|undefined;private incomingIntent:ImageCreationIntent|null=null;private transferStatus='';private transferBusy=false;
  workspaceId=''; language='bilingual'; disabled=false; revision=0; configurationGeneration=0;
  private catalog:any; private preview:any; private outcome:any; private preset='keep'; private desktop='none'; private ssh=false; private approved=false; private busy=false; private message='';
  private imageName='linux-bios-image';private draftRevision=0;private savedDraftRaw:string|null=null;private draftConflict=false;private savedBoardId:string|null=null;private draftSaveState='idle';
@@ -74,34 +77,72 @@ export class ImagePresetsPanel extends LitElement {
  private resetIso(){this.isoEpoch++;this.resetProfileGuide();this.resetRuntimeGuide();this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoUnavailableJobId=null;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
  private invalidateConfiguration(){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoUnavailableJobId=null;this.isoInspection=undefined;this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;}
  protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.invalidateConfiguration();this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
- protected updated(changed:PropertyValues){void this.bindGuideRelations();if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
+ protected updated(changed:PropertyValues){void this.bindGuideRelations();if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled&&!this.creationIntent)void this.isoAction('plan');}}
+ private readonly pendingDraftSaves=new Set<Promise<boolean>>();
  private saveIso(){
+  const pending=this.persistIso();this.pendingDraftSaves.add(pending);
+  void pending.finally(()=>this.pendingDraftSaves.delete(pending));return pending;
+ }
+ private async persistIso(){
   this.draftSaveState='unsaved';
-  if(!this.workspaceId||this.draftConflict)return;
-  try{
-   const key='iso-workflow-'+this.workspaceId,current=localStorage.getItem(key);
-   if(current!==this.savedDraftRaw){this.draftConflict=true;this.invalidateConfiguration();this.revision++;return;}
-   const raw=writeImageDraft({version:2,revision:this.draftRevision+1,step:this.isoStep,mode:this.isoMode as ImageWorkflowDraft['mode'],name:this.imageName,target:'bios-iso',preset:this.preset as ImageWorkflowDraft['preset'],desktop:this.desktop as ImageWorkflowDraft['desktop'],ssh:this.ssh,boardId:this.savedBoardId,jobId:this.isoJob?.id??null});
-   if(!raw)return;
-   localStorage.setItem(key,raw);this.savedDraftRaw=raw;this.draftRevision++;this.draftSaveState='saved';
-  }catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);}
+  const workspaceId=this.workspaceId;
+  if(!workspaceId||this.draftConflict||this.transferBusy)return false;
+  if(!navigator.locks){this.isoMessage=this.l('Draft locking is unavailable. Progress was not saved.','草稿鎖定未能使用，進度未儲存。',true);this.revision++;return false;}
+  try{return await navigator.locks.request(imageDraftLock(workspaceId),()=>{
+   if(workspaceId!==this.workspaceId||this.draftConflict)return false;
+   const key='iso-workflow-'+workspaceId,current=localStorage.getItem(key);
+   if(current!==this.savedDraftRaw){this.draftConflict=true;this.invalidateConfiguration();this.revision++;return false;}
+   const raw=writeImageDraft({version:2,revision:this.draftRevision+1,step:this.isoStep,mode:this.isoMode as ImageWorkflowDraft['mode'],name:this.imageName,target:'bios-iso',preset:this.preset as ImageWorkflowDraft['preset'],desktop:this.desktop as ImageWorkflowDraft['desktop'],ssh:this.ssh,boardId:this.savedBoardId,jobId:this.isoJob?.id??null,...(this.creationId?{creationId:this.creationId}:{})});
+   if(!raw)return false;
+   localStorage.setItem(key,raw);this.savedDraftRaw=raw;this.draftRevision++;this.draftSaveState='saved';this.revision++;return true;
+  });}catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);this.revision++;return false;}
+ }
+ /** Validated intent transfer; no permissions or host outcomes cross this boundary. */
+ async receiveCreationIntent(input:unknown,choice:'review'|'resume'|'replace'='review'):Promise<ImageIntentTransfer>{
+  const intent=validateImageIntent(input),workspaceId=this.workspaceId;
+  if(!intent||intent.workspaceId!==workspaceId)return {status:'invalid'};
+  this.incomingIntent=intent;
+  if(this.busy||this.isoBusy||this.transferBusy||this.disabled||(this.isoExecuting&&choice!=='resume')){this.transferStatus='busy';this.revision++;return {status:'unavailable'};}
+  this.transferBusy=true;this.revision++;
+  const saved=await Promise.all([...this.pendingDraftSaves]);
+  if(saved.some(value=>!value)||this.draftSaveState==='unsaved'){this.transferBusy=false;this.transferStatus='unsaved';this.revision++;return {status:'unavailable'};}
+  const epoch=this.isoEpoch;
+  const result=await transferImageIntent(workspaceId,intent,choice,()=>this.isConnected&&this.workspaceId===workspaceId&&this.isoEpoch===epoch&&!this.busy&&!this.isoBusy&&!this.isoExecuting&&(!this.isoJob?.id||readImageDraft(localStorage.getItem('iso-workflow-'+workspaceId))?.jobId===this.isoJob.id));
+  if(!this.isConnected||workspaceId!==this.workspaceId){this.transferBusy=false;return {status:'unavailable'};}
+  this.transferStatus=result.status;this.transferBusy=false;
+  if(result.status==='applied'||result.status==='existing'){
+   const job=this.isoJob;
+   this.resetIso();this.restoreIso();if(job?.id&&job.id===this.isoJob?.id)this.isoJob=job;
+   this.invalidateConfiguration();this.isoRuntime=undefined;
+   this.incomingIntent=null;this.revision++;
+   this.dispatchEvent(new CustomEvent('image-intent-resolved',{bubbles:true,composed:true,detail:{creationId:intent.id,workspaceId,status:result.status}}));
+   await this.updateComplete;
+   this.renderRoot.querySelector<HTMLElement>(`[data-step="${this.isoStep}"] h4`)?.focus();
+  }
+  this.revision++;return result;
+ }
+ private creationTransferView(){
+  if(!this.incomingIntent)return nothing;
+  const conflict=this.transferStatus==='conflict';
+  return html`<section class="panel" role="status"><h3>${conflict?this.l('This project already has image choices','呢個專案已有映像選擇',true):this.l('Image draft transfer is incomplete','映像草稿移轉未完成',true)}</h3><p>${conflict?this.l('Resume the existing draft, or explicitly replace its choices. Replacement preserves a recovery copy and every saved job reference. No configuration is applied.','繼續現有草稿，或者明確取代選擇。取代會保留復原副本同所有已儲存工作識別，唔會套用設定。',true):this.l('Keep this intent and retry after pending work finishes or local storage is available. Invalid existing records are never overwritten.','保留呢份意向，待目前工作完成或本機儲存可用後再試。唔會覆寫無效現有記錄。',true)}</p>
+  ${conflict?html`<md-outlined-button ?disabled=${this.transferBusy} @click=${()=>this.receiveCreationIntent(this.incomingIntent,'resume')}>${this.l('Resume existing draft','繼續現有草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.transferBusy||this.isoExecuting} @click=${()=>this.receiveCreationIntent(this.incomingIntent,'replace')}>${this.l('Replace choices and keep recovery copy','取代選擇並保留復原副本',true)}</md-outlined-button>`:html`<md-outlined-button ?disabled=${this.transferBusy} @click=${()=>this.receiveCreationIntent(this.incomingIntent)}>${this.l('Retry draft transfer','重試草稿移轉',true)}</md-outlined-button>`}<md-outlined-button ?disabled=${this.transferBusy} @click=${()=>{this.incomingIntent=null;this.transferStatus='';this.revision++;}}>${this.l('Keep editing existing draft','繼續編輯現有草稿',true)}</md-outlined-button></section>`;
  }
  private restoreIso(){
   const initialMode=this.isoMode;let draft=newImageDraft();this.draftConflict=false;this.savedDraftRaw=null;this.draftSaveState='idle';
   try{this.savedDraftRaw=localStorage.getItem('iso-workflow-'+this.workspaceId);const saved=readImageDraft(this.savedDraftRaw);if(saved){draft=saved;this.isoResumed=true;}else draft.mode=initialMode==='advanced'?'advanced':'easy';}catch{/* Untrusted progress never restores configuration success. */}
-  this.imageName=draft.name;this.preset=draft.preset;this.desktop=draft.desktop;this.ssh=draft.ssh;this.savedBoardId=draft.boardId;this.draftRevision=draft.revision;this.isoStep=draft.step;this.isoMode=draft.mode;
+  this.creationId=draft.creationId;this.imageName=draft.name;this.preset=draft.preset;this.desktop=draft.desktop;this.ssh=draft.ssh;this.savedBoardId=draft.boardId;this.draftRevision=draft.revision;this.isoStep=draft.step;this.isoMode=draft.mode;
   const jobId=this.pendingIsoJobs.get(this.workspaceId)??draft.jobId;
   if(jobId){this.isoJob={id:jobId,state:'unverified',sequence:0};this.isoStep=4;this.pendingIsoJobs.delete(this.workspaceId);}
  }
- private resolveDraft(useSaved:boolean){
+ private resolveDraft(useSaved:boolean){if(this.transferBusy)return;
   if(useSaved){const activeJob=this.isoActive?this.isoJob:undefined;this.resetIso();this.invalidateConfiguration();this.restoreIso();if(activeJob){this.isoJob=activeJob;this.isoStep=4;this.draftSaveState='unsaved';}if(!this.disabled)void this.isoAction('plan');}
   else{try{this.savedDraftRaw=localStorage.getItem('iso-workflow-'+this.workspaceId);this.draftRevision=readImageDraft(this.savedDraftRaw)?.revision??this.draftRevision;this.draftConflict=false;this.saveIso();}catch{this.draftConflict=true;}}
   this.revision++;
  }
- private moveIso(step:number){this.isoStep=Math.max(0,Math.min(4,step));this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>(`[data-step="${this.isoStep}"] h4`)?.focus());}
- private navigateWorkflow(destination:'runtime'|'source'|'config'|'artifacts'){
-  if(this.disabled||this.busy||this.isoBusy||this.isoExecuting||this.draftConflict||!this.workspaceId)return;
-  this.saveIso();if(this.draftConflict)return;
+ private moveIso(step:number){if(this.transferBusy)return;this.isoStep=Math.max(0,Math.min(4,step));this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>(`[data-step="${this.isoStep}"] h4`)?.focus());}
+ private async navigateWorkflow(destination:'runtime'|'source'|'config'|'artifacts'){
+  if(this.transferBusy||this.disabled||this.busy||this.isoBusy||this.isoExecuting||this.draftConflict||!this.workspaceId)return;
+  if(!(await this.saveIso()))return;
   this.dispatchEvent(new CustomEvent('guided-workflow-navigate',{bubbles:true,composed:true,detail:{destination,workspaceId:this.workspaceId}}));
  }
  private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
@@ -114,11 +155,11 @@ export class ImagePresetsPanel extends LitElement {
   const heading=this.renderRoot.querySelector<HTMLElement>(`[data-step="${this.isoStep}"] h4`);heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});
  }
  private reviewPermission(){
-  if(this.disabled||this.busy||this.isoBusy||this.isoActive||this.draftConflict||!this.workspaceId)return;
+  if(this.transferBusy||this.disabled||this.busy||this.isoBusy||this.isoActive||this.draftConflict||!this.workspaceId)return;
   this.saveIso();this.dispatchEvent(new CustomEvent('review-iso-permission',{bubbles:true,composed:true,detail:{workspaceId:this.workspaceId,epoch:this.isoEpoch}}));
  }
  private async run(action:string){
-  if(this.busy||this.isoBusy||this.isoActive||this.disabled||this.draftConflict||!this.workspaceId||!window.studio?.operations)return;
+  if(this.transferBusy||this.busy||this.isoBusy||this.isoActive||this.disabled||this.draftConflict||!this.workspaceId||!window.studio?.operations)return;
   if(action!=='imagePreset.catalog'&&(!this.catalog||this.preset==='keep'))return;
   if(action==='imagePreset.apply'&&(!this.approved||!this.preview?.applicable))return;
   this.busy=true;this.message='';this.revision++;const workspaceId=this.workspaceId,epoch=this.isoEpoch;
@@ -133,7 +174,7 @@ export class ImagePresetsPanel extends LitElement {
   finally{this.busy=false;this.revision++;}
  }
  private async isoAction(action:'plan'|'apply'|'build'|'refresh'|'cancel'|'inspect'|'boards'|'boardApply'){
-  if(this.isoBusy||this.busy||this.disabled||this.draftConflict||!this.workspaceId||!window.studio?.operations)return;
+  if(this.transferBusy||this.isoBusy||this.busy||this.disabled||this.draftConflict||!this.workspaceId||!window.studio?.operations)return;
   if(this.isoActive&&!['refresh','cancel'].includes(action))return;
   const api=window.studio.operations;
   const workspaceId=this.workspaceId,epoch=this.isoEpoch;
@@ -209,12 +250,12 @@ export class ImagePresetsPanel extends LitElement {
    if(action==='plan'||action==='apply'||action==='build'){this.isoPlan=undefined;this.isoApproved=false;this.isoOutcome=undefined;}
    const code=error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:'';
    this.isoMessage=captureOwnedStatus(this,'isoMessage',this.l.bind(this),l=>(['KCONFIG_SEMANTICS_UNAVAILABLE','KCONFIG_SOURCE_TRUST_REQUIRED','KCONFIG_SOURCE_TRUST_CHANGED'].includes(code)?l('ISO compatibility is not confirmed. Choose Review source execution permission, review the exact source and runtime, then explicitly allow the scope if you trust it. Permission is not granted automatically.','ISO 相容性未確認。請選「核對來源執行權限」，核對確切來源同執行環境，信任後先明確批准範圍。唔會自動授權。'):['KCONFIG_RUNTIME_UNAVAILABLE','RUNTIME_REQUIRED'].includes(code)?l('A usable project runtime is required. Open Projects & runtime, select and authorize the project environment, then return and check ISO prerequisites again.','需要可用嘅專案執行環境。請開啟「專案同執行環境」，選擇同授權專案環境，再返回重新檢查 ISO 所需設定。'):(action==='boards'||action==='boardApply')?l('The PC preset result is unconfirmed. Review permission and refresh source PC presets before retrying. Inspect the current configuration first if the response was lost.','電腦預設設定結果未確認。請核對權限同重新尋找來源預設設定後再試；回覆遺失時，請先檢視目前設定。'):l('Operation not confirmed. Refresh the plan or job before retrying.','操作未確認，重試前請重新整理計劃或工作。'))+' '+code);
-  }}finally{this.isoBusy=false;if(current())this.saveIso();this.revision++;}
+  }}finally{this.isoBusy=false;if(current())await this.saveIso();this.revision++;}
  }
  private get isoActive(){return this.isoJob&&!['succeeded','failed','cancelled','interrupted'].includes(this.isoJob.state);}
  private get isoExecuting(){return this.isoJob&&['queued','running','dispatching','cancelling'].includes(this.isoJob.state);}
  private detachUnavailableJob(){
-  if(this.disabled||this.busy||this.isoBusy||this.draftConflict||!this.workspaceId||!this.isoJob||this.isoUnavailableJobId!==this.isoJob.id)return;
+  if(this.transferBusy||this.disabled||this.busy||this.isoBusy||this.draftConflict||!this.workspaceId||!this.isoJob||this.isoUnavailableJobId!==this.isoJob.id)return;
   this.pendingIsoJobs.delete(this.workspaceId);this.isoJob=undefined;this.isoLogs=[];this.isoRuntime=undefined;this.invalidateConfiguration();this.isoStep=1;
   this.isoMessage=this.l('Saved job reference detached locally. No process was stopped, no host job record was changed and no output was deleted. Review project runtime and the Builds workspace for running or quarantined work, then check source permission and configuration again.','已喺本機解除已儲存工作參照。冇停止程序、改動主機工作記錄或刪除輸出。請核對專案執行環境同建置工作區嘅運行或隔離工作，再重新核對來源權限同設定。',true);
   this.saveIso();this.revision++;
@@ -297,6 +338,7 @@ export class ImagePresetsPanel extends LitElement {
  }
  private nameControl(disabled:boolean){
   const valid=validImageName(this.imageName);
+  if(this.compactJourney)return html`<div class="name-input"><md-outlined-text-field id="image-draft-name" label=${this.l('Image name','映像名稱',true)} .value=${live(this.imageName)} maxlength="64" ?disabled=${disabled} ?error=${!valid} .errorText=${this.l('Use 1–64 letters, digits, dots, hyphens or underscores; start with a letter or digit. No paths, reserved device names or trailing dot.','請用 1–64 個英文字母、數字、點、連字號或底線，以字母或數字開頭，唔接受路徑、裝置保留名稱或結尾點。',true)} @input=${(event:Event)=>{this.imageName=(event.target as HTMLInputElement).value;this.saveIso();this.revision++;}}></md-outlined-text-field><md-icon-button aria-label=${this.l('Clear image name','清除映像名稱',true)} ?disabled=${disabled||!this.imageName} @click=${()=>{this.imageName='';this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>('#image-draft-name')?.focus());}}>${materialIcon('close')}</md-icon-button></div><details><summary>${this.l('Name rules','名稱規則',true)}</summary><p>${this.l('Safe draft label and export name only; no paths or reserved device names. The producer remains images/rootfs.iso9660.','只用作安全草稿標籤同匯出名稱；唔接受路徑或裝置保留名稱。建置輸出保持 images/rootfs.iso9660。',true)}</p></details>`;
   return html`<md-outlined-text-field id="image-draft-name" label=${this.l('Image name','映像名稱',true)} .value=${live(this.imageName)} maxlength="64" ?disabled=${disabled} ?error=${!valid} .errorText=${this.l('Use 1–64 letters, digits, dots, hyphens or underscores; start with a letter or digit. No paths, reserved device names or trailing dot.','請用 1–64 個英文字母、數字、點、連字號或底線，以字母或數字開頭，唔接受路徑、裝置保留名稱或結尾點。',true)} @input=${(event:Event)=>{this.imageName=(event.target as HTMLInputElement).value;this.saveIso();this.revision++;}}></md-outlined-text-field>
    <md-outlined-button ?disabled=${disabled||!this.imageName} @click=${()=>{this.imageName='';this.saveIso();this.revision++;void this.updateComplete.then(()=>this.renderRoot.querySelector<HTMLElement>('#image-draft-name')?.focus());}}>${materialIcon('close','icon')}${this.l('Clear image name','清除映像名稱',true)}</md-outlined-button>
    <p>${this.l('This is a draft label and suggested export name. The build always writes images/rootfs.iso9660. An invalid name is not saved.','呢個係草稿標籤同建議匯出名稱。建置固定寫入 images/rootfs.iso9660，無效名稱唔會儲存。',true)}</p>`;
@@ -306,19 +348,23 @@ export class ImagePresetsPanel extends LitElement {
  private stageRequirement(){return this.isoStep===0?this.l('Enter a valid image name before continuing.','繼續前請輸入有效映像名稱。',true):this.isoStep===1?this.l('Choose a runtime, review source permission and check ISO prerequisites before continuing.','繼續前請選擇執行環境、核對來源權限同檢查 ISO 所需設定。',true):this.isoStep===2?this.l('Keep current contents, or preview and explicitly apply the selected additions before continuing.','請保留目前內容，或預覽並明確套用所選新增設定後繼續。',true):this.l('Refresh the requirements, review them and explicitly configure the ISO before building.','建置前請重新整理要求、核對並明確設定 ISO。',true);}
  private reviewDraft(){return html`<dl><dt>${this.l('Image name','映像名稱',true)}</dt><dd>${this.imageName}</dd><dt>${this.l('Purpose choice','用途選擇',true)}</dt><dd>${this.preset}${this.preset==='desktop'?html` · ${this.desktop}`:nothing}</dd><dt>${this.l('Target','目標',true)}</dt><dd>x86-64 · BIOS · GRUB2 · initrd</dd><dt>${this.l('Runtime checked this session','本次已核對執行環境',true)}</dt><dd>${this.isoRuntime?.kind??this.l('Not checked','未核對',true)}</dd><dt>${this.l('SSH package requested','SSH 套件要求',true)}</dt><dd>${this.preset==='server'||(this.preset!=='keep'&&this.ssh)?this.l('Yes; authentication requires a separate account plan','有；認證需要獨立帳戶計劃',true):this.l('Existing configuration unchanged','現有設定不變',true)}</dd><dt>${this.l('Producer output','建置輸出',true)}</dt><dd><code>images/rootfs.iso9660</code></dd></dl><p>${this.l('Review requests separately from effective values. A successful configuration is not a completed image or verified boot.','請分別核對要求同實際值。設定成功唔代表映像完成或已驗證開機。',true)}</p>${!this.contentsReady?html`<p role="status">${this.stageRequirementForContents()}</p>`:nothing}`;}
  private stageRequirementForContents(){return this.l('Selected contents have not been confirmed. Return to Contents and apply the reviewed additions or keep the existing configuration.','所選內容未確認。請返回內容步驟，套用已核對新增設定或保留現有設定。',true);}
+ private stepNavigation(disabled:boolean){return this.isoMode==='easy'?html`<nav class="step-nav" aria-label=${this.l('ISO guide steps','ISO 指南步驟',true)}><md-outlined-button ?disabled=${disabled||this.isoStep===0} @click=${()=>this.moveIso(this.isoStep-1)}>${materialIcon('arrow_back','icon')}${this.l('Back','返回',true)}</md-outlined-button>${this.isoStep<4?html`${this.workflowAction('next',disabled||!this.canAdvance(),()=>this.moveIso(this.isoStep+1),html`${materialIcon('arrow_forward','icon')}${this.l('Next','下一步',true)}`)}`:nothing}</nav>`:nothing;}
  private isoWorkflow(){
-  const disabled=this.disabled||this.busy||this.isoBusy||this.draftConflict||!this.workspaceId,iso=this.isoInspection?.iso;
+  const disabled=this.disabled||this.busy||this.isoBusy||this.transferBusy||!!this.incomingIntent||this.draftConflict||!this.workspaceId,iso=this.isoInspection?.iso;
   const structural=iso?.descriptorValid&&iso?.withinImage&&iso?.elTorito?.validationChecksumValid&&iso?.elTorito?.bootEntryValid&&iso?.elTorito?.platformId===0;
-  return html`<section class="panel stack" aria-label=${this.l('BIOS ISO workflow','BIOS ISO 流程',true)}>
-   <h3>${this.l('Make a Linux disc image','製作 Linux 光碟映像',true)}</h3><p>${this.l('An ISO is one file containing a disc. This guide prepares an image for a PC that starts in BIOS mode, an older startup method. Newer UEFI-only PCs are not supported here.','ISO 係一個包含光碟內容嘅檔案。呢份指南為使用較舊 BIOS 啟動方式嘅電腦準備映像，唔支援只用新式 UEFI 嘅電腦。',true)}</p>
-   <md-outlined-select ?disabled=${this.busy||this.isoBusy} label=${this.l('Configuration mode','設定模式',true)} .value=${this.isoMode} @change=${(e:Event)=>{this.isoMode=(e.target as HTMLSelectElement).value;this.saveIso();this.revision++;}}><md-select-option value="easy">${materialIcon('check','start')}<div slot="headline">${this.l('Easy: detected defaults','簡易：已偵測預設值',true)}</div></md-select-option><md-select-option value="advanced">${materialIcon('tune','start')}<div slot="headline">${this.l('Advanced: manual configuration','進階：手動設定',true)}</div></md-select-option></md-outlined-select>
+  return html`${this.creationTransferView()}<section class=${"panel stack"+(this.compactJourney?" compact-guide":"")} aria-label=${this.l('BIOS ISO workflow','BIOS ISO 流程',true)}>
+   ${this.compactJourney?html`<details><summary>${this.l('Guide options and target information','指南選項同目標資料',true)}</summary>   <h3>${this.l('Make a Linux disc image','製作 Linux 光碟映像',true)}</h3><p>${this.l('An ISO is one file containing a disc. This guide prepares an image for a PC that starts in BIOS mode, an older startup method. Newer UEFI-only PCs are not supported here.','ISO 係一個包含光碟內容嘅檔案。呢份指南為使用較舊 BIOS 啟動方式嘅電腦準備映像，唔支援只用新式 UEFI 嘅電腦。',true)}</p>
+   <md-outlined-select ?disabled=${this.transferBusy||this.busy||this.isoBusy} label=${this.l('Configuration mode','設定模式',true)} .value=${this.isoMode} @change=${(e:Event)=>{this.isoMode=(e.target as HTMLSelectElement).value;this.saveIso();this.revision++;}}><md-select-option value="easy">${materialIcon('check','start')}<div slot="headline">${this.l('Easy: detected defaults','簡易：已偵測預設值',true)}</div></md-select-option><md-select-option value="advanced">${materialIcon('tune','start')}<div slot="headline">${this.l('Advanced: manual configuration','進階：手動設定',true)}</div></md-select-option></md-outlined-select>
+</details>`:html`   <h3>${this.l('Make a Linux disc image','製作 Linux 光碟映像',true)}</h3><p>${this.l('An ISO is one file containing a disc. This guide prepares an image for a PC that starts in BIOS mode, an older startup method. Newer UEFI-only PCs are not supported here.','ISO 係一個包含光碟內容嘅檔案。呢份指南為使用較舊 BIOS 啟動方式嘅電腦準備映像，唔支援只用新式 UEFI 嘅電腦。',true)}</p>
+   <md-outlined-select ?disabled=${this.transferBusy||this.busy||this.isoBusy} label=${this.l('Configuration mode','設定模式',true)} .value=${this.isoMode} @change=${(e:Event)=>{this.isoMode=(e.target as HTMLSelectElement).value;this.saveIso();this.revision++;}}><md-select-option value="easy">${materialIcon('check','start')}<div slot="headline">${this.l('Easy: detected defaults','簡易：已偵測預設值',true)}</div></md-select-option><md-select-option value="advanced">${materialIcon('tune','start')}<div slot="headline">${this.l('Advanced: manual configuration','進階：手動設定',true)}</div></md-select-option></md-outlined-select>
+`}
    ${this.isoMode==='advanced'?html`<p>${this.l('Advanced shows the same draft and all five stages. Custom package values remain in the full configuration editor; changing modes never replaces or applies them. The BIOS producer still uses its fixed profile.','進階模式顯示同一份草稿同全部五個步驟。自訂套件值保留喺完整設定編輯器；切換模式唔會取代或套用設定。BIOS 建置仍使用固定組合。',true)}</p>`:nothing}
    ${this.isoResumed?html`<p role="status">${this.l('Saved progress restored. Configuration and output must be checked again; saved progress is not a completed build.','已還原儲存進度。設定同輸出須重新核對；儲存進度唔代表建置完成。',true)}</p>`:nothing}
    ${this.isoMode==='easy'?html`<p role="status">${this.l('Step','步驟',true)} ${this.isoStep+1} / 5</p><md-linear-progress .value=${this.isoStep/5} aria-label=${this.l('Guide position, not build completion','指南位置，唔係建置完成度',true)}></md-linear-progress>`:nothing}
-   ${this.draftConflict?html`<p role="alert">${this.l('This draft changed in another window. Choose which draft to keep before continuing. Configuration and permission must be checked again.','另一個視窗更改咗草稿，請先選擇保留邊份，再重新核對設定同權限。',true)}</p><md-outlined-button ?disabled=${this.busy||this.isoBusy} @click=${()=>this.resolveDraft(true)}>${this.l('Load saved draft','載入已儲存草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.busy||this.isoBusy||!validImageName(this.imageName)} @click=${()=>this.resolveDraft(false)}>${this.l('Keep this draft','保留此草稿',true)}</md-outlined-button>`:nothing}
+   ${this.draftConflict?html`<p role="alert">${this.l('This draft changed in another window. Choose which draft to keep before continuing. Configuration and permission must be checked again.','另一個視窗更改咗草稿，請先選擇保留邊份，再重新核對設定同權限。',true)}</p><md-outlined-button ?disabled=${this.transferBusy||this.busy||this.isoBusy} @click=${()=>this.resolveDraft(true)}>${this.l('Load saved draft','載入已儲存草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.busy||this.isoBusy||!validImageName(this.imageName)} @click=${()=>this.resolveDraft(false)}>${this.l('Keep this draft','保留此草稿',true)}</md-outlined-button>`:nothing}
    <div data-step="0" ?hidden=${this.isoMode==='easy'&&this.isoStep!==0}>
    <h4 tabindex="-1">${this.l('What would you like to make?','想製作甚麼？',true)}</h4>
-   ${this.nameControl(disabled)}${this.purposeControl(disabled)}${this.profileGuidance()}<md-outlined-select id="iso-profile-control" label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value="">${materialIcon('info','start')}<div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select>
+   ${this.compactJourney?html`<div class="purpose-fields"><div>${this.nameControl(disabled)}</div><div>${this.purposeControl(disabled)}</div></div>${this.stepNavigation(disabled)}<details><summary>${this.l('Target compatibility: x86-64 BIOS, not yet confirmed','目標相容性：x86-64 BIOS，尚未確認',true)}</summary>${this.profileGuidance()}</details>`:html`${this.nameControl(disabled)}${this.purposeControl(disabled)}${this.profileGuidance()}`}${this.compactJourney?html`<details><summary>${this.l('Detected profile','已偵測組合',true)}</summary><md-outlined-select id="iso-profile-control" label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value="">${materialIcon('info','start')}<div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select></details>`:html`<md-outlined-select id="iso-profile-control" label=${this.l('Detected image profile','已偵測映像組合',true)} .value=${this.isoPlan?.applicable||this.isoOutcome?.effective?'bios-iso':''} disabled><md-select-option value="">${materialIcon('info','start')}<div slot="headline">${this.l('Check source compatibility','檢查來源相容性',true)}</div></md-select-option><md-select-option value="bios-iso">${materialIcon('computer','start')}<div slot="headline">${this.l('Linux disc for a BIOS PC','BIOS 電腦使用嘅 Linux 光碟',true)}</div><div slot="supporting-text">${this.l('Initial RAM filesystem; UEFI unavailable','初始記憶體檔案系統；UEFI 未可用',true)}</div></md-select-option></md-outlined-select>`}
    </div><div data-step="1" ?hidden=${this.isoMode==='easy'&&this.isoStep!==1}><h4 tabindex="-1">${this.l('Where will it be built?','喺邊度建置？',true)}</h4><p>${this.l('Use this project’s already selected Linux environment. No command or image name needs to be typed here.','使用專案已選擇嘅 Linux 環境，毋須喺呢度輸入指令或映像名稱。',true)}</p>${this.runtimeGuidance()}<md-outlined-select id="iso-runtime-control" label=${this.l('Saved execution runtime','已儲存執行環境',true)} .value=${this.isoRuntime?'saved':''} disabled><md-select-option value="">${materialIcon('info','start')}<div slot="headline">${this.l('No runtime discovered','未偵測到執行環境',true)}</div></md-select-option>${this.isoRuntime?html`<md-select-option value="saved">${materialIcon('computer','start')}<div slot="headline">${this.isoRuntime.kind}: ${this.isoRuntime.distribution??this.isoRuntime.image??''}</div></md-select-option>`:nothing}</md-outlined-select>
 
    <p>${this.l('Use an adopted x86-64 project with Linux enabled and a trusted configuration. This profile adds GRUB2 and an initial RAM filesystem to the selected source. UEFI and other architectures are not supported by this profile. Existing package and kernel choices remain yours.','請使用已接入、啟用 Linux 同信任設定嘅 x86-64 專案。呢個組合會為所選來源加入 GRUB2 同初始記憶體檔案系統，唔支援 UEFI 或其他架構。現有套件同核心選擇會保留。',true)}</p>
@@ -355,7 +401,7 @@ export class ImagePresetsPanel extends LitElement {
    <p>${this.l('Inspection checks the current file, which may come from an earlier build. Structural checks and a successful build do not prove boot: boot execution remains unverified until separately tested. Existing ISO export only copies bytes; it does not create this bootable configuration.','檢查針對目前檔案，可能來自較早建置。結構檢查同建置成功唔代表可以開機，須另外實測。現有 ISO 匯出只會複製位元組，唔會建立呢個啟動設定。',true)}</p>
    </div>
    ${this.isoJob&&this.isoMode==='easy'&&this.isoStep!==4?html`<md-outlined-button ?disabled=${disabled} @click=${()=>this.moveIso(4)}>${materialIcon('history','icon')}${this.l('Return to current build','返回目前建置',true)}</md-outlined-button>`:nothing}
-   ${this.isoMode==='easy'?html`<nav class="step-nav" aria-label=${this.l('ISO guide steps','ISO 指南步驟',true)}><md-outlined-button ?disabled=${disabled||this.isoStep===0} @click=${()=>this.moveIso(this.isoStep-1)}>${materialIcon('arrow_back','icon')}${this.l('Back','返回',true)}</md-outlined-button>${this.isoStep<4?html`${this.workflowAction('next',disabled||!this.canAdvance(),()=>this.moveIso(this.isoStep+1),html`${materialIcon('arrow_forward','icon')}${this.l('Next','下一步',true)}`)}`:nothing}</nav>`:nothing}
+   ${!(this.compactJourney&&this.isoStep===0)?this.stepNavigation(disabled):nothing}
    ${this.isoMode==='easy'&&!this.canAdvance()&&this.isoStep<4?html`<p>${this.stageRequirement()}</p>`:nothing}
    <md-outlined-button ?disabled=${disabled||!validImageName(this.imageName)} @click=${()=>{this.saveIso();this.revision++;}}>${materialIcon('save','icon')}${this.l('Save progress','儲存進度',true)}</md-outlined-button>
    <p role="status" aria-live="polite">${this.draftSaveState==='saved'?this.l('Draft saved on this device. Permissions and effective outcomes are not saved.','草稿已儲存喺此裝置，權限同實際結果唔會儲存。',true):this.draftSaveState==='unsaved'?this.l('Current draft changes are not saved. Resolve any conflict or invalid name and save again.','目前草稿改動未儲存。請處理衝突或無效名稱，再重新儲存。',true):nothing}</p>

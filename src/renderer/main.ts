@@ -35,6 +35,9 @@ import "@material/web/icon/icon.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "./fonts.css";
 import "./operations-panel";
+import './guided-shell-image-creation';
+import {readCreationRecord,saveCreationRecord,newCreationIntent,beginAnotherCreation} from './guided-shell-image-creation-state';
+import {validateImageIntent,type ImageCreationIntent} from './image-workflow-draft';
 import { workspaceStyles } from "./workspace-styles";
 import {readShellDensity,saveShellDensity,type ShellDensity} from "./guided-shell-preferences";
 import { guidedDestinations, operationDestinations, primaryForOperation, type GuidedOperations } from "./guided-shell";
@@ -107,6 +110,8 @@ class MaterialBuildroot extends LitElement {
     densityIssue: { state: true },
     operationDestination: { state: true },
     runtimeContext: { state: true },
+    creationDecision:{state:true},creationDraft:{state:true},creationBlocked:{state:true},creationBusy:{state:true},creationNotice:{state:true},
+    projectCatalogue:{state:true},projectCatalogueState:{state:true},projectOpenBusy:{state:true},
   };
   declare state: StudioBootstrap | undefined;
   route = "images";
@@ -128,6 +133,16 @@ class MaterialBuildroot extends LitElement {
   private operationDestination='runtime';
   private runtimeContext:{projectId:string;state:'loading'|'unavailable'|'none'|'saved';label:string}={projectId:'',state:'none',label:''};
   private runtimeContextGeneration=0;
+  private creationRecord=readCreationRecord();
+  private creationDraft:ImageCreationIntent|null=this.creationRecord.draft;
+  private creationBlocked=!this.creationRecord.available;
+  private creationDecision=false;private creationBusy=false;private creationNotice='';private creationActive=false;
+  private creationWrites:Promise<unknown>=Promise.resolve();
+  private projectCatalogue:Array<{id:string;name:string;authorized:boolean}>=[];
+  private projectCatalogueState:'loading'|'ready'|'unavailable'='loading';
+  private projectCatalogueGeneration=0;private projectOpenGeneration=0;private projectOpenBusy=false;
+  private pendingRenewalId='';
+
   private settingsCategory='appearance';
   private settingsVisited=false;
   private densityRecord=readShellDensity();
@@ -147,7 +162,7 @@ class MaterialBuildroot extends LitElement {
     {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
     {id:'export-plans',en:'Export plans',zh:'匯出計劃',icon:'download'},
     ...(!this.restricted?[{id:'wording:upload',en:'Import personal vocabulary',zh:'匯入個人詞彙',icon:'upload'},{id:'wording:status',en:'Personal vocabulary status',zh:'個人詞彙狀態',icon:'info'},{id:'wording:clear',en:'Clear personal vocabulary',zh:'清除個人詞彙',icon:'delete'}]:[]),
-    {id:'attention',en:'Attention and narration',zh:'專注同旁白',icon:'accessibility_new'},
+    {id:'attention',en:'Attention and narration',zh:'專注同旁白',icon:'tune'},
     {id:'setup',en:'First-run setup',zh:'首次設定',icon:'tune'}
   ];}
   private async workspaceDestination(event:CustomEvent){
@@ -184,10 +199,25 @@ class MaterialBuildroot extends LitElement {
   }
   private async adoptedProject(event:CustomEvent){
     event.preventDefault();event.stopPropagation();
-    const workspace=event.detail;if(!workspace||typeof workspace.workspaceId!=='string'||typeof workspace.name!=='string')return;
+    const workspace=event.detail;if(!workspace||typeof workspace.workspaceId!=='string'||!/^[a-zA-Z0-9-]{1,64}$/.test(workspace.workspaceId)||typeof workspace.name!=='string'||!workspace.name||workspace.name.length>240)return;
+    if(this.pendingRenewalId&&workspace.workspaceId!==this.pendingRenewalId){this.creationNotice=this.l('The selected folders belong to a different project. The requested project and image intent are unchanged.','所選資料夾屬於另一個專案，要求嘅專案同映像意向保持不變。',true);void this.refreshImageProjects();return;}
+    this.pendingRenewalId='';
     if(!this.projectSessions.some(p=>p.workspaceId===workspace.workspaceId))this.projectSessions=[...this.projectSessions,{workspaceId:workspace.workspaceId,name:workspace.name}];
-    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();
+    const livePresentation=(event.currentTarget?['operations','image-creation']:['operations','image-creation','images']).includes(this.route)&&workspace.presentationCurrent!==false&&(!event.currentTarget||event.currentTarget===this.activeOperations());
+    const contextMatches=!workspace.creationContextId||workspace.creationContextId===this.creationDraft?.id;
+    if(!livePresentation||!contextMatches){void this.refreshImageProjects();return;}
+    const generation=this.projectOpenGeneration,workspaceId=workspace.workspaceId,creationId=this.creationDraft?.id;
+    const continuing=this.creationActive&&!!creationId&&workspace.creationContextId===creationId;
+    const current=()=>this.isConnected&&generation===this.projectOpenGeneration&&this.activeProject===workspaceId&&this.route==='operations'&&this.creationActive&&this.creationDraft?.id===creationId;
+    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;if(generation!==this.projectOpenGeneration||this.activeProject!==workspaceId)return;this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();void this.refreshImageProjects();
     this.tabsHost()?.acknowledge(`project:${workspace.workspaceId}`,workspace.name,workspace.workspaceId);
+    if(continuing){
+      const panel=this.activeOperations(),destination=panel?.tab;
+      if(!current())return;
+      if(this.creationDraft?.workspaceId!==workspaceId&&!(await this.persistCreation({workspaceId,stage:'source'})))return;
+      if(!current()||panel!==this.activeOperations()||panel?.tab!==destination)return;
+      await this.continueImageCreation(current);
+    }
   }
   protected firstUpdated(){
     try{if(!localStorage.getItem('material-buildroot.workspace-tabs.v1')){const tabs=this.tabsHost();if(tabs)tabs.edge='top';}}catch{const tabs=this.tabsHost();if(tabs)tabs.edge='top';}
@@ -241,6 +271,7 @@ class MaterialBuildroot extends LitElement {
     void this.loadSharedMode();
     void this.loadScheduledPreferences();
     void this.load();
+    void this.refreshImageProjects();
   }
   disconnectedCallback() {
     this.unregisterWorkspaceCommands?.();
@@ -445,6 +476,9 @@ class MaterialBuildroot extends LitElement {
     await this.go(route);
   }
   private async go(route: string) {
+    this.projectOpenGeneration++;this.projectOpenBusy=false;
+    if(route!=='image-creation')this.creationActive=false;
+    if(route==='images'){this.creationActive=false;void this.refreshImageProjects();}
     if(route!==this.route&&!(await this.confirmScheduleLeave()))return;
     const inner = ({builds:'builds',tools:'tools',help:'documentation'} as Record<string,string>)[route];
     this.route = inner ? 'operations' : route;
@@ -454,7 +488,7 @@ class MaterialBuildroot extends LitElement {
     this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();
     this.requestUpdate();
     await this.updateComplete;
-    this.renderRoot.querySelector<HTMLElement>("#workspace-heading")?.focus();
+    this.focusWorkspaceHeading();
   }
   private async saveLanguage() {
     if (!this.state || !this.canSave) return;
@@ -1013,15 +1047,19 @@ class MaterialBuildroot extends LitElement {
     if (destination) this.destinationDialogs.add(id);
     (this.renderRoot.querySelector("#" + id) as any)?.close();
   }
+  private focusWorkspaceHeading(){
+    const target=this.route==='operations'?this.activeOperations()?.shadowRoot?.querySelector<HTMLElement>('#operation-heading'):this.route==='image-creation'?this.renderRoot.querySelector<import('lit').LitElement>('guided-image-creation')?.shadowRoot?.querySelector<HTMLElement>('#creation-heading'):this.renderRoot.querySelector<HTMLElement>('#workspace-heading');
+    if(target?.checkVisibility())target.focus();
+  }
   private restoreFocus(id: string) {
     if (this.destinationDialogs.delete(id)) {
-      this.renderRoot.querySelector<HTMLElement>("#workspace-heading")?.focus();
+      this.focusWorkspaceHeading();
       return;
     }
     const opener = this.dialogOpeners.get(id);
     if (opener?.isConnected) opener.focus();
     else
-      this.renderRoot.querySelector<HTMLElement>("#workspace-heading")?.focus();
+      this.focusWorkspaceHeading();
   }
   private record(en: string, zh: string) {
     this.events = [
@@ -1318,6 +1356,7 @@ class MaterialBuildroot extends LitElement {
   }
 
   private routeLabel(route: string, kind:"ui-copy"|"accessible-name"="ui-copy") {
+    if(route==='image-creation')return this.owned('Create image','建立映像',kind);
     const destination=guidedDestinations.find(item=>item.id===(route==='operations'?this.primaryDestination:route));
     if(destination)return this.owned(destination.en,destination.zh,kind);
     return route === "operations"
@@ -1331,7 +1370,7 @@ class MaterialBuildroot extends LitElement {
             : this.owned("Project plans", "專案計劃", kind);
   }
   private get primaryDestination(){
-    return this.route==='operations'?primaryForOperation(this.operationDestination):this.route==='projects'?'images':this.route==='about'?'help':this.route;
+    return this.route==='operations'?primaryForOperation(this.operationDestination):(this.route==='projects'||this.route==='image-creation')?'images':this.route==='about'?'help':this.route;
   }
   private operationChanged(event:CustomEvent<{destination:string}>){
     if(event.currentTarget!==this.activeOperations()||this.route!=='operations')return;
@@ -1349,19 +1388,107 @@ class MaterialBuildroot extends LitElement {
       @click=${()=>{if(dialog)this.closeDialog('navigation-dialog',true);void this.navigate(destination.id);}}
       ><span class="navsymbol" aria-hidden="true">${materialIcon(destination.icon)}</span><span class="navlabel">${this.owned(destination.en,destination.zh)}</span></md-text-button>`)}`;
   }
-  private async openImageProject(mode:'create'|'open'){
-    if(this.dirty||!(await this.confirmScheduleLeave())){
-      this.notice=this.noticeText('Save or discard the current draft before opening a project.','開啟專案前請先儲存或捨棄目前草稿。');return;
-    }
-    await this.navigate('operations');if(this.route!=='operations')return;
-    this.activeProject='';await this.updateComplete;
+  private async persistCreation(patch:Partial<ImageCreationIntent>){
+    const current=this.creationDraft??newCreationIntent();
+    const next=validateImageIntent({...current,...patch,version:1,id:current.id,revision:current.revision+1});
+    if(!next||this.creationBlocked)return false;
+    this.creationDraft=next;
+    let success=false;
+    this.creationWrites=this.creationWrites.then(async()=>{
+      if(this.creationBlocked)return;
+      const result=await saveCreationRecord(next,this.creationRecord.raw);
+      if(!result.available){this.creationBlocked=true;this.creationNotice=this.l('Draft storage is unavailable or changed in another window. Existing records are retained. Reload saved choices before continuing.','草稿儲存未能使用或已喺另一個視窗更改。現有記錄會保留，繼續前請重新載入已儲存選擇。',true);return;}
+      this.creationRecord=result;success=true;
+    });
+    await this.creationWrites;return success;
+  }
+  private reloadCreation(){this.creationRecord=readCreationRecord();this.creationDraft=this.creationRecord.draft;this.creationBlocked=!this.creationRecord.available;this.creationNotice=this.creationBlocked?this.l('Saved image intent is invalid or unavailable and has not been overwritten.','已儲存映像意向無效或未能取得，未有覆寫。',true):'';}
+  private async creationChanged(event:CustomEvent<Partial<ImageCreationIntent>>){
+    const patch=event.detail;
+    await this.persistCreation({...(typeof patch.name==='string'?{name:patch.name}:{}),...(patch.mode?{mode:patch.mode}:{}),...(patch.purpose?{purpose:patch.purpose}:{}),...(patch.stage==='purpose'?{stage:'purpose' as const}:{})});
+  }
+  private async creationSource(){
+    if(!(await this.persistCreation({stage:'source'})))return;
+    await this.showProjectSetup('create');
+  }
+  private async showProjectSetup(mode:'create'|'open',expectedId=''){
+    this.pendingRenewalId=expectedId;this.activeProject='';
+    await this.updateComplete;
     const panel=this.activeOperations();
-    if(panel){
-      const workflow=panel as typeof panel & GuidedOperations;
-      if(workflow.openProjectWorkflow)await workflow.openProjectWorkflow(mode);
-      else {panel.tab='runtime';this.notice=this.noticeText('Choose Create new project or Open existing project in the project workflow.','請喺專案流程選擇建立新專案或開啟現有專案。');}
-      this.operationDestination=panel.tab;
-    }
+    await panel?.openProjectWorkflow(mode,expectedId||undefined,this.creationActive?this.creationDraft?.name:undefined,this.creationActive?this.creationDraft?.id:undefined);
+    this.operationDestination='runtime';
+  }
+  private async beginNewImageCreation(){
+    if(this.creationDraft){this.creationDecision=true;return;}
+    await this.openImageProject('create');
+  }
+  private async createAnotherImage(){
+    if(this.creationBusy||this.dirty||!(await this.confirmScheduleLeave()))return;
+    await this.creationWrites;this.creationBusy=true;
+    try{
+      const record=await beginAnotherCreation(this.creationRecord.raw);
+      if(!record.available){this.creationNotice=this.l('A new draft could not be saved. Previous choices and recovery copies are retained.','未能儲存新草稿，之前選擇同復原副本已保留。',true);return;}
+      this.creationRecord=record;this.creationDraft=record.draft;this.creationBlocked=false;this.creationDecision=false;this.creationNotice='';
+      await this.openImageProject('create');
+    }finally{this.creationBusy=false;}
+  }
+  private async openImageProject(mode:'create'|'open'){
+    if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before opening a project.','開啟專案前請先儲存或捨棄目前草稿。');return;}
+    if(mode==='open'){this.creationActive=false;await this.navigate('operations');if(this.route==='operations')await this.showProjectSetup('open');return;}
+    if(this.creationBlocked){this.reloadCreation();if(this.creationBlocked)return;}
+    if(!this.creationDraft&&!(await this.persistCreation({})))return;
+    await this.navigate('image-creation');if(this.route!=='image-creation')return;
+    this.creationActive=true;this.creationDecision=false;
+    if(this.creationDraft?.workspaceId){await this.openCatalogueProject(this.creationDraft.workspaceId);return;}
+    if(this.creationDraft?.stage==='source')await this.showProjectSetup('create');
+    await this.updateComplete;
+    this.renderRoot.querySelector<import('lit').LitElement>('guided-image-creation')?.shadowRoot?.querySelector<HTMLElement>('#creation-heading')?.focus();
+  }
+  private async refreshImageProjects(){
+    const generation=++this.projectCatalogueGeneration;this.projectCatalogueState='loading';
+    try{
+      const reply=await window.studio?.operations?.({action:'project.list'});
+      if(generation!==this.projectCatalogueGeneration||!this.isConnected)return;
+      if(!reply?.ok||!Array.isArray(reply.result)||reply.result.length>1000)throw new Error('Invalid catalogue');
+      const ids=new Set<string>();const rows:Array<{id:string;name:string;authorized:boolean}>=[];
+      for(const item of reply.result){if(!item||typeof item.id!=='string'||! /^[a-zA-Z0-9-]{1,64}$/.test(item.id)||ids.has(item.id)||typeof item.name!=='string'||!item.name||item.name.length>240||typeof item.authorized!=='boolean')throw new Error('Invalid catalogue');ids.add(item.id);rows.push({id:item.id,name:item.name,authorized:item.authorized});}
+      this.projectCatalogue=rows;this.projectCatalogueState='ready';
+    }catch{if(generation===this.projectCatalogueGeneration)this.projectCatalogueState='unavailable';}
+  }
+  private imageProjectRows(){
+    const rows=new Map<string,{id:string;name:string;authorized:boolean|null}>();
+    for(const project of this.projectSessions)rows.set(project.workspaceId,{id:project.workspaceId,name:project.name,authorized:null});
+    for(const project of this.projectCatalogue)rows.set(project.id,project);
+    return [...rows.values()];
+  }
+  private async renewCatalogueProject(id:string){
+    if(this.dirty||!(await this.confirmScheduleLeave()))return;
+    if(!this.creationActive){await this.navigate('operations');if(this.route!=='operations')return;}
+    else {this.route='image-creation';if(!(await this.persistCreation({stage:'source',workspaceId:id})))return;}
+    await this.showProjectSetup('open',id);
+  }
+  private async openCatalogueProject(id:string){
+    if(this.projectOpenBusy||this.dirty||!(await this.confirmScheduleLeave()))return;
+    const generation=++this.projectOpenGeneration,creationContextId=this.creationActive?this.creationDraft?.id:undefined;this.projectOpenBusy=true;
+    try{
+      const reply=await window.studio?.operations?.({action:'project.open',workspaceId:id});
+      if(generation!==this.projectOpenGeneration||!this.isConnected)return;
+      const value=reply?.ok?reply.result as {workspaceId?:unknown;name?:unknown}:null;
+      if(!value||value.workspaceId!==id||typeof value.name!=='string'||!value.name||value.name.length>240)throw new Error('Project access unavailable');
+      await this.adoptedProject(new CustomEvent('workspace-adopted',{detail:{...value,creationContextId}}));
+    }catch{if(generation===this.projectOpenGeneration){this.creationNotice=this.l('Project access could not be renewed from saved metadata. Select its folders again.','儲存記錄無法更新專案存取權，請重新選擇資料夾。',true);await this.renewCatalogueProject(id);}}
+    finally{if(generation===this.projectOpenGeneration)this.projectOpenBusy=false;void this.refreshImageProjects();}
+  }
+  private async continueImageCreation(canContinue:()=>boolean=()=>true){
+    const intent=this.creationDraft;if(!canContinue()||!intent||intent.workspaceId!==this.activeProject)return;
+    const panel=this.activeOperations();if(!panel)return;
+    if(intent.stage==='workspace'){if(!canContinue())return;await panel.openImageGuide();if(canContinue())this.creationActive=false;return;}
+    this.creationBusy=true;
+    try{if(canContinue())await panel.continueImageCreation(intent,canContinue);}finally{this.creationBusy=false;}
+  }
+  private async imageIntentResolved(event:CustomEvent<{creationId:string;workspaceId:string;status:string}>){
+    if(event.currentTarget!==this.activeOperations()||event.detail?.creationId!==this.creationDraft?.id||event.detail.workspaceId!==this.activeProject||!['applied','existing'].includes(event.detail.status))return;
+    if(await this.persistCreation({stage:'workspace',workspaceId:this.activeProject}))this.creationActive=false;
   }
   private async refreshRuntimeContext(){
     const projectId=this.activeProject,generation=++this.runtimeContextGeneration;
@@ -1386,13 +1513,16 @@ class MaterialBuildroot extends LitElement {
     return html`<div class="project-context" aria-label=${this.l('Current project and runtime','目前專案同執行環境',true)}><span>${this.l('Project','專案',true)}: <strong>${project?.name??this.l('No project selected','未選擇專案',true)}</strong></span><span>${this.l('Saved runtime (last read)','已儲存執行環境（上次讀取）',true)}: ${runtime}</span><md-text-button ?disabled=${!this.activeProject||context?.state==='loading'} @click=${this.refreshRuntimeContext}>${this.l('Refresh status','重新整理狀態',true)}</md-text-button></div>`;
   }
   private imagesView(){
+    const rows=this.imageProjectRows();
     return html`<section class="images-workspace" aria-labelledby="images-projects-heading">
-      <div class="image-actions"><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('create')}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
-      <p class="muted">${this.l('Start with trusted Buildroot source, choose a runtime, then configure and build your image.','先選擇可信嘅 Buildroot 來源同執行環境，再設定同建置映像。',true)}</p>
-      <section class="panel image-projects"><h2 id="images-projects-heading">${this.l('Open projects','已開啟專案',true)}</h2>
-      ${this.projectSessions.length?html`<ul class="project-list">${this.projectSessions.map(project=>html`<li><div><strong>${project.name}</strong><p class="muted">${this.l('Open in this session. Build and runtime status are shown in the project.','已喺今次工作階段開啟。建置同執行環境狀態可喺專案內查看。',true)}</p></div><md-outlined-button data-resume-project=${project.workspaceId} @click=${()=>this.workspaceDestination(new CustomEvent('workspace-destination',{detail:{destination:'project:'+project.workspaceId}}))}>${this.l('Resume','繼續',true)}</md-outlined-button></li>`)}</ul>`:html`<p>${this.l('No projects open in this session.','今次工作階段未有開啟專案。',true)}</p><p class="muted">${this.l('Create a project from trusted source or open an existing project. Existing source and output folders are preserved.','從可信來源建立專案，或者開啟現有專案。原有來源同輸出資料夾會保留。',true)}</p>`}
-      ${!window.studio?.operations?html`<p role="status">${this.l('Project actions are unavailable because the desktop connection is missing.','未有桌面連線，暫時無法使用專案操作。',true)}</p>`:nothing}</section>
-    </section>`;
+      <div class="image-actions"><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
+      ${this.creationDecision?html`<section class="panel"><p>${this.l('An image draft is already saved. Resume it or explicitly start another while keeping a recovery copy.','已有映像草稿。可以繼續，或者明確建立另一份並保留復原副本。',true)}</p><md-outlined-button @click=${()=>this.openImageProject('create')}>${this.l('Resume saved draft','繼續已儲存草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.creationBusy} @click=${this.createAnotherImage}>${this.l('Create another and keep previous','建立另一份並保留之前草稿',true)}</md-outlined-button></section>`:nothing}
+      ${this.creationDraft?html`<md-outlined-button data-image-action="resume-draft" @click=${()=>this.openImageProject('create')}>${this.l('Resume image draft','繼續映像草稿',true)}</md-outlined-button><p>${this.creationDraft.name} · ${this.creationDraft.purpose} · ${this.l('Saved intent, not a verified image','已儲存意向，唔係已驗證映像',true)}</p>`:nothing}
+      <section class="panel image-projects"><h2 id="images-projects-heading">${this.l('Image projects','映像專案',true)}</h2>
+      ${this.projectCatalogueState==='loading'?html`<p role="status">${this.l('Loading saved projects…','正在載入已儲存專案…',true)}</p>`:nothing}
+      ${this.projectCatalogueState==='unavailable'?html`<p role="status">${this.l('Project catalogue unavailable. Previously loaded rows may be stale; access is checked when opening.','專案目錄未能使用。先前載入記錄可能過時；開啟時會核對存取權。',true)}</p><md-outlined-button @click=${this.refreshImageProjects}>${this.l('Retry project catalogue','重試專案目錄',true)}</md-outlined-button>`:nothing}
+      ${rows.length?html`<ul class="project-list">${rows.map(project=>html`<li><div><strong>${project.name}</strong><p>${project.authorized===false?this.l('Folder access renewal required','需要更新資料夾存取權',true):this.l('Project access is checked by the desktop host when opened.','開啟時由桌面主機核對專案存取權。',true)}</p></div><md-outlined-button data-resume-project=${project.id} ?disabled=${this.projectOpenBusy} @click=${()=>project.authorized===false?this.renewCatalogueProject(project.id):this.openCatalogueProject(project.id)}>${project.authorized===false?this.l('Renew folder access','更新資料夾存取權',true):this.l('Resume','繼續',true)}</md-outlined-button></li>`)}</ul>`:this.projectCatalogueState==='ready'?html`<p>${this.l('No saved projects. Create an image draft or open existing source.','未有已儲存專案。請建立映像草稿或開啟現有來源。',true)}</p>`:nothing}
+      </section></section>`;
   }
   private runtimeName(value: string) {
     return value === "wsl" ? "WSL 2" : "Docker";
@@ -1835,7 +1965,7 @@ class MaterialBuildroot extends LitElement {
             ${this.l("Actions","操作",true)} · Ctrl+Shift+F</span
           ></md-text-button
         >
-        <md-text-button id="attention-button" aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('accessibility_new')}</md-text-button>
+        <md-text-button id="attention-button" aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('tune')}</md-text-button>
         <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
           ${(["minimize", "maximize-restore", "close"] as const).map(
             (command, index) =>
@@ -1860,14 +1990,14 @@ class MaterialBuildroot extends LitElement {
             aria-label=${this.l("Resume setup","繼續設定",true)}
             @click=${(e: Event) => this.openDialog("setup-dialog", e)}
             ><span class="navsymbol" aria-hidden="true">${materialIcon("tune")}</span><span class="navlabel"
-              >${actionIcon('Setup')}${this.l("Setup","開始設定",true)}</span
+              >${this.l("Setup","開始設定",true)}</span
             ></md-text-button
           >
         </nav>
-        <workspace-tabs .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
+        <workspace-tabs .compactEmpty=${true} .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
         <main>
           <update-panel compact .language=${this.state?.language || "bilingual"} .canRestart=${() => this.updateWorkSaved()}></update-panel>
-          <div class="toolbar">
+          <div class="toolbar" ?hidden=${this.route==='operations'||this.route==='image-creation'}>
             <div class="heading">
               <h1 id="workspace-heading" tabindex="-1">
                 ${this.routeLabel(this.route)}
@@ -1908,7 +2038,9 @@ class MaterialBuildroot extends LitElement {
                   >`
               : nothing}
           </div>
-          ${this.route==='operations'?this.projectContext():nothing}
+          ${this.route==='operations'&&this.activeProject&& !['tools','help'].includes(this.primaryDestination)?this.projectContext():nothing}
+          ${this.creationNotice||this.creationBlocked?html`<div class="notice" role="status">${this.creationNotice||this.l('Saved image intent is unavailable. Existing data was retained.','已儲存映像意向未能取得，現有資料已保留。',true)}${this.creationBlocked?html`<md-outlined-button @click=${this.reloadCreation}>${this.l('Reload saved choices','重新載入已儲存選擇',true)}</md-outlined-button>`:nothing}</div>`:nothing}
+          <div ?hidden=${this.route!=='image-creation'}>${this.creationDraft?html`<guided-image-creation .draft=${this.creationDraft} .language=${this.effectiveLanguage} .blocked=${this.creationBlocked||this.creationBusy} @creation-change=${this.creationChanged} @creation-source=${this.creationSource} @creation-return=${()=>this.navigate('images')}></guided-image-creation>`:nothing}</div>
           <div class="settings-page" ?hidden=${this.route!=='settings'}>${this.settingsVisited?this.settingsView():nothing}</div>
           ${!this.setupDone && this.route === "projects"
             ? html`<section class="onboarding">
@@ -1929,7 +2061,7 @@ class MaterialBuildroot extends LitElement {
                   >${actionIcon('Skip for now')}${this.l("Skip for now","暫時略過",true)}</md-text-button
                 >
               </section>`
-            : nothing}${this.route === "images" ? this.imagesView() : this.route === "settings"
+            : nothing}${this.route === "images" ? this.imagesView() : this.route==='image-creation' ? nothing : this.route === "settings"
             ? nothing
             : this.route === "operations"
               ? nothing
@@ -1977,20 +2109,21 @@ class MaterialBuildroot extends LitElement {
                       </p>
                     </section>`}${repeat([{workspaceId:'',name:''},...this.projectSessions],project=>project.workspaceId,project=>html`<operations-panel
             class="operations-host" data-project-id=${project.workspaceId}
-            presentation="guided" .presentation=${"guided"}
+            presentation="guided" .presentation=${"guided"} .creationSetup=${this.route==='image-creation'}
             @operation-destination-changed=${this.operationChanged}
-            ?hidden=${this.route !== "operations"||this.activeProject!==project.workspaceId}
+            ?hidden=${(this.route!=="operations"&&!(this.route==='image-creation'&&this.creationDraft?.stage!=='purpose'))||this.activeProject!==project.workspaceId}
             .workspace=${project.workspaceId?project:undefined}
             .language=${this.effectiveLanguage} .restricted=${this.restricted}
             @workspace-adopted=${this.adoptedProject}
+            @image-intent-resolved=${this.imageIntentResolved}
           ></operations-panel>`)}${this.notice
             ? html`<p class="notice" role="status">${localizedCopy(this.noticeEnglish,this.noticeCantonese,this.effectiveLanguage,true)}</p>`
             : nothing}
         </main></workspace-tabs>
       </div>
-      <div class="status" role="status" aria-live="polite">
+      <div class="status"><span class="front-provenance">${this.l('Version','版本',true)} ${this.state?.version??this.l('Unavailable','未能取得',true)} · ${this.l('Updated','更新時間',true)} ${this.buildTime()}</span><span role="status" aria-live="polite">
         ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
-      </div>
+      </span></div>
       <personal-vocabulary-drop .language=${this.effectiveLanguage}></personal-vocabulary-drop>
       ${this.dialog(
         "navigation-dialog",
