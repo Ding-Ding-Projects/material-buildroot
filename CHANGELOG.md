@@ -8,4 +8,4 @@
 - Repair runtime environment probing and wait for WSL sessions to finish.
 - Exercise real non-root Buildroot configuration and metadata jobs through WSL and Docker, with owned-process cleanup verification.
 
-Packaged and installed startup acceptance remains separate from these source and transport checks.
+Normal physical installation, startup and About-and-return navigation were verified for build 232.1. Broader workflow acceptance and complete firmware builds remain separate.

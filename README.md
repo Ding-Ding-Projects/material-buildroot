@@ -106,6 +106,8 @@ The documentation target validates isolated generated output before promotion in
 
 ## Installer startup repair, 2026-10-17
 
-The component-discovery syntax repair is available in [v0.1.0-build.230.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.230.1). Production now checks all main/shared JavaScript syntax before packaging. Installed workspace launch remains under investigation in [issue #6](https://github.com/Ding-Ding-Projects/material-buildroot/issues/6); a successful package does not prove installed startup acceptance.
+[Version 0.1.1, build 232.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.232.1) repairs startup syntax, tab registration, native element-method collisions, duplicate search notifications and WSL session waiting. The normal installed executable was verified outside package-local redirection, including About navigation and return to the workspace.
 
-The 0.1.1 candidate also repairs renderer startup registration, native-method collisions, duplicate search notifications and WSL session waiting. Real non-root WSL and Docker configuration/metadata checks passed; packaged and normal installed 0.1.1 startup are still pending. See [the handoff](HANDOFF.md) for exact limits.
+Execution tests: 20 passed, 0 failed, 6 skipped. Startup regression: 1 passed. Real non-root WSL and Docker olddefconfig/show-info checks passed with independent ownership cleanup. These are configuration and package-metadata checks, not a complete firmware-image build. See [runtime evidence](docs/evidence/startup-repair/runtime-smoke.json), [capture inventory](docs/evidence/startup-repair/inventory.json) and [the handoff](HANDOFF.md) for exact scope and remaining broader interface work.
+
+![Installed Material Buildroot 0.1.1 workspace after startup repair](docs/evidence/startup-repair/installed-workspace-011.png)

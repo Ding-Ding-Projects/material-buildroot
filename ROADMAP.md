@@ -292,5 +292,5 @@ The owner directed continuation while skipping blocker tasks. Five guest profile
 - [x] Verify source-preview startup registration and native element methods with a browser regression.
 - [x] Verify real non-root WSL olddefconfig/show-info execution and stopped-session cleanup.
 - [x] Verify real non-root Docker olddefconfig/show-info execution and absent-container cleanup.
-- [ ] Verify the packaged and normal installed 0.1.1 workspace.
-- [ ] Resolve the remaining broad execution-suite fixture failures without treating live smoke checks as a full-suite verdict.
+- [x] Verify the packaged and physical normal-installed 0.1.1 workspace, including About navigation and return, with inspected source-bound capture evidence.
+- [x] Resolve stale execution fixtures and retain explicit managed-cache refusal coverage: 20 passed, 0 failed, 6 skipped.
