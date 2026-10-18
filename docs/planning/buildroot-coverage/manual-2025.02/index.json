@@ -589,8 +589,8 @@
       },
       {
         "path": "src/renderer/image-presets-panel.ts",
-        "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f",
-        "bytes": 39436
+        "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5",
+        "bytes": 47722
       },
       {
         "path": "src/renderer/package-discovery-panel.ts",

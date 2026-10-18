@@ -6,7 +6,7 @@
     "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
     "makefileSha256": "801da8e5d6f9e5a5132fc1bbd1070432d2596a651669cd4d12c11e8cc3e03392"
   },
-  "applicationBaseline": "47d5c935917dfa71bb87a86f194dea2ad0346aee",
+  "applicationBaseline": "2ae93775f2165e75345b0d8387fc56036f0b9470",
   "scope": "Nine source symbols, one choice and one dependency comment; documentation mapping only, not native acceptance, all-version support or complete ISO capability.",
   "relatedEvidence": [
     "docs/planning/buildroot-coverage/2025.02.json",
@@ -40,13 +40,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -85,7 +85,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain upstream i386/x86_64 eligibility versus this x86_64-only profile, Linux and bootloader prerequisites."
       },
@@ -116,13 +116,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -161,7 +161,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain PC/EFI platform choices, iso9660 modules and boot-root configuration."
       },
@@ -192,13 +192,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -237,7 +237,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain the ISOLINUX prerequisite and BIOS/hybrid alternatives without suggesting this profile implements them."
       },
@@ -269,13 +269,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -314,7 +314,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain derived BIOS capability; do not expose a misleading independent switch."
       },
@@ -346,13 +346,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -391,7 +391,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain source-supported EFI separately from this BIOS-only workflow."
       },
@@ -422,13 +422,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -467,7 +467,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain GRUB/ISOLINUX defaults and __KERNEL_PATH__/__INITRD_PATH__ substitution."
       },
@@ -498,13 +498,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -543,7 +543,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain external initrd versus integrated initramfs and writable RAM versus read-only optical root."
       },
@@ -575,13 +575,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -620,7 +620,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain source dependency and kernel/runtime support; do not offer an unavailable Easy choice."
       },
@@ -652,13 +652,13 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -697,7 +697,7 @@
         "related": {
           "path": "docs/desktop/iso-fields/profile-and-firmware.md",
           "line": 5,
-          "sha256": "e2635263bd17c7ec77a32f6c7986ddb37e2a4abf8f6d2ad9374b6282988fb8ea"
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
         },
         "needed": "Explain optical versus BIOS USB/hybrid output; dependency reconciliation is not USB boot proof."
       },
@@ -722,13 +722,13 @@
         "references": [
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 147,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 194,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 166,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 212,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           },
           {
             "path": "src/renderer/configuration-panel.ts",
@@ -771,8 +771,8 @@
           },
           {
             "path": "src/renderer/image-presets-panel.ts",
-            "line": 158,
-            "sha256": "57073bf62852d3494f1e4836457259004fb5612bef464c81c8bdef97904c442f"
+            "line": 204,
+            "sha256": "faa3a62612c0606909dcff5ccf7b455112ef3629ae379d5cebeaaf388d956cd5"
           }
         ]
       },

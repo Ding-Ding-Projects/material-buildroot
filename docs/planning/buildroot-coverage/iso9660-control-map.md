@@ -2,7 +2,7 @@
 
 This supplements the existing lexical and native inventories with an explicit control disposition for every symbol, the bootloader choice and prerequisite comment in the selected Buildroot 2025.02 `fs/iso9660/Config.in`. It does not duplicate their broader inventories or claim current native GUI acceptance.
 
-The [machine-readable map](iso9660-control-map.json) preserves exact source blocks, help, line locations and hashes, and binds concrete backend, renderer and existing help references. Source-file SHA-256: `172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2`. Application baseline: `47d5c935917dfa71bb87a86f194dea2ad0346aee`. No source reference is inferred merely because a symbol exists in a catalog. Missing direct references are explicitly marked as profile context only.
+The [machine-readable map](iso9660-control-map.json) preserves exact source blocks, help, line locations and hashes, and binds concrete backend, renderer and existing help references. Source-file SHA-256: `172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2`. Application baseline: `2ae93775f2165e75345b0d8387fc56036f0b9470`. No source reference is inferred merely because a symbol exists in a catalog. Missing direct references are explicitly marked as profile context only.
 
 ## Every source item
 
@@ -35,7 +35,7 @@ The retained [ISO production](../../evidence/iso-production/production.json) and
 ## Integrity and omission witnesses
 
 ```text
-node docs/planning/buildroot-coverage/iso9660-control-map.cjs --source <retained-source> --application-baseline 47d5c935917dfa71bb87a86f194dea2ad0346aee
+node docs/planning/buildroot-coverage/iso9660-control-map.cjs --source <retained-source> --application-baseline 2ae93775f2165e75345b0d8387fc56036f0b9470
 node docs/planning/buildroot-coverage/iso9660-control-map.cjs --source <retained-source> --check
 ```
 
