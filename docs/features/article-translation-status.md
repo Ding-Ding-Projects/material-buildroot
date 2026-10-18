@@ -32,12 +32,13 @@ These translations preserve the originals’ historical verification boundaries.
 
 - [Configuration service](../desktop/configuration.zh-HK.md)
 
+- [Authenticated companion consumers](companion-consumers.zh-HK.md)
+
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
 
 - `docs/features/browser-native.md`
-- `docs/features/companion-consumers.md`
 - `docs/desktop/execution.md`
 - `docs/desktop/built-in-tools.md`
 - `docs/desktop/minecraft-manager.md`
