@@ -113,9 +113,10 @@ def read_file(directories, parent, name, maximum, structure=False):
     before = os.stat(name, dir_fd=parent, follow_symlinks=False)
     if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1 or before.st_size > maximum or before.st_uid != os.getuid():
         fail()
-    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=parent)
+    fd = os.open(name, os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=parent)
     try:
-        if file_identity(os.fstat(fd)) != file_identity(before):
+        opened = os.fstat(fd)
+        if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1 or opened.st_uid != os.getuid() or file_identity(opened) != file_identity(before):
             fail()
         digest, total = hashlib.sha256(), 0
         while True:
@@ -208,10 +209,13 @@ def run(request):
         state_file = read_file(directories, job, "state.json", 16384)
         if state_file["sha256"] != request["preparationSha256"]:
             fail()
-        fd = os.open("state.json", os.O_RDONLY | os.O_NOFOLLOW, dir_fd=job)
+        fd = os.open("state.json", os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=job)
         try:
+            opened = os.fstat(fd)
+            if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1 or opened.st_uid != os.getuid() or file_identity(opened) != state_file["identity"]:
+                fail()
             raw = os.read(fd, 16385)
-            if hashlib.sha256(raw).hexdigest() != request["preparationSha256"]:
+            if hashlib.sha256(raw).hexdigest() != request["preparationSha256"] or file_identity(os.fstat(fd)) != state_file["identity"] or file_identity(os.stat("state.json", dir_fd=job, follow_symlinks=False)) != state_file["identity"]:
                 fail()
             state = json.loads(raw)
         finally:
