@@ -235,6 +235,16 @@ try{
   else {await route.fulfill({status:404,headers:cors,body:'{}'});return;}
   await route.fulfill({status:200,headers:{...cors,'content-type':'application/json','set-cookie':'__Host-material-companion=fixture; Path=/; Secure; HttpOnly; SameSite=None'},body:JSON.stringify(payload)});
  });
+ if(new URL(target).protocol==='http:'){
+  await page.goto(new URL('site/visitor.html',target).href);await ready();await chooseLanguage('en');
+  await page.locator('#companion-endpoint').locator('input').fill('https://192.168.1.20:8443');
+  await page.locator('#companion-save-endpoint').click();
+  await page.locator('#companion-challenge').locator('textarea').fill('c'.repeat(43));
+  await page.locator('#companion-pair').click();
+  await page.waitForFunction(()=>document.querySelector('#companion-message').textContent.includes('could not complete pairing'));
+  assert.equal(companionRequests.filter(request=>request.path==='/pair').length,0,'HTTP pairing must fail before transmitting the challenge');
+  receipt.checks.push('Real served HTTP document refuses companion pairing before network transmission.');
+ }
  await page.goto(new URL('site/visitor.html',secureVisitorBase).href);await ready();
  assert.equal(await page.evaluate(()=>location.protocol),'https:');
  assert.equal(await page.locator('#visitor-workspace').count(),1);
