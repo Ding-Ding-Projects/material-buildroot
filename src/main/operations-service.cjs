@@ -128,6 +128,8 @@ const fields = {
   "accountProvisioning.preview": ["workspaceId", "username", "uid", "keyId"],
   "accountProvisioning.apply": ["workspaceId", "planId"],
   "imagePreset.catalog": ["workspaceId"],
+  "imagePreset.isoPlan": ["workspaceId", "revision"],
+  "imagePreset.isoApply": ["workspaceId", "revision"],
   "imagePreset.plan": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "imagePreset.apply": ["workspaceId", "revision", "preset", "desktop", "ssh"],
   "defconfig.catalog": ["workspaceId"],
@@ -1896,6 +1898,10 @@ function createOperationsService({
         return changeConfig(projectPaths(request.workspaceId), () => accountProvisioning.apply(request));
       case "imagePreset.catalog":
         return changeConfig(projectPaths(request.workspaceId), () => imagePresets.catalog(request));
+      case "imagePreset.isoPlan":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.isoPlan(request));
+      case "imagePreset.isoApply":
+        return changeConfig(projectPaths(request.workspaceId), () => imagePresets.isoApply(request));
       case "imagePreset.plan":
         return changeConfig(projectPaths(request.workspaceId), () => imagePresets.plan(request));
       case "imagePreset.apply":

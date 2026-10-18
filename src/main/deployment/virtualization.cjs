@@ -106,6 +106,7 @@ class Virtualization {
     store,
     managedDirectory,
     executor = defaultExecutor,
+    executables = {},
     resolveExecutable,
   }) {
     this.store = store;
