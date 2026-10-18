@@ -2,6 +2,11 @@
 
 ## Guided workspace remake, 2026-10-18
 
+- [x] Build and inspect the first combined guided candidate4c41de12;80 combined renderer checks passed. Twelve built-renderer captures identified remaining small-window spacing and complete-journey gaps; this is bounded intermediate evidence.
+- [ ] Start Create image at Purpose before project setup, preserve an unbound resumable draft through adoption, and show the real saved project catalogue after restart.
+- [ ] Reduce repeated heading/navigation rows so image choices are initially reachable at the documented minimum size; replace missing icon identifiers with admitted assets.
+- [ ] Resolve all72 current bundled-help JSON/PNG reference gaps through bounded indexed source admission, preserving integrity and unavailable states.
+
 - [ ] Replace the editor-first shell with Images, Builds, Tools, Help and Settings while preserving all destination identifiers and mounted project drafts.
 - [ ] Deliver a resumable five-stage image flow with one shared Easy/Advanced draft, contextual guidance and fresh host validation on resume.
 - [ ] Move queue and selected logs into the dedicated Builds workspace; remove the permanent dock from the guided presentation.

@@ -1,5 +1,17 @@
 # Material Buildroot continuation
 
+## Latest verified checkpoint
+
+The first combined guided GUI is integrated and remotely preserved at4c41de12de9795f749e2978dd13ed0face6cc0c0. Root build.bat /s passed with receiptc361243c0c3e781ebf5d02337dd7705bfca5bbf244ec08bfe056269b0ee6c9af and app.asarcc62291824e345bb8b19660e4ee18867583dbec34d0fc843a04c9ac5ec10ffae. The combined renderer suite passed80/80 in1.8minutes; log SHA-25665419eef19ffca87b533345d4e380d8aa50526d7e89023fd761e336a9ea52ec6. A fixture-only follow-up enters Source before permission review; the explicit Vite entry configuration avoids scanning unrelated cached outputs. The tracked entry configuration also passed its focused case.
+
+Twelve built-renderer captures cover five primary destinations and initial configuration at1440x960 and960x640, English/light/100%. The guide starts aroundy497 at the smaller size, so the image-name field is below the first viewport. The full matrix has not started. Missing icon identifiers also need correction. Host replies in these captures are explicitly fixtures; actual bundled Help uses383articles but reports72 unresolved links.
+
+The next frontend unit, owned by codex/guided-shell, starts from4c41de12 and implements the missing continuous Create image journey and saved catalogue. Create must begin Purpose/target before project setup, carry a bounded pre-project draft through adoption, preserve or explicitly resolve an existing workspace draft/job, and load project.list after restart without restoring authority. The same lane reduces repeated heading/navigation rows and restores source-bound version/update information on the initial screen. Its source changes are not integrated yet.
+
+The backend documentation lane owns codex/bundled-help-links. It repairs65 JSON references to37 tracked targets and7 PNG references to7 tracked targets through the admitted bundle boundary. All targets exist; unsupported reference admission is the cause. Do not suppress completeness findings, allow arbitrary local paths, interpret JSON as executable content or silently truncate it. Exact implementation and independent security review remain pending.
+
+Previous shellcb6c9da, image1cd8133 and operations16457a8 are integrated. Their earlier review findings are resolved at source level. The withdrawn original operations task remains retained with no accepted implementation. New coupled work must not overlap the stopped image/operations writers. Latest account reading was77% remaining; the successor goal remains active and incomplete. This record supersedes older pending-integration and allowance-boundary wording below.
+
 ## Objective and stopping boundary
 
 The owner explicitly approved implementation of the whole-application guided workspace remake. Fresh allowance recovered to 86% remaining and a later reading showed 83% remaining. The tool returned no existing goal, so a successor goal was created with the accepted redesign and unfinished runtime/ISO requirements retained. The goal is active and incomplete. The earlier blocked audit is historical; do not apply it to this resumed run.

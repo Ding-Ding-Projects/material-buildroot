@@ -28,7 +28,11 @@ async function open(page){
  });
  const p=page.locator('operations-panel').filter({has:page.locator('image-presets-panel')}).first(),iso=p.locator('image-presets-panel');
  await expect.poll(()=>page.evaluate(()=>!window.__permissionPanel.pending&&!window.__permissionPanel.shadowRoot.querySelector('image-presets-panel')?.isoBusy)).toBe(true);
- return {p,iso,review:()=>iso.getByRole('button',{name:'Review source execution permission',exact:true}).click()};
+ return {p,iso,review:async()=>{
+  const action=iso.getByRole('button',{name:'Review source execution permission',exact:true});
+  if(!await action.isVisible())await iso.getByRole('button',{name:'Next',exact:true}).click();
+  await action.click();
+ }};
 }
 async function approve(p){await p.getByRole('checkbox',{name:consent,exact:true}).check();await p.getByRole('button',{name:'Allow this scope',exact:true}).click();}
 const isoChecks=page=>page.evaluate(()=>window.__permissionCalls.filter(r=>r.action==='imagePreset.catalog').length);
