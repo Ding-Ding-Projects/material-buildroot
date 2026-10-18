@@ -4,6 +4,8 @@ A Material Design 3 desktop workspace for configuring and building embedded Linu
 
 [Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Capture provenance](docs/evidence/modern-workspace/README.md) · [Roadmap](ROADMAP.md)
 
+Current native verification at `8558894` loaded all 3,263 source packages through a bounded 50-option chooser and restored 56px build fields. ISO permission review opens, but grant/revoke IPC repair and repeated renderer-exit diagnosis remain in progress. The existing [produced ISO evidence](docs/evidence/iso-production/README.md) and [bounded BIOS boot](docs/evidence/iso-boot/README.md) are separate from the still-unverified current GUI ISO workflow. See the [roadmap](ROADMAP.md) for remaining acceptance.
+
 ## A productive desktop workspace
 
 An activity rail, project explorer, editor tabs and resizable output dock keep projects and their results together. Bundled Material icons identify navigation and editor actions. Package dependencies and guest topology have interactive canvases with pan, zoom, fit, keyboard movement and separate layout history.

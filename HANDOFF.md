@@ -1,3 +1,10 @@
+## Native acceptance update, 2026-10-18, source 8558894
+
+Exact root desktop build and hosted run `39114591065` succeeded. The real package loaded 3,263 source packages with 50 first-page package options; parallel-jobs height was 56px. Native ISO permission preview now succeeds. Actual Allow and revoke expose a separate missing-domain IPC caller defect, independently confirmed; caller repair and real-dispatcher regression are in progress. Strict host validation stays unchanged.
+
+The renderer subsequently disappeared; fault cause remains unavailable. The five-minute launch-task hypothesis is unsupported by exact stored timestamps and result0. Only owned verification processes were terminated after normal close became unavailable. Exit diagnostics are being added before another rebuilt workflow. Root private receipts are under `.cache/native-85588-cdp`; inspected captures contain task runtime identifiers and are not promoted for public publication.
+
+Guided PC defaults and admitted native-volume Docker firmware execution are separate bounded implementation lanes. The existing immutable ISO and successful bounded BIOS boot remain preserved. Current GUI ISO production, main integration, accepted release/deployment, matching installed update and complete feature acceptance remain unfinished. Current progress: issue1 comment6248185389.
 ## Latest combined candidate, 2026-10-18
 
 The combined source includes bounded package selection, reference translations, full visitor acceptance, article-language metadata and native WSL content admission. Source-bound results, exact candidate builds and remaining runtime limits are recorded in `CLOSEOUT_PROMPT.md`. Native Builds loaded 3,263 packages and returned to Configuration at `8f63abd`. The new native adapter still needs sustained GUI/queue acceptance after observed WSL service disconnects, worker exits and changing kernel boot identities. A later four-observation idle-stability check met the bounded retry condition. No host power or service-control action was used.

@@ -1,5 +1,17 @@
 # Phased implementation roadmap
 
+## Native acceptance update, 2026-10-18, source 8558894
+
+- [x] Build exact combined desktop source `855889426b76fc045170ca8cef2637486bf91f26` through root `build.bat`; workflow `39114591065` also completed successfully. This is branch build evidence, not an accepted release or installed update.
+- [x] Verify the actual packaged chooser reads 3,263 source packages and renders 50 options on its first page. Parallel-jobs and runtime text fields measured 56px high; the former stretched parallel-jobs field was 512.969px. Inspected captures remain private pending publication admission.
+- [x] Open the guided ISO permission preview through the actual native WSL content adapter with bounded source/cache identity.
+- [ ] Repair grant/revoke IPC callers: both omit required `domain`, producing actual `INVALID_REQUEST`. Independent review confirms the caller defect. Keep strict host validation and prove the corrected caller against the real dispatcher and rebuilt GUI.
+- [ ] Diagnose repeated renderer disappearance. Browser/GPU/utility survive; no fault module or exception code is available. Exact launch-task metadata does not support the proposed five-minute timeout cause. Add bounded privacy-safe exit diagnostics, then repeat the already-required rebuilt workflow.
+- [ ] Complete actual GUI ISO plan/apply/build/inspect and boot the resulting exact bytes. Earlier separately produced and booted ISO evidence remains valid only for its recorded source/hash/profile.
+- [ ] Deliver a source-discovered PC preset with explicit configuration replacement consent in Easy ISO mode.
+- [ ] Complete admitted native-volume Docker workspace, separate verified package acquisition and actual network-isolated firmware production. Existing bind-mounted source/cache probes do not establish that result.
+
+
 ## Active completion continuation, 2026-10-18
 
 The owner resumed implementation and actual acceptance, including local tests and built-interface verification. This supersedes historical test-deferral paragraphs below without changing their historical results.
