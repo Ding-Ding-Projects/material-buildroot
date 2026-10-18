@@ -16,6 +16,8 @@ The eight fixture cases passed against helper/test source at `e551fae7479c3a7cb4
 
 Independent review then identified blocking FIFO substitution between the regular-file check and open, including the second state-file open. Both opens now use `O_NONBLOCK` with `O_NOFOLLOW`, followed by regular-file, ownership, link-count and exact descriptor-identity checks. The second state open must match the earlier verified state fingerprint and digest before use and remain unchanged afterward. Two handwritten cases swap a synthetic leaf to a FIFO while preserving the original bytes; their watchdogs terminate and reap only the exact owned synthetic child. The old helper requires those watchdogs and fails both cases. Four directly related structural negatives cover checksum, endian agreement, platform and boot-image extent. This repair adds no producer or boot authority.
 
+The pinned old-source run at `98368df7c979ca3a36b1677375f31a4ef0a42f85` recorded 9 passing cases and both FIFO cases failing after their owned-child watchdogs. Repaired source `f52f32e2c32a6b7f24e7b2db43f841534e0f77c4` passed all 11 cases in 0.015 seconds; both FIFO swaps rejected with `ISO_LIFECYCLE_UNVERIFIED` before the watchdog. Both runs used the same offline/non-root synthetic-only container route and independently verified exact owned-container absence. No unchanged-source retries or production mounts were used.
+
 The fixture expects the fixed helper to be preloaded and writes only below `/fixture`. A synthetic Linux environment with that directory can load the checked-in sources without installing packages:
 
 ```sh
