@@ -1,0 +1,31 @@
+# Internal Linux ISO output lifecycle helper
+
+`scripts/configuration/iso_output_lifecycle.py` is an unexposed host-internal Linux prerequisite. It accepts only fixed prepare/capture schemas, an absolute host-selected output root and a version-4 job UUID. It has no renderer, IPC, scheduler or runtime-admission integration. Supplying a root or job identifier does not grant authority; the future host transport must establish that authority independently.
+
+Preparation confines every directory through no-follow directory descriptors and checks identity, ownership and filesystem continuity. The only production leaf is `images/rootfs.iso9660`. An existing single-link regular file is hashed and atomically moved, without replacement, into the exclusive `.material-iso-lifecycle/<job-id>/previous.iso9660` directory on that filesystem. Linux `renameat2(RENAME_NOREPLACE)` is required; there is no overwrite-capable fallback. An unsupported primitive fails without deleting the earlier file. The helper never automatically restores, overwrites or deletes earlier or partial output. A failed preparation can leave its exclusive preservation directory for later authorized recovery.
+
+The prepared state records directory identities, exact job identity, prior-file information and production-path absence. Capture requires the host-retained preparation digest and the exact persisted state. It checks the new ISO and any preserved earlier file through stable regular-file descriptors, rejects aliases, hard links, collisions and changed identities, and hashes all bounded bytes. Its bounded ISO descriptor and BIOS El Torito checks follow the existing `src/main/deployment/iso-inspection.cjs` semantics. This is metadata/structure inspection, not firmware execution or boot proof.
+
+Capture returns `fresh-file-observed-unbound`, with `jobBound`, `producerVerified`, `cleanupVerified` and `bootVerified` all false. It accepts no asserted producer-success or cleanup flags. No new file or a partial invalid ISO fails capture, and caller-supplied outcome assertions fail the strict schema. A matching observed file can contain bytes identical to the preserved earlier ISO; freshness here means observation following recorded absence, not a complete rebuild of packages or proof of the writer's identity.
+
+Only future admitted host/runtime integration can connect preparation and capture to a successful exact owned producer, verified cleanup and its job record while retaining the execution lease. Until then this helper does not satisfy fresh job-bound ISO acceptance. It does not protect against arbitrary concurrent host writers as an atomic filesystem transaction or authenticate caller-supplied roots/state digests. All file identities use decimal strings to avoid cross-language integer truncation. Limits are 4 GiB per ISO, 16 KiB for state, cooperative 60-second checks between bounded reads and an 8 KiB CLI request. Cooperative checks are not a hard wall-clock bound on filesystem operations; the future host transport must provide its own timeout and owned cancellation. No commands or arbitrary relative paths are accepted.
+
+The handwritten Linux fixture uses only synthetic temporary data. It covers preservation with no new ISO, identical new bytes, wrong job, collision, directory/file aliases, hard links, state and directory tampering, incomplete output, asserted outcome rejection and preserved-byte tampering. Its result is helper-level filesystem evidence only. Real source/output/cache volumes, GUI behavior, producer success and boot remain separate and unverified by this unit.
+
+The eight fixture cases passed against helper/test source at `e551fae7479c3a7cb423350236e04dd779e9dac0` in the existing pinned builder image, with UID/GID 1000, no network, read-only container root and a synthetic 64 MiB `/fixture` tmpfs. Exact owned-container absence was verified afterward. An earlier transport attempt delivered no stdin and ran zero tests; that exit-zero result was not accepted. One corrected interactive-stdin replacement produced the eight-case result. No production volume was mounted.
+
+Independent review then identified blocking FIFO substitution between the regular-file check and open, including the second state-file open. Both opens now use `O_NONBLOCK` with `O_NOFOLLOW`, followed by regular-file, ownership, link-count and exact descriptor-identity checks. The second state open must match the earlier verified state fingerprint and digest before use and remain unchanged afterward. Two handwritten cases swap a synthetic leaf to a FIFO while preserving the original bytes; their watchdogs terminate and reap only the exact owned synthetic child. The old helper requires those watchdogs and fails both cases. Four directly related structural negatives cover checksum, endian agreement, platform and boot-image extent. This repair adds no producer or boot authority.
+
+The pinned old-source run at `98368df7c979ca3a36b1677375f31a4ef0a42f85` recorded 9 passing cases and both FIFO cases failing after their owned-child watchdogs. Repaired source `f52f32e2c32a6b7f24e7b2db43f841534e0f77c4` passed all 11 cases in 0.015 seconds; both FIFO swaps rejected with `ISO_LIFECYCLE_UNVERIFIED` before the watchdog. Both runs used the same offline/non-root synthetic-only container route and independently verified exact owned-container absence. No unchanged-source retries or production mounts were used.
+
+The fixture expects the fixed helper to be preloaded and writes only below `/fixture`. A synthetic Linux environment with that directory can load the checked-in sources without installing packages:
+
+```sh
+python3 -I -B - <<'PY'
+import pathlib, sys, types
+helper = types.ModuleType('iso_output_lifecycle')
+exec(compile(pathlib.Path('scripts/configuration/iso_output_lifecycle.py').read_bytes(), 'iso_output_lifecycle.py', 'exec'), helper.__dict__)
+sys.modules['iso_output_lifecycle'] = helper
+exec(compile(pathlib.Path('tests/test_iso_output_lifecycle.py').read_bytes(), 'test_iso_output_lifecycle.py', 'exec'), globals())
+PY
+```
