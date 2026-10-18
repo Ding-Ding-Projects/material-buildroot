@@ -8,15 +8,20 @@ import '@material/web/progress/linear-progress.js';
 import {materialIcon} from './material-icons';
 import { workspaceStyles } from './workspace-styles';
 import {captureOwnedStatus,displayOwnedStatus} from './owned-status';
+type IsoBoardEntry={id:string;name:string;origin:string;order:number;root:string;sha256:string};
+type IsoBoardCatalog={revision:string;outputRoot:string;entries:IsoBoardEntry[]};
 export class ImagePresetsPanel extends LitElement {
  static properties={workspaceId:{type:String},language:{type:String},disabled:{type:Boolean},revision:{state:true},configurationGeneration:{type:Number}};
- static styles=[workspaceStyles,css`[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}`];
+ static styles=[workspaceStyles,css`:host{height:auto;flex-shrink:0}[hidden]{display:none!important} details{overflow-wrap:anywhere} summary{cursor:pointer;min-height:44px} md-outlined-select{max-width:100%} .step-nav{display:flex;flex-wrap:wrap;gap:12px} summary md-icon{vertical-align:middle;margin-right:8px}.board-path{overflow-wrap:anywhere}md-outlined-button{max-width:100%;height:auto;min-height:48px;white-space:normal;overflow-wrap:anywhere;padding-block:8px}`];
  workspaceId=''; language='bilingual'; disabled=false; revision=0; configurationGeneration=0;
  private catalog:any; private preview:any; private outcome:any; private preset='minimal'; private desktop='none'; private ssh=false; private approved=false; private busy=false; private message='';
  private isoPlan:any; private isoOutcome:any; private isoApproved=false; private isoJob:any; private isoInspection:any; private isoLogs:any[]=[]; private isoBusy=false; private isoMessage='';
  private isoEpoch=0; private isoMode='easy'; private isoRuntime:any; private isoStep=0; private isoResumed=false;
- private resetIso(){this.isoEpoch++;this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
- protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.isoEpoch++;this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
+ private isoBoards?:IsoBoardCatalog;private isoBoardId='';private isoBoardApproved=false;
+ private isoBoardResult?:{name:string;ready:boolean;undoDepth:number};
+ private clearBoards(){this.isoBoards=undefined;this.isoBoardId='';this.isoBoardApproved=false;this.isoBoardResult=undefined;}
+ private resetIso(){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoJob=undefined;this.isoInspection=undefined;this.isoLogs=[];this.isoMessage='';this.isoRuntime=undefined;this.isoStep=0;this.isoResumed=false;}
+ protected willUpdate(changed:PropertyValues){if(changed.has('configurationGeneration')&&changed.get('configurationGeneration')!==undefined){this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.isoMessage=this.l('Configuration changed. Check and apply the ISO profile again before building.','設定已更改，建置前請重新檢查同套用 ISO 組合。',true);}}
  protected updated(changed:PropertyValues){if(changed.has('workspaceId')){this.resetIso();this.restoreIso();this.catalog=undefined;this.preview=undefined;this.outcome=undefined;this.approved=false;this.message='';this.revision++;if(this.workspaceId&&!this.disabled)void this.isoAction('plan');}}
  private saveIso(){try{localStorage.setItem('iso-workflow-'+this.workspaceId,JSON.stringify({version:1,step:this.isoStep,mode:this.isoMode,jobId:this.isoJob?.id??null}));}catch{this.isoMessage=this.l('Progress could not be saved on this device.','未能喺呢部電腦儲存進度。',true);}}
  private restoreIso(){try{const saved=JSON.parse(localStorage.getItem('iso-workflow-'+this.workspaceId)||'null');if(saved?.version===1&&Number.isInteger(saved.step)&&saved.step>=0&&saved.step<=2){this.isoStep=saved.step;this.isoMode=saved.mode==='advanced'?'advanced':'easy';this.isoResumed=true;if(typeof saved.jobId==='string'&&/^[a-zA-Z0-9-]{1,64}$/.test(saved.jobId))this.isoJob={id:saved.jobId,state:'unverified',sequence:0};}}catch{/* Untrusted local progress never restores configuration success. */}}
@@ -46,8 +51,9 @@ export class ImagePresetsPanel extends LitElement {
   }catch(error){if(this.workspaceId===workspaceId){this.preview=undefined;this.approved=false;this.catalog=undefined;this.message=this.l('Operation not confirmed. Refresh capabilities and check configuration trust.','操作未確認。請重新整理支援能力並核對設定信任。',true)+' '+(error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:'');}}
   finally{this.busy=false;this.revision++;}
  }
- private async isoAction(action:'plan'|'apply'|'build'|'refresh'|'cancel'|'inspect'){
+ private async isoAction(action:'plan'|'apply'|'build'|'refresh'|'cancel'|'inspect'|'boards'|'boardApply'){
   if(this.isoBusy||this.busy||this.disabled||!this.workspaceId||!window.studio?.operations)return;
+  if((action==='boards'||action==='boardApply')&&this.isoActive)return;
   const api=window.studio.operations;
   const workspaceId=this.workspaceId,epoch=this.isoEpoch;
   const current=()=>workspaceId===this.workspaceId&&epoch===this.isoEpoch;
@@ -59,7 +65,19 @@ export class ImagePresetsPanel extends LitElement {
   };
   this.isoBusy=true;this.isoMessage='';this.revision++;
   try{
-   if(action==='plan'){
+   if(action==='boards'){
+    this.clearBoards();
+    this.isoBoards=await call('defconfig.catalog',{workspaceId});
+    this.isoBoardId=this.boardChoices()[0]?.id??'';
+   }else if(action==='boardApply'){
+    const selected=this.boardChoices().find(entry=>entry.id===this.isoBoardId);
+    if(!this.isoBoardApproved||!this.isoBoards||!selected)return;
+    const result=await call('defconfig.apply',{workspaceId,revision:this.isoBoards.revision,id:selected.id});
+    const enabled=(name:string)=>result.values?.[name]===true||result.values?.[name]==='y';
+    this.isoEpoch++;this.clearBoards();this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;this.catalog=undefined;this.preview=undefined;this.approved=false;
+    this.isoBoardResult={name:selected.name,ready:enabled('BR2_x86_64')&&enabled('BR2_LINUX_KERNEL'),undoDepth:Number.isInteger(result.undoDepth)?result.undoDepth:0};
+    this.saveIso();this.dispatchEvent(new CustomEvent('configuration-changed',{bubbles:true,composed:true,detail:{kind:'iso-board-preset'}}));
+   }else if(action==='plan'){
     this.isoPlan=undefined;this.isoOutcome=undefined;this.isoApproved=false;this.isoInspection=undefined;
     const options=await call('project.options',{workspaceId});this.isoRuntime=options.runtime;
     const catalog=await call('imagePreset.catalog',{workspaceId});
@@ -93,12 +111,33 @@ export class ImagePresetsPanel extends LitElement {
     this.isoInspection=await call('artifacts.inspect',{workspaceId,path:'images/rootfs.iso9660'});
    }
   }catch(error){if(current()){
+   if(action==='boards'||action==='boardApply'){this.clearBoards();this.isoPlan=undefined;this.isoApproved=false;this.isoOutcome=undefined;}
    if(action==='plan'||action==='apply'||action==='build'){this.isoPlan=undefined;this.isoApproved=false;this.isoOutcome=undefined;}
    const code=error instanceof Error&&/^[A-Z_]+$/.test(error.message)?error.message:'';
-   this.isoMessage=captureOwnedStatus(this,'isoMessage',this.l.bind(this),l=>(['KCONFIG_SEMANTICS_UNAVAILABLE','KCONFIG_SOURCE_TRUST_REQUIRED','KCONFIG_SOURCE_TRUST_CHANGED'].includes(code)?l('ISO compatibility is not confirmed. Choose Review source execution permission, review the exact source and runtime, then explicitly allow the scope if you trust it. Permission is not granted automatically.','ISO 相容性未確認。請選「核對來源執行權限」，核對確切來源同執行環境，信任後先明確批准範圍。唔會自動授權。'):['KCONFIG_RUNTIME_UNAVAILABLE','RUNTIME_REQUIRED'].includes(code)?l('A usable project runtime is required. Open Projects & runtime, select and authorize the project environment, then return and check ISO prerequisites again.','需要可用嘅專案執行環境。請開啟「專案同執行環境」，選擇同授權專案環境，再返回重新檢查 ISO 所需設定。'):l('Operation not confirmed. Refresh the plan or job before retrying.','操作未確認，重試前請重新整理計劃或工作。'))+' '+code);
+   this.isoMessage=captureOwnedStatus(this,'isoMessage',this.l.bind(this),l=>(['KCONFIG_SEMANTICS_UNAVAILABLE','KCONFIG_SOURCE_TRUST_REQUIRED','KCONFIG_SOURCE_TRUST_CHANGED'].includes(code)?l('ISO compatibility is not confirmed. Choose Review source execution permission, review the exact source and runtime, then explicitly allow the scope if you trust it. Permission is not granted automatically.','ISO 相容性未確認。請選「核對來源執行權限」，核對確切來源同執行環境，信任後先明確批准範圍。唔會自動授權。'):['KCONFIG_RUNTIME_UNAVAILABLE','RUNTIME_REQUIRED'].includes(code)?l('A usable project runtime is required. Open Projects & runtime, select and authorize the project environment, then return and check ISO prerequisites again.','需要可用嘅專案執行環境。請開啟「專案同執行環境」，選擇同授權專案環境，再返回重新檢查 ISO 所需設定。'):(action==='boards'||action==='boardApply')?l('The PC preset result is unconfirmed. Review permission and refresh source PC presets before retrying. Inspect the current configuration first if the response was lost.','電腦預設設定結果未確認。請核對權限同重新尋找來源預設設定後再試；回覆遺失時，請先檢視目前設定。'):l('Operation not confirmed. Refresh the plan or job before retrying.','操作未確認，重試前請重新整理計劃或工作。'))+' '+code);
   }}finally{this.isoBusy=false;if(current())this.saveIso();this.revision++;}
  }
  private get isoActive(){return this.isoJob&&['queued','running','dispatching','cancelling'].includes(this.isoJob.state);}
+ private boardChoices(){
+  const names=['pc_x86_64_bios_defconfig','qemu_x86_64_defconfig'];
+  return (this.isoBoards?.entries??[]).filter(entry=>entry.origin==='buildroot'&&entry.order===0&&names.includes(entry.name)).sort((a,b)=>names.indexOf(a.name)-names.indexOf(b.name));
+ }
+ private boardLabel(entry:IsoBoardEntry){return entry.name==='pc_x86_64_bios_defconfig'?this.l('BIOS PC sample: start here for a PC','BIOS 電腦範例：電腦由此開始',true):this.l('QEMU x86-64 sample: for a virtual machine','QEMU x86-64 範例：虛擬機使用',true);}
+ private boardChooser(disabled:boolean){
+  const choices=this.boardChoices(),selected=choices.find(entry=>entry.id===this.isoBoardId),result=this.isoBoardResult;
+  return html`<section class="stack" aria-label=${this.l('Choose a PC starting point','選擇電腦起點',true)}><h4>${this.l('Need a PC starting point?','需要電腦起點？',true)}</h4>
+   <p>${this.l('If your project is empty or uses the wrong processor, start with a board preset supplied by its source. This selects the processor and Linux kernel together; no symbol names need to be typed. Keep an existing suitable configuration if you do not want to replace it.','專案未設定或處理器唔合適時，可由來源提供嘅板卡預設設定開始。佢會一併選擇處理器同 Linux 核心，毋須輸入設定符號。唔想取代現有合適設定就保留原設定。',true)}</p>
+   <md-outlined-button ?disabled=${disabled||this.isoActive} @click=${()=>this.isoAction('boards')}>${materialIcon('search','icon')}${this.l('Find source PC presets','尋找來源電腦預設設定',true)}</md-outlined-button>
+   ${this.isoBoards?html`${choices.length?html`<md-outlined-select .label=${this.l('Discovered PC starting point','已發現電腦起點',true)} .value=${this.isoBoardId} ?disabled=${disabled||this.isoActive} @change=${(event:Event)=>{this.isoBoardId=(event.target as HTMLSelectElement).value;this.isoBoardApproved=false;this.revision++;}}>${choices.map(entry=>html`<md-select-option value=${entry.id}>${materialIcon(entry.name==='pc_x86_64_bios_defconfig'?'computer':'memory','start')}<div slot="headline">${this.boardLabel(entry)}</div><div slot="supporting-text">${entry.name}</div></md-select-option>`)}</md-outlined-select>
+   <p>${this.l('These are source-provided samples, not a promise that every PC works. The PC sample targets BIOS startup; the QEMU sample targets an emulated machine. UEFI-only hardware needs a different workflow. The source may also retain disk-image or post-build actions.','以上係來源提供嘅範例，唔保證每部電腦適用。電腦範例用 BIOS 啟動；QEMU 範例用模擬機器。只支援 UEFI 嘅硬件須用另一個流程。來源亦可能保留磁碟映像或建置後動作。',true)}</p>
+   ${selected?html`<dl><dt>${this.l('Selected source preset','所選來源預設設定',true)}</dt><dd><code>${selected.name}</code></dd><dt>${this.l('Source directory','來源目錄',true)}</dt><dd class="board-path">${selected.root}</dd><dt>${this.l('Output configuration to replace','將取代嘅輸出設定',true)}</dt><dd class="board-path">${this.isoBoards.outputRoot}</dd></dl>`:nothing}
+   <p>${this.l('Applying replaces this output configuration, including its package and kernel choices, and runs reconciliation. Existing source files are not edited. The host keeps configuration undo history for this session and restores the previous configuration if reconciliation fails. Use a separate output folder if you want both configurations.','套用會取代此輸出設定，包括套件同核心選擇，並執行協調；唔會編輯現有來源檔案。主機會喺本次工作階段保留設定復原記錄，協調失敗時還原先前設定。想保留兩套設定就使用獨立輸出資料夾。',true)}</p>
+   <label><md-checkbox aria-label=${this.l('Replace this output configuration with the selected PC preset','以所選電腦預設設定取代此輸出設定',true)} .checked=${this.isoBoardApproved} ?disabled=${disabled||this.isoActive||!selected} @change=${(event:Event)=>{this.isoBoardApproved=(event.target as HTMLInputElement).checked;this.revision++;}}></md-checkbox>${this.l('Replace this output configuration with the selected PC preset','以所選電腦預設設定取代此輸出設定',true)}</label>
+   <md-outlined-button ?disabled=${disabled||this.isoActive||!selected||!this.isoBoardApproved} @click=${()=>this.isoAction('boardApply')}>${materialIcon('check','icon')}${this.l('Apply this PC starting point','套用此電腦起點',true)}</md-outlined-button>`:html`<p role="status">${this.l('This source does not list either supported starting-point name. No preset has been invented or applied. Use Advanced to review its complete board catalogue, or choose a source containing a suitable PC preset.','此來源冇列出兩個支援嘅起點名稱，未有虛構或套用預設設定。請用進階模式核對完整板卡清單，或選擇包含合適電腦預設設定嘅來源。',true)}</p>`}`:nothing}
+   ${result?html`<p role="status"><code>${result.name}</code>: ${result.ready?this.l('Preset applied; the returned effective configuration enables x86-64 and Linux. Review source execution permission again for the changed configuration, then check and configure the ISO profile. No ISO was built.','已套用預設設定；傳回嘅實際設定啟用咗 x86-64 同 Linux。請為已更改設定重新核對來源執行權限，再檢查同設定 ISO 組合。未有建立 ISO。',true):this.l('Preset application returned without the required x86-64 and Linux values. ISO readiness is not confirmed. Review the source and configuration before continuing.','預設設定傳回時未保留所需 x86-64 同 Linux 值，ISO 就緒狀態未確認。繼續前請核對來源同設定。',true)}</p>${result.undoDepth>0?html`<p>${this.l('The configuration editor can undo this change during this session. Review permission again first because the configuration scope changed.','設定編輯器可喺本次工作階段復原此更改。設定範圍已變，請先重新核對權限。',true)}</p>`:nothing}`:nothing}
+   ${this.isoHelp('Which starting point should I choose?','Use the BIOS PC sample for a BIOS PC starting point, or the QEMU sample for an emulated machine. They are offered only when the selected source actually lists them. Read the full guide for replacement, recovery and hardware limits.','BIOS 電腦可由 BIOS 電腦範例開始，模擬機器則用 QEMU 範例。只有所選來源實際列出時先提供。完整指南說明取代、復原同硬件限制。','Easy ISO board presets')}
+  </section>`;
+ }
  private isoHelp(title:string,en:string,zh:string,article:string){return html`<details><summary>${materialIcon('help_outline')}${this.l(title,zh,true)}</summary><p>${this.l(en,zh,true)}</p><md-outlined-button @click=${()=>this.dispatchEvent(new CustomEvent('open-documentation',{bubbles:true,composed:true,detail:{title:article}}))}>${materialIcon('description','icon')}${this.l('Read the field guide','閱讀欄位指南',true)}</md-outlined-button></details>`;}
  private isoWorkflow(){
   const disabled=this.disabled||this.busy||this.isoBusy||!this.workspaceId,iso=this.isoInspection?.iso;
@@ -121,7 +160,8 @@ export class ImagePresetsPanel extends LitElement {
    <md-outlined-button ?disabled=${disabled||this.isoActive} @click=${()=>this.isoAction('plan')}>${this.l('Check ISO prerequisites','檢查 ISO 所需設定',true)}</md-outlined-button>
    <md-outlined-button ?disabled=${disabled||this.isoActive} @click=${this.reviewPermission}>${materialIcon('security','icon')}${this.l('Review source execution permission','核對來源執行權限',true)}</md-outlined-button>
    <p>${this.l('First-time setup may need permission to inspect this source. Review opens the exact source and runtime below; nothing is approved until you select the consent checkbox and Allow this scope.','首次設定可能需要來源檢視權限。核對會開啟下方確切來源同執行環境；只有勾選同意並按「批准此範圍」後先授權。',true)}</p>
-   ${this.isoPlan?html`<p>${this.isoPlan.profile} · BIOS</p><ul>${this.isoPlan.requirements.map((r:any)=>html`<li><code>${r.symbol}</code>: ${r.selectable?this.l('Available','可用',true):r.reason}</li>`)}</ul><p>${this.isoPlan.applicable?this.l('Configuration requests can be applied. No ISO has been built.','可以套用設定要求，尚未建立 ISO。',true):this.l('This configuration cannot use the profile. Select an x86-64 Linux board and resolve the unavailable requirements, then check again.','呢個設定未能使用此組合。請選擇 x86-64 Linux 板卡並處理不可用設定，再重新檢查。',true)}</p>
+   ${this.boardChooser(disabled)}
+   ${this.isoPlan?html`<p>${this.isoPlan.profile} · BIOS</p><ul>${this.isoPlan.requirements.map((r:any)=>html`<li><code>${r.symbol}</code>: ${r.selectable?this.l('Available','可用',true):r.reason}</li>`)}</ul><p>${this.isoPlan.applicable?this.l('Configuration requests can be applied. No ISO has been built.','可以套用設定要求，尚未建立 ISO。',true):this.l('This configuration cannot use the profile yet. Choose a source PC starting point above, review its replacement and permission steps, then check again. Advanced configuration remains available.','此設定暫時未能使用此組合。請喺上方選擇來源電腦起點，核對取代同權限步驟，再重新檢查。進階設定仍可使用。',true)}</p>
    <label><md-checkbox aria-label=${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)} ?disabled=${disabled||!this.isoPlan.applicable} .checked=${this.isoApproved} @change=${(e:Event)=>{this.isoApproved=(e.target as HTMLInputElement).checked;this.revision++;}}></md-checkbox>${this.l('Apply the listed ISO configuration requests','套用列出嘅 ISO 設定要求',true)}</label>
    <md-outlined-button ?disabled=${disabled||!this.isoApproved||!this.isoPlan.applicable} @click=${()=>this.isoAction('apply')}>${this.l('Configure BIOS ISO','設定 BIOS ISO',true)}</md-outlined-button>`:nothing}
    ${this.isoHelp('Effective configuration help','Apply only after reviewing the live source requirements. Reconciliation must retain every required value. A rejected or stale revision needs a fresh check; configuration undo is available in the editor.','檢閱實際來源要求後先套用。協調必須保留全部所需值。版本過期或被拒絕時請重新檢查；編輯器提供設定復原。','ISO configuration and recovery')}

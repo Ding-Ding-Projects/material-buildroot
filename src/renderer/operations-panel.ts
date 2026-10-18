@@ -939,7 +939,7 @@ export class OperationsPanel extends LitElement {
       </section>`;
   }
   private async openIsoHelp(event:CustomEvent<{title:string}>) {
-    const titles=['ISO profile and firmware','ISO runtime and resources','ISO configuration and recovery','ISO output and validation'];
+    const titles=['ISO profile and firmware','ISO runtime and resources','ISO configuration and recovery','ISO output and validation','Easy ISO board presets'];
     if(!titles.includes(event.detail?.title))return;
     const index=await this.run('documentation.list');
     const article=index?.articles?.find((item:any)=>item.title===event.detail.title);
@@ -951,7 +951,7 @@ export class OperationsPanel extends LitElement {
   private configView() {
     if (!this.workspace) return this.noProject();
     const entries = this.configEntries();
-    return html`<image-presets-panel @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined; }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
+    return html`<image-presets-panel @review-iso-permission=${this.reviewIsoPermission} .configurationGeneration=${this.configurationGeneration} @open-documentation=${this.openIsoHelp} .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${(event:CustomEvent) => { this.config=undefined;if(event.detail?.kind==="iso-board-preset"){this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;} }}></image-presets-panel><account-provisioning-panel .disabled=${this.pending || !!Object.keys(this.changes).length} .workspaceId=${this.workspace.workspaceId} .language=${this.language} @configuration-changed=${() => { this.config=undefined;this.configurationGeneration++; }}></account-provisioning-panel><defconfig-panel @configuration-changed=${() => {this.config=undefined;this.configurationGeneration++;}} .workspaceId=${this.workspace.workspaceId} .language=${this.language}></defconfig-panel><section class="panel stack">
       <div class="row">
         <h2>${this.l("Configuration domain","設定範圍",true)}</h2>
         <md-outlined-select .label=${this.l("Domain","範圍",true)} .value=${this.configDomain} ?disabled=${this.pending || !!Object.keys(this.changes).length} @change=${(event: Event) => { this.configDomain = (event.target as HTMLSelectElement).value; this.configTrustPreview = undefined; this.configTrustAccepted = false; this.config = undefined; this.changes = {}; this.defconfigs = []; this.configPage = 0; }}>
