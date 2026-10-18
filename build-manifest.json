@@ -68,9 +68,9 @@
     }
   },
   "electron": {
-    "version": "44.7.2",
-    "url": "https://github.com/electron/electron/releases/download/v44.7.2/electron-v44.7.2-win32-x64.zip",
-    "sha256": "10a89447ef64ac5cb9f782af48ffd83734a40ae91681259d1048ca3c9e6c5da4",
+    "version": "44.9.0",
+    "url": "https://github.com/electron/electron/releases/download/v44.9.0/electron-v44.9.0-win32-x64.zip",
+    "sha256": "88e08039d0ef359bab9f674e8051fa103bd8628ea7c5a5e1daaa610a8a0c6931",
     "maxDownloadBytes": 200000000,
     "maxExpandedBytes": 700000000,
     "stripPrefix": "",
