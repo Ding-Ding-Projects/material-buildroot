@@ -77,3 +77,11 @@ a category Postman collection is not applicable.
 ## Translation and delivery boundaries
 
 Legacy reference articles without a linked Cantonese twin remain untranslated gaps. This index does not imply complete translation of every document or implementation of every required feature. Keep PH09-T04 unchecked until its full inventory and production acceptance are established. The existing documentation producer renders admitted tracked Markdown and source wiki, then bundles indexed content for offline help. Authoring, generation, deployment, search, route completeness, offline resource completeness, persistence and runtime acceptance remain separate. No production build, test, review, static analysis, runtime interaction or screenshot was performed for this article change.
+
+## Presentation reference
+
+- [Presentation provenance](presentation-provenance.md) · [展示來源證明](presentation-provenance.zh-HK.md)
+
+- [Authenticated companion consumers](companion-consumers.md) · [已驗證伴隨連線消費端](companion-consumers.zh-HK.md)
+
+- [Browser-native visitor consumers](browser-native.md) · [瀏覽器原生訪客功能](browser-native.zh-HK.md)

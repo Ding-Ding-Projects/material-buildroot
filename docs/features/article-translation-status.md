@@ -1,6 +1,6 @@
 # Article translation and production boundary
 
-[é¦™æ¸¯ç²µèªž](article-translation-status.zh-HK.md) Â· [Task catalog](README.md)
+[香港粵語](article-translation-status.zh-HK.md) · [Task catalog](README.md)
 
 The current documentation lane preserves 49 detailed Cantonese reference twins, the source wiki twins, API workflow twins and translated category indexes. Existing English articles retain their twin links. Seven new complete Cantonese twins cover the four ISO field articles, ISO workflow, ISO production and beginner documentation. Their English originals and twins are linked together from the [ISO field index](../desktop/iso-fields/README.md). These are authored translations of behavior, permission, recovery, limits and evidence boundaries; short summaries in older articles are not counted as complete twins. This is an authoring inventory, not a translation review, build, runtime or accessibility verdict.
 
@@ -14,25 +14,39 @@ The current documentation lane preserves 49 detailed Cantonese reference twins, 
 - [ISO production](../desktop/iso-production.zh-HK.md)
 - [Beginner documentation](guided-documentation.zh-HK.md)
 
-These are full authored translations, not the older short Cantonese summary. Current English wiki updates describe installed release and bounded ISO evidence; existing wiki Cantonese twins have not been refreshed in this lane and may retain earlier statements. Their synchronization remains unfinished.
+These are full authored translations, not the older short Cantonese summary. The three Cantonese wiki twins are synchronized with their current English originals, including installed build 233.1, publication-only build 234.1 and bounded ISO consumer evidence. This is source translation equivalence, not new runtime acceptance.
+
+## Additional complete reference twins
+
+Twelve of the thirteen previously listed reference twins are now authored. The remaining server-manager article is still listed below. Documentation at source `382373f97c9b915d051dd1cf94667eb131a4c372` passed a bounded browser check, but that earlier result does not cover these later translations.
+
+- [Presentation provenance](presentation-provenance.zh-HK.md)
+- [Ollama workspace](../desktop/ollama-workspace.zh-HK.md)
+- [Managed hypervisor controls](../deployment/hypervisor-controls.zh-HK.md)
+
+These translations preserve the originals’ historical verification boundaries. They do not refresh runtime evidence.
+
+- [Artifacts and deployment](../desktop/deployment.zh-HK.md)
+- [Unsigned Windows releases](../build/releases.zh-HK.md)
+
+- [HTTPS companion boundary](../security/companion.zh-HK.md)
+- [Persistent workspace state](../security/workspace-state.zh-HK.md)
+
+- [Configuration service](../desktop/configuration.zh-HK.md)
+
+- [Authenticated companion consumers](companion-consumers.zh-HK.md)
+
+- [Built-in tool services](../desktop/built-in-tools.zh-HK.md)
+
+- [Project execution adapter](../desktop/execution.zh-HK.md)
+
+- [Browser-native visitor consumers](browser-native.zh-HK.md)
 
 ## Remaining reference twins
 
 The following current reference articles still need their full Cantonese twin:
 
-- `docs/features/browser-native.md`
-- `docs/features/companion-consumers.md`
-- `docs/features/presentation-provenance.md`
-- `docs/desktop/configuration.md`
-- `docs/desktop/execution.md`
-- `docs/desktop/deployment.md`
-- `docs/desktop/built-in-tools.md`
-- `docs/desktop/ollama-workspace.md`
 - `docs/desktop/minecraft-manager.md`
-- `docs/deployment/hypervisor-controls.md`
-- `docs/security/workspace-state.md`
-- `docs/security/companion.md`
-- `docs/build/releases.md`
 
 The feature root index, security root index and documentation root index still need complete translated index pages. The retained remote-runtime and documentation-notification changelog articles also remain without twins. Future source integrations can add or change articles; preserve their exact source history and update the corresponding twins before claiming full inventory completion. This bounded list does not claim that historical evidence/planning/design material has been translated.
 

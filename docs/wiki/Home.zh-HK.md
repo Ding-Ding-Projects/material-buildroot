@@ -2,7 +2,11 @@
 
 [English](Home.md) · [文件索引](../README.md)
 
-Material Buildroot 係開發中嘅 Windows Buildroot 桌面工作區。來源包含專案、設定、執行環境、具型別伴隨連線、歷史同個人化流程。來源實作同驗收證據分開追蹤。已有普通可下載安裝包，但來源或封裝存在唔代表執行驗收通過。目前擁有人指定交付延後測試、審查、稽核、靜態分析及畫面擷取，包括虛擬機及 Docker 測試。請先閱讀[交接](../../HANDOFF.md)、[分工清單](../planning/implementation-queue.json)及[來源綁定執行證據](../evidence/desktop-shell/README.md)，唔好由單一結果推斷全部完成。
+Material Buildroot 係 Windows 桌面工作區，提供項目、配置同執行流程。先讀[新手指南](../features/guided-documentation.zh-HK.md)，再跟住[開始使用](Getting-started.zh-HK.md)。
+
+已有普通未簽署 Squirrel.Windows 發佈。[Build 233.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.233.1)，來源 `21bf4ad4c6e1fb19a8a48fae57cdca6d63777c6a`，已有正常安裝後啟動、About 導覽同返回工作區嘅驗證，詳見[已記錄安裝版本界線](../../README.md)。之後 Build 234.1 已發佈，但此處未證明佢已安裝。目前 ISO 介面候選唔可以因此當成已包含喺獲驗收嘅安裝版本。
+
+已有真實 WSL/Docker 檢查同完整非 root BIOS GRUB2 ISO 製作記錄。未修改嘅 12,357,632 位元組映像喺記錄所列 QEMU 10.0.13/Cirrus/RTL8139 組合啟動，完成主控台、暫存檔、DHCP、內部閘道同關機檢查。請讀[製作證據](../evidence/iso-production/README.md)同[有限範圍啟動證據](../evidence/iso-boot/README.md)。其他硬件、韌體、持久儲存、互聯網連線同候選原生發佈驗收，都係獨立要求。[目前交接](../../HANDOFF.md)同[路線圖](../../ROADMAP.md)保留未完成狀態。
 
 - [開始使用計劃](Getting-started.zh-HK.md)
 - [常見問題](FAQ.zh-HK.md)

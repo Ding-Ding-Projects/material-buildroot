@@ -1,6 +1,6 @@
 # Project wiki
 
-[é¦™æ¸¯ç²µèªž](Home.zh-HK.md) Â· [Documentation index](../README.md)
+[香港粵語](Home.zh-HK.md) · [Documentation index](../README.md)
 
 Material Buildroot is a Windows desktop workspace with project, configuration and execution workflows. Start with the [beginner guide](../features/guided-documentation.md), then follow [Getting started](Getting-started.md).
 
