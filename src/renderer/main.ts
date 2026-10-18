@@ -11,7 +11,8 @@ import "./workspace-tabs";
 import type {WorkspaceTabs, WorkspaceDestination} from "./workspace-tabs";
 import "./command-surfaces";
 import "./shared-mode-panel";
-import "./attention-mode-panel";
+import "./guided-shell-attention";
+import type {GuidedShellAttention} from "./guided-shell-attention";
 import "./scheduled-preferences-panel";
 import type {ScheduledPreferencesSnapshot} from "../shared/scheduled-preferences";
 import type {SharedModeSnapshot} from "../shared/shared-mode";
@@ -35,6 +36,8 @@ import "@material/web/textfield/outlined-text-field.js";
 import "./fonts.css";
 import "./operations-panel";
 import { workspaceStyles } from "./workspace-styles";
+import {readShellDensity,saveShellDensity,type ShellDensity} from "./guided-shell-preferences";
+import { guidedDestinations, operationDestinations, primaryForOperation, type GuidedOperations } from "./guided-shell";
 
 type Plan = {
   id: string;
@@ -99,9 +102,14 @@ class MaterialBuildroot extends LitElement {
     importSummary: { state: true },
     projectSessions: { state: true },
     activeProject: { state: true },
+    settingsCategory: { state: true },
+    density: { state: true },
+    densityIssue: { state: true },
+    operationDestination: { state: true },
+    runtimeContext: { state: true },
   };
   declare state: StudioBootstrap | undefined;
-  route = window.studio?.operations ? "operations" : "projects";
+  route = "images";
   connection: ConnectionState = "loading";
   saveState: SaveState = "idle";
   windowNotice = false;
@@ -117,9 +125,19 @@ class MaterialBuildroot extends LitElement {
   importSummary = "";
   private projectSessions: {workspaceId:string;name:string}[]=[];
   private activeProject='';
+  private operationDestination='runtime';
+  private runtimeContext:{projectId:string;state:'loading'|'unavailable'|'none'|'saved';label:string}={projectId:'',state:'none',label:''};
+  private runtimeContextGeneration=0;
+  private settingsCategory='appearance';
+  private settingsVisited=false;
+  private densityRecord=readShellDensity();
+  private density:ShellDensity=this.densityRecord.density;
+  private densityIssue=this.densityRecord.available?'':'read';
+  private setDensity(density:ShellDensity){if(saveShellDensity(density)){this.density=density;this.densityIssue='';}else this.densityIssue='save';}
   private tabsHost(){return this.renderRoot.querySelector('workspace-tabs') as WorkspaceTabs|null;}
   private activeOperations(){return Array.from(this.renderRoot.querySelectorAll<import('./operations-panel').OperationsPanel>('operations-panel')).find(panel=>panel.dataset.projectId===this.activeProject)??null;}
   private workspaceDestinations():WorkspaceDestination[]{return [
+    {id:'images',en:'Images',zh:'映像',icon:'album'},
     {id:'open-project',en:'Open or adopt project',zh:'開啟或接入專案',icon:'folder_open'},
     ...this.projectSessions.map(p=>({id:`project:${p.workspaceId}`,en:p.name,zh:p.name,icon:'folder_open'})),
     ...[['projects','Plans','計劃','dashboard'],['activity','Activity','活動','history'],['settings','Settings','設定','settings'],['about','About','關於','info']].map(([id,en,zh,icon])=>({id,en,zh,icon})),
@@ -129,6 +147,7 @@ class MaterialBuildroot extends LitElement {
     {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
     {id:'export-plans',en:'Export plans',zh:'匯出計劃',icon:'download'},
     ...(!this.restricted?[{id:'wording:upload',en:'Import personal vocabulary',zh:'匯入個人詞彙',icon:'upload'},{id:'wording:status',en:'Personal vocabulary status',zh:'個人詞彙狀態',icon:'info'},{id:'wording:clear',en:'Clear personal vocabulary',zh:'清除個人詞彙',icon:'delete'}]:[]),
+    {id:'attention',en:'Attention and narration',zh:'專注同旁白',icon:'accessibility_new'},
     {id:'setup',en:'First-run setup',zh:'首次設定',icon:'tune'}
   ];}
   private async workspaceDestination(event:CustomEvent){
@@ -140,16 +159,17 @@ class MaterialBuildroot extends LitElement {
       const id=destination.slice(8),project=this.projectSessions.find(p=>p.workspaceId===id);
       if(!project){await this.navigate('operations');if(this.route==='operations'){this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';}this.notice=this.noticeText('Reopen this project through the folder picker to renew access.','請透過資料夾選擇器重新開啟專案，以更新存取權。');return;}
       await this.navigate('operations');if(this.route!=='operations')return;
-      this.activeProject=id;this.tabsHost()?.acknowledge(destination,project.name,id);return;
+      this.activeProject=id;await this.updateComplete;this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();this.tabsHost()?.acknowledge(destination,project.name,id);return;
     }
     if(destination==='open-project'){
       await this.navigate('operations');if(this.route!=='operations')return;
       this.activeProject='';await this.updateComplete;const panel=this.activeOperations();if(panel)panel.tab='runtime';this.tabsHost()?.acknowledge(destination);return;
     }
+    if(destination==='attention'){this.openAttention();return;}
     if(destination==='setup'){this.openDialog('setup-dialog');return;}
     if(destination==='new-plan'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.beginNew();}return;}
     if(destination==='export-plans'){await this.navigate('projects');if(this.route==='projects'){this.tabsHost()?.acknowledge('projects');this.exportPlans();}return;}
-    if(destination.startsWith('wording:')){if(this.restricted)return;await this.navigate('settings');if(this.route!=='settings')return;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(destination.slice(8) as 'upload'|'status'|'clear');this.tabsHost()?.acknowledge('setting:vocabulary');return;}
+    if(destination.startsWith('wording:')){if(this.restricted)return;await this.navigate('settings');if(this.route!=='settings')return;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;this.settingsCategory='vocabulary';await this.updateComplete;const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(destination.slice(8) as 'upload'|'status'|'clear');this.tabsHost()?.acknowledge('setting:vocabulary');return;}
     if(destination.startsWith('tool:')){
       await this.navigate('operations');if(this.route!=='operations')return;const panel=this.activeOperations();if(panel){panel.tab='tools';await panel.updateComplete;const tools=panel.shadowRoot?.querySelector('tools-panel') as import('lit').LitElement|null;await tools?.updateComplete;const section=tools?.shadowRoot?.querySelector<HTMLElement>(`[data-destination="${destination.slice(5)}"]`);section?.scrollIntoView({block:'start'});section?.focus();}
     }else if(destination.startsWith('operation:')){
@@ -157,18 +177,22 @@ class MaterialBuildroot extends LitElement {
       const panel=this.activeOperations();if(panel)panel.tab=destination.slice(10);
     }else if(destination.startsWith('setting:')){
       await this.navigate('settings');if(this.route!=='settings')return;
-      const id=destination.slice(8);const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;const entry=this.settingsEntries().find(e=>e.id===id);if(search&&entry){search.regex=false;search.query=entry.text;search.focusQuery();}
+      const id=destination.slice(8);this.settingsCategory=id;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;const entry=this.settingsEntries().find(e=>e.id===id);if(search&&entry){search.regex=false;search.query=entry.text;search.focusQuery();}
     }else{await this.navigate(destination);if(this.route!==destination)return;}
+    this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();
     this.tabsHost()?.acknowledge(destination,'','',destination.startsWith('operation:')||destination.startsWith('tool:')?this.activeProject:'');
   }
   private async adoptedProject(event:CustomEvent){
     event.preventDefault();event.stopPropagation();
     const workspace=event.detail;if(!workspace||typeof workspace.workspaceId!=='string'||typeof workspace.name!=='string')return;
     if(!this.projectSessions.some(p=>p.workspaceId===workspace.workspaceId))this.projectSessions=[...this.projectSessions,{workspaceId:workspace.workspaceId,name:workspace.name}];
-    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;
+    this.activeProject=workspace.workspaceId;this.route='operations';await this.updateComplete;this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();
     this.tabsHost()?.acknowledge(`project:${workspace.workspaceId}`,workspace.name,workspace.workspaceId);
   }
-  protected firstUpdated(){this.tabsHost()?.acknowledge(window.studio?.operations?'open-project':'projects');}
+  protected firstUpdated(){
+    try{if(!localStorage.getItem('material-buildroot.workspace-tabs.v1')){const tabs=this.tabsHost();if(tabs)tabs.edge='top';}}catch{const tabs=this.tabsHost();if(tabs)tabs.edge='top';}
+  }
+  private openAttention(event?:Event){this.renderRoot.querySelector<GuidedShellAttention>('guided-shell-attention')?.open(event?.currentTarget as HTMLElement|undefined);}
   private async closeWorkspaceTab(event:CustomEvent){
     // Keep mounted instances so closing navigation never discards pending drafts or job output.
     if(this.dirty||!(await this.confirmScheduleLeave())){this.notice=this.noticeText('Save or discard the current draft before closing a tab.','關閉分頁前請先儲存或捨棄目前草稿。');return;}
@@ -239,10 +263,10 @@ class MaterialBuildroot extends LitElement {
   private schedulePanel(){return this.renderRoot.querySelector('scheduled-preferences-panel') as import('./scheduled-preferences-panel').ScheduledPreferencesPanel|null;}
   private async confirmScheduleLeave(){
     const panel=this.schedulePanel();if(!panel)return true;
-    if(panel.hasPendingDraft&&!this.settingIds.includes('schedules')){this.settingIds=[...this.settingIds,'schedules'];this.requestUpdate();await this.updateComplete;}
+    if(panel.hasPendingDraft){this.settingsCategory='schedules';if(!this.settingIds.includes('schedules'))this.settingIds=[...this.settingIds,'schedules'];this.requestUpdate();await this.updateComplete;}
     return panel.confirmLeave();
   }
-  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
+  private async scheduledPreferenceAction(){const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;this.settingsCategory='schedules';await this.updateComplete;const panel=this.schedulePanel();panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#schedule-heading') as HTMLElement|null)?.focus();}
   private applySharedSnapshot(snapshot:SharedModeSnapshot|null){this.sharedSnapshot=snapshot;void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');this.syncDocumentLanguage();this.requestUpdate();}
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
   private settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];
@@ -251,7 +275,7 @@ class MaterialBuildroot extends LitElement {
     {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記',true)},
     {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰',true)},
     {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原',true)},
-    {id:'appearance',text:this.l('Appearance Theme','外觀 主題',true)},
+    {id:'appearance',text:this.l('Appearance Theme Density Comfortable Compact','外觀 主題 密度 舒適 緊密',true)},
     {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入',true)},
     ...(this.restricted?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除',true)}])];}
   private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return localizedCopy(en,zh,this.effectiveLanguage,true,kind);}
@@ -265,7 +289,7 @@ class MaterialBuildroot extends LitElement {
   private async sharedPreferenceAction(){
     const dialog=this.renderRoot.querySelector('#actions-dialog');const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));this.closeDialog('actions-dialog',true);await closed;
     this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;
-    const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
+    const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;this.settingsCategory='shared';await this.updateComplete;
     const panel=this.renderRoot.querySelector('shared-mode-panel') as import('./shared-mode-panel').SharedModePanel|null;panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;(panel?.shadowRoot?.querySelector('#shared-heading') as HTMLElement|null)?.focus();
   }
   private async vocabularyAction(action:'upload'|'status'|'clear'){
@@ -273,7 +297,7 @@ class MaterialBuildroot extends LitElement {
     const dialog=this.renderRoot.querySelector('#actions-dialog');
     const closed=new Promise<void>(resolve=>dialog?.addEventListener('closed',()=>resolve(),{once:true}));
     this.closeDialog('actions-dialog',true);await closed;this.settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];await this.navigate('settings');await this.updateComplete;
-    const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;await this.updateComplete;
+    const search=this.renderRoot.querySelector('settings-search') as import('./settings-search').SettingsSearch|null;search?.reset();await search?.updateComplete;this.settingsCategory='vocabulary';await this.updateComplete;
     const panel=this.renderRoot.querySelector('personal-vocabulary-panel') as import('./personal-vocabulary-panel').PersonalVocabularyPanel|null;
     panel?.scrollIntoView({block:'nearest'});await panel?.updateComplete;panel?.focusAction(action);
   }
@@ -422,7 +446,13 @@ class MaterialBuildroot extends LitElement {
   }
   private async go(route: string) {
     if(route!==this.route&&!(await this.confirmScheduleLeave()))return;
-    this.route = route;
+    const inner = ({builds:'builds',tools:'tools',help:'documentation'} as Record<string,string>)[route];
+    this.route = inner ? 'operations' : route;
+    if(this.route==='settings')this.settingsVisited=true;
+    await this.updateComplete;
+    if(inner){const panel=this.activeOperations();if(panel)panel.tab=inner;}
+    this.operationDestination=this.activeOperations()?.tab??'runtime';void this.refreshRuntimeContext();
+    this.requestUpdate();
     await this.updateComplete;
     this.renderRoot.querySelector<HTMLElement>("#workspace-heading")?.focus();
   }
@@ -1288,8 +1318,10 @@ class MaterialBuildroot extends LitElement {
   }
 
   private routeLabel(route: string, kind:"ui-copy"|"accessible-name"="ui-copy") {
+    const destination=guidedDestinations.find(item=>item.id===(route==='operations'?this.primaryDestination:route));
+    if(destination)return this.owned(destination.en,destination.zh,kind);
     return route === "operations"
-      ? this.owned("Project operations", "專案操作", kind)
+      ? this.owned("Images", "映像", kind)
       : route === "settings"
         ? this.owned("Settings", "設定", kind)
         : route === "activity"
@@ -1298,33 +1330,69 @@ class MaterialBuildroot extends LitElement {
             ? this.owned("About", "關於", kind)
             : this.owned("Project plans", "專案計劃", kind);
   }
+  private get primaryDestination(){
+    return this.route==='operations'?primaryForOperation(this.operationDestination):this.route==='projects'?'images':this.route==='about'?'help':this.route;
+  }
+  private operationChanged(event:CustomEvent<{destination:string}>){
+    if(event.currentTarget!==this.activeOperations()||this.route!=='operations')return;
+    if(!operationDestinations.some(id=>id===event.detail?.destination))return;
+    this.operationDestination=event.detail.destination;void this.refreshRuntimeContext();
+    this.requestUpdate();
+  }
   private navigation(dialog = false) {
-    return html`${[
-      "projects",
-      "operations",
-      "activity",
-      "settings",
-      "about",
-    ].map(
-      (route, index) =>
-        html`<md-text-button
-          data-experience-id=${"navigation:"+route} title=${this.routeLabel(route)} class=${this.route === route ? "selected" : ""}
-          aria-label=${this.route === route
-            ? `${this.routeLabel(route,"accessible-name")}, ${this.owned("current workspace", "目前工作區","accessible-name")}`
-            : this.routeLabel(route,"accessible-name")}
-          @click=${() => {
-            if (dialog) this.closeDialog("navigation-dialog", true);
-            void this.navigate(route);
-          }}
-          ><span class="navsymbol" aria-hidden="true"
-            >${this.icon(
-              ["plans", "operations", "activity", "settings", "about"][index],
-            )}</span
-          ><span class=${dialog ? "" : "navlabel"}
-            >${this.routeLabel(route)}</span
-          ></md-text-button
-        >`,
-    )}`;
+    return html`${guidedDestinations.map(destination=>html`<md-text-button
+      data-experience-id=${'navigation:'+destination.id}
+      data-primary=${destination.id}
+      class=${this.primaryDestination===destination.id?'selected':''}
+      aria-current=${this.primaryDestination===destination.id?'page':'false'}
+      aria-label=${this.owned(destination.en,destination.zh,'accessible-name')+(this.primaryDestination===destination.id?', '+this.owned('current workspace','目前工作區','accessible-name'):'')}
+      @click=${()=>{if(dialog)this.closeDialog('navigation-dialog',true);void this.navigate(destination.id);}}
+      ><span class="navsymbol" aria-hidden="true">${materialIcon(destination.icon)}</span><span class="navlabel">${this.owned(destination.en,destination.zh)}</span></md-text-button>`)}`;
+  }
+  private async openImageProject(mode:'create'|'open'){
+    if(this.dirty||!(await this.confirmScheduleLeave())){
+      this.notice=this.noticeText('Save or discard the current draft before opening a project.','開啟專案前請先儲存或捨棄目前草稿。');return;
+    }
+    await this.navigate('operations');if(this.route!=='operations')return;
+    this.activeProject='';await this.updateComplete;
+    const panel=this.activeOperations();
+    if(panel){
+      const workflow=panel as typeof panel & GuidedOperations;
+      if(workflow.openProjectWorkflow)await workflow.openProjectWorkflow(mode);
+      else {panel.tab='runtime';this.notice=this.noticeText('Choose Create new project or Open existing project in the project workflow.','請喺專案流程選擇建立新專案或開啟現有專案。');}
+      this.operationDestination=panel.tab;
+    }
+  }
+  private async refreshRuntimeContext(){
+    const projectId=this.activeProject,generation=++this.runtimeContextGeneration;
+    if(!projectId){this.runtimeContext={projectId,state:'none',label:''};return;}
+    this.runtimeContext={projectId,state:'loading',label:''};
+    try{
+      const reply=await window.studio?.operations?.({action:'project.options',workspaceId:projectId});
+      if(generation!==this.runtimeContextGeneration||projectId!==this.activeProject)return;
+      if(!reply?.ok)throw new Error('Unavailable runtime record');
+      const result=reply.result as {runtime?:{kind?:unknown;distribution?:unknown;image?:unknown}}|undefined;
+      const runtime=result?.runtime;
+      if(!runtime){this.runtimeContext={projectId,state:'none',label:''};return;}
+      const value=runtime.kind==='wsl'?runtime.distribution:runtime.kind==='docker'?runtime.image:undefined;
+      if(typeof value!=='string'||!value||value.length>512)throw new Error('Invalid runtime record');
+      this.runtimeContext={projectId,state:'saved',label:(runtime.kind==='wsl'?'WSL 2':'Docker')+' · '+value};
+    }catch{if(generation===this.runtimeContextGeneration&&projectId===this.activeProject)this.runtimeContext={projectId,state:'unavailable',label:''};}
+  }
+  private projectContext(){
+    const project=this.projectSessions.find(project=>project.workspaceId===this.activeProject);
+    const context=this.runtimeContext.projectId===this.activeProject?this.runtimeContext:null;
+    const runtime=!this.activeProject?this.l('No project selected','未選擇專案',true):context?.state==='saved'?context.label:context?.state==='loading'?this.l('Reading saved configuration…','正在讀取已儲存設定…',true):context?.state==='none'?this.l('Not selected','未選擇',true):this.l('Unavailable','未能取得',true);
+    return html`<div class="project-context" aria-label=${this.l('Current project and runtime','目前專案同執行環境',true)}><span>${this.l('Project','專案',true)}: <strong>${project?.name??this.l('No project selected','未選擇專案',true)}</strong></span><span>${this.l('Saved runtime (last read)','已儲存執行環境（上次讀取）',true)}: ${runtime}</span><md-text-button ?disabled=${!this.activeProject||context?.state==='loading'} @click=${this.refreshRuntimeContext}>${this.l('Refresh status','重新整理狀態',true)}</md-text-button></div>`;
+  }
+  private imagesView(){
+    return html`<section class="images-workspace" aria-labelledby="images-projects-heading">
+      <div class="image-actions"><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('create')}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
+      <p class="muted">${this.l('Start with trusted Buildroot source, choose a runtime, then configure and build your image.','先選擇可信嘅 Buildroot 來源同執行環境，再設定同建置映像。',true)}</p>
+      <section class="panel image-projects"><h2 id="images-projects-heading">${this.l('Open projects','已開啟專案',true)}</h2>
+      ${this.projectSessions.length?html`<ul class="project-list">${this.projectSessions.map(project=>html`<li><div><strong>${project.name}</strong><p class="muted">${this.l('Open in this session. Build and runtime status are shown in the project.','已喺今次工作階段開啟。建置同執行環境狀態可喺專案內查看。',true)}</p></div><md-outlined-button data-resume-project=${project.workspaceId} @click=${()=>this.workspaceDestination(new CustomEvent('workspace-destination',{detail:{destination:'project:'+project.workspaceId}}))}>${this.l('Resume','繼續',true)}</md-outlined-button></li>`)}</ul>`:html`<p>${this.l('No projects open in this session.','今次工作階段未有開啟專案。',true)}</p><p class="muted">${this.l('Create a project from trusted source or open an existing project. Existing source and output folders are preserved.','從可信來源建立專案，或者開啟現有專案。原有來源同輸出資料夾會保留。',true)}</p>`}
+      ${!window.studio?.operations?html`<p role="status">${this.l('Project actions are unavailable because the desktop connection is missing.','未有桌面連線，暫時無法使用專案操作。',true)}</p>`:nothing}</section>
+    </section>`;
   }
   private runtimeName(value: string) {
     return value === "wsl" ? "WSL 2" : "Docker";
@@ -1509,12 +1577,24 @@ class MaterialBuildroot extends LitElement {
           </section>`}
     </div>`;
   }
+  private settingVisible(id:string){return this.settingIds.includes(id)&&this.settingsCategory===id;}
+  private settingsCategories(){return [
+    ...(!this.restricted?[{id:'language',en:'Language',zh:'語言'}]:[]),
+    {id:'appearance',en:'Appearance',zh:'外觀'}, {id:'schedules',en:'Schedules',zh:'排程'},
+    {id:'experience',en:'Experience',zh:'體驗'}, {id:'shared',en:'Shared preference',zh:'共用偏好'},
+    {id:'backups',en:'Backups',zh:'備份'}, ...(!this.restricted?[{id:'vocabulary',en:'Personal vocabulary',zh:'個人詞彙'}]:[])
+  ];}
+  private async selectSettingsCategory(id:string){
+    if(id!==this.settingsCategory&&!(await this.confirmScheduleLeave()))return;
+    this.settingsCategory=id;
+  }
   private settingsView() {
     return html`<div class="settings-grid view">
-      <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;this.requestUpdate();}}}></settings-search>
+      <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;if(!this.settingIds.includes(this.settingsCategory))this.settingsCategory=this.settingIds[0]??'';this.requestUpdate();}}}></settings-search>
+      <div class="settings-categories" role="group" aria-label=${this.l('Settings categories','設定分類',true)}>${this.settingsCategories().filter(item=>this.settingIds.includes(item.id)).map(item=>html`<md-outlined-button class=${this.settingsCategory===item.id?"selected":""} aria-label=${this.l(item.en,item.zh,true)+(this.settingsCategory===item.id?", "+this.l("selected","已選取",true):"")} @click=${()=>this.selectSettingsCategory(item.id)}>${this.l(item.en,item.zh,true)}</md-outlined-button>`)}</div>
       ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。',true)}</p>`:nothing}
       ${!this.restricted?html`<section
-        class="panel stack" ?hidden=${!this.settingIds.includes("language")}
+        class="panel stack" ?hidden=${!this.settingVisible("language")}
         aria-busy=${this.connection === "loading" || this.busy}
       >
         <h2>${this.owned("Language", "語言")}</h2>
@@ -1564,8 +1644,11 @@ class MaterialBuildroot extends LitElement {
         <p id="save-feedback">${this.statusMessage()}</p>
         <language-wording-panel .language=${this.effectiveLanguage}></language-wording-panel>
       </section>`:nothing}
-      <section class="panel stack" ?hidden=${!this.settingIds.includes("appearance")} >
+      <section class="panel stack" ?hidden=${!this.settingVisible("appearance")} >
         <h2>${this.owned("Appearance", "外觀")}</h2>
+        <div class="row" role="group" aria-label=${this.l('Workspace density','工作區密度',true)}>${(['comfortable','compact'] as const).map(value=>html`<md-outlined-button data-density=${value} class=${this.density===value?'selected':''} aria-label=${(value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true))+(this.density===value?', '+this.l('selected','已選取',true):'')} @click=${()=>this.setDensity(value)}>${value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true)}</md-outlined-button>`)}</div>
+        <p class="muted">${this.l('Comfortable is the default. Compact reduces spacing while keeping controls at least 44 pixels tall. Saved on this device.','預設為舒適。緊密模式會減少間距，控制項保持最少 44 像素高。設定儲存喺呢部電腦。',true)}</p>
+        ${this.densityIssue?html`<p role="status">${this.densityIssue==='read'?this.l('Saved density could not be read. Comfortable spacing is used until a new choice is saved.','未能讀取已儲存密度。儲存新選擇前會使用舒適間距。',true):this.l('Density was not saved. The previous spacing remains in use.','密度未儲存，繼續使用之前嘅間距。',true)}</p>`:nothing}
         <md-outlined-select
           .label=${this.workspaceMode === "durable"
             ? this.l("Theme","主題",true)
@@ -1591,11 +1674,11 @@ class MaterialBuildroot extends LitElement {
             : this.l("Theme resets to the system preference on restart.","重新啟動後，主題會跟隨系統。",true)}
         </p>
       </section>
-      <section class="panel stack" ?hidden=${!this.settingIds.includes('experience')}><experience-policy-panel .language=${this.effectiveLanguage}></experience-policy-panel></section>
-      <section class="panel stack" ?hidden=${!this.settingIds.includes('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
-      <section class="panel stack" ?hidden=${!this.settingIds.includes('schedules')}><scheduled-preferences-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .snapshot=${this.scheduleSnapshot} .baseLanguage=${this.state?.language||"bilingual"} .baseTheme=${this.theme} @scheduled-snapshot=${(e:CustomEvent<ScheduledPreferencesSnapshot|null>)=>this.applyScheduledSnapshot(e.detail)}></scheduled-preferences-panel></section>
-      <div ?hidden=${!this.settingIds.includes('backups')}>${this.historyPanel()}</div>
-      ${!this.restricted?html`<section class="panel stack" ?hidden=${!this.settingIds.includes('vocabulary')}><personal-vocabulary-panel .language=${this.effectiveLanguage} .restricted=${this.restricted}></personal-vocabulary-panel></section>`:nothing}
+      <section class="panel stack" ?hidden=${!this.settingVisible('experience')}><experience-policy-panel .language=${this.effectiveLanguage}></experience-policy-panel></section>
+      <section class="panel stack" ?hidden=${!this.settingVisible('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
+      <section class="panel stack" ?hidden=${!this.settingVisible('schedules')}><scheduled-preferences-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .snapshot=${this.scheduleSnapshot} .baseLanguage=${this.state?.language||"bilingual"} .baseTheme=${this.theme} @scheduled-snapshot=${(e:CustomEvent<ScheduledPreferencesSnapshot|null>)=>this.applyScheduledSnapshot(e.detail)}></scheduled-preferences-panel></section>
+      <div ?hidden=${!this.settingVisible('backups')}>${this.historyPanel()}</div>
+      ${!this.restricted?html`<section class="panel stack" ?hidden=${!this.settingVisible('vocabulary')}><personal-vocabulary-panel .language=${this.effectiveLanguage} .restricted=${this.restricted}></personal-vocabulary-panel></section>`:nothing}
     </div>`;
   }
   private setupView() {
@@ -1730,8 +1813,8 @@ class MaterialBuildroot extends LitElement {
     >`;
   }
   render() {
-    return html`<div class="shell ${this.dark ? "dark" : ""}">
-      <attention-mode-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .startupEligible=${this.setupDone&&this.state?.origin==='saved'} data-experience-exempt></attention-mode-panel>
+    return html`<div class="shell ${this.dark ? "dark" : ""} ${this.density}">
+      <guided-shell-attention .language=${this.effectiveLanguage} .restricted=${this.restricted} .startupEligible=${this.setupDone&&this.state?.origin==='saved'} data-experience-exempt></guided-shell-attention>
       <header>
         <md-text-button
           class="menu"
@@ -1752,6 +1835,7 @@ class MaterialBuildroot extends LitElement {
             ${this.l("Actions","操作",true)} · Ctrl+Shift+F</span
           ></md-text-button
         >
+        <md-text-button aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('accessibility_new')}</md-text-button>
         <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
           ${(["minimize", "maximize-restore", "close"] as const).map(
             (command, index) =>
@@ -1789,7 +1873,7 @@ class MaterialBuildroot extends LitElement {
                 ${this.routeLabel(this.route)}
               </h1>
               <p class="muted">
-                ${this.route === "projects"
+                ${this.route === "images" ? this.l("Create, open or resume an image project.","建立、開啟或繼續映像專案。",true) : this.route === "projects"
                   ? `${this.plans.length} ${this.l("plans","個計劃",true)} · ${this.scope()}`
                   : this.route === "activity"
                     ? this.workspaceMode === "durable"
@@ -1824,6 +1908,8 @@ class MaterialBuildroot extends LitElement {
                   >`
               : nothing}
           </div>
+          ${this.route==='operations'?this.projectContext():nothing}
+          <div class="settings-page" ?hidden=${this.route!=='settings'}>${this.settingsVisited?this.settingsView():nothing}</div>
           ${!this.setupDone && this.route === "projects"
             ? html`<section class="onboarding">
                 <div class="heading">
@@ -1843,8 +1929,8 @@ class MaterialBuildroot extends LitElement {
                   >${actionIcon('Skip for now')}${this.l("Skip for now","暫時略過",true)}</md-text-button
                 >
               </section>`
-            : nothing}${this.route === "settings"
-            ? this.settingsView()
+            : nothing}${this.route === "images" ? this.imagesView() : this.route === "settings"
+            ? nothing
             : this.route === "operations"
               ? nothing
               : this.route === "projects"
@@ -1891,6 +1977,8 @@ class MaterialBuildroot extends LitElement {
                       </p>
                     </section>`}${repeat([{workspaceId:'',name:''},...this.projectSessions],project=>project.workspaceId,project=>html`<operations-panel
             class="operations-host" data-project-id=${project.workspaceId}
+            presentation="guided" .presentation=${"guided"}
+            @operation-destination-changed=${this.operationChanged}
             ?hidden=${this.route !== "operations"||this.activeProject!==project.workspaceId}
             .workspace=${project.workspaceId?project:undefined}
             .language=${this.effectiveLanguage} .restricted=${this.restricted}
