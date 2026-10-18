@@ -1,5 +1,22 @@
 ## Integrated guidance and source isolation, 2026-10-18
 
+## Account-boundary preservation, 2026-10-18
+
+The goal remains active and incomplete. Verified account allowance reached 10% remaining. No new implementation, native launch, WSL query, firmware attempt or corrected browser follow-up was started after that boundary. Existing data, installations, source/output trees, inactive candidates and ignored originals remain preserved. No cleanup was performed.
+
+Integration branch is preserved at `8db4e8519a27e1a3878d96714717f68432af7ed1` before this record. Its exact root desktop build passed, receipt `fb50308f8b82db2135df20068112c334a94c20fde7285178f8b607058b70560f`. Exact root documentation build passed: 411 HTML pages, 379 documents, 10,704 internal references; receipt `9ed6e5a91fcb7b3ff6778ab7149af1cf3fd806105adbbcb7c41773177b76f77a`, snapshot `5e586d0eadd96a4d326164d07c71ef973d33b3a093056a3f0743fb320f94727d`. GitHub Actions run39125712640 succeeded for8db4e85; run39125326312 succeeded fora1de1d1.
+
+The new built-documentation browser pass remains overall failed because its final keyboard locator timed out. Earlier steps passed three changed articles, ten internal link/anchor byte checks and ten article/home/status layout tuples, with six inspected captures and unchanged receipt binding. Failed receipt SHA-256 `e79073fed24771f6465393cad9bc27cd77273b06a8a735e6d650c16923190fa2` remains retained. This was a verification-script locator problem, not an established product defect. Its corrected selector-only follow-up was not started at the account boundary. Keyboard home/status navigation remains unverified.
+
+Internal WSL transport `165b51a74be2407167ebee77c08ad299d49a9b0e` is preserved on `ai/docs/20261018-progress-roadmap-readme`, not merged here. Both source reviews are dry, but no dedicated original nine-test log/run-generated source attestation was retained. The existing tool output reported9/9 in65.0233ms before the candidate commit; an explicitly transcript-derived record has SHA-256 `ee3e9f26bbee3b458a7064102f3706aef990ed1dfbc675bffcde69612f2dea4d`. It records no timestamp or before/after source hashes. No rerun was performed to fill that gap. Obtain properly bound focused proof after allowance recovery before integration. The fixed transport is unexposed; no live native admission/cancellation or producer/job-bound ISO acceptance exists.
+
+Verification branch tips were fast-forward preserved with exact remote readback: guided-docs=a12c9361b50f89bd61068438a98cdc1329fb7af9; iso-workflow=308d4545e093e03a873f6b0570b9383a880a77dc; source-coverage=d1bdf8f65ceefa8595ab1d048aaa360aa71d11d2; iso-boot=24697b52ce5e0d7cfbf82ba1d9ee9efe1d92c960. Dialog-lifecycle=d6f098d10f1b503f94a0a7b2b798f66118ecf2e7 and iso-backend=f6dfeadd6d034b02f8e406e0edd2a85dcf0f6541 remain preserved. All eight existing task checkouts were clean. Local main's two additional commits are ancestors of the preserved integration tip; no reset or deletion occurred.
+
+One dedicated public capture-gallery publication lane is active on `ai/docs/20261018-public-capture-gallery`, based only on fetched main79f0de3. It may update reviewed gallery files and the exact source backlink, without merging productive integration code or changing deployment/release wiring. Publication is not yet verified. Keep this lane's result separate from the unfinished application goal and from any automatically generated release. Preserve every generated announcement variant privately; none belongs in the public gallery.
+
+The verified80-file desktop2bd4cb9 stage is preparation only. The refreshed brief-visible-check decision remains unanswered; no verification window was launched. Runtime uncertainty, original booted ISO evidence, compiler failure, blocked translation write and unavailable authenticated Status Hub/wiki duties remain as recorded below. Progress issue1comment6249691985 precedes this preservation record.
+
+
 ## Current identity and guidance acceptance, 2026-10-18
 
 Integrated source `1acb54b4827ffeee6306fbce1d1794c7e203c0b8` contains the mandatory output-root comparison `a38954c7439381a4120d300c005057b0f5d6f9f0` and guidance acceptance `d6f098d10f1b503f94a0a7b2b798f66118ecf2e7`, each with two dry independent reviews. The helper requires exact decimal-string device/inode/UID comparison before mutation. Old missing-identity witness: 11 passed and one failed; repaired source: 15/15 in 0.026 seconds. The supplied identity remains unauthenticated comparison data; fixed admitted transport and producer/job binding remain incomplete.

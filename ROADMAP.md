@@ -1,12 +1,18 @@
 # Phased implementation roadmap
 
+## Current preservation boundary
+
+- [x] Preserve existing task branches and exact remote tips at the verified account boundary; active and unfinished work retained.
+- [ ] Finish corrected built-documentation keyboard home/status verification after allowance recovery; original partial pass remains overall failed.
+- [ ] Verify the single public capture-gallery publication lane separately from product delivery.
+
 ## Current bounded integration
 
 - [x] Add independently reviewed ISO profile and saved-runtime guides with isolated examples; source-fixture verification only.
 - [x] Add unexposed ISO preservation/observation helper and repair FIFO waits with witnessed red/green synthetic checks (11/11).
 - [x] Refresh the ISO map against explicit consumer baseline 308d4545 and the unchanged 2,245-detail manual inventory.
 - [x] Require strict output-root identity comparison before helper mutation; 15/15 synthetic checks, with supplied identity explicitly unauthenticated.
-- [ ] Derive that identity from a real admitted native grant through fixed owned transport; internal source implementation in progress.
+- [ ] Review and verify fixed admitted WSL transport candidate165b51a: source reviews dry, reported9/9 has no original run attestation; inactive pending bound proof.
 - [ ] Wire owned transport, exact producer/cleanup and durable required ISO receipt inside the existing execution lease.
 - [x] Verify runtime wording levels 1/5 in all three language modes at 480 pixels and the English admitted two-article reader route (9/9 source-fixture checks).
 - [ ] Verify current packaged/native guidance, complete packaged and translated-reader navigation, native input and assistive technology.
