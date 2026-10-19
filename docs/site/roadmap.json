@@ -45,7 +45,7 @@
         {
           "id": "PH01-T01",
           "done": false,
-          "text": "[R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 107 identities; preserve conditional and canonical-only dispositions with reasons."
+          "text": "[R (A/D/C admission only)] Reconcile all current canonical contracts against each of the 109 identities; preserve conditional and canonical-only dispositions with reasons."
         },
         {
           "id": "PH01-T02",
@@ -477,7 +477,7 @@
         {
           "id": "PH10-T08",
           "done": false,
-          "text": "[A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 107 dispositions before declaring complete."
+          "text": "[A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 109 dispositions before declaring complete."
         }
       ],
       "done": 0,
@@ -486,5 +486,5 @@
   ],
   "task_count": 79,
   "verified_count": 7,
-  "input_snapshot_sha256": "d9f0cd2d3f1ea5750fe2f36f05cefe0478287483451a8dec672617eab4cf1d8f"
+  "input_snapshot_sha256": "4fdbfb29f95133b1f43745d8671e35b04bfbcb13ff8407b8e969af23b63700a3"
 }

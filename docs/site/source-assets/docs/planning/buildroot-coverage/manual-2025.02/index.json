@@ -1,0 +1,817 @@
+{
+  "schemaVersion": 1,
+  "producer": {
+    "path": "scripts/buildroot-coverage/manual-inventory.cjs",
+    "sha256": "b4f1d5ae0d8a9fa74fc667f5765e9917b0a583cc684d4facb650669344c069fe",
+    "normalization": "CRLF-to-LF for producer only; selected source hashes retain exact bytes"
+  },
+  "source": {
+    "version": "2025.02",
+    "files": [
+      {
+        "path": "docs/manual/adding-board-support.adoc",
+        "sha256": "78ff64543d5e931cad88164c440a2620ab9ac7547bfa7bdb5d1284d8b68ccc34",
+        "bytes": 3352
+      },
+      {
+        "path": "docs/manual/adding-packages-asciidoc.adoc",
+        "sha256": "926afd856ea3b902a90518e95222d13ce7b027e2ce69742a80416fc63e4c4292",
+        "bytes": 5311
+      },
+      {
+        "path": "docs/manual/adding-packages-autotools.adoc",
+        "sha256": "2585c4b3c4e4284623361b59bec789129cf45fa0c16d1da318c0d1b90aeecc35",
+        "bytes": 6996
+      },
+      {
+        "path": "docs/manual/adding-packages-cargo.adoc",
+        "sha256": "32bacbd4fd232cd8f47321c3b3118fcdd16fe93ffda6c14475e79456f1d5ec16",
+        "bytes": 3800
+      },
+      {
+        "path": "docs/manual/adding-packages-cmake.adoc",
+        "sha256": "5232ede522671c026c410fa9336045fd1e8e57e20c36dbbc5a85874e9deb98e9",
+        "bytes": 6953
+      },
+      {
+        "path": "docs/manual/adding-packages-conclusion.adoc",
+        "sha256": "8aae8113c3006e754ad241ae4a2db419a517697d681edfc9711f8f8ce71bba63",
+        "bytes": 425
+      },
+      {
+        "path": "docs/manual/adding-packages-directory.adoc",
+        "sha256": "c7518fa939c2e7c3fb548242c7a09c8f66fc4d6507d6a0252f4d0bda47218aa5",
+        "bytes": 26095
+      },
+      {
+        "path": "docs/manual/adding-packages-generic.adoc",
+        "sha256": "8b5f670b2cc85a8c1adf809b1d9c68c2cc7229af4fbde7775ead9d987881d5cb",
+        "bytes": 32226
+      },
+      {
+        "path": "docs/manual/adding-packages-gettext.adoc",
+        "sha256": "c20d03af51fa995ca8c4f2ff8d7efb111fb349c4fc32c6eb61a9513b823f0cb8",
+        "bytes": 2850
+      },
+      {
+        "path": "docs/manual/adding-packages-golang.adoc",
+        "sha256": "ec0bd02c9b6e9b25553bb6d92702b337eb780dfbf886b440a3e1dcebae286b12",
+        "bytes": 5577
+      },
+      {
+        "path": "docs/manual/adding-packages-hooks.adoc",
+        "sha256": "a3675ccf81b3ee24f77cc7b4f532b462317edc1bbf0c92492f2d08071a3db403",
+        "bytes": 2941
+      },
+      {
+        "path": "docs/manual/adding-packages-kconfig.adoc",
+        "sha256": "bad349fa6105012051d5bb8e15a2f312d21ec640d6b4c12fb135b230fac7a49f",
+        "bytes": 4475
+      },
+      {
+        "path": "docs/manual/adding-packages-kernel-module.adoc",
+        "sha256": "6c06ff05cd9d043be02a8ef30047cfec57abdead1a13dba6adffd1d28d147f34",
+        "bytes": 5104
+      },
+      {
+        "path": "docs/manual/adding-packages-linux-kernel-spec-infra.adoc",
+        "sha256": "e99405a8d04089a985af0d4026abd26ff603a317bb595303c843098052d9c09c",
+        "bytes": 5491
+      },
+      {
+        "path": "docs/manual/adding-packages-luarocks.adoc",
+        "sha256": "e0e8ad83b014c8a9542f30d09bb4825bc88aca09ca478bfdb2f2d7bab40636be",
+        "bytes": 4144
+      },
+      {
+        "path": "docs/manual/adding-packages-meson.adoc",
+        "sha256": "064dd0f8663c0b67d5479a50181b729f575e92ef7089d5315ee9ca199524d231",
+        "bytes": 5494
+      },
+      {
+        "path": "docs/manual/adding-packages-perl.adoc",
+        "sha256": "305d1d8adea2c5b903f018eed38b9231de1de4ddeefdf15033c457b735fe0382",
+        "bytes": 5057
+      },
+      {
+        "path": "docs/manual/adding-packages-python.adoc",
+        "sha256": "682f195bd73d79783fec75bc4e794be84879044d8477c1c01570e12e7f53a4cc",
+        "bytes": 9441
+      },
+      {
+        "path": "docs/manual/adding-packages-qmake.adoc",
+        "sha256": "d06a1eed3301cf12a24c5a73e8ffc2e422a1c95d58ca238bd7174ecd360ab0c2",
+        "bytes": 2826
+      },
+      {
+        "path": "docs/manual/adding-packages-rebar.adoc",
+        "sha256": "e626ffce0851862ced5b186f1dd46278aca2a26019e416baa73c6b4f70438064",
+        "bytes": 3998
+      },
+      {
+        "path": "docs/manual/adding-packages-tips.adoc",
+        "sha256": "918ccdf1332f0fc128892d99c1b583c6a5487f741da95e6b87581fc2f9ed3c68",
+        "bytes": 9216
+      },
+      {
+        "path": "docs/manual/adding-packages-virtual.adoc",
+        "sha256": "28fbaa7f8fdca3ae36fbde1b7df6c7d8817c4a982dc224e19c756105791cf078",
+        "bytes": 4296
+      },
+      {
+        "path": "docs/manual/adding-packages-waf.adoc",
+        "sha256": "4e61ec9025278a81770a38f72b952bfb6a93bfad0390b7a34dc46f1e54d20537",
+        "bytes": 3158
+      },
+      {
+        "path": "docs/manual/adding-packages.adoc",
+        "sha256": "8cd881eaf405d37b4eb75c237b9b80efc43246f9e9c03bb8270a3f81f6e9d28f",
+        "bytes": 1405
+      },
+      {
+        "path": "docs/manual/advanced.adoc",
+        "sha256": "3344efcf7bfa91b32fbbe58d8aad95c1b84b5e0ea8191872d4bf982a652b2fb3",
+        "bytes": 304
+      },
+      {
+        "path": "docs/manual/appendix.adoc",
+        "sha256": "828a32f779fbe4200873f17ae1fa853023c519339f2ce9479f68ecd54696d18e",
+        "bytes": 141
+      },
+      {
+        "path": "docs/manual/beyond-buildroot.adoc",
+        "sha256": "d35e89a8d073693ade6c2fe2ef3078bd56251534fa5f7e75f7ffcea9581d4ced",
+        "bytes": 1794
+      },
+      {
+        "path": "docs/manual/ccache-support.adoc",
+        "sha256": "13f1609919f269aa1fbcf8503b21fec137b3d5b7e11799f008c88109ac68f5dd",
+        "bytes": 2894
+      },
+      {
+        "path": "docs/manual/common-usage.adoc",
+        "sha256": "623a4ac8d0fd4a3f2e1291b5071835de2d602d157e46b80e505d6ac20a801d8e",
+        "bytes": 15182
+      },
+      {
+        "path": "docs/manual/configure-other-components.adoc",
+        "sha256": "ce7425a6e58bf6ac9486fd20cbb9cbfece5915320701dcfe4288b6566c8c4586",
+        "bytes": 2189
+      },
+      {
+        "path": "docs/manual/configure.adoc",
+        "sha256": "946d4cf311ba27a93f7b9c1333734beb67eca44c462c4c8ad92181899dab4c7b",
+        "bytes": 20778
+      },
+      {
+        "path": "docs/manual/contribute.adoc",
+        "sha256": "7aaa7058a15323b4301da33923159eff9e802c338f5d2e34a6c2e00730289c53",
+        "bytes": 31243
+      },
+      {
+        "path": "docs/manual/customize-configuration.adoc",
+        "sha256": "68d3dede54067b1454c282cf629302882ad0e58a2fffb533efac9739593f8097",
+        "bytes": 2976
+      },
+      {
+        "path": "docs/manual/customize-device-permission-tables.adoc",
+        "sha256": "5f8dceb2814ff210570e98133caa7463f273d6f67e94a58633dcc79443b2bccf",
+        "bytes": 1368
+      },
+      {
+        "path": "docs/manual/customize-directory-structure.adoc",
+        "sha256": "10245f209775706ffde79a7d67769840c65ff781c20dc13f3bdae718b1b413f3",
+        "bytes": 3673
+      },
+      {
+        "path": "docs/manual/customize-outside-br.adoc",
+        "sha256": "52bea3893a7ad45804464f81b23d17b376e057f291d25b211af07e8bf8da665e",
+        "bytes": 16249
+      },
+      {
+        "path": "docs/manual/customize-packages.adoc",
+        "sha256": "ca58d07d156fb434706d8de24d942917086f72304b9ff52e023f5f7b546c6fa9",
+        "bytes": 2424
+      },
+      {
+        "path": "docs/manual/customize-patches.adoc",
+        "sha256": "98a629da699ea111eb3a6c9161563cb9df29c4938f16a55e00abccd252809ed6",
+        "bytes": 3369
+      },
+      {
+        "path": "docs/manual/customize-post-image.adoc",
+        "sha256": "74e616600f425ca7645ee7d1ece8e3067e266a1e70639449abd89bb68b944f30",
+        "bytes": 2092
+      },
+      {
+        "path": "docs/manual/customize-quick-guide.adoc",
+        "sha256": "4a8d64411c03742415722cbc35c7cbeb2e9460249d1b79d28fe1d98c9e8acec2",
+        "bytes": 3363
+      },
+      {
+        "path": "docs/manual/customize-rootfs.adoc",
+        "sha256": "33e6b4f7b19293ac70801938e6b7d54c1ed265ddd69cb21f5df24f66ad32c05e",
+        "bytes": 7788
+      },
+      {
+        "path": "docs/manual/customize-users-tables.adoc",
+        "sha256": "ee74b1da1e9565a2bad58831e8cd3b0d7997f6fedc26008093fd3af158cda180",
+        "bytes": 752
+      },
+      {
+        "path": "docs/manual/customize.adoc",
+        "sha256": "501be5c4461e7c55ca0229a48ef9c977036b559f2da22c8bf26f82b79e46f0c9",
+        "bytes": 2325
+      },
+      {
+        "path": "docs/manual/debugging-buildroot.adoc",
+        "sha256": "5a3456486d49032f6137342d46bde541d2df36fff50d428eeb84788c7a10cc90",
+        "bytes": 1542
+      },
+      {
+        "path": "docs/manual/developers.adoc",
+        "sha256": "bd33f526f82607b8611abfaab7879d83d3f78e429ec232b60446044b77a774c4",
+        "bytes": 2171
+      },
+      {
+        "path": "docs/manual/download-infra.adoc",
+        "sha256": "c1a25756426e207527cb39a0bf00526cb97f8fd8032e445c0bf37b6223f08476",
+        "bytes": 104
+      },
+      {
+        "path": "docs/manual/download-location.adoc",
+        "sha256": "9cbd110527eec6f1117d88fcfba28f5ac096a70bd9a02c0975317adfd6d8732d",
+        "bytes": 1081
+      },
+      {
+        "path": "docs/manual/faq-troubleshooting.adoc",
+        "sha256": "4602064ef1485ecaf21c942b681b0ac23499597ec5b546180cdada89748eaa5e",
+        "bytes": 12401
+      },
+      {
+        "path": "docs/manual/getting.adoc",
+        "sha256": "cf6e5ecfd639b733392ee0938dec920b4cb4e1c4534e306c6a53cf68bcfcbb82",
+        "bytes": 1128
+      },
+      {
+        "path": "docs/manual/how-buildroot-works.adoc",
+        "sha256": "a78d2d524f1c1b47bb6528edd5e3a2d3366f5f917dc8dd41d3e384da3b48bed4",
+        "bytes": 2703
+      },
+      {
+        "path": "docs/manual/integration-configurable-packages.adoc",
+        "sha256": "bc5ae6343656c04a28f33ec52b0b18f35ca99229f6e9496ddeeec79d9df64153",
+        "bytes": 887
+      },
+      {
+        "path": "docs/manual/integration-selinux-support.adoc",
+        "sha256": "f53b7a47b4537ed10a04ffe83b8b1c278f0cb41f7e4e538afddf0f64b758c699",
+        "bytes": 2994
+      },
+      {
+        "path": "docs/manual/integration-systemd.adoc",
+        "sha256": "59f11da8722ed9b466485af5b8e4935b3a8d41bec9015198fca98ca1248c4035",
+        "bytes": 1211
+      },
+      {
+        "path": "docs/manual/integration.adoc",
+        "sha256": "cef3a4dfa81f204ea53a57c32307379c4680e0b583fdd199d20914655c6543be",
+        "bytes": 465
+      },
+      {
+        "path": "docs/manual/introduction.adoc",
+        "sha256": "7453ab5fd77b516ba4ce65daf41ba1e182df0505c4c9e1a393d8e1e11248fde8",
+        "bytes": 1164
+      },
+      {
+        "path": "docs/manual/known-issues.adoc",
+        "sha256": "7f52c27ceeb232c0fb7912926d46642ed6dcd4fb10d4450262156b7650936b02",
+        "bytes": 491
+      },
+      {
+        "path": "docs/manual/legal-notice.adoc",
+        "sha256": "2826635a8aa673958336b5e277bacc86495cc9550a02667e7c49ccce5a449a68",
+        "bytes": 6122
+      },
+      {
+        "path": "docs/manual/make-tips.adoc",
+        "sha256": "e60cd22037e9a08f195bcd094a8e8838436d5646b01871897d0bc7eb5d9d942e",
+        "bytes": 3603
+      },
+      {
+        "path": "docs/manual/makedev-syntax.adoc",
+        "sha256": "527b2dd03a10fcece1e8b8e989c0ecc667a2e36d77d49dfe597627fef8b9cdd6",
+        "bytes": 3762
+      },
+      {
+        "path": "docs/manual/makeusers-syntax.adoc",
+        "sha256": "fedb13d9de0a8e5cbebe53414d6107b43b1c32b1a03b76f5a5ab2ab4a1d952b0",
+        "bytes": 4194
+      },
+      {
+        "path": "docs/manual/manual.adoc",
+        "sha256": "d3dbc2c4a219b5ea20eade1a270bda6f6655c7e2fd65b1b525963fb3ebe28557",
+        "bytes": 1438
+      },
+      {
+        "path": "docs/manual/migrating.adoc",
+        "sha256": "1a18c2f0fb2eae7ffa8e2235d4c8b8bd6ca7f6ed82150bac67519e6576780160",
+        "bytes": 7545
+      },
+      {
+        "path": "docs/manual/package-make-target.adoc",
+        "sha256": "11f28f771aa30f56356bf9d4e4a866e4b6e59e0121340e73feb3eca911169ebd",
+        "bytes": 3185
+      },
+      {
+        "path": "docs/manual/patch-policy.adoc",
+        "sha256": "66e88729a40feace897d8908d74b5ae85f9c6f31b55074c0145dad80685ab989",
+        "bytes": 6635
+      },
+      {
+        "path": "docs/manual/prerequisite.adoc",
+        "sha256": "f0e66c4ef39627828111c94eefea6eead5d13948864a0fcce1ab22ed2aece37f",
+        "bytes": 2774
+      },
+      {
+        "path": "docs/manual/quickstart.adoc",
+        "sha256": "0a7da530cea1a359835c96e2964bd3136e767d0a2d3d662831d13993163f2adb",
+        "bytes": 4809
+      },
+      {
+        "path": "docs/manual/rebuilding-packages.adoc",
+        "sha256": "d8efdb193515cc0961f1863733b4554981f3cded5510a128110f66b023e90fb5",
+        "bytes": 6995
+      },
+      {
+        "path": "docs/manual/release-engineering.adoc",
+        "sha256": "a4e4da7f35fa093e78c177097a718f593493c6a3bf913881acedd6d7a0415421",
+        "bytes": 1276
+      },
+      {
+        "path": "docs/manual/resources.adoc",
+        "sha256": "825e58943e56077187e71759f6a18cfa478d927272a3dc17218a1c12e0b76f2a",
+        "bytes": 2714
+      },
+      {
+        "path": "docs/manual/using-buildroot-debugger.adoc",
+        "sha256": "369fbec275eac8c010bcb398b350c1b8dd8e729759958b810d250a96efa4312b",
+        "bytes": 1821
+      },
+      {
+        "path": "docs/manual/using-buildroot-development.adoc",
+        "sha256": "d5718af452a6df8ec9d47cd332a3fbd74f24f5b3e5aa7106f8639b11a7c247cc",
+        "bytes": 4922
+      },
+      {
+        "path": "docs/manual/using-buildroot-toolchain.adoc",
+        "sha256": "66861b54f66f23684ced9247b940b977133308d103dd2777ce4f63239a5d714c",
+        "bytes": 2361
+      },
+      {
+        "path": "docs/manual/writing-rules.adoc",
+        "sha256": "d7d5955f1e01da1022f144b089687dad546cc88443fee1044ad04d20040a9de5",
+        "bytes": 6003
+      },
+      {
+        "path": "Makefile",
+        "sha256": "801da8e5d6f9e5a5132fc1bbd1070432d2596a651669cd4d12c11e8cc3e03392",
+        "bytes": 46723
+      },
+      {
+        "path": "package/pkg-autotools.mk",
+        "sha256": "b8f60ac9d3ee89014a4fb67cfc47d38c08009f53e346ca07a53e5b871c0df635",
+        "bytes": 9830
+      },
+      {
+        "path": "package/pkg-cargo.mk",
+        "sha256": "a8fbbf460126755d3feeb37b11c558829b835c675eaafebfbcaccff9036f9fbf",
+        "bytes": 10357
+      },
+      {
+        "path": "package/pkg-cmake.mk",
+        "sha256": "5b2e3a9553d41a12119384eb4cdf8ec0ff07582fd4f40f7b347493e49d81f2ac",
+        "bytes": 10710
+      },
+      {
+        "path": "package/pkg-download.mk",
+        "sha256": "636f237689d1ae696611c0a08b6865b3e03dcf121772e909689d8da1546bf5dc",
+        "bytes": 5058
+      },
+      {
+        "path": "package/pkg-generic.mk",
+        "sha256": "ae93d19cab6c39a38f5a5dd8d2694efda3da18798b6949684cc653a069cba265",
+        "bytes": 45827
+      },
+      {
+        "path": "package/pkg-golang.mk",
+        "sha256": "fb5d255dd06e76780476a3d2d6853b1d1b942b72a97ab762b624802c0c570816",
+        "bytes": 6505
+      },
+      {
+        "path": "package/pkg-kconfig.mk",
+        "sha256": "b1a8cd5d083f9a492f3fc1eaddaf48ff4ac681ff57b74300df13764a0211d436",
+        "bytes": 14100
+      },
+      {
+        "path": "package/pkg-kernel-module.mk",
+        "sha256": "5a39e3ce24b296ecc02e8de2691dddc3b947d3687e8620a4560596a327b81762",
+        "bytes": 3872
+      },
+      {
+        "path": "package/pkg-luarocks.mk",
+        "sha256": "1031e09f1450fc0ac6b00a16a111fa3f491764a09df6757581442cb63836cf37",
+        "bytes": 4937
+      },
+      {
+        "path": "package/pkg-meson.mk",
+        "sha256": "d6afb7eb69b4886c0f908ac9cf4e363dd21257d050bf15fb69f84056178210d7",
+        "bytes": 10357
+      },
+      {
+        "path": "package/pkg-perl.mk",
+        "sha256": "3698ee26aaa5172b70e809aa598221f6bcd875d5bdef7d655616b19fff8a4a55",
+        "bytes": 7159
+      },
+      {
+        "path": "package/pkg-python.mk",
+        "sha256": "68b8785df9a4f153ee5877e10d381420193c732aefb9fa34d19ed55b53fc34c8",
+        "bytes": 13988
+      },
+      {
+        "path": "package/pkg-qmake.mk",
+        "sha256": "6b7f2c006df1575e38dd487187334593f5c98825976535514696e707add7844c",
+        "bytes": 4330
+      },
+      {
+        "path": "package/pkg-rebar.mk",
+        "sha256": "f7e0cbb88a0325ba9dc14739605fbf6dce197b4ba00a137f434f91e4e0608073",
+        "bytes": 8702
+      },
+      {
+        "path": "package/pkg-utils.mk",
+        "sha256": "ead55d7e8b52806844c97d13d95896dcafacad870771a822abed0b1f4c5e31dc",
+        "bytes": 12484
+      },
+      {
+        "path": "package/pkg-virtual.mk",
+        "sha256": "3cd4ffc517b077adce08e8d4f05ece9c64931424cd7602c364ba91b2b71ae2c9",
+        "bytes": 3079
+      },
+      {
+        "path": "package/pkg-waf.mk",
+        "sha256": "9ed7deec16f629c8e257d149886b1036f63add8d6d0e77d3c797240c0ea94950",
+        "bytes": 4236
+      }
+    ]
+  },
+  "application": {
+    "files": [
+      {
+        "path": "docs/desktop/configuration.md",
+        "sha256": "b7575f97901dcc68e4ae388e1291d7b5774eb284b456a8ce34bb4168a3c83b0b",
+        "bytes": 19156
+      },
+      {
+        "path": "docs/desktop/execution.md",
+        "sha256": "5fea5799fdada2c7c33cc0ee23c0eb2b65d34e99a3c8f49b2a64c8d9fb0e7728",
+        "bytes": 40075
+      },
+      {
+        "path": "docs/desktop/iso-production.md",
+        "sha256": "26e32950cbf191030fb9cdcf522526ca29d315de226a4da52ab2ec83477c0975",
+        "bytes": 3669
+      },
+      {
+        "path": "docs/desktop/iso-workflow.md",
+        "sha256": "0a0099c34a827eb4c5ec2877bbc97e2b31e66775724b21ae0b20cfb02b0e5da1",
+        "bytes": 4062
+      },
+      {
+        "path": "docs/desktop/kconfig-semantics.md",
+        "sha256": "5d523e20cf5daa44cc596469ab18c5fff2b87fff50c29444bc354586e3499d8a",
+        "bytes": 7054
+      },
+      {
+        "path": "docs/desktop/package-targets.md",
+        "sha256": "5d69c34aba596e5b23c257cf742cd93e7f6d8084558f3568d5db3f095a0b3632",
+        "bytes": 4433
+      },
+      {
+        "path": "docs/features/outputs/sdk-export.md",
+        "sha256": "fc459911af60cc254cbfdf5572a24595673483423863e8e7969dfe6983a195c6",
+        "bytes": 4856
+      },
+      {
+        "path": "docs/features/packages/package-authoring.md",
+        "sha256": "ac87e72c8e92be5695034943b5abf6f5f593d24763662b8ffe8a09c3de733941",
+        "bytes": 9805
+      },
+      {
+        "path": "docs/features/reproducibility.md",
+        "sha256": "954c9a00760c031edc0db21d736d9cb9f0992c3184bb7adc91970b907488d515",
+        "bytes": 5368
+      },
+      {
+        "path": "docs/features/source-lifecycle.md",
+        "sha256": "84a2301dcc25dbe016806609e6a21b00bdaf28bab09a815ba9f1e1d977197e8d",
+        "bytes": 4761
+      },
+      {
+        "path": "src/main/configuration/account-provisioning.cjs",
+        "sha256": "b1ad9a3387ce5763ea6f6b557791c086e3426e6ba6e54805cc23647b9a1918a3",
+        "bytes": 10840
+      },
+      {
+        "path": "src/main/configuration/defconfig-workflows.cjs",
+        "sha256": "7f4cc6fcb86c60b113b680dc4548ec89efab0940b38bd2454a34b358fb1d3293",
+        "bytes": 4578
+      },
+      {
+        "path": "src/main/configuration/image-presets.cjs",
+        "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45",
+        "bytes": 8847
+      },
+      {
+        "path": "src/main/configuration/index.cjs",
+        "sha256": "fdfa02528683c31bb96390843fed007e7c5b14c3399454209d0e37d1ebbe5ee3",
+        "bytes": 12656
+      },
+      {
+        "path": "src/main/configuration/package-authoring.cjs",
+        "sha256": "d2ff217fcfc14477628996a5c31cbba7e1dd647a0bd1d2abd04461929e4e35fb",
+        "bytes": 20503
+      },
+      {
+        "path": "src/main/configuration/package-discovery.cjs",
+        "sha256": "633ae4a2203cb7589f1457fd71b1753f04a5fea7470a54866eaa258a817f8866",
+        "bytes": 29127
+      },
+      {
+        "path": "src/main/deployment/reproducibility.cjs",
+        "sha256": "1bf0bb248656a4ebf4638cea2563fc0ee572bd61cb4e4746374077d1e769ef66",
+        "bytes": 7699
+      },
+      {
+        "path": "src/main/deployment/sdk-export.cjs",
+        "sha256": "9c6a40780f6371ecea06e14868cfc15271f54a56b4d476fdb90eecc07c878a7e",
+        "bytes": 10202
+      },
+      {
+        "path": "src/main/execution/index.cjs",
+        "sha256": "d66f8168dcc6661637d0f84e3edb122a9e40188dff11c5171f1748b9e2769230",
+        "bytes": 46495
+      },
+      {
+        "path": "src/main/execution/source.cjs",
+        "sha256": "2b63306553574e6dc3daa92c03ee1ed3dc04e41f1d8f2fe9307725c711a5244d",
+        "bytes": 15417
+      },
+      {
+        "path": "src/main/jobs/scheduler.cjs",
+        "sha256": "8453aee8f213f51e232ecdc11cc8221ca245fd95bbc9af25d2a49cc444003b20",
+        "bytes": 12696
+      },
+      {
+        "path": "src/renderer/build-queue-panel.ts",
+        "sha256": "e4a3311b99394995809e941fd6a8e24fe1b4315677783ba61d69db70773fb563",
+        "bytes": 14406
+      },
+      {
+        "path": "src/renderer/configuration-panel.ts",
+        "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec",
+        "bytes": 8798
+      },
+      {
+        "path": "src/renderer/defconfig-panel.ts",
+        "sha256": "32a15ee8d60d4aca0b76f5414c05bbb12f239d144d85145fc157b87c3c8c499c",
+        "bytes": 5885
+      },
+      {
+        "path": "src/renderer/image-presets-panel.ts",
+        "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81",
+        "bytes": 52248
+      },
+      {
+        "path": "src/renderer/package-discovery-panel.ts",
+        "sha256": "4b45e0a484dee3544ec62afecc5e9685b40eb8ea27b53219a90241d7fa1e5ea6",
+        "bytes": 23307
+      },
+      {
+        "path": "src/renderer/package-panel.ts",
+        "sha256": "f38f92a91497a42951bdad700c8b8789f4fdc60f761e7598cb0af05ee84ca588",
+        "bytes": 38311
+      },
+      {
+        "path": "src/renderer/sdk-export-panel.ts",
+        "sha256": "d7c566d9c07917e931fc2a1133762051c2be71f48e7da7a397d4d563f65fb4ea",
+        "bytes": 6151
+      },
+      {
+        "path": "src/renderer/source-panel.ts",
+        "sha256": "2d0d1883c34492406a14602b4cdd87842ba07d798b728a9dba06170d0e93c41f",
+        "bytes": 23163
+      },
+      {
+        "path": "src/renderer/wsl-runtime-panel.ts",
+        "sha256": "478d0741b52f5ad38be2a14089b0c1bee18b947614ccd28b5bbaa011f80543ab",
+        "bytes": 8025
+      }
+    ]
+  },
+  "scope": {
+    "state": "partial",
+    "meaning": "Complete lexical enumeration for the declared manual file set and patterns, not complete semantic understanding or runtime acceptance.",
+    "boundaries": [
+      "One selected Buildroot version; no all-version claim.",
+      "No AsciiDoc macro, command, conditional or automatic-anchor evaluation.",
+      "Paragraphs and multiline syntax are bound by whole-article hashes; topic extraction is deliberately lexical.",
+      "Source package/make references are lexical, not executable availability.",
+      "Every GUI/Easy-mode/help mapping is provisional and independently unfinished.",
+      "No source link traversal, native runtime call, build or arbitrary source execution."
+    ]
+  },
+  "categories": [
+    "manual-article",
+    "manual-anchor",
+    "manual-heading",
+    "manual-topic",
+    "manual-table-row",
+    "manual-table-cell",
+    "manual-identifier",
+    "manual-include"
+  ],
+  "requiredArticles": [
+    "manual.adoc",
+    "configure.adoc",
+    "customize.adoc",
+    "adding-packages.adoc",
+    "adding-packages-generic.adoc",
+    "package-make-target.adoc",
+    "makeusers-syntax.adoc",
+    "makedev-syntax.adoc"
+  ],
+  "completenessProof": {
+    "omissions": [
+      {
+        "category": "manual-article",
+        "id": "manual-article:docs/manual/adding-board-support.adoc:adding-board-support.adoc",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-anchor",
+        "id": "manual-anchor:docs/manual/adding-board-support.adoc:adding-board-support",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-heading",
+        "id": "manual-heading:docs/manual/adding-board-support.adoc:Adding support for a particular board",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-topic",
+        "id": "manual-topic:docs/manual/adding-packages-asciidoc.adoc:040447a97b69730a",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-table-row",
+        "id": "manual-table-row:docs/manual/customize-directory-structure.adoc:007038a58c3c2602",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-table-cell",
+        "id": "manual-table-cell:docs/manual/customize-directory-structure.adoc:007038a58c3c2602:1",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-identifier",
+        "id": "manual-identifier:docs/manual/adding-board-support.adoc:BR2_KERNEL_HEADERS_AS_KERNEL",
+        "state": "rejected"
+      },
+      {
+        "category": "manual-include",
+        "id": "manual-include:docs/manual/adding-packages-directory.adoc:S01syslogd",
+        "state": "rejected"
+      }
+    ],
+    "restored": "passed",
+    "scope": "One selected actual detail per handwritten category; fixture tests additionally remove every fixture detail."
+  },
+  "shards": [
+    {
+      "path": "details-000.json",
+      "entries": 100,
+      "sha256": "f9a8691a6c0b303752a85275733cd55acae1b23ab1d8944e1fdb698daa0ce8a9"
+    },
+    {
+      "path": "details-001.json",
+      "entries": 100,
+      "sha256": "1d6317d17757ad04ca7dfee100a0be9bcc7ba1bea5e90bcf97589242cecc4c1a"
+    },
+    {
+      "path": "details-002.json",
+      "entries": 100,
+      "sha256": "c77839209f7e9b86e3beac271b5e303c0cc672ae72b94237ff16e4bfb0207f22"
+    },
+    {
+      "path": "details-003.json",
+      "entries": 100,
+      "sha256": "fb2ef9708960116a5941ed2d57dec6c07653ba6a9cd5159269374a8f02e0c20a"
+    },
+    {
+      "path": "details-004.json",
+      "entries": 100,
+      "sha256": "60b16f83a2fb26d57450b38acb5846d037ee1b75d5b7ffee65567ca4da52bab1"
+    },
+    {
+      "path": "details-005.json",
+      "entries": 100,
+      "sha256": "bebf81bf4297fd728b331c718b8246a411f8b0abf417ebcd0daa25ea51bdbac8"
+    },
+    {
+      "path": "details-006.json",
+      "entries": 100,
+      "sha256": "46b32bb9edcf78b151f6677459daabdf24ce12620e2df12dfe8f480bdebe40b9"
+    },
+    {
+      "path": "details-007.json",
+      "entries": 100,
+      "sha256": "f8b16bf975a0f664fc42c0dcad6b6662d78b27a22158451047221483b991c4e9"
+    },
+    {
+      "path": "details-008.json",
+      "entries": 100,
+      "sha256": "2902064c9f2a51154c37f0a7614872904c714980f1f79fd0ac8c0a309498bb2f"
+    },
+    {
+      "path": "details-009.json",
+      "entries": 100,
+      "sha256": "3c5790cb53c3933af2f247a40eb2a1018299cd2d2485dd847f56e9deeb2ded28"
+    },
+    {
+      "path": "details-010.json",
+      "entries": 100,
+      "sha256": "63233403a8f116d818e3586f60f2d66d431b0f950b8b22d6b9e33490bf24f961"
+    },
+    {
+      "path": "details-011.json",
+      "entries": 100,
+      "sha256": "5ffba5054edc75de870cd93fa0612550362744bba3a040900d31ca5803f5ec56"
+    },
+    {
+      "path": "details-012.json",
+      "entries": 100,
+      "sha256": "fcc3b440c99922bf4f781c97486651f23a22d9ac0ccd05e3e175836994164dee"
+    },
+    {
+      "path": "details-013.json",
+      "entries": 100,
+      "sha256": "1760078dfc53aad75363454f15e83d2f1c172bd8ba09c97a092c82e81dbc45fd"
+    },
+    {
+      "path": "details-014.json",
+      "entries": 100,
+      "sha256": "a97966800af9871d902701b3718b26a2079219879d6afce0554a0b3f84500375"
+    },
+    {
+      "path": "details-015.json",
+      "entries": 100,
+      "sha256": "b7d08cb5dac45692cc71e51e5d6afa0b18a0504d52be8bc6bffa268722250d2e"
+    },
+    {
+      "path": "details-016.json",
+      "entries": 100,
+      "sha256": "1d838835c6a9690393200c10ece5fb7a5cbd32003a2cbe3b7e734ad7c6404620"
+    },
+    {
+      "path": "details-017.json",
+      "entries": 100,
+      "sha256": "b59370cf7673cb4f728185789451e6cc6a2fbd959820972e8c4bf2ecc12202db"
+    },
+    {
+      "path": "details-018.json",
+      "entries": 100,
+      "sha256": "2ff8d1bdd1d61a1e865e32f1f48c97c89c3391535dde36e3375374de4d2aef06"
+    },
+    {
+      "path": "details-019.json",
+      "entries": 100,
+      "sha256": "8a9747d5c3faa03c2f1a105a7044522a6d56d34a8c2a3e7d13cbb9ab079b0781"
+    },
+    {
+      "path": "details-020.json",
+      "entries": 100,
+      "sha256": "9d64638e1645901329d8a54d458aa36b7f01ad38df3406c5c4ea95f58a85dd84"
+    },
+    {
+      "path": "details-021.json",
+      "entries": 100,
+      "sha256": "f3de495b04ab7cf65d0d2121c9b33ddf73af0d56907a3c9fdc3a2a47bc92338d"
+    },
+    {
+      "path": "details-022.json",
+      "entries": 45,
+      "sha256": "db3f95c24d9ac5352a27c3ac53f9c8521f0b4017020127b9b90d8559289ff9ce"
+    }
+  ]
+}

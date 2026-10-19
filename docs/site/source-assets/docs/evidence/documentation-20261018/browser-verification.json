@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local built documentation browser verification",
+  "sourceCommit": "646e297b1a42eb8db8e79a16c34b5f50382d8ed2",
+  "inputSnapshotSha256": "8955c97308129d965efd95faf02b177bbfea76974ab1d62a9708c81e89254a16",
+  "buildReceiptSha256": "e0a6ef20bbea2cc6a27b69ccb5880b9cbfdaba1a2a4f68c766dc22a94b698042",
+  "browserReceiptSha256": "54b1e40a0240e222e514540ef1621d9ef3a6a227fb056e290d3e6bafc99f4294",
+  "inputsDifferFromBase": false,
+  "sourceSnapshotUnchangedDuringVerification": true,
+  "verdict": "passed",
+  "checkedAt": "2026-10-18T10:37:47.392Z",
+  "browser": {
+    "product": "Microsoft Edge",
+    "version": "155.0.4283.62",
+    "automation": "Playwright",
+    "launch": "Direct low-level CLI on a task-owned off-screen desktop",
+    "mode": "Isolated headless browser"
+  },
+  "counts": {
+    "interactionChecks": 22,
+    "documentRoutes": 372,
+    "responsiveTuples": 12,
+    "genuineCapturesRetainedPrivately": 7
+  },
+  "responsiveWidthsCssPixels": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "headingLanguages": [
+    "en",
+    "zh",
+    "both"
+  ],
+  "coverage": [
+    "Beginner task navigation and explanations",
+    "Local interactive examples without installed execution",
+    "Visitor-only progress, plan and backup persistence",
+    "Keyboard navigation and reduced motion",
+    "Document routing, search and offline article fixture",
+    "Served HTML, JavaScript and CSS matched selected build bytes"
+  ],
+  "captureReview": {
+    "inspectedCount": 7,
+    "privateDataObserved": false,
+    "formalPromotion": "pending",
+    "publicCaptureFilesIncluded": false,
+    "limitation": "Some desktop captures retain a shortened existing heading-selector label; full typography certification is not claimed."
+  },
+  "cleanup": {
+    "ownedLauncherProcessAbsent": true,
+    "ownedLoopbackListenerAbsent": true,
+    "desktopCloseReportedClosed": false,
+    "explicitDesktopCloseSuccessClaimed": false
+  },
+  "notEstablished": [
+    "Native desktop execution or input",
+    "Public deployment",
+    "Physical mobile-device behavior",
+    "Audible output",
+    "Real companion TLS or LAN acceptance",
+    "Complete feature acceptance"
+  ],
+  "companionFixture": "Explicitly intercepted HTTPS protocol fixture using the built document bytes; not a real TLS connection"
+}

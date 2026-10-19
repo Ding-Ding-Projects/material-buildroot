@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "installed-workspace-011-light-bilingual",
+      "active": true,
+      "path": "docs/evidence/startup-repair/installed-workspace-011.png",
+      "sourceCommit": "00bca0993c22a30c6c5071458489c01331c67d2e",
+      "artifactSha256": "5700e24dbdfeeb5b718eb9bd316d16fdbf6c19956978d13fc355598c6b930e6c",
+      "captureSha256": "bd3f1d0577a9414ebf9397ee0d77d4e09f6bb74ac643a2e8d4490c64a7fb4aac",
+      "screen": "project-operations",
+      "state": "installed-empty-bilingual",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "viewportHeight": 960,
+      "scale": 1,
+      "interactionProofId": "installed-about-and-return",
+      "interactionReceiptSha256": "c36aa9f219b2ebe1eb95e7c481aa9057829b2a64d9b7043c9990fbdc4237740d",
+      "inspectionStatus": "inspected",
+      "capturedAt": "2026-10-18T02:57:16.398Z",
+      "captureTimeZone": "UTC",
+      "release": "v0.1.1-build.232.1",
+      "limitations": [
+        "Startup, About navigation and return only; not full workflow or design acceptance."
+      ]
+    }
+  ]
+}

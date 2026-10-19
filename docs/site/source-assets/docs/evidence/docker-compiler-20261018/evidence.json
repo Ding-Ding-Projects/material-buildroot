@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "Bounded Docker compiler diagnostics; firmware production incomplete",
+  "applicationSourceCommit": "92763f4cf10d89a406affc162bc283eff64dabaa",
+  "buildrootSourceCommit": "aa2d7ca53f704af901f6c33c13e4bb1591886700",
+  "builderImageDigest": "sha256:340aa0de68e8e13e4eca70a00aaf94ec68d3a3891c28f3e7495d844829a8c958",
+  "bindings": {
+    "sourceContentSha256": "c40da4e4122544e528bede1021dec04c5d26c61ae434e3e3737915e05b6a6b41",
+    "configurationSha256": "eb89c597c534163d87b8c5183bf10953cb12f58cca83f64250cb308ebf1474b6",
+    "downloadCacheSha256": "a2788003e350c95a1dfcc9d9e7e375a3d31b79f147fe4542465e272875e7704b"
+  },
+  "firmware": {
+    "attempt": 3,
+    "exitCode": 2,
+    "state": "failed",
+    "crossCompilerBeingBuilt": "GCC 13.3.0",
+    "hostObjects": [
+      {
+        "name": "generic-match.o",
+        "input": "generic-match.cc",
+        "line": 16611,
+        "column": 175,
+        "diagnostic": "internal compiler error: Segmentation fault"
+      },
+      {
+        "name": "gimple-match.o",
+        "input": "gimple-match.cc",
+        "line": 210565,
+        "column": 1,
+        "diagnostic": "internal compiler error: Segmentation fault",
+        "optimizationPass": "ccp"
+      }
+    ],
+    "ownedContainerAbsenceVerified": true
+  },
+  "metadataProbe": {
+    "exitCode": 0,
+    "hostCompilerVersion": "g++ (Debian 12.2.0-14) 12.2.0",
+    "generatedInputs": [
+      {
+        "name": "generic-match.cc",
+        "bytes": 3191126,
+        "sha256": "4ddaa2778d57f3bb19844595ab1dcf542f6f9a678621421afd34d3ceb1fe3471"
+      },
+      {
+        "name": "gimple-match.cc",
+        "bytes": 6591426,
+        "sha256": "b528ace69d09e2ea0777094dac48fffd10326a20aa0ac33707d0632ee48f59c3"
+      }
+    ],
+    "ownedContainerAbsenceVerified": true,
+    "resolvedDriverExecutableBytes": 1305592,
+    "resolvedDriverExecutableSha256": "7f286ca4017ae9052c4233eb4cc129373222a4356088d21e0feed12fc583f3a0",
+    "compilerComponentHashScope": "Resolved g++ driver only; cc1plus and other compiler dependencies were not independently hashed"
+  },
+  "singleObject": {
+    "input": "generic-match.cc",
+    "compilerExitCode": 1,
+    "diagnosticContainerExitCode": 0,
+    "elapsedSeconds": 7.477,
+    "diagnostics": {
+      "internalCompilerError": true,
+      "segmentationFault": true,
+      "killedSignal": false,
+      "noSpace": false
+    },
+    "generatedInputSha256": "4ddaa2778d57f3bb19844595ab1dcf542f6f9a678621421afd34d3ceb1fe3471",
+    "optimization": "-O2",
+    "argumentChanges": [
+      "Object output destination moved to temporary storage",
+      "Dependency output destination moved to temporary storage",
+      "Added -save-temps=obj"
+    ],
+    "preservedArguments": [
+      "Compiler",
+      "Optimization",
+      "Defines",
+      "Include options",
+      "Source input",
+      "Working directory"
+    ],
+    "concurrencyDifference": "One isolated compiler command instead of two concurrent firmware build jobs",
+    "memoryLimitBytes": 4294967296,
+    "cpuQuota": 2,
+    "processLimit": 512,
+    "compilerTimeoutSeconds": 180,
+    "peakChildRssKiB": 410764,
+    "retainedOutputs": [
+      {
+        "name": "generic-match.s",
+        "bytes": 1366191,
+        "sha256": "c5db7190edb06a43d7a425df9e034ecb8159518619e6065dcf2bc4fc9d27d19b"
+      },
+      {
+        "name": "generic-match.TPo",
+        "bytes": 8345,
+        "sha256": "1e5ea9f541747fc191f7d144d4448c57de13fbcdd3db1672981ca720cd4adc07"
+      },
+      {
+        "name": "generic-match.ii",
+        "bytes": 6330801,
+        "sha256": "aeddc475f03dde9765f987e74ed96f5a97cb4fe824c6dd74c94c0d59f73d6e78"
+      }
+    ],
+    "retainedArchiveBytes": 7720960,
+    "retainedArchiveSha256": "5ee5be4117ea2ff946525e58894e13fb8c65ebf3f5be3df0a1f96ab337a348c3",
+    "sourceConfigurationCacheUnchanged": true,
+    "ownedContainerAbsenceVerified": true,
+    "resolvedDriverExecutableSha256": "7f286ca4017ae9052c4233eb4cc129373222a4356088d21e0feed12fc583f3a0",
+    "stderr": {
+      "bytes": 785,
+      "sha256": "680a55a58e169d68c6dcbd8b616151926056548e15f9aefa0ebf9884b2d780be",
+      "retention": "Bounded diagnostic classification and hash only; raw diagnostic text was not retained as a new independently readable trace",
+      "exactDiagnosticLocationRecorded": false
+    }
+  },
+  "isolation": {
+    "nonRoot": true,
+    "network": "none",
+    "producerMounts": "read-only",
+    "containerRoot": "read-only",
+    "capabilities": "all dropped",
+    "noNewPrivileges": true
+  },
+  "limits": {
+    "fourthFirmwareAttemptPerformed": false,
+    "firmwareSuccessProved": false,
+    "isoSuccessProved": false,
+    "hardwareCauseEstablished": false,
+    "specificUpstreamDefectEstablished": false,
+    "publicCompilerReportPosted": false
+  },
+  "guidance": "https://gcc.gnu.org/bugs/"
+}

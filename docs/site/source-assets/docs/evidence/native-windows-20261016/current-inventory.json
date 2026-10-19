@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "schedule-leave-dialog-e722cf1-bilingual-light",
+      "active": true,
+      "path": "docs/evidence/native-windows-20261016/dialog-actions-e722cf1.png",
+      "sourceCommit": "e722cf1b91ccc46465eb449df4abd84d9d6df2a1",
+      "artifactSha256": "47ed433b93e9c924ba510207f670a455c54ec28a5c8c59b5883a8090f5f77c6b",
+      "captureSha256": "cf450358cc4ad6eb1c79cdbd192836ff1b77649ac25c6f4fcbe1c6dc26ee77ad",
+      "screen": "scheduled-preferences",
+      "state": "unsaved-draft-leave-dialog",
+      "theme": "light",
+      "language": "bilingual",
+      "viewportWidth": 1280,
+      "viewportHeight": 752,
+      "scale": 1.5,
+      "pixelWidth": 1920,
+      "pixelHeight": 1128,
+      "interactionProofId": "stable-dialog-layout",
+      "interactionReceiptSha256": "057b04f356080134d5cf1703a582c2f56f6c5613593f1f50a438c7173c975c8e",
+      "inspectionStatus": "inspected",
+      "capturedAt": "2026-10-16T10:04:39.245Z",
+      "captureTimezone": "UTC",
+      "alt": "Native Windows unsaved preference drafts dialog with all three bilingual actions contained at 1280 by 752 and 150 percent scale",
+      "scope": "One stable native dialog layout, not complete feature acceptance."
+    }
+  ]
+}

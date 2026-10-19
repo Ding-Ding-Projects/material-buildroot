@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "applicationSource": "00bca0993c22a30c6c5071458489c01331c67d2e",
+  "buildrootSource": "aa2d7ca53f704af901f6c33c13e4bb1591886700",
+  "buildrootVersion": "2025.02",
+  "environmentImage": "registry.gitlab.com/buildroot.org/buildroot/base@sha256:340aa0de68e8e13e4eca70a00aaf94ec68d3a3891c28f3e7495d844829a8c958",
+  "runs": [
+    {
+      "runtime": "wsl",
+      "uid": 1000,
+      "targets": [
+        {
+          "target": "olddefconfig",
+          "state": "succeeded",
+          "code": 0,
+          "cleanup": {
+            "state": "verified-stopped",
+            "reason": "owned-session-absent"
+          }
+        },
+        {
+          "target": "show-info",
+          "state": "succeeded",
+          "code": 0,
+          "cleanup": {
+            "state": "verified-stopped",
+            "reason": "owned-session-absent"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "docker",
+      "uid": 1000,
+      "targets": [
+        {
+          "target": "olddefconfig",
+          "state": "succeeded",
+          "code": 0,
+          "cleanup": {
+            "state": "verified-stopped",
+            "reason": "owned-container-absent"
+          }
+        },
+        {
+          "target": "show-info",
+          "state": "succeeded",
+          "code": 0,
+          "cleanup": {
+            "state": "verified-stopped",
+            "reason": "owned-container-absent"
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Configuration-tool compilation and package metadata, not a full firmware-image build.",
+  "sourceTransferLimit": "Native Windows extraction did not preserve every Linux symbolic link; Docker acceptance is limited to the exercised targets."
+}

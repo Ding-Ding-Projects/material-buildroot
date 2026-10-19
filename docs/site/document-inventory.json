@@ -7,7 +7,7 @@
   },
   {
     "source": "CLOSEOUT_PROMPT.md",
-    "title": "Continuation handoff",
+    "title": "Main-only closeout checkpoint",
     "url": "/material-buildroot/site/articles/CLOSEOUT_PROMPT.html",
     "category": "Planning"
   },
@@ -19,7 +19,7 @@
   },
   {
     "source": "HANDOFF.md",
-    "title": "Handoff",
+    "title": "Current main-only closeout checkpoint, 2026-10-19",
     "url": "/material-buildroot/site/articles/HANDOFF.html",
     "category": "Planning"
   },
@@ -96,6 +96,24 @@
     "category": "Design"
   },
   {
+    "source": "design/archive/schedule-editor-20261016/README.md",
+    "title": "Scheduled-preferences candidate recovery, 2026-10-16",
+    "url": "/material-buildroot/site/articles/design/archive/schedule-editor-20261016/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/archive/schedule-editor-in-progress/README.md",
+    "title": "Unintegrated schedule editor recovery draft",
+    "url": "/material-buildroot/site/articles/design/archive/schedule-editor-in-progress/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/bounded-help-reader.md",
+    "title": "Bounded task-oriented Help reader",
+    "url": "/material-buildroot/site/articles/design/bounded-help-reader.html",
+    "category": "Design"
+  },
+  {
     "source": "design/components.md",
     "title": "Planned component provenance",
     "url": "/material-buildroot/site/articles/design/components.html",
@@ -111,6 +129,36 @@
     "source": "design/desktop-workspace-remake.md",
     "title": "Desktop editor workspace",
     "url": "/material-buildroot/site/articles/design/desktop-workspace-remake.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/guided-creation-journey.md",
+    "title": "Image creation before project selection",
+    "url": "/material-buildroot/site/articles/design/guided-creation-journey.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/guided-image-workflow.md",
+    "title": "Guided image creation",
+    "url": "/material-buildroot/site/articles/design/guided-image-workflow.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/guided-operations.md",
+    "title": "Guided operations adapter",
+    "url": "/material-buildroot/site/articles/design/guided-operations.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/guided-workspace-shell.md",
+    "title": "Guided workspace shell",
+    "url": "/material-buildroot/site/articles/design/guided-workspace-shell.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/guided-workspace.md",
+    "title": "Guided image workspace remake",
+    "url": "/material-buildroot/site/articles/design/guided-workspace.html",
     "category": "Design"
   },
   {
@@ -138,6 +186,12 @@
     "category": "Design"
   },
   {
+    "source": "design/short-viewport-shell.md",
+    "title": "Short viewport shell",
+    "url": "/material-buildroot/site/articles/design/short-viewport-shell.html",
+    "category": "Design"
+  },
+  {
     "source": "docs/README.md",
     "title": "Documentation",
     "url": "/material-buildroot/site/articles/docs/README.html",
@@ -150,9 +204,51 @@
     "category": "Build"
   },
   {
+    "source": "docs/build/README.zh-HK.md",
+    "title": "建置及必要工具取得",
+    "url": "/material-buildroot/site/articles/docs/build/README.zh-HK.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/adapter-admission.md",
+    "title": "Component and adapter admission",
+    "url": "/material-buildroot/site/articles/docs/build/adapter-admission.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/main-only-integration.md",
+    "title": "Main-only source integration",
+    "url": "/material-buildroot/site/articles/docs/build/main-only-integration.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/native-toolchain.md",
+    "title": "Native compiler acquisition",
+    "url": "/material-buildroot/site/articles/docs/build/native-toolchain.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/offline-payloads.md",
+    "title": "Offline capability payload assembly",
+    "url": "/material-buildroot/site/articles/docs/build/offline-payloads.html",
+    "category": "Build"
+  },
+  {
     "source": "docs/build/releases.md",
     "title": "Unsigned Windows releases",
     "url": "/material-buildroot/site/articles/docs/build/releases.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/releases.zh-HK.md",
+    "title": "未簽署 Windows 發佈",
+    "url": "/material-buildroot/site/articles/docs/build/releases.zh-HK.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/build/squirrel-packaging.md",
+    "title": "Squirrel package and installed-version identity",
+    "url": "/material-buildroot/site/articles/docs/build/squirrel-packaging.html",
     "category": "Build"
   },
   {
@@ -162,9 +258,45 @@
     "category": "Build"
   },
   {
+    "source": "docs/build/windows-entrypoints.zh-HK.md",
+    "title": "Windows 根入口及來源綁定輸出",
+    "url": "/material-buildroot/site/articles/docs/build/windows-entrypoints.zh-HK.html",
+    "category": "Build"
+  },
+  {
+    "source": "docs/ci/README.md",
+    "title": "Release execution and evidence",
+    "url": "/material-buildroot/site/articles/docs/ci/README.html",
+    "category": "Ci"
+  },
+  {
+    "source": "docs/ci/publication-eligibility.md",
+    "title": "Publication eligibility exit handling",
+    "url": "/material-buildroot/site/articles/docs/ci/publication-eligibility.html",
+    "category": "Ci"
+  },
+  {
+    "source": "docs/deployment/hypervisor-controls.md",
+    "title": "Managed hypervisor controls",
+    "url": "/material-buildroot/site/articles/docs/deployment/hypervisor-controls.html",
+    "category": "Deployment"
+  },
+  {
+    "source": "docs/deployment/hypervisor-controls.zh-HK.md",
+    "title": "受管理虛擬機控制",
+    "url": "/material-buildroot/site/articles/docs/deployment/hypervisor-controls.zh-HK.html",
+    "category": "Deployment"
+  },
+  {
     "source": "docs/desktop/README.md",
     "title": "Desktop workspace",
     "url": "/material-buildroot/site/articles/docs/desktop/README.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/README.zh-HK.md",
+    "title": "桌面工作區",
+    "url": "/material-buildroot/site/articles/docs/desktop/README.zh-HK.html",
     "category": "Desktop"
   },
   {
@@ -174,9 +306,45 @@
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/built-in-tools.zh-HK.md",
+    "title": "內置工具服務",
+    "url": "/material-buildroot/site/articles/docs/desktop/built-in-tools.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/configuration-domains.md",
+    "title": "Component configuration domains",
+    "url": "/material-buildroot/site/articles/docs/desktop/configuration-domains.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/configuration-domains.zh-HK.md",
+    "title": "元件設定範疇",
+    "url": "/material-buildroot/site/articles/docs/desktop/configuration-domains.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
     "source": "docs/desktop/configuration.md",
     "title": "Configuration service",
     "url": "/material-buildroot/site/articles/docs/desktop/configuration.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/configuration.zh-HK.md",
+    "title": "配置服務",
+    "url": "/material-buildroot/site/articles/docs/desktop/configuration.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/defconfig-workflows.md",
+    "title": "Defconfig workflows",
+    "url": "/material-buildroot/site/articles/docs/desktop/defconfig-workflows.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/defconfig-workflows.zh-HK.md",
+    "title": "defconfig 工作流程",
+    "url": "/material-buildroot/site/articles/docs/desktop/defconfig-workflows.zh-HK.html",
     "category": "Desktop"
   },
   {
@@ -186,15 +354,147 @@
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/deployment.zh-HK.md",
+    "title": "產物與部署",
+    "url": "/material-buildroot/site/articles/docs/desktop/deployment.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/docker-native-workspace.md",
+    "title": "Native Docker firmware workspace",
+    "url": "/material-buildroot/site/articles/docs/desktop/docker-native-workspace.html",
+    "category": "Desktop"
+  },
+  {
     "source": "docs/desktop/execution.md",
     "title": "Project execution adapter",
     "url": "/material-buildroot/site/articles/docs/desktop/execution.html",
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/execution.zh-HK.md",
+    "title": "項目執行適配器",
+    "url": "/material-buildroot/site/articles/docs/desktop/execution.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
     "source": "docs/desktop/host-and-preferences.md",
     "title": "Host admission and preferences",
     "url": "/material-buildroot/site/articles/docs/desktop/host-and-preferences.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/host-and-preferences.zh-HK.md",
+    "title": "主機准入及偏好",
+    "url": "/material-buildroot/site/articles/docs/desktop/host-and-preferences.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/README.md",
+    "title": "ISO field guides / ISO 欄位指南",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/README.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/beginner-board-presets.md",
+    "title": "Easy ISO board presets",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/beginner-board-presets.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/beginner-board-presets.zh-HK.md",
+    "title": "簡易 ISO 板卡預設設定",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/beginner-board-presets.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/configuration-and-recovery.md",
+    "title": "ISO configuration and recovery",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/configuration-and-recovery.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/configuration-and-recovery.zh-HK.md",
+    "title": "ISO 配置與復原",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/configuration-and-recovery.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/output-and-validation.md",
+    "title": "ISO output and validation",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/output-and-validation.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/output-and-validation.zh-HK.md",
+    "title": "ISO 輸出與驗證",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/output-and-validation.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/profile-and-firmware.md",
+    "title": "ISO profile and firmware",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/profile-and-firmware.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/profile-and-firmware.zh-HK.md",
+    "title": "ISO 設定組合與韌體",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/profile-and-firmware.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/runtime-and-resources.md",
+    "title": "ISO runtime and resources",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/runtime-and-resources.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-fields/runtime-and-resources.zh-HK.md",
+    "title": "ISO 執行環境與資源",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-fields/runtime-and-resources.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-production.md",
+    "title": "BIOS ISO production and export",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-production.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-production.zh-HK.md",
+    "title": "BIOS ISO 製作與匯出",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-production.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-workflow.md",
+    "title": "BIOS ISO workflow",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-workflow.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/iso-workflow.zh-HK.md",
+    "title": "BIOS ISO 工作流程",
+    "url": "/material-buildroot/site/articles/docs/desktop/iso-workflow.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/kconfig-semantics.md",
+    "title": "Kconfig evaluation and source trust",
+    "url": "/material-buildroot/site/articles/docs/desktop/kconfig-semantics.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/kconfig-semantics.zh-HK.md",
+    "title": "Kconfig 求值及來源信任",
+    "url": "/material-buildroot/site/articles/docs/desktop/kconfig-semantics.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/minecraft-manager.md",
+    "title": "Minecraft server manager",
+    "url": "/material-buildroot/site/articles/docs/desktop/minecraft-manager.html",
     "category": "Desktop"
   },
   {
@@ -210,9 +510,99 @@
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/ollama-workspace.md",
+    "title": "Ollama workspace",
+    "url": "/material-buildroot/site/articles/docs/desktop/ollama-workspace.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/ollama-workspace.zh-HK.md",
+    "title": "Ollama 工作區",
+    "url": "/material-buildroot/site/articles/docs/desktop/ollama-workspace.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/package-targets.md",
+    "title": "Choose a package build target",
+    "url": "/material-buildroot/site/articles/docs/desktop/package-targets.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/package-targets.zh-HK.md",
+    "title": "選擇套件建置目標",
+    "url": "/material-buildroot/site/articles/docs/desktop/package-targets.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/personal-vocabulary-drop-sounds.md",
+    "title": "Personal wording drop sounds",
+    "url": "/material-buildroot/site/articles/docs/desktop/personal-vocabulary-drop-sounds.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/personal-vocabulary-drop-sounds.zh-HK.md",
+    "title": "個人用語拖放提示音",
+    "url": "/material-buildroot/site/articles/docs/desktop/personal-vocabulary-drop-sounds.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/renderer-exit-diagnostics.md",
+    "title": "Renderer exit diagnostics",
+    "url": "/material-buildroot/site/articles/docs/desktop/renderer-exit-diagnostics.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/renderer-exit-diagnostics.zh-HK.md",
+    "title": "Renderer退出診斷",
+    "url": "/material-buildroot/site/articles/docs/desktop/renderer-exit-diagnostics.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/runtime-refresh-44.9.0.md",
+    "title": "Pinned desktop runtime refresh to 44.9.0",
+    "url": "/material-buildroot/site/articles/docs/desktop/runtime-refresh-44.9.0.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/runtime-refresh-44.9.0.zh-HK.md",
+    "title": "固定桌面執行環境更新至 44.9.0",
+    "url": "/material-buildroot/site/articles/docs/desktop/runtime-refresh-44.9.0.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/typed-configuration-controls.md",
+    "title": "Typed configuration controls",
+    "url": "/material-buildroot/site/articles/docs/desktop/typed-configuration-controls.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/typed-configuration-controls.zh-HK.md",
+    "title": "有型別設定控制",
+    "url": "/material-buildroot/site/articles/docs/desktop/typed-configuration-controls.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
     "source": "docs/desktop/updates.md",
     "title": "Desktop updates",
     "url": "/material-buildroot/site/articles/docs/desktop/updates.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/updates.zh-HK.md",
+    "title": "桌面更新",
+    "url": "/material-buildroot/site/articles/docs/desktop/updates.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/vocabulary-drop-sound.md",
+    "title": "Native feedback for local wording-file drops",
+    "url": "/material-buildroot/site/articles/docs/desktop/vocabulary-drop-sound.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/vocabulary-drop-sound.zh-HK.md",
+    "title": "本機用語檔拖放嘅原生提示",
+    "url": "/material-buildroot/site/articles/docs/desktop/vocabulary-drop-sound.zh-HK.html",
     "category": "Desktop"
   },
   {
@@ -228,9 +618,51 @@
     "category": "Evidence"
   },
   {
+    "source": "docs/evidence/docker-compiler-20261018/README.md",
+    "title": "Docker compiler diagnostic evidence, 2026-10-18",
+    "url": "/material-buildroot/site/articles/docs/evidence/docker-compiler-20261018/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/documentation-20261018/README.md",
+    "title": "Local documentation browser verification, 2026-10-18",
+    "url": "/material-buildroot/site/articles/docs/evidence/documentation-20261018/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/iso-boot/README.md",
+    "title": "BIOS ISO boot and console acceptance",
+    "url": "/material-buildroot/site/articles/docs/evidence/iso-boot/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/iso-boot/qemu7-attempt.md",
+    "title": "BIOS ISO acceptance: partial evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/iso-boot/qemu7-attempt.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/iso-production/README.md",
+    "title": "Real ISO production and export",
+    "url": "/material-buildroot/site/articles/docs/evidence/iso-production/README.html",
+    "category": "Evidence"
+  },
+  {
     "source": "docs/evidence/modern-workspace/README.md",
-    "title": "Current Material workspace gallery",
+    "title": "Historical Material workspace gallery at e8f9beb",
     "url": "/material-buildroot/site/articles/docs/evidence/modern-workspace/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/native-windows-20261016/README.md",
+    "title": "Native Windows continuation evidence, 2026-10-16",
+    "url": "/material-buildroot/site/articles/docs/evidence/native-windows-20261016/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/package-authoring-reference/README.md",
+    "title": "docs/evidence/package-authoring-reference/README.md",
+    "url": "/material-buildroot/site/articles/docs/evidence/package-authoring-reference/README.html",
     "category": "Evidence"
   },
   {
@@ -243,6 +675,24 @@
     "source": "docs/evidence/tasks/PH00-current-hosting.md",
     "title": "PH00-T05 current hosting evidence",
     "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH00-current-hosting.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-canonical-batch-01.md",
+    "title": "PH01 canonical reconciliation batch 01",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-canonical-batch-01.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-canonical-batch-02.md",
+    "title": "PH01 remaining direct mappings and cross-contract review",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-canonical-batch-02.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-canonical-group-a.md",
+    "title": "Group A bounded semantic-detail reconciliation",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-canonical-group-a.html",
     "category": "Evidence"
   },
   {
@@ -261,6 +711,12 @@
     "source": "docs/evidence/tasks/PH01-current-interface-contracts.md",
     "title": "PH01 current documentation and interface obligations",
     "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-current-interface-contracts.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/PH01-delivery-audit.md",
+    "title": "Feature delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/PH01-delivery-audit.html",
     "category": "Evidence"
   },
   {
@@ -288,6 +744,1302 @@
     "category": "Evidence"
   },
   {
+    "source": "docs/evidence/tasks/README.md",
+    "title": "Implementation evidence index",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/browser-workflow-repair.md",
+    "title": "Browser summary and supporting-link repair",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/browser-workflow-repair.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/README.md",
+    "title": "Feature delivery audit index",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/accessibility-sizing.md",
+    "title": "accessibility-sizing delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/accessibility-sizing.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/adhd-modes.md",
+    "title": "adhd-modes delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/adhd-modes.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/agents-md-vocabulary-block.md",
+    "title": "agents-md-vocabulary-block delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/agents-md-vocabulary-block.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/app-icon.md",
+    "title": "app-icon delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/app-icon.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/appearance-editor.md",
+    "title": "appearance-editor delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/appearance-editor.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/authenticator.md",
+    "title": "authenticator delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/authenticator.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/auto-updates.md",
+    "title": "auto-updates delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/auto-updates.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/blank-editors.md",
+    "title": "blank-editors delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/blank-editors.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/build-entrypoints.md",
+    "title": "build-entrypoints delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/build-entrypoints.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/bulk-actions.md",
+    "title": "bulk-actions delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/bulk-actions.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/bundled-dependencies.md",
+    "title": "bundled-dependencies delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/bundled-dependencies.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/changelog.md",
+    "title": "changelog delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/changelog.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/ci-bootstrap.md",
+    "title": "ci-bootstrap delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/ci-bootstrap.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/closeout-prompt.md",
+    "title": "closeout-prompt delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/closeout-prompt.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/collapse-filters.md",
+    "title": "collapse-filters delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/collapse-filters.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/color-picker.md",
+    "title": "color-picker delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/color-picker.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/command-palette.md",
+    "title": "command-palette delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/command-palette.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/completeness-parity.md",
+    "title": "completeness-parity delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/completeness-parity.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/context-menus.md",
+    "title": "context-menus delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/context-menus.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/dependency-fetcher.md",
+    "title": "dependency-fetcher delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/dependency-fetcher.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/design-folder.md",
+    "title": "design-folder delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/design-folder.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/design-reference-parity.md",
+    "title": "design-reference-parity delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/design-reference-parity.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/dim-sum-code-names.md",
+    "title": "dim-sum-code-names delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/dim-sum-code-names.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/dim-sum-photo-source.md",
+    "title": "dim-sum-photo-source delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/dim-sum-photo-source.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/dim-sum.md",
+    "title": "dim-sum delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/dim-sum.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/discord-status-bridge.md",
+    "title": "discord-status-bridge delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/discord-status-bridge.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/discussion-records.md",
+    "title": "discussion-records delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/discussion-records.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/display-name.md",
+    "title": "display-name delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/display-name.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/download-handoff.md",
+    "title": "download-handoff delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/download-handoff.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/element-locks.md",
+    "title": "element-locks delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/element-locks.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/encrypted-public-builder.md",
+    "title": "encrypted-public-builder delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/encrypted-public-builder.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/exports.md",
+    "title": "exports delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/exports.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/external-editor.md",
+    "title": "external-editor delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/external-editor.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/feature-articles.md",
+    "title": "feature-articles delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/feature-articles.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/feature-docs.md",
+    "title": "feature-docs delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/feature-docs.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/file-converter.md",
+    "title": "file-converter delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/file-converter.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/forge-publishing.md",
+    "title": "forge-publishing delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/forge-publishing.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/fresh-build-run-command.md",
+    "title": "fresh-build-run-command delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/fresh-build-run-command.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/front-provenance.md",
+    "title": "front-provenance delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/front-provenance.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/functional-ui.md",
+    "title": "functional-ui delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/functional-ui.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/funny-emoji.md",
+    "title": "funny-emoji delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/funny-emoji.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/guided-forms.md",
+    "title": "guided-forms delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/guided-forms.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/handoff-record.md",
+    "title": "handoff-record delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/handoff-record.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/homepage-link.md",
+    "title": "homepage-link delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/homepage-link.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/honest-monetization.md",
+    "title": "honest-monetization delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/honest-monetization.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/human-time-estimate.md",
+    "title": "human-time-estimate delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/human-time-estimate.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/info-icon-guidance.md",
+    "title": "info-icon-guidance delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/info-icon-guidance.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/installer-download-button.md",
+    "title": "installer-download-button delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/installer-download-button.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/landing-site.md",
+    "title": "landing-site delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/landing-site.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/language.md",
+    "title": "language delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/language.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/layout-matrix.md",
+    "title": "layout-matrix delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/layout-matrix.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/local-history.md",
+    "title": "local-history delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/local-history.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/logo-customization.md",
+    "title": "logo-customization delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/logo-customization.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/material-design.md",
+    "title": "material-design delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/material-design.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/menu-shortcuts.md",
+    "title": "menu-shortcuts delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/menu-shortcuts.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/minecraft-server-manager.md",
+    "title": "minecraft-server-manager delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/minecraft-server-manager.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/mobile-site.md",
+    "title": "mobile-site delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/mobile-site.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/motion.md",
+    "title": "motion delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/motion.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/narration.md",
+    "title": "narration delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/narration.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/notifications.md",
+    "title": "notifications delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/notifications.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/offline-docs.md",
+    "title": "offline-docs delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/offline-docs.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/ollama-suite.md",
+    "title": "ollama-suite delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/ollama-suite.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/onboarding-wizard.md",
+    "title": "onboarding-wizard delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/onboarding-wizard.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/operational-skill.md",
+    "title": "operational-skill delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/operational-skill.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/overlay-panels.md",
+    "title": "overlay-panels delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/overlay-panels.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/panic-webhooks.md",
+    "title": "panic-webhooks delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/panic-webhooks.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/personal-vocabulary.md",
+    "title": "personal-vocabulary delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/personal-vocabulary.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/postman-collections.md",
+    "title": "postman-collections delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/postman-collections.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/private-documentation-package.md",
+    "title": "private-documentation-package delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/private-documentation-package.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/product-evidence.md",
+    "title": "product-evidence delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/product-evidence.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/progress-recovery.md",
+    "title": "progress-recovery delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/progress-recovery.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/project-board.md",
+    "title": "project-board delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/project-board.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/project-profile.md",
+    "title": "project-profile delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/project-profile.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/public-screenshot-gallery.md",
+    "title": "public-screenshot-gallery delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/public-screenshot-gallery.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/qr-pairing.md",
+    "title": "qr-pairing delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/qr-pairing.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/readme-prompt-banner.md",
+    "title": "readme-prompt-banner delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/readme-prompt-banner.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/regex-search.md",
+    "title": "regex-search delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/regex-search.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/release-dim-sum-photo.md",
+    "title": "release-dim-sum-photo delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/release-dim-sum-photo.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/release-line-counts.md",
+    "title": "release-line-counts delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/release-line-counts.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/release-timing.md",
+    "title": "release-timing delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/release-timing.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/release-workflow.md",
+    "title": "release-workflow delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/release-workflow.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/rendered-provider-text.md",
+    "title": "rendered-provider-text delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/rendered-provider-text.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/rich-controls.md",
+    "title": "rich-controls delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/rich-controls.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/roadmap-checklist.md",
+    "title": "roadmap-checklist delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/roadmap-checklist.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/roblox-model-catalogue.md",
+    "title": "roblox-model-catalogue delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/roblox-model-catalogue.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/roblox-visual-realism.md",
+    "title": "roblox-visual-realism delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/roblox-visual-realism.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/runner-selection.md",
+    "title": "runner-selection delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/runner-selection.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/sanitized-instruction-copy.md",
+    "title": "sanitized-instruction-copy delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/sanitized-instruction-copy.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/scheduled-settings.md",
+    "title": "scheduled-settings delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/scheduled-settings.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/school-mode.md",
+    "title": "school-mode delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/school-mode.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/screen-recording.md",
+    "title": "screen-recording delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/screen-recording.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/self-signing.md",
+    "title": "self-signing delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/self-signing.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/settings-explanations.md",
+    "title": "settings-explanations delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/settings-explanations.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/shared-link-embed.md",
+    "title": "shared-link-embed delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/shared-link-embed.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/single-file-instruction-editions.md",
+    "title": "single-file-instruction-editions delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/single-file-instruction-editions.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/squirrel-installer.md",
+    "title": "squirrel-installer delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/squirrel-installer.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/status-hub.md",
+    "title": "status-hub delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/status-hub.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/super-confirmation.md",
+    "title": "super-confirmation delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/super-confirmation.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/support-tickets.md",
+    "title": "support-tickets delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/support-tickets.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/tabbed-readme.md",
+    "title": "tabbed-readme delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/tabbed-readme.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/tabs.md",
+    "title": "tabs delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/tabs.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/tidbyt-displays.md",
+    "title": "tidbyt-displays delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/tidbyt-displays.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/unlock-ladder.md",
+    "title": "unlock-ladder delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/unlock-ladder.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/vendored-fonts.md",
+    "title": "vendored-fonts delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/vendored-fonts.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/vocabulary-drop-apply.md",
+    "title": "vocabulary-drop-apply delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/vocabulary-drop-apply.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/vocabulary-hash-lock.md",
+    "title": "vocabulary-hash-lock delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/vocabulary-hash-lock.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/vocabulary-unlock-boundary.md",
+    "title": "vocabulary-unlock-boundary delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/vocabulary-unlock-boundary.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/wiki-site-sync.md",
+    "title": "wiki-site-sync delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/wiki-site-sync.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/feature-delivery/workflow-navigation.md",
+    "title": "workflow-navigation delivery source audit",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/feature-delivery/workflow-navigation.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/learning-markup-repair.md",
+    "title": "Learning navigation accessible-name repair",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/learning-markup-repair.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/tasks/wording-drop-native.md",
+    "title": "Window-wide personal wording: bounded desktop evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/tasks/wording-drop-native.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/features/README.md",
+    "title": "Task-oriented feature articles",
+    "url": "/material-buildroot/site/articles/docs/features/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/appearance-editor.md",
+    "title": "Element appearance, motion and local profiles",
+    "url": "/material-buildroot/site/articles/docs/features/appearance-editor.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/appearance-editor.zh-HK.md",
+    "title": "元素外觀、動態效果及本機設定檔",
+    "url": "/material-buildroot/site/articles/docs/features/appearance-editor.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/article-source-language.md",
+    "title": "Article source-language metadata",
+    "url": "/material-buildroot/site/articles/docs/features/article-source-language.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/article-source-language.zh-HK.md",
+    "title": "文章來源語言資料",
+    "url": "/material-buildroot/site/articles/docs/features/article-source-language.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/article-translation-status.md",
+    "title": "Article translation and production boundary",
+    "url": "/material-buildroot/site/articles/docs/features/article-translation-status.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/article-translation-status.zh-HK.md",
+    "title": "文章翻譯同正式產出界線",
+    "url": "/material-buildroot/site/articles/docs/features/article-translation-status.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/authenticator.md",
+    "title": "Local authenticator and pairing",
+    "url": "/material-buildroot/site/articles/docs/features/authenticator.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/authenticator.zh-HK.md",
+    "title": "本機驗證器及配對",
+    "url": "/material-buildroot/site/articles/docs/features/authenticator.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/browser-native.md",
+    "title": "Browser-native visitor consumers",
+    "url": "/material-buildroot/site/articles/docs/features/browser-native.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/browser-native.zh-HK.md",
+    "title": "瀏覽器原生訪客功能",
+    "url": "/material-buildroot/site/articles/docs/features/browser-native.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/browser-pairing.md",
+    "title": "Browser pairing and private network grants",
+    "url": "/material-buildroot/site/articles/docs/features/browser-pairing.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/browser-pairing.zh-HK.md",
+    "title": "瀏覽器配對及私人網絡授權",
+    "url": "/material-buildroot/site/articles/docs/features/browser-pairing.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/build-queues.md",
+    "title": "Concurrent project build queues",
+    "url": "/material-buildroot/site/articles/docs/features/build-queues.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/build-queues.zh-HK.md",
+    "title": "並行專案建置佇列",
+    "url": "/material-buildroot/site/articles/docs/features/build-queues.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/build-targets.md",
+    "title": "Named build and package targets",
+    "url": "/material-buildroot/site/articles/docs/features/build-targets.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/build-targets.zh-HK.md",
+    "title": "具名建置及套件目標",
+    "url": "/material-buildroot/site/articles/docs/features/build-targets.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/bundled-source-links.md",
+    "title": "Bundled documentation source references",
+    "url": "/material-buildroot/site/articles/docs/features/bundled-source-links.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/cloud-destinations.md",
+    "title": "Private cloud destinations",
+    "url": "/material-buildroot/site/articles/docs/features/cloud-destinations.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/cloud-destinations.zh-HK.md",
+    "title": "私人雲端目的地",
+    "url": "/material-buildroot/site/articles/docs/features/cloud-destinations.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/companion-consumers.md",
+    "title": "Authenticated companion consumers",
+    "url": "/material-buildroot/site/articles/docs/features/companion-consumers.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/companion-consumers.zh-HK.md",
+    "title": "已驗證伴隨連線消費端",
+    "url": "/material-buildroot/site/articles/docs/features/companion-consumers.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/destructive-confirmation.md",
+    "title": "Exact-destination clean confirmation",
+    "url": "/material-buildroot/site/articles/docs/features/destructive-confirmation.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/destructive-confirmation.zh-HK.md",
+    "title": "清理操作嘅確切目的地確認",
+    "url": "/material-buildroot/site/articles/docs/features/destructive-confirmation.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/documentation-notifications-changelog.md",
+    "title": "Documentation and notification changes",
+    "url": "/material-buildroot/site/articles/docs/features/documentation-notifications-changelog.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/documentation-notifications.md",
+    "title": "Documentation, release history and notification review",
+    "url": "/material-buildroot/site/articles/docs/features/documentation-notifications.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/documentation-notifications.zh-HK.md",
+    "title": "文件、發行歷史及通知檢視",
+    "url": "/material-buildroot/site/articles/docs/features/documentation-notifications.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/durable-jobs.md",
+    "title": "Durable jobs and recovery",
+    "url": "/material-buildroot/site/articles/docs/features/durable-jobs.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/editor-transfers.md",
+    "title": "Editor handoff and browser transfers",
+    "url": "/material-buildroot/site/articles/docs/features/editor-transfers.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution-workflows.md",
+    "title": "Managed Buildroot execution workflows",
+    "url": "/material-buildroot/site/articles/docs/features/execution-workflows.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution-workflows.zh-HK.md",
+    "title": "受管理 Buildroot 執行 workflow",
+    "url": "/material-buildroot/site/articles/docs/features/execution-workflows.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution/README.md",
+    "title": "Execution workflows",
+    "url": "/material-buildroot/site/articles/docs/features/execution/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution/README.zh-HK.md",
+    "title": "執行流程",
+    "url": "/material-buildroot/site/articles/docs/features/execution/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution/hosted-jobs.md",
+    "title": "Hosted Buildroot job controls",
+    "url": "/material-buildroot/site/articles/docs/features/execution/hosted-jobs.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution/hosted-jobs.zh-HK.md",
+    "title": "託管 Buildroot 工作控制",
+    "url": "/material-buildroot/site/articles/docs/features/execution/hosted-jobs.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution/setup.md",
+    "title": "GitHub execution setup",
+    "url": "/material-buildroot/site/articles/docs/features/execution/setup.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/execution/setup.zh-HK.md",
+    "title": "GitHub 執行設定",
+    "url": "/material-buildroot/site/articles/docs/features/execution/setup.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/experience-policies.md",
+    "title": "Experience preferences",
+    "url": "/material-buildroot/site/articles/docs/features/experience-policies.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/experience-policies.zh-HK.md",
+    "title": "體驗偏好",
+    "url": "/material-buildroot/site/articles/docs/features/experience-policies.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/experience/README.md",
+    "title": "Experience documentation",
+    "url": "/material-buildroot/site/articles/docs/features/experience/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/experience/README.zh-HK.md",
+    "title": "體驗文件",
+    "url": "/material-buildroot/site/articles/docs/features/experience/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/flashing-installation.md",
+    "title": "Flashing and installation routes",
+    "url": "/material-buildroot/site/articles/docs/features/flashing-installation.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/flashing-installation.zh-HK.md",
+    "title": "寫入媒體及安裝流程",
+    "url": "/material-buildroot/site/articles/docs/features/flashing-installation.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/forge-publication.md",
+    "title": "Forge release publication",
+    "url": "/material-buildroot/site/articles/docs/features/forge-publication.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/guided-documentation.md",
+    "title": "Beginner documentation guide",
+    "url": "/material-buildroot/site/articles/docs/features/guided-documentation.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/guided-documentation.zh-HK.md",
+    "title": "新手文件指南",
+    "url": "/material-buildroot/site/articles/docs/features/guided-documentation.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/guided-forms.md",
+    "title": "Guided forms, recipe drafts and keyboard diagrams",
+    "url": "/material-buildroot/site/articles/docs/features/guided-forms.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/guided-image-creation.md",
+    "title": "Create and resume an image",
+    "url": "/material-buildroot/site/articles/docs/features/guided-image-creation.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/guided-image-creation.zh-HK.md",
+    "title": "建立及繼續製作映像",
+    "url": "/material-buildroot/site/articles/docs/features/guided-image-creation.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/image-presets/README.md",
+    "title": "Image presets and target account plans",
+    "url": "/material-buildroot/site/articles/docs/features/image-presets/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/image-presets/README.zh-HK.md",
+    "title": "映像預設及目標帳戶計劃",
+    "url": "/material-buildroot/site/articles/docs/features/image-presets/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/local-assistant-actions.md",
+    "title": "Local assistant plans and reviewed actions",
+    "url": "/material-buildroot/site/articles/docs/features/local-assistant-actions.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/navigation/README.md",
+    "title": "Navigation features",
+    "url": "/material-buildroot/site/articles/docs/features/navigation/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/navigation/README.zh-HK.md",
+    "title": "導覽功能",
+    "url": "/material-buildroot/site/articles/docs/features/navigation/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/navigation/dialog-lifecycle.md",
+    "title": "Workspace dialog lifecycle",
+    "url": "/material-buildroot/site/articles/docs/features/navigation/dialog-lifecycle.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/navigation/search-commands.md",
+    "title": "Search and command surfaces",
+    "url": "/material-buildroot/site/articles/docs/features/navigation/search-commands.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/navigation/search-commands.zh-HK.md",
+    "title": "搜尋及指令介面",
+    "url": "/material-buildroot/site/articles/docs/features/navigation/search-commands.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/outputs/README.md",
+    "title": "Output inspection and export",
+    "url": "/material-buildroot/site/articles/docs/features/outputs/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/outputs/README.zh-HK.md",
+    "title": "輸出檢視及匯出",
+    "url": "/material-buildroot/site/articles/docs/features/outputs/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/outputs/sdk-export.md",
+    "title": "SDK and toolchain export",
+    "url": "/material-buildroot/site/articles/docs/features/outputs/sdk-export.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/outputs/sdk-export.zh-HK.md",
+    "title": "SDK 及工具鏈匯出",
+    "url": "/material-buildroot/site/articles/docs/features/outputs/sdk-export.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/outputs/viewers-and-export.md",
+    "title": "Output viewers and validated export",
+    "url": "/material-buildroot/site/articles/docs/features/outputs/viewers-and-export.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/outputs/viewers-and-export.zh-HK.md",
+    "title": "輸出檢視及已驗證匯出",
+    "url": "/material-buildroot/site/articles/docs/features/outputs/viewers-and-export.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/packages/README.md",
+    "title": "Package workflows",
+    "url": "/material-buildroot/site/articles/docs/features/packages/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/packages/README.zh-HK.md",
+    "title": "套件流程",
+    "url": "/material-buildroot/site/articles/docs/features/packages/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/packages/package-authoring.md",
+    "title": "Package authoring and source-editor handoff",
+    "url": "/material-buildroot/site/articles/docs/features/packages/package-authoring.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/packages/package-authoring.zh-HK.md",
+    "title": "套件編寫及來源編輯器交接",
+    "url": "/material-buildroot/site/articles/docs/features/packages/package-authoring.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/preferences/README.md",
+    "title": "Language and shared preferences",
+    "url": "/material-buildroot/site/articles/docs/features/preferences/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/preferences/README.zh-HK.md",
+    "title": "語言及共用偏好",
+    "url": "/material-buildroot/site/articles/docs/features/preferences/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/preferences/language-wording.md",
+    "title": "Language, voice, and display wording",
+    "url": "/material-buildroot/site/articles/docs/features/preferences/language-wording.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/preferences/language-wording.zh-HK.md",
+    "title": "語言、語氣及顯示用詞",
+    "url": "/material-buildroot/site/articles/docs/features/preferences/language-wording.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/preferences/shared-modes.md",
+    "title": "Shared modes, attention controls and narration",
+    "url": "/material-buildroot/site/articles/docs/features/preferences/shared-modes.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/preferences/shared-modes.zh-HK.md",
+    "title": "共用模式、專注控制及旁白",
+    "url": "/material-buildroot/site/articles/docs/features/preferences/shared-modes.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/presentation-provenance.md",
+    "title": "Presentation provenance",
+    "url": "/material-buildroot/site/articles/docs/features/presentation-provenance.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/presentation-provenance.zh-HK.md",
+    "title": "展示內容嘅來源證明",
+    "url": "/material-buildroot/site/articles/docs/features/presentation-provenance.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/product-workflows.md",
+    "title": "Product production workflows",
+    "url": "/material-buildroot/site/articles/docs/features/product-workflows.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/product-workflows.zh-HK.md",
+    "title": "產品正式產出 workflow",
+    "url": "/material-buildroot/site/articles/docs/features/product-workflows.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/projects/README.md",
+    "title": "Projects",
+    "url": "/material-buildroot/site/articles/docs/features/projects/README.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/projects/README.zh-HK.md",
+    "title": "專案",
+    "url": "/material-buildroot/site/articles/docs/features/projects/README.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/projects/project-workflows.md",
+    "title": "Project creation and opening",
+    "url": "/material-buildroot/site/articles/docs/features/projects/project-workflows.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/projects/project-workflows.zh-HK.md",
+    "title": "建立及開啟專案",
+    "url": "/material-buildroot/site/articles/docs/features/projects/project-workflows.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/remote-runtimes-changelog.md",
+    "title": "docs/features/remote-runtimes-changelog.md",
+    "url": "/material-buildroot/site/articles/docs/features/remote-runtimes-changelog.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/remote-runtimes.md",
+    "title": "Remote Buildroot runtimes",
+    "url": "/material-buildroot/site/articles/docs/features/remote-runtimes.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/remote-runtimes.zh-HK.md",
+    "title": "遠端 Buildroot 執行環境",
+    "url": "/material-buildroot/site/articles/docs/features/remote-runtimes.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/reproducibility.md",
+    "title": "Reproducibility records and compliance evidence",
+    "url": "/material-buildroot/site/articles/docs/features/reproducibility.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/reproducibility.zh-HK.md",
+    "title": "可重現記錄及授權合規證據",
+    "url": "/material-buildroot/site/articles/docs/features/reproducibility.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/runtime-containers.md",
+    "title": "Managed container runtime",
+    "url": "/material-buildroot/site/articles/docs/features/runtime-containers.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/runtime-containers.zh-HK.md",
+    "title": "受管理 container 執行環境",
+    "url": "/material-buildroot/site/articles/docs/features/runtime-containers.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/scheduled-preferences.md",
+    "title": "Scheduled language and appearance preferences",
+    "url": "/material-buildroot/site/articles/docs/features/scheduled-preferences.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/scheduled-preferences.zh-HK.md",
+    "title": "排程語言及外觀偏好",
+    "url": "/material-buildroot/site/articles/docs/features/scheduled-preferences.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/source-lifecycle.md",
+    "title": "Source acquisition and revision lifecycle",
+    "url": "/material-buildroot/site/articles/docs/features/source-lifecycle.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/source-lifecycle.zh-HK.md",
+    "title": "取得來源及管理修訂",
+    "url": "/material-buildroot/site/articles/docs/features/source-lifecycle.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/status-hub.md",
+    "title": "Authenticated status integration",
+    "url": "/material-buildroot/site/articles/docs/features/status-hub.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/status-hub.zh-HK.md",
+    "title": "已認證狀態整合",
+    "url": "/material-buildroot/site/articles/docs/features/status-hub.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/visitor-acceptance.md",
+    "title": "Visitor acceptance and narrow navigation",
+    "url": "/material-buildroot/site/articles/docs/features/visitor-acceptance.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/visitor-acceptance.zh-HK.md",
+    "title": "訪客驗收同窄畫面導覽",
+    "url": "/material-buildroot/site/articles/docs/features/visitor-acceptance.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/workspace-history.md",
+    "title": "Workspace history and scoped exports",
+    "url": "/material-buildroot/site/articles/docs/features/workspace-history.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/workspace-history.zh-HK.md",
+    "title": "工作區歷史及限範圍匯出",
+    "url": "/material-buildroot/site/articles/docs/features/workspace-history.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/workspace-tabs.md",
+    "title": "Project workspace tabs",
+    "url": "/material-buildroot/site/articles/docs/features/workspace-tabs.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/workspace-tabs.zh-HK.md",
+    "title": "專案工作區分頁",
+    "url": "/material-buildroot/site/articles/docs/features/workspace-tabs.zh-HK.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/wsl-runtime.md",
+    "title": "WSL setup and Linux storage",
+    "url": "/material-buildroot/site/articles/docs/features/wsl-runtime.html",
+    "category": "Features"
+  },
+  {
+    "source": "docs/features/wsl-runtime.zh-HK.md",
+    "title": "WSL 設定及 Linux 儲存",
+    "url": "/material-buildroot/site/articles/docs/features/wsl-runtime.zh-HK.html",
+    "category": "Features"
+  },
+  {
     "source": "docs/planning/README.md",
     "title": "Planning documentation",
     "url": "/material-buildroot/site/articles/docs/planning/README.html",
@@ -303,6 +2055,42 @@
     "source": "docs/planning/buildroot-constraints.md",
     "title": "Official-source Buildroot constraints",
     "url": "/material-buildroot/site/articles/docs/planning/buildroot-constraints.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/buildroot-coverage/README.md",
+    "title": "Source-derived Buildroot coverage",
+    "url": "/material-buildroot/site/articles/docs/planning/buildroot-coverage/README.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/buildroot-coverage/iso9660-control-map.md",
+    "title": "ISO9660 source-to-control map",
+    "url": "/material-buildroot/site/articles/docs/planning/buildroot-coverage/iso9660-control-map.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/buildroot-coverage/manual-coverage.md",
+    "title": "Buildroot 2025.02 manual and source-topic coverage",
+    "url": "/material-buildroot/site/articles/docs/planning/buildroot-coverage/manual-coverage.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/buildroot-coverage/native-kconfig.md",
+    "title": "Native Kconfig definition inventory",
+    "url": "/material-buildroot/site/articles/docs/planning/buildroot-coverage/native-kconfig.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/canonical-reconciliation.md",
+    "title": "Canonical section reconciliation",
+    "url": "/material-buildroot/site/articles/docs/planning/canonical-reconciliation.html",
+    "category": "Planning"
+  },
+  {
+    "source": "docs/planning/catalogue-delta-2026-10-16.md",
+    "title": "Catalogue delta: file-drop wording and private documentation delivery",
+    "url": "/material-buildroot/site/articles/docs/planning/catalogue-delta-2026-10-16.html",
     "category": "Planning"
   },
   {
@@ -330,10 +2118,40 @@
     "category": "Planning"
   },
   {
+    "source": "docs/planning/surface-evidence-admission.md",
+    "title": "Surface evidence admission",
+    "url": "/material-buildroot/site/articles/docs/planning/surface-evidence-admission.html",
+    "category": "Planning"
+  },
+  {
     "source": "docs/planning/surfaces.md",
     "title": "Surface identities and capability boundaries",
     "url": "/material-buildroot/site/articles/docs/planning/surfaces.html",
     "category": "Planning"
+  },
+  {
+    "source": "docs/postman/README.md",
+    "title": "API collections",
+    "url": "/material-buildroot/site/articles/docs/postman/README.html",
+    "category": "Postman"
+  },
+  {
+    "source": "docs/postman/README.zh-HK.md",
+    "title": "API 集合",
+    "url": "/material-buildroot/site/articles/docs/postman/README.zh-HK.html",
+    "category": "Postman"
+  },
+  {
+    "source": "docs/postman/api-workflow.md",
+    "title": "Use the HTTP collections without confusing them with desktop IPC",
+    "url": "/material-buildroot/site/articles/docs/postman/api-workflow.html",
+    "category": "Postman"
+  },
+  {
+    "source": "docs/postman/api-workflow.zh-HK.md",
+    "title": "使用 HTTP 集合，同桌面 IPC 分清界線",
+    "url": "/material-buildroot/site/articles/docs/postman/api-workflow.zh-HK.html",
+    "category": "Postman"
   },
   {
     "source": "docs/security/README.md",
@@ -348,9 +2166,51 @@
     "category": "Security"
   },
   {
+    "source": "docs/security/broker-admission.zh-HK.md",
+    "title": "耐久設定 broker 准入",
+    "url": "/material-buildroot/site/articles/docs/security/broker-admission.zh-HK.html",
+    "category": "Security"
+  },
+  {
     "source": "docs/security/companion.md",
     "title": "Opt-in HTTPS companion boundary",
     "url": "/material-buildroot/site/articles/docs/security/companion.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/companion.zh-HK.md",
+    "title": "自願啟用 HTTPS 伴隨連線嘅界線",
+    "url": "/material-buildroot/site/articles/docs/security/companion.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/file-capabilities.md",
+    "title": "Native file capabilities",
+    "url": "/material-buildroot/site/articles/docs/security/file-capabilities.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/file-capabilities.zh-HK.md",
+    "title": "原生檔案能力",
+    "url": "/material-buildroot/site/articles/docs/security/file-capabilities.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/iso-job-output-policy.md",
+    "title": "ISO job output intent",
+    "url": "/material-buildroot/site/articles/docs/security/iso-job-output-policy.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/iso-output-lifecycle.md",
+    "title": "Internal Linux ISO output lifecycle helper",
+    "url": "/material-buildroot/site/articles/docs/security/iso-output-lifecycle.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/iso-producer-transaction.md",
+    "title": "Internal ISO producer transaction",
+    "url": "/material-buildroot/site/articles/docs/security/iso-producer-transaction.html",
     "category": "Security"
   },
   {
@@ -360,9 +2220,33 @@
     "category": "Security"
   },
   {
+    "source": "docs/security/jobs-and-recovery.zh-HK.md",
+    "title": "耐久工作及本機安全服務",
+    "url": "/material-buildroot/site/articles/docs/security/jobs-and-recovery.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/native-wsl-content-intent.md",
+    "title": "Native WSL content intent and configuration consent",
+    "url": "/material-buildroot/site/articles/docs/security/native-wsl-content-intent.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/native-wsl-content-intent.zh-HK.md",
+    "title": "原生WSL內容意圖同配置同意",
+    "url": "/material-buildroot/site/articles/docs/security/native-wsl-content-intent.zh-HK.html",
+    "category": "Security"
+  },
+  {
     "source": "docs/security/offline-documentation.md",
     "title": "Bundled offline documentation",
     "url": "/material-buildroot/site/articles/docs/security/offline-documentation.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/offline-documentation.zh-HK.md",
+    "title": "綑綁離線文件",
+    "url": "/material-buildroot/site/articles/docs/security/offline-documentation.zh-HK.html",
     "category": "Security"
   },
   {
@@ -372,9 +2256,87 @@
     "category": "Security"
   },
   {
+    "source": "docs/security/operation-requests.zh-HK.md",
+    "title": "序列化操作請求",
+    "url": "/material-buildroot/site/articles/docs/security/operation-requests.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/personal-vocabulary.md",
+    "title": "Local personal vocabulary boundary",
+    "url": "/material-buildroot/site/articles/docs/security/personal-vocabulary.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/personal-vocabulary.zh-HK.md",
+    "title": "本機個人用詞界線",
+    "url": "/material-buildroot/site/articles/docs/security/personal-vocabulary.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/schedule-draft-recovery.md",
+    "title": "Local scheduled-preference draft recovery",
+    "url": "/material-buildroot/site/articles/docs/security/schedule-draft-recovery.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/schedule-draft-recovery.zh-HK.md",
+    "title": "本機排程草稿復原",
+    "url": "/material-buildroot/site/articles/docs/security/schedule-draft-recovery.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/scheduled-settings.md",
+    "title": "Scheduled preferences core and host service",
+    "url": "/material-buildroot/site/articles/docs/security/scheduled-settings.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/scheduled-settings.zh-HK.md",
+    "title": "排程偏好核心及主機服務",
+    "url": "/material-buildroot/site/articles/docs/security/scheduled-settings.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/shared-mode.md",
+    "title": "Shared experience mode host protocol candidate",
+    "url": "/material-buildroot/site/articles/docs/security/shared-mode.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/shared-mode.zh-HK.md",
+    "title": "共用體驗模式主機協定候選",
+    "url": "/material-buildroot/site/articles/docs/security/shared-mode.zh-HK.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/source-global-config.md",
+    "title": "Isolated source-service global configuration",
+    "url": "/material-buildroot/site/articles/docs/security/source-global-config.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/vault-boundaries.md",
+    "title": "Host vault and privilege boundaries",
+    "url": "/material-buildroot/site/articles/docs/security/vault-boundaries.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/vault-boundaries.zh-HK.md",
+    "title": "主機憑證庫及權限界線",
+    "url": "/material-buildroot/site/articles/docs/security/vault-boundaries.zh-HK.html",
+    "category": "Security"
+  },
+  {
     "source": "docs/security/workspace-state.md",
     "title": "Persistent workspace state",
     "url": "/material-buildroot/site/articles/docs/security/workspace-state.html",
+    "category": "Security"
+  },
+  {
+    "source": "docs/security/workspace-state.zh-HK.md",
+    "title": "持久工作區狀態",
+    "url": "/material-buildroot/site/articles/docs/security/workspace-state.zh-HK.html",
     "category": "Security"
   },
   {
@@ -384,9 +2346,21 @@
     "category": "Wiki"
   },
   {
+    "source": "docs/wiki/FAQ.zh-HK.md",
+    "title": "常見問題",
+    "url": "/material-buildroot/site/articles/docs/wiki/FAQ.zh-HK.html",
+    "category": "Wiki"
+  },
+  {
     "source": "docs/wiki/Getting-started.md",
-    "title": "Getting started with the plan",
+    "title": "Getting started",
     "url": "/material-buildroot/site/articles/docs/wiki/Getting-started.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/wiki/Getting-started.zh-HK.md",
+    "title": "開始使用",
+    "url": "/material-buildroot/site/articles/docs/wiki/Getting-started.zh-HK.html",
     "category": "Wiki"
   },
   {
@@ -394,6 +2368,36 @@
     "title": "Project wiki",
     "url": "/material-buildroot/site/articles/docs/wiki/Home.html",
     "category": "Wiki"
+  },
+  {
+    "source": "docs/wiki/Home.zh-HK.md",
+    "title": "專案 wiki",
+    "url": "/material-buildroot/site/articles/docs/wiki/Home.zh-HK.html",
+    "category": "Wiki"
+  },
+  {
+    "source": "docs/workspace/README.md",
+    "title": "Workspace storage",
+    "url": "/material-buildroot/site/articles/docs/workspace/README.html",
+    "category": "Workspace"
+  },
+  {
+    "source": "docs/workspace/README.zh-HK.md",
+    "title": "工作區儲存",
+    "url": "/material-buildroot/site/articles/docs/workspace/README.zh-HK.html",
+    "category": "Workspace"
+  },
+  {
+    "source": "docs/workspace/project-model.md",
+    "title": "Versioned project model",
+    "url": "/material-buildroot/site/articles/docs/workspace/project-model.html",
+    "category": "Workspace"
+  },
+  {
+    "source": "docs/workspace/project-model.zh-HK.md",
+    "title": "有版本專案模型",
+    "url": "/material-buildroot/site/articles/docs/workspace/project-model.zh-HK.html",
+    "category": "Workspace"
   },
   {
     "source": "website/README.md",

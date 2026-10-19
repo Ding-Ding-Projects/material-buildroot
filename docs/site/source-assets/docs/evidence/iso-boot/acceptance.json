@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "productRevision": "5431a6275d875428ae50335905107d5951cc6150",
+  "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+  "isoBytes": 12357632,
+  "configurationSha256": "0e33a58b7dfbe2099d0cc6027f18dbce99650168936ce56cb5f71934137db51f",
+  "consumer": {
+    "image": "debian@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f",
+    "package": "qemu-system-x86",
+    "version": "1:10.0.13+ds-0+deb13u1",
+    "packageSha256": "5e841d0723a657fd8bc2e9e1a085d24f47fcb3e4a0f94762e6c38b429f22fbb1",
+    "binarySha256": "d3c1a558ad220e77a4412048c8d96b44f8c2b41c7ad2a4ecfe522a4b122fe067",
+    "userId": 65534,
+    "network": "container disconnected; guest SLIRP only",
+    "machine": "pc",
+    "cpu": "qemu64",
+    "vga": "cirrus",
+    "nic": "rtl8139",
+    "acceleration": "tcg,thread=single",
+    "memoryMiB": 512,
+    "cpus": 1
+  },
+  "captures": [
+    {
+      "file": "qemu10-grub.png",
+      "rawFile": "qemu10-grub.ppm",
+      "capturedAt": "2026-10-18T07:13:36.698936+00:00",
+      "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+      "rawSha256": "991fa47caa05368f5428db917c81ee2f6ee87e552b363ae8e3290466f97381a7",
+      "pngSha256": "f071b4ff242961f7ffffeb3c9ad0ee97ffdedc49946a3e9c8b96f7ab8e1a9812",
+      "width": 720,
+      "height": 400,
+      "route": "linux-container-qemu-qmp-vga",
+      "privacy": "Inspected generated guest console only; no host paths or credentials."
+    },
+    {
+      "file": "login-network-ready.png",
+      "rawFile": "login-network-ready.ppm",
+      "capturedAt": "2026-10-18T07:18:13.693599+00:00",
+      "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+      "rawSha256": "7116bb646be70e4d1564dcf2a151d2cea665a01cda8243f389c40ff60d339d2b",
+      "pngSha256": "22e7d2790262704b967a32afa00351f4faada0e4b804715d9b471ab72875736a",
+      "width": 720,
+      "height": 400,
+      "route": "linux-container-qemu-qmp-vga",
+      "privacy": "Inspected generated guest console only; no host paths or credentials."
+    },
+    {
+      "file": "shell-identity.png",
+      "rawFile": "shell-identity.ppm",
+      "capturedAt": "2026-10-18T07:18:31.990506+00:00",
+      "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+      "rawSha256": "7dcac3ee604d30cf16b032dd1ef1673346b79ecc1b1d6a38acc638426dd63677",
+      "pngSha256": "5c72ca9010aef894c11c78202fef7ac3d22325965e7f9c8d1179200a9924c6a6",
+      "width": 720,
+      "height": 400,
+      "route": "linux-container-qemu-qmp-vga",
+      "privacy": "Inspected generated guest console only; no host paths or credentials."
+    },
+    {
+      "file": "filesystem-network.png",
+      "rawFile": "filesystem-network.ppm",
+      "capturedAt": "2026-10-18T07:18:52.060394+00:00",
+      "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+      "rawSha256": "a18e407b81ef2ce4377997734ffa22d44ba070308e5d8a62887c5e25c9e310c9",
+      "pngSha256": "d0cda2df447d5d83ddd79482ae6e95e1607b67bea99ae9d8847bfe597edd6887",
+      "width": 720,
+      "height": 400,
+      "route": "linux-container-qemu-qmp-vga",
+      "privacy": "Inspected generated guest console only; no host paths or credentials."
+    },
+    {
+      "file": "virtio-panic.png",
+      "rawFile": "virtio-panic.ppm",
+      "capturedAt": "2026-10-18T07:16:49.249359+00:00",
+      "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+      "rawSha256": "53a4b70449d7be6dca4219a3ee6cfde73802610fbece65dc5d6c838936d6d9f4",
+      "pngSha256": "198691a3500d2288cdb69d4e071eaf2e1343f71ed2244db205ee6a752619a08b",
+      "width": 720,
+      "height": 400,
+      "route": "linux-container-qemu-qmp-vga",
+      "privacy": "Inspected generated guest console only; no host paths or credentials."
+    },
+    {
+      "file": "max-cpu-fault.png",
+      "rawFile": "max-cpu-fault.ppm",
+      "capturedAt": "2026-10-18T07:17:30.742805+00:00",
+      "isoSha256": "1d75d40b94e3c441aaaead9109f8074f62334931e1d84a576f3d7a36ec566dba",
+      "rawSha256": "ea67e2cb572c67094b65819726b2d1ffb9bc751b4d9300cb0f87842965b64d9c",
+      "pngSha256": "78defc9e3d3c8c34b9b7b65d8e8cd730849a79fa50a8673e17d9cf43bba15273",
+      "width": 720,
+      "height": 400,
+      "route": "linux-container-qemu-qmp-vga",
+      "privacy": "Inspected generated guest console only; no host paths or credentials."
+    }
+  ],
+  "terminal": {
+    "exitedAt": "2026-10-18T07:19:01.907355+00:00",
+    "exitCode": 0
+  },
+  "teardown": {
+    "checkedAt": "2026-10-18T07:19:02.780966+00:00",
+    "ownedProcessAbsent": true
+  },
+  "verdict": {
+    "biosBoot": true,
+    "consoleLogin": true,
+    "kernel": "6.12.9",
+    "architecture": "x86_64",
+    "ephemeralFilesystemWriteRead": true,
+    "dhcp": true,
+    "gatewayPing": {
+      "transmitted": 2,
+      "received": 2,
+      "packetLossPercent": 0
+    },
+    "guestPoweroff": true,
+    "persistence": false,
+    "internetConnectivity": "not tested; container network isolated",
+    "allConsumerConfigurations": "not supported by this evidence",
+    "nativeWindowsGui": "not tested by this lane"
+  }
+}

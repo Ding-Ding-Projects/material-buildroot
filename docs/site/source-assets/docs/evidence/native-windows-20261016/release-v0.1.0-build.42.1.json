@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "release": "v0.1.0-build.42.1",
+  "source": "22861aed9678918b5a9a23e319ac5f17719f5d5d",
+  "url": "https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.0-build.42.1",
+  "isDraft": false,
+  "isPrerelease": false,
+  "squirrelReleaseSha1": "3bcd9a1d2efcd2e46abef1ae8140eae9f8016211",
+  "packageInventory": ["MaterialBuildroot.nuspec", "lib/net45/Material Buildroot.exe", "lib/net45/resources/app.asar"],
+  "verification": "Downloaded bytes match GitHub asset sizes and SHA-256 digests, published SHA256SUMS and package provenance. Installation and update are unverified.",
+  "assets": [
+    {"name":"MaterialBuildroot-0.1.0-full.nupkg","bytes":162064651,"sha256":"f8b43184e56f90570ff3f3d471de32cb9714a9ec9884bd5d947388f109ece8ee"},
+    {"name":"provenance.json","bytes":1100,"sha256":"59c73756ff43cf2ac2d184a032005fda3c04e1e3a43cddb3e95d87295e24bd9d"},
+    {"name":"RELEASES","bytes":88,"sha256":"85f89e7fb67757c993b671fb86ee756925d66334665d3543f97110a9ea753d79"},
+    {"name":"Setup.exe","bytes":162762752,"sha256":"67183b70ebc9d5d291442e94926954a55c9c21b104d322f4e7c575562af9d264"},
+    {"name":"SHA256SUMS.txt","bytes":334,"sha256":"5369a7a3c05e7794d6bfa83f54515762708f13d3dde35588b32d60ac1d4478a7"}
+  ]
+}

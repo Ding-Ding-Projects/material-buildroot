@@ -1,0 +1,641 @@
+{
+  "schemaVersion": 1,
+  "baseline": "cb88af0c006b62f5ab300630d4093f63ec8714d7",
+  "mode": "Implementation and release only; all tests, reviews, audits and captures deferred by owner",
+  "assignmentRule": "One implementation worker per unfinished roadmap leaf; parents aggregate children",
+  "items": [
+    {
+      "id": "PH01-T01-C02",
+      "description": "Finish full canonical-section reconciliation and independent review for every identity. The [reconciliation index](docs/planning/canonical-reconciliation.md) maps all 109 identities and 427 current requirements, with bounded independent review. Exhaustive clause/research interpretation and actual consumer admission remain open.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH01-T02-C02",
+      "description": "Admit concrete implementation consumers, localized articles/copy, persistence, detailed runtime/capture tuples and tests before each feature is implemented. All 436 records now have explicit planned identities and tuple axes, but reserved paths are not admitted consumers or runtime evidence.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/consumer-admission",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "bd3e01002c23c70f1332855b5dc352217647af93"
+    },
+    {
+      "id": "PH01-T03",
+      "description": "[R (A/D/C admission only)] Admit genuine registered Material Design 3 components and every native/browser/tool adapter: pin provenance, compatibility, licenses, redistributability, offline payloads and full installer size.",
+      "state": "source-ready-production-consumer-pending",
+      "owner": "task/adapter-admission",
+      "verification": "deferred",
+      "sourceCommit": "050130bd1e80cab270c500f220c7649bd2e3b27d"
+    },
+    {
+      "id": "PH01-T04",
+      "description": "[R (A/D/C admission only)] Create deterministic screen/state references, a direct reference renderer and hand-written parity/control maps; include reduced-motion, accessible structured canvas alternatives and negative textbox-substitution checks. Thirty reference states and local build tooling are authored. Two source-bound builds and focused runtime repairs are verified; full reference interaction, accessibility, typography and tuple acceptance remain pending.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH01-T05",
+      "description": "[R (A/D/C admission only)] Implement evidence validation that fails red then green when individual implementation, test, article, runtime, capture or parity records are absent or stale; bind proof to source and built artifact hashes.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/evidence-admission",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "38044fd6f3f6378e3baaf707883382fecaf8c8f8"
+    },
+    {
+      "id": "PH05-T11-C01",
+      "description": "Guided setup for source or dedicated execution repositories, scoped credentials and compatible hosted/self-hosted Linux runner discovery.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/execution-setup",
+      "verification": "deferred",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd"
+    },
+    {
+      "id": "PH05-T11-C02",
+      "description": "Generate workflows and validate reviewed expert YAML through the same admitted action model.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/execution-workflows",
+      "verification": "deferred",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd"
+    },
+    {
+      "id": "PH05-T11-C03",
+      "description": "Queue, observe, cancel, reconnect and download verified outputs from standard public hosted Linux builds.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/execution-jobs",
+      "verification": "deferred",
+      "sourceCommit": "5c814cc20c135e7099811505960e328348b750dd"
+    },
+    {
+      "id": "PH05-T11-C04",
+      "description": "Independently verify self-hosted Linux execution and explicit runner choice; never auto-select larger billed runners.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T11-C05",
+      "description": "Review and extract the generic encrypted-builder engine without private records or secrets; enable transport only after user-selected push and private-repository verification.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T09-C01",
+      "description": "Guided/generated and reviewed expert YAML for source or dedicated execution repositories, selecting compatible hosted/self-hosted Windows runners for product builds and packaging.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/product-workflows",
+      "verification": "deferred",
+      "sourceCommit": "c952cdf5f1afeaf90a5f2bc9b7e1111a35ea14cf"
+    },
+    {
+      "id": "PH10-T09-C02",
+      "description": "Produce and verify Windows outputs by invoking exact root `build.bat` and `build-installer.bat` on compatible Windows runners; Linux coordination alone proves no native package.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T09-C03",
+      "description": "Publish a normal unique release and verify source, downloadable assets and readback independently from user-build jobs.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T01",
+      "description": "[A+R] Replace scaffold assumptions with a reviewed versioned project model, ordered external-tree array, migrations, stable installed identity and isolated per-surface storage.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/project-model",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "adff340fe855c55eb6548e5cbc77cf6849474f87"
+    },
+    {
+      "id": "PH02-T02-C03",
+      "description": "Improve and verify settings loading, save progress, conflict recovery, unknown-outcome protection and current navigation feedback. Renderer implementation and Linux Chromium fixtures are being verified; updated packaged Windows evidence remains required. Keep this separate from the earlier C02 native receipts.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH02-T03",
+      "description": "[A+R] Implement canonical file capabilities with picker/import grants, revalidation, path translation and symlink/reparse/case escape rejection.",
+      "state": "preserved-native-source-uncompiled",
+      "owner": "task/file-capabilities",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "37bc9da1e590d3696da3649898cb4721b865f420"
+    },
+    {
+      "id": "PH02-T04",
+      "description": "[A+R] Implement OS-vault references, reviewed typed host privilege boundaries, least-privilege operation ownership and secret-redacted records.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/vault-boundaries",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "50893bd1b75d97496ddb9a954ff6cc4390deaa95"
+    },
+    {
+      "id": "PH02-T05",
+      "description": "[A+R] Implement pinned bundled-first dependency discovery/acquisition and root build.bat/build-installer.bat entrypoints with silent mode and nonzero failures.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/bootstrap",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "a8593de5f693ab72d8fa404fc0b47afda2f24a00"
+    },
+    {
+      "id": "PH02-T06",
+      "description": "[A+R] Prove the real fresh-Windows one-command bootstrap/build/run route and interrupted dependency recovery without overwriting existing installations or data.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH03-T01",
+      "description": "[A+D-native+R] Implement the productive workspace shell, real window controls, tabs on all four edges, grouping/pinning/reordering/overflow and all discovery searches; use genuine registered Material Design 3 controls, with phone-friendly browser layouts and no generic control substitutes.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/workspace-tabs",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "709661ccaf2c4d9e69484451b93083dfb7ef407b",
+      "productionReceiptSha256": "b926380c572da68dc15673ab362bcac31a3a02363489cd311b00503f5658d91d"
+    },
+    {
+      "id": "PH03-T02",
+      "description": "[A+D-native+R] Implement complete English/Cantonese/bilingual copy, persisted fresh bilingual/system-theme defaults, independent humor levels, bounded local vocabulary import and display rename.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/language-wording",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "632f86de3d698458f755868c4f25a9ed4937c581"
+    },
+    {
+      "id": "PH03-T03",
+      "description": "[A+D-native+R] Implement shared School mode, narration/voice discovery, five ADHD modes, scheduled settings with timezone/DST precedence and required surprise/catalogue behavior.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/shared-modes",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "7984d5428f60820526a43dd1f23d5d173b153161",
+      "productionReceiptSha256": "b5accc47fc01740d7817420068d2f603b4d9b62e0c84d2eed3e74931b3fbb4fb"
+    },
+    {
+      "id": "PH03-T04",
+      "description": "[A+D-native+R] Implement anchored regex workbenches at every search/picker, Ctrl+Shift+F rich command palette, actual context menus and working shortcut labels from shared action consumers.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/search-commands",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "f7d6835f3cea3a542a65c30122ac2854f57c4324"
+    },
+    {
+      "id": "PH03-T05",
+      "description": "[A+D-native+R] Implement every-element appearance editor, continuous color tools, logo derivatives, accessible sizing, motion/reduced motion and bounded overlay/collapse behavior.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/appearance",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "02acf2ad674a1bc36360677a2704d38eeb1aa93b"
+    },
+    {
+      "id": "PH03-T06",
+      "description": "[A+D-native+R] Implement guided forms, useful empty-editor presets, settings provenance/help and real rich controls/canvases with keyboard structured equivalents and undo.",
+      "state": "preserved-source-integration-pending",
+      "owner": "task/guided-forms",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "98203b2f79b484abb83f0ed14103ab3acce8bf89"
+    },
+    {
+      "id": "PH03-T07",
+      "description": "[A+D-native+R] Verify A and implemented browser-native D children independently with reload persistence, interaction, component provenance and source-bound captures. C and remaining D child records stay unchecked for PH09; this task does not close the full identity.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH04-T01",
+      "description": "[A+D-native+R] Implement exact-destination destructive confirmation with two independent keys, full slider, cancellation and focus return; retain explicit clean-rebuild consent.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/destructive-confirmation",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "2eb184470415479f9efd9e22d8d0b8bb24cb8513"
+    },
+    {
+      "id": "PH04-T02",
+      "description": "[A+D-native+R] Implement reversible per-element experience policies, protected enrollment, support-ticket records and preserved-budget timed unlock ladders; never use these as broker authentication.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/experience-policies",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "617db048533e477273bf7dfa3e7be4c4bde03b46",
+      "productionReceiptSha256": "2e23b3e64d8fda90063ef5586fe0d1ea95b6b3dc07048104c7571ac2bd281205"
+    },
+    {
+      "id": "PH04-T03",
+      "description": "[A+D-native+R] Implement standards-tested local authenticators and real QR/manual pairing with protected secret handling.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/authenticator-workflows",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "617db048533e477273bf7dfa3e7be4c4bde03b46",
+      "productionReceiptSha256": "2e23b3e64d8fda90063ef5586fe0d1ea95b6b3dc07048104c7571ac2bd281205"
+    },
+    {
+      "id": "PH04-T04",
+      "description": "[A+D-native+R] Implement isolated append-only history, snapshots, restore-as-new-revision, complete scoped exports and protected-data exclusions.",
+      "state": "owned-implementation-in-progress",
+      "owner": "task/history-exports",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "9e689cf9f63dd94b4ddd34ae2e36b66b13976d1c"
+    },
+    {
+      "id": "PH04-T05",
+      "description": "[A+D-native+R] Implement durable jobs, crash/re-entry recovery, progress at initiator, per-item bulk outcomes, cancel/retry and contextual recovery routes.",
+      "state": "preserved-source-integration-pending",
+      "owner": "task/durable-jobs",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "8efc504fe46b5f5cc682e5a6069aff3b8e1c4f0b"
+    },
+    {
+      "id": "PH04-T06",
+      "description": "[A+D-native+R] Implement factual changelog, safe upstream-markup rendering, complete offline documentation and accessible persistent notification/review centre.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/documentation-notifications",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "632f86de3d698458f755868c4f25a9ed4937c581"
+    },
+    {
+      "id": "PH04-T07",
+      "description": "[A+D-native+R] Verify retention across failure/restart, cancellation ownership and no automatic cache/source/history pruning; prove free defaults and upstream cost/license disclosure.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T01",
+      "description": "[A+R] Implement create/open/adopt/import/clone projects with source/ref/branch status, maintained-LTS recommendation, actual revision provenance and per-project WSL/Docker choice.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/project-workflows",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "6664eabff93be0006510b48509556b91c6beae23",
+      "productionReceiptSha256": "7a7bc7807af11bfe18df0b585e36207e64b22db24648286fb86f16c0850358a5"
+    },
+    {
+      "id": "PH05-T02",
+      "description": "[A+R] Implement existing and dedicated managed WSL distribution discovery/provisioning, prerequisite checks and Linux-side storage with Windows browse/export.",
+      "state": "owned-implementation-in-progress",
+      "owner": "task/wsl-runtime",
+      "verification": "deferred"
+    },
+    {
+      "id": "PH05-T03",
+      "description": "[A+R] Implement Docker discovery, managed volumes, isolated non-root execution and truthful container lifecycle/permission recovery.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/container-runtime",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "69595897dad0553f47c723d6e5e1fcd87d88dfed"
+    },
+    {
+      "id": "PH05-T04",
+      "description": "[A+R] Implement source download/clone/ref acquisition and snapshot/diff/preview/explicit-Apply upgrades with rollback and compatibility boundaries.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/source-lifecycle",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "04e9e6435ec6eab8e0f307a32ca3d6001ea072b3",
+      "productionReceiptSha256": "ca2a8e165b08dd746847da3c78302b4406b2402095feb2bab97aa6807bb0aa43"
+    },
+    {
+      "id": "PH05-T05",
+      "description": "[A+R] Implement concurrent per-project queues with global CPU/RAM/storage limits, serialization per canonical output tree, safe process-group/container cancellation and scoped terminals.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/build-queues",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "5d257c7b8c0634664d99e35820b3fb1174dfa696",
+      "productionReceiptSha256": "7cdcad725e743ad3f788b76266dc49a67a828bbae744bf829913f83cec5bc22b"
+    },
+    {
+      "id": "PH05-T06",
+      "description": "[A+R] Verify both runtime adapters on real Buildroot source acquisition and owned execution, including interrupted transfer, missing prerequisites and preserved existing trees.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH06-T01",
+      "description": "[A+R] Bridge authoritative Buildroot Kconfig semantics through a pinned admitted library and actual make olddefconfig; expose full menus/types/choices/ranges/dependencies/help.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/kconfig-semantics",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "8e35b41099bee3d63a283d3bc4d41edeae114cc3"
+    },
+    {
+      "id": "PH06-T02",
+      "description": "[A+R] Implement typed configuration controls and immediate queued reconciliation with requested/effective diff, atomic snapshots, undo ordering and failure restoration.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/configuration-controls",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "3314d1559a5c3e4eef05a81a2d2aeff07eb7a9e2",
+      "productionReceiptSha256": "5d79a54f7471c375a0b9ec949ba54d0c75551da72c71a4f1fe93df3b5d609a80"
+    },
+    {
+      "id": "PH06-T03",
+      "description": "[A+R] Implement full Linux kernel, BusyBox and U-Boot configuration domains with the same real semantics and revision-bound behavior.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/configuration-domains",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "d3e213efc880573cb4089e8ed6081f82c951f549"
+    },
+    {
+      "id": "PH06-T04",
+      "description": "[A+R] Implement real defconfig browsing/apply/minimal-save provenance, ordered external trees and separate output directories.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/defconfig-workflows",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "2af12fd7cf8a5d648dd6585511c210369a6b6993",
+      "productionReceiptSha256": "121e65a73d094234d4c7f991549926405aea15ce559080e0187cbe882e851262"
+    },
+    {
+      "id": "PH06-T05",
+      "description": "[A+R] Implement complete package source/build/hash/license/dependency editors, ordered patch/hook workflows, overlays with mappings/permissions and discovered external-editor handoff.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/package-editors",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "2f2aa74b78f91e8d8f22888f597cbcbd87c6243a",
+      "productionReceiptSha256": "8c38d3f8e76fb21c6d38efc3ae6033c0579f7ca1cf97c4756a1b4937d5902bc9"
+    },
+    {
+      "id": "PH06-T06",
+      "description": "[A+R] Implement named build/package/clean targets, truthful streaming logs/history/progress and explicit invalidation/rebuild explanations.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/named-targets",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "ea20112761862f2b76d8752348ec71622e5a4941"
+    },
+    {
+      "id": "PH06-T07",
+      "description": "[A+R] Verify real source-to-image builds in WSL and Docker, rapid-edit race/rollback behavior and interaction tests rejecting generic textbox substitutions.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T01",
+      "description": "[A+R] Implement minimal/desktop/server/appliance presets and genuinely supported desktop/compositor previews with account/SSH provisioning and protected credentials.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/image-presets",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "af826915474a0c36732acf9e072de3b97d7ab6ad",
+      "productionReceiptSha256": "80560daafd7ade849013ac600ecbe00bad78a680b55750e997f443748270e00f"
+    },
+    {
+      "id": "PH07-T02",
+      "description": "[A+R] Implement safe artifact viewers, checksums/graphs/licenses, filesystem/archive/image inspection, disk/partition canvas and validated ISO/VMDK/VDI/OVA conversion/export.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/artifact-viewers",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "a2790c838b7c964af117223e94cc650ac4bd7754",
+      "productionReceiptSha256": "107299ca9ecd02b69ee193094f9a80cce91a626c0db53b7c11ab394fe8cd0a62"
+    },
+    {
+      "id": "PH07-T03",
+      "description": "[A+R] Implement VMware Workstation and VirtualBox discovery/create/import/hardware/storage/network/firmware edit/launch/stop with topology controls, NAT default and advanced network options.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/hypervisor-controls",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "734e882ad1ecf279148c402683829ca1e0f4f4cf",
+      "productionReceiptSha256": "f7a9eb43faabf7c57fb110eee0f817535304f51be11271c1f1a9fe513c5f51f8"
+    },
+    {
+      "id": "PH07-T04",
+      "description": "[A+R] Prove real x86_64 BIOS and UEFI guest boot, login/console, networking, disk persistence and graceful shutdown on both observed current-stable hypervisors; record actual versions and no Secure Boot claim.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH07-T05",
+      "description": "[A+R] Implement source/config locks, manifests, hashes, SBOM/license outputs and repeat-build comparisons with explicit nonreproducible differences.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/reproducibility",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "a2790c838b7c964af117223e94cc650ac4bd7754",
+      "productionReceiptSha256": "107299ca9ecd02b69ee193094f9a80cce91a626c0db53b7c11ab394fe8cd0a62"
+    },
+    {
+      "id": "PH07-T06",
+      "description": "[A+R] Implement real SDK/toolchain export with consumer smoke-build verification and environment instructions.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/sdk-export",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "ea20112761862f2b76d8752348ec71622e5a4941"
+    },
+    {
+      "id": "PH07-T07",
+      "description": "[A+R] After P42, implement exact destination-validated flashing and guest installer routes with reviewed destructive actions, cancellation and recovery proof.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/flashing-routes",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "0ac283315ae869caafd6accb12e0898500a7e596"
+    },
+    {
+      "id": "PH07-T08",
+      "description": "[A+R] After P41, implement authenticated remote runtime enrollment, transfer/jobs/cancel/recovery/output verification for the approved target types.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/remote-runtimes",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "0ac283315ae869caafd6accb12e0898500a7e596"
+    },
+    {
+      "id": "PH07-T09",
+      "description": "[A+R] After P40, implement approved cloud providers/destinations with scoped vault credentials, previewed upload, checksums, cancel/retry and actual provider readback.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/cloud-destinations",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "2499e954554c16e243e5edd1fbca1b9b4f215888"
+    },
+    {
+      "id": "PH08-T01",
+      "description": "[A+D-native+R] Implement all eight converter categories and PDF operations with packaged offline adapters, searchable rich controls and unlimited disk-backed paged queues; validate genuine outputs.",
+      "state": "preserved-built-source-integration-pending",
+      "owner": "task/converter-workflows",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "b8b98ff1f811d578068e111a2188373aec79d8a7"
+    },
+    {
+      "id": "PH08-T02",
+      "description": "[A+D-native+R] Implement Java/Bedrock version/flavour/plugin discovery and rich Minecraft server creation/configuration/lifecycle across local process, local container, SSH process and SSH container.",
+      "state": "integrated-partial-source-acceptance-deferred",
+      "owner": "task/minecraft-manager",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "49df30e82c4388ee77d92becfa85a712e57c658e",
+      "productionReceiptSha256": "6ce85d8ee83a00a8d099000f1c26a01f2cb5ac6d17bd6dd1d5a31130c96ae5bf"
+    },
+    {
+      "id": "PH08-T03",
+      "description": "[A+D-native+R] Implement Ollama discovery and one-click managed install/recovery, full catalogue/tags/hardware fit, durable model pulls and streamed chat preserving existing models.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/ollama-workflows",
+      "verification": "Production only; all tests, reviews, audits and runtime acceptance deferred. Remaining source gaps stay in feature documentation.",
+      "sourceCommit": "09f31e1191b2e2a50ba8579925eeed9d6f0373ef",
+      "productionReceiptSha256": "534348e6bf4903cc63dd39b95bf45a47019c6de6d502b1b5d8a4d39342509900"
+    },
+    {
+      "id": "PH08-T04",
+      "description": "[A+D-native+R] Implement local assistant plans/checkpoints/reviewed actions and harness recovery with no silent privilege escalation; verify failure and cancellation phases.",
+      "state": "preserved-source-integration-pending",
+      "owner": "task/assistant-actions",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "f6c9d25d328817b84fa20021c8cd7283eb589cca"
+    },
+    {
+      "id": "PH08-T05",
+      "description": "[A+D-native+R] Implement actual external-editor handoff and browser transfer start/progress/completion surfaces with real queue consumers, recovery and supported focus/visibility behavior.",
+      "state": "preserved-source-integration-pending",
+      "owner": "task/editor-transfers",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "dbfeb8fcf1a54ea95d256748881d57459d85c4a6"
+    },
+    {
+      "id": "PH08-T06",
+      "description": "[A+D-native+R] Implement previewed authenticated forge publication with exact destination/source, scoped credentials and actual readback.",
+      "state": "preserved-source-integration-pending",
+      "owner": "task/forge-publication",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "7cfa95f7fc52397a25e0c71f6a0e7bf918eaca00"
+    },
+    {
+      "id": "PH08-T07",
+      "description": "[A+D-native+R] Verify every A tool and each implemented browser-native D tool using separate runtime/output/persistence/capture proof, including offline missing-payload and partial-result behavior. C and remaining D records stay unchecked for PH09; full identity closure waits for all applicable records.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T01",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete D browser-native implementations for every applicable identity, with local visitor state, reset/export explanations and truthful unavailable/offline behavior.",
+      "state": "integrated-partial-source-remaining-work-preserved",
+      "owner": "task/browser-native",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "c5e501acfeb02bdbcc8e1a2ad1c54c0540306155"
+    },
+    {
+      "id": "PH09-T02",
+      "description": "[A+D+C+R (through-PH09 scope)] Implement reviewed explicit Edge/Chrome pairing and authenticated LAN capability grants/revocation with origin, TLS, CSRF/replay and browser private-network handling; no internet control exposure.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/pairing-security",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "e840d9113ff15ea61d26f4b75bfa274b39363b39"
+    },
+    {
+      "id": "PH09-T03",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete C typed broker consumers and independent client state for every applicable identity; revocation stops new authority and settles owned jobs truthfully.",
+      "state": "latest-atomic-source-preserved-unbuilt",
+      "owner": "task/companion-consumers",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "89c7fad3f1bf37f6a6ac72eac16a691d9b34cdce",
+      "integratedSourceCommit": "1777cd7024fcde736d14ee22e14ffb0d552a1e72"
+    },
+    {
+      "id": "PH09-T04",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete detailed categorized feature articles and Cantonese twins, rendered source wiki, search/offline navigation and actual API Postman category/master collections; distinguish non-HTTP IPC.",
+      "state": "integrated-partial-source-remaining-translations-listed",
+      "owner": "task/complete-articles",
+      "verification": "deferred",
+      "sourceCommit": "b01f17ae425b417fe459bb56b369cf5879d9586b"
+    },
+    {
+      "id": "PH09-T05",
+      "description": "[A+D+C+R (through-PH09 scope)] Complete vendored licensed/hashed fonts, safe shared-link metadata, genuine screenshot/gallery/recording presentation and current source-bound front provenance.",
+      "state": "integrated-source-font-production-only",
+      "owner": "task/presentation-provenance",
+      "verification": "deferred",
+      "sourceCommit": "f8af2f026907ebd583aa3565f6ec366f7006270c"
+    },
+    {
+      "id": "PH09-T06",
+      "description": "[A+D+C+R (through-PH09 scope)] Implement authenticated status integration and truthful unavailable states; verify authorized status bridge, protected webhooks and display-event delivery with separate R evidence.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/status-integration",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "632f86de3d698458f755868c4f25a9ed4937c581"
+    },
+    {
+      "id": "PH09-T07",
+      "description": "[A+D+C+R (through-PH09 scope)] Run independent A/D/C identity and state/persistence audits for capabilities implemented through PH09, plus normal/minimum × three languages × two themes × four scales, pure registered Material Design 3 controls and phone-friendly touch/keyboard checks from approximately 320px. Keep PH10 installer/update/download-dependent records unchecked until PH10 final acceptance.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH09-T08",
+      "description": "[A+D+C+R (through-PH09 scope)] Prove exact-boundary completeness and design-reference guards red then green by removing one required record at a time; all missing runtime, hosted, permission or platform evidence remains open. PH10-dependent records are explicitly pending, not waived or treated as passed.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T01",
+      "description": "[A+D+C+R (final applicable acceptance)] Assemble one complete Windows x64 installer with all required capability payloads, original installed icons, valid license disclosures and actual offline bundled-first discovery.",
+      "state": "preserved-source-changed-producer-pending",
+      "owner": "task/offline-payload-source-origin",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "d8a6489821657ae6fa4a6ae893130127ab1175f9"
+    },
+    {
+      "id": "PH10-T02",
+      "description": "[A+D+C+R (final applicable acceptance)] Produce real unsigned Squirrel.Windows Setup.exe, RELEASES, full packages and deltas; apply only required project-owned signing without claiming public trust.",
+      "state": "preserved-source-installer-embedding-unverified",
+      "owner": "task/squirrel-native",
+      "verification": "All tests, reviews, audits, static analysis and runtime acceptance remain deferred. Build receipts apply only to their exact recorded sources.",
+      "sourceCommit": "6a537ba009162c2a9281c0df61bcd271030e5a19"
+    },
+    {
+      "id": "PH10-T03",
+      "description": "[A+D+C+R (final applicable acceptance)] Verify actual current physical Windows host installation/launch, preservation, cancellation, update/rollback and unsaved-state handling; record fresh-environment and uninstall proof separately when actually available.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T04",
+      "description": "[A+D+C+R (final applicable acceptance)] Implement background update discovery/download with an unsigned-ready banner and explicit restart; exercise real version transitions and recovery.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/updates",
+      "verification": "All tests, reviews, audits, static analysis and captures deferred; production receipts do not prove runtime acceptance.",
+      "sourceCommit": "6ae7649306ebd62f220a24326ca32259d5bfaf73"
+    },
+    {
+      "id": "PH10-T05",
+      "description": "[A+D+C+R (final applicable acceptance)] Implement CI bootstrap inventories, compatible accessible runner selection/cloud fallback and defensive evidence collection; use encrypted public builder transport only if private source is introduced.",
+      "state": "integrated-source-acceptance-deferred",
+      "owner": "task/ci-inventory",
+      "verification": "deferred",
+      "sourceCommit": "7d7e4bcd7adb3c31482f686ca4306fe8ca98348f"
+    },
+    {
+      "id": "PH10-T06",
+      "description": "[A+D+C+R (final applicable acceptance)] Publish uniquely tagged normal releases with verified installer assets, workflow timing and line counts, factual catalogue-linked naming and resolved permitted release-photo policy; read back draft=false/prerelease=false.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T07",
+      "description": "[A+D+C+R (final applicable acceptance)] Verify live downloads against expected source/version/checksums and complete homepage/wiki/articles/screenshots/gallery links; synchronize repository records, supported discussions/project item and sanitized guidance.",
+      "state": "acceptance-deferred",
+      "owner": null,
+      "verification": "deferred"
+    },
+    {
+      "id": "PH10-T08",
+      "description": "[A+D+C+R (final applicable acceptance)] Publish the verified operating procedure, grounded human-effort estimate and source-bound final handoff/issue/next-session prompt; reconcile every applicable child and all 109 dispositions before declaring complete.",
+      "state": "queued",
+      "owner": null,
+      "verification": "deferred"
+    }
+  ],
+  "updatedAt": "2026-10-16T18:35:07.7280332Z",
+  "integrationCommit": "26e3f4264ebd049cb21e1358e63533321d485377",
+  "preservationBoundary": {
+    "reason": "Configured account-preservation threshold reached",
+    "implementationStopped": true,
+    "newProducersStopped": true,
+    "goalComplete": false,
+    "testsAndRuntimeAcceptance": "Deferred by owner",
+    "cleanup": "Not performed; source workspaces retained",
+    "goalStatus": "blocked",
+    "consecutiveBoundaryTurns": 3,
+    "stateObservedAt": "2026-10-17T00:14:59Z"
+  }
+}

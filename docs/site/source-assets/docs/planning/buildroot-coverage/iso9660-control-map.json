@@ -1,0 +1,786 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "version": "2025.02",
+    "path": "fs/iso9660/Config.in",
+    "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+    "makefileSha256": "801da8e5d6f9e5a5132fc1bbd1070432d2596a651669cd4d12c11e8cc3e03392"
+  },
+  "applicationBaseline": "308d4545e093e03a873f6b0570b9383a880a77dc",
+  "scope": "Nine source symbols, one choice and one dependency comment; documentation mapping only, not native acceptance, all-version support or complete ISO capability.",
+  "relatedEvidence": [
+    "docs/planning/buildroot-coverage/2025.02.json",
+    "docs/planning/buildroot-coverage/native-kconfig.md",
+    "docs/evidence/iso-production/production.json",
+    "docs/evidence/iso-boot/acceptance.json"
+  ],
+  "entries": [
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 1,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660\n\tbool \"iso image\"\n\tdepends on (BR2_i386 || BR2_x86_64)\n\tdepends on BR2_LINUX_KERNEL\n\tdepends on BR2_TARGET_GRUB2 || BR2_TARGET_SYSLINUX_ISOLINUX\n\tselect BR2_LINUX_KERNEL_INSTALL_TARGET \\\n\t       if (!BR2_TARGET_ROOTFS_ISO9660_INITRD && !BR2_TARGET_ROOTFS_INITRAMFS)\n\thelp\n\t  Build a bootable ISO9660 image. By default, the root\n\t  filesystem is directly packed as the ISO9660 filesystem,\n\t  which means the root filesystem will be read-only. It\n\t  requires ISO9660 filesystem support and CDROM support in the\n\t  kernel.\n\n\t  However, if BR2_TARGET_ROOTFS_INITRAMFS or\n\t  BR2_TARGET_ROOTFS_ISO9660_INITRD have been enabled, the\n\t  ISO9660 filesystem will only contain a kernel image and\n\t  optionally an external initrd image. In this case, the\n\t  filesystem being in RAM, it will be read/write. No ISO9660\n\t  or CDROM support is needed in the kernel.\n"
+      },
+      "type": "bool",
+      "prompt": "iso image",
+      "help": "Build a bootable ISO9660 image. By default, the root\n\t  filesystem is directly packed as the ISO9660 filesystem,\n\t  which means the root filesystem will be read-only. It\n\t  requires ISO9660 filesystem support and CDROM support in the\n\t  kernel.\n\n\t  However, if BR2_TARGET_ROOTFS_INITRAMFS or\n\t  BR2_TARGET_ROOTFS_ISO9660_INITRD have been enabled, the\n\t  ISO9660 filesystem will only contain a kernel image and\n\t  optionally an external initrd image. In this case, the\n\t  filesystem being in RAM, it will be read/write. No ISO9660\n\t  or CDROM support is needed in the kernel.",
+      "guided": {
+        "state": "fixed-profile",
+        "requested": "true",
+        "explanation": "The guided Apply requests ISO output; no independent Easy switch.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "profile-level-only",
+        "needed": "Explain upstream i386/x86_64 eligibility versus this x86_64-only profile, Linux and bootloader prerequisites."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain upstream i386/x86_64 eligibility versus this x86_64-only profile, Linux and bootloader prerequisites."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_GRUB2",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_GRUB2",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 27,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_GRUB2\n\tbool \"grub2\"\n\tdepends on BR2_TARGET_GRUB2\n\tselect BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER \\\n\t\tif BR2_TARGET_GRUB2_I386_PC\n\tselect BR2_TARGET_ROOTFS_ISO9660_EFI_BOOTLOADER \\\n\t\tif (BR2_TARGET_GRUB2_I386_EFI || BR2_TARGET_GRUB2_X86_64_EFI)\n\thelp\n\t  Use Grub 2 as the bootloader for the ISO9660 image. Make\n\t  sure to enable the 'iso9660' module in\n\t  BR2_TARGET_GRUB2_BUILTIN_MODULES_PC or\n\t  BR2_TARGET_GRUB2_BUILTIN_MODULES_EFI. Use 'cd' as the boot\n\t  partition in BR2_TARGET_GRUB2_BOOT_PARTITION= for GRUB on BIOS\n\t  or 'set root=(cd0)' in the configuration file passed to\n\t  BR2_TARGET_GRUB2_BUILTIN_CONFIG_EFI for GRUB on EFI.\n"
+      },
+      "type": "bool",
+      "prompt": "grub2",
+      "help": "Use Grub 2 as the bootloader for the ISO9660 image. Make\n\t  sure to enable the 'iso9660' module in\n\t  BR2_TARGET_GRUB2_BUILTIN_MODULES_PC or\n\t  BR2_TARGET_GRUB2_BUILTIN_MODULES_EFI. Use 'cd' as the boot\n\t  partition in BR2_TARGET_GRUB2_BOOT_PARTITION= for GRUB on BIOS\n\t  or 'set root=(cd0)' in the configuration file passed to\n\t  BR2_TARGET_GRUB2_BUILTIN_CONFIG_EFI for GRUB on EFI.",
+      "guided": {
+        "state": "fixed-profile",
+        "requested": "true",
+        "explanation": "GRUB2 is the sole guided bootloader; no independent bootloader dropdown.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "profile-level-only",
+        "needed": "Explain PC/EFI platform choices, iso9660 modules and boot-root configuration."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain PC/EFI platform choices, iso9660 modules and boot-root configuration."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_ISOLINUX",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_ISOLINUX",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 43,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_ISOLINUX\n\tbool \"isolinux\"\n\tdepends on BR2_TARGET_SYSLINUX_ISOLINUX\n\tselect BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER\n"
+      },
+      "type": "bool",
+      "prompt": "isolinux",
+      "help": null,
+      "guided": {
+        "state": "unsupported-in-guided-profile",
+        "requested": "false",
+        "explanation": "The profile disables this source-supported alternative.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 78,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "missing-or-deliberately-unavailable",
+        "needed": "Explain the ISOLINUX prerequisite and BIOS/hybrid alternatives without suggesting this profile implements them."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain the ISOLINUX prerequisite and BIOS/hybrid alternatives without suggesting this profile implements them."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 50,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER\n\tbool\n"
+      },
+      "type": "bool",
+      "prompt": null,
+      "help": null,
+      "guided": {
+        "state": "hidden-derived",
+        "requested": "not directly requested",
+        "explanation": "Promptless source flag selected by GRUB2 PC or ISOLINUX.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45",
+            "relation": "profile context only; no explicit symbol request exists"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "hidden-derived",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "missing-or-deliberately-unavailable",
+        "needed": "Explain derived BIOS capability; do not expose a misleading independent switch."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain derived BIOS capability; do not expose a misleading independent switch."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_EFI_BOOTLOADER",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_EFI_BOOTLOADER",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 53,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_EFI_BOOTLOADER\n\tbool\n"
+      },
+      "type": "bool",
+      "prompt": null,
+      "help": null,
+      "guided": {
+        "state": "hidden-derived",
+        "requested": "not directly requested",
+        "explanation": "Promptless source flag; guided profile disables the two x86 EFI GRUB2 platform symbols.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45",
+            "relation": "profile context only; no explicit symbol request exists"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "hidden-derived",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "missing-or-deliberately-unavailable",
+        "needed": "Explain source-supported EFI separately from this BIOS-only workflow."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain source-supported EFI separately from this BIOS-only workflow."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 56,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU\n\tstring \"Boot menu config file\"\n\tdefault \"fs/iso9660/grub.cfg\" if BR2_TARGET_ROOTFS_ISO9660_GRUB2\n\tdefault \"fs/iso9660/isolinux.cfg\" if BR2_TARGET_ROOTFS_ISO9660_ISOLINUX\n\thelp\n\t  Use this option to provide a custom bootloader configuration\n\t  file (grub.cfg for Grub 2, isolinux.cfg for isolinux).\n\n\t  Note that the strings __KERNEL_PATH__ and __INITRD_PATH__\n\t  will automatically be replaced by the path to the kernel and\n\t  initrd images respectively.\n"
+      },
+      "type": "string",
+      "prompt": "Boot menu config file",
+      "help": "Use this option to provide a custom bootloader configuration\n\t  file (grub.cfg for Grub 2, isolinux.cfg for isolinux).\n\n\t  Note that the strings __KERNEL_PATH__ and __INITRD_PATH__\n\t  will automatically be replaced by the path to the kernel and\n\t  initrd images respectively.",
+      "guided": {
+        "state": "fixed-profile",
+        "requested": "fs/iso9660/grub.cfg",
+        "explanation": "The profile resets the menu string; no guided custom-menu browse/editor.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 17,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "profile-level-only",
+        "needed": "Explain GRUB/ISOLINUX defaults and __KERNEL_PATH__/__INITRD_PATH__ substitution."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain GRUB/ISOLINUX defaults and __KERNEL_PATH__/__INITRD_PATH__ substitution."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_INITRD",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_INITRD",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 68,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_INITRD\n\tbool \"Use initrd\"\n\tdefault y\n\tselect BR2_TARGET_ROOTFS_CPIO\n\thelp\n\t  Enable this option to have the root filesystem bundled as an\n\t  initrd/initramfs rather than directly as the ISO9660\n\t  filesystem. With this option enabled, the ISO9660 will only\n\t  contain a kernel image, an initrd image (unless an initramfs\n\t  linked into the kernel is used) and the bootloader.\n"
+      },
+      "type": "bool",
+      "prompt": "Use initrd",
+      "help": "Enable this option to have the root filesystem bundled as an\n\t  initrd/initramfs rather than directly as the ISO9660\n\t  filesystem. With this option enabled, the ISO9660 will only\n\t  contain a kernel image, an initrd image (unless an initramfs\n\t  linked into the kernel is used) and the bootloader.",
+      "guided": {
+        "state": "fixed-profile",
+        "requested": "true",
+        "explanation": "The profile requests an initial RAM root; no guided direct-optical-root choice.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "profile-level-only",
+        "needed": "Explain external initrd versus integrated initramfs and writable RAM versus read-only optical root."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain external initrd versus integrated initramfs and writable RAM versus read-only optical root."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_TRANSPARENT_COMPRESSION",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_TRANSPARENT_COMPRESSION",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 79,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_TRANSPARENT_COMPRESSION\n\tbool \"transparent compression\"\n\tdepends on !BR2_TARGET_ROOTFS_ISO9660_INITRD\n\tdepends on !BR2_TARGET_ROOTFS_INITRAMFS\n\thelp\n\t  Say 'y' to enable use of transparent (de)compression. Files\n\t  are stored compressed and will be decompressed on-the-fly\n\t  upon access at runtime.\n"
+      },
+      "type": "bool",
+      "prompt": "transparent compression",
+      "help": "Say 'y' to enable use of transparent (de)compression. Files\n\t  are stored compressed and will be decompressed on-the-fly\n\t  upon access at runtime.",
+      "guided": {
+        "state": "unsupported-in-guided-profile",
+        "requested": "not directly requested",
+        "explanation": "Source requires neither initrd nor integrated initramfs; guided initrd route is incompatible.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45",
+            "relation": "profile context only; no explicit symbol request exists"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "missing-or-deliberately-unavailable",
+        "needed": "Explain source dependency and kernel/runtime support; do not offer an unavailable Easy choice."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain source dependency and kernel/runtime support; do not offer an unavailable Easy choice."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "BR2_TARGET_ROOTFS_ISO9660_HYBRID",
+      "kind": "symbol",
+      "existingLexicalIdentity": "filesystem-option:fs/iso9660/Config.in:BR2_TARGET_ROOTFS_ISO9660_HYBRID",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 88,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "config BR2_TARGET_ROOTFS_ISO9660_HYBRID\n\tbool \"Build hybrid image\"\n\tdepends on BR2_TARGET_ROOTFS_ISO9660_ISOLINUX\n\thelp\n\t  Enable this option to build an hybrid image, i.e an image\n\t  which can either be booted from a CD-ROM or from a device\n\t  which BIOS considers a hard disk or ZIP disk, e.g. a USB key\n\t  or similar.\n"
+      },
+      "type": "bool",
+      "prompt": "Build hybrid image",
+      "help": "Enable this option to build an hybrid image, i.e an image\n\t  which can either be booted from a CD-ROM or from a device\n\t  which BIOS considers a hard disk or ZIP disk, e.g. a USB key\n\t  or similar.",
+      "guided": {
+        "state": "unsupported-in-guided-profile",
+        "requested": "not directly requested",
+        "explanation": "Source depends on ISOLINUX, which this profile disables. No explicit hybrid mutation is emitted.",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 16,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45",
+            "relation": "profile context only; no explicit symbol request exists"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "generic-consumer-only",
+        "reason": "Generic typed controls depend on actual admitted graph visibility and native reconciliation; no per-symbol built acceptance is claimed.",
+        "references": [
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "missing-or-deliberately-unavailable",
+        "needed": "Explain optical versus BIOS USB/hybrid output; dependency reconciliation is not USB boot proof."
+      },
+      "contextualHelp": {
+        "state": "partial",
+        "related": {
+          "path": "docs/desktop/iso-fields/profile-and-firmware.md",
+          "line": 5,
+          "sha256": "0e0283a97af1a8da53e6e4cc7a9bbc12910dba486bad83b4b52df0a1472c0a06"
+        },
+        "needed": "Explain optical versus BIOS USB/hybrid output; dependency reconciliation is not USB boot proof."
+      },
+      "nativeAcceptance": "pending for current integrated GUI/service; historical one-profile production and boot receipts remain separate"
+    },
+    {
+      "id": "choice:iso9660-bootloader",
+      "kind": "choice",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 24,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "choice\n\tprompt \"Bootloader\"\n\nconfig BR2_TARGET_ROOTFS_ISO9660_GRUB2\n\tbool \"grub2\"\n\tdepends on BR2_TARGET_GRUB2\n\tselect BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER \\\n\t\tif BR2_TARGET_GRUB2_I386_PC\n\tselect BR2_TARGET_ROOTFS_ISO9660_EFI_BOOTLOADER \\\n\t\tif (BR2_TARGET_GRUB2_I386_EFI || BR2_TARGET_GRUB2_X86_64_EFI)\n\thelp\n\t  Use Grub 2 as the bootloader for the ISO9660 image. Make\n\t  sure to enable the 'iso9660' module in\n\t  BR2_TARGET_GRUB2_BUILTIN_MODULES_PC or\n\t  BR2_TARGET_GRUB2_BUILTIN_MODULES_EFI. Use 'cd' as the boot\n\t  partition in BR2_TARGET_GRUB2_BOOT_PARTITION= for GRUB on BIOS\n\t  or 'set root=(cd0)' in the configuration file passed to\n\t  BR2_TARGET_GRUB2_BUILTIN_CONFIG_EFI for GRUB on EFI.\n\nconfig BR2_TARGET_ROOTFS_ISO9660_ISOLINUX\n\tbool \"isolinux\"\n\tdepends on BR2_TARGET_SYSLINUX_ISOLINUX\n\tselect BR2_TARGET_ROOTFS_ISO9660_BIOS_BOOTLOADER\n\nendchoice"
+      },
+      "members": [
+        "BR2_TARGET_ROOTFS_ISO9660_GRUB2",
+        "BR2_TARGET_ROOTFS_ISO9660_ISOLINUX"
+      ],
+      "guided": {
+        "state": "fixed-profile",
+        "selection": "BR2_TARGET_ROOTFS_ISO9660_GRUB2",
+        "references": [
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 223,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 240,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 46,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          },
+          {
+            "path": "src/renderer/configuration-panel.ts",
+            "line": 45,
+            "sha256": "494c640ac861708d350ff334c0e90742d51423286e5e403a8c0bc4231078d4ec"
+          }
+        ]
+      },
+      "advanced": {
+        "state": "dedicated-choice-workflow-unverified",
+        "reason": "Generic per-symbol controls are not proof of a labeled source-derived mutually exclusive choice group."
+      },
+      "easyMode": {
+        "state": "missing-or-deliberately-unavailable",
+        "needed": "Only offer alternatives after source/architecture capability discovery; do not describe the sole guided profile as complete choice parity."
+      },
+      "nativeAcceptance": "pending"
+    },
+    {
+      "id": "comment:iso9660-prerequisites",
+      "kind": "comment",
+      "source": {
+        "path": "fs/iso9660/Config.in",
+        "line": 99,
+        "sha256": "172e3e70c48df32d47e29d76b65ce60b48906ee1231a9426aaad6130309a7cc2",
+        "raw": "comment \"iso image needs a Linux kernel and either grub2 or isolinux to be built\"\n\tdepends on BR2_i386 || BR2_x86_64\n\tdepends on !BR2_LINUX_KERNEL || \\\n\t\t!(BR2_TARGET_GRUB2 || BR2_TARGET_SYSLINUX_ISOLINUX)\n"
+      },
+      "guided": {
+        "state": "partial-contextual-replacement",
+        "references": [
+          {
+            "path": "src/main/configuration/image-presets.cjs",
+            "line": 74,
+            "sha256": "a8cd0ddbd387b28f68a43b3194e29136608981a3fc2c79f5fb44c7be36721e45"
+          },
+          {
+            "path": "src/renderer/image-presets-panel.ts",
+            "line": 232,
+            "sha256": "2e9e69b1554510573b10ba68c62e1fb85e48261d67cdce8412116b835e094e81"
+          }
+        ]
+      },
+      "easyMode": {
+        "state": "partial",
+        "needed": "Explain each source dependency and what can safely be changed; fixed-profile requirement summaries do not display the exact upstream comment."
+      },
+      "nativeAcceptance": "pending"
+    }
+  ]
+}
