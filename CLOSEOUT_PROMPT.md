@@ -2,6 +2,9 @@
 
 Continue the authorized guided workspace remake. Keep every check hidden. Preserve settings, data, unrelated applications, existing runtime ownership and installation recovery. No visible launch is authorized.
 
+Latest update: reviewed ISO activation/submission31a1fb4 is integrated at a731ea48a65e5315ee65df7811ade0932ce64503;15 focused integration checks pass. Hidden Help layout8c93d73 passes15 formal measurements but actual service returns INVALID_BUNDLE. Two reviewers confirm physical identity checks against archive metadata as the cause. Physical-resource repair5815e70 is independently reviewed; actual build/native acceptance is pending. Focused five-task Tools implementation continues in its isolated lane. A new isolated WSL attempt decision is pending, with all existing quarantine preserved. Old physical installed b9447cf startup now reached ready workspace/About and passed162.009seconds prospective observation over three intervals, then normal owned teardown; this is not redesigned update or normal-profile migration proof.
+
+Earlier preserved context, superseded where the latest update differs:
 Integration branch: `ai/integration/20261018-roadmap-combined`. Source before this record: `388c5f42543f1314a7d37be77abb87184e103f4f`, combining GUI `bd746d7eb7b93b9e32f406e2b4fa8e91d6dac570` and inactive ISO recovery/scheduler `96923b4467268d2dcf1581b3ddae37fb30155498`. Both component tips are remotely verified. Verify this record's next commit and remote ref before claiming preservation.
 
 The exact bd746d7 desktop build passed. Receipt SHA-256: `a97ed2c8cc2f784476767e913912eab598dbfc39c1a8b6306bf802d6bc6e5ee2`. Archive: `101761f92c3ee68e7f9520f6523f514600785b6d8bf2bf6660a28020d50f7711`. Executable: `8c1964fc6ee9efb92e1839a1463eb627fb8379f4153acdb7f29fe71793a4b797`. CI39184315958 succeeded. Later merged source needs its own build.
