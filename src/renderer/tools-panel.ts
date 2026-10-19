@@ -12,6 +12,7 @@ import "@material/web/select/select-option.js";
 import "@material/web/checkbox/checkbox.js";
 import "@material/web/progress/linear-progress.js";
 import { workspaceStyles } from "./workspace-styles";
+type Feedback = { task: string; key: string; action: [string, string]; value: string };
 type Grant = { id: string; name: string; kind: string };
 type Category = {
   category: string;
@@ -65,7 +66,7 @@ export class ToolsPanel extends LitElement {
   revision = 0;
   private pending = false;
   private runningQueue = false;
-  private feedback = "";
+  private feedback = new Map<string, Feedback>();
   private categories: Category[] = [];
   private category = "text";
   private format = "txt";
@@ -193,20 +194,32 @@ export class ToolsPanel extends LitElement {
   private tool(request: Record<string, unknown>) {
     return this.call("tools", { request });
   }
-  private async run(work: () => Promise<void>) {
+  private startFeedback(action: [string, string], task = this.selectedTask): Feedback {
+    const record: Feedback = {task, key: crypto.randomUUID(), action, value: ""};
+    this.feedback.set(task, record);
+    return record;
+  }
+  private setFeedback(record: Feedback, render: (l: (en: string, zh: string) => string) => string) {
+    record.value = captureOwnedStatus(record, record.key, this.l.bind(this), render);
+  }
+  private displayFeedback() {
+    const record = this.feedback.get(this.selectedTask);
+    return record ? displayOwnedStatus(record, record.key, record.value, this.language) : "";
+  }
+  private async run(work: (record: Feedback) => Promise<void>, action: [string, string]) {
     if (this.pending) return;
     this.pending = true;
-    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>"");
+    const record = this.startFeedback(action);
     this.changed();
     try {
-      await work();
-      this.feedback ||= captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Completed.", "已完成。"));
+      await work(record);
+      if (!record.value) this.setFeedback(record, l => `${l(...record.action)}: ${l("Completed", "已完成")}`);
     } catch (error) {
       const code =
         error instanceof Error && /^[A-Z_]+$/.test(error.message)
           ? error.message
           : "OPERATION_FAILED";
-      this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Operation not completed", "操作未完成")}: ${code}`);
+      this.setFeedback(record, l => `${l(...record.action)}: ${l("Operation not completed", "操作未完成")}: ${code}`);
     } finally {
       this.pending = false;
       this.changed();
@@ -215,12 +228,12 @@ export class ToolsPanel extends LitElement {
   private button(
     en: string,
     zh: string,
-    work: () => Promise<void>,
+    work: (record: Feedback) => Promise<void>,
     disabled = false,
     primary = this.primaryAction===en,
     trackPending = true,
   ) {
-    const invoke=()=>trackPending?this.run(work):work();
+    const invoke=()=>trackPending?this.run(work,[en,zh]):work(this.startFeedback([en,zh]));
     if(primary)return html`<md-filled-button data-primary-action=${en} ?disabled=${this.pending||disabled} @click=${invoke}>${actionIcon(en)}${this.l(en,zh)}</md-filled-button>`;
     if (/^(Refresh|Remove|Move|Stop|Cancel|Revoke)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||disabled} @click=${invoke}>${materialIcon(actionSymbol(en))}</md-icon-button>`;
     return html`<md-outlined-button
@@ -289,13 +302,13 @@ export class ToolsPanel extends LitElement {
     this.jobs = after ? [...this.jobs, ...result.items] : result.items;
     this.next = result.next;
   }
-  private result(result: {
+  private result(record: Feedback, result: {
     bytes?: number;
     pages?: number;
     pageCounts?: number[];
   }) {
-    this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>[
-      l("Completed", "已完成"),
+    this.setFeedback(record,l=>[
+      `${l(...record.action)}: ${l("Completed", "已完成")}`,
       result.bytes !== undefined ? `${result.bytes} bytes` : "",
       result.pageCounts
         ? `${l("Pages", "頁數")}: ${result.pageCounts.join(", ")}`
@@ -315,7 +328,7 @@ export class ToolsPanel extends LitElement {
         this.pdfSources.length === 1)
     );
   }
-  private async executePdf(queued: boolean) {
+  private async executePdf(queued: boolean, record: Feedback) {
     const requiresPages = ["split", "extract", "reorder", "rotate"].includes(
       this.pdfOperation,
     );
@@ -337,18 +350,18 @@ export class ToolsPanel extends LitElement {
     if (queued) {
       await this.tool({ action: "queue.add", job: request });
       await this.queuePage();
-    } else this.result(await this.tool(request));
+    } else this.result(record, await this.tool(request));
     this.pdfDestination = undefined;
   }
-  private async runQueue(){
+  private async runQueue(record: Feedback){
               this.runningQueue = true;
               this.changed();
               try {
                 const r = await this.tool({ action: "queue.run" });
-                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Queue finished", "佇列已完成")}: ${r.completed} / ${r.failed}`);
+                this.setFeedback(record,l=>`${l("Queue finished", "佇列已完成")}: ${r.completed} / ${r.failed}`);
                 await this.queuePage();
               } catch (e) {
-                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
+                this.setFeedback(record,l=>l(
                   "Queue could not finish. Refresh its status.",
                   "佇列未能完成，請重新整理狀態。",
                 ));
@@ -372,7 +385,7 @@ export class ToolsPanel extends LitElement {
             aria-label=${this.l("Operation in progress","操作進行中",true)}
           ></md-linear-progress>`
         : nothing}
-      <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
+      <div role="status" aria-live="polite">${this.displayFeedback()}</div>
       <section class="panel stack" data-destination="local" ?hidden=${this.selectedTask!=='tool:local'} ?inert=${this.selectedTask!=='tool:local'} aria-labelledby="tool-heading-local" data-experience-id="tools-section:local" tabindex="-1">
         <h2 id="tool-heading-local" tabindex="-1">${this.l("Local tools","本機工具",true)}</h2>
         <p class="note">
@@ -449,8 +462,8 @@ export class ToolsPanel extends LitElement {
             ${this.button(
               "Convert now",
               "立即轉換",
-              async () => {
-                this.result(await this.tool(this.conversion()));
+              async (record) => {
+                this.result(record, await this.tool(this.conversion()));
                 this.destination = undefined;
               },
               !this.source || !this.destination || !this.categories.length,
@@ -543,12 +556,12 @@ export class ToolsPanel extends LitElement {
             ${this.button(
               "Run PDF operation",
               "執行 PDF 操作",
-              () => this.executePdf(false),
+              (record) => this.executePdf(false, record),
               !this.pdfReady(),
             )}${this.button(
               "Queue PDF operation",
               "排程 PDF 操作",
-              () => this.executePdf(true),
+              (record) => this.executePdf(true, record),
               !this.pdfReady(),
             )}
           </div>
@@ -588,7 +601,7 @@ export class ToolsPanel extends LitElement {
               await this.queuePage();
             },
             this.runningQueue,
-          )}${this.button('Run queue','執行佇列',()=>this.runQueue(),this.runningQueue,this.primaryAction==='Run queue',false)}
+          )}${this.button('Run queue','執行佇列',(record)=>this.runQueue(record),this.runningQueue,this.primaryAction==='Run queue',false)}
         </div>
         ${this.jobs.map(
           (j) =>
