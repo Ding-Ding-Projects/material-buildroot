@@ -11,7 +11,8 @@ const {snapshotIsoBuild}=require("./iso-host-build-snapshot.cjs");
 const fail=code=>{throw Object.assign(Error(code),{code});};
 /** Host-only composition. Required durable hooks are not supplied by the current scheduler. */
 function createIsoHostBuildAdapter({execution,directory,resolveProject,authorize,retainReference,checkpointCurrentOwner,checkpointCurrentCleanup,run,checkpoint,signalScript}){
- if(typeof directory!=="string"||!path.isAbsolute(directory)||[resolveProject,authorize,retainReference,checkpointCurrentOwner,checkpointCurrentCleanup,run,checkpoint].some(fn=>typeof fn!=="function")||typeof signalScript!=="string")fail("ISO_HOST_ADAPTER_REQUIRED");
+ const nativeFactory=typeof execution?.createLeasedIsoOutputLifecycle==="function";
+ if(typeof directory!=="string"||!path.isAbsolute(directory)||[resolveProject,authorize,retainReference,checkpointCurrentOwner,checkpointCurrentCleanup].some(fn=>typeof fn!=="function")||(!nativeFactory&&([run,checkpoint].some(fn=>typeof fn!=="function")||typeof signalScript!=="string")))fail("ISO_HOST_ADAPTER_REQUIRED");
  return async function build(payload,context){
   ({payload,context}=snapshotIsoBuild(payload,context));
   assertIsoOutputPolicy(payload?.isoOutputPolicy,payload?.target);
@@ -44,7 +45,7 @@ function createIsoHostBuildAdapter({execution,directory,resolveProject,authorize
    produce:(input,options)=>producer(input,options),
    capture:(input,options)=>lifecycle({grantId:input.grantId,runtime:input.runtime,jobId:input.jobId,operation:"capture",preparationSha256:input.preparationSha256},{...options,lease:input.lease})
   }});
-  lifecycle=createLeasedWslIsoOutputLifecycle({execution,run,checkpoint,signalScript},transactions);
+  lifecycle=nativeFactory?execution.createLeasedIsoOutputLifecycle(transactions):createLeasedWslIsoOutputLifecycle({execution,run,checkpoint,signalScript},transactions);
   producer=createIsoWslProducer({execution,transactions,jobs:payload.jobs,onLog:context.log});
   const request={grantId:item.grantId,runtime,jobId:context.jobId,policy:payload.isoOutputPolicy};
   const result=await transactions.run(request,{signal:context.signal});currentProject();

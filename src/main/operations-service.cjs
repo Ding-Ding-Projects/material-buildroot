@@ -8,6 +8,9 @@ const { createBuildQuarantine } = require("./jobs/quarantine.cjs");
 const { createBuildConfirmation } = require("./security/build-confirmation.cjs");
 const { captureBuildIntent } = require("./jobs/build-intent.cjs");
 const { createIsoOutputPolicy, assertIsoOutputPolicy } = require("./jobs/iso-output-policy.cjs");
+const { createIsoScheduledBuild } = require("./jobs/iso-scheduled-build.cjs");
+const { restoreIsoSchedulerRecovery } = require("./jobs/iso-scheduler-recovery.cjs");
+const { isWslReceipt } = require("./execution/wsl-project.cjs");
 const { captureWslBuildIntent, validateNativeIntent } = require("./jobs/wsl-build-intent.cjs");
 const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
@@ -503,6 +506,22 @@ function createOperationsService({
     getJob: id => jobs.get(id, owner),
     listJobs: () => jobs.list(owner),
   });
+  const isoJournalDirectory = path.join(directory, "iso-journal"), isoRecoveryDirectory = path.join(directory, "iso-recovery");
+  const scheduledIsoBuild = createIsoScheduledBuild({
+    quarantine, activeRecovery, markRecoveryUnavailable: () => { recoveryUnavailable = true; },
+    hostOptions: {
+      execution, directory: isoJournalDirectory, recoveryDirectory: isoRecoveryDirectory, resolveProject: project,
+      authorize: async (payload, context) => {
+        validateBuildPayload(payload);
+        if (disposed || context.signal?.aborted) reject("BUILD_CANCELLED");
+        const item = project(payload.workspaceId);
+        authorizedExternalPaths(payload.workspaceId, item);
+        if (!item.externalStateVerified || item.storage?.kind !== "wsl" || item.externalTrees.length ||
+            !isWslReceipt(execution.grants?.get(item.grantId)?.wslReceipt) ||
+            JSON.stringify(item.runtime) !== JSON.stringify(payload.runtime)) reject("BLOCKED_AUTHORIZATION_REQUIRED");
+      },
+    },
+  });
   const jobs = createJobManager({
     onTransition: notificationTransition,
     directory: path.join(directory, "jobs"),
@@ -511,6 +530,7 @@ function createOperationsService({
         try {
           validateBuildPayload(payload);
           if (disposed || context.signal.aborted) reject("BUILD_CANCELLED");
+          if (Object.hasOwn(payload, "isoOutputPolicy")) return await scheduledIsoBuild(payload, context);
           await checkDispatchIntent(payload, context.signal);
           if (disposed || context.signal.aborted) reject("BUILD_CANCELLED");
         } catch (error) {
@@ -598,6 +618,8 @@ function createOperationsService({
         });
     quarantine.initialize();
   }
+  restoreIsoSchedulerRecovery({ jobs, owner, quarantine, recoveryDirectory: isoRecoveryDirectory, journalDirectory: isoJournalDirectory,
+    markRecoveryUnavailable: () => { recoveryUnavailable = true; } });
   function unknownRecovery() {
     return quarantine
       .list()
@@ -626,7 +648,10 @@ function createOperationsService({
           payload.workspaceId,
           item,
         );
-        const current = await captureProjectIntent(item, {
+        const iso = Object.hasOwn(payload, "isoOutputPolicy");
+        if (iso && (item.storage?.kind !== "wsl" || !isWslReceipt(execution.grants?.get(item.grantId)?.wslReceipt))) reject("BLOCKED_AUTHORIZATION_REQUIRED");
+        // ISO admission carries the queued expectation only. Native current proof runs after its durable pending reference under the acquired scheduler lease.
+        const current = iso ? { sourceRevision: payload.intent.sourceRevision, configRevision: payload.intent.configRevision } : await captureProjectIntent(item, {
           source: item.source,
           output: item.output,
           externalTrees,

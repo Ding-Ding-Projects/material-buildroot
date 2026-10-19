@@ -72,6 +72,7 @@ export class ExecutionService {
     externalTrees: string[];
   };
   revoke(grantId: string): void;
+  createLeasedIsoOutputLifecycle(transactions: { assertLifecycleLease(lease: object, context: unknown): void }): (request: Parameters<ExecutionService["runIsoOutputLifecycle"]>[0], options: Parameters<ExecutionService["runIsoOutputLifecycle"]>[1] & { lease: object }) => ReturnType<ExecutionService["runIsoOutputLifecycle"]>;
   /** Internal native composition only; not exposed through renderer IPC. */
   startIsoProducer(
     request: { grantId: string; target: "all"; runtime: { kind: "wsl"; distribution: string }; jobs?: number },

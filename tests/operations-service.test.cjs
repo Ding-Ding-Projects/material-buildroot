@@ -495,7 +495,7 @@ test("native external-tree selection binds package preview and actual apply to t
     offset: 0,
     limit: 20,
   });
-  assert.equal(discovery.ok, true);
+  assert.equal(discovery.ok, true, JSON.stringify(discovery));
   assert.equal(discovery.result.total, 1);
   assert.equal(discovery.result.packages[0].treeId, input.externalTreeId);
   const imported = await f.request({
