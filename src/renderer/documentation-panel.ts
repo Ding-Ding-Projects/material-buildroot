@@ -5,6 +5,17 @@ import { LitElement, html, css, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { materialIcon } from "./material-icons";
 import { workspaceStyles } from "./workspace-styles";
+import '@material/web/select/outlined-select.js';
+import '@material/web/select/select-option.js';
+import '@material/web/button/outlined-button.js';
+const workflowGuides=[
+  ['doc-8597af462ad4f61246ee5b44c5fedec05a6fe57509913d7a33ca1be885fc4a47','Create or resume an image','建立或繼續映像'],
+  ['doc-d062af14460c354dcc54c30429bd5b47a6e12a331de5af5535c5015196c43428','Prepare a BIOS ISO','準備 BIOS ISO'],
+  ['doc-8766f36206e92967ff9231c3c8b0b4337eb57f6b7b766a273e74a007cad2ac33','Choose a container runtime','選擇容器執行環境'],
+  ['doc-47ca4da807be3ad8723b190bf73ac8dae0c4befdfe43efc8e770845827ae2878','Review component configuration','核對元件設定'],
+  ['doc-723ffe21f773334cdf4d51e9a585edd7671244dfebd64ce4b99440869727790f','Manage build queues','管理建置佇列'],
+  ['doc-36250245eca0e206e5d824fe16595f480a5dd24d4566ae094ea730be6e9f6215','Author a package','編寫套件'],
+];
 type Article = {
   id: string;
   title: string;
@@ -39,12 +50,18 @@ export class DocumentationPanel extends LitElement {
     language: { type: String },
     active: { type: Boolean },
     revision: { state: true },
+    articlePage:{state:true},
+    category:{state:true},
   };
   restricted=false;
   guidedShortFlow=false;
   language = "bilingual";
   active = false;
   revision = 0;
+  private articlePage=0;
+  private category='';
+  private readonly pageSize=24;
+  private lastSearchKey='';
   private index?: Index;
   private document?: Document;
   private requestedLanguage?: "en" | "zh-HK" | "bilingual";
@@ -139,6 +156,11 @@ export class DocumentationPanel extends LitElement {
       .topic[aria-current="page"] {
         background: var(--md-sys-color-secondary-container);
       }
+      .topic-row small{display:block;padding:0 8px 8px;overflow-wrap:anywhere}
+      .topic,.pagination md-outlined-button,.task md-text-button{white-space:normal;text-wrap:wrap;overflow-wrap:anywhere;text-overflow:clip;height:auto;min-height:48px}
+      .topic-filter{width:100%;min-width:0;margin-bottom:8px}
+      .pagination{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+      .pagination p{margin:0;width:100%;font-size:12px}
       .article {
         overflow: auto;
         padding: 18px 24px;
@@ -380,7 +402,6 @@ export class DocumentationPanel extends LitElement {
       this.bodies = undefined;
       this.bodyState = "idle";
       this.search();
-      void this.loadBodies(index);
     } catch (e) {
       if (token === this.serial) this.feedback = this.error(e);
     } finally {
@@ -573,7 +594,9 @@ export class DocumentationPanel extends LitElement {
       ? this.l("titles, summaries and article text","標題、摘要及文章內容",true)
       : this.bodyState === "loading"
         ? this.l("titles and summaries while article text loads","標題及摘要（文章內容載入中）",true)
-        : this.l("titles and summaries only; article text is unavailable","只限標題及摘要；文章內容未能使用",true);
+        : this.bodyState==='idle'
+          ? this.l('titles and summaries; article text loads when you search','標題及摘要；搜尋時才載入文章內容',true)
+          : this.l("titles and summaries only; article text is unavailable","只限標題及摘要；文章內容未能使用",true);
   }
   private stopSearch() {
     this.worker?.terminate();
@@ -585,6 +608,10 @@ export class DocumentationPanel extends LitElement {
     this.stopSearch();
     this.searchFeedback = "";
     const articles = this.index?.articles || [];
+    const value=this.mode==='literal'?this.query:this.pattern,key=JSON.stringify([this.mode,value,this.flags]);
+    if(key!==this.lastSearchKey){this.articlePage=0;this.lastSearchKey=key;}
+    if(!value){this.matchedIds=undefined;this.revision++;return;}
+    if(this.index&&this.bodyState==='idle'&&!this.restricted)void this.loadBodies(this.index);
     if (this.mode === "literal") {
       const query = this.query.toLocaleLowerCase();
       this.matchedIds = new Set(
@@ -647,6 +674,16 @@ export class DocumentationPanel extends LitElement {
     this.mode = "regex";
     this.search();
   }
+  private matchingArticles(){return (this.index?.articles??[]).filter(article=>!this.matchedIds||this.matchedIds.has(article.id));}
+  private browseArticles(){return this.matchingArticles().filter(article=>!this.category||article.category===this.category);}
+  private categoryLabel(value:string){return value?`${value} (${this.matchingArticles().filter(article=>article.category===value).length})`:`${this.l('All topics','所有主題',true)} (${this.matchingArticles().length})`;}
+  private pageFor(articles:Article[]){return Math.min(this.articlePage,Math.max(0,Math.ceil(articles.length/this.pageSize)-1));}
+  private async turnPage(delta:number){const articles=this.browseArticles();this.articlePage=Math.max(0,Math.min(this.pageFor(articles)+delta,Math.max(0,Math.ceil(articles.length/this.pageSize)-1)));await this.updateComplete;const heading=this.renderRoot.querySelector<HTMLElement>('#article-list-heading');heading?.focus();heading?.scrollIntoView({block:'nearest'});}
+  private homeTasks(){
+    const articles=this.index?.articles??[];
+    const chosen=workflowGuides.flatMap(([id,en,zh])=>{const article=articles.find(item=>item.id===id);return article?[{article,label:this.l(en,zh,true)}]:[];});
+    return chosen.length?chosen:articles.slice(0,6).map(article=>({article,label:article.title}));
+  }
   private icon(
     en: string,
     zh: string,
@@ -664,9 +701,9 @@ export class DocumentationPanel extends LitElement {
   }
   render() {
     if(this.restricted)return html`<section class="panel"><h1>Workspace help</h1><p>The full built-in article reader is unavailable while the shared preference is active or its status is unconfirmed. This limited guide does not expose the article index, history or search.</p><h2>Project workflow</h2><ol><li>Use Projects &amp; runtime to choose trusted source and output folders.</li><li>Use Source to inspect a revision before applying changes.</li><li>Review Configuration and build settings before starting a build.</li><li>Inspect returned jobs and output. An empty job list does not establish success.</li></ol><h2>Shared preference recovery</h2><p>Open Settings or use the Shared preference action to refresh the host state, verify exit or read manual recovery instructions. Your project records remain unchanged.</p></section>`;
-    const articles = (this.index?.articles || []).filter(
-      (a) => !this.matchedIds || this.matchedIds.has(a.id),
-    );
+    const articles=this.browseArticles(),page=this.pageFor(articles),pageCount=Math.max(1,Math.ceil(articles.length/this.pageSize));
+    const pageArticles=articles.slice(page*this.pageSize,(page+1)*this.pageSize);
+    const browsing=!!this.category||!!(this.mode==='literal'?this.query:this.pattern);
     return html`<div class="reader">
       <div class="bar">
         ${this.icon(
@@ -779,29 +816,18 @@ export class DocumentationPanel extends LitElement {
           class="topics"
           aria-label=${this.l("Documentation topics","文件主題",true)}
         >
-          ${this.index?.navigation.categories.map((category) => {
-            const items = articles.filter((a) => a.category === category.name);
-            return items.length
-              ? html`<h3>${category.name}</h3>
-                  ${items.map(
-                    (a) =>
-                      html`<md-text-button
-                        class="topic"
-                        title=${a.title}
-                        aria-current=${this.document?.article.id === a.id
-                          ? "page"
-                          : "false"}
-                        @click=${() => void this.open(a.id)}
-                        >${materialIcon(
-                          "description",
-                          "icon",
-                        )}${a.title}</md-text-button
-                      >`,
-                  )}`
-              : nothing;
-          })}${this.index && !articles.length
-            ? html`<p>${this.l("No matching articles.","無符合文章。",true)}</p>`
-            : nothing}
+          <h2 id="article-list-heading" tabindex="-1">${this.l('Browse articles','瀏覽文章',true)}</h2>
+          <md-outlined-select id="documentation-category" class="topic-filter" .label=${this.l('Topic','主題',true)} .value=${this.category} .displayText=${this.categoryLabel(this.category)} @change=${(event:Event)=>{const value=(event.target as HTMLSelectElement).value;if(!value||this.index?.navigation.categories.some(item=>item.name===value)){this.category=value;this.articlePage=0;this.revision++;}}}>
+            <md-select-option value=""><div slot="headline">${this.categoryLabel('')}</div></md-select-option>
+            ${(this.index?.navigation.categories??[]).map(item=>html`<md-select-option value=${item.name}><div slot="headline">${this.categoryLabel(item.name)}</div></md-select-option>`)}
+          </md-outlined-select>
+          <div class="pagination" role="group" aria-label=${this.l('Article pages','文章頁面',true)}>
+            <p role="status" aria-live="polite">${this.l(`Page ${page+1} of ${pageCount}; ${articles.length} articles`,`${page+1}／${pageCount} 頁；${articles.length} 篇文章`)}</p>
+            <md-outlined-button data-article-page="previous" ?disabled=${page===0} @click=${()=>this.turnPage(-1)}>${this.l('Previous page','上一頁',true)}</md-outlined-button>
+            <md-outlined-button data-article-page="next" ?disabled=${page+1>=pageCount} @click=${()=>this.turnPage(1)}>${this.l('Next page','下一頁',true)}</md-outlined-button>
+          </div>
+          ${pageArticles.map(article=>html`<div class="topic-row"><md-text-button class="topic" data-article-id=${article.id} title=${article.title} aria-current=${this.document?.article.id===article.id?'page':'false'} @click=${()=>void this.open(article.id)}>${materialIcon('description','icon')}${article.title}</md-text-button><small>${article.category}</small></div>`)}
+          ${this.index&&!articles.length?html`<p>${this.l('No matching articles.','無符合文章。',true)}</p>`:nothing}
         </nav>
         <section
           class="article"
@@ -832,26 +858,9 @@ export class DocumentationPanel extends LitElement {
                     </details>`
                   : nothing}${unsafeHTML(this.document.html)}`
             : html`<div class="intro">
-                <h1>
-                  ${this.l("Work with your local project","使用本機專案",true)}
-                </h1>
-                <p>
-                  ${this.l("Choose a task to read the bundled guide. Reading never starts a build, changes a project or downloads a runtime.","選擇工作以閱讀內附指引，閱讀唔會開始建置、更改專案或下載執行環境。",true)}
-                </p>
-                <div class="tasks">
-                  ${articles.map(
-                    (a) =>
-                      html`<section class="task">
-                        <md-text-button @click=${() => void this.open(a.id)}
-                          >${materialIcon(
-                            "description",
-                            "icon",
-                          )}${a.title}</md-text-button
-                        >
-                        <p>${a.summary}</p>
-                      </section>`,
-                  )}
-                </div>
+                <h1>${browsing?this.l('Find a guide','尋找指南',true):this.l('Work with your local project','使用本機專案',true)}</h1>
+                <p>${browsing?this.l('Choose a result from the paged article list. Search covers the full admitted index, not only this page.','請從分頁文章清單選擇結果。搜尋涵蓋完整已接納目錄，唔只目前頁面。',true):this.l('Choose a workflow below, or browse every admitted article by topic and page. Reading never starts a build or changes a project.','選擇下方流程，或按主題同頁面瀏覽全部已接納文章。閱讀唔會開始建置或更改專案。',true)}</p>
+                ${!browsing?html`<div class="tasks">${this.homeTasks().map(({article,label})=>html`<section class="task"><md-text-button data-home-article-id=${article.id} title=${article.title} @click=${()=>void this.open(article.id)}>${materialIcon('description','icon')}${label}</md-text-button><p>${article.summary}</p></section>`)}</div>${this.index&&workflowGuides.some(([id])=>!this.index?.articles.some(article=>article.id===id))?html`<p class="notice">${this.l('Some recommended workflow guides are unavailable in this bundle. The article list still includes every admitted guide.','此文件包未提供部分建議流程指南。文章清單仍包含全部已接納指南。',true)}</p>`:nothing}`:nothing}
                 ${!this.index
                   ? html`<p>
                       ${this.l("Load the bundled documentation using Reload documentation.","請使用重新載入文件以載入內附說明。",true)}

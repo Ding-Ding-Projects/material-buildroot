@@ -313,6 +313,7 @@ for (const [language, theme, width] of [
       expect(
         await p.evaluate((el) => el.scrollWidth > el.clientWidth + 1),
       ).toBe(false);
+      expect(await p.evaluate(el=>[...el.shadowRoot.querySelectorAll('.topic,.pagination md-outlined-button')].every(button=>{const label=button.shadowRoot?.querySelector('.label');return !label||(label.scrollWidth<=label.clientWidth+1&&label.scrollHeight<=label.clientHeight+1);}))).toBe(true);
       await page.screenshot({
         path: testInfo.outputPath(
           `documentation-${language}-${theme}-${width}.png`,
@@ -379,10 +380,12 @@ test("documentation search matches article body text and reports a title-only fa
   const f = await fixture(page);
   try {
     const p = page.locator("documentation-panel");
-    await expect(p.locator(".notice")).toContainText("titles, summaries and article text");
+    await expect(p.locator('.notice[role="status"]')).toContainText("article text loads when you search");
+    expect(await page.evaluate(()=>window.__documentationRequests.some(r=>r.action==='documentation.searchText'))).toBe(false);
     await p
       .getByRole("textbox", { name: "Search documentation", exact: true })
       .fill("external-tree activation");
+    await expect(p.locator('.notice[role="status"]')).toContainText("titles, summaries and article text");
     await expect(p.locator(".topics .topic")).toHaveCount(1);
     await expect(p.locator(".topics")).toContainText("Author a package");
     await p
