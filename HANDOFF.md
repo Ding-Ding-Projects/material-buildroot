@@ -740,3 +740,11 @@ Independent review found Tools API migration mismatches. Repairs preserve the fe
 Earlier combined source `fbc3140` passed exact `build.bat /s`, receipt SHA-256 `3dede560c5b10b11f9ae95d6cf243ecb2adcb891086deab6f39239f6a342ed6b`, 70 host seam checks and bounded real hidden Images/Help/article/Settings/About navigation with six inspected captures and owned teardown. That evidence does not verify later source. The selected article had no image. A redundant second host run adds no new acceptance.
 
 Final integrated desktop/installer production, focused runtime verification, remote proof and retirement remain pending here. No new release or installed update is claimed. Full product, firmware, hardware, fresh-host and matrix gaps remain visible in ROADMAP.md. Rolling progress and handoff use issue #1.
+
+## Final local integration checks, 2026-10-19
+
+Published product source `2d1adf93fbe764b01e4e10e7136d0d9d3fceb360` passed the full host inventory: 732 tests, 716 passed, zero failed and16 skipped. The skips cover explicitly selected optional source/WSL fixtures, POSIX filename and mode semantics, browser IndexedDB, native ACL proof and active SQLite-journal replacement cases unavailable under Windows sharing. They are unverified, not passing runtime evidence.
+
+The complete selected renderer run passed33/33 after aligning the standalone fixture with its explicit inactive host mode, scoping the workspace catalog's owned dialog, and exercising current converter/PDF controls. The fixture retains delayed feedback, native-authority errors, permission release and companion setup behavior. Browser DOM fixtures do not prove native input, installer behavior or firmware production.
+
+The provider resolver and exact existing companion action registration repairs passed independent source refutation and focused admission negatives. Both generated Postman collections match the exhaustive current action inventory. Final root production and post-build native verification follow this record; no later release or installed-update verdict is implied.

@@ -22,7 +22,7 @@ test('searchable utility picker reaches all five mounted tasks with keyboard foc
 test('New tab catalog opens each exact utility destination through the public adapter',async({page})=>{
  const {app,tools}=await open(page),tabs=app.locator('workspace-tabs');
  for(const [id,,label] of tasks){
-  await tabs.locator('[data-control="new-tab"]').click();const dialog=tabs.locator('md-dialog');
+  await tabs.locator('[data-control="new-tab"]').click();const dialog=tabs.locator('md-dialog').filter({has:page.locator('settings-search[data-experience-id="workspace-catalog-search"]')});
   await dialog.locator('settings-search').getByRole('textbox').fill(label);await dialog.getByRole('button',{name:label,exact:true}).click();
   await expect(dialog).toBeHidden();await selected(tools,id);await expect.poll(()=>tools.evaluate(el=>el.shadowRoot.activeElement?.id)).toBe('tool-heading-'+id);
  }

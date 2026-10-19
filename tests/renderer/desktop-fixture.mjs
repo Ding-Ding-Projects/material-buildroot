@@ -46,8 +46,9 @@ export async function open(page,{language='en',theme='light'}={}) {
  await operations.evaluate(panel=>panel.workspace={workspaceId:'project-1',name:'Appliance source'});
  const tabs=page.locator('workspace-tabs');
  await tabs.locator('[data-control="new-tab"]').click();
- await tabs.locator('md-dialog').getByRole('button',{name:language==='en'?'Source':language==='zh-HK'?'來源':'Source · 來源',exact:true}).click();
- await expect(tabs.locator('md-dialog')).not.toBeVisible();
+ const catalog=tabs.locator('md-dialog').filter({has:page.locator('settings-search[data-experience-id="workspace-catalog-search"]')});
+ await catalog.getByRole('button',{name:language==='en'?'Source':language==='zh-HK'?'來源':'Source · 來源',exact:true}).click();
+ await expect(catalog).not.toBeVisible();
  await expect(operations.locator('source-panel')).toBeVisible();
  return {errors,close:()=>fs.rmSync(directory,{recursive:true,force:true})};
 }

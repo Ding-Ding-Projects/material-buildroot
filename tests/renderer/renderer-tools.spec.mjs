@@ -3,9 +3,12 @@ import { test, expect } from "@playwright/test";
 async function open(page, language = "en") {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.route("http://127.0.0.1:5197/", route => route.fulfill({contentType:"text/html",body:"<!doctype html><html><head><meta charset=\"utf-8\"></head><body></body></html>"}));
   await page.goto("/");
   await page.evaluate(async (language) => {
     await import("/src/renderer/operations-panel.ts");
+    const {vocabulary}=await import("/src/renderer/owned-copy.ts");
+    await vocabulary.setSchool("inactive");
     let count = 0,
       jobs = [],
       configured = false,
@@ -25,7 +28,8 @@ async function open(page, language = "en") {
         window.__requests.push(input);
         let result = {};
         const r = input.request;
-        if (input.action === "file.choose")
+        if (input.action === "file.release") result={released:input.ids?.length||0};
+        else if (input.action === "file.choose")
           result = {
             id: `grant-${++count}`,
             name: input.access === "write" ? "output.txt" : "example.txt",
@@ -40,7 +44,9 @@ async function open(page, language = "en") {
             },
           ];
         else if (input.action === "tools") {
-          if (r.action === "converter.catalog")
+          if (r.action === "converter.inspect") result = {name:"example.txt",bytes:3,mime:"text/plain"};
+          else if (r.action === "pdf.catalog") result = {operations:[{operation:"extract",available:false,attemptAvailable:true}]};
+          else if (r.action === "converter.catalog")
             result = {
               categories: [
                 {
@@ -118,9 +124,9 @@ test("typed converter and PDF forms submit grants, queue transitions and honest 
   await page.getByRole("tab", { name: "Tools", exact: true }).click();
   await page.locator("tools-panel").evaluate(el=>el.openDestination("tool:convert"));
   await button(page, "Load formats").click();
-  await expect(
-    page.locator('tools-panel [data-destination="convert"] md-outlined-select').first(),
-  ).toHaveJSProperty("displayText", "text");
+  await page.locator('tools-panel [data-destination="convert"]').getByRole("button",{name:"TXT",exact:true}).click();
+  await expect(page.locator("tools-panel")).toHaveJSProperty("category","text");
+  await expect(page.locator("tools-panel")).toHaveJSProperty("format","txt");
   await button(page, "Choose source").click();
   await button(page, "Choose new output").click();
   await button(page, "Add to queue").click();
@@ -129,9 +135,11 @@ test("typed converter and PDF forms submit grants, queue transitions and honest 
   await button(page, "Run queue").click();
   await expect(page.locator("tools-panel")).toContainText("completed");
   await page.locator("tools-panel").evaluate(el=>el.openDestination("tool:pdf"));
+  await button(page, "Load PDF operations").click();
   await button(page, "Add PDF source").click();
-  await button(page, "Run PDF operation").click();
-  await expect(page.locator("tools-panel [role=status]:visible")).toContainText(
+  await button(page, "Choose PDF output").click();
+  await button(page, "Attempt isolated PDF operation").click();
+  await expect(page.locator("tools-panel div[role=status][aria-live=polite]:visible")).toContainText(
     "ISOLATED_RUNTIME_REQUIRED",
   );
   const requests = await page.evaluate(() => window.__requests);
@@ -159,6 +167,7 @@ test("companion configuration, explicit start, pairing concealment and stop", as
   await page
     .getByRole("textbox", { name: "Browser origin (HTTPS)", exact: true })
     .fill("https://example.com");
+  await page.getByRole("textbox",{name:"Device label (for your approval)",exact:true}).fill("Fixture browser");
   await button(page, "Create five-minute pairing code").click();
   await expect(
     page.locator("companion-panel md-outlined-text-field").last(),

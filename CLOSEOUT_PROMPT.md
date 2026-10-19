@@ -15,3 +15,7 @@ Run final focused host/renderer checks and exact build.bat and build-installer.b
 Publish and verify safe preservation and main integration. Refresh the complete verified archive after changes, preserve private announcement variants separately, prove each retirement tip an ancestor of freshly verified remote main and confirm no active/load-bearing state before removal. Read back final branch/worktree inventories and status. Update issue #1, roadmap and handoff factually.
 
 Account reading at task start: 84 percent remaining. Refresh before relying on it. No fixed budget. At the verified preservation threshold settle atomic work and preserve unfinished work without claiming completion. No deletion has occurred at this record.
+
+## Latest preservation and verification
+
+Remote main was verified at 2d1adf93fbe764b01e4e10e7136d0d9d3fceb360. Full host checks:732 total,716 passed,0 failed,16 explicit skips. Selected renderer checks:33 passed,0 failed. Strict renderer checking passed. Final source-bound builds and native verification remain pending. Both task lanes are committed and their originals are privately preserved. Nothing has been deleted.
