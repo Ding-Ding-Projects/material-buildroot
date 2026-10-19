@@ -42,7 +42,8 @@ function validateNativeIntent(result) {
   }
   return result;
 }
-async function captureWslBuildIntent({ execution, grantId, runtime, source, output, externalTrees = [], limits, signal }) {
+async function captureWslBuildIntent({ execution, grantId, runtime, source, output, externalTrees = [], limits, signal, onOwnership }) {
+  if (onOwnership !== undefined && typeof onOwnership !== "function") fail("BLOCKED_CONTENT_AUTHORITY");
   const grant = execution.grants.get(grantId), receipt = grant?.wslReceipt;
   if (!receipt || runtime?.kind !== "wsl" || runtime.distribution !== receipt.storage.distribution || externalTrees.length) fail("BLOCKED_CONTENT_AUTHORITY");
   function translate(selected) {
@@ -84,6 +85,7 @@ async function captureWslBuildIntent({ execution, grantId, runtime, source, outp
           if (!match) fail("BLOCKED_CONTENT_AUTHORITY");
           owner = execution.validateOwnershipReceipt({ version: 1, kind: "wsl", ownerToken, distribution: storage.distribution, ...JSON.parse(match[1]) });
           await verify();
+          if (onOwnership) { await onOwnership(owner); await verify(); }
           if (!job.writeInput(input)) fail("BLOCKED_CONTENT_CANCELLED");
         } catch (error) { handshakeError = error; job.cancel(); }
       })();

@@ -47,3 +47,10 @@ test("native transport refuses revoked authority and unavailable cleanup", async
   const revoked = fixture({ revoked: true }); await assert.rejects(revoked.capture(revoked.input), { code: "BLOCKED_CONTENT_AUTHORITY" });
   const unavailable = fixture({ unavailableCleanup: true }); await assert.rejects(unavailable.capture(unavailable.input), { code: "BLOCKED_CONTENT_CLEANUP_UNVERIFIED" });
 });
+test("current-input ownership is durable before helper input and revalidated after checkpoint",async()=>{
+ const f=fixture();let release,reached;const ready=new Promise(resolve=>reached=resolve);
+ const pending=f.capture({...f.input,onOwnership:async owner=>{assert.equal(owner.pid,1234);reached();await new Promise(resolve=>release=resolve);}});
+ await ready;assert.equal(f.calls.some(call=>call.request),false);release();assert.equal((await pending).snapshot.version,3);
+ const revoked=fixture();await assert.rejects(revoked.capture({...revoked.input,onOwnership:async()=>revoked.execution.grants.delete("grant")}),{code:"BLOCKED_CONTENT_AUTHORITY"});assert.equal(revoked.calls.some(call=>call.request),false);
+ const failed=fixture();await assert.rejects(failed.capture({...failed.input,onOwnership:async()=>{throw Error("durable checkpoint failed");}}),/durable checkpoint failed/);assert.equal(failed.calls.some(call=>call.request),false);
+});
