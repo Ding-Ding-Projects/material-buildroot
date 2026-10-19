@@ -51,11 +51,17 @@ function inspectIsoSubmissions({directory:root,jobs,owner}){
  try{
   if(!fs.existsSync(root)){if(jobs.list(owner).some(job=>Object.hasOwn(job.payload||{},"isoSubmission")))fail();return{state:"verified",grantsRestored:false};}directory(root);const iterator=fs.opendirSync(root),ids=[];
   try{for(let count=0;count<1001;count++){const entry=iterator.readSync();if(!entry)break;if(count===1000||!entry.isDirectory()||entry.isSymbolicLink()||!UUID.test(entry.name))fail();ids.push(entry.name);}}finally{iterator.closeSync();}
-  const all=jobs.list(owner);if(all.length>1000)fail();
+  const all=jobs.list(owner);if(all.length>1000)fail();const linked=new Map();
   for(const id of ids){const saved=readSubmission(root,id),matches=all.filter(job=>job.id===saved.job.jobId);if(matches.length!==1)fail();const job=matches[0];assertDescriptor(job.payload.isoSubmission);
    if(job.kind!=="build"||job.payload.workspaceId!==saved.begin.workspaceId||!equal(job.payload.isoSubmission,saved.descriptor)||job.payload.intent.sourceRevision!==saved.capture.sourceRevision||job.payload.intent.configRevision!==saved.capture.configRevision||!isDeepStrictEqual(job.payload.snapshot,saved.capture.snapshot)||!equal(job.payload.runtime,saved.begin.runtime)||!equal(job.payload.isoOutputPolicy,saved.begin.policy))fail();
+   if(linked.has(id))fail();linked.set(id,{jobId:saved.job.jobId,descriptor:saved.descriptor});
   }
-  for(const job of all)if(Object.hasOwn(job.payload||{},"isoSubmission")&&!ids.includes(assertDescriptor(job.payload.isoSubmission).id))fail();
+  const used=new Set();
+  for(const job of all)if(Object.hasOwn(job.payload||{},"isoSubmission")){
+   const descriptor=assertDescriptor(job.payload.isoSubmission),saved=linked.get(descriptor.id);
+   if(!saved||used.has(descriptor.id)||saved.jobId!==job.id||!equal(descriptor,saved.descriptor))fail();used.add(descriptor.id);
+  }
+  if(used.size!==linked.size)fail();
   return{state:"verified",grantsRestored:false};
  }catch{return{state:"unknown",grantsRestored:false};}
 }
