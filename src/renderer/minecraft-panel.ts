@@ -3,6 +3,7 @@ import "./minecraft-workflow-panel";
 import "./minecraft-remote-panel";
 import { LitElement, html, css, nothing } from "lit";
 import "@material/web/button/outlined-button.js";
+import "@material/web/button/filled-button.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/select/outlined-select.js";
 import "@material/web/select/select-option.js";
@@ -88,7 +89,21 @@ export class MinecraftPanel extends LitElement {
     catch (error) { const code = error instanceof Error && /^[A-Z_]+$/.test(error.message) ? error.message : "OPERATION_FAILED"; this.message = this.l("Operation incomplete","操作未完成",true) + ": " + code; }
     finally { this.busy = false; this.change(); }
   }
-  private button(en: string, zh: string, work: () => Promise<void>, disabled = false) { return html`<md-outlined-button ?disabled=${this.busy || disabled} @click=${() => this.run(work)}>${this.l(en, zh,true)}</md-outlined-button>`; }
+  private get primaryAction(){
+    if(this.tab==='distribution'){
+      if(!this.version)return 'Discover official versions';
+      if(!this.directory)return 'Choose trusted server folder';
+      if(this.edition==='bedrock')return 'Discover official versions';
+      if(this.flavour==='paper')return this.paperBuild?'Install selected Paper build':'Load stable Paper builds';
+      if(this.flavour==='fabric')return this.fabricLoader&&this.fabricInstaller?'Install complete Fabric files':'Load compatible Fabric launchers';
+      return 'Install selected vanilla server';
+    }
+    if(this.tab==='configuration')return !this.directory?'Choose trusted server folder':this.eula?'Save configuration':'Read current configuration';
+    if(this.tab==='extensions')return !this.directory?'Choose trusted server folder':this.pluginVersion?'Install or update selected extension':this.project.trim()&&this.version?'Find compatible releases':'Load managed extensions';
+    if(this.tab==='lifecycle')return this.state==='not-managed'&&this.eula&&this.execution&&this.version?'Start selected server':'Refresh server status';
+    return '';
+  }
+  private button(en: string, zh: string, work: () => Promise<void>, disabled = false) { if(en===this.primaryAction)return html`<md-filled-button data-primary-action=${en} ?disabled=${this.busy||disabled} @click=${()=>this.run(work)}>${this.l(en,zh,true)}</md-filled-button>`;return html`<md-outlined-button ?disabled=${this.busy || disabled} @click=${() => this.run(work)}>${this.l(en, zh,true)}</md-outlined-button>`; }
   private field(en: string, zh: string, value: string, set: (v: string) => void, type = "text") { return html`<md-outlined-text-field .label=${this.l(en, zh,true)} .value=${value} .type=${type} ?disabled=${this.busy} @input=${(e: Event) => { set((e.target as HTMLInputElement).value); this.change(); }}></md-outlined-text-field>`; }
   private select(en: string, zh: string, value: string, choices: string[], set: (v: string) => void) { return html`<md-outlined-select .label=${this.l(en, zh,true)} .value=${value} .displayText=${value} ?disabled=${this.busy} @change=${(e: Event) => { set((e.target as HTMLSelectElement).value); this.change(); }}>${choices.map(v => html`<md-select-option .value=${v}><div slot="headline">${v}</div></md-select-option>`)}</md-outlined-select>`; }
   private check(en: string, zh: string, checked: boolean, set: (v: boolean) => void) { return html`<label class="row"><md-checkbox aria-label=${this.l(en, zh,true)} ?checked=${checked} ?disabled=${this.busy} @change=${(e: Event) => { set((e.target as HTMLInputElement).checked); this.change(); }}></md-checkbox><span>${this.l(en, zh,true)}</span></label>`; }

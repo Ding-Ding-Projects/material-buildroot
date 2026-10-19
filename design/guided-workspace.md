@@ -52,3 +52,12 @@ The baseline is 1440 by 960 CSS pixels and the existing documented minimum is 96
 Exercise first launch, create/open/resume, preset changes, contextual explanations, mode changes, saved drafts, reviewed configuration, actual authorized build and output location. Include unavailable runtimes, stale revisions, invalid inputs, cancellation, uncertain results, active work and unsaved changes. Cover every retained destination and the explicit New tab catalog.
 
 Renderer fixtures prove renderer behavior only. The existing ISO, compiler and native-startup evidence retains its original source binding. Current-GUI ISO production, sustained native startup, release delivery and installed update remain incomplete until separately verified. No mock, design reference, successful process exit or previous output may stand in for those results.
+
+
+## Focused local utility tasks
+
+The Local tools category now selects one of five tasks: Local tool setup, Convert a file, PDF operations, File/model queue and Server management. The selection uses the existing searchable Material picker. It changes the visible task without opening another workspace tab. The explicit New tab catalog retains `tool:local`, `tool:convert`, `tool:pdf`, `tool:queue` and `tool:server` and selects the corresponding task through the component's validated public adapter.
+
+All five sections remain mounted; inactive sections are hidden and inert. Conversion grants, PDF choices, queued model text and the server manager's own draft survive task changes. Only the chosen task is presented, with an existing readiness-based next action emphasized. Secondary actions and the outer Tools category selector remain available. Navigation never selects a file or executes a host operation. Short-height Tools continues to use its previously verified outer scroll owner.
+
+Server management retains its existing tailored child workflow. The parent adds no duplicate action. The child emphasizes its existing next distribution, configuration, extension or lifecycle action while retaining the original handler, disabled conditions and explicit execution/consent boundaries. Its deeper world, player, console, profile and remote controls remain their existing workflows; this change adds no server behavior.

@@ -116,19 +116,22 @@ test("typed converter and PDF forms submit grants, queue transitions and honest 
 }) => {
   const errors = await open(page);
   await page.getByRole("tab", { name: "Tools", exact: true }).click();
+  await page.locator("tools-panel").evaluate(el=>el.openDestination("tool:convert"));
   await button(page, "Load formats").click();
   await expect(
-    page.locator("tools-panel md-outlined-select").first(),
+    page.locator('tools-panel [data-destination="convert"] md-outlined-select').first(),
   ).toHaveJSProperty("displayText", "text");
   await button(page, "Choose source").click();
   await button(page, "Choose new output").click();
   await button(page, "Add to queue").click();
+  await page.locator("tools-panel").evaluate(el=>el.openDestination("tool:queue"));
   await expect(page.locator("tools-panel")).toContainText("queued");
   await button(page, "Run queue").click();
   await expect(page.locator("tools-panel")).toContainText("completed");
+  await page.locator("tools-panel").evaluate(el=>el.openDestination("tool:pdf"));
   await button(page, "Add PDF source").click();
   await button(page, "Run PDF operation").click();
-  await expect(page.locator("tools-panel [role=status]")).toContainText(
+  await expect(page.locator("tools-panel [role=status]:visible")).toContainText(
     "ISOLATED_RUNTIME_REQUIRED",
   );
   const requests = await page.evaluate(() => window.__requests);
@@ -188,6 +191,7 @@ for (const width of [960, 1440])
       await page
         .getByRole("tab", { name: "Tools · 工具", exact: true })
         .click();
+      await page.locator('tools-panel').evaluate(el=>el.openDestination('tool:convert'));
       await page
         .getByRole("button", { name: "Load formats · 載入格式", exact: true })
         .click();
