@@ -3,10 +3,20 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const {validate, hash} = require('../scripts/evidence/validate-ledger.cjs');
+const {validate: validateLedger, hash} = require('../scripts/evidence/validate-ledger.cjs');
 const root = path.resolve(__dirname, '..');
 const baseline = JSON.parse(fs.readFileSync(path.join(root,'docs/planning/feature-evidence.json'),'utf8'));
 const copy = () => structuredClone(baseline);
+const fixtureRoots = new WeakMap(), ownedFixtures = [];
+function validate(ledger, options) { return validateLedger(ledger, options || (fixtureRoots.has(ledger) ? {root:fixtureRoots.get(ledger)} : undefined)); }
+test.after(() => {
+  const temporary = fs.realpathSync(require('node:os').tmpdir());
+  for (const directory of ownedFixtures) {
+    assert.equal(path.dirname(directory), temporary);
+    assert(path.basename(directory).startsWith('material-ledger-contract-'));
+    fs.rmSync(directory, {recursive:true,force:true});
+  }
+});
 test('admission ledger is valid without pretending product completion', () => {
   assert.deepEqual(validate(baseline), []);
   assert.equal(baseline.identities.length,109);
@@ -32,15 +42,40 @@ test('completion fails with absent proof', () => {
   const ledger=copy(); ledger.identities[0].surfaces.A.state='complete';
   assert(validate(ledger).some(e=>e.includes('absent or stale proof')));
 });
-function completeFixture() {
-  const ledger=copy(), record=ledger.identities[0], entry=record.surfaces.A;
-  record.reconciliation='reviewed'; entry.state='complete'; entry.sourceRevision='a'.repeat(40); entry.builtHash='b'.repeat(64);
+function completeFixture(selectedRoot) {
+  const cp=require('node:child_process'),os=require('node:os');
+  const directory=selectedRoot||fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'material-ledger-contract-'));
+  if(!selectedRoot)ownedFixtures.push(directory);
+  fs.mkdirSync(path.join(directory,'docs/planning'),{recursive:true});
+  fs.mkdirSync(path.join(directory,'tests'),{recursive:true});
+  fs.copyFileSync(path.join(root,'docs/planning/feature-coverage.md'),path.join(directory,'docs/planning/feature-coverage.md'));
+  fs.copyFileSync(__filename,path.join(directory,'tests/evidence-ledger.test.cjs'));
+  const git=(...args)=>cp.execFileSync('git',args,{cwd:directory,encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']}).trim();
+  git('init');git('config','core.autocrlf','false');git('config','user.name','Claude Fable 5.1');git('config','user.email','noreply@anthropic.com');
+  git('add','tests/evidence-ledger.test.cjs');
+  git('commit','-m','Create isolated evidence validator fixture','-m','建立獨立測試資料，唔會冒認產品證據。','-m','Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>');
+  const ledger=copy(),record=ledger.identities[0],entry=record.surfaces.A;
+  fixtureRoots.set(ledger,directory);
+  record.reconciliation='reviewed';entry.state='complete';entry.sourceRevision=git('rev-parse','HEAD');
   const file={path:'tests/evidence-ledger.test.cjs',sha256:hash(fs.readFileSync(__filename))};
-  for(const key of ['implementationConsumers','articles','localizedCopy','focusedTests','negativeTests']) entry[key]=[file];
+  for(const key of ['implementationConsumers','articles','localizedCopy','focusedTests','negativeTests'])entry[key]=[file];
   entry.persistence={state:'not-applicable',reason:'Synthetic validator fixture only'};
-  for(const kind of ['source','runtime','capture','parity']) entry.proof[kind]={status:'verified',sourceRevision:entry.sourceRevision,builtHash:entry.builtHash,files:[file]};
+  // Synthetic contract bytes and receipts are not product runtime evidence.
+  fs.writeFileSync(path.join(directory,'synthetic-build.txt'),'Synthetic validator fixture, not a product build.');
+  const buildArtifact={path:'synthetic-build.txt',sha256:hash(fs.readFileSync(path.join(directory,'synthetic-build.txt')))};
+  entry.builtHash=buildArtifact.sha256;
+  const plan=entry.plannedAdmission.runtime;let tuples=[{}];
+  for(const [axis,key] of Object.entries({states:'state',languages:'language',themes:'theme',scales:'scale',viewports:'viewport'}))tuples=tuples.flatMap(tuple=>plan[axis].map(value=>({...tuple,[key]:value})));
+  for(const kind of ['source','runtime','capture','parity']){
+    const receipt={schemaVersion:1,workId:entry.workId,sourceRevision:entry.sourceRevision,builtHash:entry.builtHash,status:'verified',recordedAt:'2026-10-19T00:00:00Z',environment:'Synthetic validator contract fixture only',kind,buildArtifact,bindings:[file]};
+    if(kind==='source')receipt.articles=['en','zh-HK'].map(locale=>({...file,locale}));
+    else Object.assign(receipt,{exitCode:0,command:'synthetic fixture',method:'synthetic validator fixture only',tuples:tuples.map(tuple=>({...tuple,id:plan.tupleIdTemplate.replace(/\{(state|language|theme|scale|viewport)\}/g,(_,key)=>tuple[key]),status:'verified',sourceRevision:entry.sourceRevision,builtHash:entry.builtHash,output:buildArtifact,inspected:true,privacy:'approved',method:'synthetic validator fixture only',reference:buildArtifact,comparison:buildArtifact,matches:true}))});
+    const name=`synthetic-${kind}-receipt.json`;fs.writeFileSync(path.join(directory,name),JSON.stringify(receipt));
+    entry.proof[kind]={status:'verified',sourceRevision:entry.sourceRevision,builtHash:entry.builtHash,files:[file],receipt:{path:name,sha256:hash(fs.readFileSync(path.join(directory,name)))}};
+  }
   return ledger;
 }
+
 test('validator contract fixture turns red for stale source/build binding, green after restoration', () => {
   const ledger=completeFixture(); assert.deepEqual(validate(ledger),[]);
   const entry=ledger.identities[0].surfaces.A;
@@ -91,7 +126,7 @@ test('realpath containment rejects an internal directory link to external proof'
     fs.copyFileSync(__filename,path.join(isolated,'tests/evidence-ledger.test.cjs'));
     fs.writeFileSync(path.join(external,'proof.txt'),'external fixture proof');
     require('./helpers/filesystem-links.cjs').symlinkSync(external,path.join(isolated,'linked-proof'),process.platform==='win32'?'junction':'dir');
-    const ledger=completeFixture();
+    const ledger=completeFixture(isolated);
     assert.deepEqual(validate(ledger,{root:isolated}),[]);
     ledger.identities[0].surfaces.A.proof.runtime.files=[{path:'linked-proof/proof.txt',sha256:hash(fs.readFileSync(path.join(external,'proof.txt')))}];
     assert(validate(ledger,{root:isolated}).some(e=>e.includes('resolved path escapes repository')));
