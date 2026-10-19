@@ -10,21 +10,36 @@ function fixture(t,mode={}){
  const file=require.resolve("../src/main/jobs/iso-host-build-adapter.cjs"),loaded={exports:{}};
  const substitutes={
   "../execution/wsl-project.cjs":{isWslReceipt:value=>value===receipt&&!mode.forged},
-  "./wsl-build-intent.cjs":{captureWslBuildIntent:async options=>{calls.push("current-launch");await options.onOwnership(owner);calls.push("current-input");return{sourceRevision:mode.capturedRevision||(mode.changed?"b".repeat(64):HASH),configRevision:mode.capturedRevision||HASH};}},
+  "./wsl-build-intent.cjs":{captureWslBuildIntent:async options=>{const currentOwner={...owner,ownerToken:require("node:crypto").randomUUID()};calls.push("current-launch");await options.onOwnership(currentOwner);calls.push("current-input");await options.onCleanup(currentOwner,{state:mode.unknownCurrentCleanup?"unknown":"verified-stopped",reason:mode.unknownCurrentCleanup?"runtime-unavailable":"owned-session-absent"});if(mode.unknownCurrentCleanup)throw Error("current cleanup unknown");return{sourceRevision:mode.capturedRevision||(mode.changed?"b".repeat(64):HASH),configRevision:mode.capturedRevision||HASH};}},
   "../execution/wsl-iso-output-lifecycle.cjs":{createLeasedWslIsoOutputLifecycle:()=>async(request,options)=>{calls.push(request.operation);await options.onOwnership(owner);return{state:"succeeded",code:0,observation:request.operation==="prepare"?{state:"prepared-unbound",jobId:JOB,preparationSha256:HASH,prior:null,jobBound:false,bootVerified:false}:{state:"fresh-file-observed-unbound",jobId:JOB,preparationSha256:HASH,jobBound:false,producerVerified:false,cleanupVerified:false,bootVerified:false,output:{sha256:HASH,bytes:51200,identity:Array(9).fill("1"),structure:{descriptorValid:true,withinImage:true,biosCatalogValid:true,bootVerified:false}}}};}},
   "../execution/iso-wsl-producer.cjs":{createIsoWslProducer:()=>async(input,options)=>{calls.push("produce");await options.onOwnership({...owner,pid:null,startTime:null});await options.onOwnership(owner);return{state:mode.failed?"failed":"succeeded",code:mode.failed?2:0};}}
  };
  vm.runInThisContext(Module.wrap(fs.readFileSync(file,"utf8")),{filename:file})(loaded.exports,name=>substitutes[name]||require(name.startsWith(".")?path.resolve(path.dirname(file),name):name),loaded,file,path.dirname(file));
  const references=[],authorizations=[];
- const options={execution,directory,resolveProject:()=>item,authorize:async(payload,context)=>{calls.push("authorize");authorizations.push({jobId:context.jobId,sourceRevision:payload.intent.sourceRevision,signal:context.signal});},retainReference:async value=>{calls.push("reference:"+value.state);references.push({...value});if(mode.delayReference&&value.state==="pending")await mode.delayReference();if(mode.referenceFailure)throw Error("reference unavailable");},checkpointCurrentOwner:async()=>{calls.push("current-owner");if(mode.checkpointFailure)throw Error("checkpoint unavailable");if(mode.revoked)execution.grants.delete("grant");},run:()=>{},checkpoint:()=>{},signalScript:"fixed-existing-signal"};
- const build=loaded.exports.createIsoHostBuildAdapter(options),payload={workspaceId:"workspace",target:"all",runtime:item.runtime,jobs:2,intent:{projectId:"workspace",sourceRevision:HASH,configRevision:HASH},isoOutputPolicy:createIsoOutputPolicy({revision:HASH,profile:"x86_64-bios-grub2-initrd"})};
+ const recoveryDirectory=path.join(directory,"recovery"),journalDirectory=path.join(directory,"journal");
+ const options={execution,directory:mode.durable?journalDirectory:directory,recoveryDirectory,resolveProject:()=>item,authorize:async(payload,context)=>{calls.push("authorize");authorizations.push({jobId:context.jobId,sourceRevision:payload.intent.sourceRevision,signal:context.signal});},retainReference:async value=>{calls.push("reference:"+value.state);references.push({...value});if(mode.delayReference&&value.state==="pending")await mode.delayReference();if(mode.referenceFailure)throw Error("reference unavailable");},checkpointCurrentOwner:async()=>{calls.push("current-owner");if(mode.checkpointFailure)throw Error("checkpoint unavailable");if(mode.revoked)execution.grants.delete("grant");},checkpointCurrentCleanup:async()=>calls.push("current-cleanup"),run:()=>{},checkpoint:()=>{},signalScript:"fixed-existing-signal"};
+ let factory=loaded.exports.createIsoHostBuildAdapter;
+ if(mode.durable){const durableFile=require.resolve("../src/main/jobs/iso-durable-host-adapter.cjs"),durable={exports:{}};vm.runInThisContext(Module.wrap(fs.readFileSync(durableFile,"utf8")),{filename:durableFile})(durable.exports,name=>name==="./iso-host-build-adapter.cjs"?loaded.exports:substitutes[name]||require(name.startsWith(".")?path.resolve(path.dirname(durableFile),name):name),durable,durableFile,path.dirname(durableFile));factory=durable.exports.createDurableIsoHostBuildAdapter;}
+ const build=factory(options),payload={workspaceId:"workspace",target:"all",runtime:item.runtime,jobs:2,intent:{projectId:"workspace",sourceRevision:HASH,configRevision:HASH},isoOutputPolicy:createIsoOutputPolicy({revision:HASH,profile:"x86_64-bios-grub2-initrd"})};
  const context={jobId:JOB,log:()=>{},signal:mode.signal};
- return{run:()=>build(payload,context),calls,execution,directory,payload,context,references,authorizations};
+ return{run:()=>build(payload,context),calls,execution,directory,payload,context,references,authorizations,recoveryDirectory,journalDirectory,recoveryBinding:{jobId:JOB,workspaceId:"workspace",grantId:"grant",runtime:item.runtime,journalKey:JOB,sourceSha256:HASH,configurationSha256:HASH,projectProofSha256:require("node:crypto").createHash("sha256").update(receipt.proof).digest("hex"),policy:payload.isoOutputPolicy}};
 }
 test("host composition requires anchored fresh ISO readback before returning success",async t=>{
  const f=fixture(t),result=await f.run();assert.equal(result.state,"succeeded");assert.equal(result.iso.state,"complete");assert.equal(result.iso.bootVerified,false);
  assert.ok(f.calls.indexOf("reference:pending")<f.calls.indexOf("current-launch"));assert.ok(f.calls.indexOf("current-owner")<f.calls.indexOf("current-input"));
  assert.ok(f.calls.indexOf("reference:receipt-recorded")<f.calls.indexOf("reference:verified"));assert.equal(f.execution.locks.size,0);
+});
+test("durable host bridge persists every helper owner and cleanup before anchored completion",async t=>{
+ const {createIsoRecoveryRecords}=require("../src/main/jobs/iso-recovery-records.cjs"),f=fixture(t,{durable:true});
+ const result=await f.run();assert.equal(result.state,"succeeded");
+ const state=createIsoRecoveryRecords({directory:f.recoveryDirectory,journalDirectory:f.journalDirectory}).read(f.recoveryBinding);
+ assert.equal(state.state,"complete");assert.ok(state.owners.length>1);assert.equal(state.cleanups.length,state.owners.length);assert.equal(state.grantsAuthority,false);
+ await assert.rejects(f.run(),{code:"EEXIST"});
+});
+for(const mode of["unknownCurrentCleanup","failed"])test(`durable host bridge retains ${mode} evidence across restart`,async t=>{
+ const {createIsoRecoveryRecords}=require("../src/main/jobs/iso-recovery-records.cjs"),f=fixture(t,{durable:true,[mode]:true});await assert.rejects(f.run());
+ const state=createIsoRecoveryRecords({directory:f.recoveryDirectory,journalDirectory:f.journalDirectory}).read(f.recoveryBinding);
+ assert.equal(state.state,"incomplete");assert.ok(state.owners.length>0);assert.equal(state.reference.state,"pending");if(mode==="unknownCurrentCleanup")assert.equal(state.cleanups[0].verdict.state,"unknown");
 });
 test("delayed pending reference cannot switch caller revision or job identity",async t=>{
  let release,reached;const ready=new Promise(resolve=>reached=resolve),controller=new AbortController();

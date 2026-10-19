@@ -42,8 +42,9 @@ function validateNativeIntent(result) {
   }
   return result;
 }
-async function captureWslBuildIntent({ execution, grantId, runtime, source, output, externalTrees = [], limits, signal, onOwnership }) {
+async function captureWslBuildIntent({ execution, grantId, runtime, source, output, externalTrees = [], limits, signal, onOwnership, onCleanup }) {
   if (onOwnership !== undefined && typeof onOwnership !== "function") fail("BLOCKED_CONTENT_AUTHORITY");
+  if (onCleanup !== undefined && typeof onCleanup !== "function") fail("BLOCKED_CONTENT_AUTHORITY");
   const grant = execution.grants.get(grantId), receipt = grant?.wslReceipt;
   if (!receipt || runtime?.kind !== "wsl" || runtime.distribution !== receipt.storage.distribution || externalTrees.length) fail("BLOCKED_CONTENT_AUTHORITY");
   const selectedRuntime = Object.freeze({ kind: runtime.kind, distribution: runtime.distribution });
@@ -109,6 +110,7 @@ async function captureWslBuildIntent({ execution, grantId, runtime, source, outp
     const result = await job.completion;
     await handshake;
     const cleanup = owner ? await execution.reconcileCleanup(owner) : null;
+    if (owner && onCleanup) await onCleanup(owner, cleanup || { state: "unknown", reason: "runtime-unavailable" });
     if (cleanup?.state !== "verified-stopped") fail("BLOCKED_CONTENT_CLEANUP_UNVERIFIED");
     if (handshakeError) throw handshakeError;
     await verify();

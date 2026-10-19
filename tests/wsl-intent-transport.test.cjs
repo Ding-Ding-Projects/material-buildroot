@@ -54,6 +54,14 @@ test("current-input ownership is durable before helper input and revalidated aft
  const revoked=fixture();await assert.rejects(revoked.capture({...revoked.input,onOwnership:async()=>revoked.execution.grants.delete("grant")}),{code:"BLOCKED_CONTENT_AUTHORITY"});assert.equal(revoked.calls.some(call=>call.request),false);
  const failed=fixture();await assert.rejects(failed.capture({...failed.input,onOwnership:async()=>{throw Error("durable checkpoint failed");}}),/durable checkpoint failed/);assert.equal(failed.calls.some(call=>call.request),false);
 });
+test("cleanup persistence settles before current-input result and retains unknown outcomes",async()=>{
+ const f=fixture();let release,reached,settled=false;const ready=new Promise(resolve=>reached=resolve);
+ const pending=f.capture({...f.input,onCleanup:async(owner,verdict)=>{assert.equal(owner.pid,1234);assert.equal(verdict.state,"verified-stopped");reached();await new Promise(resolve=>release=resolve);}}).then(value=>{settled=true;return value;});
+ await ready;assert.equal(settled,false);release();assert.equal((await pending).snapshot.version,3);
+ const unknown=fixture({unavailableCleanup:true});let observed;
+ await assert.rejects(unknown.capture({...unknown.input,onCleanup:async(owner,verdict)=>{observed={owner,verdict};}}),{code:"BLOCKED_CONTENT_CLEANUP_UNVERIFIED"});assert.equal(observed.owner.pid,1234);assert.equal(observed.verdict.state,"unknown");
+ const failed=fixture();await assert.rejects(failed.capture({...failed.input,onCleanup:async()=>{throw Error("cleanup persistence failed");}}),/cleanup persistence failed/);
+});
 for(const at of[1,2,3])for(const action of["revoke","receipt","abort"])test(`deferred probe ${at} rechecks ${action} before input or result`,async()=>{
  let count=0,release,reached;const ready=new Promise(resolve=>reached=resolve),controller=new AbortController();
  const f=fixture({verifyProbe:async()=>{if(++count===at){reached();await new Promise(resolve=>release=resolve);}}});

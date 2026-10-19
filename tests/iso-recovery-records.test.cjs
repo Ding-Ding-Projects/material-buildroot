@@ -67,3 +67,12 @@ for(const operation of["writeFileSync","fsyncSync"])test(`injected ${operation} 
  const store=loaded.exports.createIsoRecoveryRecords(f.options);assert.throws(()=>store.checkpointOwner(f.bound,f.owner),{code:"EIO"});
  assert.deepEqual(fs.readFileSync(first),before);assert.equal(fs.existsSync(path.join(f.directory,JOB,"000001.json")),true);assert.notEqual(createIsoRecoveryRecords(f.options).read(f.bound).state,"complete");assert.throws(()=>store.begin(f.bound),{code:"EEXIST"});
 });
+test("final verified-record fsync throws while later historical read grants no authority",async t=>{
+ const f=fixture(t);f.store.begin(f.bound);f.store.checkpointOwner(f.bound,f.owner);f.store.checkpointCleanup(f.bound,f.owner,{state:"verified-stopped",reason:"owned-session-absent"});const anchor=await f.completeJournal();f.store.recordReference(f.bound,{state:"receipt-recorded",receiptRecordSha256:anchor});
+ const descriptors=new Map(),faulty={...fs,openSync(file,...args){const fd=fs.openSync(file,...args);descriptors.set(fd,String(file));return fd;},closeSync(fd){descriptors.delete(fd);return fs.closeSync(fd);},fsyncSync(fd){if(descriptors.get(fd)?.endsWith("000004.json"))throw Object.assign(Error("final fsync failed"),{code:"EIO"});return fs.fsyncSync(fd);}};
+ const vm=require("node:vm"),Module=require("node:module"),file=require.resolve("../src/main/jobs/iso-recovery-records.cjs"),loaded={exports:{}};
+ vm.runInThisContext(Module.wrap(fs.readFileSync(file,"utf8")),{filename:file})(loaded.exports,name=>name==="node:fs"?faulty:require(name.startsWith(".")?path.resolve(path.dirname(file),name):name),loaded,file,path.dirname(file));
+ const store=loaded.exports.createIsoRecoveryRecords(f.options);assert.throws(()=>store.recordReference(f.bound,{state:"verified",receiptRecordSha256:anchor}),{code:"EIO"});
+ const later=createIsoRecoveryRecords(f.options).read(f.bound);assert.equal(later.state,"complete");assert.equal(later.grantsAuthority,false);assert.equal(later.reference.receiptRecordSha256,anchor);
+ assert.equal(typeof store.release,"undefined");assert.equal(typeof store.forget,"undefined");
+});

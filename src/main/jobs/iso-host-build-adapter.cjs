@@ -10,8 +10,8 @@ const {assertIsoOutputPolicy}=require("./iso-output-policy.cjs");
 const {snapshotIsoBuild}=require("./iso-host-build-snapshot.cjs");
 const fail=code=>{throw Object.assign(Error(code),{code});};
 /** Host-only composition. Required durable hooks are not supplied by the current scheduler. */
-function createIsoHostBuildAdapter({execution,directory,resolveProject,authorize,retainReference,checkpointCurrentOwner,run,checkpoint,signalScript}){
- if(typeof directory!=="string"||!path.isAbsolute(directory)||[resolveProject,authorize,retainReference,checkpointCurrentOwner,run,checkpoint].some(fn=>typeof fn!=="function")||typeof signalScript!=="string")fail("ISO_HOST_ADAPTER_REQUIRED");
+function createIsoHostBuildAdapter({execution,directory,resolveProject,authorize,retainReference,checkpointCurrentOwner,checkpointCurrentCleanup,run,checkpoint,signalScript}){
+ if(typeof directory!=="string"||!path.isAbsolute(directory)||[resolveProject,authorize,retainReference,checkpointCurrentOwner,checkpointCurrentCleanup,run,checkpoint].some(fn=>typeof fn!=="function")||typeof signalScript!=="string")fail("ISO_HOST_ADAPTER_REQUIRED");
  return async function build(payload,context){
   ({payload,context}=snapshotIsoBuild(payload,context));
   assertIsoOutputPolicy(payload?.isoOutputPolicy,payload?.target);
@@ -33,7 +33,8 @@ function createIsoHostBuildAdapter({execution,directory,resolveProject,authorize
     currentProject();await authorize(payload,context);currentProject();
     await execution.verifyWslGrant(grant,runtime);currentProject();
     const captured=await captureWslBuildIntent({execution,grantId:item.grantId,runtime,source:item.source,output:item.output,externalTrees:[],signal:context.signal,
-     onOwnership:async owner=>{currentProject();await checkpointCurrentOwner({version:1,jobId:context.jobId,workspaceId:payload.workspaceId,phase:"current-input",receipt:owner});currentProject();}});
+     onOwnership:async owner=>{currentProject();await checkpointCurrentOwner({version:1,jobId:context.jobId,workspaceId:payload.workspaceId,phase:"current-input",receipt:owner});currentProject();},
+     onCleanup:async(owner,verdict)=>{await checkpointCurrentCleanup({version:1,jobId:context.jobId,workspaceId:payload.workspaceId,phase:"current-input",receipt:owner,verdict});currentProject();}});
     currentProject();
     if(captured.sourceRevision!==payload.intent?.sourceRevision||captured.configRevision!==payload.intent?.configRevision||captured.configRevision!==payload.isoOutputPolicy.appliedConfigurationRevision)fail("ISO_HOST_INPUT_CHANGED");
     return expectedBinding={sourceSha256:captured.sourceRevision,configurationSha256:captured.configRevision,projectProofSha256:crypto.createHash("sha256").update(receipt.proof).digest("hex")};
