@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test"), assert = require("node:assert/strict"), fs = require("node:fs"), path = require("node:path"), vm = require("node:vm");
 const { DEFAULT_LIMITS } = require("../src/main/jobs/build-intent.cjs");
-function fixture({ cancel, revoked = false, unavailableCleanup = false } = {}) {
+function fixture({ cancel, revoked = false, unavailableCleanup = false, verifyProbe = async()=>{} } = {}) {
   const root = path.resolve("fixture-native-authority"), source = path.join(root, "source"), output = path.join(root, "output");
   const receipt = { paths: { source, output }, storage: { distribution: "fixture", rootLinux: "/home/fixture/material-buildroot", sourceLinux: "/home/fixture/material-buildroot/source", outputLinux: "/home/fixture/material-buildroot/output" }, proof: "private-identity-proof" };
   const grant = { wslReceipt: receipt }, calls = []; let stopped = false;
@@ -28,7 +28,7 @@ function fixture({ cancel, revoked = false, unavailableCleanup = false } = {}) {
   const module = { exports: {} };
   const file = require.resolve("../src/main/jobs/wsl-build-intent.cjs");
   vm.runInNewContext(fs.readFileSync(file, "utf8"), { module, exports: module.exports, __dirname: path.dirname(file), Buffer, queueMicrotask,
-    require: name => name === "../execution/index.cjs" ? { boundedProcess } : name === "../execution/wsl-project.cjs" ? { verifyWslProject: async () => {} } : require(name.startsWith(".") ? path.resolve(path.dirname(file), name) : name) });
+    require: name => name === "../execution/index.cjs" ? { boundedProcess } : name === "../execution/wsl-project.cjs" ? { verifyWslProject: verifyProbe } : require(name.startsWith(".") ? path.resolve(path.dirname(file), name) : name) });
   return { capture: module.exports.captureWslBuildIntent, execution, calls, input: { execution, grantId: "grant", runtime: { kind: "wsl", distribution: "fixture" }, source, output, ...(cancel ? { signal: cancel.signal } : {}) } };
 }
 test("native transport keeps admitted roots and proves cleanup before accepting a receipt", async () => {
@@ -46,4 +46,22 @@ test("native transport cancellation signals only the exact owned session and nev
 test("native transport refuses revoked authority and unavailable cleanup", async () => {
   const revoked = fixture({ revoked: true }); await assert.rejects(revoked.capture(revoked.input), { code: "BLOCKED_CONTENT_AUTHORITY" });
   const unavailable = fixture({ unavailableCleanup: true }); await assert.rejects(unavailable.capture(unavailable.input), { code: "BLOCKED_CONTENT_CLEANUP_UNVERIFIED" });
+});
+test("current-input ownership is durable before helper input and revalidated after checkpoint",async()=>{
+ const f=fixture();let release,reached;const ready=new Promise(resolve=>reached=resolve);
+ const pending=f.capture({...f.input,onOwnership:async owner=>{assert.equal(owner.pid,1234);reached();await new Promise(resolve=>release=resolve);}});
+ await ready;assert.equal(f.calls.some(call=>call.request),false);release();assert.equal((await pending).snapshot.version,3);
+ const revoked=fixture();await assert.rejects(revoked.capture({...revoked.input,onOwnership:async()=>revoked.execution.grants.delete("grant")}),{code:"BLOCKED_CONTENT_AUTHORITY"});assert.equal(revoked.calls.some(call=>call.request),false);
+ const failed=fixture();await assert.rejects(failed.capture({...failed.input,onOwnership:async()=>{throw Error("durable checkpoint failed");}}),/durable checkpoint failed/);assert.equal(failed.calls.some(call=>call.request),false);
+});
+for(const at of[1,2,3])for(const action of["revoke","receipt","abort"])test(`deferred probe ${at} rechecks ${action} before input or result`,async()=>{
+ let count=0,release,reached;const ready=new Promise(resolve=>reached=resolve),controller=new AbortController();
+ const f=fixture({verifyProbe:async()=>{if(++count===at){reached();await new Promise(resolve=>release=resolve);}}});
+ const pending=f.capture({...f.input,signal:controller.signal});const rejection=assert.rejects(pending);
+ await ready;
+ if(action==="revoke")f.execution.grants.delete("grant");
+ if(action==="receipt"){const grant=f.execution.grants.get("grant");grant.wslReceipt={...grant.wslReceipt};}
+ if(action==="abort")controller.abort();
+ release();await rejection;
+ if(at<3)assert.equal(f.calls.some(call=>call.request),false);
 });
