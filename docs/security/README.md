@@ -10,6 +10,7 @@
 - [Jobs and recovery](jobs-and-recovery.md)
 - [Isolated source-service global configuration](source-global-config.md)
 - [Internal Linux ISO output lifecycle](iso-output-lifecycle.md)
+- [Internal ISO producer transaction and receipt boundaries](iso-producer-transaction.md)
 - [Shared-mode restrictions](shared-mode.md)
 - [Personal wording import and privacy](personal-vocabulary.md)
 - [Offline documentation admission](offline-documentation.md)

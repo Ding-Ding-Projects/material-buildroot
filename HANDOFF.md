@@ -1,3 +1,15 @@
+## Native language finding and integrated repair
+
+The source at948363dd098bafde1209e4d179124238ffb79408 passed a fresh desktop build and a419-page documentation build with10,947 checked internal references. Bounded documentation runtime verification covered10 desktop/narrow views, changed English/Cantonese guides, home/status keyboard navigation, visible focus and saved theme/language/progress. All10 audit receipts passed;663 output files were rehashed. This remains local built verification, not deployment.
+
+The actual native Purpose matrix accepted8 of48 tuples across two owned runs, captured a localization finding at tuple9, and left39 unrun. A transient process-identity gap stopped the first run; supported bounded fresh identity proof allowed the next run to continue. Both runs closed normally and proved owned process/listener/desktop absence. Every capture remains bound to948363d; no physical OS-scale or full matrix claim is made.
+
+Tuple9 showed Cantonese option headlines but cached English selected labels. Two independent inspections confirmed the registered select's displayed-text cache. Repair ed602ad0f6fe4807bd8bc90075e69aab95a94e5b explicitly binds both displayed labels, preserving selections and draft identity. The real Settings English/Cantonese/bilingual/English regression failed before repair and passed afterward in9.7seconds. New built/native verification is pending. Historical/current capture proposals remain unstaged until the repaired candidate is inspected.
+
+Reviewed inactive ISO transaction, durable reservations, borrowed-lock lifecycle bridge and typed producer owner refinement through43db877488f70aff9ba995a7c13f58bcae3d7dcf are integrated with the GUI repair at e9cc0f0d7a2f38efc7715d499988b31c2d939c4a. Scheduler and renderer construction remain disconnected. The producer slice passed37 focused cases; an earlier protocol run passed57 with6 platform skips. Reservation-write retention was independently confirmed, repaired at736a4d8 and witnessed red then green. A separate strict read-only journal-verification candidate ec377aa22a5170f6981588a2f5ff9c04546994c8 is preserved on codex/iso-producer-transaction with59 synthetic passes and independent review pending. No WSL, Docker or firmware operation occurred during these slices.
+
+Hidden-only verification remains the owner's explicit choice. Current-GUI ISO production, sustained installed startup, full destination/layout acceptance, deployment, normal release and matching installed update remain incomplete. Progress: https://github.com/Ding-Ding-Projects/material-buildroot/issues/1#issuecomment-6256874068 .
+
 ## Guided workspace candidate d02fd59
 
 The whole guided creation journey is implemented and independently reviewed at d02fd59afc53c976d0ce36e4a87a80633a89f0ac. The integration branch remote ref was verified at that exact commit. The root build.bat /s succeeded; receipt SHA-256 058e725bf4e9f8cb5246eb80ab7d6df84875a957be67cde8e6c07be131be7fff, application archive SHA-256 f6bd2b9ef4fd6f6ae8b84676c6da455193fab9596487a4fc37f42e7079c4f81f.

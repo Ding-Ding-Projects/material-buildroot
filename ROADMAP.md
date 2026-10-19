@@ -2,6 +2,10 @@
 
 ## Guided workspace remake, 2026-10-18
 
+- [x] Verify the948 documentation build and bounded10-view runtime/navigation/persistence scope, with explicit local-only delivery.
+- [ ] Rebuild and repeat the native Cantonese selected-label tuple after source repair ed602ad; original matrix accepted8, found1 defect, left39 tuples unrun.
+- [ ] Complete scheduler integration and runtime verification of the reviewed internal ISO transaction modules; source adapters remain disconnected.
+
 - [x] Build reviewed candidate d02fd59 through the exact root entrypoint; verify the 126 selected renderer cases across focused runs and20 host documentation cases, with 3 symbolic-link cases explicitly unverified.
 - [x] Observe one real hidden native d02 launch reaching Images and Purpose; verify actual titlebar Close and owned teardown. Continuous stability, the complete matrix and installed startup remain open.
 
