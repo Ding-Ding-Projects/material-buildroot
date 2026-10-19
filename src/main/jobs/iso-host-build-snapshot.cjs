@@ -32,13 +32,14 @@ function immutableData(value,depth=0,budget={nodes:0,bytes:0}){
  return Object.freeze(result);
 }
 function snapshotIsoBuild(payload,context){
- const fixed=immutableData(payload),required=["workspaceId","target","runtime","jobs","intent","isoOutputPolicy"],allowed=[...required,"resources","snapshot"];
+ const fixed=immutableData(payload),required=["workspaceId","target","runtime","jobs","intent","isoOutputPolicy"],allowed=[...required,"resources","snapshot","isoSubmission"];
  if(!fixed||required.some(key=>!Object.hasOwn(fixed,key))||Object.keys(fixed).some(key=>!allowed.includes(key))||Buffer.byteLength(JSON.stringify(fixed))>65536)fail();
  if(typeof fixed.workspaceId!=="string"||!fixed.workspaceId||fixed.workspaceId.length>200||fixed.target!=="all"||!Number.isInteger(fixed.jobs)||fixed.jobs<1||fixed.jobs>32)fail();
  if(!fixed.runtime||Object.keys(fixed.runtime).sort().join()!=="distribution,kind"||fixed.runtime.kind!=="wsl"||typeof fixed.runtime.distribution!=="string"||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(fixed.runtime.distribution))fail();
  if(!fixed.intent||Object.keys(fixed.intent).sort().join()!=="configRevision,projectId,sourceRevision"||fixed.intent.projectId!==fixed.workspaceId||![fixed.intent.sourceRevision,fixed.intent.configRevision].every(value=>typeof value==="string"&&SHA.test(value)))fail();
  assertIsoOutputPolicy(fixed.isoOutputPolicy,"all");
  if(fixed.isoOutputPolicy.appliedConfigurationRevision!==fixed.intent.configRevision)fail();
+ if(Object.hasOwn(fixed,"isoSubmission")){const value=fixed.isoSubmission;if(!value||Object.keys(value).sort().join()!=="captureRecordSha256,id,version"||value.version!==1||typeof value.id!=="string"||!UUID.test(value.id)||typeof value.captureRecordSha256!=="string"||!SHA.test(value.captureRecordSha256))fail();}
  if(!context||typeof context!=="object")fail();
  const captured={};
  for(const key of["jobId","signal","log"]){

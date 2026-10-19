@@ -11,6 +11,7 @@ const { createIsoOutputPolicy, assertIsoOutputPolicy } = require("./jobs/iso-out
 const { createIsoScheduledBuild } = require("./jobs/iso-scheduled-build.cjs");
 const { restoreIsoSchedulerRecovery } = require("./jobs/iso-scheduler-recovery.cjs");
 const { isWslReceipt } = require("./execution/wsl-project.cjs");
+const { captureIsoSubmission, inspectIsoSubmissions, assertDescriptor: assertIsoSubmissionDescriptor } = require("./jobs/iso-submission.cjs");
 const { captureWslBuildIntent, validateNativeIntent } = require("./jobs/wsl-build-intent.cjs");
 const targetActions = require("./build/target-actions.cjs");
 const { ExecutionService, TARGETS } = require("./execution/index.cjs");
@@ -367,6 +368,7 @@ function createOperationsService({
     },
   });
   const activeRecovery = new Set();
+  const isoSubmissionControllers = new Set();
   const buildConfirmation = createBuildConfirmation({ resolveWorkspace: project });
   let recoveryUnavailable = false;
   function project(id) {
@@ -620,6 +622,7 @@ function createOperationsService({
   }
   restoreIsoSchedulerRecovery({ jobs, owner, quarantine, recoveryDirectory: isoRecoveryDirectory, journalDirectory: isoJournalDirectory,
     markRecoveryUnavailable: () => { recoveryUnavailable = true; } });
+  if (inspectIsoSubmissions({ directory: path.join(directory, "iso-submissions"), jobs, owner }).state !== "verified") recoveryUnavailable = true;
   function unknownRecovery() {
     return quarantine
       .list()
@@ -919,8 +922,11 @@ function createOperationsService({
       "intent",
       "snapshot",
       ...(Object.hasOwn(payload, "isoOutputPolicy") ? ["isoOutputPolicy"] : []),
+      ...(Object.hasOwn(payload, "isoSubmission") ? ["isoSubmission"] : []),
     ]);
     if (Object.hasOwn(payload, "isoOutputPolicy")) assertIsoOutputPolicy(payload.isoOutputPolicy, payload.target);
+    if (Object.hasOwn(payload, "isoSubmission")) { if (!Object.hasOwn(payload, "isoOutputPolicy")) reject("BLOCKED_INVALID_INTENT"); assertIsoSubmissionDescriptor(payload.isoSubmission); }
+    if (Object.hasOwn(payload, "isoOutputPolicy") && !Object.hasOwn(payload, "isoSubmission")) reject("BLOCKED_INTENT_UNAVAILABLE");
     if (
       typeof payload.workspaceId !== "string" ||
       !/^[a-f0-9-]{36}$/.test(payload.workspaceId) ||
@@ -1801,7 +1807,18 @@ function createOperationsService({
           selectedRuntime,
           request.jobs,
         );
-        const captured = await captureProjectIntent(item, {
+        let submission, submissionReserved = false;
+        const submissionController = internalIsoOutputPolicy ? new AbortController() : null;
+        if (submissionController) isoSubmissionControllers.add(submissionController);
+        let captured;
+        try {
+        if (internalIsoOutputPolicy) {
+          submission = await captureIsoSubmission({ directory: path.join(directory, "iso-submissions"), execution, item,
+            workspaceId: request.workspaceId, runtime: selectedRuntime, policy: internalIsoOutputPolicy,
+            resolveProject: id => { if (disposed) reject("UNAVAILABLE"); return project(id); }, signal: submissionController.signal,
+            onReserved: () => { submissionReserved = true; } });
+          captured = submission.captured;
+        } else captured = await captureProjectIntent(item, {
           source: item.source,
           output: item.output,
           externalTrees: authorizedExternalPaths(request.workspaceId, item),
@@ -1836,10 +1853,14 @@ function createOperationsService({
               ...(captured.snapshot.version === 3 ? { limits: captured.snapshot.limits, downloadCache: captured.snapshot.downloadCache } : {}),
             },
             ...(internalIsoOutputPolicy ? { isoOutputPolicy: assertIsoOutputPolicy(internalIsoOutputPolicy, request.target) } : {}),
+            ...(submission ? { isoSubmission: submission.descriptor } : {}),
           },
         });
+        submission?.commitJob(job);
         void scheduler.pump().catch(() => {});
         return job;
+        } catch (error) { if (internalIsoOutputPolicy && (submissionReserved || inspectIsoSubmissions({ directory: path.join(directory, "iso-submissions"), jobs, owner }).state !== "verified")) recoveryUnavailable = true; throw error; }
+        finally { if (submissionController) isoSubmissionControllers.delete(submissionController); }
       }
       case "scheduler.configure": {
         schedulerLimits = budgetStore.write(request.limits);
@@ -2365,6 +2386,7 @@ function createOperationsService({
     dispose() {
       if (disposal) return disposal;
       disposed = true;
+      for (const controller of isoSubmissionControllers) controller.abort();
       executionSetup.dispose();
       productSetup.dispose();
       executionJobs?.dispose();

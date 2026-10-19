@@ -76,7 +76,7 @@ function fixture(t, { cancelled = false, hold = false, createService = createOpe
     picks,
   };
 }
-test("guided ISO jobs persist exact host output intent while renderer injection and ordinary jobs stay separate", async t => {
+test("guided ISO rejects unadmitted runtime while renderer injection and ordinary jobs stay separate", async t => {
   // Keep the real dispatcher, project admission, ISO service and job store.
   // Supply only an inert configuration adapter; no native command is executed.
   const modulePath = require.resolve("../src/main/operations-service.cjs"), nativeRequire = require("node:module").createRequire(modulePath);
@@ -98,13 +98,12 @@ test("guided ISO jobs persist exact host output intent while renderer injection 
   const policy = { version: 1, profile: "x86_64-bios-grub2-initrd", appliedConfigurationRevision: revision, path: "images/rootfs.iso9660", freshness: "required", state: "intent-only" };
   for (const extra of [{ isoOutputPolicy: policy }, { path: "other.iso" }, { command: "anything" }]) assert.equal((await f.request({ ...request, ...extra })).code, "INVALID_REQUEST");
   assert.equal((await f.request({ ...request, profile: "other" })).code, "INVALID_REQUEST");
-  const submitted = await f.request(request); assert.equal(submitted.ok, true); assert.deepEqual(submitted.result.payload.isoOutputPolicy, policy);
-  const file = path.join(f.directory, "state", "jobs", "jobs.json"), saved = JSON.parse(fs.readFileSync(file, "utf8"));
-  assert.deepEqual(saved.jobs.find(job => job.id === submitted.result.id).payload.isoOutputPolicy, policy);
+  const submitted = await f.request(request); assert.equal(submitted.ok, false); assert.equal(submitted.code,"ISO_SUBMISSION_UNVERIFIED");
+  assert.equal((await f.request({action:"scheduler.status"})).result.quarantine.unavailable,false);
   const ordinary = { action: "build.submit", workspaceId, target: "all", runtime, jobs: 2 };
   assert.equal((await f.request({ ...ordinary, isoOutputPolicy: policy })).code, "INVALID_REQUEST");
   const normal = await f.request(ordinary); assert.equal(normal.ok, true); assert.equal(Object.hasOwn(normal.result.payload, "isoOutputPolicy"), false);
-  assert.equal(Object.hasOwn(submitted.result, "freshnessVerified"), false);
+  const file = path.join(f.directory, "state", "jobs", "jobs.json"), saved = JSON.parse(fs.readFileSync(file, "utf8"));assert.ok(saved.jobs.every(job=>!Object.hasOwn(job.payload,"isoOutputPolicy")));
 });
 
 test("source preservation failure settles without skipping independent disposal and repeated calls share one promise", {timeout:5000}, async t => {

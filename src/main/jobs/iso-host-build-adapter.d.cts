@@ -4,6 +4,7 @@ export interface IsoHostBuildPayload {
   workspaceId: string; target: "all"; runtime: { kind: "wsl"; distribution: string }; jobs: number;
   intent: { projectId: string; sourceRevision: string; configRevision: string };
   isoOutputPolicy: IsoTransactionReadExpectation["policy"];
+  isoSubmission?: { version: 1; id: string; captureRecordSha256: string };
 }
 export interface IsoHostBuildContext { jobId: string; signal?: AbortSignal; log(event: ExecutionLog): void }
 export interface IsoRecoveryReference {
