@@ -3,6 +3,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
+const os = require('node:os');
+const {packageIdentity,stageBaseline} = require('./squirrel.cjs');
+const {acquireHostedBaseline} = require('./squirrel-baseline.cjs');
+const {loadAdapterAdmission,assertInstallerAdmission} = require('./adapter-admission.cjs');
 const root = path.resolve(__dirname, '../..');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -138,7 +142,11 @@ function activateOutput(base, relative, produced) {
   try {fs.writeFileSync(fd,JSON.stringify({schemaVersion:1,target:relative,previous:path.basename(previous)}));fs.fsyncSync(fd);} finally {fs.closeSync(fd);}
   try {
     if (fs.existsSync(destination)) fs.renameSync(destination,previous);
-    fs.renameSync(produced,destination);
+    try { fs.renameSync(produced,destination); }
+    catch(error) {
+      if(error.code!=='EXDEV') throw error;
+      fs.cpSync(produced,destination,{recursive:true,errorOnExist:true,force:false});
+    }
     if (!verifiedOutput(destination)) throw new Error('Activated output failed its receipt verification.');
     fs.renameSync(journal,`${journal}.complete-${crypto.randomUUID()}`);
   } catch(error) {
@@ -173,6 +181,7 @@ async function main() {
   }
   execute(node,[path.join(root,'scripts/check-vocabulary.cjs')]);
   const before = dependenciesOnly ? null : sourceIdentity(root,git,manifestBytes);
+<<<<<<< HEAD
   if (!dependenciesOnly && target.kind === 'desktop') {
     for (const directory of ['src/main', 'src/shared']) {
       for (const file of inventory(path.join(root, directory))) {
@@ -180,27 +189,176 @@ async function main() {
       }
     }
   }
+=======
+  const adapterAdmission = dependenciesOnly ? null : loadAdapterAdmission(root);
+>>>>>>> origin/task/offline-payload-source-origin
   console.log('Installing exact locked npm packages with lifecycle scripts disabled.');
   execute(node,[npm,'ci','--ignore-scripts','--no-audit','--no-fund'],{cwd:packageRoot});
   if (dependenciesOnly) { console.log('Locked dependencies acquired. No build or runtime verification is claimed.'); return; }
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   recoverOutput(root,installer ? target.installerOutput : target.output);
   const generation = crypto.randomUUID();
-  const staging = contained(root,`.cache/builds/${generation}`);
-  fs.mkdirSync(staging,{recursive:true});
+  let staging;
+  if(installer) {
+    const temporary=fs.realpathSync(os.tmpdir());
+    // Genuine NuGet uses legacy path limits. Keep its owned producer tree short.
+    staging=fs.mkdtempSync(path.join(temporary,'mbr-'));
+    contained(temporary,path.basename(staging));
+    fs.writeFileSync(path.join(staging,'producer-owner.json'),JSON.stringify({schemaVersion:1,source:before.commit,root,createdAt:new Date().toISOString(),purpose:'Squirrel installer production'}));
+    fs.writeFileSync(contained(root,'.cache/installer-producer.json'),JSON.stringify({schemaVersion:1,source:before.commit,generation,staging}));
+    console.log('Installer staging uses an exclusive short temporary directory with a retained ownership receipt.');
+  } else {
+    staging = contained(root,`.cache/builds/${generation}`);
+    fs.mkdirSync(staging,{recursive:true});
+  }
   const output = path.join(staging,'output');
   const template = installer ? target.installerCommand : target.command;
   if (!Array.isArray(template) || !template.length) throw new Error('Canonical package command is missing.');
   if (target.rendererCommand) execute(node,target.rendererCommand);
-  if (target.kind === 'desktop') fs.writeFileSync(path.join(root,'dist/build-info.json'),JSON.stringify({source:before.commit,updatedAt:new Date().toISOString()})+'\n');
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, setupEmbedding = null, flashingHelper = {status:'not-produced',runtimeVerified:false};
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
+    const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
+    packageVersion = identity.version;
+    packageVersionSource = identity.source;
+    fs.writeFileSync(path.join(root,'dist/build-info.json'),JSON.stringify({version:packageVersion,source:before.commit,updatedAt:new Date().toISOString()})+'\n');
+    command.push(`--config.extraMetadata.version=${packageVersion}`);
     command.push(`--config.electronDist=${process.env.MATERIAL_BUILD_ELECTRON_DIST}`);
+    if (installer) {
+      const cache = contained(root,'.cache/payload-downloads');
+      fs.mkdirSync(cache,{recursive:true});
+      if (args.includes('--payload-cache')) {
+        const input = args[args.indexOf('--payload-cache')+1];
+        if (!input || !path.isAbsolute(input)) throw Error('Payload cache input must be an absolute directory.');
+        const origin = path.resolve(input);
+        for(let cursor=origin;;cursor=path.dirname(cursor)) {
+          if(fs.lstatSync(cursor).isSymbolicLink()) throw Error('Payload cache input contains a linked ancestor.');
+          if(cursor===path.dirname(cursor)) break;
+        }
+        const registry = require('./offline-payloads.json');
+        for(const item of [...registry.tools,registry.extractor,registry.fullExtractor].filter(Boolean)) {
+          const name = `${item.sha256}.zip`, source = path.join(origin,name), destination = path.join(cache,name);
+          if(fs.existsSync(source)&&!fs.existsSync(destination)) {
+            const stat=fs.lstatSync(source);
+            if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==item.bytes) throw Error('Payload input cache member does not match its pinned size.');
+            fs.copyFileSync(source,destination,fs.constants.COPYFILE_EXCL);
+          }
+        }
+      }
+      console.log('Assembling every required bundled payload. Host-selected external tools remain separate and unadmitted. Original cache inputs are read only.');
+      const assembled = await require('./payloads.cjs').assemblePayloads({output:path.join(staging,'offline-payloads'),cache,complete:true});
+      if(assembled.manifest.scope!=='bundled-payload-inventory'||assembled.manifest.bundledComplete!==true||assembled.manifest.wholeToolsetOffline!==false||!Array.isArray(assembled.manifest.requiredBundledToolIds)||!Array.isArray(assembled.manifest.externalTools)) throw Error('Normal installer production requires explicit bundled completeness and external tool classification.');
+      const longest = Math.max(...assembled.manifest.tools.flatMap(tool=>tool.files.map(file=>file.path.length)));
+      if(path.join(output,'win-unpacked/resources/offline-payloads').length+1+longest>=240) throw Error('Exclusive producer staging is still too long for the genuine package toolchain. Outputs retained.');
+      if(!process.env.MATERIAL_BUILD_NATIVE_TOOLCHAIN) throw Error('Native broker production requires root-initialized installed compiler discovery.');
+      const toolchain = JSON.parse(process.env.MATERIAL_BUILD_NATIVE_TOOLCHAIN);
+      if(toolchain.origin!=='installed'||!/^\d+(?:\.\d+){1,3}$/.test(toolchain.installationVersion||'')||!/^\d+(?:\.\d+){1,3}$/.test(toolchain.sdkVersion||'')) throw Error('Native toolchain version metadata is unavailable.');
+      const brokerOutput=contained(root,`.cache/native-broker/${generation}`);
+      const systemRoot=process.env.SystemRoot;
+      if(!systemRoot||!path.isAbsolute(systemRoot)) throw Error('System PowerShell location unavailable.');
+      execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(root,'scripts/build/native-file-broker.ps1'),'-OutputDirectory',brokerOutput]);
+      const brokerManifest=JSON.parse(fs.readFileSync(nonempty(brokerOutput,'broker-manifest.json'),'utf8'));
+      const brokerHash=sha256(fs.readFileSync(nonempty(brokerOutput,'material-file-broker.exe')));
+      if(brokerManifest.schemaVersion!==1||brokerManifest.file!=='material-file-broker.exe'||brokerManifest.sha256!==brokerHash||brokerManifest.mechanism!=='appcontainer-handle-job'||brokerManifest.runtimeVerified!==false) throw Error('Compiled native broker manifest does not match the produced executable.');
+      nativeBroker={status:'compiled',sha256:brokerHash,mechanism:brokerManifest.mechanism,toolchain,runtimeVerified:false};
+      const helperOutput=contained(root,`.cache/squirrel-writezip/${generation}`);
+      execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(root,'scripts/build/squirrel-writezip.ps1'),'-OutputDirectory',helperOutput]);
+      const helperManifest=JSON.parse(fs.readFileSync(nonempty(helperOutput,'helper-manifest.json'),'utf8'));
+      if(helperManifest.architecture!=='x64'||helperManifest.source!=='eef37460aef77b2f9de8cd2237c1e55b344a6554'||helperManifest.role!=='genuine-helper-invocation-observer'||helperManifest.sha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.exe')))||helperManifest.genuineSha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.Genuine.exe')))) throw Error('Genuine x64 Squirrel helper and observer identities are inconsistent.');
+      const vendor=path.join(staging,'squirrel-vendor');
+      fs.cpSync(path.join(path.dirname(require.resolve('electron-winstaller/package.json')),'vendor'),vendor,{recursive:true});
+      // These are the same immutable vendor coordinates used by the pinned target.
+      const pinnedVendor=await require('app-builder-lib/out/binDownload').getBinFromUrl('squirrel.windows@1.0.0','squirrel.windows-2.0.1-patched.7z','76851f0c192eaf9bc6f8f3eecdfe325857ebe70d7833ec62ed846a1acd50c846');
+      fs.cpSync(path.join(pinnedVendor,'electron-winstaller/vendor'),vendor,{recursive:true});
+      fs.copyFileSync(path.join(helperOutput,'WriteZipToSetup.exe'),path.join(vendor,'WriteZipToSetup.exe'));
+      fs.copyFileSync(path.join(helperOutput,'WriteZipToSetup.Genuine.exe'),path.join(vendor,'WriteZipToSetup.Genuine.exe'));
+      genuineUpdater=path.join(vendor,'Squirrel.exe');
+      nonempty(vendor,'Squirrel.exe');nonempty(vendor,'Setup.exe');
+      squirrelHelper={source:helperManifest.source,architecture:'x64',role:helperManifest.role,sha256:helperManifest.sha256,genuineHelperSha256:helperManifest.genuineSha256,proxySourceSha256:helperManifest.proxySourceSha256,genuineUpdaterSha256:sha256(fs.readFileSync(genuineUpdater)),runtimeVerified:false};
+      squirrelTrace=path.join(staging,'squirrel-invocation');fs.mkdirSync(squirrelTrace);
+      childEnv.MATERIAL_BUILD_SQUIRREL_TRACE=squirrelTrace;childEnv.MATERIAL_BUILD_SOURCE_SHA=before.commit;
+      const flashingOutput=path.join(staging,'native-flashing');
+      const flashingCommand="$ErrorActionPreference='Stop'; . (Join-Path $env:MATERIAL_FLASH_SOURCE_ROOT 'scripts/build/flashing.ps1'); $null=Invoke-FlashingBuild -RepositoryRoot $env:MATERIAL_FLASH_SOURCE_ROOT -ToolsRoot $env:MATERIAL_FLASH_TOOLS_ROOT -OutputDirectory $env:MATERIAL_FLASH_OUTPUT_DIRECTORY";
+      execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-Command',flashingCommand],{env:{...childEnv,MATERIAL_FLASH_SOURCE_ROOT:root,MATERIAL_FLASH_TOOLS_ROOT:contained(root,'.cache/flashing-tools'),MATERIAL_FLASH_OUTPUT_DIRECTORY:flashingOutput}});
+      const flashingManifest=JSON.parse(fs.readFileSync(nonempty(flashingOutput,'manifest.json'),'utf8'));
+      const flashingHash=sha256(fs.readFileSync(nonempty(flashingOutput,'MaterialBuildroot.Flash.exe')));
+      const flashingInputs=JSON.parse(fs.readFileSync(path.join(root,'native/flashing/build-inputs.json'),'utf8'));
+      if(flashingManifest.protocol!==1||flashingManifest.sha256!==flashingHash||flashingManifest.sdkVersion!==flashingInputs.sdk.version||flashingManifest.runtimeVersion!==flashingInputs.runtime.version||flashingManifest.runtimeIdentifier!=='win-x64'||flashingManifest.selfContained!==true||flashingManifest.unsigned!==true||flashingManifest.debugType!=='None'||flashingManifest.debugSymbols!==false||flashingManifest.runtimeAcceptance!=='unverified') throw Error('Flashing helper production manifest differs from the pinned source and output.');
+      for(const name of ['Program.cs','app.manifest','MaterialBuildroot.Flash.csproj','build-inputs.json'])if(flashingManifest.sourceHashes?.[name]!==sha256(fs.readFileSync(path.join(root,'native/flashing',name))))throw Error('Flashing helper source changed during production.');
+      for(const name of ['dotnet-sdk-LICENSE.txt','dotnet-sdk-ThirdPartyNotices.txt','dotnet-runtime-LICENSE.txt','dotnet-runtime-ThirdPartyNotices.txt'])nonempty(flashingOutput,`notices/${name}`);
+      if(inventory(flashingOutput).some(file=>/\.(pdb|mdb)$/i.test(file.path)))throw Error('Flashing output contains debug symbols; retained without packaging private source-path metadata.');
+      flashingHelper={status:'produced-self-contained',protocol:1,sha256:flashingHash,sdkVersion:flashingManifest.sdkVersion,runtimeVersion:flashingManifest.runtimeVersion,runtimeIdentifier:'win-x64',debugType:'None',debugSymbols:false,sourceHashes:flashingManifest.sourceHashes,buildInputsSha256:flashingManifest.buildInputsSha256,runtimeVerified:false};
+      const baseConfiguration=JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build;
+      const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']},{from:flashingOutput,to:'native/flashing',filter:['**/*']}]};
+      const configurationPath = path.join(staging,'installer-config.json');
+      fs.writeFileSync(configurationPath,JSON.stringify(configuration));
+      command.push(`--config=${configurationPath}`);
+      payloads={status:'assembled',scope:assembled.manifest.scope,bundledComplete:assembled.manifest.bundledComplete,wholeToolsetOffline:assembled.manifest.wholeToolsetOffline,requiredBundledToolIds:assembled.manifest.requiredBundledToolIds,externalTools:assembled.manifest.externalTools,manifestSha256:sha256(fs.readFileSync(path.join(assembled.directory,'manifest.json'))),tools:assembled.manifest.tools.map(tool=>({id:tool.id,classification:tool.classification,version:tool.version,archive:tool.archive,license:tool.license,sourceUrl:tool.sourceUrl,profile:tool.profile,composition:tool.composition,excludedMembers:tool.excludedMembers,sourceInventory:tool.sourceInventory,runtimeVerified:false}))};
+      const baseline = acquireHostedBaseline(root,packageVersion);
+      delta = stageBaseline(baseline.directory,output,packageVersion);
+      if (!baseline.directory) delta.reason = baseline.reason;
+      if (baseline.releaseTag) delta = {...delta,releaseTag:baseline.releaseTag,source:baseline.source,provenanceSha256:baseline.provenanceSha256};
+    }
   }
+  let packageError=null;
+  try {execute(node,command,{env:childEnv});}catch(error){packageError=error;}
+  if(installer&&target.kind==='desktop') {
+    setupEmbedding={schemaVersion:1,source:before.commit,status:'invocation-unavailable',runtimeVerified:false};
+    try {
+      const report=path.join(squirrelTrace,'setup-helper-invocation.json');
+      if(fs.statSync(report).size>65536)throw Error('Invocation evidence exceeds its bound.');
+      setupEmbedding={...require('./squirrel-setup.cjs').admitInvocation(JSON.parse(fs.readFileSync(report,'utf8')),before.commit,squirrelHelper),status:'genuine-helper-observed'};
+    }catch{setupEmbedding.status='invocation-unavailable-or-invalid';}
+    fs.mkdirSync(output,{recursive:true});
+    fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
+  }
+  if(packageError)throw packageError;
+  if(installer&&target.kind==='desktop') {
+    if(setupEmbedding.status!=='genuine-helper-observed')throw Error('No source-bound genuine setup embedding invocation was retained.');
+    if(setupEmbedding.childExitCode!==0)throw Error(`Genuine Squirrel embedding helper exited with code ${setupEmbedding.childExitCode}; exact invocation evidence retained.`);
+    const data=setupEmbedding.after.dataResource;
+    if(!data.present||data.bytes!==setupEmbedding.inputZip.bytes||data.sha256!==setupEmbedding.inputZip.sha256)throw Error('Genuine helper output did not retain a nonempty DATA resource matching its input ZIP; invocation evidence retained.');
+  }
+  if (target.kind === 'desktop') {
+    const asar = require('@electron/asar');
+    const packaged = JSON.parse(asar.extractFile(nonempty(output,'win-unpacked/resources/app.asar'),'package.json').toString('utf8'));
+    if (packaged.version !== packageVersion) throw new Error('Packaged application metadata differs from the installed package version.');
+    if(installer) {
+      const bundled=nonempty(output,'win-unpacked/resources/offline-payloads/manifest.json');
+      if(sha256(fs.readFileSync(bundled))!==payloads.manifestSha256) throw Error('Packaged offline payload manifest differs from the complete assembled inventory.');
+      nonempty(output,'win-unpacked/resources/offline-payloads/THIRD-PARTY-NOTICES.txt');
+      if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/material-file-broker.exe')))!==nativeBroker.sha256) throw Error('Packaged native broker differs from its compiled executable.');
+      const bundledBroker=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native-file-broker/broker-manifest.json'),'utf8'));
+      if(bundledBroker.sha256!==nativeBroker.sha256||bundledBroker.runtimeVerified!==false) throw Error('Packaged native broker manifest differs from its compiled identity.');
+      if(sha256(fs.readFileSync(nonempty(output,'win-unpacked/resources/native/flashing/MaterialBuildroot.Flash.exe')))!==flashingHelper.sha256)throw Error('Packaged flashing helper differs from its produced executable.');
+      const bundledFlash=JSON.parse(fs.readFileSync(nonempty(output,'win-unpacked/resources/native/flashing/manifest.json'),'utf8'));
+      if(bundledFlash.protocol!==1||bundledFlash.sha256!==flashingHelper.sha256||bundledFlash.runtimeAcceptance!=='unverified')throw Error('Packaged flashing helper manifest differs from its produced identity.');
+      for(const name of ['dotnet-sdk-LICENSE.txt','dotnet-sdk-ThirdPartyNotices.txt','dotnet-runtime-LICENSE.txt','dotnet-runtime-ThirdPartyNotices.txt'])nonempty(output,`win-unpacked/resources/native/flashing/notices/${name}`);
+      const setupFile=nonempty(output,'squirrel-windows/Setup.exe'),setupAdmission=require('./squirrel-setup.cjs');
+      let description={status:'format-unavailable'};
+      try {
+        const inspected=setupAdmission.embeddedZip(setupFile);
+        description={status:'inventory-only',bytes:inspected.bytes,resourceBytes:inspected.resourceBytes,members:inspected.entries.map(entry=>({name:entry.name,bytes:entry.bytes,compressed:entry.compressed,method:entry.method}))};
+      } catch {}
+      const describe=()=>fs.writeFileSync(path.join(output,'setup-format.json'),JSON.stringify({schemaVersion:1,source:before.commit,packageVersion,runtimeVerified:false,...description},null,2)+'\n');
+      describe();
+      setupEmbedding.finalFormat=description;
+      fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
+      if(description.status==='format-unavailable')throw Error('Configured final Setup has no readable embedded ZIP after genuine helper resource preservation.');
+      setupPayload=await setupAdmission.verifySetupPayload(setupFile,{packageFile:nonempty(output,`squirrel-windows/MaterialBuildroot-${packageVersion}-full.nupkg`),packageName:`MaterialBuildroot-${packageVersion}-full.nupkg`,updateFile:genuineUpdater});
+      if(setupPayload.resourceBytes!==setupEmbedding.after.dataResource.bytes||setupPayload.resourceSha256!==setupEmbedding.after.dataResource.sha256)throw Error('Configured final Setup resource differs from the genuine helper post-embedding resource.');
+      setupEmbedding.status='final-resource-preserved';setupEmbedding.finalResourceSha256=setupPayload.resourceSha256;
+      fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
+      description={status:'embedded-identity-verified',...setupPayload};describe();
+    }
+  }
+<<<<<<< HEAD
   execute(node,command,{env:childEnv});
   if (target.kind === 'desktop') verifyDocumentationResources(path.join(root,'dist/documentation'), output);
+=======
+>>>>>>> origin/task/offline-payload-source-origin
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
   if (installer) verifyInstaller(output);
   else {
@@ -209,7 +367,24 @@ async function main() {
   }
   assertIdentity(before,sourceIdentity(root,git,fs.readFileSync(manifestPath)));
   const files = inventory(output);
-  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
+  let adapterInstallerMeasurement = null;
+  if (installer && target.kind === 'desktop') {
+    for(const file of files.filter(file=>/(^|\/)(Setup\.exe|RELEASES|[^/]+\.nupkg)$/.test(file.path))) {
+      console.log(`Installer transfer asset: ${path.basename(file.path)} (${file.bytes} bytes).`);
+      if(file.bytes>1400000000) throw Error('Installer asset exceeds the supported 1.4 GB transfer budget; original output is retained and no release is permitted.');
+    }
+    const expectedFull = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-full.nupkg`);
+    if (!expectedFull) throw new Error('Squirrel full package identity differs from the requested installed version.');
+    adapterInstallerMeasurement = assertInstallerAdmission(adapterAdmission, files.map(file => ({path:file.path,size:file.bytes})));
+    const generatedDelta = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-delta.nupkg`);
+    if (delta.status === 'staged' && !generatedDelta) throw new Error('Squirrel did not produce a delta from the supplied baseline.');
+    if (generatedDelta) {
+      const baseline = {...delta};delete baseline.status;
+      delta = {status:'produced',baseline,package:path.basename(generatedDelta.path),sha256:generatedDelta.sha256};
+    }
+    console.log(delta.status === 'produced' ? `Squirrel delta produced for ${packageVersion}.` : `Squirrel delta unavailable: ${delta.reason}`);
+  }
+  const receipt = {schemaVersion:1, source:before, target:targetName, kind:target.kind, installer, packageVersion, packageVersionSource, delta, payloads, nativeBroker, squirrelHelper, setupEmbedding, setupPayload, flashingHelper, adapterAdmission, adapterInstallerMeasurement, canonicalCommand:template, targetMetadata:target, packageLockSha256:sha256(fs.readFileSync(packageLock)), files, producedAt:new Date().toISOString(), runtimeVerified:false};
   fs.writeFileSync(path.join(output,'build-receipt.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
   const destination = activateOutput(root,installer ? target.installerOutput : target.output,output);
   console.log(`Built ${targetName}${installer ? ' unsigned Squirrel.Windows installer' : ''} from ${before.commit}.`);
