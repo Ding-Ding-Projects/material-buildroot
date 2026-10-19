@@ -1948,7 +1948,7 @@ class MaterialBuildroot extends LitElement {
       <header>
         <md-text-button
           class="menu"
-          aria-label=${this.l("Open navigation","開啟導覽",true)}
+          aria-label=${this.l("Open navigation","開啟導覽",true)} title=${this.l("Open navigation","開啟導覽",true)}
           @click=${(e: Event) => this.openDialog("navigation-dialog", e)}
           >${materialIcon("menu")}</md-text-button
         >
@@ -1959,13 +1959,13 @@ class MaterialBuildroot extends LitElement {
         </div>
         <md-text-button
           class="command-search"
-          aria-label=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)}
+          aria-label=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)} title=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)}
           @click=${(e: Event) => this.openDialog("actions-dialog", e)}
           >${materialIcon("search","icon")}<span class="palette-label">
             ${this.l("Actions","操作",true)} · Ctrl+Shift+F</span
           ></md-text-button
         >
-        <md-text-button id="attention-button" aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('tune')}</md-text-button>
+        <md-text-button id="attention-button" title=${this.l('Attention and narration','專注同旁白',true)} aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('tune')}</md-text-button>
         <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
           ${(["minimize", "maximize-restore", "close"] as const).map(
             (command, index) =>
@@ -1975,6 +1975,7 @@ class MaterialBuildroot extends LitElement {
                   this.l("Maximize or restore","最大化或還原",true),
                   this.l("Close application","關閉應用程式",true),
                 ][index]}
+                title=${[this.l("Minimize","最小化",true),this.l("Maximize or restore","最大化或還原",true),this.l("Close application","關閉應用程式",true)][index]}
                 ?disabled=${!window.studio}
                 @click=${() => void this.controlWindow(command)}
                 >${materialIcon(["remove", "crop_square", "close"][index])}</md-text-button
@@ -2121,14 +2122,14 @@ class MaterialBuildroot extends LitElement {
             : nothing}
         </main></workspace-tabs>
       </div>
-      <div class="status"><span class="front-provenance">${this.l('Version','版本',true)} ${this.state?.version??this.l('Unavailable','未能取得',true)} · ${this.l('Updated','更新時間',true)} ${this.buildTime()}</span><span role="status" aria-live="polite">
+      <div class="status" tabindex="0" aria-label=${this.l('Workspace status','工作區狀態',true)}><span class="front-provenance">${this.l('Version','版本',true)} ${this.state?.version??this.l('Unavailable','未能取得',true)} · ${this.l('Updated','更新時間',true)} ${this.buildTime()}</span><span role="status" aria-live="polite">
         ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
       </span></div>
       <personal-vocabulary-drop .language=${this.effectiveLanguage}></personal-vocabulary-drop>
       ${this.dialog(
         "navigation-dialog",
         this.l("Navigation","導覽",true),
-        html`<div class="dialog-nav">${this.navigation(true)}</div>`,
+        html`<div class="dialog-nav">${this.navigation(true)}<md-text-button data-navigation-setup aria-label=${this.l("Resume setup","繼續設定",true)} @click=${async()=>{await this.openDialog('setup-dialog');const menu=this.renderRoot.querySelector<HTMLElement>('header .menu');if(menu)this.dialogOpeners.set('setup-dialog',menu);}}>${materialIcon('tune','icon')}${this.l('Setup','開始設定',true)}</md-text-button></div>`,
         this.closeButton("navigation-dialog"),
       )}
       ${this.dialog(

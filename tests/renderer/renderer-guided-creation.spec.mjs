@@ -304,7 +304,19 @@ test('shared shell navigation styles never resize or hide a nested pager',async(
   const geometry=await page.locator('#nested-nav-fixture').evaluate(host=>{const nav=host.shadowRoot.querySelector('nav'),style=getComputedStyle(nav);return {display:style.display,direction:style.flexDirection,width:nav.getBoundingClientRect().width};});
   expect(geometry.display).toBe('flex');expect(geometry.direction).toBe('row');expect(geometry.width).toBe(width-32);
   await expect(app.locator('nav [data-primary]')).toHaveCount(5);
-  for(const button of await app.locator('nav [data-primary]').all())await expect(button).toBeVisible();
+  if(width===960){
+   for(const button of await app.locator('nav [data-primary]').all())await expect(button).toBeVisible();
+   await expect(app.locator('header .menu')).toBeHidden();
+  }else{
+   await expect(app.locator('.shell > .body > nav')).toBeHidden();
+   const menu=app.locator('header .menu');await expect(menu).toBeVisible();
+   for(const destination of ['builds','tools','help','settings','images']){
+    await menu.click();const dialog=app.locator('#navigation-dialog');await expect(dialog).toBeVisible();
+    await expect(dialog.locator('[data-primary]')).toHaveCount(5);
+    await dialog.locator('[data-primary="'+destination+'"]').click();await expect(dialog).toBeHidden();
+    expect(await app.evaluate(el=>el.primaryDestination)).toBe(destination);
+   }
+  }
  }
 });
 

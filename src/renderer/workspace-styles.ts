@@ -501,12 +501,6 @@ export const workspaceStyles = css`
     }
   }
   @media (max-width: 699px) {
-    .shell > .body > nav {
-      display: none;
-    }
-    .menu {
-      display: inline-flex;
-    }
     header {
       flex-wrap: wrap;
     }
@@ -560,7 +554,7 @@ export const workspaceStyles = css`
   .front-provenance{margin-right:16px;overflow-wrap:anywhere}
   .status{font-size:12px;padding:8px 16px;min-height:32px}
   @media(max-width:1100px){.shell > .body > nav{width:64px;padding:8px 4px}.brand strong{max-width:180px;overflow:hidden;text-overflow:ellipsis}}
-  @media(max-width:699px){.shell > .body > nav{display:none}main{padding:8px}header{padding-left:8px;gap:4px}.brand-mark{display:none}.brand strong{max-width:100px}.command-search{flex:0 0 auto}.window md-text-button{min-width:40px}.palette-label{display:none}}
+  @media(max-width:699px){main{padding:8px}header{padding-left:8px;gap:4px}.brand-mark{display:none}.brand strong{max-width:100px}.command-search{flex:0 0 auto}.window md-text-button{min-width:40px}.palette-label{display:none}}
   /* Scope shell layout to avoid changing nested workflow anatomy. */
   .shell > .body > nav{width:192px;padding:16px 12px;gap:8px}
   .shell > .body > nav .navlabel,.dialog-nav .navlabel{display:inline;white-space:normal;overflow-wrap:anywhere}
@@ -595,17 +589,11 @@ export const workspaceStyles = css`
   .shell.compact > .body > nav{gap:4px;padding:12px}
   @media(max-width:900px){
     .shell > .body{flex-direction:column}
-    .shell > .body > nav{display:flex;flex-direction:row;flex-wrap:wrap;width:auto;padding:8px;gap:4px;flex-shrink:0}
-    .shell > .body > nav md-text-button{width:auto;flex:1 1 100px;--md-text-button-container-height:44px}
-    .shell > .body > nav .spacer{display:none}
-    .shell > .body > nav .navsymbol{margin-right:6px}
     .shell main{padding:16px}
     .shell .toolbar h1{font-size:24px}
   }
   @media(max-width:480px){
-    .shell header{padding:8px;gap:4px;flex-wrap:wrap}
-    .shell .brand{flex:1 1 140px}.shell .brand strong{font-size:14px}
-    .shell > .body > nav md-text-button{flex:1 1 88px;font-size:13px}
+    .shell .brand strong{font-size:14px}
     .shell .toolbar{align-items:flex-start}
     .shell main{padding:12px}
     .shell main:has(>.operations-host:not([hidden]))>.toolbar{padding:16px 12px 8px}
@@ -614,6 +602,24 @@ export const workspaceStyles = css`
     .image-actions{align-items:stretch;flex-direction:column}
     .image-projects{padding:16px}
   }
+  /* Compact shell chrome uses the existing labelled navigation dialog. */
+  @media(max-width:900px),(max-height:500px){
+    .shell > .body > nav{display:none}
+    .shell > header{flex-wrap:nowrap;gap:0;padding:4px;min-height:52px;height:52px;flex:0 0 52px}
+    .shell > header .menu{display:inline-flex}
+    .shell > header md-text-button{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;flex:0 0 44px;--md-text-button-container-height:44px}
+    .shell > header .command-search{margin:0;--md-text-button-container-height:44px}
+    .shell > header .palette-label,.shell > header .brand-mark,.shell > header .brand small{display:none}
+    .shell > header .brand{flex:1;min-width:0;padding-inline:4px}
+    .shell > header .brand strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+    .shell > header .window{margin:0;flex:none}
+    .shell > .body{min-height:0;flex:1}
+    .shell > .status{flex:none;min-height:32px;max-height:64px;overflow:auto;padding:6px 12px}
+    .shell > .status:focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:-3px}
+    .shell #navigation-dialog{max-height:calc(100dvh - 16px)}
+    .dialog-nav md-text-button{min-height:44px}
+  }
+  @media(max-width:380px){.shell > header .brand{display:none}}
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

@@ -287,3 +287,57 @@ for(const language of ['en','zh-HK','bilingual'])test('Images has no horizontal 
     await expect(app.locator('[data-image-action="create"]')).toBeVisible();
   }
 });
+
+
+test.describe('short viewport shell',()=>{
+ test.use({viewport:{width:480,height:320},deviceScaleFactor:2,colorScheme:'dark',reducedMotion:'reduce'});
+ test('bilingual compact chrome leaves usable content and exposes every destination',async({page},testInfo)=>{
+  const app=await open(page,{language:'bilingual'});await expect(app.locator('.shell')).toHaveClass(/dark/);
+  const measurements=await app.evaluate(el=>{
+   const root=el.shadowRoot,centre=root.querySelector('notification-centre');
+   const rect=e=>({top:e.getBoundingClientRect().top,bottom:e.getBoundingClientRect().bottom,height:e.getBoundingClientRect().height,width:e.getBoundingClientRect().width});
+   return {header:rect(root.querySelector('header')),notification:rect(centre),trigger:rect(centre.shadowRoot.querySelector('#trigger')),main:rect(root.querySelector('main')),status:rect(root.querySelector('.shell > .status')),viewport:innerHeight};
+  });
+  await testInfo.attach('short-shell-geometry',{body:JSON.stringify(measurements),contentType:'application/json'});
+  expect(measurements.notification.height).toBeLessThanOrEqual(measurements.trigger.height+2);
+  expect(measurements.header.height).toBeLessThanOrEqual(60);
+  expect(measurements.main.height).toBeGreaterThanOrEqual(120);
+  expect(measurements.status.bottom).toBeLessThanOrEqual(measurements.viewport+1);
+  expect(measurements.main.bottom).toBeLessThanOrEqual(measurements.status.top+1);
+  await expect(app.locator('.shell > .body > nav')).toBeHidden();
+  const menu=app.locator('header .menu');await expect(menu).toBeVisible();
+  for(const trigger of [menu,app.locator('header .command-search'),app.locator('#attention-button'),app.locator('notification-centre #trigger'),...await app.locator('header .window md-text-button').all()]){
+   const box=await trigger.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
+   await expect(trigger).toHaveAttribute('title',/.+/);await expect(trigger.getByRole('button')).toHaveAccessibleName(/.+/);
+  }
+  const create=app.locator('[data-image-action="create"]');await create.focus();await create.scrollIntoViewIfNeeded();await create.click({trial:true});
+  const action=await create.boundingBox();expect(action.y).toBeGreaterThanOrEqual(measurements.main.top);expect(action.y+action.height).toBeLessThanOrEqual(measurements.main.bottom+1);
+  for(const destination of ['builds','tools','help','settings','images']){
+   await menu.click();const dialog=app.locator('#navigation-dialog');await expect(dialog).toBeVisible();
+   await expect(dialog.locator('[data-primary]')).toHaveCount(5);
+   await dialog.locator('[data-primary="'+destination+'"]').click();await expect(dialog).toBeHidden();
+   expect(await app.evaluate(el=>el.primaryDestination)).toBe(destination);
+  }
+  await menu.click();await app.locator('#navigation-dialog [data-navigation-setup]').click();await expect(app.locator('#setup-dialog')).toBeVisible();
+  await page.keyboard.press('Escape');await expect(app.locator('#setup-dialog')).toBeHidden();
+  expect(await app.evaluate(el=>el.shadowRoot.activeElement===el.shadowRoot.querySelector('header .menu'))).toBe(true);
+  await expect(app.locator('.shell > .status')).toHaveAttribute('tabindex','0');
+  await app.locator('.shell > .status').focus();
+  const centre=app.locator('notification-centre');await centre.locator('#trigger').click();
+  await expect(centre.locator('#notification-review')).toBeVisible();
+  const exportAction=centre.getByRole('button',{name:/^Export Markdown/});await exportAction.scrollIntoViewIfNeeded();await exportAction.click({trial:true});
+  await centre.getByRole('button',{name:/^Close ·/}).click();await expect(centre.locator('#notification-review')).toHaveCount(0);
+  expect(await centre.evaluate(el=>el.shadowRoot.activeElement?.id)).toBe('trigger');
+  expect(await page.evaluate(()=>window.__requests.some(r=>['runtime.discover','build.submit','project.choose'].includes(r.action)))).toBe(false);
+ });
+});
+
+test('normal desktop keeps labelled navigation and auto-height notification host',async({page})=>{
+ await page.setViewportSize({width:960,height:640});const app=await open(page);
+ await expect(app.locator('.shell > .body > nav')).toBeVisible();await expect(app.locator('header .menu')).toBeHidden();
+ await expect(app.locator('nav [data-primary]')).toHaveCount(5);
+ const heights=await app.locator('notification-centre').evaluate(el=>({host:el.getBoundingClientRect().height,trigger:el.shadowRoot.querySelector('#trigger').getBoundingClientRect().height}));
+ expect(heights.host).toBeLessThanOrEqual(heights.trigger+2);
+ await expect(app.locator('notification-centre .trigger-label')).toBeVisible();
+ await app.locator('[data-image-action="create"]').click();await expect(app.locator('guided-image-creation')).toBeVisible();
+});
