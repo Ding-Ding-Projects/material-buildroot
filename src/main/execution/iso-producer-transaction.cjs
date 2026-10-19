@@ -54,6 +54,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       };
       const result = await adapters[name]({ lease, ...fixed, ...extra }, { signal, onOwnership });
       if (!owners.length || result?.state !== "succeeded" || result.code !== 0) fail("ISO_TRANSACTION_STAGE_UNVERIFIED");
+      journal.append("result", { stage, state: result.state, code: result.code });
       // Independent owner inspection is mandatory, even when the adapter reports cleanup success.
       for (const owner of producerOwner ? [producerOwner.precise()] : owners) {
         const cleanup = await adapters.inspectCleanup(owner);
