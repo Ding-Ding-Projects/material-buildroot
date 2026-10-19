@@ -49,15 +49,21 @@ export class ProjectWorkflowPanel extends LitElement {
   `];
   private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private changed() { this.revision++; }
-  private async request(action: string, fields: Record<string, unknown> = {}) {
+  private request(action: "project.list", fields?: Record<string, unknown>): Promise<unknown[]>;
+  private request(action: string, fields?: Record<string, unknown>): Promise<Record<string, unknown>>;
+  private async request(action: string, fields: Record<string, unknown> = {}): Promise<Record<string, unknown> | unknown[]> {
     if (!window.studio?.operations) throw Error("DESKTOP_REQUIRED");
     const outer = await window.studio.operations({ action, ...fields });
     if (!outer.ok) throw Error(outer.code);
+    const result=outer.result;
+    if(action==="project.list"){if(!Array.isArray(result))throw Error("INVALID_RESULT");return result;}
+    if(!result||typeof result!=="object"||Array.isArray(result))throw Error("INVALID_RESULT");
+    const record=result as Record<string,unknown>;
     if (action === "source") {
-      if (!outer.result?.ok) throw Error(outer.result?.code || "SOURCE_UNAVAILABLE");
-      if (outer.result.cancelled) throw Error("CANCELLED");
+      if (!record.ok) throw Error(typeof record.code==="string"?record.code:"SOURCE_UNAVAILABLE");
+      if (record.cancelled) throw Error("CANCELLED");
     }
-    return outer.result;
+    return record;
   }
   private async run(work: () => Promise<void>) {
     if (this.pending) return;
@@ -126,7 +132,7 @@ export class ProjectWorkflowPanel extends LitElement {
       </div>`:nothing}
       ${this.workspaceId?html`<h3>${this.l("Actual project provenance","實際專案來源記錄",true)}</h3>
         <p>${this.l("Portable export contains runtime choices, external-tree paths and recorded provenance. Keep this local file private when its paths or source details are sensitive. It excludes credentials, source files, outputs and execution grants.","可攜匯出包含執行環境選擇、外部樹路徑同來源記錄。如路徑或來源資料敏感，請保密保存本機檔案。匯出唔包含憑證、來源檔案、輸出或執行授權。",true)}</p>
-        ${this.button("Export project descriptor","匯出專案描述檔",async()=>{const result=await this.request("project.portable.export",{workspaceId:this.workspaceId});const url=URL.createObjectURL(new Blob([result.document],{type:"application/json"}));const link=document.createElement("a");link.href=url;link.download="buildroot-project.json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);})}
+        ${this.button("Export project descriptor","匯出專案描述檔",async()=>{const result=await this.request("project.portable.export",{workspaceId:this.workspaceId});if(typeof result.document!=="string")throw Error("INVALID_RESULT");const url=URL.createObjectURL(new Blob([result.document],{type:"application/json"}));const link=document.createElement("a");link.href=url;link.download="buildroot-project.json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);})}
         ${this.button("Refresh project provenance","重新整理專案來源記錄",async()=>{const id=this.workspaceId;this.status=undefined;await this.refresh();const status=await this.request("source",{request:{action:"source.status",workspaceId:id}});if(this.workspaceId===id){this.status=status;this.statusWorkspace=id;}})}
         ${current?html`<dl><dt>${this.l("Source path","來源路徑",true)}</dt><dd>${current.source}</dd><dt>${this.l("Output path","輸出路徑",true)}</dt><dd>${current.output}</dd></dl>`:nothing}
         ${this.status&&this.statusWorkspace===this.workspaceId?html`<dl><dt>${this.l("Resolved revision","實際修訂版本",true)}</dt><dd><code>${this.status.revision}</code></dd><dt>${this.l("Branch","分支",true)}</dt><dd>${this.status.branch||this.l("Detached revision","獨立修訂版本",true)}</dd><dt>${this.l("Working tree status","工作樹狀態",true)}</dt><dd>${this.status.dirty?this.l("Local modifications present","有本機修改",true):this.l("Clean","乾淨",true)}</dd></dl>`:html`<p>${this.l("Revision provenance has not been refreshed for this project. A requested tag is not proof of the checked-out revision.","尚未重新整理呢個專案嘅修訂來源記錄。要求嘅標籤唔代表實際已取出嘅修訂版本。",true)}</p>`}

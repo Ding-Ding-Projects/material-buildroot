@@ -145,7 +145,7 @@ export class PackagePanel extends LitElement {
         this.preview=undefined;this.reviewedModel=undefined;this.consent=false;this.validation=[];this.replaceExample=false;
         this.dependency="";this.configDependency="";this.editorTab="identity";
       }
-      this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>action==="save"?l("Draft and bounded undo history saved locally. Package files are unchanged. Refresh history to restore a saved revision.","草稿同有限復原歷史已喺本機儲存，套件檔案保持不變。重新整理歷史可還原已儲存修訂版本。",true):action==="restore"?l("Saved draft restored in the editor only. The previous draft is available through Undo draft. Preview and approve again before writing files.","只喺編輯器還原已儲存草稿。可用復原草稿返回之前草稿，寫入檔案前須重新預覽同批准。",true):l("History loaded for the currently authorized project, source and external tree. Choose a revision and explicitly approve editor replacement.","已載入目前授權專案、來源同外部樹嘅歷史。請選擇修訂版本並明確批准取代編輯器草稿。",true));
+      this.feedback=captureOwnedStatus(this,"feedback",(en,zh)=>this.l(en,zh,true),l=>action==="save"?l("Draft and bounded undo history saved locally. Package files are unchanged. Refresh history to restore a saved revision.","草稿同有限復原歷史已喺本機儲存，套件檔案保持不變。重新整理歷史可還原已儲存修訂版本。"):action==="restore"?l("Saved draft restored in the editor only. The previous draft is available through Undo draft. Preview and approve again before writing files.","只喺編輯器還原已儲存草稿。可用復原草稿返回之前草稿，寫入檔案前須重新預覽同批准。"):l("History loaded for the currently authorized project, source and external tree. Choose a revision and explicitly approve editor replacement.","已載入目前授權專案、來源同外部樹嘅歷史。請選擇修訂版本並明確批准取代編輯器草稿。"));
       if(reply.historyWarning)this.feedback+=this.l(" Earlier history is unavailable; the latest saved draft remains available."," 較早歷史不可用，最新已儲存草稿仍然可用。",true);
     });
     if(!confirmed){this.resetDraftStorage();this.changed();}
@@ -221,7 +221,7 @@ export class PackagePanel extends LitElement {
   private restoreDraft(redo=false){
     if(this.pending)return;const restored=this.draftHistory.restore(redo);if(!restored)return;
     this.model=restored;this.edit();
-    this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Draft restored. Applied files are unchanged; preview again before writing.","草稿已還原，已套用檔案保持不變，寫入前請重新預覽。",true));
+    this.feedback=captureOwnedStatus(this,"feedback",(en,zh)=>this.l(en,zh,true),l=>l("Draft restored. Applied files are unchanged; preview again before writing.","草稿已還原，已套用檔案保持不變，寫入前請重新預覽。"));
   }
   private example(){
     if(this.pending||(JSON.stringify(this.model)!==JSON.stringify(emptyModel())&&!this.replaceExample))return;

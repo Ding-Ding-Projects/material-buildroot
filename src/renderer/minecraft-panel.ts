@@ -78,7 +78,7 @@ export class MinecraftPanel extends LitElement {
   private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private change() { this.revision++; }
   private async call(action: string, fields: Record<string, unknown> = {}) {
-    const reply: any = await window.studio?.operations({ action, ...fields });
+    const reply: any = await window.studio?.operations?.({ action, ...fields });
     if (!reply?.ok || reply.result?.ok === false || reply.result?.cancelled) throw new Error(reply?.code || reply?.result?.code || "CANCELLED");
     return reply.result;
   }
