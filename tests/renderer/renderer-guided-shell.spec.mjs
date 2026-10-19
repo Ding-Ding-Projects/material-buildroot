@@ -393,7 +393,7 @@ for(const [width,height,scale] of [[480,320,2],[960,640,1],[1440,960,1]])test.de
   const app=await open(page,{language:'bilingual'});
   if(width===480){await app.locator('header .menu').click();await app.locator('#navigation-dialog [data-primary="tools"]').click();}else await nav(app,'tools').click();
   const operations=app.locator('operations-panel:not([hidden])'),tools=operations.locator('tools-panel');
-  const action=tools.locator('md-outlined-button').filter({hasText:'Check tool availability'});
+  const action=tools.locator('md-filled-button,md-outlined-button').filter({hasText:'Check tool availability'});
   await action.focus();await action.scrollIntoViewIfNeeded();
   const geometry=await action.evaluate(button=>{
    const rect=button.getBoundingClientRect(),violations=[],ancestors=[];

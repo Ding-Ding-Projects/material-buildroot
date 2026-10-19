@@ -23,9 +23,45 @@ type QueueItem = {
   request: { action: string };
   result?: { code?: string };
 };
+const toolTasks=[['tool:local','Local tool setup','本機工具設定'],['tool:convert','Convert a file','轉換檔案'],['tool:pdf','PDF operations','PDF 操作'],['tool:queue','File/model queue','檔案／模型佇列'],['tool:server','Server management','伺服器管理']];
 export class ToolsPanel extends LitElement {
-  static properties = { language: { type: String }, revision: { state: true } };
+  static properties = { language: { type: String }, revision: { state: true }, selectedTask:{state:true} };
   language = "bilingual";
+  selectedTask='tool:local';
+  private navigationEpoch=0;
+  private pickerReturn?:{id:string;epoch:number};
+  private taskLabel(id:string){const entry=toolTasks.find(([value])=>value===id);return entry?this.l(entry[1],entry[2],true):'';}
+  /** Presentation-only navigation; no file picker or operation is invoked. */
+  async openDestination(id:string){
+    if(!toolTasks.some(([value])=>value===id))return false;
+    this.pickerReturn=undefined;
+    const epoch=++this.navigationEpoch;this.selectedTask=id;await this.updateComplete;
+    if(epoch!==this.navigationEpoch||this.selectedTask!==id||!this.isConnected||!this.checkVisibility())return false;
+    const heading=this.renderRoot.querySelector<HTMLElement>('#tool-heading-'+id.slice(5));heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});return true;
+  }
+  private chooseTask(event:Event){
+    const select=event.currentTarget as HTMLElement&{value:string};
+    const returnsFromPicker=!select.matches(':focus-within'),id=select.value;
+    void this.openDestination(id);
+    if(returnsFromPicker)this.pickerReturn={id,epoch:this.navigationEpoch};
+  }
+  private async taskPickerFocus(){
+    const pending=this.pickerReturn;this.pickerReturn=undefined;
+    if(!pending)return;await this.updateComplete;
+    // The shared picker restores its trigger after its closed event and close promise.
+    // Move focus once both restorations have settled, retaining the navigation epoch.
+    await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
+    if(pending.epoch!==this.navigationEpoch||pending.id!==this.selectedTask||!this.isConnected||!this.checkVisibility())return;
+    const heading=this.renderRoot.querySelector<HTMLElement>('#tool-heading-'+pending.id.slice(5));heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});
+  }
+  disconnectedCallback(){this.navigationEpoch++;this.pickerReturn=undefined;super.disconnectedCallback();}
+  private get primaryAction(){
+    if(this.selectedTask==='tool:local')return this.payloads.some(p=>!p.available)?'Choose executable':'Check tool availability';
+    if(this.selectedTask==='tool:convert')return !this.categories.find(c=>c.category===this.category)?.formats.find(f=>f.format===this.format)?.available?'Load formats':!this.source?'Choose source':!this.destination?'Choose new output':'Convert now';
+    if(this.selectedTask==='tool:pdf')return !this.pdfSources.length?'Add PDF source':this.pdfOperation!=='inspect'&&!this.pdfDestination?'Choose PDF output':'Run PDF operation';
+    if(this.selectedTask==='tool:queue')return this.runningQueue?'Refresh queue':this.jobs.some(j=>j.state==='interrupted')?'Recover interrupted jobs':this.jobs.some(j=>j.state==='queued')?'Run queue':this.model.trim()?'Queue model download':'Refresh queue';
+    return '';
+  }
   revision = 0;
   private pending = false;
   private runningQueue = false;
@@ -94,8 +130,10 @@ export class ToolsPanel extends LitElement {
         display: grid;
         gap: 16px;
       }
+      [hidden]{display:none!important}
+      .task-selector{max-width:640px}
       .columns {
-        display: grid;
+        display: contents;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
       }
@@ -179,11 +217,15 @@ export class ToolsPanel extends LitElement {
     zh: string,
     work: () => Promise<void>,
     disabled = false,
+    primary = this.primaryAction===en,
+    trackPending = true,
   ) {
-    if (/^(Refresh|Remove|Move|Stop|Cancel|Revoke)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||disabled} @click=${()=>this.run(work)}>${materialIcon(actionSymbol(en))}</md-icon-button>`;
+    const invoke=()=>trackPending?this.run(work):work();
+    if(primary)return html`<md-filled-button data-primary-action=${en} ?disabled=${this.pending||disabled} @click=${invoke}>${actionIcon(en)}${this.l(en,zh)}</md-filled-button>`;
+    if (/^(Refresh|Remove|Move|Stop|Cancel|Revoke)\b/.test(en)) return html`<md-icon-button aria-label=${this.l(en,zh)} title=${this.l(en,zh)} ?disabled=${this.pending||disabled} @click=${invoke}>${materialIcon(actionSymbol(en))}</md-icon-button>`;
     return html`<md-outlined-button
       ?disabled=${this.pending || disabled}
-      @click=${() => this.run(work)}
+      @click=${invoke}
       >${actionIcon(en)}${this.l(en, zh)}</md-outlined-button
     >`;
   }
@@ -298,6 +340,23 @@ export class ToolsPanel extends LitElement {
     } else this.result(await this.tool(request));
     this.pdfDestination = undefined;
   }
+  private async runQueue(){
+              this.runningQueue = true;
+              this.changed();
+              try {
+                const r = await this.tool({ action: "queue.run" });
+                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Queue finished", "佇列已完成")}: ${r.completed} / ${r.failed}`);
+                await this.queuePage();
+              } catch (e) {
+                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
+                  "Queue could not finish. Refresh its status.",
+                  "佇列未能完成，請重新整理狀態。",
+                ));
+              } finally {
+                this.runningQueue = false;
+                this.changed();
+              }
+  }
   render() {
     const formats = this.categories.find(
       (c) => c.category === this.category,
@@ -306,6 +365,7 @@ export class ToolsPanel extends LitElement {
       this.pdfOperation,
     );
     return html`<div class="stack" aria-busy=${this.pending}>
+      <md-outlined-select id="tool-task" class="task-selector" .label=${this.l('Choose a utility task','選擇工具工作',true)} .value=${this.selectedTask} .displayText=${this.taskLabel(this.selectedTask)} @change=${this.chooseTask} @focusin=${this.taskPickerFocus}>${toolTasks.map(([id,en,zh])=>html`<md-select-option value=${id}><div slot="headline">${this.l(en,zh,true)}</div></md-select-option>`)}</md-outlined-select>
       ${this.pending || this.runningQueue
         ? html`<md-linear-progress
             indeterminate
@@ -313,8 +373,8 @@ export class ToolsPanel extends LitElement {
           ></md-linear-progress>`
         : nothing}
       <div role="status" aria-live="polite">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>
-      <section class="panel stack" data-destination="local" data-experience-id="tools-section:local" tabindex="-1">
-        <h2>${this.l("Local tools","本機工具",true)}</h2>
+      <section class="panel stack" data-destination="local" ?hidden=${this.selectedTask!=='tool:local'} ?inert=${this.selectedTask!=='tool:local'} aria-labelledby="tool-heading-local" data-experience-id="tools-section:local" tabindex="-1">
+        <h2 id="tool-heading-local" tabindex="-1">${this.l("Local tools","本機工具",true)}</h2>
         <p class="note">
           ${this.l("Choose trusted executables through the desktop review. Files are selected with native dialogs; outputs must be new files.","透過桌面審核選擇可信執行檔。請用原生對話框選擇檔案，輸出必須係新檔案。",true)}
         </p>
@@ -339,14 +399,14 @@ export class ToolsPanel extends LitElement {
                   await this.call("payload.choose", { toolId: p.toolId });
                   const r = await this.call("payload.list");
                   this.payloads = Array.isArray(r) ? r : r.tools;
-                },
+                },false,p===this.payloads.find(item=>!item.available),
               )}
             </div>`,
         )}
       </section>
       <div class="columns">
-        <section class="panel stack" data-destination="convert" data-experience-id="tools-section:convert" tabindex="-1">
-          <h2>${this.l("Convert a file","轉換檔案",true)}</h2>
+        <section class="panel stack" data-destination="convert" ?hidden=${this.selectedTask!=='tool:convert'} ?inert=${this.selectedTask!=='tool:convert'} aria-labelledby="tool-heading-convert" data-experience-id="tools-section:convert" tabindex="-1">
+          <h2 id="tool-heading-convert" tabindex="-1">${this.l("Convert a file","轉換檔案",true)}</h2>
           ${this.button("Load formats", "載入格式", async () => {
             this.categories = (
               await this.tool({ action: "converter.catalog" })
@@ -409,8 +469,8 @@ export class ToolsPanel extends LitElement {
             )}
           </div>
         </section>
-        <section class="panel stack" data-destination="pdf" data-experience-id="tools-section:pdf" tabindex="-1">
-          <h2>${this.l("PDF workspace","PDF 工作區",true)}</h2>
+        <section class="panel stack" data-destination="pdf" ?hidden=${this.selectedTask!=='tool:pdf'} ?inert=${this.selectedTask!=='tool:pdf'} aria-labelledby="tool-heading-pdf" data-experience-id="tools-section:pdf" tabindex="-1">
+          <h2 id="tool-heading-pdf" tabindex="-1">${this.l("PDF workspace","PDF 工作區",true)}</h2>
           <p class="note">
             ${this.l("PDF operations require qpdf and verified isolation. Add sources in merge order. Page numbers start at 1.","PDF 操作需要 qpdf 同已驗證隔離環境。請按合併次序加入來源，頁碼由 1 開始。",true)}
           </p>
@@ -494,8 +554,8 @@ export class ToolsPanel extends LitElement {
           </div>
         </section>
       </div>
-      <section class="panel stack" data-destination="queue" data-experience-id="tools-section:queue" tabindex="-1">
-        <h2>${this.l("File and model queue","檔案同模型佇列",true)}</h2>
+      <section class="panel stack" data-destination="queue" ?hidden=${this.selectedTask!=='tool:queue'} ?inert=${this.selectedTask!=='tool:queue'} aria-labelledby="tool-heading-queue" data-experience-id="tools-section:queue" tabindex="-1">
+        <h2 id="tool-heading-queue" tabindex="-1">${this.l("File and model queue","檔案同模型佇列",true)}</h2>
         <p class="note">
           ${this.l("Jobs run when you choose Run queue. File permissions must be selected again after restarting the app.","選擇執行佇列先會開始工作，重新啟動應用程式後需要重新選擇檔案權限。",true)}
         </p>
@@ -528,27 +588,7 @@ export class ToolsPanel extends LitElement {
               await this.queuePage();
             },
             this.runningQueue,
-          )}<md-outlined-button
-            ?disabled=${this.runningQueue || this.pending}
-            @click=${async () => {
-              this.runningQueue = true;
-              this.changed();
-              try {
-                const r = await this.tool({ action: "queue.run" });
-                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>`${l("Queue finished", "佇列已完成")}: ${r.completed} / ${r.failed}`);
-                await this.queuePage();
-              } catch (e) {
-                this.feedback = captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l(
-                  "Queue could not finish. Refresh its status.",
-                  "佇列未能完成，請重新整理狀態。",
-                ));
-              } finally {
-                this.runningQueue = false;
-                this.changed();
-              }
-            }}
-            >${actionIcon('Run queue')}${this.l("Run queue","執行佇列",true)}</md-outlined-button
-          >
+          )}${this.button('Run queue','執行佇列',()=>this.runQueue(),this.runningQueue,this.primaryAction==='Run queue',false)}
         </div>
         ${this.jobs.map(
           (j) =>
@@ -582,7 +622,7 @@ export class ToolsPanel extends LitElement {
             )
           : nothing}
       </section>
-      <section data-destination="server" data-experience-id="tools-section:server" tabindex="-1"><minecraft-panel .language=${this.language}></minecraft-panel></section>
+      <section data-destination="server" ?hidden=${this.selectedTask!=='tool:server'} ?inert=${this.selectedTask!=='tool:server'} aria-labelledby="tool-heading-server" data-experience-id="tools-section:server" tabindex="-1"><h2 id="tool-heading-server" tabindex="-1">${this.taskLabel('tool:server')}</h2><minecraft-panel .language=${this.language}></minecraft-panel></section>
     </div>`;
   }
 }

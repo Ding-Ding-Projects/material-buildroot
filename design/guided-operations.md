@@ -29,3 +29,18 @@ The focused renderer suite covers legacy defaults, all fourteen retained destina
 On October 18, 2026, the focused local run passed 25 tests (12 guided adapter regressions and 13 existing ISO permission regressions). `git diff --check` passed. The preview used its own loopback port and an ignored configuration; no native operation was invoked.
 
 These are isolated renderer fixtures with synthetic host replies. They do not establish WSL or container execution, current-source image production, native startup, installer behavior, source-bound packaged layout, real display scaling or release delivery. The complete built-artifact layout/capture matrix and integration with the replacement five-stage image guide remain parent-workflow acceptance work. Whole-tree TypeScript checking currently has 23 existing diagnostics; no new diagnostic is introduced in the operations adapter. Parent review independently confirmed the baseline diagnostics.
+
+
+## Focused utilities adapter
+
+`ToolsPanel.openDestination(id)` accepts only the five existing full `tool:*` identifiers. It selects the mounted task, waits for rendering and focuses its heading only if the current navigation generation and visibility still match. Invalid identifiers change nothing. The shared searchable picker returns focus after its dialog closes; the component waits for that return to settle before focusing the selected heading. The parent catalog calls this public method before acknowledging its explicit utility tab choice.
+
+| Task | Existing emphasized next action |
+| --- | --- |
+| Local tool setup | Check availability, then choose the first unavailable executable |
+| Convert a file | Load available formats, choose source, choose output, then convert |
+| PDF operations | Add a source, choose required output, then run the existing operation |
+| File/model queue | Refresh, queue a named model, run queued jobs, or recover interrupted jobs according to current state |
+| Server management | The child workflow owns its existing distribution/configuration/extension/lifecycle action |
+
+Primary emphasis never changes authority. Queue execution retains its independent running state so cancellation and recovery behavior are preserved. All original secondary actions remain. Renderer fixtures verify all five searchable choices and catalog routes, invalid destination rejection, hidden-control keyboard exclusion, draft and child identity retention, readiness progression, localized selected text and full-size primary actions at 480 by 320, 960 by 640 and 1440 by 960. Existing converter/PDF and short-height Tools regressions remain covered. Built native verification of this new focused presentation remains pending.
