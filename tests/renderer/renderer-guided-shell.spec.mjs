@@ -427,3 +427,57 @@ for(const [width,height,scale] of [[480,320,2],[960,640,1],[1440,960,1]])test.de
   if(height===320){await operations.evaluate(el=>el.tab='source');await expect(operations.locator('.guided-tools')).toHaveCount(0);expect(await owner.evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');}
  });
 });
+
+
+for(const [width,height,scale] of [[480,320,2],[960,640,1],[1440,960,1]])test.describe(`Help natural flow ${width}x${height}`,()=>{
+ test.use({viewport:{width,height},deviceScaleFactor:scale,colorScheme:'dark',reducedMotion:'reduce'});
+ test('search field fits its ancestors and retained reader controls stay reachable',async({page},testInfo)=>{
+  const app=await open(page,{language:'bilingual'});
+  await page.evaluate(()=>{
+   const ids=['doc-'+'a'.repeat(64),'doc-'+'b'.repeat(64)];
+   const articles=ids.map((id,index)=>({id,title:'Fixture guide '+(index+1),category:'Fixture topics',language:'en',summary:'Local fixture guide'}));
+   const navigation={categories:[{name:'Fixture topics',articles:articles.map(({id,title})=>({id,title}))}],headings:[]};
+   const original=window.studio.operations;window.__readerCalls=[];
+   window.studio.operations=async request=>{
+    if(!request.action.startsWith('documentation.'))return original(request);
+    window.__readerCalls.push(request.action);
+    if(request.action==='documentation.list')return {ok:true,result:{articles,navigation,issues:[],complete:true}};
+    if(request.action==='documentation.read'){const article=articles.find(a=>a.id===request.id);return {ok:true,result:{article,html:'<h1 id="reader-heading">'+article.title+'</h1><p>Retained article fixture.</p><h2 id="reader-section">Fixture section</h2>',navigation:{...navigation,headings:[{id:'reader-section',text:'Fixture section',level:2}]},issues:[],complete:true}};}
+    return {ok:false,code:'FIXTURE_UNAVAILABLE'};
+   };
+  });
+  const destination=async id=>{if(width===480){await app.locator('header .menu').click();await app.locator('#navigation-dialog [data-primary="'+id+'"]').click();}else await nav(app,id).click();};
+  await destination('help');const operations=app.locator('operations-panel:not([hidden])'),reader=operations.locator('documentation-panel');
+  await expect(reader.locator('.topics .topic')).toHaveCount(2);
+  await expect.poll(()=>reader.evaluate(el=>!el.loading&&!el.searching&&el.bodyState!=='loading')).toBe(true);
+  const initialTextReads=await page.evaluate(()=>window.__readerCalls.filter(action=>action==='documentation.searchText').length);
+  const field=reader.locator('.search > md-outlined-text-field');await field.focus();await field.scrollIntoViewIfNeeded();
+  const geometry=await field.evaluate(target=>{
+   const rect=target.getBoundingClientRect(),ancestors=[],violations=[];
+   const parent=el=>el.assignedSlot||el.parentElement||(el.getRootNode() instanceof ShadowRoot?el.getRootNode().host:null);
+   for(let el=target;el;el=parent(el)){
+    const box=el.getBoundingClientRect(),style=getComputedStyle(el),clipsX=/auto|scroll|hidden|clip/.test(style.overflowX),clipsY=/auto|scroll|hidden|clip/.test(style.overflowY);
+    const row={tag:el.localName,classes:el.className,x:box.x,y:box.y,width:box.width,height:box.height,overflowX:style.overflowX,overflowY:style.overflowY};ancestors.push(row);
+    if((clipsX&&(rect.left<box.left-1||rect.right>box.right+1))||(clipsY&&(rect.top<box.top-1||rect.bottom>box.bottom+1)))violations.push(row);
+   }
+   return {field:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},ancestors,violations};
+  });
+  await testInfo.attach('help-field-ancestors',{body:JSON.stringify(geometry),contentType:'application/json'});
+  expect(geometry.field.height).toBeGreaterThanOrEqual(88);expect(geometry.violations).toEqual([]);
+  await field.click({trial:true});expect(await field.evaluate(el=>el.supportingText)).toContain('local only');
+  expect(await page.evaluate(()=>window.__readerCalls.filter(action=>action==='documentation.searchText').length)).toBe(initialTextReads);
+  const owner=operations.locator('.editor-frame');
+  if(height===320){expect(await owner.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');for(const selector of ['.reader','.layout','.topics','.article'])expect(await reader.locator(selector).evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');}
+  else{expect(await owner.evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');expect(await reader.locator('.article').evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');}
+  const regex=reader.locator('.search > md-icon-button');await regex.focus();await regex.scrollIntoViewIfNeeded();await regex.click();await expect(reader.locator('#documentation-regex')).toBeVisible();
+  const close=reader.getByRole('button',{name:/^Close regex builder/});await close.scrollIntoViewIfNeeded();await close.click();
+  await reader.locator('.topics .topic').first().click();await expect(reader.locator('.article h1')).toHaveText('Fixture guide 1');
+  await reader.locator('.topics .topic').last().click();await expect(reader.locator('.article h1')).toHaveText('Fixture guide 2');
+  await reader.getByRole('button',{name:/^Back in documentation/}).click();await expect(reader.locator('.article h1')).toHaveText('Fixture guide 1');
+  await reader.locator('.outline summary').click();await reader.getByRole('link',{name:'Fixture section',exact:true}).click();await expect(reader.locator('#reader-section')).toBeVisible();
+  const snapshot=await reader.evaluate(el=>{window.__retainedReader=el;el.query='retained unsent query';el.pattern='retained pattern';el.flags='im';el.revision++;return {query:el.query,pattern:el.pattern,flags:el.flags,history:el.history,cursor:el.cursor,article:el.document.article.id};});
+  await destination('images');await destination('help');
+  expect(await reader.evaluate(el=>({same:el===window.__retainedReader,query:el.query,pattern:el.pattern,flags:el.flags,history:el.history,cursor:el.cursor,article:el.document.article.id}))).toEqual({same:true,...snapshot});
+  expect(await page.evaluate(()=>window.__readerCalls.filter(action=>action==='documentation.searchText').length)).toBe(initialTextReads);
+ });
+});

@@ -34,12 +34,14 @@ type Location = { id: string; anchor: string };
 /** Reads only host-admitted HTML. Navigation never accepts renderer-provided URLs. */
 export class DocumentationPanel extends LitElement {
   static properties = {
+    guidedShortFlow:{type:Boolean,attribute:'guided-short-flow',reflect:true},
     restricted:{type:Boolean},
     language: { type: String },
     active: { type: Boolean },
     revision: { state: true },
   };
   restricted=false;
+  guidedShortFlow=false;
   language = "bilingual";
   active = false;
   revision = 0;
@@ -310,6 +312,15 @@ export class DocumentationPanel extends LitElement {
           width: min(440px, calc(100vw - 70px));
         }
       }
+      @media (max-height:500px) {
+        :host([guided-short-flow]) {height:auto;overflow:visible}
+        :host([guided-short-flow]) .reader {height:auto;min-height:0;display:block}
+        :host([guided-short-flow]) .layout {display:block;flex:none;height:auto;min-height:0}
+        :host([guided-short-flow]) .topics,:host([guided-short-flow]) .article {height:auto;max-height:none;flex:none;overflow:visible}
+        :host([guided-short-flow]) .search {flex-wrap:wrap;align-items:flex-start}
+        :host([guided-short-flow]) .search > md-outlined-text-field {flex:1 1 240px}
+        :host([guided-short-flow]) .builder {position:static;flex:1 0 100%;min-width:0;max-height:none!important;overflow:visible!important;width:100%!important}
+      }
     `,
   ];
   private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
@@ -440,6 +451,7 @@ export class DocumentationPanel extends LitElement {
     }
     target.setAttribute("tabindex", "-1");
     target.focus({ preventScroll: true });
+    if(this.guidedShortFlow&&matchMedia('(max-height:500px)').matches){target.scrollIntoView({block:'start',behavior:'auto'});return;}
     if (body) {
       if (target === body) body.scrollTop = 0;
       else

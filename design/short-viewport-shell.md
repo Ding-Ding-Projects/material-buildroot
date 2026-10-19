@@ -22,3 +22,12 @@ The renderer regression uses 480 by 320 CSS pixels, device scale factor 2, bilin
 | Scrollable status | 64 px | 256 to 320 px |
 
 The focused cases verify all five compact navigation destinations, Setup, localized names and tooltips, minimum control dimensions, nonoverlapping main/status geometry, focused and scrolled Create activation, reachable notification export controls and close-focus return, normal desktop navigation, three-language horizontal fit, and unaffected nested-pager geometry. Tests use typed renderer fixtures, and do not execute native operations. Formal built application before/after capture and layout receipts remain separate integration verification.
+
+
+## Guided Help at short heights
+
+The exact guided Help destination also uses the outer operations editor as its scroll owner at heights up to 500 pixels. Its heading and documentation host flow together. The documentation component receives an explicit `guidedShortFlow` property, reflected as `guided-short-flow`; only that opt-in plus the short-height media condition changes its reader, layout, topics and article to natural height and visible overflow. The standalone reader and taller layouts retain their existing behavior.
+
+The full search field, supporting text and regex access remain present. The regex builder joins the natural flow when opened, and article anchors scroll the outer flow rather than attempting to scroll a non-scrolling article pane. No control or reader instance is recreated, and search, history and article state are not cleared.
+
+The 480 by 320 bilingual/dark scale-2 renderer regression failed before repair because the complete search field exceeded its enclosing scroll bounds. After repair the field remains 108 pixels high at y=124.1875, with zero clipping-ancestor violations. Focus and scrolling submit no search. Three focused cases pass at 480 by 320, 960 by 640 and 1440 by 960, including regex access, topics, article history, anchor navigation and retained reader/query state after leaving and returning. These are renderer fixtures. Rebuilt native after-repair capture and formal layout validation remain pending in the integration workflow.
