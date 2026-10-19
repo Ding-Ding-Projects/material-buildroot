@@ -8,6 +8,8 @@
 - [x] Distinguish verified release publication from explicitly skipped preservation builds.
 - [x] Verify source-bound desktop and documentation production through the exact root entrypoints.
 - [ ] Repair final embedded ZIP admission after installer retry 39207625084 failed; no release was published.
+- [x] Implement exact retained-ZIP final embedding, source-bound receipts and owned child containment; pass four focused checks and supported MSVC compilation.
+- [ ] Verify actual native final embedding and runtime termination; three bounded fixture launches returned EACCES before execution, without security changes.
 - [x] Pass 33 focused renderer checks, record bounded native navigation and its remaining catalog/reference limits, publish integration and verify remote main.
 - [x] Verify the recovery archive and separate ignored-image preservation, then retire 77 ancestor-proven remote branches and two completed task worktrees/local branches.
 

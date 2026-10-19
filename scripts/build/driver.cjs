@@ -6,6 +6,7 @@ const cp = require('node:child_process');
 const os = require('node:os');
 const {packageIdentity,stageBaseline} = require('./squirrel.cjs');
 const {acquireHostedBaseline} = require('./squirrel-baseline.cjs');
+const {finalizeSetup,assertInstallerTransfer} = require('./squirrel-finalize.cjs');
 const {loadAdapterAdmission,assertInstallerAdmission} = require('./adapter-admission.cjs');
 const root = path.resolve(__dirname, '../..');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -214,7 +215,7 @@ async function main() {
   if (target.rendererCommand) execute(node,target.rendererCommand);
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
-  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, setupEmbedding = null, flashingHelper = {status:'not-produced',runtimeVerified:false};
+  let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, squirrelHelperDirectory = null, setupEmbedding = null, flashingHelper = {status:'not-produced',runtimeVerified:false};
   if (target.kind === 'desktop') {
     if (!process.env.MATERIAL_BUILD_ELECTRON_DIST) throw new Error('Verified desktop runtime directory is unavailable.');
     const identity = packageIdentity(JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version);
@@ -261,6 +262,7 @@ async function main() {
       if(brokerManifest.schemaVersion!==1||brokerManifest.file!=='material-file-broker.exe'||brokerManifest.sha256!==brokerHash||brokerManifest.mechanism!=='appcontainer-handle-job'||brokerManifest.runtimeVerified!==false) throw Error('Compiled native broker manifest does not match the produced executable.');
       nativeBroker={status:'compiled',sha256:brokerHash,mechanism:brokerManifest.mechanism,toolchain,runtimeVerified:false};
       const helperOutput=contained(root,`.cache/squirrel-writezip/${generation}`);
+      squirrelHelperDirectory=helperOutput;
       execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-File',path.join(root,'scripts/build/squirrel-writezip.ps1'),'-OutputDirectory',helperOutput]);
       const helperManifest=JSON.parse(fs.readFileSync(nonempty(helperOutput,'helper-manifest.json'),'utf8'));
       if(helperManifest.architecture!=='x64'||helperManifest.source!=='eef37460aef77b2f9de8cd2237c1e55b344a6554'||helperManifest.role!=='genuine-helper-invocation-observer'||helperManifest.sha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.exe')))||helperManifest.genuineSha256!==sha256(fs.readFileSync(nonempty(helperOutput,'WriteZipToSetup.Genuine.exe')))) throw Error('Genuine x64 Squirrel helper and observer identities are inconsistent.');
@@ -275,7 +277,7 @@ async function main() {
       nonempty(vendor,'Squirrel.exe');nonempty(vendor,'Setup.exe');
       squirrelHelper={source:helperManifest.source,architecture:'x64',role:helperManifest.role,sha256:helperManifest.sha256,genuineHelperSha256:helperManifest.genuineSha256,proxySourceSha256:helperManifest.proxySourceSha256,genuineUpdaterSha256:sha256(fs.readFileSync(genuineUpdater)),runtimeVerified:false};
       squirrelTrace=path.join(staging,'squirrel-invocation');fs.mkdirSync(squirrelTrace);
-      childEnv.MATERIAL_BUILD_SQUIRREL_TRACE=squirrelTrace;childEnv.MATERIAL_BUILD_SOURCE_SHA=before.commit;
+      childEnv.MATERIAL_BUILD_SQUIRREL_TRACE=squirrelTrace;childEnv.MATERIAL_BUILD_SOURCE_SHA=before.commit;childEnv.MATERIAL_BUILD_SQUIRREL_INPUT_MODE='retain';
       const flashingOutput=path.join(staging,'native-flashing');
       const flashingCommand="$ErrorActionPreference='Stop'; . (Join-Path $env:MATERIAL_FLASH_SOURCE_ROOT 'scripts/build/flashing.ps1'); $null=Invoke-FlashingBuild -RepositoryRoot $env:MATERIAL_FLASH_SOURCE_ROOT -ToolsRoot $env:MATERIAL_FLASH_TOOLS_ROOT -OutputDirectory $env:MATERIAL_FLASH_OUTPUT_DIRECTORY";
       execute(path.join(systemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoLogo','-NoProfile','-NonInteractive','-Command',flashingCommand],{env:{...childEnv,MATERIAL_FLASH_SOURCE_ROOT:root,MATERIAL_FLASH_TOOLS_ROOT:contained(root,'.cache/flashing-tools'),MATERIAL_FLASH_OUTPUT_DIRECTORY:flashingOutput}});
@@ -317,6 +319,8 @@ async function main() {
     if(setupEmbedding.childExitCode!==0)throw Error(`Genuine Squirrel embedding helper exited with code ${setupEmbedding.childExitCode}; exact invocation evidence retained.`);
     const data=setupEmbedding.after.dataResource;
     if(!data.present||data.bytes!==setupEmbedding.inputZip.bytes||data.sha256!==setupEmbedding.inputZip.sha256)throw Error('Genuine helper output did not retain a nonempty DATA resource matching its input ZIP; invocation evidence retained.');
+    setupEmbedding.finalEmbedding=await finalizeSetup({setup:nonempty(output,'squirrel-windows/Setup.exe'),trace:squirrelTrace,helperDirectory:squirrelHelperDirectory,source:before.commit,helper:squirrelHelper,initial:setupEmbedding,onObserved:record=>{setupEmbedding.finalEmbedding=record;fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');}});
+    fs.writeFileSync(path.join(output,'setup-embedding.json'),JSON.stringify(setupEmbedding,null,2)+'\n');
   }
   if (target.kind === 'desktop') {
     const asar = require('@electron/asar');
@@ -364,7 +368,7 @@ async function main() {
   if (installer && target.kind === 'desktop') {
     for(const file of files.filter(file=>/(^|\/)(Setup\.exe|RELEASES|[^/]+\.nupkg)$/.test(file.path))) {
       console.log(`Installer transfer asset: ${path.basename(file.path)} (${file.bytes} bytes).`);
-      if(file.bytes>1400000000) throw Error('Installer asset exceeds the supported 1.4 GB transfer budget; original output is retained and no release is permitted.');
+      assertInstallerTransfer(file.bytes);
     }
     const expectedFull = files.find(file => path.basename(file.path) === `MaterialBuildroot-${packageVersion}-full.nupkg`);
     if (!expectedFull) throw new Error('Squirrel full package identity differs from the requested installed version.');

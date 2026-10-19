@@ -6,11 +6,13 @@ Remote main was read back at b10f6ebc4b13a783d31723582dd0ff9098ba5659. Exactly o
 
 ## Actual verification
 
+Evidence checkpoint 4c3235125e70729985122937d37f9ede5a1cd2d5 is pushed and verified. Two current native screenshots from source4c5e9ec passed formal promotion checks and are embedded in README.md. Their deployed URLs return HTTP200 with exact matching PNG hashes. See docs/evidence/main-closeout/captures.json for source, executable, viewport and state identities. Both show bounded navigation/state only. The final genuine-helper embedding repair passed source review, supported MSVC compilation and four focused checks. Native positive and runtime termination remain unverified after three bounded EACCES fixture attempts. No security setting changed and no release was published.
+
 Full host inventory:732 tests,716 passed,0 failed,16 explicit skips. Selected renderer checks:33 passed. Strict renderer checking passed. Exact desktop source c6ade502691c583e6aa4d53230e0bd3c5ad2a0c8 built successfully; bounded real hidden navigation and owned teardown were verified with11 inspected captures. Catalog loading and image/reference interaction remain unverified. Documentation source b10f6eb passed433 pages and11,315 internal links/assets/fragments. Existing live home and exact stored homepage were verified separately from fresh generated-output publication.
 
 ## Remaining external verdict at this checkpoint
 
-Installer run39206481441 failed on a cross-volume flashing-producer move. The same-volume repair and its real filesystem checks are complete. Retry39207625084 failed final embedded ZIP admission. No release was published. Diagnose the exact produced package and reader, repair the bounded cause, then verify a fresh exact-source result before any release or installed-update claim. Preserve the matching installation and existing settings/data; do not newly install an absent or unrelated product, interrupt active work or initiate a host power/login action.
+Installer run39206481441 failed on a cross-volume flashing-producer move. The same-volume repair and its real filesystem checks are complete. Retry39207625084 failed final embedded ZIP admission. No release was published. The bounded source repair is ready; verify a fresh exact-source installer result before any release or installed-update claim. Preserve the matching installation and existing settings/data; do not newly install an absent or unrelated product, interrupt active work or initiate a host power/login action.
 
 Finish the accurate final handoff and generated documentation publication, verify the final remote main SHA and keep the main-only state. Do not recreate retired branches or adopt broader product backlog. Retain all roadmap acceptance limits. The larger Project and issue1 remain In Progress; bounded source-control retirement does not complete the whole application.
 

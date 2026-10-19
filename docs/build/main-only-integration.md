@@ -16,6 +16,14 @@ Timing requires exact successful publication before measuring a release. A prese
 
 Final root builds, runtime observations, remote proof and retirement results are recorded in HANDOFF.md as they finish. Source integration never proves whole-product acceptance, firmware/device operations, fresh-host installation or installed update.
 
+## Final installer resource preservation
+
+The genuine embedding observer now retains its exact input ZIP before the packaging tool edits executable resources. Finalization verifies that input and both compiled helper identities, invokes the unchanged genuine helper after resource editing, and retains separate source-bound invocation evidence. Existing final package, updater, feed and embedded-resource hash checks still decide admission. A kill-on-close Job Object owns the suspended helper before execution, with bounded waiting and termination so a timed-out observer cannot leave a child writing the output.
+
+Four focused checks pass, including exact transfer-boundary and changed-input rejection cases plus a static containment check with four mutation negatives. The supported MSVC compilation passed. Actual native fixture execution returned EACCES before either the observer or unchanged genuine helper started, across three bounded attempts. Positive native embedding and runtime termination remain unverified. The retained native fixture is explicit opt-in evidence, not a passing default test. No security setting was changed.
+
+The hard per-file installer transfer ceiling is 1,450,000,000 bytes, retaining 50 MB below the 1.5 GB transport limit. Exact ceiling and ceiling-plus-one cases are checked. The smaller optional diagnostic-collection budget remains separate and does not limit the normal release transport.
+
 ## Retirement checkpoint
 
 All 77 actual non-main remote branches and two completed task worktrees/local branches have been retired after fresh ancestry proof against remote main at `b10f6eb`. The earlier count of 78 included the symbolic remote HEAD alias. The primary checkout remains clean with only local and remote main. The source archive passed full integrity testing before deletion, and ignored generated images were separately preserved.

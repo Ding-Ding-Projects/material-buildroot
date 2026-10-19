@@ -62,14 +62,40 @@ std::wstring Quote(const std::wstring& value) {
     out.append(slashes*2,L'\\');out.push_back(L'\"');return out;
 }
 
+struct OwnedHelper {
+    HANDLE job=nullptr,process=nullptr,thread=nullptr;bool completed=false;
+    ~OwnedHelper(){
+        // Process termination also covers assignment or resume failures before the job owns it.
+        if(process&&!completed){TerminateProcess(process,ERROR_PROCESS_ABORTED);WaitForSingleObject(process,5000);}
+        if(thread)CloseHandle(thread);
+        if(process)CloseHandle(process);
+        if(job)CloseHandle(job);
+    }
+};
+
 DWORD Launch(const std::wstring& genuine,int argc,wchar_t** argv) {
+    OwnedHelper owned;
+    owned.job=CreateJobObjectW(nullptr,nullptr);
+    if(!owned.job)throw std::runtime_error("Genuine helper job creation failed");
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={};
+    limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+    if(!SetInformationJobObject(owned.job,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))throw std::runtime_error("Genuine helper containment unavailable");
     std::wstring command=Quote(genuine);for(int i=1;i<argc;i++)command+=L" "+Quote(argv[i]);
     std::vector<wchar_t> mutableCommand(command.begin(),command.end());mutableCommand.push_back(0);
     STARTUPINFOW startup={};startup.cb=sizeof(startup);PROCESS_INFORMATION process={};
-    if(!CreateProcessW(genuine.c_str(),mutableCommand.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,nullptr,&startup,&process))throw std::runtime_error("Genuine helper launch failed");
-    const DWORD waited=WaitForSingleObject(process.hProcess,INFINITE);DWORD result=ERROR_PROCESS_ABORTED;
-    const BOOL read=GetExitCodeProcess(process.hProcess,&result);CloseHandle(process.hThread);CloseHandle(process.hProcess);
-    if(waited!=WAIT_OBJECT_0||!read)throw std::runtime_error("Genuine helper exit unavailable");return result;
+    if(!CreateProcessW(genuine.c_str(),mutableCommand.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW|CREATE_SUSPENDED,nullptr,nullptr,&startup,&process))throw std::runtime_error("Genuine helper launch failed");
+    owned.process=process.hProcess;owned.thread=process.hThread;
+    if(!AssignProcessToJobObject(owned.job,owned.process))throw std::runtime_error("Genuine helper assignment failed");
+    if(ResumeThread(owned.thread)==static_cast<DWORD>(-1))throw std::runtime_error("Genuine helper resume failed");
+    const DWORD waited=WaitForSingleObject(owned.process,120000);
+    if(waited!=WAIT_OBJECT_0){
+        const DWORD reason=waited==WAIT_TIMEOUT?ERROR_TIMEOUT:ERROR_PROCESS_ABORTED;
+        if(!TerminateJobObject(owned.job,reason)||WaitForSingleObject(owned.process,5000)!=WAIT_OBJECT_0)throw std::runtime_error("Genuine helper stop could not be confirmed");
+    }
+    DWORD result=ERROR_PROCESS_ABORTED;
+    if(!GetExitCodeProcess(owned.process,&result)||result==STILL_ACTIVE)throw std::runtime_error("Genuine helper exit unavailable");
+    owned.completed=true;
+    return result;
 }
 
 std::string Describe(const SetupIdentity& value) {
@@ -90,9 +116,18 @@ int wmain(int argc,wchar_t** argv) {
         if(!traceLength||traceLength>=32768||sourceLength!=40)return ERROR_BAD_ENVIRONMENT;
         std::string sourceAscii;for(DWORD i=0;i<sourceLength;i++){if(!((source[i]>=L'0'&&source[i]<=L'9')||(source[i]>=L'a'&&source[i]<=L'f')))return ERROR_BAD_ENVIRONMENT;sourceAscii.push_back(static_cast<char>(source[i]));}
         const FileIdentity genuineIdentity=File(genuine),proxyIdentity=File(self),zip=File(argv[2]);const SetupIdentity before=Setup(argv[1]);
+        wchar_t retention[16];const DWORD retentionLength=GetEnvironmentVariableW(L"MATERIAL_BUILD_SQUIRREL_INPUT_MODE",retention,16);
+        const bool reuse=retentionLength==5&&std::wstring(retention,retentionLength)==L"reuse";
+        if(retentionLength&&!reuse&&!(retentionLength==6&&std::wstring(retention,retentionLength)==L"retain"))return ERROR_BAD_ENVIRONMENT;
+        if(!reuse){
+            const std::wstring retained=std::wstring(trace,traceLength)+L"\\embedding-input.zip";
+            if(!CopyFileW(argv[2],retained.c_str(),TRUE))throw std::runtime_error("Exclusive embedding input could not be retained");
+            const FileIdentity saved=File(retained);
+            if(saved.bytes!=zip.bytes||saved.sha256!=zip.sha256)throw std::runtime_error("Retained embedding input changed");
+        }
         actualExit=Launch(genuine,argc,argv);ran=true;
         const SetupIdentity after=Setup(argv[1]);
-        std::ostringstream out;out<<"{\"schemaVersion\":1,\"source\":\""<<sourceAscii<<"\",\"kind\":\"genuine-embedding-invocation\",\"genuineHelperSha256\":\""<<genuineIdentity.sha256<<"\",\"proxySha256\":\""<<proxyIdentity.sha256<<"\",\"childExitCode\":"<<actualExit<<",\"inputZip\":{\"bytes\":"<<zip.bytes<<",\"sha256\":\""<<zip.sha256<<"\"},\"before\":"<<Describe(before)<<",\"after\":"<<Describe(after)<<",\"runtimeVerified\":false}";
+        std::ostringstream out;out<<"{\"schemaVersion\":1,\"source\":\""<<sourceAscii<<"\",\"kind\":\"genuine-embedding-invocation\",\"genuineHelperSha256\":\""<<genuineIdentity.sha256<<"\",\"proxySha256\":\""<<proxyIdentity.sha256<<"\",\"childExitCode\":"<<actualExit<<",\"inputRetained\":"<<(!reuse?"true":"false")<<",\"inputZip\":{\"bytes\":"<<zip.bytes<<",\"sha256\":\""<<zip.sha256<<"\"},\"before\":"<<Describe(before)<<",\"after\":"<<Describe(after)<<",\"runtimeVerified\":false}";
         const std::wstring report=std::wstring(trace,traceLength)+L"\\setup-helper-invocation.json";
         HANDLE output=CreateFileW(report.c_str(),GENERIC_WRITE,0,nullptr,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,nullptr);
         if(output==INVALID_HANDLE_VALUE)throw std::runtime_error("Invocation record already exists or cannot be created");

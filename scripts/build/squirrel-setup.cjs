@@ -106,8 +106,8 @@ function admitInvocation(record,source,helper) {
     if(!resource||typeof resource.present!=='boolean'||!Number.isSafeInteger(resource.bytes)||resource.bytes<0||resource.bytes>2000000000||!Number.isSafeInteger(resource.error)||resource.error<0||resource.error>0xffffffff||(resource.present?!resource.bytes||!validHash(resource.sha256):resource.bytes!==0||resource.sha256!==''))throw Error('Genuine helper resource record is invalid.');
     return {...file,dataResource:{present:resource.present,bytes:resource.bytes,sha256:resource.sha256,error:resource.error}};
   };
-  if(!record||record.schemaVersion!==1||record.source!==source||record.kind!=='genuine-embedding-invocation'||record.genuineHelperSha256!==helper.genuineHelperSha256||record.proxySha256!==helper.sha256||!Number.isSafeInteger(record.childExitCode)||record.childExitCode<0||record.childExitCode>0xffffffff||record.runtimeVerified!==false)throw Error('Actual Squirrel helper invocation is missing or does not match compiled source.');
-  return {schemaVersion:1,source,kind:record.kind,genuineHelperSha256:record.genuineHelperSha256,proxySha256:record.proxySha256,childExitCode:record.childExitCode,inputZip:identity(record.inputZip),before:setup(record.before),after:setup(record.after),runtimeVerified:false};
+  if(!record||record.schemaVersion!==1||record.source!==source||record.kind!=='genuine-embedding-invocation'||record.genuineHelperSha256!==helper.genuineHelperSha256||record.proxySha256!==helper.sha256||!Number.isSafeInteger(record.childExitCode)||record.childExitCode<0||record.childExitCode>0xffffffff||record.runtimeVerified!==false||typeof record.inputRetained!=='boolean')throw Error('Actual Squirrel helper invocation is missing or does not match compiled source.');
+  return {schemaVersion:1,source,kind:record.kind,genuineHelperSha256:record.genuineHelperSha256,proxySha256:record.proxySha256,childExitCode:record.childExitCode,inputRetained:record.inputRetained,inputZip:identity(record.inputZip),before:setup(record.before),after:setup(record.after),runtimeVerified:false};
 }
 
 module.exports={embeddedZip,verifySetupPayload,admitInvocation};
