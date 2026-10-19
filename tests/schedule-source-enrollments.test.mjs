@@ -265,7 +265,7 @@ test("service keeps unenrolled/removed rules readable and local overrides usable
       queries++;
       return [{ address: "10.0.0.3", family: 4 }];
     },
-    baseReader: async () => ({ language: "en", "appearance.theme": "system" }),
+    baseReader: async () => ({ language: "en", "appearance.profile": null, "appearance.theme": "system" }),
   });
   t.after(() => service.close());
   await service.start();
@@ -492,6 +492,7 @@ test("live enrollment changes and failed reads revoke prior actual HTTPS generat
       ],
       baseReader: async () => ({
         language: "en",
+        "appearance.profile": null,
         "appearance.theme": "system",
       }),
     });
@@ -619,7 +620,7 @@ test("service can change and remove persisted unenrolled origins without network
       queries++;
       throw Error("Unexpected network lookup");
     },
-    baseReader: async () => ({ language: "en", "appearance.theme": "system" }),
+    baseReader: async () => ({ language: "en", "appearance.profile": null, "appearance.theme": "system" }),
   });
   t.after(() => service.close());
   await service.start();

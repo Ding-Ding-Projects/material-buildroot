@@ -145,7 +145,7 @@ test("source enrollment bridge stores protected references without returning sec
   const service = createSchedulePreferencesService({
     directory,
     profileId: "desktop",
-    baseReader: () => ({ language: "en", "appearance.theme": "light" }),
+    baseReader: () => ({ language: "en", "appearance.profile": null, "appearance.theme": "light" }),
     vault: {
       write(owner, secret) {
         protectedWrites.push({ owner, secret });
@@ -270,8 +270,8 @@ test("preload admits bounded schedule events without private fields and owns its
     revision: 0,
     externalAvailable: false,
     effective: {
-      values: { language: "en", "appearance.theme": "dark" },
-      provenance: { language: null, "appearance.theme": "night" },
+      values: { language: "en", "appearance.profile": null, "appearance.theme": "dark" },
+      provenance: { language: null, "appearance.profile": null, "appearance.theme": "night" },
       appliedRuleIds: ["night"],
       issues: [],
     },
@@ -319,7 +319,7 @@ test("desktop schedule boundary commits actual private storage and returns tempo
     "../src/main/preferences/service.mjs"
   );
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "schedule-ipc-"));
-  const base = { language: "en", "appearance.theme": "system" };
+  const base = { language: "en", "appearance.profile": null, "appearance.theme": "system" };
   const service = createSchedulePreferencesService({
     directory,
     profileId: "desktop",
@@ -368,8 +368,9 @@ test("desktop schedule boundary commits actual private storage and returns tempo
   assert.deepEqual(refreshed.result.effective.values, {
     language: "bilingual",
     "appearance.theme": "dark",
+    "appearance.profile": null,
   });
-  assert.deepEqual(base, { language: "en", "appearance.theme": "system" });
+  assert.deepEqual(base, { language: "en", "appearance.profile": null, "appearance.theme": "system" });
   assert.equal(refreshed.result.externalAvailable, false);
   assert.equal(
     (await request({ action: "replace", document, expectedRevision: null }))
