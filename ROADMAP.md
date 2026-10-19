@@ -4,7 +4,11 @@
 
 - [x] Verify the948 documentation build and bounded10-view runtime/navigation/persistence scope, with explicit local-only delivery.
 - [x] Repeat native selected-label language switching after ed602ad in build e47: four actual captures, persisted values unchanged and owned teardown verified.
-- [ ] Verify the integrated short-viewport repair d339e07 against the exact native480x320 bilingual/dark scale2 finding, then finish the remaining matrix.
+- [x] Verify outer-shell repair d339e07 on native5437fff at480x320 bilingual/dark scale2, including ten validated positive-area measurements and owned teardown.
+- [x] Verify the actual native Tools selected-label language roundtrip on bd746d7 with four inspected captures and unchanged selection.
+- [ ] Repair the separate short-height Tools nested viewport, repeat its focused native action geometry, then finish the remaining matrix. The48px action does not fit the40.8125px owner; no tool was invoked.
+- [x] Independently review and regression-check inactive ISO restart receipt correlation at96923b4, requiring full anchored receipt equality and verified successful state. Runtime activation remains separate.
+- [x] Read back actual ordinary installed physical bytes and embedded source: package0.1.1/sourceb9447cf. This does not claim updated installation or startup.
 - [ ] Complete scheduler integration and runtime verification of the reviewed internal ISO transaction modules; source adapters remain disconnected.
 
 - [x] Build reviewed candidate d02fd59 through the exact root entrypoint; verify the 126 selected renderer cases across focused runs and20 host documentation cases, with 3 symbolic-link cases explicitly unverified.

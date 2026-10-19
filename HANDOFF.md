@@ -1,4 +1,18 @@
-## Native localization verified; short-viewport repair integrated
+## Current continuation state
+
+Integration source `388c5f42543f1314a7d37be77abb87184e103f4f` combines reviewed selected-label repairs through `bd746d7` and inactive ISO recovery/scheduler seams through `96923b4`. Operations activation remains pending. The last exact desktop build used `bd746d7`, exited zero and produced receipt SHA-256 `a97ed2c8cc2f784476767e913912eab598dbfc39c1a8b6306bf802d6bc6e5ee2`. Its CI run 39184315958 succeeded. Later merged source is not covered by that build.
+
+Native hidden verification confirmed the outer short-viewport shell repair on source5437fff: header52px, notification44px, main158px, reachable Create action and scrollable status. Ten positive-area measurements passed the formal validator. The subsequent bd746d7 Tools language roundtrip passed English/Cantonese/bilingual/English with four inspected captures. All owned native instances closed normally and their process/listener/desktop absence was verified.
+
+A separate Tools minimum-layout issue remains: at480x320 effective CSS, bilingual/dark scale2, its48px primary button cannot fit the40.8125px nested scrolling viewport. The inspected focused capture and full ancestor measurements confirm the issue without invoking the tool. The supplementary formal expression failed, so no formal receipt is claimed for this finding. The isolated GUI lane is repairing this with one short-height Tools scrolling owner. Help, Settings, Purpose and Source frontier tuples remain unrun. Evidence is retained under the ignored native-frontier-next and native-tools-regression directories; earlier captures remain bound to their original source.
+
+The ISO scheduler restart seam was independently repaired and approved at96923b4. Historical output must have verified state, successful durable job result, actual anchored transaction readback and complete receipt equality. Four actual journal/inventory regressions witnessed the old mismatch acceptance, followed by14 focused passes. Earlier durable-host work passed38 focused checks. This code has not yet been constructed by operations and grants no live runtime authority. The isolated backend lane is implementing that next narrow connection, with no WSL/Docker/firmware operations.
+
+An independent physical-handle readback confirmed the ordinary installed package is0.1.1 from sourceb9447cf5cceaf45355f744dfd402470af2c4a5e0, outside package-local cache. The current redesign is not installed. No product or installer was launched by this readback. The updater selects strictly higher three-part versions, so another0.1.1 tag alone cannot prove a selected update. Accepted release, supported setup, physical-byte readback and hidden installed startup remain separate acceptance steps.
+
+The owner's latest decision is hidden-only verification. Preserve data, settings, unrelated processes and prior installation recovery bytes. Current-GUI ISO production, full layout/destination acceptance, sustained installed startup, release/update, current presentation capture promotion and final integration remain incomplete. Progress: https://github.com/Ding-Ding-Projects/material-buildroot/issues/1#issuecomment-6257563933 .
+
+## Historical checkpoint: native localization and short-viewport source repair
 
 The targeted native regression passed on e47c6c886b4796a266c313e829571cd5ef8e8f5b using actual registered controls and persisted intent. Advanced/server displayed correctly across English, Cantonese, bilingual and English, with ID/name/mode/purpose unchanged. Four native captures were inspected and owned graceful teardown verified.
 
