@@ -7,7 +7,7 @@
 - [x] Resolve carried renderer type and host-result diagnostics without weakening strict checking; current check exits zero.
 - [x] Distinguish verified release publication from explicitly skipped preservation builds.
 - [x] Verify source-bound desktop and documentation production through the exact root entrypoints.
-- [ ] Verify full installer production after the final embedded-ZIP source repair; run39214540214 remains in progress and no new release is claimed.
+- [ ] Verify full installer production after the final embedded-ZIP source repair using the newest exact-main workflow; earlier producer IDs are historical checkpoints and no new release is claimed here.
 - [x] Implement exact retained-ZIP final embedding, source-bound receipts and owned child containment; pass four focused checks and supported MSVC compilation.
 - [ ] Verify actual native final embedding and runtime termination; three bounded fixture launches returned EACCES before execution, without security changes.
 - [x] Pass 33 focused renderer checks, record bounded native navigation and its remaining catalog/reference limits, publish integration and verify remote main.

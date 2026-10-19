@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "sourceCommit": "1ceec1177f4936dc6f19c90ac4dc93df27e2f069",
-  "sourceSnapshotSha256": "4fdbfb29f95133b1f43745d8671e35b04bfbcb13ff8407b8e969af23b63700a3",
+  "sourceCommit": "2fbd115c6a8c1e8a4651041b1f6a5954a8433c02",
+  "sourceSnapshotSha256": "4153ae7e452e18943d0ee8d69fa57b48be2a111a8b621e0e2f98e46a0c8dbe2b",
   "acquisition": "Exact lockfile-pinned packages; all subsets of each required stylesheet, normal and Roboto italic, bundled locally",
   "packages": [
     {

@@ -1,5 +1,7 @@
 # Main-only integration closeout
 
+This is a source checkpoint. For later production verdicts, discover the newest Windows release workflow pinned to the current main SHA and read [Discussion2](https://github.com/Ding-Ding-Projects/material-buildroot/discussions/2) and [issue1](https://github.com/Ding-Ding-Projects/material-buildroot/issues/1). Run IDs below are historical checkpoint facts; do not retry a superseded producer solely because it appears here.
+
 ## Objective and verified source-control outcome
 
 The requested integration and retirement scope is complete at checkpoint4f15070b779fdf73cebe98ea260dbb0ca05910c9: exactly one primary checkout, one local main branch and only remote main, with no stashes or uncommitted source. All77 retired remote tips were integrated and ancestry-proven before conditional atomic deletion. Earlier78-count statements included the symbolic remote HEAD alias. Two completed task worktrees/local branches were removed after verified complete recovery archive and separate ignored-image preservation. No history was rewritten. Read back the final main SHA after this record's own commit; the task response supplies it.
