@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "id": "main-closeout-converter",
+      "active": true,
+      "path": "docs/evidence/main-closeout/converter.png",
+      "sourceCommit": "4c5e9ec4d9ed505bd3b715a0dad2882b1b2a6067",
+      "artifactSha256": "7b19d746f761a0130a9a0b72c9c03188c45f1b47d57f9ca8fd3fa5e5eaef7dc5",
+      "captureSha256": "38ab0a6d7ebb772548bb31f644d1f073b89e820dd7d2ad58c110798336fdd44d",
+      "screen": "converter",
+      "state": "empty-profile-no-source-selected",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "viewportHeight": 962,
+      "scale": 1.5,
+      "interactionProofId": "converter-navigation-and-state-observed",
+      "interactionReceiptSha256": "7215e7bcdeaa17f6311591c97d6f39546cdc0a719a4c4da98c2df2c68f65d16b",
+      "inspectionStatus": "inspected",
+      "capturedAt": "2026-10-19T06:43:09.848Z",
+      "language": "bilingual",
+      "captureKind": "page",
+      "route": "cheap-lowlevel-headless",
+      "limits": "Navigation and displayed state only; no conversion execution, full layout matrix or installed-update acceptance."
+    },
+    {
+      "id": "main-closeout-help",
+      "active": true,
+      "path": "docs/evidence/main-closeout/help.png",
+      "sourceCommit": "4c5e9ec4d9ed505bd3b715a0dad2882b1b2a6067",
+      "artifactSha256": "7b19d746f761a0130a9a0b72c9c03188c45f1b47d57f9ca8fd3fa5e5eaef7dc5",
+      "captureSha256": "a2b800082ecbaa186f8e60440c9bcfb8c514244ae1766f6172d7789aebd29a9d",
+      "screen": "help",
+      "state": "offline-home-560-articles",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "viewportHeight": 962,
+      "scale": 1.5,
+      "interactionProofId": "help-navigation-and-state-observed",
+      "interactionReceiptSha256": "6e7184c78611063e15d87457bc23fcbc996562a3686e1b2d711b860775270fe0",
+      "inspectionStatus": "inspected",
+      "capturedAt": "2026-10-19T06:43:21.488Z",
+      "language": "bilingual",
+      "captureKind": "page",
+      "route": "cheap-lowlevel-headless",
+      "limits": "Navigation and displayed state only; no conversion execution, full layout matrix or installed-update acceptance."
+    }
+  ]
+}

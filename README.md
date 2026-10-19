@@ -42,7 +42,11 @@ See [presentation provenance](docs/features/presentation-provenance.md) for sour
 
 The guided workspace organizes Images, Builds, Tools, Help and Settings around the image workflow. See [Create and resume an image](docs/features/guided-image-creation.md) for purpose and target selection, saved project access, the five-stage guide and recovery boundaries.
 
-The current browser capture run uses renderer files extracted from the exact built application archive after checking its SHA-256. Host-facing operations use explicit fixtures. These are captures of built renderer bytes, not source previews or proof of native Windows execution. Current native capture and interaction acceptance remain pending. The capture inventory must retain the producing archive, source, individual image hashes, state tuples and fixture boundaries before any image is presented as reviewed evidence.
+The following native screenshots come from the exact desktop build at `4c5e9ec4d9ed505bd3b715a0dad2882b1b2a6067`, running on an isolated hidden Windows desktop. Both show dark bilingual mode at an observed 1440 by 962 CSS pixels and device pixel ratio 1.5. Navigation and state observation are verified; conversion execution, the complete layout matrix and installed-update acceptance remain incomplete. The [capture inventory](docs/evidence/main-closeout/captures.json) records exact source, executable and PNG identities.
+
+![Material Buildroot converter workspace in dark bilingual mode at 1440 by 962 CSS pixels](docs/evidence/main-closeout/converter.png)
+
+![Material Buildroot offline Help home in dark bilingual mode at 1440 by 962 CSS pixels](docs/evidence/main-closeout/help.png)
 
 [Historical interface screenshots and original provenance](docs/evidence/ARCHIVE.md) are retained separately. Earlier native startup, dialogs and ISO console images do not depict the current guided interface.
 

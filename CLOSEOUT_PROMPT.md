@@ -10,7 +10,7 @@ Full host inventory:732 tests,716 passed,0 failed,16 explicit skips. Selected re
 
 ## Remaining external verdict at this checkpoint
 
-Installer run39206481441 failed on a cross-volume flashing-producer move. The same-volume repair and its real filesystem checks are complete. Retry39207625084 was still running when this record was written. Read its terminal result and exact-source normal-release/assets state before any release or installed-update claim. Preserve the matching installation and existing settings/data; do not newly install an absent or unrelated product, interrupt active work or initiate a host power/login action.
+Installer run39206481441 failed on a cross-volume flashing-producer move. The same-volume repair and its real filesystem checks are complete. Retry39207625084 failed final embedded ZIP admission. No release was published. Diagnose the exact produced package and reader, repair the bounded cause, then verify a fresh exact-source result before any release or installed-update claim. Preserve the matching installation and existing settings/data; do not newly install an absent or unrelated product, interrupt active work or initiate a host power/login action.
 
 Finish the accurate final handoff and generated documentation publication, verify the final remote main SHA and keep the main-only state. Do not recreate retired branches or adopt broader product backlog. Retain all roadmap acceptance limits. The larger Project and issue1 remain In Progress; bounded source-control retirement does not complete the whole application.
 

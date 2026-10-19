@@ -7,7 +7,7 @@
 - [x] Resolve carried renderer type and host-result diagnostics without weakening strict checking; current check exits zero.
 - [x] Distinguish verified release publication from explicitly skipped preservation builds.
 - [x] Verify source-bound desktop and documentation production through the exact root entrypoints.
-- [ ] Verify installer retry 39207625084 for source b10f6eb; it was still running at this checkpoint.
+- [ ] Repair final embedded ZIP admission after installer retry 39207625084 failed; no release was published.
 - [x] Pass 33 focused renderer checks, record bounded native navigation and its remaining catalog/reference limits, publish integration and verify remote main.
 - [x] Verify the recovery archive and separate ignored-image preservation, then retire 77 ancestor-proven remote branches and two completed task worktrees/local branches.
 
