@@ -1,21 +1,17 @@
-# Main-only integration continuation
+# Main-only closeout checkpoint
 
-Finish the owner-authorized source integration and safe retirement. End with one primary checkout, one local main branch and only remote main. Preserve all recoverable work. Never remove active, uncommitted, unmerged, unpublished or ownership-uncertain work.
+## Verified source-control outcome
 
-## Source and evidence
+Remote main was read back at b10f6ebc4b13a783d31723582dd0ff9098ba5659. Exactly one primary checkout, one local main branch and only remote main remain. No stashes or uncommitted source changes existed at this checkpoint. All 77 actual non-main remote tips were integrated and ancestry-proven before conditional atomic deletion. The earlier count of78 included the symbolic remote HEAD alias. Two completed task worktrees/local branches were removed after verified full recovery backup and separate ignored-image preservation. No commit history was rewritten.
 
-Integrated source before this record: 3be630dd0582fb0a4d9ee3b6eb95be6ddcf0dc24. All 78 additional fetched tips are ancestors through six semantic merges. Task branch: ai/integration/20261019-main-closeout. Its ignored announcement originals and receipts require separate private preservation before removal.
+## Actual verification
 
-Strict renderer checking passes with zero diagnostics. Nine Tools regressions have witnessed failing-then-passing evidence. Boundary/feedback/timing checks passed 20 cases. Earlier fbc3140 passed the exact desktop build, 70 host seam checks and bounded hidden native Images/Help/article/Settings/About navigation. Earlier evidence does not verify newer source. No live firmware or installed update occurred.
+Full host inventory:732 tests,716 passed,0 failed,16 explicit skips. Selected renderer checks:33 passed. Strict renderer checking passed. Exact desktop source c6ade502691c583e6aa4d53230e0bd3c5ad2a0c8 built successfully; bounded real hidden navigation and owned teardown were verified with11 inspected captures. Catalog loading and image/reference interaction remain unverified. Documentation source b10f6eb passed433 pages and11,315 internal links/assets/fragments. Existing live home and exact stored homepage were verified separately from fresh generated-output publication.
 
-## Next safe work
+## Remaining external verdict at this checkpoint
 
-Run final focused host/renderer checks and exact build.bat and build-installer.bat, keeping producers pinned. Verify the final built surface on the hidden route and close only owned processes. Record and repair exact failures with at most three materially unchanged attempts and at most one hour external observation. Preserve broader product acceptance gaps without adopting unrelated backlog.
+Installer run39206481441 failed on a cross-volume flashing-producer move. The same-volume repair and its real filesystem checks are complete. Retry39207625084 was still running when this record was written. Read its terminal result and exact-source normal-release/assets state before any release or installed-update claim. Preserve the matching installation and existing settings/data; do not newly install an absent or unrelated product, interrupt active work or initiate a host power/login action.
 
-Publish and verify safe preservation and main integration. Refresh the complete verified archive after changes, preserve private announcement variants separately, prove each retirement tip an ancestor of freshly verified remote main and confirm no active/load-bearing state before removal. Read back final branch/worktree inventories and status. Update issue #1, roadmap and handoff factually.
+Finish the accurate final handoff and generated documentation publication, verify the final remote main SHA and keep the main-only state. Do not recreate retired branches or adopt broader product backlog. Retain all roadmap acceptance limits. The larger Project and issue1 remain In Progress; bounded source-control retirement does not complete the whole application.
 
-Account reading at task start: 84 percent remaining. Refresh before relying on it. No fixed budget. At the verified preservation threshold settle atomic work and preserve unfinished work without claiming completion. No deletion has occurred at this record.
-
-## Latest preservation and verification
-
-Remote main was verified at 2d1adf93fbe764b01e4e10e7136d0d9d3fceb360. Full host checks:732 total,716 passed,0 failed,16 explicit skips. Selected renderer checks:33 passed,0 failed. Strict renderer checking passed. Final source-bound builds and native verification remain pending. Both task lanes are committed and their originals are privately preserved. Nothing has been deleted.
+Use live account data privately for any continuation, not a stale percentage in this public record. No fixed budget was requested. At most three materially unchanged attempts and one hour observation per external operation; preserve facts if an external verdict is still unavailable at the bound.

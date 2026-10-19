@@ -2,13 +2,14 @@
 
 ## Main-only integration closeout, 2026-10-19
 
-- [x] Reconcile all 78 preserved remote tips through six semantic ancestry merges, retaining guided workflows and leased ISO ownership.
+- [x] Reconcile all 77 actual non-main remote tips through six semantic ancestry merges, retaining guided workflows and leased ISO ownership.
 - [x] Repair Tools cancellation/pause feedback, queue export, teardown and primary actions with nine failing-then-passing regressions.
 - [x] Resolve carried renderer type and host-result diagnostics without weakening strict checking; current check exits zero.
 - [x] Distinguish verified release publication from explicitly skipped preservation builds.
-- [ ] Verify the final integrated desktop and installer through exact root entrypoints.
-- [ ] Complete final focused renderer/native checks, publish integration and verify remote main.
-- [ ] Refresh verified archives, preserve private announcement originals separately, then retire ancestor-proven branches and the completed task worktree.
+- [x] Verify source-bound desktop and documentation production through the exact root entrypoints.
+- [ ] Verify installer retry 39207625084 for source b10f6eb; it was still running at this checkpoint.
+- [x] Pass 33 focused renderer checks, record bounded native navigation and its remaining catalog/reference limits, publish integration and verify remote main.
+- [x] Verify the recovery archive and separate ignored-image preservation, then retire 77 ancestor-proven remote branches and two completed task worktrees/local branches.
 
 This phase concerns integration and safe retirement. Broader product acceptance below retains its recorded limits.
 
