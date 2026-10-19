@@ -159,6 +159,8 @@ function state(value) {
       "onboarding",
       "snapshots",
       "activity",
+      "preferenceProvenance",
+      "packageDraft",
     ],
     [
       "format",
@@ -176,6 +178,18 @@ function state(value) {
   if (value.format !== "material-buildroot-workspace" || value.version !== 1)
     fail();
   revision(value.revision);
+  if (Object.hasOwn(value, "packageDraft")) require("./package-draft-contract.cjs").packageDraft(value.packageDraft);
+  // Absence on older files is unknown, never inferred from the value or revision.
+  if (Object.hasOwn(value, "preferenceProvenance")) {
+    object(value.preferenceProvenance, ["theme"]);
+    const source = value.preferenceProvenance.theme;
+    object(source, ["origin", "revision"]);
+    one(source.origin, ["default", "saved", "restored", "imported"]);
+    revision(source.revision);
+    if (source.revision > value.revision) fail();
+    if (source.origin === "default" && (source.revision !== 0 || value.preferences?.theme !== "system")) fail();
+    if (source.origin !== "default" && source.revision < 1) fail();
+  }
   payload({
     plans: value.plans,
     preferences: value.preferences,
@@ -201,7 +215,7 @@ function state(value) {
   for (const a of value.activity) {
     object(a, ["id", "action", "timestamp", "revision"]);
     id(a.id);
-    one(a.action, ACTIONS);
+    one(a.action, [...ACTIONS, "package.draft.save"]);
     timestamp(a.timestamp);
     revision(a.revision);
     if (a.revision > value.revision) fail();

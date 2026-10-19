@@ -103,9 +103,10 @@ class SdkExport {
       const content=JSON.stringify(receipt,null,2)+"\n";if(Buffer.byteLength(content)>1024*1024)fail("SDK_RECEIPT_SIZE_LIMIT");
       fs.writeFileSync(path.join(destination,"README.md"),instructions(plan.info),{flag:"wx",mode:0o600});
       fs.writeFileSync(path.join(destination,"sdk-export.json"),content,{flag:"wx",mode:0o600});
-      return {folder:plan.folder,sha256,size:receipt.archive.size,receiptSha256:crypto.createHash("sha256").update(content).digest("hex"),consumerBuildVerified:false,runtimeVerified:false,overwritten:false};
+      return {folder:plan.folder,instructionsId:this.viewer.admit(path.join(plan.folder,"README.md"),"file"),receiptId:this.viewer.admit(path.join(plan.folder,"sdk-export.json"),"file"),sha256,size:receipt.archive.size,receiptSha256:crypto.createHash("sha256").update(content).digest("hex"),consumerBuildVerified:false,runtimeVerified:false,overwritten:false};
     } catch {fail("SDK_EXPORT_INCOMPLETE_RETAINED");}
   }
 }
 module.exports={SdkExport};
+
 

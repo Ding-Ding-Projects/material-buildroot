@@ -181,7 +181,6 @@ async function main() {
   }
   execute(node,[path.join(root,'scripts/check-vocabulary.cjs')]);
   const before = dependenciesOnly ? null : sourceIdentity(root,git,manifestBytes);
-<<<<<<< HEAD
   if (!dependenciesOnly && target.kind === 'desktop') {
     for (const directory of ['src/main', 'src/shared']) {
       for (const file of inventory(path.join(root, directory))) {
@@ -189,9 +188,7 @@ async function main() {
       }
     }
   }
-=======
   const adapterAdmission = dependenciesOnly ? null : loadAdapterAdmission(root);
->>>>>>> origin/task/offline-payload-source-origin
   console.log('Installing exact locked npm packages with lifecycle scripts disabled.');
   execute(node,[npm,'ci','--ignore-scripts','--no-audit','--no-fund'],{cwd:packageRoot});
   if (dependenciesOnly) { console.log('Locked dependencies acquired. No build or runtime verification is claimed.'); return; }
@@ -354,11 +351,7 @@ async function main() {
       description={status:'embedded-identity-verified',...setupPayload};describe();
     }
   }
-<<<<<<< HEAD
-  execute(node,command,{env:childEnv});
   if (target.kind === 'desktop') verifyDocumentationResources(path.join(root,'dist/documentation'), output);
-=======
->>>>>>> origin/task/offline-payload-source-origin
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
   if (installer) verifyInstaller(output);
   else {

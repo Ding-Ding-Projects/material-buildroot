@@ -20,6 +20,7 @@ import {ownedCopy, vocabulary} from "./owned-copy";
 import "./personal-vocabulary-panel";
 import "./personal-vocabulary-drop";
 import "./settings-search";
+import "./guided-forms";
 import "./regex-workbench";
 import materialIconsLicense from "./assets/material-icons/LICENSE.txt?raw";
 import {materialIcon, actionIcon} from "./material-icons";
@@ -229,6 +230,7 @@ class MaterialBuildroot extends LitElement {
     event.detail.complete();
   }
   private workspaceRevision = 0;
+  private themeSource: import('../shared/workspace').WorkspaceState['preferenceProvenance'];
   plans: Plan[] = [];
   selectedId = "";
   edit: Plan | undefined;
@@ -574,6 +576,7 @@ class MaterialBuildroot extends LitElement {
     this.snapshots = state.snapshots;
     this.plans = state.plans;
     this.theme = state.preferences.theme;
+    this.themeSource = state.preferenceProvenance;
     this.mediaChanged();
     this.setupDone =
       state.onboardingCompleted || state.onboarding?.dismissed === true;
@@ -1719,6 +1722,15 @@ class MaterialBuildroot extends LitElement {
     if(id!==this.settingsCategory&&!(await this.confirmScheduleLeave()))return;
     this.settingsCategory=id;
   }
+  private themeProvenance(){
+    if(this.workspaceMode==="loading"||this.workspaceMode==="unavailable")return this.l("Saved theme origin is unavailable while loading or disconnected.","載入中或連線中斷時，無法確認已儲存主題來源。",true);
+    if(this.workspaceMode==="session")return this.l("Session-only choice. Initial fallback: follow system. This is not a confirmed saved preference.","只限工作階段嘅選擇。初始後備值：跟隨系統。唔係已確認儲存偏好。",true);
+    const source=this.themeSource?.theme;
+    if(!source)return this.l("Legacy workspace: the theme value is loaded, but its written-versus-default origin was not recorded. A new explicit save records provenance.","舊工作區：已載入主題值，但未記錄寫入或預設來源。再次明確儲存會記錄來源。",true);
+    if(source.origin==='default')return this.l("Source: compiled initial default, follow system. No explicit theme save is recorded.","來源：內置初始預設值，跟隨系統。未記錄明確主題儲存。",true);
+    const description=source.origin==='saved'?this.l("Source: explicit preference write at local revision","來源：明確偏好寫入，本機修訂版本",true):source.origin==='restored'?this.l("Source: restored workspace at local revision","來源：已還原工作區，本機修訂版本",true):this.l("Source: imported workspace at local revision","來源：已匯入工作區，本機修訂版本",true);
+    return description+' '+source.revision;
+  }
   private settingsView() {
     return html`<div class="settings-grid view">
       <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;if(!this.settingIds.includes(this.settingsCategory))this.settingsCategory=this.settingIds[0]??'';this.requestUpdate();}}}></settings-search>
@@ -1732,7 +1744,7 @@ class MaterialBuildroot extends LitElement {
         <p>
           ${this.l("Bilingual is the default. A successful save persists across application restarts.","預設使用雙語。成功儲存後，重新啟動都會保留。",true)}
         </p>
-        ${this.confirmedPreference()}<md-outlined-select
+        ${this.confirmedPreference()}<guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Interface language","介面語言",true),purpose:this.l("Choose English, Cantonese or both, then save explicitly. Discard choice restores the confirmed value. Scheduled overrides can temporarily change the effective language without overwriting the saved base.","選擇英文、粵語或雙語，再明確儲存。放棄選擇會還原已確認值。排程覆寫可暫時改變有效語言，但唔會覆蓋已儲存基礎值。",true),steps:[this.l("Try a sample language below. This practice does not change the interface.","喺下面試用語言範例，練習唔會改變介面。",true),this.l("Choose in the real selector, save, and read the confirmed result. If saving is unavailable, reconnect or reload before retrying.","喺真實選單選擇並儲存，再閱讀已確認結果。如無法儲存，請重新連接或載入再試。",true)],example:"bilingual",options:["en","zh-HK","bilingual"],expected:this.l("The example selection changes only; actual language requires Save language.","只會改變範例選項，真實語言須使用儲存語言。",true)}}></guided-forms><md-outlined-select
           id="language-select" data-experience-id="settings:language"
           .label=${this.l("Interface language","介面語言",true)}
           .value=${this.draft}
@@ -1780,6 +1792,8 @@ class MaterialBuildroot extends LitElement {
         <div class="row" role="group" aria-label=${this.l('Workspace density','工作區密度',true)}>${(['comfortable','compact'] as const).map(value=>html`<md-outlined-button data-density=${value} class=${this.density===value?'selected':''} aria-label=${(value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true))+(this.density===value?', '+this.l('selected','已選取',true):'')} @click=${()=>this.setDensity(value)}>${value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true)}</md-outlined-button>`)}</div>
         <p class="muted">${this.l('Comfortable is the default. Compact reduces spacing while keeping controls at least 44 pixels tall. Saved on this device.','預設為舒適。緊密模式會減少間距，控制項保持最少 44 像素高。設定儲存喺呢部電腦。',true)}</p>
         ${this.densityIssue?html`<p role="status">${this.densityIssue==='read'?this.l('Saved density could not be read. Comfortable spacing is used until a new choice is saved.','未能讀取已儲存密度。儲存新選擇前會使用舒適間距。',true):this.l('Density was not saved. The previous spacing remains in use.','密度未儲存，繼續使用之前嘅間距。',true)}</p>`:nothing}
+        <p class="muted">${this.themeProvenance()} ${this.l("Current base value:","目前基礎值：",true)} ${this.theme}</p>
+        <guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Theme","主題",true),purpose:this.l("System follows the operating-system appearance; light and dark choose a fixed palette. This selector saves immediately when local workspace storage is available. A schedule may temporarily override the base palette.","跟隨系統會使用作業系統外觀，淺色同深色使用固定配色。本機工作區儲存可用時，此選單會即時儲存。排程可能暫時覆寫基礎配色。",true),steps:[this.l("Try a sample palette choice here; this isolated selection does not restyle or save the application.","喺呢度試用配色選項，獨立選擇唔會改變或儲存程式外觀。",true),this.l("Use the real selector below and wait for the save outcome. Choose the previous value to reverse the preference.","使用下方真實選單並等候儲存結果，選擇之前嘅值可還原偏好。",true)],example:"system",options:["system","light","dark"],expected:this.l("The practice choice is retained only while this guide is open.","練習選項只會喺此說明開啟期間保留。",true)}}></guided-forms>
         <md-outlined-select
           .label=${this.workspaceMode === "durable"
             ? this.l("Theme","主題",true)

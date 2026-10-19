@@ -38,6 +38,7 @@ function admit(request, nested = false) {
   object(request);
   string(request.action, 80);
   const action = request.action;
+  if (action.startsWith("editor.") || action.startsWith("transfer.")) { require("./editor-transfer.cjs").validate(request); return structuredClone(request); }
   if (require("./minecraft-workflow-contract.cjs").actions.includes(action)) { require("./minecraft-workflow-contract.cjs").validate(request); return structuredClone(request); }
   if (action.startsWith("minecraft.managed.") || action.startsWith("minecraft.configuration.")) { require("./minecraft-managed.cjs").validate(request); return structuredClone(request); }
   const simple = [
@@ -53,9 +54,13 @@ function admit(request, nested = false) {
     "ollama.managed.cancel",
     "ollama.managed.start",
     "ollama.managed.stop",
+    "pdf.catalog",
+    "pdf.cancel",
     "converter.catalog",
+    "converter.cancel",
     "minecraft.bedrock.discovery",
     "queue.run",
+    "queue.pause",
     "queue.recover",
   ];
   if (simple.includes(action)) keys(request, ["action"]);
@@ -127,6 +132,10 @@ function admit(request, nested = false) {
         }
         if (size > 262144) fail("REQUEST_LIMIT");
         break;
+      case "converter.inspect":
+        keys(request, ["action", "sourceId"]);
+        string(request.sourceId);
+        break;
       case "converter.convert":
         keys(request, [
           "action",
@@ -181,7 +190,7 @@ function admit(request, nested = false) {
           if (
             !Array.isArray(request.sourceIds) ||
             !request.sourceIds.length ||
-            request.sourceIds.length > 100
+            request.sourceIds.length > (request.operation === "merge" ? 8 : 1)
           )
             fail("INPUT_LIMIT");
           request.sourceIds.forEach((id) => string(id));
@@ -194,7 +203,7 @@ function admit(request, nested = false) {
           if (
             !Array.isArray(request.pages) ||
             !request.pages.length ||
-            request.pages.length > 10000 ||
+            request.pages.length > 1000 ||
             request.pages.some((page) => !integer(page, 1, 10000))
           )
             fail("INVALID_PAGE_SELECTION");
@@ -314,7 +323,7 @@ function admit(request, nested = false) {
         keys(request, ["action", "job"]);
         if (
           nested ||
-          !["converter.convert", "ollama.pull", "pdf.execute"].includes(
+          !["converter.convert", "ollama.pull", "pdf.execute", "transfer.download"].includes(
             request.job?.action,
           )
         )
@@ -334,6 +343,15 @@ function admit(request, nested = false) {
         if (request.limit !== undefined && !integer(request.limit, 1, 100))
           fail("INVALID_REQUEST");
         break;
+      case "queue.export":
+        keys(request, ["action", "destinationId"]);
+        string(request.destinationId);
+        break;
+      case "queue.rebind":
+        keys(request, ["action", "id", "job"]);
+        if (!uuid(request.id) || nested || !["converter.convert", "pdf.execute", "transfer.download"].includes(request.job?.action)) fail("INVALID_REQUEST");
+        admit(request.job, true);
+        break;
       case "queue.cancel":
       case "queue.resume":
         keys(request, ["action", "id"]);
@@ -345,3 +363,4 @@ function admit(request, nested = false) {
   return structuredClone(request);
 }
 module.exports = { admit };
+

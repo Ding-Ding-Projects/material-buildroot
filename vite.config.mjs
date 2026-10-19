@@ -7,7 +7,7 @@ import { bundleDocumentation } from "./scripts/documentation/bundle.mjs";
 
 export default defineConfig({
   base: "./",
-  build: { outDir: "dist", sourcemap: false, assetsInlineLimit: (file) => /\.woff2?$/.test(file) ? false : undefined },
+  build: { outDir: "dist", sourcemap: false, rollupOptions: { input: { main: path.resolve(import.meta.dirname, "index.html"), transferProgress: path.resolve(import.meta.dirname, "transfer-progress.html") } }, assetsInlineLimit: (file) => /\.woff2?$/.test(file) ? false : undefined },
   server: { strictPort: true, port: 5173 },
   plugins: [
     {

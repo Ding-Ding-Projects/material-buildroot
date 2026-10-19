@@ -141,6 +141,7 @@ function createWorkspaceService(options) {
             break;
           case "preferences.update":
             current.preferences = request.preferences;
+            current.preferenceProvenance = { theme: { origin: "saved", revision: current.revision + 1 } };
             break;
           case "onboarding.update":
             current.onboarding = request.onboarding;
@@ -187,23 +188,26 @@ function createWorkspaceService(options) {
           case "revision.restore": {
             const previous = store.readRevision(request.revision);
             Object.assign(current, payload(previous));
+            current.preferenceProvenance = { theme: { origin: "restored", revision: current.revision + 1 } };
             break;
           }
           case "snapshot.restore": {
             const snapshot = current.snapshots.find((s) => s.id === request.id);
             if (!snapshot) reject("NOT_FOUND");
             Object.assign(current, clone(snapshot.payload));
+            current.preferenceProvenance = { theme: { origin: "restored", revision: current.revision + 1 } };
             break;
           }
           case "document.import": {
             const document = contract.parseExport(request.document);
             Object.assign(current, payload(document));
+            current.preferenceProvenance = { theme: { origin: "imported", revision: current.revision + 1 } };
             break;
           }
           default:
             reject("INVALID_REQUEST");
         }
-        if (beforePayload === JSON.stringify(payload(current)) && !["snapshot.create","snapshot.restore","revision.restore","document.import"].includes(request.action)) return current;
+        if (beforePayload === JSON.stringify(payload(current)) && !["preferences.update","snapshot.create","snapshot.restore","revision.restore","document.import"].includes(request.action)) return current;
         current.activity.push({
           id: randomUUID(),
           action: request.action,

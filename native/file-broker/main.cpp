@@ -13,6 +13,8 @@
 #include <bcrypt.h>
 #include <cstring>
 #include <cstddef>
+#include <memory>
+#include "qpdf-json.hpp"
 
 // Host-only protocol. No renderer command line is accepted by this executable.
 // argv: operation, input, new output, private payload root, executable basename, input identity, output-parent identity.
@@ -90,11 +92,11 @@ std::wstring quote(const std::wstring& value) {
   require(value.find(L'"') == std::wstring::npos && (value.empty() || value.back() != L'\\'));
   return L"\"" + value + L"\"";
 }
-void acl(const std::wstring& path, PSID sid, bool directory) {
+void acl(const std::wstring& path, PSID sid, bool directory, bool executable = true) {
   LPWSTR sidText = nullptr;
   require(ConvertSidToStringSidW(sid, &sidText) != 0);
   std::wstring descriptor = L"D:P(A;;FA;;;SY)(A;;FA;;;OW)(A;;";
-  descriptor += directory ? L"GRGX" : L"GRGX";
+  descriptor += directory || executable ? L"GRGX" : L"GR";
   descriptor += L";;;" + std::wstring(sidText) + L")";
   LocalFree(sidText);
   PSECURITY_DESCRIPTOR security = nullptr;
@@ -150,6 +152,9 @@ std::wstring arguments(const std::wstring& operation) {
   if (operation == L"ffmpeg-wav") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f wav pipe:1";
   if (operation == L"ffmpeg-mp3") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f mp3 pipe:1";
   if (operation == L"ffmpeg-flac") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map_metadata -1 -f flac pipe:1";
+  if (operation == L"ffmpeg-mp4") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac -movflags +frag_keyframe+empty_moov+default_base_moof -f mp4 pipe:1";
+  if (operation == L"ffmpeg-webm") return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -map 0:v:0 -map 0:a:0? -map_metadata -1 -map_metadata:s -1 -map_chapters -1 -sn -dn -threads 1 -c:v libvpx-vp9 -deadline realtime -cpu-used 8 -row-mt 0 -c:a libopus -f webm pipe:1";
+  if (operation == L"qpdf-extract" || operation == L"qpdf-reorder" || operation == L"qpdf-merge" || operation == L"qpdf-rotate" || operation == L"qpdf-metadata") return L"";
   stop();
 }
 }
@@ -191,6 +196,11 @@ void signature(HANDLE handle, const std::wstring& operation) {
   else if (operation == L"ffmpeg-wav") matches = std::memcmp(bytes, "RIFF", 4) == 0 && std::memcmp(bytes + 8, "WAVE", 4) == 0;
   else if (operation == L"ffmpeg-flac") matches = std::memcmp(bytes, "fLaC", 4) == 0;
   else if (operation == L"ffmpeg-mp3") matches = std::memcmp(bytes, "ID3", 3) == 0 || (bytes[0] == 255 && (bytes[1] & 224) == 224);
+  else if (operation == L"ffmpeg-mp4") matches = std::memcmp(bytes + 4, "ftyp", 4) == 0;
+  else if (operation == L"ffmpeg-webm") {
+    const BYTE magic[] = {0x1a,0x45,0xdf,0xa3}; matches = std::memcmp(bytes, magic, sizeof(magic)) == 0;
+  }
+  else if (operation.rfind(L"qpdf-", 0) == 0) matches = std::memcmp(bytes, "%PDF-", 5) == 0;
   require(matches); rewindFile(handle);
 }
 std::wstring validationArguments(const std::wstring& operation) {
@@ -199,8 +209,10 @@ std::wstring validationArguments(const std::wstring& operation) {
     require(format == L"png" || format == L"jpg" || format == L"webp");
     return L" -regard-warnings -limit width 16384 -limit height 16384 -limit list-length 256 -limit memory 128MiB -limit map 0 -limit disk 0 " + format + L":- null:";
   }
-  require(operation == L"ffmpeg-wav" || operation == L"ffmpeg-mp3" || operation == L"ffmpeg-flac");
-  return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -i pipe:0 -f null pipe:1";
+  require(operation == L"ffmpeg-wav" || operation == L"ffmpeg-mp3" || operation == L"ffmpeg-flac" || operation == L"ffmpeg-mp4" || operation == L"ffmpeg-webm");
+  const std::wstring demuxer = operation == L"ffmpeg-mp4" ? L"mov" : operation == L"ffmpeg-webm" ? L"matroska" : operation.substr(7);
+  const std::wstring streams = operation == L"ffmpeg-mp4" || operation == L"ffmpeg-webm" ? L" -map 0:v:0 -map 0:a:0? -sn -dn" : L" -map 0:a:0 -vn -sn -dn";
+  return L" -nostdin -hide_banner -loglevel error -xerror -err_detect explode -threads 1 -filter_threads 1 -protocol_whitelist pipe -f " + demuxer + L" -i pipe:0" + streams + L" -f null pipe:1";
 }
 void tokenAdmission(HANDLE process, PSID expectedSid, HANDLE job) {
   HANDLE raw = nullptr; require(OpenProcessToken(process, TOKEN_QUERY, &raw) != 0); Handle token(raw);
@@ -222,7 +234,8 @@ void tokenAdmission(HANDLE process, PSID expectedSid, HANDLE job) {
   BOOL assigned = FALSE; require(IsProcessInJob(process, job, &assigned) && assigned);
 }
 void decoder(const std::wstring& executable, const std::wstring& args, const std::wstring& root,
-    PSID sid, HANDLE job, HANDLE input, HANDLE output, HANDLE outputInspection, HANDLE errors, ULONGLONG deadline) {
+    PSID sid, HANDLE job, HANDLE input, HANDLE output, HANDLE outputInspection, HANDLE errors, ULONGLONG deadline,
+    LONGLONG outputLimit = 128ll * 1024 * 1024) {
   HANDLE inputRaw = nullptr, outputRaw = nullptr;
   require(DuplicateHandle(GetCurrentProcess(), input, GetCurrentProcess(), &inputRaw, GENERIC_READ, TRUE, 0) != 0);
   Handle childInput(inputRaw);
@@ -261,7 +274,7 @@ void decoder(const std::wstring& executable, const std::wstring& args, const std
     while ((wait = WaitForSingleObject(child.value, 20)) == WAIT_TIMEOUT) {
       DWORD available = 0; LARGE_INTEGER size{};
       require(PeekNamedPipe(GetStdHandle(STD_INPUT_HANDLE), nullptr, 0, nullptr, &available, nullptr) && !available);
-      require(GetTickCount64() < deadline && GetFileSizeEx(outputInspection, &size) && size.QuadPart <= 128ll * 1024 * 1024);
+      require(GetTickCount64() < deadline && GetFileSizeEx(outputInspection, &size) && size.QuadPart <= outputLimit);
     }
     require(wait == WAIT_OBJECT_0);
     DWORD exitCode = 1; require(GetExitCodeProcess(child.value, &exitCode) && exitCode == 0);
@@ -282,13 +295,91 @@ void publish(HANDLE output, HANDLE parent, const std::wstring& finalName) {
   std::memcpy(info->FileName, finalName.data(), bytes);
   require(SetFileInformationByHandle(output, FileRenameInfo, info, size) != 0);
 }
+std::vector<unsigned> selectedPages(const std::wstring& value) {
+  require(!value.empty() && value.size() <= 6000);
+  std::vector<unsigned> pages; unsigned number = 0, digits = 0;
+  for (size_t i = 0; i <= value.size(); ++i) {
+    const wchar_t character = i == value.size() ? L',' : value[i];
+    if (character == L',') {
+      require(digits > 0 && number > 0 && number <= 10000 && pages.size() < 1000);
+      pages.push_back(number); number = 0; digits = 0;
+    } else {
+      require(character >= L'0' && character <= L'9' && digits < 5);
+      number = number * 10 + static_cast<unsigned>(character - L'0'); ++digits;
+    }
+  }
+  return pages;
+}
+// Only fixed broker-generated names are used. The decoder sees a read-only copy,
+// not authority to reopen the original source or selected output by path.
+HANDLE stageReadOnly(HANDLE source, const std::wstring& destination, PSID sid, const std::string& expectedHash) {
+  BY_HANDLE_FILE_INFORMATION created{};
+  {
+    Handle writer(CreateFileW(destination.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+      CREATE_NEW, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(writer.value != INVALID_HANDLE_VALUE);
+    rewindFile(source); BYTE buffer[65536]; DWORD read = 0; ULONGLONG total = 0;
+    while (true) {
+      require(ReadFile(source, buffer, sizeof(buffer), &read, nullptr) != 0); if (!read) break;
+      total += read; require(total <= 128ull * 1024 * 1024);
+      DWORD written = 0; require(WriteFile(writer.value, buffer, read, &written, nullptr) && written == read);
+    }
+    require(FlushFileBuffers(writer.value) != 0);
+    require(sha256(writer.value) == expectedHash);
+    require(GetFileInformationByHandle(writer.value, &created) != 0);
+    acl(destination, sid, false, false);
+  }
+  HANDLE reader = CreateFileW(destination.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+    OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
+  require(reader != INVALID_HANDLE_VALUE);
+  try {
+    inspect(reader, destination, false);
+    BY_HANDLE_FILE_INFORMATION reopened{}; require(GetFileInformationByHandle(reader, &reopened) != 0);
+    require(created.dwVolumeSerialNumber == reopened.dwVolumeSerialNumber && created.nFileIndexHigh == reopened.nFileIndexHigh && created.nFileIndexLow == reopened.nFileIndexLow);
+    require(sha256(reader) == expectedHash); rewindFile(source); return reader;
+  } catch (...) { CloseHandle(reader); throw; }
+}
+unsigned readPageCount(HANDLE handle) {
+  LARGE_INTEGER size{}; require(GetFileSizeEx(handle, &size) && size.QuadPart > 0 && size.QuadPart <= 32);
+  rewindFile(handle); char bytes[33]{}; DWORD read = 0;
+  require(ReadFile(handle, bytes, 32, &read, nullptr) && read == static_cast<DWORD>(size.QuadPart));
+  unsigned result = 0, digits = 0; bool ending = false;
+  for (DWORD i = 0; i < read; ++i) {
+    if (bytes[i] == '\r' || bytes[i] == '\n') { ending = true; continue; }
+    require(!ending && bytes[i] >= '0' && bytes[i] <= '9' && digits < 5);
+    result = result * 10 + static_cast<unsigned>(bytes[i] - '0'); ++digits;
+  }
+  require(digits > 0 && result > 0 && result <= 10000); return result;
+}
+std::string boundedReport(HANDLE handle) {
+  LARGE_INTEGER size{}; require(GetFileSizeEx(handle, &size) && size.QuadPart > 0 && size.QuadPart <= 1024 * 1024);
+  rewindFile(handle); std::string result(static_cast<size_t>(size.QuadPart), '\0'); DWORD read = 0;
+  require(ReadFile(handle, result.data(), static_cast<DWORD>(result.size()), &read, nullptr) && read == result.size());
+  return result;
+}
+std::string fileIdentity(HANDLE handle) {
+  BY_HANDLE_FILE_INFORMATION identity{}; require(GetFileInformationByHandle(handle, &identity) != 0);
+  const ULONGLONG index = (ULONGLONG(identity.nFileIndexHigh) << 32) | identity.nFileIndexLow;
+  return std::to_string(identity.dwVolumeSerialNumber) + ":" + std::to_string(index);
+}
 }
 int wmain(int argc, wchar_t** argv) {
   std::wstring temporaryName;
   bool published = false;
   try {
-    require(argc == 8);
+    require(argc >= 8 && argc <= 23);
     std::wstring operation(argv[1]); const auto args = arguments(operation);
+    const bool pdf = operation.rfind(L"qpdf-", 0) == 0;
+    const bool merge = operation == L"qpdf-merge", rotate = operation == L"qpdf-rotate", metadata = operation == L"qpdf-metadata";
+    require(pdf ? (merge ? argc >= 9 && (argc - 9) % 2 == 0 : rotate ? argc == 10 : argc == 9) : argc == 8);
+    if (merge) require(std::wstring(argv[8]) == L"merge");
+    if (metadata) require(std::wstring(argv[8]) == L"remove");
+    const std::wstring selection = pdf && !merge && !metadata ? argv[8] : L"";
+    const auto pages = !selection.empty() ? selectedPages(selection) : std::vector<unsigned>{};
+    unsigned degrees = 0;
+    if (rotate) {
+      const std::wstring value(argv[9]); require(value == L"90" || value == L"180" || value == L"270");
+      degrees = static_cast<unsigned>(std::stoul(value)); require(std::set<unsigned>(pages.begin(), pages.end()).size() == pages.size());
+    }
     const std::wstring input = full(argv[2]), output = full(argv[3]);
     const std::wstring root = full(argv[4]), executableName(argv[5]); safeName(executableName);
     require(input != output && input.rfind(root + L"\\", 0) != 0 && output.rfind(root + L"\\", 0) != 0);
@@ -309,6 +400,21 @@ int wmain(int argc, wchar_t** argv) {
     require(std::to_wstring(sourceIdentity.dwVolumeSerialNumber) + L":" + std::to_wstring(fileIndex) == argv[6]);
     LARGE_INTEGER size{}; require(GetFileSizeEx(source.value, &size) && size.QuadPart <= 64ll * 1024 * 1024);
     const std::string inputDigest = sha256(source.value);
+    std::vector<std::unique_ptr<ParentLocks>> additionalParents;
+    std::vector<std::unique_ptr<Handle>> additionalSources;
+    std::vector<HANDLE> sources{source.value};
+    std::vector<std::string> inputDigests{inputDigest};
+    LONGLONG totalInputBytes = size.QuadPart;
+    if (merge) for (int index = 9; index < argc; index += 2) {
+      const auto selected = full(argv[index]); require(selected != output && selected.rfind(root + L"\\", 0) != 0);
+      additionalParents.push_back(std::make_unique<ParentLocks>(selected));
+      auto handle = std::make_unique<Handle>(CreateFileW(selected.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+        OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(handle->value != INVALID_HANDLE_VALUE);
+      inspect(handle->value, selected, false); require(fileIdentity(handle->value) == ascii(argv[index + 1]));
+      require(GetFileSizeEx(handle->value, &size) && size.QuadPart >= 0 && size.QuadPart <= 64ll * 1024 * 1024);
+      totalInputBytes += size.QuadPart; require(totalInputBytes <= 64ll * 1024 * 1024);
+      inputDigests.push_back(sha256(handle->value)); sources.push_back(handle->value); additionalSources.push_back(std::move(handle));
+    }
     GUID temporaryId{}; require(CoCreateGuid(&temporaryId) == S_OK);
     wchar_t guid[40]; require(StringFromGUID2(temporaryId, guid, 40) > 0);
     const std::wstring candidate = L".material-incomplete-" + std::wstring(guid + 1, 36) + L".tmp";
@@ -337,17 +443,106 @@ int wmain(int argc, wchar_t** argv) {
     limits.ProcessMemoryLimit = 256ull * 1024 * 1024; limits.JobMemoryLimit = limits.ProcessMemoryLimit;
     require(SetInformationJobObject(job.value, JobObjectExtendedLimitInformation, &limits, sizeof(limits)) != 0);
     const ULONGLONG deadline = GetTickCount64() + 30000;
-    decoder(executable, args, root, profile.sid, job.value, source.value, destination.value, destination.value, errors.value, deadline);
+    unsigned inputPages = 0, outputPages = 0, expectedPages = 0;
+    std::vector<unsigned> inputPageCounts;
+    bool rotationVerified = false, metadataVerified = false;
+    if (pdf) {
+      const std::wstring data = root + L"-data";
+      require(CreateDirectoryW(data.c_str(), nullptr) != 0); acl(data, profile.sid, true);
+      ParentLocks dataParents(data + L"\\entry");
+      Handle counter(CreateFileW((data + L"\\page-count.bin").c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+        CREATE_NEW, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(counter.value != INVALID_HANDLE_VALUE);
+      Handle report(CreateFileW((data + L"\\inspection.json").c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+        CREATE_NEW, FILE_FLAG_OPEN_REPARSE_POINT, nullptr)); require(report.value != INVALID_HANDLE_VALUE);
+      std::vector<std::wstring> sourcePaths;
+      std::vector<std::unique_ptr<Handle>> stagedSources;
+      auto pageCount = [&](const std::wstring& file) {
+        rewindFile(counter.value); require(SetEndOfFile(counter.value) != 0);
+        decoder(executable, L" --show-npages " + quote(file), root, profile.sid, job.value, source.value,
+          counter.value, counter.value, errors.value, deadline, 32);
+        return readPageCount(counter.value);
+      };
+      auto inspectReport = [&](const std::wstring& file) {
+        rewindFile(report.value); require(SetEndOfFile(report.value) != 0);
+        decoder(executable, L" --json=2 --json-key=qpdf --json-key=pages --json-stream-data=none " + quote(file),
+          root, profile.sid, job.value, source.value, report.value, report.value, errors.value, deadline, 1024 * 1024);
+        return qpdf_json::Report(boundedReport(report.value));
+      };
+      for (size_t index = 0; index < sources.size(); ++index) {
+        signature(sources[index], operation);
+        const std::wstring staged = data + L"\\source-" + std::to_wstring(index) + L".pdf";
+        auto reader = std::make_unique<Handle>(stageReadOnly(sources[index], staged, profile.sid, inputDigests[index]));
+        decoder(executable, L" --check " + quote(staged), root, profile.sid, job.value, source.value, errors.value, destination.value, errors.value, deadline);
+        const unsigned count = pageCount(staged);
+        inputPageCounts.push_back(count); inputPages += count; require(inputPages <= 10000);
+        sourcePaths.push_back(staged); stagedSources.push_back(std::move(reader));
+      }
+      for (unsigned page : pages) require(page <= inputPages);
+      expectedPages = merge || rotate || metadata ? inputPages : static_cast<unsigned>(pages.size());
+      std::vector<int> beforeRotations;
+      if (rotate) { beforeRotations = inspectReport(sourcePaths[0]).rotations(); require(beforeRotations.size() == inputPages); }
+      std::wstring metadataPath;
+      std::unique_ptr<Handle> metadataUpdate;
+      if (metadata) {
+        const std::string patch = inspectReport(sourcePaths[0]).withoutInfoUpdate();
+        rewindFile(counter.value); require(SetEndOfFile(counter.value) != 0);
+        DWORD written = 0; require(WriteFile(counter.value, patch.data(), static_cast<DWORD>(patch.size()), &written, nullptr) && written == patch.size());
+        metadataPath = data + L"\\metadata-update.json";
+        metadataUpdate = std::make_unique<Handle>(stageReadOnly(counter.value, metadataPath, profile.sid, sha256(counter.value)));
+      }
+      std::wstring command;
+      if (merge) {
+        command = L" --empty --pages";
+        for (const auto& file : sourcePaths) command += L" " + quote(file) + L" 1-z";
+        command += L" -- -";
+      } else if (rotate) command = L" " + quote(sourcePaths[0]) + L" --rotate=+" + std::to_wstring(degrees) + L":" + selection + L" -";
+      else if (metadata) command = L" " + quote(sourcePaths[0]) + L" --update-from-json=" + quote(metadataPath) + L" --remove-metadata -";
+      else command = L" " + quote(sourcePaths[0]) + L" --pages . " + selection + L" -- -";
+      require(command.size() + executable.size() + 3 < 24000);
+      decoder(executable, command, root, profile.sid, job.value, source.value, destination.value, destination.value, errors.value, deadline);
+      require(FlushFileBuffers(destination.value) != 0); signature(destination.value, operation);
+      const std::string expectedOutputHash = sha256(destination.value);
+      const std::wstring validationPath = data + L"\\validation.pdf";
+      Handle stagedOutput(stageReadOnly(destination.value, validationPath, profile.sid, expectedOutputHash));
+      decoder(executable, L" --check " + quote(validationPath), root, profile.sid, job.value, source.value, errors.value, destination.value, errors.value, deadline);
+      outputPages = pageCount(validationPath);
+      require(outputPages == expectedPages && sha256(destination.value) == expectedOutputHash);
+      if (rotate) {
+        const auto afterRotations = inspectReport(validationPath).rotations(); require(afterRotations.size() == beforeRotations.size());
+        const std::set<unsigned> selected(pages.begin(), pages.end());
+        for (size_t index = 0; index < afterRotations.size(); ++index) {
+          const int expected = (beforeRotations[index] + (selected.count(static_cast<unsigned>(index + 1)) ? static_cast<int>(degrees) : 0)) % 360;
+          require(afterRotations[index] == expected);
+        }
+        rotationVerified = true;
+      }
+      if (metadata) { metadataVerified = inspectReport(validationPath).metadataAbsent(); require(metadataVerified); }
+    } else {
+      decoder(executable, args, root, profile.sid, job.value, source.value, destination.value, destination.value, errors.value, deadline);
+    }
     require(GetFileSizeEx(destination.value, &size) && size.QuadPart > 0 && size.QuadPart <= 128ll * 1024 * 1024);
     require(FlushFileBuffers(destination.value) != 0); signature(destination.value, operation);
-    decoder(executable, validationArguments(operation), root, profile.sid, job.value, destination.value, errors.value, destination.value, errors.value, deadline);
+    if (!pdf) decoder(executable, validationArguments(operation), root, profile.sid, job.value, destination.value, errors.value, destination.value, errors.value, deadline);
     const std::string outputDigest = sha256(destination.value);
     DWORD available = 0;
     require(PeekNamedPipe(GetStdHandle(STD_INPUT_HANDLE), nullptr, 0, nullptr, &available, nullptr) && !available && GetTickCount64() < deadline);
     publish(destination.value, parent.value, output.substr(output.find_last_of(L'\\') + 1)); published = true;
     const std::string operationText = ascii(operation);
-    std::printf("{\"protocol\":1,\"state\":\"completed\",\"operation\":\"%s\",\"mechanism\":\"appcontainer-handle-job\",\"sourceSha256\":\"%s\",\"outputBytes\":%llu,\"outputSha256\":\"%s\",\"validation\":\"signature-and-decoder-roundtrip\",\"admission\":{\"appContainer\":true,\"lpac\":true,\"capabilityCount\":0,\"jobAssigned\":true,\"handleList\":true},\"publication\":\"atomic-no-replace\"}\n",
-      operationText.c_str(), inputDigest.c_str(), static_cast<unsigned long long>(size.QuadPart), outputDigest.c_str());
+    std::string pdfFields = pdf ? ",\"inputPages\":" + std::to_string(inputPages) + ",\"expectedPages\":" + std::to_string(expectedPages) + ",\"outputPages\":" + std::to_string(outputPages) : "";
+    if (merge) {
+      pdfFields += ",\"sourceSha256s\":[";
+      for (size_t index = 0; index < inputDigests.size(); ++index) {
+        if (index) pdfFields += ","; pdfFields += "\"" + inputDigests[index] + "\"";
+      }
+      pdfFields += "],\"inputPageCounts\":[";
+      for (size_t index = 0; index < inputPageCounts.size(); ++index) { if (index) pdfFields += ","; pdfFields += std::to_string(inputPageCounts[index]); }
+      pdfFields += "]";
+    }
+    if (rotate) pdfFields += ",\"degrees\":" + std::to_string(degrees) + ",\"rotationVerified\":" + (rotationVerified ? "true" : "false");
+    if (metadata) pdfFields += ",\"metadataMode\":\"remove\",\"metadataAbsent\":" + std::string(metadataVerified ? "true" : "false");
+    std::printf("{\"protocol\":1,\"state\":\"completed\",\"operation\":\"%s\",\"mechanism\":\"appcontainer-handle-job\",\"sourceSha256\":\"%s\",\"outputBytes\":%llu,\"outputSha256\":\"%s\",\"validation\":\"%s\",\"admission\":{\"appContainer\":true,\"lpac\":true,\"capabilityCount\":0,\"jobAssigned\":true,\"handleList\":true},\"publication\":\"atomic-no-replace\"%s}\n",
+      operationText.c_str(), inputDigest.c_str(), static_cast<unsigned long long>(size.QuadPart), outputDigest.c_str(),
+      rotate ? "qpdf-structure-page-count-and-rotation" : metadata ? "qpdf-structure-page-count-and-metadata" : pdf ? "qpdf-structure-and-page-count" : "signature-and-decoder-roundtrip", pdfFields.c_str());
     return 0;
   } catch (...) {
     // Preserve the exact partial output under its explicit incomplete name. Never

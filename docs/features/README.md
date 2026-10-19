@@ -50,6 +50,8 @@ Choose a task below and read its permission, recovery and verification boundarie
 
 ## Existing reference inventory
 
+- [Durable jobs and recovery](durable-jobs.md): saved outcomes, explicit retry, batch receipts and contextual recovery.
+
 - [Source acquisition and revision lifecycle](source-lifecycle.md): official HTTPS acquisition, retained revision snapshots, explicit preview/Apply and typed WSL authority.
 
 - [Scheduled language and appearance preferences](scheduled-preferences.md): local
