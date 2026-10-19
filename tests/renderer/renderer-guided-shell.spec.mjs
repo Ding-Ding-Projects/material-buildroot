@@ -385,3 +385,45 @@ test('retained Tools category localizes selected text through the real Settings 
  expect(await page.evaluate(()=>window.__toolsLanguageRequests)).toEqual(['zh-HK','bilingual','en']);
  expect(await page.evaluate(()=>window.__requests.some(r=>['runtime.discover','build.submit','project.choose','config.trustGrant'].includes(r.action)))).toBe(false);
 });
+
+
+for(const [width,height,scale] of [[480,320,2],[960,640,1],[1440,960,1]])test.describe(`Tools scroll ownership ${width}x${height}`,()=>{
+ test.use({viewport:{width,height},deviceScaleFactor:scale,colorScheme:'dark',reducedMotion:'reduce'});
+ test('focused availability action fits every clipping ancestor without invocation',async({page},testInfo)=>{
+  const app=await open(page,{language:'bilingual'});
+  if(width===480){await app.locator('header .menu').click();await app.locator('#navigation-dialog [data-primary="tools"]').click();}else await nav(app,'tools').click();
+  const operations=app.locator('operations-panel:not([hidden])'),tools=operations.locator('tools-panel');
+  const action=tools.locator('md-outlined-button').filter({hasText:'Check tool availability'});
+  await action.focus();await action.scrollIntoViewIfNeeded();
+  const geometry=await action.evaluate(button=>{
+   const rect=button.getBoundingClientRect(),violations=[],ancestors=[];
+   const parent=el=>el.assignedSlot||el.parentElement||(el.getRootNode() instanceof ShadowRoot?el.getRootNode().host:null);
+   for(let el=button;el;el=parent(el)){
+    const box=el.getBoundingClientRect(),style=getComputedStyle(el),clipsX=/auto|scroll|hidden|clip/.test(style.overflowX),clipsY=/auto|scroll|hidden|clip/.test(style.overflowY);
+    const row={tag:el.localName,classes:el.className,x:box.x,y:box.y,width:box.width,height:box.height,overflowX:style.overflowX,overflowY:style.overflowY};ancestors.push(row);
+    if((clipsX&&(rect.left<box.left-1||rect.right>box.right+1))||(clipsY&&(rect.top<box.top-1||rect.bottom>box.bottom+1)))violations.push(row);
+   }
+   return {action:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},violations,ancestors};
+  });
+  await testInfo.attach('tools-action-ancestors',{body:JSON.stringify(geometry),contentType:'application/json'});
+  expect(geometry.action.height).toBeGreaterThanOrEqual(48);expect(geometry.violations).toEqual([]);
+  await action.click({trial:true});
+  expect(await page.evaluate(()=>window.__requests.some(r=>r.action==='payload.list'))).toBe(false);
+  const owner=operations.locator('.editor-frame'),category=operations.locator('.guided-navigation md-outlined-select');
+  if(height===320){
+   expect(await owner.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');
+   expect(await tools.evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');
+   expect(await owner.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+  }else{
+   expect(await owner.evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');
+   expect(await tools.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');
+  }
+  await category.focus();await category.scrollIntoViewIfNeeded();await category.press('Enter');
+  const picker=page.locator('searchable-picker').filter({has:page.locator('md-dialog[open]')});await expect(picker.getByRole('dialog')).toBeVisible();
+  expect(await picker.locator('[data-option]').evaluateAll(elements=>elements.filter(el=>!el.disabled).length)).toBe(6);
+  expect(await category.evaluate(el=>[...el.querySelectorAll('md-select-option')].filter(option=>!option.disabled).map(option=>option.value))).toEqual(['tools','regex','guests','assistant','companion','authenticator']);
+  await page.keyboard.press('Escape');await expect(picker.getByRole('dialog')).toBeHidden();
+  expect(await page.evaluate(()=>window.__requests.some(r=>r.action==='payload.list'))).toBe(false);
+  if(height===320){await operations.evaluate(el=>el.tab='source');await expect(operations.locator('.guided-tools')).toHaveCount(0);expect(await owner.evaluate(el=>getComputedStyle(el).overflowY)).toBe('visible');}
+ });
+});
