@@ -37,7 +37,7 @@ function fixture(t, mode = {}) {
       service.assertLease(input.lease, JOB); calls.push("prepare"); await options.onOwnership(owner);
       if (mode.competing) await assert.rejects(service.run({ ...request, jobId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" }), { code: "ISO_TRANSACTION_PROJECT_BUSY" });
       if (mode.crossJob) assert.throws(() => service.assertLease(input.lease, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), { code: "ISO_TRANSACTION_LEASE_REQUIRED" });
-      return { state: "succeeded", code: 0, observation };
+      return { state: "succeeded", code: 0, observation: mode.arrayPreparation ? { ...observation, preparationSha256: [HASH] } : observation };
     },
     produce: async (input, options) => {
       calls.push("produce"); await options.onOwnership({ ...owner, pid: null, startTime: null }); await options.onOwnership(owner); phase = "produced";
@@ -89,6 +89,10 @@ test("exclusive transaction retains every stage owner, binds output and never cl
   assert.deepEqual(f.records().filter(row => row.kind === "ownership").map(row => row.value.stage), ["prepare", "produce", "produce", "capture"]);
   assert.equal(f.records().at(-1).kind, "receipt");
   await assert.rejects(f.service.run(f.request), { code: "EEXIST" });
+});
+test("array preparation hash is rejected before producer dispatch",async t=>{
+ const f=fixture(t,{arrayPreparation:true});await assert.rejects(f.service.run(f.request),{code:"ISO_TRANSACTION_PREPARATION_UNVERIFIED"});
+ assert.deepEqual(f.calls,["prepare"]);assert.equal(f.records().some(row=>row.kind==="receipt"),false);assert.equal(f.execution.locks.size,3);
 });
 for (const [mode, code, capture] of [["crash", undefined, false], ["unknownCleanup", "ISO_TRANSACTION_CLEANUP_UNVERIFIED", false], ["cancel", "ISO_TRANSACTION_CANCELLED", false], ["changedConfig", "ISO_TRANSACTION_INPUT_CHANGED", false], ["changedGrant", "ISO_TRANSACTION_LEASE_REQUIRED", false], ["stale", "ISO_TRANSACTION_STALE_OUTPUT", true], ["replayedCapture", "ISO_TRANSACTION_OUTPUT_UNVERIFIED", true]]) {
   test(`${mode} retains incomplete evidence without accepting ISO bytes`, async t => {

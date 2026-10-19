@@ -68,6 +68,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       journal = store.begin(fixed.jobId, { ...fixed, binding: JSON.parse(binding) }, () => { reserved = true; });
       const prepared = await invoke("prepare"), preparation = prepared.observation;
       if (!keys(preparation, "state,jobId,preparationSha256,prior,jobBound,bootVerified")) fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
+      if (typeof preparation.preparationSha256 !== "string") fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
       if (preparation?.state !== "prepared-unbound" || preparation.jobId !== fixed.jobId || !SHA.test(preparation.preparationSha256 || "") || preparation.jobBound !== false || preparation.bootVerified !== false) fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
       journal.append("preparation", preparation);
       await invoke("produce", { preparationSha256: preparation.preparationSha256 });

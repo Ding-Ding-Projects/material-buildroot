@@ -48,6 +48,7 @@ function inspect(records,active,expected){
     keys(value,"stage,receipt,verdict");keys(value.verdict,"state,reason");if(!result||value.stage!==stage||!["verified-stopped","unknown"].includes(value.verdict.state)||typeof value.verdict.reason!=="string"||value.verdict.reason.length>200)fail();validateOwnershipReceipt(value.receipt);equal(value.receipt,(producerOwner?[producerOwner.precise()]:owners)[cleanups.length]);cleanups.push(value);break;
    case"preparation":
     if(stage!=="prepare"||preparation)fail();finished();keys(value,"state,jobId,preparationSha256,prior,jobBound,bootVerified");
+    if(typeof value.preparationSha256!=="string")fail();
     if(value.state!=="prepared-unbound"||value.jobId!==expected.jobId||!SHA.test(value.preparationSha256||"")||value.jobBound!==false||value.bootVerified!==false)fail();if(value.prior!==null)file(value.prior,false);preparation=value;break;
    case"receipt":
     if(stage!=="capture"||!preparation)fail();finished();keys(value,"version,jobId,runtime,policy,binding,preparationSha256,output,jobBound,producerVerified,cleanupVerified,bootVerified");

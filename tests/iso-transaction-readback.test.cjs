@@ -39,6 +39,7 @@ for(const [name,mutate]of[
  ["unknown cleanup",rows=>rows.find(row=>row.kind==="cleanup").value.verdict.state="unknown"],
  ["changed refinement token",rows=>rows.find(row=>row.kind==="ownership"&&row.value.stage==="produce"&&row.value.receipt.pid!==null).value.receipt.ownerToken="cccccccc-cccc-4ccc-8ccc-cccccccccccc"],
  ["wrong preparation",rows=>rows.at(-1).value.preparationSha256="b".repeat(64)],
+ ["array preparation hash",rows=>{rows.find(row=>row.kind==="preparation").value.preparationSha256=[HASH];rows.at(-1).value.preparationSha256=[HASH];}],
  ["optimistic boot",rows=>rows.at(-1).value.bootVerified=true],
  ["duplicate stage",rows=>rows.find(row=>row.kind==="stage"&&row.value.stage==="capture").value.stage="produce"],
  ["foreign source",rows=>rows.at(-1).value.binding.sourceSha256="b".repeat(64)],
@@ -60,3 +61,22 @@ for(const mode of["missing","missing-tail","truncated","oversized","duplicate-ke
  });
 }
 test("receipt plus retained reservation remains incomplete",async t=>{const f=await fixture(t);fs.writeFileSync(path.join(f.directory,"active.json"),JSON.stringify({version:1,jobId:JOB}));assert.equal(f.read().state,"incomplete");assert.equal(fs.existsSync(path.join(f.directory,"active.json")),true);});
+
+function injectedReader(root,mode){
+ const vm=require("node:vm"),Module=require("node:module"),file=require.resolve("../src/main/jobs/iso-transaction-read-files.cjs"),loaded={exports:{}},counts={reads:[],closed:0,records:0,unbounded:0};
+ const realNames=fs.readdirSync(root).sort();let pass=0;
+ const fake={...fs,readdirSync(){counts.unbounded++;return Array.from({length:10000},(_,i)=>String(i).padStart(6,"0")+".json");},
+  opendirSync(){const current=pass++;let at=0;counts.reads[current]=0;if(current===1)counts.recordsAtSecond=counts.records;return{readSync(){counts.reads[current]++;if(mode==="exception"&&at===3)throw Error("injected iterator failure");if(mode==="second"&&current===0)return at<realNames.length?{name:realNames[at++]}:null;return{name:String(at++).padStart(6,"0")+".json"};},closeSync(){counts.closed++;}};},
+  openSync(file,...args){if(String(file).startsWith(root+path.sep))counts.records++;return fs.openSync(file,...args);}
+ };
+ vm.runInThisContext(Module.wrap(fs.readFileSync(file,"utf8")),{filename:file})(loaded.exports,name=>name==="node:fs"?fake:name==="../security/workspace-contract.cjs"?require("../src/main/security/workspace-contract.cjs"):require(name),loaded,file,path.dirname(file));
+ return{read:loaded.exports.readTransactionFiles,counts};
+}
+for(const mode of["excess","exception","second"])test(`bounded iterator ${mode} closes and limits enumeration`,async t=>{
+ const f=await fixture(t),reader=injectedReader(f.root,mode);assert.throws(()=>reader.read(f.directory,JOB));
+ assert.equal(reader.counts.unbounded,0);assert.equal(reader.counts.closed,mode==="second"?2:1);
+ assert.ok(reader.counts.reads.every(count=>count<=65));
+ if(mode!=="second")assert.equal(reader.counts.records,0);
+ if(mode==="excess")assert.deepEqual(reader.counts.reads,[65]);
+ if(mode==="second"){assert.equal(reader.counts.reads[1],65);assert.equal(reader.counts.records,reader.counts.recordsAtSecond);}
+});
