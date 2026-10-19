@@ -40,8 +40,8 @@ function observation(value, request) {
   else { if (value.state !== "fresh-file-observed-unbound" || value.preparationSha256 !== request.preparationSha256 || value.producerVerified !== false || value.cleanupVerified !== false) fail("ISO_LIFECYCLE_INVALID_RESPONSE"); file(value.output, true); }
   return value;
 }
-function createWslIsoOutputLifecycle({ execution, run, checkpoint, signalScript }) {
-  return async function lifecycle(request, { signal, onOwnership } = {}) {
+function createTransport({ execution, run, checkpoint, signalScript }, validateLease) {
+  return async function lifecycle(request, { signal, onOwnership, lease } = {}) {
     exact(request, ["grantId", "runtime", "operation", "jobId", ...(request?.operation === "capture" ? ["preparationSha256"] : [])]);
     exact(request.runtime, ["kind", "distribution"]);
     if (typeof request.grantId !== "string" || request.runtime.kind !== "wsl" || !["prepare", "capture"].includes(request.operation) || typeof request.jobId !== "string" || !UUID.test(request.jobId) ||
@@ -51,14 +51,19 @@ function createWslIsoOutputLifecycle({ execution, run, checkpoint, signalScript 
     const proof = receipt.proof.split("\n"), outputPair = proof[5]?.match(/^(0|[1-9][0-9]{0,19}):(0|[1-9][0-9]{0,19})$/);
     if (proof.length !== 6 || !UUID.test(proof[0]) || !/^[1-9][0-9]{0,9}$/.test(proof[2]) || !outputPair) fail("ISO_LIFECYCLE_AUTHORITY_REQUIRED");
     const roots = [grant.root, grant.source, grant.output], stage = Object.freeze({ operation: request.operation, jobId: request.jobId });
+    const borrowed = typeof validateLease === "function";
+    if (!borrowed && lease !== undefined) fail("ISO_LIFECYCLE_AUTHORITY_REQUIRED");
     const current = () => {
       if (signal?.aborted) fail("ISO_LIFECYCLE_CANCELLED");
       if (execution.grants.get(request.grantId) !== grant || grant.wslReceipt !== receipt || roots.some((root, index) => root !== [grant.root, grant.source, grant.output][index])) fail("ISO_LIFECYCLE_AUTHORITY_REQUIRED");
+      if (borrowed) validateLease(lease, { execution, jobId: request.jobId, grantId: request.grantId, runtime: request.runtime, roots });
     };
     const verify = async () => { current(); await verifyWslProject(receipt, args => run(execution.executables.wsl, args, { timeoutMs: 10000, maxBytes: 4096 }).completion, request.runtime); current(); };
     current();
-    if (roots.some(root => execution.locks.has(root))) fail("ISO_LIFECYCLE_PROJECT_BUSY");
-    roots.forEach(root => execution.locks.add(root));
+    if (!borrowed) {
+      if (roots.some(root => execution.locks.has(root))) fail("ISO_LIFECYCLE_PROJECT_BUSY");
+      roots.forEach(root => execution.locks.add(root));
+    }
     let job, owner = null, handshake, handshakeError, line = "", authority;
     const cancel = () => job?.cancel();
     try {
@@ -115,7 +120,16 @@ function createWslIsoOutputLifecycle({ execution, run, checkpoint, signalScript 
         if (response.ok !== true) fail("ISO_LIFECYCLE_INVALID_RESPONSE");
         return { ...base, state: "succeeded", code: 0, observation: observation(response.result, request) };
       } catch { return { ...base, state: "failed", code: null, errorCode: "ISO_LIFECYCLE_UNVERIFIED" }; }
-    } finally { clearInterval(authority); signal?.removeEventListener("abort", cancel); roots.forEach(root => execution.locks.delete(root)); }
+    } finally {
+      clearInterval(authority); signal?.removeEventListener("abort", cancel);
+      if (!borrowed) roots.forEach(root => execution.locks.delete(root));
+    }
   };
 }
-module.exports = { createWslIsoOutputLifecycle };
+function createWslIsoOutputLifecycle(options) { return createTransport(options); }
+/** Internal bridge only. No renderer or scheduler route constructs this factory. */
+function createLeasedWslIsoOutputLifecycle(options, transactions) {
+  if (typeof transactions?.assertLifecycleLease !== "function") fail("ISO_LIFECYCLE_AUTHORITY_REQUIRED");
+  return createTransport(options, (lease, context) => transactions.assertLifecycleLease(lease, context));
+}
+module.exports = { createWslIsoOutputLifecycle, createLeasedWslIsoOutputLifecycle };

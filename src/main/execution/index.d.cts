@@ -13,9 +13,12 @@ export type ExecutionRuntime =
   | { kind: "wsl"; distribution: string }
   | { kind: "docker"; image: string; uid: number; gid: number }
   | { kind: "linux-fixture" };
+export interface WslOwnerIdentity { version: 1; kind: "wsl"; ownerToken: string; distribution: string; bootId: string; pidNamespace: string }
+export type WslReservationOwner = WslOwnerIdentity & { pid: null; startTime: null };
+export type WslPreciseOwner = WslOwnerIdentity & { pid: number; startTime: string };
 export type OwnershipReceipt =
   | { version: 1; kind: "docker"; ownerToken: string; containerName: string; daemonId: string }
-  | { version: 1; kind: "wsl"; ownerToken: string; distribution: string; bootId: string; pidNamespace: string; pid: number | null; startTime: string | null };
+  | WslReservationOwner | WslPreciseOwner;
 export interface CleanupVerdict { state: "verified-stopped" | "unknown"; reason: string }
 export function validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
 export interface ExecutionResult {
@@ -69,6 +72,14 @@ export class ExecutionService {
     externalTrees: string[];
   };
   revoke(grantId: string): void;
+  /** Internal native composition only; not exposed through renderer IPC. */
+  startIsoProducer(
+    request: { grantId: string; target: "all"; runtime: { kind: "wsl"; distribution: string }; jobs?: number },
+    onLog: ((event: ExecutionLog) => void) | undefined,
+    options: { onOwnership?(receipt: Readonly<OwnershipReceipt>): Promise<void> | void; signal?: AbortSignal },
+    transactions: { assertLifecycleLease(lease: object, context: { execution: ExecutionService; jobId: string; grantId: string; runtime: { kind: "wsl"; distribution: string }; roots: string[] }): void },
+    context: { lease: object; jobId: string },
+  ): Promise<ExecutionJob>;
   runIsoOutputLifecycle(request: { grantId: string; runtime: {kind:"wsl"; distribution:string}; operation:"prepare"; jobId:string } | { grantId:string; runtime:{kind:"wsl"; distribution:string}; operation:"capture"; jobId:string; preparationSha256:string }, options: { signal?:AbortSignal; onOwnership(receipt:Readonly<OwnershipReceipt>, stage:Readonly<{operation:"prepare"|"capture";jobId:string}>):void|Promise<void> }):Promise<{state:"succeeded"|"failed"|"cancelled"|"runtime-cleanup-failed";code:number|null;ownership:OwnershipReceipt|null;cleanup:CleanupVerdict;stage:Readonly<{operation:"prepare"|"capture";jobId:string}>;observation:unknown|null;errorCode?:string}>;
   validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
   reconcileCleanup(receipt: unknown): Promise<CleanupVerdict>;
