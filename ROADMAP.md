@@ -7,11 +7,13 @@
 - [x] Resolve carried renderer type and host-result diagnostics without weakening strict checking; current check exits zero.
 - [x] Distinguish verified release publication from explicitly skipped preservation builds.
 - [x] Verify source-bound desktop and documentation production through the exact root entrypoints.
-- [ ] Repair final embedded ZIP admission after installer retry 39207625084 failed; no release was published.
+- [ ] Verify full installer production after the final embedded-ZIP source repair; run39214540214 remains in progress and no new release is claimed.
 - [x] Implement exact retained-ZIP final embedding, source-bound receipts and owned child containment; pass four focused checks and supported MSVC compilation.
 - [ ] Verify actual native final embedding and runtime termination; three bounded fixture launches returned EACCES before execution, without security changes.
 - [x] Pass 33 focused renderer checks, record bounded native navigation and its remaining catalog/reference limits, publish integration and verify remote main.
 - [x] Verify the recovery archive and separate ignored-image preservation, then retire 77 ancestor-proven remote branches and two completed task worktrees/local branches.
+- [x] Publish the verified 433-page documentation snapshot and current native screenshots; verify live bytes, bounded navigation and persistent guide interactions.
+- [ ] Complete formal website visible-focus pixel proof and isolated-profile removal; automated review blocked profile removal, while owned processes/listener/desktop were closed.
 
 This phase concerns integration and safe retirement. Broader product acceptance below retains its recorded limits.
 
@@ -23,8 +25,8 @@ This phase concerns integration and safe retirement. Broader product acceptance 
 - [x] Verify the actual native Tools selected-label language roundtrip on bd746d7 with four inspected captures and unchanged selection.
 - [x] Repair the short-height Tools nested viewport and verify native967c0cf at minimum and normal sizes:48px action within158px editor,15 validated ancestor records; no tool invoked.
 - [x] Repair short-height Help search layout and verify native8c93d73:108px field within158px editor,15 validated records; no search invoked.
-- [ ] Repair packaged Help INVALID_BUNDLE through physical resources while preserving strict file checks, then verify real article/reference/image routes and remaining frontier.
-- [ ] Complete the focused five-task local-utility presentation, preserving all mounted drafts and catalog identities; implementation is in an isolated lane.
+- [ ] Verify remaining packaged Help reference/image workflows after physical-resource repair. Native home and article navigation work; catalog-loading diagnostics and image/reference interaction retain their recorded gaps.
+- [ ] Complete remaining acceptance of the integrated five-task local-utility presentation. Source is merged into main with focused browser checks and bounded native navigation; complete layout and actual tool execution acceptance remain open.
 - [ ] Verify integrated bounded Help, task/action-owned utility feedback and nested dark-palette inheritance in the rebuilt native application. Source units have independent approvals and focused regressions; full native acceptance remains open.
 - [ ] Exercise the authorized single isolated WSL experiment after GUI readiness and successful product recovery validation. Authorization is unused; historical owners and quarantine remain preserved.
 - [x] Verify bounded ordinary installed b9447cf/version0.1.1 startup with ready workspace, About navigation,162.009seconds prospective observation across three intervals and normal teardown. Redesigned update/profile migration remain separate.
