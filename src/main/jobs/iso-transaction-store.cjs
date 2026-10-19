@@ -23,8 +23,8 @@ function createIsoTransactionStore(directory) {
     const fd = fs.openSync(root, "r"); try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
   }
   return Object.freeze({
-    begin(jobId, binding) {
-      if (!UUID.test(jobId)) fail();
+    begin(jobId, binding, onReservation) {
+      if (!UUID.test(jobId) || typeof onReservation !== "function") fail();
       check();
       const root = path.join(directory, jobId);
       if (fs.existsSync(root)) throw Object.assign(Error("ISO transaction already recorded"), { code: "EEXIST" });
@@ -33,6 +33,9 @@ function createIsoTransactionStore(directory) {
       const reservationFd = fs.openSync(reservation, "wx", 0o600);
       let reservationIdentity;
       try {
+        // Notify synchronously after exclusive creation, before any fallible write or sync.
+        // The caller must retain its locks even if this method never returns a journal.
+        onReservation();
         fs.writeFileSync(reservationFd, JSON.stringify({ version: 1, jobId })); fs.fsyncSync(reservationFd);
         const stat = fs.fstatSync(reservationFd); reservationIdentity = `${stat.dev}:${stat.ino}`;
       } finally { fs.closeSync(reservationFd); }

@@ -26,7 +26,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
     const admittedReceipt = grant.wslReceipt;
     const lease = Object.freeze({}), state = { jobId: fixed.jobId, grantId: fixed.grantId, grant, roots };
     roots.forEach(root => execution.locks.add(root)); leases.set(lease, state);
-    let journal, stage = "admission", binding, completed = false;
+    let journal, stage = "admission", binding, completed = false, reserved = false;
     async function current() {
       if (signal?.aborted) fail("ISO_TRANSACTION_CANCELLED");
       assertLease(lease, fixed.jobId);
@@ -60,7 +60,8 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       await current(); return result;
     }
     try {
-      await current(); journal = store.begin(fixed.jobId, { ...fixed, binding: JSON.parse(binding) });
+      await current();
+      journal = store.begin(fixed.jobId, { ...fixed, binding: JSON.parse(binding) }, () => { reserved = true; });
       const prepared = await invoke("prepare"), preparation = prepared.observation;
       if (!keys(preparation, "state,jobId,preparationSha256,prior,jobBound,bootVerified")) fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
       if (preparation?.state !== "prepared-unbound" || preparation.jobId !== fixed.jobId || !SHA.test(preparation.preparationSha256 || "") || preparation.jobBound !== false || preparation.bootVerified !== false) fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
@@ -82,7 +83,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
     } finally {
       leases.delete(lease);
       // Incomplete durable work retains its reservation until separately verified recovery.
-      if (completed || !journal) roots.forEach(root => execution.locks.delete(root));
+      if (completed || !reserved) roots.forEach(root => execution.locks.delete(root));
     }
   }
   return Object.freeze({ run, assertLease });
