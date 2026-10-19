@@ -307,3 +307,59 @@ test('shared shell navigation styles never resize or hide a nested pager',async(
   for(const button of await app.locator('nav [data-primary]').all())await expect(button).toBeVisible();
  }
 });
+
+
+test('Purpose selects localize their selected text through Settings without changing the draft',async({page})=>{
+ const {app,creation}=await begin(page);
+ await page.evaluate(()=>{
+  window.__languageRequests=[];
+  window.studio.request=async request=>{
+   if(request.action!=='settings.setLanguage')return {ok:false,code:'FIXTURE_UNAVAILABLE'};
+   window.__languageRequests.push(request.arguments.language);
+   return {ok:true,revision:String(window.__languageRequests.length).repeat(40)};
+  };
+ });
+ const mode=creation.locator('md-outlined-select').nth(0),purpose=creation.locator('md-outlined-select').nth(1);
+ const choose=async(select,index)=>{
+  await select.click();
+  const picker=page.locator('searchable-picker').filter({has:page.locator('md-dialog[open]')});
+  await expect(picker.getByRole('dialog')).toBeVisible();
+  await picker.locator('[data-option="'+index+'"]').click();
+  await expect(picker.getByRole('dialog')).toBeHidden();
+ };
+ await creation.getByRole('textbox',{name:'Image name',exact:true}).fill('retained-server-image');
+ await choose(mode,1);await choose(purpose,3);
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('material-buildroot.image-creation.v1')))).toMatchObject({name:'retained-server-image',mode:'advanced',purpose:'server',stage:'purpose'});
+ const saved=await page.evaluate(()=>localStorage.getItem('material-buildroot.image-creation.v1'));
+ await creation.evaluate(el=>{window.__purposeHost=el;window.__purposeSelects=[...el.shadowRoot.querySelectorAll('md-outlined-select')];window.__purposeChanges=0;el.addEventListener('creation-change',()=>window.__purposeChanges++);});
+ const labels={
+  en:{mode:'Configuration mode',modeValue:'Advanced',purpose:'Intended purpose (unverified)',purposeValue:'Small server'},
+  'zh-HK':{mode:'設定模式',modeValue:'進階',purpose:'預定用途（未核實）',purposeValue:'小型伺服器'},
+  bilingual:{mode:'Configuration mode · 設定模式',modeValue:'Advanced · 進階',purpose:'Intended purpose (unverified) · 預定用途（未核實）',purposeValue:'Small server · 小型伺服器'},
+ };
+ const check=async language=>{
+  await expect(creation).toHaveJSProperty('language',language);
+  for(const [select,key] of [[mode,'mode'],[purpose,'purpose']]){
+   await expect(select).toHaveJSProperty('label',labels[language][key]);
+   await expect(select).toHaveJSProperty('displayText',labels[language][key+'Value']);
+   await expect(select.locator('div#label')).toHaveText(labels[language][key+'Value']);
+   expect(await select.evaluate(el=>el.displayText===el.querySelector('md-select-option[value="'+el.value+'"] [slot="headline"]').textContent.trim())).toBe(true);
+  }
+  expect(await creation.evaluate(el=>el===window.__purposeHost&&[...el.shadowRoot.querySelectorAll('md-outlined-select')].every((select,i)=>select===window.__purposeSelects[i]))).toBe(true);
+  expect(await page.evaluate(()=>localStorage.getItem('material-buildroot.image-creation.v1'))).toBe(saved);
+  expect(await page.evaluate(()=>window.__purposeChanges)).toBe(0);
+ };
+ await check('en');
+ for(const [language,index] of [['zh-HK',1],['bilingual',2],['en',0]]){
+  await app.locator('nav [data-primary="settings"]').click();
+  await app.locator('.settings-categories md-outlined-button').first().click();
+  await choose(app.locator('#language-select'),index);
+  await app.locator('#language-select').locator('..').locator('md-filled-button').first().click();
+  await expect.poll(()=>app.evaluate(el=>el.effectiveLanguage)).toBe(language);
+  await app.locator('nav [data-primary="images"]').click();
+  await app.locator('[data-image-action="resume-draft"]').click();
+  await expect(creation).toBeVisible();await check(language);
+ }
+ expect(await page.evaluate(()=>window.__languageRequests)).toEqual(['zh-HK','bilingual','en']);
+ expect(await page.evaluate(()=>window.__calls.some(r=>['project.choose','source','project.adopt','imagePreset.isoBuild','config.trustGrant'].includes(r.action)))).toBe(false);
+});
