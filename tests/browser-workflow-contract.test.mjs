@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {createCompanionConsumers} from '../src/main/security/companion-consumers.cjs';
 
 const source = fs.readFileSync(new URL('../website/app.js', import.meta.url), 'utf8').replace(/\r\n?/g, '\n');
 const host = fs.readFileSync(new URL('../src/main/operations-service.cjs', import.meta.url), 'utf8').replace(/\r\n?/g, '\n');
@@ -19,22 +20,24 @@ class Element {
 }
 function renderer(language='en') {
   const region=new Element();
-  const context=vm.createContext({document:{createElement:()=>new Element()},visitor:{querySelector:()=>region},copy:(en,zh)=>language==='zh'?zh:language==='both'?`${en} · ${zh}`:en,companionError:()=> 'Request unavailable',lastCompanionResult:null});
+  const context=vm.createContext({document:{createElement:()=>new Element()},visitor:{querySelector:()=>region},copy:(en,zh)=>language==='zh'?zh:language==='both'?`${en} · ${zh}`:en,companionError:()=> 'Request unavailable',lastCompanionResult:null,consumerBusy:false});
   vm.runInContext(bounded(source,'  function renderCompanionData(',"  language?.addEventListener('change', () => {"),context);
   return {region,context,render:(action,result,error='')=>context.renderCompanionData(action,result,error)};
 }
 const now='2026-10-16T12:00:00.000Z';
 const plan={id:'plan-1',name:'Sample plan',runtime:'wsl',target:'sdk',status:'draft',updatedAt:now,notes:'PRIVATE-NOTES'};
 const job={id:'job-1',kind:'build',state:'completed',sequence:2,createdAt:now,updatedAt:now,logCount:3,itemCount:1,ownerId:'owner',logs:'PRIVATE-LOGS'};
-function hostResult(action) {
-  const body=bounded(host,'            const summarizeJob =','\n          },\n        })');
-  return new Function('request','workspaceRead','projectStore','projects','jobs','owner','reject',body)(
-    {action,args:{}},()=>({ok:true,state:{revision:3,onboardingCompleted:true,plans:[plan],preferences:{theme:'PRIVATE-PREFERENCE'}}}),
-    {list:()=>[{id:'project-1',name:'Sample project',root:'PRIVATE-PATH'}]},new Map([['project-1',{}]]),{list:()=>[job]},'owner',()=>{throw Error('rejected');});
+async function hostResult(action) {
+  const callbacks=bounded(host,'    readWorkspace:','    cancelJob:');
+  const projected=new Function('workspaceRead','projectStore','projects','jobs','owner','ownJob','reject','return ({'+callbacks+'});')(
+    ()=>({ok:true,state:{revision:3,onboardingCompleted:true,plans:[plan],preferences:{theme:'PRIVATE-PREFERENCE'}}}),
+    {list:()=>[{id:'project-1',name:'Sample project',root:'PRIVATE-PATH'}]},new Map([['project-1',{}]]),{list:()=>[job]},'owner',()=>job,()=>{throw Error('rejected');});
+  return createCompanionConsumers(projected).dispatch({action,args:{}},{sessionId:'fixture-session',origin:'https://companion.example',scopes:['workspace:read','projects:read','jobs:read'],isAuthorized:()=>true});
 }
+
 for(const [action,label] of [['workspace.read','Sample plan'],['projects.list','Sample project'],['jobs.list','build · completed']]) {
-  test(`${action} renders the actual host privacy projection`,()=>{
-    const {render,region}=renderer();render(action,hostResult(action));
+  test(`${action} renders the actual host privacy projection`,async()=>{
+    const {render,region}=renderer();render(action,await hostResult(action));
     assert.ok(region.textContent.includes(label),region.textContent);
     assert.doesNotMatch(region.textContent,/PRIVATE-|Theme preference|did not match/);
   });
@@ -57,7 +60,7 @@ test('action replies retain sequence recovery and never automatically retry',asy
     const {context,region}=renderer();let listener,requests=0;
     const button={dataset:{companionAction:'workspace.read'},addEventListener:(_name,callback)=>listener=callback};
     context.visitor.querySelectorAll=()=>[button];
-    Object.assign(context,{companion:{session:{scopes:['workspace:read']},nextSequence:1,csrfToken:'fixture'},actionScope:{'workspace.read':'workspace:read'},companionMessage:new Element(),makeUUID:()=> 'fixture',companionFetch:async()=>{requests++;if(outcome==='lost')throw Error('lost');return {response:{ok:true},payload:{nextSequence:2,operation:{action:'workspace.read',state:'succeeded'},result:outcome==='valid'?hostResult('workspace.read'):{state:{preferences:{theme:'PRIVATE-PREFERENCE'}}}}};}});
+    Object.assign(context,{companion:{session:{scopes:['workspace:read']},nextSequence:1,csrfToken:'fixture'},actionScope:{'workspace.read':'workspace:read'},companionMessage:new Element(),makeUUID:()=> 'fixture',companionFetch:async()=>{requests++;if(outcome==='lost')throw Error('lost');return {response:{ok:true},payload:{nextSequence:2,operation:{action:'workspace.read',state:'succeeded'},result:outcome==='valid'?await hostResult('workspace.read'):{state:{preferences:{theme:'PRIVATE-PREFERENCE'}}}}};}});
     vm.runInContext(bounded(source,"  visitor.querySelectorAll('[data-companion-action]').forEach(button=>button.addEventListener('click',async()=>{",'\n  function renderCompanionData('),context);
     await listener();assert.equal(requests,1);assert.equal(button.disabled,false);
     if(outcome==='valid'){assert.match(context.companionMessage.textContent,/returned a read-only result/);assert.match(region.textContent,/Sample plan/);}
@@ -79,7 +82,7 @@ test('a language rerender cannot restore records after a malformed or lost reply
         requests++;
         if(requests===2&&outcome==='lost')throw Error('lost');
         return {response:{ok:true},payload:{nextSequence:requests+1,operation:{action:'workspace.read',state:'succeeded'},
-          result:requests===1?hostResult('workspace.read'):{state:{plans:[plan],preferences:{theme:'PRIVATE-PREFERENCE'}}}}};
+          result:requests===1?await hostResult('workspace.read'):{state:{plans:[plan],preferences:{theme:'PRIVATE-PREFERENCE'}}}}};
       },
     });
     vm.runInContext(bounded(source,"  visitor.querySelectorAll('[data-companion-action]').forEach(button=>button.addEventListener('click',async()=>{",'\n  function renderCompanionData('),context);
