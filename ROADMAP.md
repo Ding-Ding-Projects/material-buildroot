@@ -3,7 +3,8 @@
 ## Guided workspace remake, 2026-10-18
 
 - [x] Verify the948 documentation build and bounded10-view runtime/navigation/persistence scope, with explicit local-only delivery.
-- [ ] Rebuild and repeat the native Cantonese selected-label tuple after source repair ed602ad; original matrix accepted8, found1 defect, left39 tuples unrun.
+- [x] Repeat native selected-label language switching after ed602ad in build e47: four actual captures, persisted values unchanged and owned teardown verified.
+- [ ] Verify the integrated short-viewport repair d339e07 against the exact native480x320 bilingual/dark scale2 finding, then finish the remaining matrix.
 - [ ] Complete scheduler integration and runtime verification of the reviewed internal ISO transaction modules; source adapters remain disconnected.
 
 - [x] Build reviewed candidate d02fd59 through the exact root entrypoint; verify the 126 selected renderer cases across focused runs and20 host documentation cases, with 3 symbolic-link cases explicitly unverified.

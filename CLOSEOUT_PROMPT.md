@@ -1,3 +1,15 @@
+## Native localization verified; short-viewport repair integrated
+
+The targeted native regression passed on e47c6c886b4796a266c313e829571cd5ef8e8f5b using actual registered controls and persisted intent. Advanced/server displayed correctly across English, Cantonese, bilingual and English, with ID/name/mode/purpose unchanged. Four native captures were inspected and owned graceful teardown verified.
+
+The broader native probe then confirmed shell overlap at effective480x320 bilingual/dark scale2: header185px, notification host168px around48px trigger, navigation148px and main24px. The focused Create action remained obscured. A separate formal version1 layout receipt validated10 positive-area measurements; its zero-height ancestor and original schema rejection remain retained separately. Both runs closed normally. This is emulated density/reflow, not physical OS scaling.
+
+Responsive repair d339e077a63ff0c7eda301710abf5d779333e233 passed independent review and seven focused renderer cases. It fixes notification host height, uses the existing labelled navigation menu for compact layouts, retains all destinations and Setup, and keeps status/drawer content scrollable. Source-fixture geometry is header52px, notification44px, main158px and status64px. Exact native after-repair verification is pending.
+
+The repair is combined with reviewed inactive host-admission code through0c1a1125d7791e3a667ee52aa9e278bf544720f8 at66582952cedbc7f1774a6ce3c2ed91a93a147bc4. The host code checks authority after awaited probes and snapshots accepted queued inputs before awaiting. Its sparse-array and aggregate serialized-byte bounds were repaired with safe red-before-green sentinels;26 focused checks passed. Durable quarantine hooks and scheduler activation remain unfinished. No WSL/Docker/firmware operation occurred.
+
+Next: rebuild this combined source, repeat the exact failed native layout tuple with the same formal measurements, then continue remaining destination/layout acceptance. Preserve hidden-only operation and all historical evidence. No full matrix, installed update, release or current-GUI ISO completion is claimed.
+
 ## Reviewed read-only journal verification
 
 The inactive ISO journal reader and its two independently confirmed repairs are integrated through f81001671a232f01274da0342cbad9877942becb. Directory enumeration now requests at most 65 entries on each pass, closes every opened iterator and accepts at most 64 record names. Preparation digests require primitive strings in both writer and reader. Five regressions witnessed the previous behavior before repair; the combined focused run passed 64 cases, followed by three final iterator cases. The reader requires explicit stage results, validated ownership/cleanup, consistent preparation/final output and a trusted external final-record hash. It never clears reservations, releases locks, calls a runtime or grants current output authority. Scheduler/renderer construction remains disconnected. A fresh combined desktop build and native localized-choice verification are the next steps.
