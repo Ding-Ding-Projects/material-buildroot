@@ -35,7 +35,7 @@ function setup(t, extra = {}) {
   const service = createSchedulePreferencesService({
     directory,
     profileId: "desktop",
-    baseReader: async () => ({ language: "en", "appearance.theme": "system" }),
+    baseReader: async () => ({ language: "en", "appearance.profile": null, "appearance.theme": "system" }),
     clock: () => time,
     tickMs: 1000,
     ...extra,
@@ -135,7 +135,7 @@ test("a revoked frame while scoped read awaits cannot commit the actual SQLite d
     directory,
     profileId: "desktop",
     storageAdapter: adapter,
-    baseReader: async () => ({ language: "en", "appearance.theme": "system" }),
+    baseReader: async () => ({ language: "en", "appearance.profile": null, "appearance.theme": "system" }),
   });
   t.after(() => {
     service.close();
@@ -277,6 +277,7 @@ test("five actual HTTPS rules receive bounded worker attempts and failures emit 
       profileId: "desktop",
       baseReader: async () => ({
         language: "en",
+        "appearance.profile": null,
         "appearance.theme": "system",
       }),
       clock: () => time,

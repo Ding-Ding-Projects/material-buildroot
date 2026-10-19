@@ -45,10 +45,12 @@ test("runtime and external tree metadata persist independently without granting 
     runtime: wsl(),
     externalTrees,
   });
-  assert.deepEqual(saved, { revision: 1, runtime: wsl(), externalTrees });
+  assert.equal(saved.historyWarning, false);
+  const {historyWarning, ...savedOptions} = saved;
+  assert.deepEqual(savedOptions, { revision: 1, runtime: wsl(), externalTrees });
   assert.deepEqual(
     createProjectOptionsStore({ directory }).get(request),
-    saved,
+    savedOptions,
   );
   saved.externalTrees[0].name = "Mutated";
   assert.equal(store.get(request).externalTrees[0].name, "Board_Support");
@@ -72,7 +74,7 @@ test("runtime and external tree metadata persist independently without granting 
       runtime: null,
       externalTrees: [],
     }),
-    { revision: 3, runtime: null, externalTrees: [] },
+    { revision: 3, runtime: null, externalTrees: [], historyWarning: false },
   );
 });
 test("stale saves and replacement failures retain the previous complete options", (t) => {
@@ -111,8 +113,10 @@ test("stale saves and replacement failures retain the previous complete options"
   } finally {
     fs.renameSync = rename;
   }
-  assert.deepEqual(store.get(request), previous);
-  assert.deepEqual(fs.readdirSync(directory), [`${request.workspaceId}.json`]);
+  const {historyWarning, ...previousOptions} = previous;
+  assert.equal(historyWarning, false);
+  assert.deepEqual(store.get(request), previousOptions);
+  assert.deepEqual(fs.readdirSync(directory).sort(), [`${request.workspaceId}.json`, `${request.workspaceId}.json.history.git`].sort());
 });
 test("unsafe runtimes, unknown fields, accessors and malformed identities are rejected", (t) => {
   const { store, request } = setup(t);
@@ -231,7 +235,7 @@ test("corrupt, foreign, mismatched and invalid UTF-8 records remain unchanged", 
     Buffer.from(JSON.stringify({ ...valid, workspaceId: randomUUID() })),
     Buffer.from(JSON.stringify({ ...valid, unsupported: true })),
     Buffer.from(
-      JSON.stringify(valid).replace('"version":1', '"version":1,"version":1'),
+      JSON.stringify(valid).replace('"version":2', '"version":2,"version":2'),
     ),
     Buffer.from([0xff]),
   ]) {

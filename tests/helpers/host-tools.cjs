@@ -6,8 +6,9 @@ const cp = require('node:child_process');
 function hostTool(name) {
   const override = process.env[`TEST_${name.toUpperCase()}_EXECUTABLE`];
   const candidates = override ? [override] : [];
+  if (process.platform === 'win32' && name === 'openssl') candidates.push(path.join(process.env.ProgramFiles || 'C:/Program Files', 'Git/usr/bin/openssl.exe'));
   for (const directory of (process.env.PATH || '').split(path.delimiter)) {
-    for (const file of process.platform === 'win32' ? [`${name}.exe`, name] : [name]) candidates.push(path.join(directory, file));
+    for (const file of process.platform === 'win32' ? (name === 'python3' ? ['python3.exe', 'python.exe', name] : [`${name}.exe`, name]) : [name]) candidates.push(path.join(directory, file));
   }
   if (process.platform === 'win32') {
     if (name === 'openssl') candidates.push(path.join(process.env.ProgramFiles || 'C:/Program Files', 'Git/usr/bin/openssl.exe'));
@@ -15,8 +16,9 @@ function hostTool(name) {
   }
   for (const candidate of candidates) {
     if (!path.isAbsolute(candidate) || !fs.existsSync(candidate)) continue;
-    const resolved = fs.realpathSync(candidate);
-    const check = cp.spawnSync(resolved, [name === 'openssl' ? 'version' : '--version'], {encoding:'utf8', windowsHide:true});
+    let resolved;
+    try { resolved = fs.realpathSync(candidate); if (!fs.statSync(resolved).isFile()) continue; } catch { continue; }
+    const check = cp.spawnSync(resolved, [name === 'openssl' ? 'version' : '--version'], {encoding:'utf8', windowsHide:true, timeout:10000, maxBuffer:65536});
     if (check.status === 0 && (name === 'openssl' ? /^OpenSSL / : /^Python 3\./).test(check.stdout || check.stderr || '')) return resolved;
   }
   throw new Error(`Required test executable unavailable: ${name}; provide TEST_${name.toUpperCase()}_EXECUTABLE with an absolute path.`);
