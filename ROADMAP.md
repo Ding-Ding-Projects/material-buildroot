@@ -10,6 +10,8 @@
 - [x] Repair short-height Help search layout and verify native8c93d73:108px field within158px editor,15 validated records; no search invoked.
 - [ ] Repair packaged Help INVALID_BUNDLE through physical resources while preserving strict file checks, then verify real article/reference/image routes and remaining frontier.
 - [ ] Complete the focused five-task local-utility presentation, preserving all mounted drafts and catalog identities; implementation is in an isolated lane.
+- [ ] Verify integrated bounded Help, task/action-owned utility feedback and nested dark-palette inheritance in the rebuilt native application. Source units have independent approvals and focused regressions; full native acceptance remains open.
+- [ ] Exercise the authorized single isolated WSL experiment after GUI readiness and successful product recovery validation. Authorization is unused; historical owners and quarantine remain preserved.
 - [x] Verify bounded ordinary installed b9447cf/version0.1.1 startup with ready workspace, About navigation,162.009seconds prospective observation across three intervals and normal teardown. Redesigned update/profile migration remain separate.
 - [x] Independently review and regression-check inactive ISO restart receipt correlation at96923b4, requiring full anchored receipt equality and verified successful state. Runtime activation remains separate.
 - [x] Read back actual ordinary installed physical bytes and embedded source: package0.1.1/sourceb9447cf. This does not claim updated installation or startup.
