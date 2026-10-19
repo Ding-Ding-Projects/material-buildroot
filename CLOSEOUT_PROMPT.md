@@ -1,3 +1,7 @@
+## Reviewed read-only journal verification
+
+The inactive ISO journal reader and its two independently confirmed repairs are integrated through f81001671a232f01274da0342cbad9877942becb. Directory enumeration now requests at most 65 entries on each pass, closes every opened iterator and accepts at most 64 record names. Preparation digests require primitive strings in both writer and reader. Five regressions witnessed the previous behavior before repair; the combined focused run passed 64 cases, followed by three final iterator cases. The reader requires explicit stage results, validated ownership/cleanup, consistent preparation/final output and a trusted external final-record hash. It never clears reservations, releases locks, calls a runtime or grants current output authority. Scheduler/renderer construction remains disconnected. A fresh combined desktop build and native localized-choice verification are the next steps.
+
 # Material Buildroot continuation
 
 ## Native language finding and integrated repair
