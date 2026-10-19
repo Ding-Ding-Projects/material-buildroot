@@ -19,6 +19,7 @@ const { createDesktopSession } = require("./security/desktop-session.cjs");
 const { createWorkspaceService } = require("./workspace-service.cjs");
 const { createWorkspaceIPC } = require("./security/workspace-ipc.cjs");
 const { createOperationsService } = require("./operations-service.cjs");
+const { documentationDirectory } = require("./documentation/directory.cjs");
 const { createExperienceIPC } = require("./experience-policies.cjs");
 const {createWorkspaceTabRegistry}=require('./workspace-tabs.cjs');
 const workspaceTabs=createWorkspaceTabRegistry();
@@ -297,10 +298,11 @@ else {
           notificationTransition: ({state}) => {
             if (['succeeded','failed','cancelled','interrupted'].includes(state)) notifications?.notify('Build job status', `A recorded build job is ${state}. Open the build queue to inspect its output.`, state==='succeeded'?'success':state==='failed'?'error':'warning');
           },
-          documentationDirectory: path.join(
-            app.getAppPath(),
-            "dist/documentation",
-          ),
+          documentationDirectory: documentationDirectory({
+            isPackaged: app.isPackaged,
+            appPath: app.getAppPath(),
+            resourcesPath: process.resourcesPath,
+          }),
           openDocumentationExternal: (url) => shell.openExternal(url),
           openWslPath: (folder) => shell.openPath(folder),
           workspaceRead: () => workspaceService.get(),

@@ -18,6 +18,12 @@ JSON requires valid UTF-8 with an exact byte round trip and valid JSON syntax. I
 
 The manifest retains exact source bytes, lengths and SHA-256 hashes. Every original input enters the aggregate source snapshot once, including an image used as both a link and an embedded image. Runtime reads verify the admitted bundle files and snapshot before returning content. Unknown manifest fields, duplicate source identities, invalid types, mismatched image backing records and altered or missing bytes fail closed. The reader accepts the exact previous manifest shape or the exact extended shape with a strict reference array.
 
+## Packaged resource location
+
+Packaged execution reads the generated bundle from the physical `documentation` directory below the runtime's host-owned resources directory. Packaging copies `dist/documentation` with `extraResources` and excludes its manifest, articles and JSON references from the application archive. Image assets also retain an archive-local copy for the reader's existing renderer-relative image URLs; both copies enter the output integrity inventory. Development continues to read `dist/documentation` below the application root. Renderer input cannot select either root. Physical resources preserve the strict file-descriptor identity checks, which are incompatible with synthetic archive filesystem metadata.
+
+The root build entrypoints compare the complete copied resource inventory with the generated bundle and run the existing strict reader validation before accepting desktop output, including installer production. The normal build receipt inventories every physical documentation file with its length and SHA-256 hash alongside the application archive and installer files. Missing, extra, altered or invalid resources fail the build; archive-only output is insufficient. Focused physical-resource tests cover root selection, copy integrity, corruption and missing resources. Actual packaged interaction remains a separate runtime acceptance check.
+
 ## Resource limits
 
 - Markdown inputs retain the existing 512 KiB per-article bound.
