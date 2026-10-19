@@ -10,3 +10,6 @@
 This category documents local build tooling. It has no HTTP API, so a Postman collection is not applicable. Desktop runtime and installation acceptance remain separate from build-tool verification.
 
 - [Component and adapter admission](adapter-admission.md)
+# Integration records
+
+- [Main-only source integration](main-only-integration.md)

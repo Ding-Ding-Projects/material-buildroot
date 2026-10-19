@@ -1,5 +1,17 @@
 # Phased implementation roadmap
 
+## Main-only integration closeout, 2026-10-19
+
+- [x] Reconcile all 78 preserved remote tips through six semantic ancestry merges, retaining guided workflows and leased ISO ownership.
+- [x] Repair Tools cancellation/pause feedback, queue export, teardown and primary actions with nine failing-then-passing regressions.
+- [x] Resolve carried renderer type and host-result diagnostics without weakening strict checking; current check exits zero.
+- [x] Distinguish verified release publication from explicitly skipped preservation builds.
+- [ ] Verify the final integrated desktop and installer through exact root entrypoints.
+- [ ] Complete final focused renderer/native checks, publish integration and verify remote main.
+- [ ] Refresh verified archives, preserve private announcement originals separately, then retire ancestor-proven branches and the completed task worktree.
+
+This phase concerns integration and safe retirement. Broader product acceptance below retains its recorded limits.
+
 ## Guided workspace remake, 2026-10-18
 
 - [x] Verify the948 documentation build and bounded10-view runtime/navigation/persistence scope, with explicit local-only delivery.
