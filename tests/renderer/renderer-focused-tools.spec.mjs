@@ -46,7 +46,8 @@ test('next action follows existing readiness without invoking operations',async(
  const check=async(id,action,props={})=>{await tools.evaluate(async(el,{id,props})=>{Object.assign(el,props);el.changed();await el.openDestination('tool:'+id);},{id,props});const primary=tools.locator('[data-destination="'+id+'"] md-filled-button[data-primary-action]');await expect(primary).toHaveCount(1);await expect(primary).toHaveAttribute('data-primary-action',action);};
  await check('local','Check tool availability');await check('local','Choose executable',{payloads:[{toolId:'qpdf',available:false},{toolId:'other',available:false}]});
  await check('convert','Load formats');await check('convert','Choose source',{categories:[{category:'text',formats:[{format:'txt',available:true,adapter:'fixture'}]}]});await check('convert','Choose new output',{source:{id:'fixture-read',name:'source.txt',kind:'file'}});await check('convert','Convert now',{destination:{id:'fixture-write',name:'output.txt',kind:'file'}});
- await check('pdf','Add PDF source');await check('pdf','Run PDF operation',{pdfSources:[{id:'fixture-pdf',name:'source.pdf',kind:'file'}]});await check('pdf','Choose PDF output',{pdfOperation:'merge'});
+ await check('convert','Attempt isolated conversion',{categories:[{category:'text',formats:[{format:'txt',available:false,attemptAvailable:true,adapter:'fixture'}]}]});
+ await check('pdf','Add PDF source');await check('pdf','Attempt isolated PDF operation',{pdfOperation:'inspect',pdfSources:[{id:'fixture-pdf',name:'source.pdf',kind:'file'}]});await check('pdf','Choose PDF output',{pdfOperation:'merge'});
  await check('queue','Refresh queue');await check('queue','Queue model download',{model:'fixture-model'});await check('queue','Run queue',{jobs:[{id:'fixture-job',state:'queued',request:{action:'converter.convert'}}]});await check('queue','Recover interrupted jobs',{jobs:[{id:'fixture-job',state:'interrupted',request:{action:'converter.convert'}}]});
  await tools.evaluate(el=>el.openDestination('tool:server'));await expect(tools.locator('minecraft-panel md-filled-button[data-primary-action]')).toHaveAttribute('data-primary-action','Discover official versions');
  expect(await page.evaluate(()=>window.__toolCalls)).toEqual([]);
@@ -76,9 +77,9 @@ test('retained utility selection localizes without changing task or draft',async
 
 for(const kind of ['local','convert','pdf','queue'])test(`feedback stays with its originating ${kind} task after delayed completion`,async({page})=>{
  const {tools}=await open(page);
- await page.evaluate(()=>{window.__toolCalls=[];window.studio.operations=async r=>{window.__toolCalls.push(r);if(r.request?.action==='queue.page')return {ok:true,result:{items:[],next:null}};return new Promise(resolve=>window.__finishTool=()=>resolve({ok:true,result:r.action==='payload.list'?[]:{bytes:42,pages:3,completed:1,failed:0}}));};});
- await tools.evaluate(async(el,kind)=>{el.categories=[{category:'text',formats:[{format:'txt',available:true}]}];el.source={id:'s',name:'source'};el.destination={id:'d',name:'output'};el.pdfSources=[{id:'p',name:'source.pdf'}];el.jobs=[{id:'q',state:'queued',request:{action:'converter.convert'}}];el.changed();await el.openDestination('tool:'+kind);},kind);
- const labels={local:'Check tool availability',convert:'Convert now',pdf:'Run PDF operation',queue:'Run queue'};
+ await page.evaluate(()=>{window.__toolCalls=[];window.studio.operations=async r=>{window.__toolCalls.push(r);if(r.request?.action==='queue.page')return {ok:true,result:{items:[],next:null}};if(r.action==='file.release')return {ok:true,result:{}};return new Promise(resolve=>window.__finishTool=()=>resolve({ok:true,result:r.action==='payload.list'?[]:{bytes:42,pages:3,completed:1,failed:0}}));};});
+ await tools.evaluate(async(el,kind)=>{el.categories=[{category:'text',formats:[{format:'txt',available:true}]}];el.source={id:'s',name:'source'};el.destination={id:'d',name:'output'};el.pdfOperation='inspect';el.pdfOperations=[{operation:'inspect',attemptAvailable:true}];el.pdfSources=[{id:'p',name:'source.pdf'}];el.jobs=[{id:'q',state:'queued',request:{action:'converter.convert'}}];el.changed();await el.openDestination('tool:'+kind);},kind);
+ const labels={local:'Check tool availability',convert:'Convert now',pdf:'Attempt isolated PDF operation',queue:'Run queue'};
  await tools.getByRole('button',{name:labels[kind],exact:true}).click();await expect.poll(()=>page.evaluate(()=>typeof window.__finishTool)).toBe('function');
  await tools.evaluate(el=>el.openDestination('tool:server'));
  await page.evaluate(()=>window.__finishTool());await expect.poll(()=>tools.evaluate(el=>el.pending||el.runningQueue)).toBe(false);
@@ -91,7 +92,7 @@ for(const kind of ['local','convert','pdf','queue'])test(`feedback stays with it
  if(kind==='local')await expect(tools.locator('[role="status"]').first()).toHaveText('');
  await tools.evaluate((el,kind)=>el.openDestination('tool:'+kind),kind);
  await tools.evaluate(el=>el.language='zh-HK');
- await expect(tools.locator('[role="status"]').first()).toContainText(kind==='queue'?'佇列已完成':{local:'檢查工具可用性',convert:'立即轉換',pdf:'執行 PDF 操作'}[kind]);
+ await expect(tools.locator('[role="status"]').first()).toContainText(kind==='queue'?'佇列已完成':{local:'檢查工具可用性',convert:'立即轉換',pdf:'嘗試隔離 PDF 操作'}[kind]);
  expect(await page.evaluate(()=>window.__toolCalls.length)).toBe(calls);
 });
 

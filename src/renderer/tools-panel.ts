@@ -59,11 +59,11 @@ export class ToolsPanel extends LitElement {
     if(pending.epoch!==this.navigationEpoch||pending.id!==this.selectedTask||!this.isConnected||!this.checkVisibility())return;
     const heading=this.renderRoot.querySelector<HTMLElement>('#tool-heading-'+pending.id.slice(5));heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});
   }
-  disconnectedCallback(){this.navigationEpoch++;this.pickerReturn=undefined;super.disconnectedCallback();}
+  disconnectedCallback(){this.navigationEpoch++;this.pickerReturn=undefined;clearInterval(this.queuePoll);this.queuePoll=undefined;super.disconnectedCallback();}
   private get primaryAction(){
     if(this.selectedTask==='tool:local')return this.payloads.some(p=>!p.available)?'Choose executable':'Check tool availability';
-    if(this.selectedTask==='tool:convert')return !this.categories.find(c=>c.category===this.category)?.formats.find(f=>f.format===this.format)?.available?'Load formats':!this.source?'Choose source':!this.destination?'Choose new output':'Convert now';
-    if(this.selectedTask==='tool:pdf')return !this.pdfSources.length?'Add PDF source':this.pdfOperation!=='inspect'&&!this.pdfDestination?'Choose PDF output':'Run PDF operation';
+    if(this.selectedTask==='tool:convert'){const format=this.categories.find(c=>c.category===this.category)?.formats.find(f=>f.format===this.format);return !(format?.available||format?.attemptAvailable)?'Load formats':!this.source?'Choose source':!this.destination?'Choose new output':format.attemptAvailable?'Attempt isolated conversion':'Convert now';}
+    if(this.selectedTask==='tool:pdf')return !this.pdfSources.length?'Add PDF source':this.pdfOperation!=='inspect'&&!this.pdfDestination?'Choose PDF output':'Attempt isolated PDF operation';
     if(this.selectedTask==='tool:queue')return this.runningQueue?'Refresh queue':this.jobs.some(j=>j.state==='interrupted')?'Recover interrupted jobs':this.jobs.some(j=>j.state==='queued')?'Run queue':this.model.trim()?'Queue model download':'Refresh queue';
     return '';
   }
@@ -303,7 +303,6 @@ export class ToolsPanel extends LitElement {
   ): Promise<Grant> {
     return this.call("file.choose", { access, kind });
   }
-  disconnectedCallback() { clearInterval(this.queuePoll); super.disconnectedCallback(); }
   private disclosure(category:string) {
     if(category==="video")return this.format==="mp4"
       ? this.l("Lossy fragmented MP4 uses H.264/yuv420p with optional first AAC audio. Only the first video and first audio stream are kept. Subtitles, data, metadata and chapters are omitted. Seek-dependent sources, unavailable codecs or resource limits may stop the attempt without publishing a final output. Keep the original.","有損分段 MP4 使用 H.264/yuv420p，並可將第一條音訊轉成 AAC。只保留第一條影片同音訊串流，字幕、資料、中繼資料同章節會略過。需要搜尋位置嘅來源、缺少編解碼器或資源限制可能令嘗試停止而唔發佈最終輸出，請保留原檔。",true)
@@ -549,8 +548,9 @@ export class ToolsPanel extends LitElement {
             )}
           </div>
           <md-outlined-button ?disabled=${!this.pending&&!this.runningQueue} @click=${async()=>{
-            try{const r=await this.tool({action:"converter.cancel"});this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Cancellation requested for active isolated conversions","已要求取消目前隔離轉換")+`: ${r.requested}`);}
-            catch{this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Cancellation could not be delivered","未能送出取消要求"));}this.changed();
+            const record=this.startFeedback(["Cancel active isolated conversions","取消目前隔離轉換"]);
+            try{const r=await this.tool({action:"converter.cancel"});this.setFeedback(record,l=>l("Cancellation requested for active isolated conversions","已要求取消目前隔離轉換")+`: ${r.requested}`);}
+            catch{this.setFeedback(record,l=>l("Cancellation could not be delivered","未能送出取消要求"));}this.changed();
           }}>${this.l("Cancel active isolated conversions","取消目前隔離轉換",true)}</md-outlined-button>
           <h3>${this.l("Batch conversion","批次轉換",true)}</h3>
           <p>${this.l("Choose up to 100 files per selection. Queue storage has no total-file limit. Process or release a page before selecting another; live permissions stay bounded.","每次選擇最多 100 個檔案，儲存佇列冇總檔案上限。選取下一批前請處理或釋放目前批次，以限制即時權限數量。",true)}</p>
@@ -661,8 +661,9 @@ export class ToolsPanel extends LitElement {
               !this.pdfReady(),
             )}
             <md-outlined-button ?disabled=${!this.pending&&!this.runningQueue} @click=${async()=>{
-              try{const r=await this.tool({action:"pdf.cancel"});this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Cancellation requested for active isolated PDF operations","已要求取消目前隔離 PDF 操作")+`: ${r.requested}`);}
-              catch{this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Cancellation could not be delivered","未能送出取消要求"));}this.changed();
+              const record=this.startFeedback(["Cancel active isolated PDF operations","取消目前隔離 PDF 操作"]);
+              try{const r=await this.tool({action:"pdf.cancel"});this.setFeedback(record,l=>l("Cancellation requested for active isolated PDF operations","已要求取消目前隔離 PDF 操作")+`: ${r.requested}`);}
+              catch{this.setFeedback(record,l=>l("Cancellation could not be delivered","未能送出取消要求"));}this.changed();
             }}>${this.l("Cancel active isolated PDF operations","取消目前隔離 PDF 操作",true)}</md-outlined-button>
           </div>
         </section>
@@ -691,8 +692,8 @@ export class ToolsPanel extends LitElement {
           )}
         </div>
         <div class="row">
-          <md-outlined-button ?disabled=${!this.runningQueue} @click=${async()=>{try {await this.tool({action:"queue.pause"});this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Pause requested. The current file finishes first.","已要求暫停，會先完成目前檔案。"));}catch {this.feedback=captureOwnedStatus(this,"feedback",this.l.bind(this),l=>l("Pause was not accepted.","未能暫停。"));}this.changed();}}>${this.l("Pause after current file","完成目前檔案後暫停",true)}</md-outlined-button>
-          ${this.button("Export queue history", "匯出佇列記錄",async()=>{const destination=await this.choose("write");try{this.result(await this.tool({action:"queue.export",destinationId:destination.id}));}finally{await this.release([destination.id]);}})}
+          <md-outlined-button ?disabled=${!this.runningQueue} @click=${async()=>{const record=this.startFeedback(["Pause after current file","完成目前檔案後暫停"]);try {await this.tool({action:"queue.pause"});this.setFeedback(record,l=>l("Pause requested. The current file finishes first.","已要求暫停，會先完成目前檔案。"));}catch {this.setFeedback(record,l=>l("Pause was not accepted.","未能暫停。"));}this.changed();}}>${this.l("Pause after current file","完成目前檔案後暫停",true)}</md-outlined-button>
+          ${this.button("Export queue history", "匯出佇列記錄",async(record)=>{const destination=await this.choose("write");try{this.result(record,await this.tool({action:"queue.export",destinationId:destination.id}));}finally{await this.release([destination.id]);}})}
           ${this.button("Refresh queue", "重新整理佇列", () =>
             this.queuePage(),
           )}${this.button(
