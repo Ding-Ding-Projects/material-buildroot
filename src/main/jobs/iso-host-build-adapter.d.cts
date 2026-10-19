@@ -15,5 +15,6 @@ export function createIsoHostBuildAdapter(options: {
   authorize(payload: IsoHostBuildPayload, context: IsoHostBuildContext): Promise<void>;
   retainReference(reference: IsoRecoveryReference): Promise<void>;
   checkpointCurrentOwner(record: { version: 1; jobId: string; workspaceId: string; phase: "current-input"; receipt: OwnershipReceipt }): Promise<void>;
+  checkpointCurrentCleanup(record: { version: 1; jobId: string; workspaceId: string; phase: "current-input"; receipt: OwnershipReceipt; verdict: { state: "verified-stopped" | "unknown"; reason: string } }): Promise<void>;
   run: (...args: unknown[]) => unknown; checkpoint: (...args: unknown[]) => unknown; signalScript: string;
 }): (payload: IsoHostBuildPayload, context: IsoHostBuildContext) => Promise<{ state: "succeeded"; code: 0; iso: IsoTransactionReadResult & { bootVerified: false } }>;
