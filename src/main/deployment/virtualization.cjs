@@ -111,6 +111,7 @@ class Virtualization {
   }) {
     this.store = store;
     this.executor = executor;
+    this.resolveExecutable = resolveExecutable;
     this.executables = {
       virtualbox: "VBoxManage",
       vmware: "vmrun",

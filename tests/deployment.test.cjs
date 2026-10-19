@@ -14,6 +14,7 @@ function fixture(t, options = {}) {
     service: createDeploymentService({
       root,
       managedDirectory: path.join(root, ".test-guests"),
+      resolveExecutable: async toolId => { assert.ok(['vboxmanage','vmrun','qemu-img'].includes(toolId)); return {available:true,path:process.execPath,sha256:require('node:crypto').createHash('sha256').update(fs.readFileSync(process.execPath)).digest('hex'),bundled:true}; },
       ...options,
     }),
   };
@@ -35,7 +36,7 @@ test("artifact paths, binary metadata, manifests and repeat-build differences", 
   assert.equal(a.sha256.length, 64);
   await assert.rejects(s.inspectArtifact("../outside"), /ENOENT|outside/);
   await require('./helpers/filesystem-links.cjs').fileLinkCase(t,"real outside artifact symbolic link",async()=>{
-require('./helpers/filesystem-links.cjs').symlinkSync("/etc/passwd", path.join(root, "escape"));
+require('./helpers/filesystem-links.cjs').symlinkSync(__filename, path.join(root, "escape"));
   await assert.rejects(s.inspectArtifact("escape"), /outside/);
 
 });
@@ -43,7 +44,9 @@ require('./helpers/filesystem-links.cjs').symlinkSync("/etc/passwd", path.join(r
     paths: ["notes.txt"],
     locks: { sourceRevision: "abcdef123" },
   });
-  assert.equal(s.compareManifests(first, first).reproducible, true);
+  assert.equal(s.compareManifests(first, first).reproducible, false);
+  assert.equal(s.compareManifests(first, first).status, "insufficient-input-locks");
+  assert.deepEqual(s.compareManifests(first, first).differences, []);
   fs.appendFileSync(path.join(root, "notes.txt"), "changed");
   const second = await s.createManifest({ paths: ["notes.txt"] });
   assert.equal(
@@ -102,8 +105,8 @@ test("conversion binds hash, rejects backing files and writes only absent output
     executor: async (file, args) => {
       calls.push(args);
       if (args[0] === "info")
-        return { state: "succeeded", stdout: '{"format":"raw"}' };
-      fs.writeFileSync(args.at(-1), "converted");
+        return { state: "succeeded", stdout: JSON.stringify({format:args[3],"virtual-size":4096}) };
+      if(args[0]==="convert")fs.writeFileSync(args.at(-1), "converted");
       return { state: "succeeded", stdout: "" };
     },
   });
@@ -119,7 +122,7 @@ test("conversion binds hash, rejects backing files and writes only absent output
     fs.readFileSync(path.join(root, "result.vdi"), "utf8"),
     "converted",
   );
-  assert.deepEqual(calls[1].slice(0, 5), ["convert", "-f", "raw", "-O", "vdi"]);
+  assert.deepEqual(calls.find(args=>args[0]==="convert").slice(0, 5), ["convert", "-f", "raw", "-O", "vdi"]);
   await assert.rejects(
     f.service.executeConversion({ id: p.id }),
     /preview-required/,
@@ -249,7 +252,7 @@ test("conversion rejects dependent images and existing outputs before execution"
   const { root, service: s } = fixture(t, {
     executor: async () => ({
       state: "succeeded",
-      stdout: '{"format":"raw","backing-filename":"outside.img"}',
+      stdout: '{"format":"raw","virtual-size":4096,"backing-filename":"outside.img"}',
     }),
   });
   disk(root);
@@ -259,7 +262,7 @@ test("conversion rejects dependent images and existing outputs before execution"
       format: "vdi",
       outputName: "disk.vdi",
     }),
-    /dependent/,
+    /metadata-not-admitted/,
   );
   assert.equal(fs.existsSync(path.join(root, "disk.vdi")), false);
 });
@@ -309,6 +312,7 @@ test("VMware fixed managed VMX lifecycle and persistent registry preserve owners
   const options = {
     root,
     managedDirectory,
+    resolveExecutable: async()=>({path:process.execPath,sha256:require("node:crypto").createHash("sha256").update(fs.readFileSync(process.execPath)).digest("hex"),bundled:true}),
     executor: async (_file, args) => {
       commands.push(args);
       if (args[2] === "start") activeVmx = args[3];
@@ -583,4 +587,11 @@ test("new disk creation admits typed capacity and never replaces existing artifa
     }),
     /invalid-new-disk/,
   );
+});
+
+test('managed guest execution requires a verified resolver even with an injected executor',async t=>{
+ for(const [resolveExecutable,expected] of [[undefined,/MISSING_VERIFIED_PAYLOAD/],[async()=>({path:process.execPath,sha256:'0'.repeat(64),bundled:true}),/PAYLOAD_HASH_MISMATCH/],[async()=>({path:process.execPath,sha256:'0'.repeat(64),bundled:false}),/MISSING_VERIFIED_PAYLOAD/]]){
+  let calls=0;const {service}=fixture(t,{resolveExecutable,executor:async()=>{calls++;return {state:'succeeded'};}});
+  await assert.rejects(service.createDiskArtifact({outputName:'new.vmdk',format:'vmdk',capacityMiB:2048}),expected);assert.equal(calls,0);
+ }
 });

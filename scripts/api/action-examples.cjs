@@ -26,6 +26,12 @@ const keys={
  'servers.remote.preview':'directoryId edition version flavour target host destination',
  'servers.remote.execute':'previewId','servers.remote.status':'previewId',
  'servers.paper.builds':'version','servers.fabric.options':'version',
+ 'servers.fabric.complete':'directoryId version loader installer folderName',
+ 'servers.extensions.list':'directoryId offset',
+ 'servers.extensions.install':'directoryId gameVersion loader revision versionId',
+ 'servers.extensions.remove':'directoryId gameVersion loader revision projectId',
+ 'servers.extensions.rollback':'directoryId gameVersion loader revision projectId snapshotId',
+ 'servers.extensions.recover':'directoryId gameVersion loader revision projectId',
  'servers.paper.install':'directoryId version build','servers.fabric.install':'directoryId version loader installer',
  'servers.plugin.install':'directoryId versionId gameVersion loader',
  'servers.versions':'edition offset query','servers.flavours':'flavour','servers.plugins':'projectId',
@@ -76,6 +82,9 @@ const defaults={
 function example(action){
  if(!Object.hasOwn(keys,action))throw new Error(`No authored API example for ${action}. Update the collection definition before publishing.`);
  const args=Object.fromEntries(keys[action].split(' ').filter(Boolean).map(key=>[key,defaults[key]]));
+ if(action==='servers.fabric.complete')args.folderName='managed-fabric-server';
+ if(action.startsWith('servers.extensions.')&&action!=='servers.extensions.list')args.loader='paper';
+ if(action==='servers.extensions.rollback')args.snapshotId='{{recordId}}';
  if(action==='defconfig.apply')args.id='{{defconfigId}}';
  if(action==='source.upgrade.preview')args.revision='{{sourceRevision}}';
  if(action==='pdf.queue')args.destinationId='';
