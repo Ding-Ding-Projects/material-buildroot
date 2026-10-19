@@ -145,9 +145,12 @@ test("desktop tool workflow writes a real queued conversion from native file sel
     });
     assert.equal(companion.result.enabled, false);
     assert.deepEqual(companion.result.allowedScopes, [
-      "workspace:read",
-      "projects:read",
-      "jobs:read",
+      "configuration:read", "configuration:write", "deployment:write", "deployment:read",
+      "tools:write", "tools:read", "servers:write", "servers:read", "workspace:read",
+      "projects:write", "projects:read", "jobs:read", "jobs:cancel", "source:write", "source:read",
+      "runtimes:read", "runtimes:write", "builds:submit", "packages:read", "packages:write",
+      "forge:read", "forge:write", "remote:read", "remote:write", "guests:read", "guests:write",
+      "outputs:read", "outputs:write",
     ]);
     assert.equal(
       (

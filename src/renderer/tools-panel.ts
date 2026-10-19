@@ -420,6 +420,7 @@ export class ToolsPanel extends LitElement {
   }
   private async runQueue(record: Feedback){
               this.runningQueue = true;
+              this.queuePoll=setInterval(async()=>{if(this.refreshingQueue)return;this.refreshingQueue=true;try{await this.queuePage();this.changed();}catch{}finally{this.refreshingQueue=false;}},1500);
               this.changed();
               try {
                 const r = await this.tool({ action: "queue.run" });
@@ -431,6 +432,7 @@ export class ToolsPanel extends LitElement {
                   "佇列未能完成，請重新整理狀態。",
                 ));
               } finally {
+                clearInterval(this.queuePoll);
                 this.runningQueue = false;
                 this.changed();
               }

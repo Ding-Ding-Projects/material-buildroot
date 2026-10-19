@@ -3,9 +3,12 @@ const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_pro
 const BEGIN='<!-- workflow-timing:begin -->',END='<!-- workflow-timing:end -->';
 const sha=/^[a-f0-9]{40}$/;
 function timestamp(value){if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(value)||!Number.isFinite(Date.parse(value)))throw Error('Exact UTC timing unavailable.');return new Date(value).toISOString();}
-function measure(run,jobs,repository){
+function assertOriginal(run,jobs,repository){
  if(run.repository?.full_name!==repository||run.head_repository?.full_name!==repository||run.path!=='.github/workflows/release.yml'||!['push','workflow_dispatch'].includes(run.event)||run.status!=='completed'||run.conclusion!=='success'||!sha.test(run.head_sha||'')||![run.id,run.run_number,run.run_attempt].every(x=>Number.isSafeInteger(x)&&x>0))throw Error('Original release workflow identity is invalid.');
  if(!Array.isArray(jobs)||!jobs.length||jobs.some(j=>j.run_id!==run.id||j.head_sha!==run.head_sha||j.status!=='completed'||j.conclusion!=='success'))throw Error('Original jobs are not completely successful.');
+}
+function measure(run,jobs,repository){
+ assertOriginal(run,jobs,repository);
  const starts=jobs.map(j=>timestamp(j.started_at)),ends=jobs.map(j=>timestamp(j.completed_at));
  const publication=jobs.flatMap(j=>(j.steps||[]).filter(s=>s.name==='Publish exact-source normal release'));
  if(publication.length!==1||publication[0].status!=='completed'||publication[0].conclusion!=='success')throw Error('Final publication step unavailable.');
@@ -24,6 +27,14 @@ function annotate({repository,event,api,edit}){
  const jobs=[],seen=new Set();let complete=false,total;
  for(let page=1;page<=20;page++){const value=api(`repos/${repository}/actions/runs/${run.id}/attempts/${run.run_attempt}/jobs?per_page=100&page=${page}`);if(!Number.isSafeInteger(value.total_count)||!Array.isArray(value.jobs)||value.jobs.length>100||total!==undefined&&total!==value.total_count)throw Error('Job inventory invalid.');total=value.total_count;for(const job of value.jobs){if(!Number.isSafeInteger(job.id)||seen.has(job.id))throw Error('Duplicate job inventory.');seen.add(job.id);jobs.push(job);}if(value.jobs.length<100){complete=true;break;}}
  if(!complete||jobs.length!==total)throw Error('Complete job inventory unavailable.');
+ assertOriginal(run,jobs,repository);
+ const publication=jobs.flatMap(job=>(job.steps||[]).filter(step=>step.name==='Publish exact-source normal release'));
+ if(publication.length!==1||publication[0].status!=='completed')throw Error('Final publication step unavailable.');
+ if(publication[0].conclusion==='skipped'){
+  const eligibility=jobs.flatMap(job=>(job.steps||[]).filter(step=>step.name==='Determine exact-source publication eligibility'));
+  if(eligibility.length!==1||eligibility[0].status!=='completed'||eligibility[0].conclusion!=='success')throw Error('Successful publication eligibility step unavailable.');
+  return {state:'skipped',reason:'no-publication',runId:run.id,attempt:run.run_attempt,source:run.head_sha,annotation:'not-applicable-no-publication'};
+ }
  const timing=measure(run,jobs,repository);
  // Read package metadata as JSON only. Never execute triggering-branch code.
  const pkg=api(`repos/${repository}/contents/package.json?ref=${run.head_sha}`,true);
@@ -37,6 +48,6 @@ function annotate({repository,event,api,edit}){
  const after=api(`repos/${repository}/releases/tags/${tag}`);if(after.id!==release.id||after.tag_name!==tag||after.draft!==false||after.prerelease!==false||after.body!==body||JSON.stringify(after.assets?.map(a=>({id:a.id,name:a.name,size:a.size,digest:a.digest})))!==assetIdentity)throw Error('Timing annotation readback mismatch.');
  return {tag,timing,annotation:'release-note-readback-verified; annotation workflow terminal result still separate'};
 }
-function main(){const repository=process.env.GITHUB_REPOSITORY,gh=process.env.MATERIAL_RELEASE_GH||'gh';let requests=0;const deadline=Date.now()+60000;function command(args){if(++requests>50||Date.now()>=deadline)throw Error('Timing annotation bound exceeded.');const r=cp.spawnSync(gh,args,{encoding:'utf8',windowsHide:true,timeout:Math.min(10000,deadline-Date.now()),maxBuffer:8*1024*1024});if(r.error||r.status!==0)throw Error('Timing annotation command failed.');return r.stdout;}const api=(route,raw=false)=>JSON.parse(command(['api',route,...(raw?['-H','Accept: application/vnd.github.raw+json']:[])]));const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const directory=process.env.RUNNER_TEMP;if(!directory)throw Error('Owned temporary directory unavailable.');const result=annotate({repository,event,api,edit:(tag,body)=>{const file=path.join(directory,'release-timing-notes.md');fs.writeFileSync(file,body);command(['release','edit',tag,'--repo',repository,'--notes-file',file]);}});const evidence=path.join(directory,'release-timing-evidence');fs.mkdirSync(evidence,{recursive:true});fs.writeFileSync(path.join(evidence,'annotation.json'),JSON.stringify(result,null,2)+'\n');console.log(`Timing annotation readback verified for ${result.tag}; annotation workflow completion remains separate.`);}
+function main(){const repository=process.env.GITHUB_REPOSITORY,gh=process.env.MATERIAL_RELEASE_GH||'gh';let requests=0;const deadline=Date.now()+60000;function command(args){if(++requests>50||Date.now()>=deadline)throw Error('Timing annotation bound exceeded.');const r=cp.spawnSync(gh,args,{encoding:'utf8',windowsHide:true,timeout:Math.min(10000,deadline-Date.now()),maxBuffer:8*1024*1024});if(r.error||r.status!==0)throw Error('Timing annotation command failed.');return r.stdout;}const api=(route,raw=false)=>JSON.parse(command(['api',route,...(raw?['-H','Accept: application/vnd.github.raw+json']:[])]));const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const directory=process.env.RUNNER_TEMP;if(!directory)throw Error('Owned temporary directory unavailable.');const result=annotate({repository,event,api,edit:(tag,body)=>{const file=path.join(directory,'release-timing-notes.md');fs.writeFileSync(file,body);command(['release','edit',tag,'--repo',repository,'--notes-file',file]);}});const evidence=path.join(directory,'release-timing-evidence');fs.mkdirSync(evidence,{recursive:true});fs.writeFileSync(path.join(evidence,'annotation.json'),JSON.stringify(result,null,2)+'\n');if(result.state==='skipped')console.log(`Timing annotation skipped: no publication for workflow ${result.runId}, attempt ${result.attempt}; evidence retained.`);else console.log(`Timing annotation readback verified for ${result.tag}; annotation workflow completion remains separate.`);}
 if(require.main===module){try{main();}catch(e){console.error(e.message);process.exitCode=1;}}
 module.exports={measure,replace,annotate,BEGIN,END};

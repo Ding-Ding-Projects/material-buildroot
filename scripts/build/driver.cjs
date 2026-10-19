@@ -288,7 +288,7 @@ async function main() {
       if(inventory(flashingOutput).some(file=>/\.(pdb|mdb)$/i.test(file.path)))throw Error('Flashing output contains debug symbols; retained without packaging private source-path metadata.');
       flashingHelper={status:'produced-self-contained',protocol:1,sha256:flashingHash,sdkVersion:flashingManifest.sdkVersion,runtimeVersion:flashingManifest.runtimeVersion,runtimeIdentifier:'win-x64',debugType:'None',debugSymbols:false,sourceHashes:flashingManifest.sourceHashes,buildInputsSha256:flashingManifest.buildInputsSha256,runtimeVerified:false};
       const baseConfiguration=JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).build;
-      const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']},{from:flashingOutput,to:'native/flashing',filter:['**/*']}]};
+      const configuration = {...baseConfiguration,squirrelWindows:{...baseConfiguration.squirrelWindows,customSquirrelVendorDir:vendor},extraResources:[...(baseConfiguration.extraResources||[]),assembled.extraResources,{from:brokerOutput,to:'native-file-broker',filter:['broker-manifest.json','material-file-broker.exe']},{from:flashingOutput,to:'native/flashing',filter:['**/*']}]};
       const configurationPath = path.join(staging,'installer-config.json');
       fs.writeFileSync(configurationPath,JSON.stringify(configuration));
       command.push(`--config=${configurationPath}`);

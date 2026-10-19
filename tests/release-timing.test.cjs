@@ -11,3 +11,23 @@ function fixture(){const tag='v1.2.3-build.7.2',release={id:3,tag_name:tag,draft
 test('annotation binds attempt/source/tag and reads back unchanged assets',()=>{const f=fixture();assert.equal(annotate(f).tag,'v1.2.3-build.7.2');assert.equal(f.edited,1);annotate(f);assert.equal(f.edited,1);});
 test('missing identity, source/tag mismatch and incomplete job inventory do not edit notes',()=>{for(const kind of ['source','count','tag']){const f=fixture(),base=f.api;f.api=(route,raw)=>kind==='count'&&route.includes('/jobs?')?{total_count:2,jobs}:kind==='tag'&&route.includes('/git/ref/')?{object:{type:'commit',sha:'c'.repeat(40)}}:base(route,raw);if(kind==='source')f.release.body=f.release.body.replace(source,'c'.repeat(40));assert.throws(()=>annotate(f));assert.equal(f.edited,0);}});
 test('annotation readback catches changed notes or assets rather than reporting success',()=>{for(const kind of ['notes','assets']){const f=fixture(),base=f.api;let reads=0;f.api=(route,raw)=>{const value=base(route,raw);if(route.includes('/releases/tags/')&&++reads>1){const changed=structuredClone(value);if(kind==='notes')changed.body+='unexpected';else changed.assets[0].size++;return changed;}return value;};assert.throws(()=>annotate(f),/readback mismatch/);}});
+
+test('successful preservation build skips annotation before any release or source lookup',()=>{
+ const f=fixture(),calls=[],readback=structuredClone(jobs);
+ readback[0].steps=[{name:'Determine exact-source publication eligibility',status:'completed',conclusion:'success'},{name:'Publish exact-source normal release',status:'completed',conclusion:'skipped'}];
+ const base=f.api;f.api=(route,raw)=>{calls.push(route);if(route.includes('/jobs?'))return {total_count:1,jobs:readback};if(!route.endsWith('/attempts/2'))throw Error('No publication must not look up source, tag or release');return base(route,raw);};
+ assert.deepEqual(annotate(f),{state:'skipped',reason:'no-publication',runId:123,attempt:2,source,annotation:'not-applicable-no-publication'});assert.equal(calls.length,2);assert.equal(f.edited,0);
+});
+test('skipped publication still requires one completed successful eligibility step and one publication',()=>{
+ const eligible={name:'Determine exact-source publication eligibility',status:'completed',conclusion:'success'},published={name:'Publish exact-source normal release',status:'completed',conclusion:'skipped'};
+ for(const steps of [[published],[eligible],[eligible,eligible,published],[eligible,published,published],[{...eligible,conclusion:'failure'},published],[{...eligible,status:'in_progress'},published],[eligible,{...published,conclusion:'failure'}],[eligible,{...published,status:'in_progress'}]]){
+  const f=fixture(),base=f.api,rows=structuredClone(jobs);rows[0].steps=steps;f.api=(route,raw)=>route.includes('/jobs?')?{total_count:1,jobs:rows}:base(route,raw);assert.throws(()=>annotate(f));assert.equal(f.edited,0);
+ }
+});
+test('skipped publication rejects unsuccessful foreign incomplete and mismatched attempt readbacks',()=>{
+ for(const kind of ['failed-job','foreign-job','missing-job','attempt']){
+  const f=fixture(),base=f.api,rows=structuredClone(jobs);rows[0].steps=[{name:'Determine exact-source publication eligibility',status:'completed',conclusion:'success'},{name:'Publish exact-source normal release',status:'completed',conclusion:'skipped'}];
+  if(kind==='failed-job')rows[0].conclusion='failure';if(kind==='foreign-job')rows[0].head_sha='c'.repeat(40);
+  f.api=(route,raw)=>route.includes('/jobs?')?{total_count:kind==='missing-job'?2:1,jobs:rows}:route.endsWith('/attempts/2')&&kind==='attempt'?{...run,run_attempt:3}:base(route,raw);assert.throws(()=>annotate(f));assert.equal(f.edited,0);
+ }
+});
