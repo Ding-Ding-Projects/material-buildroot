@@ -29,6 +29,9 @@ function fixture(mode={}){
 }
 test("real transport rejects forged receipt, unsupported runtime and renderer-shaped extras without native access",async()=>{
  const real=new ExecutionService();real.grants.set("forged",{wslReceipt:{}});
+ assert.throws(()=>real.createLeasedIsoOutputLifecycle({}),{code:"ISO_LIFECYCLE_AUTHORITY_REQUIRED"});
+ const internal=real.createLeasedIsoOutputLifecycle({assertLifecycleLease(){throw Error("unreachable without admission");}});
+ await assert.rejects(internal({grantId:"forged",runtime:{kind:"wsl",distribution:"Fixture"},operation:"prepare",jobId:JOB},{lease:{},onOwnership:async()=>{}}),{code:"ISO_LIFECYCLE_AUTHORITY_REQUIRED"});
  await assert.rejects(real.runIsoOutputLifecycle({grantId:"forged",runtime:{kind:"wsl",distribution:"Fixture"},operation:"prepare",jobId:JOB},{onOwnership:async()=>{}}),{code:"ISO_LIFECYCLE_AUTHORITY_REQUIRED"});
  const f=fixture();for(const extra of [{outputRoot:"/other"},{admittedOutputIdentity:{device:"1",inode:"12",uid:"1000"}},{command:"anything"}])await assert.rejects(f.lifecycle({...f.request,...extra},f.options),{code:"ISO_LIFECYCLE_INVALID_REQUEST"});
  await assert.rejects(f.lifecycle({...f.request,runtime:{kind:"docker",distribution:"Fixture"}},f.options),{code:"ISO_LIFECYCLE_AUTHORITY_REQUIRED"});

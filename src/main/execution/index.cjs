@@ -7,7 +7,7 @@ const { createDockerRuntime } = require("./docker-runtime.cjs");
 const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs");
 const { isBuildTarget, assertPackage } = require("../build/target-actions.cjs");
 const { LINUX_BUILD_PATH_SCRIPT } = require("./linux-build-path.cjs");
-const { createWslIsoOutputLifecycle } = require("./wsl-iso-output-lifecycle.cjs");
+const { createWslIsoOutputLifecycle, createLeasedWslIsoOutputLifecycle } = require("./wsl-iso-output-lifecycle.cjs");
 const TARGETS = Object.freeze([
   "all",
   "sdk",
@@ -287,6 +287,9 @@ class ExecutionService {
     this.wslIsoOutputLifecycle = createWslIsoOutputLifecycle({ execution: this, run: boundedProcess, checkpoint: checkpointOwnership, signalScript: WSL_SIGNAL_SCRIPT });
   }
   runIsoOutputLifecycle(request, options) { return this.wslIsoOutputLifecycle(request, options); }
+  createLeasedIsoOutputLifecycle(transactions) {
+    return createLeasedWslIsoOutputLifecycle({ execution: this, run: boundedProcess, checkpoint: checkpointOwnership, signalScript: WSL_SIGNAL_SCRIPT }, transactions);
+  }
   grantProject({
     root,
     source,
