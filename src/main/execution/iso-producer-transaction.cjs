@@ -54,6 +54,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       };
       const result = await adapters[name]({ lease, ...fixed, ...extra }, { signal, onOwnership });
       if (!owners.length || result?.state !== "succeeded" || result.code !== 0) fail("ISO_TRANSACTION_STAGE_UNVERIFIED");
+      journal.append("result", { stage, state: result.state, code: result.code });
       // Independent owner inspection is mandatory, even when the adapter reports cleanup success.
       for (const owner of producerOwner ? [producerOwner.precise()] : owners) {
         const cleanup = await adapters.inspectCleanup(owner);
@@ -67,6 +68,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       journal = store.begin(fixed.jobId, { ...fixed, binding: JSON.parse(binding) }, () => { reserved = true; });
       const prepared = await invoke("prepare"), preparation = prepared.observation;
       if (!keys(preparation, "state,jobId,preparationSha256,prior,jobBound,bootVerified")) fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
+      if (typeof preparation.preparationSha256 !== "string") fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
       if (preparation?.state !== "prepared-unbound" || preparation.jobId !== fixed.jobId || !SHA.test(preparation.preparationSha256 || "") || preparation.jobBound !== false || preparation.bootVerified !== false) fail("ISO_TRANSACTION_PREPARATION_UNVERIFIED");
       journal.append("preparation", preparation);
       await invoke("produce", { preparationSha256: preparation.preparationSha256 });
