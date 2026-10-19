@@ -811,7 +811,7 @@ export class OperationsPanel extends LitElement {
       ${images.map(destination => html`<md-text-button aria-current=${this.tab === destination ? 'page' : 'false'} @click=${(event:Event)=>this.chooseGuidedDestination(event,destination)}>${destination === 'config' ? this.l('Image guide','映像指南') : destination === 'runtime' ? this.l('Project & runtime','專案同執行環境') : this.label(destination)}</md-text-button>`)}
     </nav>`;
     if (tools.includes(this.tab)) return html`<nav class="guided-navigation" aria-label=${this.l('Tool categories','工具分類')}>
-      <md-outlined-select .label=${this.l('Tool workspace','工具工作區')} .value=${this.tab} @change=${(event:Event) => {
+      <md-outlined-select .label=${this.l('Tool workspace','工具工作區')} .value=${this.tab} .displayText=${this.label(this.tab)} @change=${(event:Event) => {
         const value=(event.target as HTMLSelectElement).value;
         if (tools.includes(value)) this.tab=value;
       }}>

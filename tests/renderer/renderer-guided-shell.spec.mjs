@@ -341,3 +341,47 @@ test('normal desktop keeps labelled navigation and auto-height notification host
  await expect(app.locator('notification-centre .trigger-label')).toBeVisible();
  await app.locator('[data-image-action="create"]').click();await expect(app.locator('guided-image-creation')).toBeVisible();
 });
+
+
+test('retained Tools category localizes selected text through the real Settings language flow',async({page})=>{
+ const app=await open(page);
+ await app.evaluate(async el=>{
+  await el.adoptedProject(new CustomEvent('workspace-adopted',{detail:{workspaceId:'retained-tools-project',name:'Retained tools project'}}));
+  window.__toolsLanguageRequests=[];
+  window.studio.request=async request=>{
+   if(request.action!=='settings.setLanguage')return {ok:false,code:'FIXTURE_UNAVAILABLE'};
+   window.__toolsLanguageRequests.push(request.arguments.language);
+   return {ok:true,revision:String(window.__toolsLanguageRequests.length).repeat(40)};
+  };
+ });
+ await nav(app,'tools').click();
+ const operations=app.locator('operations-panel[data-project-id="retained-tools-project"]');
+ const category=operations.locator('.guided-navigation md-outlined-select');
+ await expect(category).toHaveJSProperty('value','tools');
+ await operations.evaluate(el=>{
+  window.__retainedToolsWorkspace=el;window.__retainedToolsChild=el.shadowRoot.querySelector('tools-panel');window.__retainedToolsCategory=el.shadowRoot.querySelector('.guided-navigation md-outlined-select');window.__toolsCategoryChanges=0;
+  window.__retainedToolsCategory.addEventListener('change',()=>window.__toolsCategoryChanges++);
+ });
+ const expected={en:{label:'Tool workspace',value:'Tools'},'zh-HK':{label:'工具工作區',value:'工具'},bilingual:{label:'Tool workspace · 工具工作區',value:'Tools · 工具'}};
+ const check=async language=>{
+  await expect(operations).toBeVisible();await expect(operations).toHaveJSProperty('language',language);
+  await expect(category).toHaveJSProperty('label',expected[language].label);
+  await expect(category).toHaveJSProperty('displayText',expected[language].value);
+  await expect(category.locator('div#label')).toBeVisible();await expect(category.locator('div#label')).toHaveText(expected[language].value);
+  expect(await category.evaluate(el=>el.displayText===el.querySelector('md-select-option[value="'+el.value+'"] [slot="headline"]').textContent.trim())).toBe(true);
+  expect(await operations.evaluate(el=>el===window.__retainedToolsWorkspace&&el.shadowRoot.querySelector('tools-panel')===window.__retainedToolsChild&&el.shadowRoot.querySelector('.guided-navigation md-outlined-select')===window.__retainedToolsCategory&&el.workspace.workspaceId==='retained-tools-project'&&el.tab==='tools')).toBe(true);
+  expect(await page.evaluate(()=>window.__toolsCategoryChanges)).toBe(0);
+ };
+ await check('en');
+ for(const [language,index] of [['zh-HK',1],['bilingual',2],['en',0]]){
+  await nav(app,'settings').click();await app.locator('.settings-categories md-outlined-button').first().click();
+  await app.locator('#language-select').click();
+  const picker=page.locator('searchable-picker').filter({has:page.locator('md-dialog[open]')});
+  await picker.locator('[data-option="'+index+'"]').click();await expect(picker.getByRole('dialog')).toBeHidden();
+  await app.locator('#language-select').locator('..').locator('md-filled-button').first().click();
+  await expect.poll(()=>app.evaluate(el=>el.effectiveLanguage)).toBe(language);
+  await nav(app,'tools').click();await check(language);
+ }
+ expect(await page.evaluate(()=>window.__toolsLanguageRequests)).toEqual(['zh-HK','bilingual','en']);
+ expect(await page.evaluate(()=>window.__requests.some(r=>['runtime.discover','build.submit','project.choose','config.trustGrant'].includes(r.action)))).toBe(false);
+});
