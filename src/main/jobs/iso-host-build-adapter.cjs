@@ -7,11 +7,13 @@ const {createLeasedWslIsoOutputLifecycle}=require("../execution/wsl-iso-output-l
 const {createIsoWslProducer}=require("../execution/iso-wsl-producer.cjs");
 const {readIsoTransaction}=require("./iso-transaction-readback.cjs");
 const {assertIsoOutputPolicy}=require("./iso-output-policy.cjs");
+const {snapshotIsoBuild}=require("./iso-host-build-snapshot.cjs");
 const fail=code=>{throw Object.assign(Error(code),{code});};
 /** Host-only composition. Required durable hooks are not supplied by the current scheduler. */
 function createIsoHostBuildAdapter({execution,directory,resolveProject,authorize,retainReference,checkpointCurrentOwner,run,checkpoint,signalScript}){
  if(typeof directory!=="string"||!path.isAbsolute(directory)||[resolveProject,authorize,retainReference,checkpointCurrentOwner,run,checkpoint].some(fn=>typeof fn!=="function")||typeof signalScript!=="string")fail("ISO_HOST_ADAPTER_REQUIRED");
  return async function build(payload,context){
+  ({payload,context}=snapshotIsoBuild(payload,context));
   assertIsoOutputPolicy(payload?.isoOutputPolicy,payload?.target);
   if(payload.runtime?.kind!=="wsl"||typeof context?.jobId!=="string"||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(context.jobId)||payload.intent?.projectId!==payload.workspaceId||!Number.isInteger(payload.jobs)||payload.jobs<1||payload.jobs>32)fail("ISO_HOST_REQUEST_INVALID");
   await authorize(payload,context);

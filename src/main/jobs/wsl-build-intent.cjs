@@ -46,6 +46,16 @@ async function captureWslBuildIntent({ execution, grantId, runtime, source, outp
   if (onOwnership !== undefined && typeof onOwnership !== "function") fail("BLOCKED_CONTENT_AUTHORITY");
   const grant = execution.grants.get(grantId), receipt = grant?.wslReceipt;
   if (!receipt || runtime?.kind !== "wsl" || runtime.distribution !== receipt.storage.distribution || externalTrees.length) fail("BLOCKED_CONTENT_AUTHORITY");
+  const selectedRuntime = Object.freeze({ kind: runtime.kind, distribution: runtime.distribution });
+  const storage = receipt.storage, paths = receipt.paths, proof = receipt.proof;
+  const storageValues = JSON.stringify(storage), pathValues = JSON.stringify(paths);
+  const grantPaths = [grant.root, grant.source, grant.output];
+  const current = () => {
+    if (signal?.aborted) fail("BLOCKED_CONTENT_CANCELLED");
+    if (execution.grants.get(grantId) !== grant || grant.wslReceipt !== receipt || receipt.storage !== storage || receipt.paths !== paths || receipt.proof !== proof ||
+        JSON.stringify(storage) !== storageValues || JSON.stringify(paths) !== pathValues || runtime.kind !== selectedRuntime.kind || runtime.distribution !== selectedRuntime.distribution ||
+        grantPaths.some((value,index) => value !== [grant.root, grant.source, grant.output][index])) fail("BLOCKED_CONTENT_AUTHORITY");
+  };
   function translate(selected) {
     for (const [native, linux] of [[receipt.paths.source, receipt.storage.sourceLinux], [receipt.paths.output, receipt.storage.outputLinux]]) {
       const relative = path.relative(native, selected);
@@ -55,14 +65,14 @@ async function captureWslBuildIntent({ execution, grantId, runtime, source, outp
   }
   const request = { source: translate(source), output: translate(output), externalTrees: [], ...(limits ? { limits } : {}) };
   const verify = async () => {
-    if (signal?.aborted) fail("BLOCKED_CONTENT_CANCELLED");
-    if (execution.grants.get(grantId) !== grant) fail("BLOCKED_CONTENT_AUTHORITY");
-    await verifyWslProject(receipt, args => boundedProcess(execution.executables.wsl, args).completion, runtime);
+    current();
+    await verifyWslProject(receipt, args => boundedProcess(execution.executables.wsl, args).completion, selectedRuntime);
+    current();
   };
   await verify();
   const helper = fs.readFileSync(HELPER).toString("base64");
-  const storage = receipt.storage, ownerToken = crypto.randomUUID();
-  const input = JSON.stringify({ request, helper, storage, proof: receipt.proof }) + "\n";
+  const ownerToken = crypto.randomUUID();
+  const input = JSON.stringify({ request, helper, storage, proof }) + "\n";
   if (Buffer.byteLength(input) > 65536) fail("BLOCKED_CONTENT_LIMIT");
   let job, owner, handshake, line = "", handshakeError;
   const terminate = async () => {
@@ -86,6 +96,7 @@ async function captureWslBuildIntent({ execution, grantId, runtime, source, outp
           owner = execution.validateOwnershipReceipt({ version: 1, kind: "wsl", ownerToken, distribution: storage.distribution, ...JSON.parse(match[1]) });
           await verify();
           if (onOwnership) { await onOwnership(owner); await verify(); }
+          current();
           if (!job.writeInput(input)) fail("BLOCKED_CONTENT_CANCELLED");
         } catch (error) { handshakeError = error; job.cancel(); }
       })();
@@ -104,6 +115,7 @@ async function captureWslBuildIntent({ execution, grantId, runtime, source, outp
     if (result.state !== "succeeded") fail(result.state === "cancelled" ? "BLOCKED_CONTENT_CANCELLED" : result.state === "timed-out" ? "BLOCKED_CONTENT_LIMIT" : "BLOCKED_CONTENT_UNAVAILABLE");
     let response; try { response = JSON.parse(result.stdout); } catch { fail("BLOCKED_CONTENT_INVALID_RESPONSE"); }
     if (response.ok !== true) fail(/^BLOCKED_[A-Z_]+$/.test(response.code || "") ? response.code : "BLOCKED_CONTENT_INVALID_RESPONSE");
+    current();
     return validateNativeIntent(response.result);
   } finally { signal?.removeEventListener("abort", cancel); }
 }
