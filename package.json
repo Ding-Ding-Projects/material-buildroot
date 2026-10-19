@@ -38,6 +38,9 @@
     "appId": "com.dingdingprojects.materialbuildroot",
     "productName": "Material Buildroot",
     "asar": true,
+    "extraResources": [
+      { "from": "dist/documentation", "to": "documentation", "filter": ["**/*"] }
+    ],
     "asarUnpack": [
       "scripts/configuration/**/*"
     ],
@@ -46,6 +49,9 @@
     },
     "files": [
       "dist/**/*",
+      "!dist/documentation/index.json",
+      "!dist/documentation/articles/**/*",
+      "!dist/documentation/references/**/*",
       "src/main/**/*",
       "src/shared/**/*",
       "scripts/configuration/**/*",

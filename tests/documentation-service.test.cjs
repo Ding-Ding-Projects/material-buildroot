@@ -79,6 +79,35 @@ async function fixture(
       createDocumentationService({ directory: output, ...options }),
   };
 }
+test("packaged Help selects physical extraResources and verifies every copied byte", async (t) => {
+  const fixtureData = await fixture(t);
+  await fixtureData.build();
+  const { documentationDirectory } = require('../src/main/documentation/directory.cjs');
+  const { verifyDocumentationResources, inventory } = require('../scripts/build/driver.cjs');
+  const output = path.join(fixtureData.root, 'packaged');
+  const resourcesPath = path.join(output, 'win-unpacked/resources');
+  const appPath = path.join(resourcesPath, 'app.asar');
+  const directory = documentationDirectory({isPackaged:true, appPath, resourcesPath});
+  assert.equal(directory, path.join(resourcesPath, 'documentation'));
+  assert.equal(documentationDirectory({isPackaged:false, appPath:fixtureData.root, resourcesPath}), path.join(fixtureData.root, 'dist/documentation'));
+  assert.throws(() => documentationDirectory({isPackaged:true, appPath, resourcesPath:'relative'}));
+  fs.cpSync(fixtureData.output, directory, {recursive:true});
+  assert.deepEqual(verifyDocumentationResources(fixtureData.output, output), inventory(directory));
+  assert.equal(createDocumentationService({directory}).list().complete, true);
+  const packagedArticle = path.join(directory, JSON.parse(fs.readFileSync(path.join(directory, 'index.json'))).documents[0].file);
+  fs.appendFileSync(packagedArticle, 'changed');
+  assert.throws(() => verifyDocumentationResources(fixtureData.output, output), /differs/);
+  fs.cpSync(directory, fixtureData.output, {recursive:true});
+  assert.throws(() => verifyDocumentationResources(fixtureData.output, output));
+  fs.rmSync(directory, {recursive:true});
+  assert.throws(() => verifyDocumentationResources(fixtureData.output, output));
+  const packaging = require('../package.json').build;
+  assert.deepEqual(packaging.extraResources, [{from:'dist/documentation',to:'documentation',filter:['**/*']}]);
+  for (const excluded of ['index.json', 'articles/**/*', 'references/**/*']) assert.ok(packaging.files.includes(`!dist/documentation/${excluded}`));
+  assert.ok(packaging.files.includes('dist/**/*'));
+  assert.ok(!packaging.files.some(pattern => pattern.startsWith('!') && pattern.includes('assets')));
+});
+
 test("real generated indexed articles render tables, code, admitted navigation and hashed images", async (t) => {
   const fixtureData = await fixture(t);
   const built = await fixtureData.build();

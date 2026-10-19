@@ -69,6 +69,15 @@ function nonempty(directory, relative) {
   return full;
 }
 
+function verifyDocumentationResources(source, output) {
+  const destination = contained(output, 'win-unpacked/resources/documentation');
+  const expected = inventory(source);
+  if (JSON.stringify(inventory(destination)) !== JSON.stringify(expected)) throw new Error('Packaged documentation differs from the generated bundle.');
+  // Validate physical descriptor identity as well as the complete manifest and hashes.
+  require('../../src/main/documentation/service.cjs').createDocumentationService({directory:destination}).list();
+  return expected;
+}
+
 function verifyInstaller(directory) {
   const files = inventory(directory);
   const setup = files.find(file => /(^|\/)Setup\.exe$/i.test(file.path));
@@ -191,6 +200,7 @@ async function main() {
     command.push(`--config.electronDist=${process.env.MATERIAL_BUILD_ELECTRON_DIST}`);
   }
   execute(node,command,{env:childEnv});
+  if (target.kind === 'desktop') verifyDocumentationResources(path.join(root,'dist/documentation'), output);
   if (target.checkCommand) execute(node,target.checkCommand.map(arg => arg.replaceAll('{output}',output)));
   if (installer) verifyInstaller(output);
   else {
@@ -221,5 +231,5 @@ async function main() {
   }
 }
 
-module.exports = {contained,sourceIdentity,assertIdentity,inventory,nonempty,verifyInstaller,verifiedOutput,outputJournal,recoverOutput,activateOutput};
+module.exports = {contained,sourceIdentity,assertIdentity,inventory,nonempty,verifyDocumentationResources,verifyInstaller,verifiedOutput,outputJournal,recoverOutput,activateOutput};
 if (require.main === module) main().catch(error => {console.error(`Build stopped: ${error.message}`);process.exitCode=error.exitCode || 1;});
