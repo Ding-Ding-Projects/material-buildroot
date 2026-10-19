@@ -3726,6 +3726,264 @@
       }
     },
     {
+      "name": "Action servers.extensions.install",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrfToken}}"
+          },
+          {
+            "key": "X-Companion-Client",
+            "value": "{{clientId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"servers.extensions.install\",\n  \"args\": {\n    \"directoryId\": \"{{directoryId}}\",\n    \"gameVersion\": \"{{serverVersion}}\",\n    \"loader\": \"paper\",\n    \"revision\": \"{{configRevision}}\",\n    \"versionId\": \"{{pluginVersionId}}\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/actions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actions"
+          ]
+        },
+        "description": "Requires scope `servers:write`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
+      }
+    },
+    {
+      "name": "Action servers.extensions.list",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrfToken}}"
+          },
+          {
+            "key": "X-Companion-Client",
+            "value": "{{clientId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"servers.extensions.list\",\n  \"args\": {\n    \"directoryId\": \"{{directoryId}}\",\n    \"offset\": 0\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/actions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actions"
+          ]
+        },
+        "description": "Requires scope `servers:read`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority."
+      }
+    },
+    {
+      "name": "Action servers.extensions.recover",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrfToken}}"
+          },
+          {
+            "key": "X-Companion-Client",
+            "value": "{{clientId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"servers.extensions.recover\",\n  \"args\": {\n    \"directoryId\": \"{{directoryId}}\",\n    \"gameVersion\": \"{{serverVersion}}\",\n    \"loader\": \"paper\",\n    \"revision\": \"{{configRevision}}\",\n    \"projectId\": \"{{pluginProjectId}}\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/actions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actions"
+          ]
+        },
+        "description": "Requires scope `servers:write`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
+      }
+    },
+    {
+      "name": "Action servers.extensions.remove",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrfToken}}"
+          },
+          {
+            "key": "X-Companion-Client",
+            "value": "{{clientId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"servers.extensions.remove\",\n  \"args\": {\n    \"directoryId\": \"{{directoryId}}\",\n    \"gameVersion\": \"{{serverVersion}}\",\n    \"loader\": \"paper\",\n    \"revision\": \"{{configRevision}}\",\n    \"projectId\": \"{{pluginProjectId}}\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/actions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actions"
+          ]
+        },
+        "description": "Requires scope `servers:write`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
+      }
+    },
+    {
+      "name": "Action servers.extensions.rollback",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrfToken}}"
+          },
+          {
+            "key": "X-Companion-Client",
+            "value": "{{clientId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"servers.extensions.rollback\",\n  \"args\": {\n    \"directoryId\": \"{{directoryId}}\",\n    \"gameVersion\": \"{{serverVersion}}\",\n    \"loader\": \"paper\",\n    \"revision\": \"{{configRevision}}\",\n    \"projectId\": \"{{pluginProjectId}}\",\n    \"snapshotId\": \"{{recordId}}\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/actions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actions"
+          ]
+        },
+        "description": "Requires scope `servers:write`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
+      }
+    },
+    {
+      "name": "Action servers.fabric.complete",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{origin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrfToken}}"
+          },
+          {
+            "key": "X-Companion-Client",
+            "value": "{{clientId}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"servers.fabric.complete\",\n  \"args\": {\n    \"directoryId\": \"{{directoryId}}\",\n    \"version\": \"{{serverVersion}}\",\n    \"loader\": \"{{loaderVersion}}\",\n    \"installer\": \"{{installerVersion}}\",\n    \"folderName\": \"managed-fabric-server\"\n  },\n  \"sequence\": {{sequence}},\n  \"nonce\": \"{{$guid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/actions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actions"
+          ]
+        },
+        "description": "Requires scope `servers:write`. Set `sequence` to the `nextSequence` value from the previous reply. `{{$guid}}` creates a fresh UUID nonce for every send. Examples are structural templates: obtain record, file, model, revision and preview identities from actual earlier replies in the same session; placeholder IDs grant no authority. This is a non-read scope: the desktop must explicitly admit it. Native-confirmation-required operations still require the desktop owner to approve the actual native review; an API request cannot supply that consent. Never resend an accepted mutation after a lost reply; first reconcile actual state."
+      }
+    },
+    {
       "name": "Action servers.fabric.install",
       "request": {
         "method": "POST",
