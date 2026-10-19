@@ -117,3 +117,20 @@ test('queue cancellation stays available while queue execution runs independentl
  await tools.evaluate(el=>el.openDestination('tool:queue'));await expect(tools.locator('[role="status"]').first()).toContainText('Cancel job: Completed');
  expect(await page.evaluate(()=>window.__toolCalls.map(r=>r.request?.action))).toEqual(['queue.run','queue.cancel','queue.page','queue.page']);
 });
+
+for(const [tab,tag,draft] of [['configuration','minecraft-panel','serverName'],['worlds','minecraft-workflow-panel','world'],['remote','minecraft-remote-panel','host']])test(`nested server ${tab} inherits the shell palette across live theme changes`,async({page})=>{
+ const {app,tools}=await open(page);await tools.evaluate(el=>el.openDestination('tool:server'));
+ const server=tools.locator('minecraft-panel');await server.evaluate(async(el,tab)=>{el.tab=tab;el.change();await el.updateComplete;},tab);
+ const child=tag==='minecraft-panel'?server:server.locator(tag);await expect(child).toBeVisible();
+ await child.evaluate((el,draft)=>{el[draft]='retained-theme-draft';window.__paletteChild=el;},draft);
+ const tokens=['primary','on-primary','primary-container','on-primary-container','surface','surface-container','surface-container-low','surface-container-high','on-surface','on-surface-variant','outline','outline-variant','secondary-container','on-secondary-container','error'];
+ const seen=[];
+ for(const dark of [false,true,false]){
+  await app.evaluate((el,dark)=>el.shadowRoot.querySelector('.shell').classList.toggle('dark',dark),dark);
+  const expected=await tools.evaluate((el,tokens)=>Object.fromEntries(tokens.map(t=>[t,getComputedStyle(el).getPropertyValue('--md-sys-color-'+t).trim()])),tokens);
+  await expect.poll(()=>child.evaluate((el,tokens)=>Object.fromEntries(tokens.map(t=>[t,getComputedStyle(el).getPropertyValue('--md-sys-color-'+t).trim()])),tokens)).toEqual(expected);
+  seen.push(expected.surface);expect(await child.evaluate((el,draft)=>el===window.__paletteChild&&el[draft]==='retained-theme-draft',draft)).toBe(true);expect(await server.evaluate(el=>el.tab)).toBe(tab);
+  await expect.poll(async()=>await child.evaluate(el=>getComputedStyle(el).color)===await tools.evaluate(el=>getComputedStyle(el).color)).toBe(true);
+ }
+ expect(seen[0]).not.toBe(seen[1]);expect(seen[0]).toBe(seen[2]);expect(await page.evaluate(()=>window.__toolCalls)).toEqual([]);
+});

@@ -9,6 +9,7 @@ import "@material/web/select/outlined-select.js";
 import "@material/web/select/select-option.js";
 import "@material/web/checkbox/checkbox.js";
 import { workspaceStyles } from "./workspace-styles";
+import { inheritedWorkspaceTheme } from "./inherited-workspace-theme";
 
 type Grant = { id: string; name: string };
 type Version = { id: string; type?: string };
@@ -65,7 +66,7 @@ export class MinecraftPanel extends LitElement {
   private readiness = "unknown";
   private onlineNames: string[] = [];
   private discoveryNote = "";
-  static styles = [workspaceStyles, css`
+  static styles = [workspaceStyles, inheritedWorkspaceTheme, css`
     :host { display:block; min-width:0; } .stack { display:grid; gap:16px; }
     .columns { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px; }
     .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }

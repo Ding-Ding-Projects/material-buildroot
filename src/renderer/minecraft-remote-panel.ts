@@ -1,6 +1,7 @@
 import {localizedCopy} from './language-wording';
 import { LitElement, html, css, nothing } from "lit";
 import { workspaceStyles } from "./workspace-styles";
+import { inheritedWorkspaceTheme } from "./inherited-workspace-theme";
 import "@material/web/button/outlined-button.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/select/outlined-select.js";
@@ -11,7 +12,7 @@ export class MinecraftRemotePanel extends LitElement {
   static properties={language:{type:String},edition:{type:String},version:{type:String},flavour:{type:String},revision:{state:true}};
   language="bilingual";edition="java";version="";flavour="vanilla";revision=0;
   private busy=false;private message="";private kind="server";private target="ssh-process";private host="";private destination="";private source?:Grant;private stopped=false;private eula=false;private preview:any;private shown=100;private transferId="";private status:any;private transfers:any[]=[];
-  static styles=[workspaceStyles,css`:host{display:block;min-width:0}.stack{display:grid;gap:16px}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.record{padding:12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;overflow-wrap:anywhere}.note{color:var(--md-sys-color-on-surface-variant)}code{overflow-wrap:anywhere}`];
+  static styles=[workspaceStyles, inheritedWorkspaceTheme,css`:host{display:block;min-width:0}.stack{display:grid;gap:16px}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.record{padding:12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;overflow-wrap:anywhere}.note{color:var(--md-sys-color-on-surface-variant)}code{overflow-wrap:anywhere}`];
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   private async call(action:string,fields:Record<string,unknown>={}){const r:any=await window.studio?.operations({action,...fields});if(!r?.ok||r.result?.ok===false||r.result?.cancelled)throw new Error(r?.code||r?.result?.code||"CANCELLED");return r.result;}
   private tool(request:Record<string,unknown>){return this.call("tools",{request});}
