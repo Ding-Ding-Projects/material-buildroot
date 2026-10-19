@@ -51,6 +51,14 @@ export interface ExecutionJob {
   completion: Promise<ExecutionResult>;
   cancel(): Promise<ExecutionResult>;
 }
+export interface NativeDockerProjectReceipt {
+  readonly id: string; readonly daemonId: string; readonly image: string;
+  readonly uid: 1000; readonly gid: 1000; readonly profile: "buildroot-2025.02-x86_64-bios";
+  readonly archiveSha256: string;
+  readonly volumes: Readonly<Record<"source" | "output" | "cache", { readonly name: string; readonly key: string }>>;
+  readonly seal: { readonly uid: 1000; readonly gid: 1000; readonly identities: Readonly<Record<string, readonly number[]>>;
+    readonly source: { readonly sha256: string; readonly entries: number; readonly bytes: number }; readonly configurationSha256: string; readonly configurationBytes: number };
+}
 export class ExecutionService {
   constructor(options?: {
     platform?: string;
@@ -82,6 +90,11 @@ export class ExecutionService {
     context: { lease: object; jobId: string },
   ): Promise<ExecutionJob>;
   runIsoOutputLifecycle(request: { grantId: string; runtime: {kind:"wsl"; distribution:string}; operation:"prepare"; jobId:string } | { grantId:string; runtime:{kind:"wsl"; distribution:string}; operation:"capture"; jobId:string; preparationSha256:string }, options: { signal?:AbortSignal; onOwnership(receipt:Readonly<OwnershipReceipt>, stage:Readonly<{operation:"prepare"|"capture";jobId:string}>):void|Promise<void> }):Promise<{state:"succeeded"|"failed"|"cancelled"|"runtime-cleanup-failed";code:number|null;ownership:OwnershipReceipt|null;cleanup:CleanupVerdict;stage:Readonly<{operation:"prepare"|"capture";jobId:string}>;observation:unknown|null;errorCode?:string}>;
+  prepareNativeDockerProject(input: { archivePath: string; profile: "buildroot-2025.02-x86_64-bios"; consent: true; onProgress?(event: { workspaceId: string; daemonId: string; phase: "volume-created"; volumes: Record<string, {name:string;key:string}> }): void | Promise<void> }): Promise<NativeDockerProjectReceipt>;
+  readmitNativeDockerProject(input: { metadata: NativeDockerProjectReceipt; archivePath: string; configurationSha256: string; consent: true }): Promise<NativeDockerProjectReceipt>;
+  grantNativeDockerProject(receipt: NativeDockerProjectReceipt): Promise<{ grantId: string; kind: "docker-native"; workspaceId: string; profile: string; runtime: ExecutionRuntime; sourceReceipt: { sha256: string; entries: number; bytes: number }; volumes: Record<string, string> }>;
+  acquireNativeDockerCache(input: { grantId: string; consent: true; onLog?(event: ExecutionLog): void; onOwnership?(receipt: Readonly<OwnershipReceipt>): Promise<void> | void }): Promise<ExecutionJob>;
+  inspectNativeDockerOutputs(input: { grantId: string }): Promise<{ workspace: unknown; files: Array<{ name: string; sha256: string; bytes: number }> }>;
   validateOwnershipReceipt(receipt: unknown): Readonly<OwnershipReceipt>;
   reconcileCleanup(receipt: unknown): Promise<CleanupVerdict>;
   prepareDocker(request: { grantId: string; runtime: ExecutionRuntime }): Promise<{ name: string; daemonId: string; uid: number; gid: number; state: "prepared"; permissions: "unverified"; retained: true }>;

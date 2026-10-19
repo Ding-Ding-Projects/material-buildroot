@@ -8,6 +8,7 @@ const { isWslReceipt, verifyWslProject, wrapBuild } = require("./wsl-project.cjs
 const { isBuildTarget, assertPackage } = require("../build/target-actions.cjs");
 const { LINUX_BUILD_PATH_SCRIPT } = require("./linux-build-path.cjs");
 const { createWslIsoOutputLifecycle, createLeasedWslIsoOutputLifecycle } = require("./wsl-iso-output-lifecycle.cjs");
+const { createNativeDockerProjects } = require("./docker-native-project.cjs");
 const TARGETS = Object.freeze([
   "all",
   "sdk",
@@ -285,10 +286,42 @@ class ExecutionService {
     this.grants = new Map();
     this.locks = new Set();
     this.wslIsoOutputLifecycle = createWslIsoOutputLifecycle({ execution: this, run: boundedProcess, checkpoint: checkpointOwnership, signalScript: WSL_SIGNAL_SCRIPT });
+    this.nativeDocker = createNativeDockerProjects({
+      run: (args, options) => boundedProcess(this.executables.docker, args, options), identity: () => this.dockerIdentity(),
+      cleanup: { stop: receipt => this.stopOwnedDocker(receipt), inspect: receipt => this.reconcileCleanup(receipt) }, checkpoint: checkpointOwnership,
+    });
   }
   runIsoOutputLifecycle(request, options) { return this.wslIsoOutputLifecycle(request, options); }
   createLeasedIsoOutputLifecycle(transactions) {
     return createLeasedWslIsoOutputLifecycle({ execution: this, run: boundedProcess, checkpoint: checkpointOwnership, signalScript: WSL_SIGNAL_SCRIPT }, transactions);
+  }
+  prepareNativeDockerProject(input) { return this.nativeDocker.prepare(input); }
+  readmitNativeDockerProject(input) { return this.nativeDocker.readmit(input); }
+  async grantNativeDockerProject(receipt) {
+    const runtime = { kind: "docker", image: receipt?.image, uid: 1000, gid: 1000 };
+    await this.nativeDocker.validate(receipt, runtime);
+    await this.nativeDocker.inspect(receipt);
+    const grantId = crypto.randomUUID(), root = `docker-native:${receipt.id}`;
+    this.grants.set(grantId, { nativeDockerReceipt: receipt, root, source: root + ":source", output: root + ":output", external: [], identities: {} });
+    return { grantId, kind: "docker-native", workspaceId: receipt.id, profile: receipt.profile, runtime, sourceReceipt: receipt.seal.source, volumes: Object.fromEntries(Object.entries(receipt.volumes).map(([role, value]) => [role, value.name])) };
+  }
+  async acquireNativeDockerCache({ grantId, consent, onLog, onOwnership }) {
+    const grant = this.grants.get(grantId);
+    if (!grant?.nativeDockerReceipt) throw Error("native-docker-authority-required");
+    if (this.locks.has(grant.source) || this.locks.has(grant.output)) throw Error("project-busy");
+    this.locks.add(grant.source); this.locks.add(grant.output);
+    try {
+      const job = await this.nativeDocker.acquire(grant.nativeDockerReceipt, { consent, onLog, onOwnership: async receipt => {
+        await checkpointOwnership(onOwnership, receipt);
+        if (this.grants.get(grantId) !== grant) throw Error("grant-unavailable");
+      } });
+      const authority = setInterval(() => { if (this.grants.get(grantId) !== grant) void job.cancel(); }, 250); authority.unref?.();
+      return { ...job, completion: job.completion.finally(() => { clearInterval(authority); this.locks.delete(grant.source); this.locks.delete(grant.output); }) };
+    } catch (error) { this.locks.delete(grant.source); this.locks.delete(grant.output); throw error; }
+  }
+  async inspectNativeDockerOutputs({ grantId }) {
+    const grant = this.grants.get(grantId); if (!grant?.nativeDockerReceipt) throw Error("native-docker-authority-required");
+    return this.nativeDocker.inspect(grant.nativeDockerReceipt, "outputs");
   }
   grantProject({
     root,
@@ -689,6 +722,25 @@ class ExecutionService {
       throw new Error("invalid-build-request");
     const grant = this.grants.get(grantId);
     if (!grant) throw new Error("grant-unavailable");
+    if (grant.nativeDockerReceipt) {
+      if (signal?.aborted) throw Error("execution-cancelled");
+      if (this.locks.has(grant.source) || this.locks.has(grant.output)) throw Error("project-busy");
+      this.locks.add(grant.source); this.locks.add(grant.output);
+      try {
+        const job = await this.nativeDocker.start(grant.nativeDockerReceipt, runtime, target, jobs, { onLog, onOwnership: async receipt => {
+          await checkpointOwnership(onOwnership, receipt);
+          if (this.grants.get(grantId) !== grant || signal?.aborted) throw Error("grant-unavailable");
+        } });
+        effect.started = true;
+        const abort = () => { void job.cancel(); };
+        signal?.addEventListener("abort", abort, { once: true });
+        if (signal?.aborted) abort();
+        const authority = setInterval(() => { if (this.grants.get(grantId) !== grant) abort(); }, 250); authority.unref?.();
+        const completion = job.completion.finally(() => { clearInterval(authority); signal?.removeEventListener("abort", abort); this.locks.delete(grant.source); this.locks.delete(grant.output); });
+        return { ...job, completion };
+      } catch (error) { this.locks.delete(grant.source); this.locks.delete(grant.output); throw error; }
+    }
+
     assertPackage({source:grant.source,externalTrees:grant.external.map(entry => entry.path)}, target);
     await this.verifyWslGrant(grant, request?.runtime);
     const revalidateAuthority = () => {
