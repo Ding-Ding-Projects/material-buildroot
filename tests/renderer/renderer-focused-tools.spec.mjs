@@ -73,3 +73,64 @@ test('retained utility selection localizes without changing task or draft',async
  }
  expect(await page.evaluate(()=>window.__toolCalls)).toEqual([]);
 });
+
+for(const kind of ['local','convert','pdf','queue'])test(`feedback stays with its originating ${kind} task after delayed completion`,async({page})=>{
+ const {tools}=await open(page);
+ await page.evaluate(()=>{window.__toolCalls=[];window.studio.operations=async r=>{window.__toolCalls.push(r);if(r.request?.action==='queue.page')return {ok:true,result:{items:[],next:null}};return new Promise(resolve=>window.__finishTool=()=>resolve({ok:true,result:r.action==='payload.list'?[]:{bytes:42,pages:3,completed:1,failed:0}}));};});
+ await tools.evaluate(async(el,kind)=>{el.categories=[{category:'text',formats:[{format:'txt',available:true}]}];el.source={id:'s',name:'source'};el.destination={id:'d',name:'output'};el.pdfSources=[{id:'p',name:'source.pdf'}];el.jobs=[{id:'q',state:'queued',request:{action:'converter.convert'}}];el.changed();await el.openDestination('tool:'+kind);},kind);
+ const labels={local:'Check tool availability',convert:'Convert now',pdf:'Run PDF operation',queue:'Run queue'};
+ await tools.getByRole('button',{name:labels[kind],exact:true}).click();await expect.poll(()=>page.evaluate(()=>typeof window.__finishTool)).toBe('function');
+ await tools.evaluate(el=>el.openDestination('tool:server'));
+ await page.evaluate(()=>window.__finishTool());await expect.poll(()=>tools.evaluate(el=>el.pending||el.runningQueue)).toBe(false);
+ await expect(tools.locator('[role="status"]').first()).toHaveText('');
+ const calls=await page.evaluate(()=>window.__toolCalls.length);
+ await tools.evaluate((el,kind)=>el.openDestination('tool:'+kind),kind);
+ await expect(tools.locator('[role="status"]').first()).toContainText(kind==='queue'?'Queue finished':labels[kind]);
+ if(kind==='convert')await expect(tools.locator('[role="status"]').first()).toContainText('42 bytes');
+ await tools.evaluate(el=>el.openDestination('tool:convert'));
+ if(kind==='local')await expect(tools.locator('[role="status"]').first()).toHaveText('');
+ await tools.evaluate((el,kind)=>el.openDestination('tool:'+kind),kind);
+ await tools.evaluate(el=>el.language='zh-HK');
+ await expect(tools.locator('[role="status"]').first()).toContainText(kind==='queue'?'佇列已完成':{local:'檢查工具可用性',convert:'立即轉換',pdf:'執行 PDF 操作'}[kind]);
+ expect(await page.evaluate(()=>window.__toolCalls.length)).toBe(calls);
+});
+
+test('completed availability feedback does not imply a conversion and both records relocalize independently',async({page})=>{
+ const {tools}=await open(page);
+ await page.evaluate(()=>{window.studio.operations=async r=>{window.__toolCalls.push(r);return {ok:true,result:r.action==='payload.list'?[]:{categories:[]}};};});
+ await tools.getByRole('button',{name:'Check tool availability',exact:true}).click();
+ await expect(tools.locator('[role="status"]').first()).toContainText('Check tool availability: Completed');
+ await tools.evaluate(el=>el.openDestination('tool:convert'));await expect(tools.locator('[role="status"]').first()).toHaveText('');
+ await tools.getByRole('button',{name:'Load formats',exact:true}).click();await expect(tools.locator('[role="status"]').first()).toContainText('Load formats: Completed');
+ await tools.evaluate(async el=>{el.language='zh-HK';await el.openDestination('tool:local');});await expect(tools.locator('[role="status"]').first()).toContainText('檢查工具可用性');
+ await tools.evaluate(el=>el.openDestination('tool:convert'));await expect(tools.locator('[role="status"]').first()).toContainText('載入格式');
+ expect(await page.evaluate(()=>window.__toolCalls.map(r=>r.request?.action||r.action))).toEqual(['payload.list','converter.catalog']);
+});
+
+test('queue cancellation stays available while queue execution runs independently',async({page})=>{
+ const {tools}=await open(page);
+ await page.evaluate(()=>{window.studio.operations=async r=>{window.__toolCalls.push(r);if(r.request?.action==='queue.run')return new Promise(resolve=>window.__finishQueue=()=>resolve({ok:true,result:{completed:0,failed:0}}));if(r.request?.action==='queue.page')return {ok:true,result:{items:[{id:'q',state:'cancelled',request:{action:'converter.convert'}}],next:null}};return {ok:true,result:{}};};});
+ await tools.evaluate(async el=>{el.jobs=[{id:'q',state:'queued',request:{action:'converter.convert'}}];el.changed();await el.openDestination('tool:queue');});
+ await tools.getByRole('button',{name:'Run queue',exact:true}).click();await expect.poll(()=>tools.evaluate(el=>el.runningQueue)).toBe(true);expect(await tools.evaluate(el=>el.pending)).toBe(false);
+ await tools.getByRole('button',{name:'Cancel job',exact:true}).click();await expect(tools.locator('[role="status"]').first()).toContainText('Cancel job: Completed');
+ await tools.evaluate(el=>el.openDestination('tool:convert'));await page.evaluate(()=>window.__finishQueue());await expect.poll(()=>tools.evaluate(el=>el.runningQueue)).toBe(false);await expect(tools.locator('[role="status"]').first()).toHaveText('');
+ await tools.evaluate(el=>el.openDestination('tool:queue'));await expect(tools.locator('[role="status"]').first()).toContainText('Cancel job: Completed');
+ expect(await page.evaluate(()=>window.__toolCalls.map(r=>r.request?.action))).toEqual(['queue.run','queue.cancel','queue.page','queue.page']);
+});
+
+for(const [tab,tag,draft] of [['configuration','minecraft-panel','serverName'],['worlds','minecraft-workflow-panel','world'],['remote','minecraft-remote-panel','host']])test(`nested server ${tab} inherits the shell palette across live theme changes`,async({page})=>{
+ const {app,tools}=await open(page);await tools.evaluate(el=>el.openDestination('tool:server'));
+ const server=tools.locator('minecraft-panel');await server.evaluate(async(el,tab)=>{el.tab=tab;el.change();await el.updateComplete;},tab);
+ const child=tag==='minecraft-panel'?server:server.locator(tag);await expect(child).toBeVisible();
+ await child.evaluate((el,draft)=>{el[draft]='retained-theme-draft';window.__paletteChild=el;},draft);
+ const tokens=['primary','on-primary','primary-container','on-primary-container','surface','surface-container','surface-container-low','surface-container-high','on-surface','on-surface-variant','outline','outline-variant','secondary-container','on-secondary-container','error'];
+ const seen=[];
+ for(const dark of [false,true,false]){
+  await app.evaluate((el,dark)=>el.shadowRoot.querySelector('.shell').classList.toggle('dark',dark),dark);
+  const expected=await tools.evaluate((el,tokens)=>Object.fromEntries(tokens.map(t=>[t,getComputedStyle(el).getPropertyValue('--md-sys-color-'+t).trim()])),tokens);
+  await expect.poll(()=>child.evaluate((el,tokens)=>Object.fromEntries(tokens.map(t=>[t,getComputedStyle(el).getPropertyValue('--md-sys-color-'+t).trim()])),tokens)).toEqual(expected);
+  seen.push(expected.surface);expect(await child.evaluate((el,draft)=>el===window.__paletteChild&&el[draft]==='retained-theme-draft',draft)).toBe(true);expect(await server.evaluate(el=>el.tab)).toBe(tab);
+  await expect.poll(async()=>await child.evaluate(el=>getComputedStyle(el).color)===await tools.evaluate(el=>getComputedStyle(el).color)).toBe(true);
+ }
+ expect(seen[0]).not.toBe(seen[1]);expect(seen[0]).toBe(seen[2]);expect(await page.evaluate(()=>window.__toolCalls)).toEqual([]);
+});

@@ -1,6 +1,7 @@
 import {localizedCopy} from './language-wording';
 import { LitElement, html, css, nothing } from "lit";
 import { workspaceStyles } from "./workspace-styles";
+import { inheritedWorkspaceTheme } from "./inherited-workspace-theme";
 import "@material/web/button/outlined-button.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "@material/web/select/outlined-select.js";
@@ -14,7 +15,7 @@ export class MinecraftWorkflowPanel extends LitElement {
   private collection="allowlist"; private entries:any[]=[]; private playerRevision=""; private playerName=""; private identity=""; private permission="member"; private level="1"; private ignoresLimit=false;
   private command="list"; private announcement=""; private rule="keepInventory"; private ruleValue=true; private difficulty="normal";
   private profiles:any[]=[]; private history:any[]=[]; private ownership:any[]=[]; private schedules:any[]=[]; private at=""; private scheduleOperation="stop"; private occurrences="1"; private repeatMinutes="60"; private timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone;
-  static styles=[workspaceStyles,css`:host{display:block;min-width:0}.stack{display:grid;gap:16px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.note{color:var(--md-sys-color-on-surface-variant);overflow-wrap:anywhere}.record{padding:12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;overflow-wrap:anywhere}code{overflow-wrap:anywhere}`];
+  static styles=[workspaceStyles, inheritedWorkspaceTheme,css`:host{display:block;min-width:0}.stack{display:grid;gap:16px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}md-outlined-text-field,md-outlined-select{width:100%;min-width:0}.note{color:var(--md-sys-color-on-surface-variant);overflow-wrap:anywhere}.record{padding:12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:12px;overflow-wrap:anywhere}code{overflow-wrap:anywhere}`];
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   private async call(action:string,fields:Record<string,unknown>={}){const r:any=await window.studio?.operations({action,...fields});if(!r?.ok||r.result?.ok===false||r.result?.cancelled)throw new Error(r?.code||r?.result?.code||"CANCELLED");return r.result;}
   private tool(request:Record<string,unknown>){return this.call("tools",{request});}
