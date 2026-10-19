@@ -91,7 +91,8 @@ function transactionFixture(t,mode={}){
   produce:async(input,options)=>{
    assert.equal(f.execution.locks.size,3);stages.push("produce");
    await assert.rejects(f.lifecycle(f.request,f.options),{code:"ISO_LIFECYCLE_PROJECT_BUSY"});
-   await options.onOwnership({version:1,kind:"wsl",ownerToken:"cccccccc-cccc-4ccc-8ccc-cccccccccccc",distribution:"Fixture",bootId:BOOT,pidNamespace:"pid:[123]",pid:1234,startTime:"98765"});
+   const producerOwner={version:1,kind:"wsl",ownerToken:"cccccccc-cccc-4ccc-8ccc-cccccccccccc",distribution:"Fixture",bootId:BOOT,pidNamespace:"pid:[123]",pid:1234,startTime:"98765"};
+   await options.onOwnership({...producerOwner,pid:null,startTime:null});await options.onOwnership(producerOwner);
    return{state:"succeeded",code:0};
   }
  }});bridge=f.leased(transactions);

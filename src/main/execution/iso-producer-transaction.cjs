@@ -2,6 +2,7 @@
 const crypto = require("node:crypto");
 const { assertIsoOutputPolicy } = require("../jobs/iso-output-policy.cjs");
 const { createIsoTransactionStore } = require("../jobs/iso-transaction-store.cjs");
+const { createIsoProducerOwner } = require("./iso-producer-owner.cjs");
 const SHA = /^[a-f0-9]{64}$/;
 const fail = code => { throw Object.assign(Error(code), { code }); };
 const freeze = value => { if (value && typeof value === "object") { Object.values(value).forEach(freeze); Object.freeze(value); } return value; };
@@ -42,9 +43,11 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
     async function invoke(name, extra = {}) {
       stage = name; await current(); journal.append("stage", { stage });
       const owners = [];
+      const producerOwner = name === "produce" ? createIsoProducerOwner(adapters.validateOwner, fixed.runtime.distribution) : null;
       const onOwnership = async receipt => {
         assertLease(lease, fixed.jobId); adapters.validateOwner(receipt);
         const owner = freeze(copy(receipt));
+        producerOwner?.observe(owner);
         if (owner.kind !== "wsl" || owner.distribution !== fixed.runtime.distribution) fail("ISO_TRANSACTION_OWNER_CHANGED");
         journal.append("ownership", { stage, receipt: owner }); owners.push(owner);
         await current();
@@ -52,7 +55,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       const result = await adapters[name]({ lease, ...fixed, ...extra }, { signal, onOwnership });
       if (!owners.length || result?.state !== "succeeded" || result.code !== 0) fail("ISO_TRANSACTION_STAGE_UNVERIFIED");
       // Independent owner inspection is mandatory, even when the adapter reports cleanup success.
-      for (const owner of owners) {
+      for (const owner of producerOwner ? [producerOwner.precise()] : owners) {
         const cleanup = await adapters.inspectCleanup(owner);
         journal.append("cleanup", { stage, receipt: owner, verdict: cleanup });
         if (cleanup?.state !== "verified-stopped") fail("ISO_TRANSACTION_CLEANUP_UNVERIFIED");

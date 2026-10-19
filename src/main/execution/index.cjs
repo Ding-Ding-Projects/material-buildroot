@@ -652,13 +652,22 @@ class ExecutionService {
   }
   async start(request, onLog, options = {}) {
     const effect = { started: false };
-    try { return await this.#startOwned(request, onLog, options, effect); }
+    const { onOwnership, signal } = options;
+    try { return await this.#startOwned(request, onLog, { onOwnership, signal }, effect); }
     catch (error) {
       if (!effect.started && error.message !== "ownership-checkpoint-failed") error.code = "RUNTIME_NOT_STARTED";
       throw error;
     }
   }
-  async #startOwned(request, onLog, { onOwnership, signal } = {}, effect) {
+  async startIsoProducer(request, onLog, options, transactions, context) {
+    if (request?.runtime?.kind !== "wsl" || request.target !== "all" || typeof transactions?.assertLifecycleLease !== "function") throw Error("iso-producer-authority-required");
+    const grant = this.grants.get(request.grantId);
+    if (!isWslReceipt(grant?.wslReceipt)) throw Error("iso-producer-authority-required");
+    const validateLease = () => transactions.assertLifecycleLease(context?.lease, { execution: this, jobId: context?.jobId, grantId: request.grantId, runtime: request.runtime, roots: [grant?.root, grant?.source, grant?.output] });
+    validateLease();
+    return this.#startOwned(request, onLog, { onOwnership: options?.onOwnership, signal: options?.signal, validateLease }, { started: false });
+  }
+  async #startOwned(request, onLog, { onOwnership, signal, validateLease } = {}, effect) {
     if (onOwnership !== undefined && typeof onOwnership !== "function") throw new Error("invalid-ownership-checkpoint");
     if (signal !== undefined && (!signal || typeof signal.aborted !== "boolean" || typeof signal.addEventListener !== "function" || typeof signal.removeEventListener !== "function")) throw new Error("invalid-cancellation-signal");
     const { grantId, target, runtime, jobs = 1 } = request || {};
@@ -680,6 +689,7 @@ class ExecutionService {
     assertPackage({source:grant.source,externalTrees:grant.external.map(entry => entry.path)}, target);
     await this.verifyWslGrant(grant, request?.runtime);
     const revalidateAuthority = () => {
+      validateLease?.();
       if (signal?.aborted) throw new Error("execution-cancelled");
       if (this.grants.get(grantId) !== grant) throw new Error("grant-unavailable");
       for (const key of ["root", "source", "output"]) {
@@ -698,7 +708,7 @@ class ExecutionService {
         throw new Error("grant-path-changed");
     }
     this.validateExternal(grant);
-    if (this.locks.has(grant.output) || this.locks.has(grant.source))
+    if (!validateLease && (this.locks.has(grant.output) || this.locks.has(grant.source)))
       throw new Error("project-busy");
     let file,
       args,
@@ -937,11 +947,10 @@ class ExecutionService {
         throw new Error("grant-path-changed");
     }
     this.validateExternal(grant);
-    if (this.locks.has(grant.output) || this.locks.has(grant.source))
+    if (!validateLease && (this.locks.has(grant.output) || this.locks.has(grant.source)))
       throw new Error("project-busy");
     revalidateAuthority();
-    this.locks.add(grant.output);
-    this.locks.add(grant.source);
+    if (!validateLease) { this.locks.add(grant.output); this.locks.add(grant.source); }
     effect.started = true;
     processJob = boundedProcess(file, args, {
       cwd: grant.root,
@@ -967,8 +976,7 @@ class ExecutionService {
     return {
       ownership,
       completion: completion.finally(() => {
-        this.locks.delete(grant.output);
-        this.locks.delete(grant.source);
+        if (!validateLease) { this.locks.delete(grant.output); this.locks.delete(grant.source); }
       }),
       cancel: async () => {
         processJob.cancel();

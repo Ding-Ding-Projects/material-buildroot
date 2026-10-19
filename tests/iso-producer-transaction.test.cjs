@@ -19,7 +19,7 @@ function faultedFactory(target, operation) {
     return module.exports;
   }
   const store = load("../src/main/jobs/iso-transaction-store.cjs", name => name === "node:fs" ? faultyFs : require(name));
-  return load("../src/main/execution/iso-producer-transaction.cjs", name => name === "../jobs/iso-transaction-store.cjs" ? store : name === "../jobs/iso-output-policy.cjs" ? require("../src/main/jobs/iso-output-policy.cjs") : require(name)).createIsoProducerTransactions;
+  return load("../src/main/execution/iso-producer-transaction.cjs", name => name === "../jobs/iso-transaction-store.cjs" ? store : name === "../jobs/iso-output-policy.cjs" ? require("../src/main/jobs/iso-output-policy.cjs") : name === "./iso-producer-owner.cjs" ? require("../src/main/execution/iso-producer-owner.cjs") : require(name)).createIsoProducerTransactions;
 }
 function fixture(t, mode = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "iso-transaction-")); t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
@@ -27,7 +27,7 @@ function fixture(t, mode = {}) {
   const execution = { grants: new Map([["grant", grant]]), locks: new Set() }, calls = [], controller = new AbortController();
   const request = { jobId: JOB, grantId: "grant", runtime: { kind: "wsl", distribution: "Fixture" }, policy: createIsoOutputPolicy({ revision: HASH, profile: "x86_64-bios-grub2-initrd" }) };
   let phase = "initial", service;
-  const owner = { kind: "wsl", distribution: "Fixture", pid: 123 };
+  const owner = { kind: "wsl", distribution: "Fixture", pid: 123, startTime: "456" };
   const observation = { state: "prepared-unbound", jobId: JOB, preparationSha256: HASH, prior: mode.stale ? { identity: Array(9).fill("1") } : null, jobBound: false, bootVerified: false };
   const adapters = {
     current: async () => ({ sourceSha256: HASH, projectProofSha256: HASH, configurationSha256: mode.changedConfig && phase === "produced" ? "b".repeat(64) : HASH }),
@@ -40,7 +40,7 @@ function fixture(t, mode = {}) {
       return { state: "succeeded", code: 0, observation };
     },
     produce: async (input, options) => {
-      calls.push("produce"); await options.onOwnership(owner); phase = "produced";
+      calls.push("produce"); await options.onOwnership({ ...owner, pid: null, startTime: null }); await options.onOwnership(owner); phase = "produced";
       if (mode.crash) throw Error("simulated crash after preparation");
       if (mode.cancel) controller.abort();
       if (mode.changedGrant) execution.grants.set("grant", { ...grant });
@@ -86,7 +86,7 @@ test("exclusive transaction retains every stage owner, binds output and never cl
   const result = await f.service.run(f.request);
   assert.equal(result.receipt.jobBound, true); assert.equal(result.receipt.bootVerified, false); assert.equal(Object.isFrozen(result.receipt.output), true);
   assert.deepEqual(f.calls, ["prepare", "produce", "capture"]); assert.equal(f.execution.locks.size, 0);
-  assert.deepEqual(f.records().filter(row => row.kind === "ownership").map(row => row.value.stage), ["prepare", "produce", "capture"]);
+  assert.deepEqual(f.records().filter(row => row.kind === "ownership").map(row => row.value.stage), ["prepare", "produce", "produce", "capture"]);
   assert.equal(f.records().at(-1).kind, "receipt");
   await assert.rejects(f.service.run(f.request), { code: "EEXIST" });
 });
