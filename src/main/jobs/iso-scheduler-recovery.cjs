@@ -2,6 +2,8 @@
 const fs=require("node:fs"),path=require("node:path");
 const {createIsoRecoveryRecords}=require("./iso-recovery-records.cjs");
 const {assertIsoOutputPolicy}=require("./iso-output-policy.cjs");
+const {readIsoTransaction}=require("./iso-transaction-readback.cjs");
+const {isDeepStrictEqual}=require("node:util");
 /** Restore only denial reservations. Historical records never recreate project grants. */
 function restoreIsoSchedulerRecovery({jobs,owner,quarantine,recoveryDirectory,journalDirectory,markRecoveryUnavailable}){
  const retained=[];
@@ -31,7 +33,9 @@ function restoreIsoSchedulerRecovery({jobs,owner,quarantine,recoveryDirectory,jo
     const bound=bindings[0].binding,result=outputs[0];
     if(bound.jobId!==job.id||bound.workspaceId!==job.payload.workspaceId||bound.journalKey!==job.id||bound.sourceSha256!==job.payload.intent?.sourceRevision||bound.configurationSha256!==job.payload.intent?.configRevision||JSON.stringify(bound.runtime)!==JSON.stringify(job.payload.runtime)||JSON.stringify(bound.policy)!==JSON.stringify(job.payload.isoOutputPolicy)||result.receipt?.jobId!==job.id)throw Error("binding-changed");
     const recovered=store?.read(bound);
-    valid=job.state==="succeeded"&&recovered?.state==="complete"&&recovered.reference.receiptRecordSha256===result.receiptRecordSha256;
+    const transaction=readIsoTransaction({directory:journalDirectory,expected:{jobId:bound.jobId,grantId:bound.grantId,runtime:bound.runtime,policy:bound.policy,
+     binding:{sourceSha256:bound.sourceSha256,configurationSha256:bound.configurationSha256,projectProofSha256:bound.projectProofSha256},receiptRecordSha256:result.receiptRecordSha256}});
+    valid=job.state==="succeeded"&&job.result?.state==="succeeded"&&job.result.code===0&&result.state==="verified"&&recovered?.state==="complete"&&recovered.reference.receiptRecordSha256===result.receiptRecordSha256&&transaction.state==="complete"&&isDeepStrictEqual(result.receipt,transaction.receipt);
    }catch{valid=false;}
    if(!valid)hold(job,"ISO_RECOVERY_REQUIRED");
   }
