@@ -24,7 +24,7 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
     const roots = [grant.root, grant.source, grant.output];
     if (new Set(roots).size !== 3 || roots.some(root => typeof root !== "string" || execution.locks.has(root))) fail("ISO_TRANSACTION_PROJECT_BUSY");
     const admittedReceipt = grant.wslReceipt;
-    const lease = Object.freeze({}), state = { jobId: fixed.jobId, grantId: fixed.grantId, grant, roots };
+    const lease = Object.freeze({}), state = { jobId: fixed.jobId, grantId: fixed.grantId, grant, roots, runtime: fixed.runtime, admittedReceipt };
     roots.forEach(root => execution.locks.add(root)); leases.set(lease, state);
     let journal, stage = "admission", binding, completed = false, reserved = false;
     async function current() {
@@ -86,6 +86,13 @@ function createIsoProducerTransactions({ execution, directory, adapters }) {
       if (completed || !reserved) roots.forEach(root => execution.locks.delete(root));
     }
   }
-  return Object.freeze({ run, assertLease });
+  function assertLifecycleLease(lease, context) {
+    const state = assertLease(lease, context.jobId);
+    if (context.execution !== execution || context.grantId !== state.grantId ||
+        context.runtime?.kind !== state.runtime.kind || context.runtime?.distribution !== state.runtime.distribution ||
+        state.grant.wslReceipt !== state.admittedReceipt || !Array.isArray(context.roots) || context.roots.length !== 3 ||
+        state.roots.some((root, index) => root !== context.roots[index] || root !== [state.grant.root, state.grant.source, state.grant.output][index])) fail("ISO_TRANSACTION_LEASE_REQUIRED");
+  }
+  return Object.freeze({ run, assertLease, assertLifecycleLease });
 }
 module.exports = { createIsoProducerTransactions };

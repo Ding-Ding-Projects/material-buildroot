@@ -11,7 +11,7 @@ function fixture(mode={}){
  const processRun=(file,args,options)=>{
   calls.push({file,args,options});
   if(!args.includes("setsid")){stopped=true;return{completion:Promise.resolve({state:"succeeded",code:0})};}
-  const completion=new Promise(resolve=>finish=resolve);
+  stopped=false;const completion=new Promise(resolve=>finish=resolve);
   const job={completion,cancel(){Promise.resolve().then(options.onTerminate).then(()=>finish({state:"cancelled",code:null}),()=>finish({state:"runtime-cleanup-failed",code:null}));},writeInput(input){
    const parsed=JSON.parse(input);writes.push(parsed);if(mode.abort){mode.abort.abort();return true;}if(mode.timeout){Promise.resolve().then(options.onTerminate).then(()=>finish({state:"timed-out",code:null}));return true;}
    if(mode.revokeAfterInput)execution.grants.delete("grant");stopped=true;
@@ -22,9 +22,10 @@ function fixture(mode={}){
  };
  const file=require.resolve("../src/main/execution/wsl-iso-output-lifecycle.cjs"),loaded={exports:{}};
  vm.runInThisContext(require("node:module").wrap(fs.readFileSync(file,"utf8")),{filename:file})(loaded.exports,name=>name==="./wsl-project.cjs"?{isWslReceipt:value=>value===receipt,verifyWslProject:async value=>{assert.equal(value,receipt);calls.push({verify:true});}}:require(name),loaded,file,path.dirname(file));
- const lifecycle=loaded.exports.createWslIsoOutputLifecycle({execution,run:processRun,checkpoint:async(callback,owner)=>callback(owner),signalScript:"fixed-existing-signal"});
+ const transportOptions={execution,run:processRun,checkpoint:async(callback,owner)=>callback(owner),signalScript:"fixed-existing-signal"};
+ const lifecycle=loaded.exports.createWslIsoOutputLifecycle(transportOptions);
  const request={grantId:"grant",runtime:{kind:"wsl",distribution:"Fixture"},operation:"prepare",jobId:JOB};
- return{lifecycle,request,execution,calls,writes,receipt,options:{onOwnership:async(owner,stage)=>{calls.push({checkpoint:owner,stage});if(mode.revokeAtCheckpoint)execution.grants.delete("grant");},...(mode.abort?{signal:mode.abort.signal}:{})}};
+ return{lifecycle,request,execution,calls,writes,receipt,leased:transactions=>loaded.exports.createLeasedWslIsoOutputLifecycle(transportOptions,transactions),options:{onOwnership:async(owner,stage)=>{calls.push({checkpoint:owner,stage});if(mode.revokeAtCheckpoint)execution.grants.delete("grant");},...(mode.abort?{signal:mode.abort.signal}:{})}};
 }
 test("real transport rejects forged receipt, unsupported runtime and renderer-shaped extras without native access",async()=>{
  const real=new ExecutionService();real.grants.set("forged",{wslReceipt:{}});
@@ -63,3 +64,48 @@ test("capture preserves unbound flags and rejects optimistic or private response
  const f=fixture(),request={...f.request,operation:"capture",preparationSha256:HASH};const result=await f.lifecycle(request,f.options);assert.equal(result.state,"succeeded");assert.equal(result.observation.producerVerified,false);assert.equal(result.observation.cleanupVerified,false);
  for(const changeResponse of [value=>value.jobBound=true,value=>value.privatePath="/private",value=>value.output.sha256=[HASH]]){const invalid=fixture({changeResponse});const reply=await invalid.lifecycle({...invalid.request,operation:"capture",preparationSha256:HASH},invalid.options);assert.equal(reply.state,"failed");assert.equal(reply.observation,null);}
 });
+
+function transactionFixture(t,mode={}){
+ const os=require("node:os"),{createIsoProducerTransactions}=require("../src/main/execution/iso-producer-transaction.cjs"),{createIsoOutputPolicy}=require("../src/main/jobs/iso-output-policy.cjs");
+ const f=fixture(mode),directory=fs.mkdtempSync(path.join(os.tmpdir(),"iso-leased-"));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+ let bridge,transactions;const stages=[];
+ async function call(operation,input,options){
+  const request={...f.request,operation,...(operation==="capture"?{preparationSha256:input.preparationSha256}:{})};
+  stages.push(operation);
+  if(operation==="prepare"&&mode.checkBoundaries){
+   const context={execution:f.execution,jobId:JOB,grantId:"grant",runtime:f.request.runtime,roots:["root","source","output"]};
+   transactions.assertLifecycleLease(input.lease,context);
+   for(const changed of [{execution:{}},{grantId:"other"},{runtime:{kind:"wsl",distribution:"Other"}},{roots:["root","source","other"]}])assert.throws(()=>transactions.assertLifecycleLease(input.lease,{...context,...changed}),{code:"ISO_TRANSACTION_LEASE_REQUIRED"});
+   await assert.rejects(bridge(request,{...options,lease:{}}),{code:"ISO_TRANSACTION_LEASE_REQUIRED"});
+   await assert.rejects(bridge({...request,jobId:"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"},{...options,lease:input.lease}),{code:"ISO_TRANSACTION_LEASE_REQUIRED"});
+   await assert.rejects(f.lifecycle(request,f.options),{code:"ISO_LIFECYCLE_PROJECT_BUSY"});
+   await assert.rejects(f.lifecycle(request,{...f.options,lease:input.lease}),{code:"ISO_LIFECYCLE_AUTHORITY_REQUIRED"});
+  }
+  const result=await bridge(request,{...options,lease:input.lease,onOwnership:async(owner,stage)=>{await f.options.onOwnership(owner,stage);await options.onOwnership(owner);}});
+  assert.equal(f.execution.locks.size,3);return result;
+ }
+ transactions=createIsoProducerTransactions({execution:f.execution,directory,adapters:{
+  current:async()=>({sourceSha256:HASH,configurationSha256:HASH,projectProofSha256:HASH}),validateOwner:validateOwnershipReceipt,
+  inspectCleanup:async()=>({state:"verified-stopped"}),
+  prepare:(input,options)=>call("prepare",input,options),capture:(input,options)=>call("capture",input,options),
+  produce:async(input,options)=>{
+   assert.equal(f.execution.locks.size,3);stages.push("produce");
+   await assert.rejects(f.lifecycle(f.request,f.options),{code:"ISO_LIFECYCLE_PROJECT_BUSY"});
+   await options.onOwnership({version:1,kind:"wsl",ownerToken:"cccccccc-cccc-4ccc-8ccc-cccccccccccc",distribution:"Fixture",bootId:BOOT,pidNamespace:"pid:[123]",pid:1234,startTime:"98765"});
+   return{state:"succeeded",code:0};
+  }
+ }});bridge=f.leased(transactions);
+ return{...f,transactions,stages,transactionRequest:{grantId:"grant",jobId:JOB,runtime:f.request.runtime,policy:createIsoOutputPolicy({revision:HASH,profile:"x86_64-bios-grub2-initrd"})}};
+}
+test("internal lifecycle bridge borrows transaction locks across prepare and capture",async t=>{
+ const f=transactionFixture(t,{checkBoundaries:true});const result=await f.transactions.run(f.transactionRequest);
+ assert.equal(result.receipt.jobBound,true);assert.equal(result.receipt.bootVerified,false);assert.deepEqual(f.stages,["prepare","produce","capture"]);assert.equal(f.execution.locks.size,0);assert.equal(f.writes.length,2);
+});
+for(const mode of [{revokeAtCheckpoint:true},{unknownCleanup:true},{abort:new AbortController()}]){
+ test(`borrowed locks survive lifecycle ${Object.keys(mode)[0]}`,async t=>{
+  const f=transactionFixture(t,mode);
+  await assert.rejects(f.transactions.run(f.transactionRequest,{...(mode.abort?{signal:mode.abort.signal}:{})}));
+  assert.equal(f.execution.locks.size,3);assert.deepEqual(f.stages,["prepare"]);
+  if(mode.revokeAtCheckpoint)assert.equal(f.writes.length,0);
+ });
+}
