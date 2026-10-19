@@ -52,6 +52,28 @@ function Expand-FlashingInput([object]$Spec, [string]$ToolsRoot) {
     return $destination
 }
 
+# Producer files share the final output volume; verified tool caches stay separate.
+function New-FlashingProducerDirectory([string]$OutputDirectory) {
+    $output = [IO.Path]::GetFullPath($OutputDirectory)
+    Assert-NoReparse $output
+    if (Test-Path -LiteralPath $output) { throw 'Flashing output must be a new directory; existing output is preserved.' }
+    $parent = [IO.Path]::GetDirectoryName($output)
+    if (!$parent) { throw 'Flashing output requires a parent directory.' }
+    Assert-NoReparse $parent
+    [IO.Directory]::CreateDirectory($parent) | Out-Null
+    Assert-NoReparse $parent
+    Assert-NoReparse $output
+    if (Test-Path -LiteralPath $output) { throw 'Flashing output appeared during producer setup; existing output is preserved.' }
+    $work = Join-Path $parent ('.flashing-producer-' + [guid]::NewGuid().ToString('N'))
+    Assert-NoReparse $work
+    if (Test-Path -LiteralPath $work) { throw 'Flashing producer directory already exists; existing files are preserved.' }
+    [IO.Directory]::CreateDirectory($work) | Out-Null
+    Assert-NoReparse $work
+    Assert-NoReparse $output
+    if (Test-Path -LiteralPath $output) { throw 'Flashing output appeared during producer setup; producer and output are retained.' }
+    return $work
+}
+
 function Invoke-FlashingBuild {
     [CmdletBinding()]
     param(
@@ -78,8 +100,7 @@ function Invoke-FlashingBuild {
         if ($inputs.schemaVersion -ne 1) { throw 'Unsupported flashing build input version.' }
         $sdk = Expand-FlashingInput $inputs.sdk $tools
         $runtime = Expand-FlashingInput $inputs.runtime $tools
-        $work = Join-Path $tools ('flashing-producer-' + [guid]::NewGuid().ToString('N'))
-        [IO.Directory]::CreateDirectory($work) | Out-Null
+        $work = New-FlashingProducerDirectory $output
         foreach ($name in @('Program.cs','app.manifest','MaterialBuildroot.Flash.csproj')) {
             Copy-Item -LiteralPath (Join-Path $root ('native/flashing/' + $name)) -Destination (Join-Path $work $name)
         }
@@ -102,8 +123,11 @@ function Invoke-FlashingBuild {
         foreach ($name in @('Program.cs','app.manifest','MaterialBuildroot.Flash.csproj','build-inputs.json')) { $sources[$name] = Get-Sha256 (Join-Path $root ('native/flashing/' + $name)) }
         $manifest = @{protocol=1;sha256=(Get-Sha256 $executable);sdkVersion=$inputs.sdk.version;runtimeVersion=$inputs.runtime.version;runtimeIdentifier='win-x64';selfContained=$true;unsigned=$true;debugType='None';debugSymbols=$false;sourceHashes=$sources;buildInputsSha256=(Get-Sha256 $inputsPath);runtimeAcceptance='unverified'}
         Write-AtomicJson (Join-Path $publish 'manifest.json') $manifest
-        [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($output)) | Out-Null
+        Assert-NoReparse $publish
+        Assert-NoReparse $output
+        if (Test-Path -LiteralPath $output) { throw 'Flashing output appeared during compilation; producer and output are retained.' }
         [IO.Directory]::Move($publish, $output)
+        Assert-NoReparse $output
         return [pscustomobject]@{Directory=$output;Executable=(Join-Path $output 'MaterialBuildroot.Flash.exe');Manifest=(Join-Path $output 'manifest.json');Sha256=$manifest.sha256;RuntimeAcceptance='unverified'}
     } finally { $lock.Dispose() }
 }
