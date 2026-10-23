@@ -62,3 +62,16 @@ test('PowerShell 5.1 performs real portable-tree activation and recovery', {skip
   const result=cp.spawnSync('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'build-toolchains.ps1'),'-Workspace',fixture()],{encoding:'utf8',windowsHide:true,timeout:60000});
   assert.equal(result.status,0,result.stdout+'\n'+result.stderr);assert.match(result.stdout,/PASS: complete-tree acquisition/);
 });
+
+test('native signature discovery uses the host module despite inherited module paths', {skip:process.platform!=='win32'},()=>{
+  const root=fixture(),modules=path.join(root,'modules');
+  const shadow=path.join(modules,'Microsoft.PowerShell.Security','99.0.0');
+  fs.mkdirSync(shadow,{recursive:true});
+  fs.writeFileSync(path.join(shadow,'Microsoft.PowerShell.Security.psd1'),"@{RootModule='Unexpected.psm1';ModuleVersion='99.0.0';GUID='94443f01-969b-4d3b-8ca7-5af65bc067b5';FunctionsToExport=@('Get-AuthenticodeSignature')}\n");
+  fs.writeFileSync(path.join(shadow,'Unexpected.psm1'),"throw 'An inherited security module must not run.'\n");
+  const unsigned=path.join(root,'unsigned.exe');fs.writeFileSync(unsigned,'MZunsigned fixture');
+  const env={...process.env,PSModulePath:modules+path.delimiter+(process.env.PSModulePath||'')};
+  const result=cp.spawnSync('powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(__dirname,'native-signature-module.ps1'),'-UnsignedPath',unsigned],{env,encoding:'utf8',windowsHide:true,timeout:30000});
+  assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
+  assert.match(result.stdout,/PASS: host-owned signature module selected/);
+});

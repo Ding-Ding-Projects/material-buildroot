@@ -1,5 +1,7 @@
 # Installer documentation path recovery
 
+Desktop production passed at 88341b289ed41169240b88797665ad380880e7d2, receipt 5a008e951ddce1b9e694b128d9d50db5ef1c000607cbf1a4e2e1a10d474e5641. Two installer attempts stopped before packaging at incompatible inherited PowerShell security-module loading. The host-bound module correction passed seven native build cases, including a higher-version throwing module, actual signed executable verification, exact process-local path restoration and unsigned-file rejection. The installer must be retried from the corrected committed source; no signature or host setting was weakened.
+
 The owner additionally requested the preserved standalone OS contribution. Its reviewed current-tree changes are integrated locally without private historical ancestry or private operational handoff records. Five original snapshot branches remain preserved; the unfinished console-web snapshot remains outside this selected contribution. Both README and roadmap conflicts were combined, preserving the native temporary-path repair.
 
 Integrated source verification: strict TypeScript passed; 35 Node service cases passed; Python cases recorded 46 passes and one POSIX-only skip; all 16 standalone renderer cases passed. Combined packaging/documentation checks recorded 29 passes and three file-link skips, admitting 406 documents, 55 assets and 46 source references. Historical screenshot pixels and hashes were checked, but original promotion receipts were unavailable and all imported rows remain historical.

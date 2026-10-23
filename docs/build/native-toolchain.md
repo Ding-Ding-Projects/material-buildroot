@@ -26,3 +26,8 @@ Exit zero is followed by installed-tool discovery. Cancellations, other nonzero 
 - [Hosted Windows 2025 image inventory](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md)
 
 These references and the bootstrapper bytes were read during preparation. They describe supported routes, not proof that a particular host is ready.
+# Host-bound signature module loading
+
+When the batch entrypoint is launched from a newer PowerShell host, its child Windows PowerShell process can inherit an incompatible higher-version `Microsoft.PowerShell.Security` module. Native signature checks must load the module belonging to their own `$PSHOME`, including its nested module lookup. The verifier temporarily selects that host's module directory only while importing it, then restores the caller's exact process-local `PSModulePath` in `finally`. It changes no persistent host setting and retains the actual Microsoft signature and certificate checks.
+
+The focused native regression supplies a higher-version module that throws if loaded, verifies a real signed Windows executable using the system cmdlet assembly, confirms the inherited path is restored and rejects an unsigned fixture. It failed against the earlier discovery behavior and passes after the correction.

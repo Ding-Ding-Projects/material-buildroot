@@ -1,5 +1,7 @@
 # Installer documentation path recovery, 2026-10-22
 
+Exact desktop production passed at `88341b289ed41169240b88797665ad380880e7d2`, receipt SHA-256 `5a008e951ddce1b9e694b128d9d50db5ef1c000607cbf1a4e2e1a10d474e5641`. Two local installer attempts stopped before packaging because an inherited newer PowerShell security module could not load in Windows PowerShell. A causal native regression reproduced the incompatible module selection. The verifier now imports its own host's module with narrowly scoped process-local lookup and restores the caller path; all seven focused build cases pass, including real signature verification and unsigned-file rejection. No host security setting changed. Installer production remains pending a new exact-source attempt.
+
 ## Additional requested standalone-source integration
 
 The owner additionally requested integration of the preserved standalone OS contribution. Its reviewed current-tree delta is being reconstructed on the fetched public baseline without importing private historical ancestry or private operational handoff files. All five original snapshot branches remain preserved, and the unfinished console-web snapshot is outside the selected source. README and roadmap conflicts were combined semantically; the native staging repair remains intact.

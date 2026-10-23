@@ -16,6 +16,12 @@ function Get-NativeToolchainPlan {
 }
 
 function Assert-MicrosoftExecutable([string]$Path) {
+    # Nested module lookup must use this host too; restore the caller's exact path afterward.
+    $originalModulePath = $env:PSModulePath
+    try {
+        $env:PSModulePath = Join-Path $PSHOME 'Modules'
+        Import-Module (Join-Path $PSHOME 'Modules/Microsoft.PowerShell.Security/Microsoft.PowerShell.Security.psd1') -ErrorAction Stop
+    } finally { $env:PSModulePath = $originalModulePath }
     $signature = Get-AuthenticodeSignature -LiteralPath $Path
     if ($signature.Status -ne 'Valid' -or !$signature.SignerCertificate -or
         $signature.SignerCertificate.Subject -notmatch '(^|,\s*)O=Microsoft Corporation(,|$)') {

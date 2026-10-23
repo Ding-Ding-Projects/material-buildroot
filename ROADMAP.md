@@ -2,6 +2,8 @@
 
 ## Installer documentation path recovery, 2026-10-22
 
+- [x] Repair inherited PowerShell security-module selection without weakening signature verification; all seven focused build cases pass, including unsigned-input rejection.
+
 - [x] Reconstruct the additional reviewed standalone OS source contribution without importing private historical ancestry; retain its five original snapshot branches.
 - [x] Verify integrated source seams: strict TypeScript, 35 Node cases, 46 Python passes with one POSIX-only skip, and 16 standalone renderer cases.
 
