@@ -23,3 +23,7 @@ For actual browser verification, serve `docs/` under `/material-buildroot/`, ins
 The root documentation build validates generated internal routes and fragment destinations, document inventory, roadmap identity uniqueness, completion/evidence links and source metadata. Browser interaction and visual inspection are separate evidence. Rebuild after changing an included document so the website cannot retain an old checklist.
 
 The GitHub wiki service has no accessible initialized repository at the time of initial authoring. `docs/wiki/` contains the canonical starter wiki content and is rendered in this website. Synchronization with GitHub's separate wiki service remains pending.
+
+## Shared search corpus
+
+The complete document and phase search corpus is generated once as the local data-only `site/assets/document-search-index.js` module. Every page preloads that same module and the bundled interface imports it. Full article bodies, category navigation, keyboard search and offline caching remain available. This removes a megabyte-scale repeated payload from every article without shortening the searchable content. The output checker requires the exact module, complete unique route inventory and a module reference on every page; it rejects inline corpus duplication.

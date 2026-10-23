@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "maximumInstallerBytes": 1400000000,
+  "maximumInstallerBytes": 1450000000,
   "materialComponents": {
     "package": "@material/web",
     "upstream": "https://github.com/material-components/material-web",

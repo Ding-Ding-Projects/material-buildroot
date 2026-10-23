@@ -24,6 +24,14 @@ for(const source of assets) {
  if(!original.equals(copied)) failures.push(`${source}: local asset differs from source.`);
 }
 const roadmap=JSON.parse(await fs.readFile(path.join(docs,'site/roadmap.json'),'utf8'));
+try {
+ const moduleText=await fs.readFile(containedPath(docs,'site/assets/document-search-index.js'),'utf8');
+ const match=moduleText.match(/^export default ([\s\S]+);\n$/);
+ if(!match) throw new Error('Search index must be a generated data-only module.');
+ const entries=JSON.parse(match[1]);
+ const expectedUrls=[...inventory.map(item=>item.url),...roadmap.phases.map(item=>base+'site/phases/'+item.id.toLowerCase()+'.html')].sort();
+ if(!Array.isArray(entries)||entries.some(item=>!item||Object.keys(item).sort().join(',')!=='category,text,title,url'||['category','text','title','url'].some(key=>typeof item[key]!=='string'))||JSON.stringify(entries.map(item=>item.url).sort())!==JSON.stringify(expectedUrls))throw new Error('Search index omits, duplicates or changes document routes.');
+} catch(error) { failures.push(error.message); }
 if(sourceSnapshot(root,meta.source_inputs,sourceIndex)!==meta.input_snapshot_sha256)failures.push('Website source snapshot is stale; rebuild after documentation changes.');
 if(!/^[a-f0-9]{40}$/.test(meta.base_commit)||!Number.isFinite(Date.parse(meta.built_at)))failures.push('Invalid build provenance.');
 const tasks=roadmap.phases.flatMap(p=>p.tasks);
@@ -40,6 +48,7 @@ for(const doc of inventory) {
 }
 let checkedLinks=0;
 for(const [file,html] of htmlByFile){
+  if(!html.includes(`id="document-index" rel="modulepreload" href="${base}site/assets/document-search-index.js"`)||html.includes('type="application/json" id="document-index"'))failures.push(`${file}: shared search-index module is missing or the corpus is duplicated inline.`);
   if (/<(?:button|select|input|details|summary)\b/i.test(html)) failures.push(`${file}: native interactive control substitutes are not allowed; use the admitted Material component.`);
   for(const match of html.matchAll(/\b(?:href|src)="([^"]+)"/g)){
     const link=match[1].replace(/&amp;/g,'&');

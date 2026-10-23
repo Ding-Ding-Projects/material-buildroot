@@ -2,7 +2,7 @@
 
 A Material Design 3 desktop workspace for configuring and building embedded Linux systems through WSL 2 or Docker.
 
-Installer recovery now resolves temporary staging through native physical paths, preserving strict offline-documentation admission. The real short-path regression and focused build/documentation checks pass locally, with three file-symbolic-link cases explicitly unverified. Exact installer production and its replacement workflow verdict remain pending; see [packaging recovery](docs/build/squirrel-packaging.md#physical-temporary-paths-and-offline-documentation).
+Installer recovery now resolves temporary staging through native physical paths and selects compatible PowerShell host modules, preserving strict documentation and signature checks. The latest production reached final package admission, exposing an obsolete duplicate size budget. Admission now shares the existing 1,450,000,000-byte transfer ceiling and rejects policy drift; 14 focused build and packaging cases pass. Exact corrected-source installer production and its replacement workflow verdict remain pending; see [packaging recovery](docs/build/squirrel-packaging.md#physical-temporary-paths-and-offline-documentation).
 
 ## Standalone OS creation in the running desktop
 

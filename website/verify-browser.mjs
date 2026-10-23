@@ -370,7 +370,7 @@ try{
  }
  receipt.checks.push('Short overview links to roadmap categories, filtered phase summaries and separate phase checklists with working previous/next navigation.');
  await page.locator('#doc-search').locator('input').fill('build');
- const searchTotal=await page.evaluate(()=>JSON.parse(document.querySelector('#document-index').textContent).filter(d=>(d.title+' '+d.text).toLowerCase().includes('build')).length);
+ const searchTotal=await page.evaluate(async()=>{const {default:entries}=await import(document.querySelector('#document-index').href);return entries.filter(d=>(d.title+' '+d.text).toLowerCase().includes('build')).length;});
  assert.equal(await page.locator('#search-results md-list-item').count(),Math.min(12,searchTotal));
  assert.ok((await page.locator('.search-count').innerText()).startsWith(searchTotal+' matching '));
  if(searchTotal>12)assert.match(await page.locator('.search-count').innerText(),/showing the first 12/);

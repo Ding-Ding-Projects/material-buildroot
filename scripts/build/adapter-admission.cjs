@@ -2,6 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {INSTALLER_TRANSFER_LIMIT} = require('./squirrel-finalize.cjs');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
 // This inventory records source admission, never runtime or legal acceptance.
@@ -35,6 +36,8 @@ function loadAdapterAdmission(root) {
       offline:{mode:'verified-cache-or-network', bundledWithProduct:entry.id === 'electron', completePayload:'unverified'}});
   }
   const policy = read('scripts/build/adapter-admission.json');
+  if (policy.maximumInstallerBytes !== INSTALLER_TRANSFER_LIMIT)
+    throw new Error('Installer admission policy differs from the transfer ceiling.');
   const icons = read('src/renderer/assets/material-icons/provenance.json');
   records.push({id:'material-icons', kind:'bundled-assets', version:icons.revision,
     provenance:{source:'src/renderer/assets/material-icons/provenance.json', url:icons.upstream},

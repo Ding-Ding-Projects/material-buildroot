@@ -1,4 +1,5 @@
 import { mountCompanionConsumers } from './companion-consumers.js';
+import documents from './document-search-index.js';
 import { mountBeginnerGuide } from './beginner-guide.js';
 import {createPairingIdentity, pairingHeaders} from './pairing-client.js';
 import {mountBrowserNative} from './browser-native.js';
@@ -237,7 +238,6 @@ document.querySelectorAll('.sidebar a, .sidebar md-list-item').forEach(a => a.ad
 
 const search = document.querySelector('#doc-search');
 const results = document.querySelector('#search-results');
-const documents = JSON.parse(document.querySelector('#document-index')?.textContent || '[]');
 const searchWrap = search?.closest('.search-wrap');
 const closeSearch = () => { if (results) results.hidden = true; };
 const showSearch = () => {

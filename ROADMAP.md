@@ -2,6 +2,8 @@
 
 ## Installer documentation path recovery, 2026-10-22
 
+- [x] Reconcile adapter admission with the established 1,450,000,000-byte transfer ceiling, reject policy drift and pass 14 focused build/packaging cases after the actual package exposed the old duplicate budget.
+- [ ] Verify regenerated documentation and shared search-module loading, publication wording, current routes and live deployment.
 - [x] Verify both actual batch entrypoints initialize compatible child PowerShell modules, forward arguments and propagate nonzero child exit status; all eight focused build cases pass after a causal failure.
 - [x] Repair inherited PowerShell security-module selection without weakening signature verification; all seven focused build cases pass, including unsigned-input rejection.
 

@@ -122,7 +122,7 @@ Completed raster最多4MiB可按stored bytes編Base64/hex，係可逆byte encodi
 
 ## 內置PDF同ZIP
 
-Manifest精確 `pdf-lib`1.17.1、`fflate`0.8.2加npm integrity，MIT同PDF transitive licences入offline inventory，無CDN/runtime acquisition。Dedicated same-origin worker30秒，input/page/member/output bounds；deadline唔係hard browser heap limit，唔claim native isolation/rendered acceptance。
+Manifest精確 `pdf-lib`1.17.1、`fflate`0.8.2加npm integrity，MIT同PDF transitive licences入offline inventory，無CDN/runtime acquisition。Dedicated same-origin worker30秒，input/page/member/output bounds；deadline唔係hard browser memory limit，唔claim native isolation/rendered acceptance。
 
 PDF提供inspect/extract/reorder/rotate/merge/selected-page split成ZIP/standard title-metadata。最多十inputs總20MiB、2,000pages，split最多100selected。其他writes用first PDF同exact order，merge用全部shown order。Output reopen按序比page count/geometry/rotation/content-stream hashes，唔證font/resource/visual等價。Copied pages可能失outlines/attachments/forms/signatures，execute前披露。Recognized signed/encrypted/malformed/unsupported拒絕。Remove standard metadata唔係redaction，唔移除全部page/embedded metadata。
 
