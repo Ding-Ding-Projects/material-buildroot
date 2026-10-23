@@ -2,6 +2,7 @@
 
 ## Installer documentation path recovery, 2026-10-22
 
+- [x] Verify both actual batch entrypoints initialize compatible child PowerShell modules, forward arguments and propagate nonzero child exit status; all eight focused build cases pass after a causal failure.
 - [x] Repair inherited PowerShell security-module selection without weakening signature verification; all seven focused build cases pass, including unsigned-input rejection.
 
 - [x] Reconstruct the additional reviewed standalone OS source contribution without importing private historical ancestry; retain its five original snapshot branches.

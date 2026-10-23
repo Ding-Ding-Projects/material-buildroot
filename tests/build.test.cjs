@@ -75,3 +75,31 @@ test('native signature discovery uses the host module despite inherited module p
   assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
   assert.match(result.stdout,/PASS: host-owned signature module selected/);
 });
+
+test('batch entrypoints use their PowerShell host modules and propagate arguments and exit status', {skip:process.platform!=='win32'},()=>{
+  const root=fixture(),modules=path.join(root,'modules');
+  const shadow=path.join(modules,'Microsoft.PowerShell.Utility','99.0.0');
+  fs.mkdirSync(shadow,{recursive:true});
+  fs.writeFileSync(path.join(shadow,'Microsoft.PowerShell.Utility.psd1'),"@{RootModule='Unexpected.psm1';ModuleVersion='99.0.0';GUID='36be7c53-a927-40ad-9dba-d8191599bcd5';FunctionsToExport=@('Get-FileHash')}\n");
+  fs.writeFileSync(path.join(shadow,'Unexpected.psm1'),"throw 'An inherited utility module must not run.'\n");
+  const entrypoint=path.join(root,'scripts','build');fs.mkdirSync(entrypoint,{recursive:true});
+  const input=Buffer.from('batch host module fixture');fs.writeFileSync(path.join(root,'input.bin'),input);
+  const digest=crypto.createHash('sha256').update(input).digest('hex');
+  fs.writeFileSync(path.join(entrypoint,'entrypoint.ps1'),[
+    'param([Parameter(ValueFromRemainingArguments=$true)][string[]]$BuildArguments=@())',
+    "$ErrorActionPreference='Stop'",
+    "$hash=Get-FileHash -LiteralPath (Join-Path $PSScriptRoot '../../input.bin') -Algorithm SHA256",
+    `if ($hash.Hash -ine '${digest}') { throw 'The fixture input hash changed.' }`,
+    "Write-Output ('PASS: batch host modules; arguments=' + ($BuildArguments -join '|'))",
+    'exit 13',''
+  ].join('\n'));
+  const original=process.env.PSModulePath;
+  const env={...process.env,PSModulePath:modules+path.delimiter+(original||'')};
+  for(const name of ['build.bat','build-installer.bat']){
+    const batch=path.join(root,name);fs.copyFileSync(path.join(__dirname,'..',name),batch);
+    const result=cp.spawnSync(process.env.ComSpec||'cmd.exe',['/d','/s','/c',`""${batch}" /s"`],{env,encoding:'utf8',windowsHide:true,windowsVerbatimArguments:true,timeout:30000});
+    assert.equal(result.status,13,result.stdout+'\n'+result.stderr);
+    assert.ok(result.stdout.includes('PASS: batch host modules; arguments='+(name==='build-installer.bat'?'--installer|':'')+'/s'),result.stdout);
+  }
+  assert.equal(process.env.PSModulePath,original);
+});

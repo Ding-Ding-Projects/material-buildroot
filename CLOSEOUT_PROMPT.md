@@ -1,5 +1,9 @@
 # Installer documentation path recovery
 
+Repair source 5eb91b7176507aa3769476ba2d9605a03df00dd1 and earlier documentation recovery 1e0de359dada455095ad6ab82d48007f3a5335f8 are preserved on their matching branches in the existing private recovery repository, with exact remote readback. Its main remains 41d55aadf18bdad961578e73734e1765263df9dd and Actions remain disabled. Public-main integration is still pending the complete publication review.
+
+The installer retry at 5eb91b7 reached pinned payload assembly after native signature discovery, then stopped because a nested Windows PowerShell process could not load Get-FileHash. The root batch wrappers now scope inherited module-path initialization to their child host. Verify the causal batch regression and retry exact build-installer.bat /s from an unchanged committed source. Retain all signature, hash and installer admission checks.
+
 Desktop production passed at 88341b289ed41169240b88797665ad380880e7d2, receipt 5a008e951ddce1b9e694b128d9d50db5ef1c000607cbf1a4e2e1a10d474e5641. Two installer attempts stopped before packaging at incompatible inherited PowerShell security-module loading. The host-bound module correction passed seven native build cases, including a higher-version throwing module, actual signed executable verification, exact process-local path restoration and unsigned-file rejection. The installer must be retried from the corrected committed source; no signature or host setting was weakened.
 
 The owner additionally requested the preserved standalone OS contribution. Its reviewed current-tree changes are integrated locally without private historical ancestry or private operational handoff records. Five original snapshot branches remain preserved; the unfinished console-web snapshot remains outside this selected contribution. Both README and roadmap conflicts were combined, preserving the native temporary-path repair.
