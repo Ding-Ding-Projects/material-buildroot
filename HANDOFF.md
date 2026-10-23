@@ -1,4 +1,14 @@
-# Current main-only closeout checkpoint, 2026-10-19
+# Installer documentation path recovery, 2026-10-22
+
+The recovery source starts from public main `dd07fb78454a8e6e9f8fbf629510efe3695f2449`. Earlier local documentation edits are retained in recovery commit `1e0de35` on `ai/integration/20261018-roadmap-combined`; its remote preservation is pending the complete publication scan. The prior integration source was 106 commits behind main with zero unique commits and no unresolved merge conflicts. Existing checkouts and unrelated branches are retained.
+
+Release run `39218941053` failed offline-documentation admission after installer production. Ordinary Windows path resolution retained a short alias; native physical resolution admitted the same existing 548-article bundle. The producer now normalizes its temporary root before staging, while the documentation reader and all existing identity, containment, manifest and hash checks remain unchanged. A bounded diagnostic retains the rejection code without document content or machine paths.
+
+The new real short-path regression failed with `INVALID_BUNDLE` against the previous producer behavior and passes after the correction, including the native long-root path. Focused build/documentation verification completed 32 cases: 29 passed, zero failed and three file-symbolic-link cases skipped for unavailable native privilege. The broader current-source documentation fixture admitted 401 documents, 51 assets and 45 source references with zero unresolved issues. These are local service and packaging-boundary checks, not installed-update evidence.
+
+Exact root desktop/installer production, the new remote workflow and any resulting release/update remain pending. Project access lacks `read:project`; no scope change is requested. Discussion 2 and issue 1 retain progress. The broader issue stays open. The earlier records below remain historical and do not describe the current checkout inventory or account allowance.
+
+# Previous main-only closeout checkpoint, 2026-10-19
 
 ## Final integration and publication record
 

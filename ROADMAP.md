@@ -1,5 +1,13 @@
 # Phased implementation roadmap
 
+## Installer documentation path recovery, 2026-10-22
+
+- [x] Reproduce the genuine short-path alias rejection and retain native physical staging without weakening documentation admission.
+- [x] Verify the focused build/documentation cases: 29 passed, zero failed and three explicit file-symbolic-link skips.
+- [ ] Complete exact-source desktop and installer production through the root entrypoints.
+- [ ] Verify the repaired source on remote main and a successful replacement release workflow.
+- [ ] Verify any resulting normal release and matching accepted installed update separately.
+
 ## Main-only integration closeout, 2026-10-19
 
 - [x] Reconcile all 77 actual non-main remote tips through six semantic ancestry merges, retaining guided workflows and leased ISO ownership.

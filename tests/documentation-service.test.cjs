@@ -108,6 +108,44 @@ test("packaged Help selects physical extraResources and verifies every copied by
   assert.ok(!packaging.files.some(pattern => pattern.startsWith('!') && pattern.includes('assets')));
 });
 
+test("installer staging resolves real Windows short paths before packaged Help admission", { skip: process.platform !== "win32" }, async (t) => {
+  const fixtureData = await fixture(t);
+  await fixtureData.build();
+  const shortRoot = execFileSync("cmd.exe", ["/d", "/c", `for %I in ("${fixtureData.root}") do @echo %~sI`], {
+    encoding: "utf8", windowsHide: true, windowsVerbatimArguments: true, timeout: 5000,
+  }).trim();
+  if (fs.realpathSync(shortRoot) === fs.realpathSync.native(shortRoot)) {
+    t.skip("This volume exposes no distinct real short-path alias; native alias acceptance remains unverified.");
+    return;
+  }
+  const { createInstallerStaging, verifyDocumentationResources, inventory } = require("../scripts/build/driver.cjs");
+  for (const temporary of [shortRoot, fs.realpathSync.native(shortRoot)]) {
+    const staging = createInstallerStaging(temporary);
+    t.after(() => fs.rmSync(staging, { recursive: true, force: true }));
+    const output = path.join(staging, "output");
+    fs.cpSync(fixtureData.output, path.join(output, "win-unpacked/resources/documentation"), { recursive: true });
+    assert.deepEqual(verifyDocumentationResources(fixtureData.output, output), inventory(fixtureData.output));
+    assert.equal(staging, fs.realpathSync.native(staging));
+    assert.equal(path.dirname(staging), fs.realpathSync.native(fixtureData.root));
+  }
+});
+
+test("packaged Help admission retains a bounded rejection code without content or paths", async (t) => {
+  const fixtureData = await fixture(t);
+  await fixtureData.build();
+  const manifestPath = path.join(fixtureData.output, "index.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.format = "invalid-format-with-untrusted-detail";
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  const output = path.join(fixtureData.root, "packaged");
+  fs.cpSync(fixtureData.output, path.join(output, "win-unpacked/resources/documentation"), { recursive: true });
+  const { verifyDocumentationResources } = require("../scripts/build/driver.cjs");
+  assert.throws(() => verifyDocumentationResources(fixtureData.output, output), {
+    code: "INVALID_BUNDLE",
+    message: "Packaged offline documentation admission failed (INVALID_BUNDLE).",
+  });
+});
+
 test("real generated indexed articles render tables, code, admitted navigation and hashed images", async (t) => {
   const fixtureData = await fixture(t);
   const built = await fixtureData.build();

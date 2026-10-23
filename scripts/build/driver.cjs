@@ -74,12 +74,24 @@ function nonempty(directory, relative) {
   return full;
 }
 
+function createInstallerStaging(temporary = os.tmpdir()) {
+  const physicalRoot = fs.realpathSync.native(temporary);
+  const staging = fs.mkdtempSync(path.join(physicalRoot, 'mbr-'));
+  contained(physicalRoot, path.basename(staging));
+  return staging;
+}
+
 function verifyDocumentationResources(source, output) {
   const destination = contained(output, 'win-unpacked/resources/documentation');
   const expected = inventory(source);
   if (JSON.stringify(inventory(destination)) !== JSON.stringify(expected)) throw new Error('Packaged documentation differs from the generated bundle.');
   // Validate physical descriptor identity as well as the complete manifest and hashes.
-  require('../../src/main/documentation/service.cjs').createDocumentationService({directory:destination}).list();
+  try {
+    require('../../src/main/documentation/service.cjs').createDocumentationService({directory:destination}).list();
+  } catch (error) {
+    const code = ['INVALID_BUNDLE', 'INVALID_REQUEST', 'NOT_FOUND', 'ENOENT', 'EACCES', 'EPERM'].includes(error?.code) ? error.code : 'VALIDATION_FAILED';
+    throw Object.assign(new Error(`Packaged offline documentation admission failed (${code}).`), {code});
+  }
   return expected;
 }
 
@@ -198,10 +210,8 @@ async function main() {
   const generation = crypto.randomUUID();
   let staging;
   if(installer) {
-    const temporary=fs.realpathSync(os.tmpdir());
     // Genuine NuGet uses legacy path limits. Keep its owned producer tree short.
-    staging=fs.mkdtempSync(path.join(temporary,'mbr-'));
-    contained(temporary,path.basename(staging));
+    staging=createInstallerStaging();
     fs.writeFileSync(path.join(staging,'producer-owner.json'),JSON.stringify({schemaVersion:1,source:before.commit,root,createdAt:new Date().toISOString(),purpose:'Squirrel installer production'}));
     fs.writeFileSync(contained(root,'.cache/installer-producer.json'),JSON.stringify({schemaVersion:1,source:before.commit,generation,staging}));
     console.log('Installer staging uses an exclusive short temporary directory with a retained ownership receipt.');
@@ -403,5 +413,5 @@ async function main() {
   }
 }
 
-module.exports = {contained,sourceIdentity,assertIdentity,inventory,nonempty,verifyDocumentationResources,verifyInstaller,verifiedOutput,outputJournal,recoverOutput,activateOutput};
+module.exports = {contained,sourceIdentity,assertIdentity,inventory,nonempty,createInstallerStaging,verifyDocumentationResources,verifyInstaller,verifiedOutput,outputJournal,recoverOutput,activateOutput};
 if (require.main === module) main().catch(error => {console.error(`Build stopped: ${error.message}`);process.exitCode=error.exitCode || 1;});

@@ -18,6 +18,14 @@ Use `--payload-cache <absolute-directory>` to reuse previously acquired immutabl
 
 Installer production uses an exclusively created short directory under the current writable temporary directory because the genuine NuGet packaging tool retains legacy path-length limits. A private ownership receipt records source and ownership there; its path and receipt are excluded from public output. The producer checks the deepest assembled path against its packaging budget before launching NuGet. Failed staging is retained. Activation still verifies the complete source-bound output; a cross-volume activation copies the verified output while retaining the original producer tree. This changes no host path-limit setting and substitutes no packaging tool.
 
+## Physical temporary paths and offline documentation
+
+Installer staging resolves the writable temporary root with `fs.realpathSync.native` before creating its exclusive `mbr-` directory. On Windows, ordinary `fs.realpathSync` can retain an 8.3 alias such as a shortened user-directory name. The documentation reader deliberately requires native physical paths, so an otherwise identical complete bundle can fail with `INVALID_BUNDLE` when the producer supplies that alias. Normalize the host-owned producer root rather than relaxing the reader's file-identity checks.
+
+The producer retains its existing path-length budget, ownership receipt, link checks, complete resource inventory and hashes. A documentation-reader rejection reports a bounded code, for example `Packaged offline documentation admission failed (INVALID_BUNDLE).`, without reflecting document content or machine paths. Missing or altered resources still stop production.
+
+The local regression invokes the actual short-path API through the command interpreter, copies a generated documentation bundle into the real producer staging layout and exercises the production verifier. Both the short alias and native long root must pass after normalization. A volume without a distinct short-path alias records that case as unverified. Native file-link tests separately retain any unavailable symbolic-link privilege; successful packaging does not imply installed-update or whole-product acceptance.
+
 ## Native broker resource
 
 Normal desktop installer production initializes the verified installed MSVC x64 and Windows SDK route through the root entrypoint, then calls `scripts/build/native-file-broker.ps1` inside the same source-bound production. The generated executable and its matching SHA-256 manifest are appended as `resources/native-file-broker/material-file-broker.exe` and `resources/native-file-broker/broker-manifest.json`, alongside the complete offline tool resource. The object file is not packaged. The producer checks the compiled identity again after packaging and records only toolchain versions and hashes, without compiler or machine paths.

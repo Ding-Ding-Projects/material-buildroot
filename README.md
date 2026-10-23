@@ -2,6 +2,8 @@
 
 A Material Design 3 desktop workspace for configuring and building embedded Linux systems through WSL 2 or Docker.
 
+Installer recovery now resolves temporary staging through native physical paths, preserving strict offline-documentation admission. The real short-path regression and focused build/documentation checks pass locally, with three file-symbolic-link cases explicitly unverified. Exact installer production and its replacement workflow verdict remain pending; see [packaging recovery](docs/build/squirrel-packaging.md#physical-temporary-paths-and-offline-documentation).
+
 [Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Historical capture provenance](docs/evidence/ARCHIVE.md) · [Roadmap](ROADMAP.md)
 
 The main-only integration pass reconciles preserved packaging, converter, queue, native file-broker, companion and inactive native-container histories. Strict renderer checking passes after repairing task-owned tool feedback and host-result boundaries. Integration is separate from release, installed update and live firmware acceptance; see the [verification record](docs/build/main-only-integration.md).
