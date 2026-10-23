@@ -70,6 +70,19 @@ const {createProductWorkflows}=require('./execution/product-workflows.cjs');
 const { createAssistantActions } = require("./assistant/actions.cjs");
 const owner = "desktop-owner";
 const fields = {
+  'appliance.prepare.choose': [],
+  'appliance.prepare.preview': ['sourceId','distribution'],
+  'appliance.prepare.build': ['previewId','consent'],
+  'appliance.prepare.state': ['id'],
+  'appliance.prepare.result': ['id'],
+  'appliance.prepare.cancel': ['id'],
+  'appliance.choose': ['kind'],
+  'appliance.preview': ['spec'],
+  'appliance.build': ['previewId','consent'],
+  'appliance.state': ['id'],
+  'appliance.cancel': ['id'],
+  'appliance.export': ['id'],
+  'appliance.verify': ['id'],
  'product.inspect':['sourceRepository','executionRepository','mode'],
  'product.discover':['selectionId'],
  'product.selectRunner':['selectionId','kind','runnerId','billingConsent'],
@@ -324,6 +337,12 @@ function createOperationsService({
 }) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const wslRuntime = createWslRuntime({ directory, dialog, parentWindow, openPath: openWslPath, run: (args, options) => boundedProcess(execution.executables.wsl, args, options).completion });
+  const appliance = require('./appliance/service.cjs').createApplianceService({
+    directory, dialog, parentWindow, run: boundedProcess,
+    wslExecutable: execution.executables?.wsl,
+    scriptDirectory: path.resolve(__dirname, '../../scripts/appliance').replace('app.asar', 'app.asar.unpacked'),
+    downloadsDirectory: () => require('electron').app.getPath('downloads'),
+  });
   const executionSetup = createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal});
   const productSetup=createExecutionSetup({directory,dialog,parentWindow,openExternal:openDocumentationExternal,platform:'windows'});
   const productWorkflows=createProductWorkflows({setup:productSetup,dialog,parentWindow});
@@ -1735,11 +1754,28 @@ function createOperationsService({
     const action = request?.action;
     if (typeof action !== "string" || !Object.hasOwn(fields, action))
       reject("INVALID_ACTION");
-    const optional = action === "build.submit"
+    const optional = action === "appliance.prepare.choose" ? ["kind"].filter(key=>Object.hasOwn(request,key)) : action === "appliance.prepare.preview" ? ["frontendSourceId"].filter(key=>Object.hasOwn(request,key)) : action === "build.submit"
       ? ["resources", "confirmationToken"].filter(key => Object.hasOwn(request,key)) : action === "imagePreset.isoBuild" ? ["resources"].filter(key => Object.hasOwn(request,key)) : action === "documentation.read" ? ["language"].filter(key => Object.hasOwn(request,key)) : [];
     exact(request, ["action", ...fields[action], ...optional, ...(action.startsWith("config.") ? ["domain"] : [])]);
     if (disposed) reject("UNAVAILABLE");
     if (updateInstalling && action !== "updates.state") reject("UPDATE_INSTALL_PENDING");
+    if (action.startsWith('appliance.')) {
+      switch (action) {
+        case 'appliance.prepare.choose': return appliance.prepare.choose(request.kind);
+        case 'appliance.prepare.preview': return appliance.prepare.preview(request.sourceId,request.distribution,request.frontendSourceId);
+        case 'appliance.prepare.build': return appliance.prepare.build(request.previewId,request.consent);
+        case 'appliance.prepare.state': return appliance.prepare.state(request.id);
+        case 'appliance.prepare.result': return appliance.prepare.result(request.id);
+        case 'appliance.prepare.cancel': return appliance.prepare.cancel(request.id);
+        case 'appliance.choose': return appliance.choose(request.kind);
+        case 'appliance.preview': return appliance.preview(request.spec);
+        case 'appliance.build': return appliance.build(request.previewId, request.consent);
+        case 'appliance.state': return appliance.state(request.id);
+        case 'appliance.cancel': return appliance.cancel(request.id);
+        case 'appliance.export': return appliance.export(request.id);
+        case 'appliance.verify': return appliance.verify(request.id);
+      }
+    }
     if (action.startsWith("forge.")) {
       const forge = forgePublication(request.workspaceId);
       switch (action) {
@@ -2616,6 +2652,7 @@ function createOperationsService({
       const settle = action => Promise.resolve().then(action);
       disposal = Promise.allSettled([
         settle(() => assistant.dispose()),
+        settle(() => appliance.dispose()),
         settle(() => sources.dispose()),
         settle(() => scheduler.awaitIdle()),
         settle(() => tools.dispose?.()),

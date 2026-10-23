@@ -4,6 +4,22 @@ A Material Design 3 desktop workspace for configuring and building embedded Linu
 
 Installer recovery now resolves temporary staging through native physical paths, preserving strict offline-documentation admission. The real short-path regression and focused build/documentation checks pass locally, with three file-symbolic-link cases explicitly unverified. Exact installer production and its replacement workflow verdict remain pending; see [packaging recovery](docs/build/squirrel-packaging.md#physical-temporary-paths-and-offline-documentation).
 
+## Standalone OS creation in the running desktop
+
+Images now has a direct **Create standalone OS** action. The guided workspace accepts container images, native-picked archives, supported Compose manifests and reviewed source preparation. It provides WSL setup, kiosk or console choices, persistent storage, optional private personal wording, tunnel options, real build status, boot verification and Downloads export. Implementation and runtime acceptance are separate; see the [workflow and remaining verification](docs/desktop/standalone-os.md).
+
+The following historical screenshots were produced from source `8ae5a66bbb39929c75ff4585b2a5fbeffda56140` on 2026-10-22. Their original recorded native run opened the standalone creator through its actual Images action without an adopted project. The [capture inventory](docs/evidence/os-native/captures.json) retains the original executable, screenshots, viewport and interaction identities. Their PNG hashes and pixels were inspected during source integration, but the original complete producer receipts were unavailable for renewed promotion. They are not current integrated-build acceptance. The earlier run reported successful package setup in a dedicated non-root WSL environment; its first registry workload attempt stopped during image preparation, before compilation. ISO production, boot, workload health, LAN, tunnels and persistence remain unverified.
+
+![Material Buildroot Images workspace with Create standalone OS in dark bilingual mode](docs/evidence/os-native/images-current.png)
+
+![Material Buildroot standalone OS Source controls in dark bilingual mode](docs/evidence/os-native/standalone-source.png)
+
+The later diagnostic build, source `28272e3098fc0eed14238df27ed896f7bd7bbdf4`, completed a fresh GUI preview and build attempt on 2026-10-22. It stopped before compilation with `SOURCE_IDENTITY_MISMATCH`. The selected registry digest remained unchanged, so this diagnostic does not establish registry drift. The visible explanation is being refined alongside archive identity compatibility. This is evidence of the current limit, not a successful ISO build:
+
+![Material Buildroot standalone OS preparation stopped with a validated source identity diagnostic](docs/evidence/os-native/diagnostic-visible.png)
+
+[Earlier standalone OS capture and provenance](docs/evidence/os-native/ARCHIVE.md).
+
 [Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Historical capture provenance](docs/evidence/ARCHIVE.md) · [Roadmap](ROADMAP.md)
 
 The main-only integration pass reconciles preserved packaging, converter, queue, native file-broker, companion and inactive native-container histories. Strict renderer checking passes after repairing task-owned tool feedback and host-result boundaries. Integration is separate from release, installed update and live firmware acceptance; see the [verification record](docs/build/main-only-integration.md).

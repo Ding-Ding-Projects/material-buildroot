@@ -4,7 +4,8 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { admitWslProject, metadataPaths, linuxSelection } = require("./wsl-project.cjs");
 const DISTRO = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/;
-const PACKAGES = ["build-essential", "bash", "binutils", "bzip2", "cpio", "file", "findutils", "gawk", "git", "gzip", "libncurses-dev", "patch", "perl", "python3", "rsync", "sed", "tar", "unzip", "wget", "which", "xz-utils"];
+const PACKAGES = ["build-essential", "bc", "bison", "curl", "flex", "gettext", "help2man", "libssl-dev", "libelf-dev", "texinfo", "bash", "binutils", "bzip2", "cpio", "file", "findutils", "gawk", "git", "gzip", "libncurses-dev", "patch", "perl", "python3", "rsync", "sed", "tar", "unzip", "wget", "which", "xz-utils"];
+const APPLIANCE_PACKAGES = ["docker.io", "docker-compose-v2", "qemu-system-x86", "qemu-utils", "e2fsprogs"];
 const PROBE = `set -eu
  test "$(id -u)" -ne 0 || { echo non-root-required; exit 77; }
  printf 'USER=%s\\nHOME=%s\\n' "$(id -un)" "$HOME"
@@ -12,7 +13,7 @@ const PROBE = `set -eu
  test -d "$HOME" && test -w "$HOME" || exit 78
  test "$(readlink -f -- "$HOME")" = "$HOME" || exit 78
  case "$(stat -f -c %T -- "$HOME")" in ext2/ext3|btrfs|xfs) ;; *) exit 78 ;; esac
- for tool in bash gcc g++ make patch perl tar cpio unzip rsync file wget python3 git bzip2 xz; do
+ for tool in bash gcc g++ make patch perl tar cpio unzip rsync file wget python3 git bzip2 xz curl bc bison flex gettext help2man makeinfo; do
  if command -v "$tool" >/dev/null 2>&1; then printf 'OK=%s\\n' "$tool"; else printf 'MISSING=%s\\n' "$tool"; fi
  done
  if test -r /etc/os-release; then . /etc/os-release; printf 'OS=%s\\n' "$ID"; fi
@@ -27,7 +28,7 @@ function createWslRuntime({ directory, run, dialog, parentWindow, openPath, plat
     records = value;
   }
   const save = () => { const temporary = `${recordsFile}.tmp`; fs.writeFileSync(temporary, JSON.stringify(records), {mode:0o600}); fs.renameSync(temporary, recordsFile); };
-  const execute = (args, timeoutMs = 15000) => run(args, { timeoutMs, maxBytes: 65536 });
+  const execute = (args, timeoutMs = 15000, options = {}) => run(args, { timeoutMs, maxBytes: 65536, ...options });
   const text = value => String(value || "").replace(/\0/g, "");
   async function discover() {
     if (platform !== "win32") return {state:"unsupported-platform", distributions:[]};
@@ -45,7 +46,7 @@ function createWslRuntime({ directory, run, dialog, parentWindow, openPath, plat
     if (!entry || entry.version !== 2) throw Error("wsl2-distribution-required");
     return entry;
   }
-  const linux = (name, script, args=[], root=false, timeout=15000) => execute(["--distribution",name,...(root?["--user","root"]:[]),"--exec","/bin/sh","-c",script,"material-buildroot",...args],timeout);
+  const linux = (name, script, args=[], root=false, timeout=15000, options={}) => execute(["--distribution",name,...(root?["--user","root"]:[]),"--exec","/bin/sh","-c",script,"material-buildroot",...args],timeout,options);
   async function inspect(name) {
     await selected(name);
     const result = await linux(name, PROBE);
@@ -54,7 +55,7 @@ function createWslRuntime({ directory, run, dialog, parentWindow, openPath, plat
     const home = field("HOME");
     const validHome = typeof home === "string" && /^\/home\/[A-Za-z0-9_.-]+$/.test(home);
     const missing = lines.filter(x=>x.startsWith("MISSING=")).map(x=>x.slice(8));
-    return {state:result.state==="succeeded" && validHome ? (missing.length?"prerequisites-missing":"ready") : "account-setup-required",distribution:name,missing,os:field("OS"),home:validHome?home:null,freeKiB:field("FREE"),storage:validHome?`${home}/material-buildroot`:null};
+    return {state:result.state==="succeeded" && validHome ? (missing.length?"prerequisites-missing":"ready") : "account-setup-required",distribution:name,missing,os:field("OS"),home:validHome?home:null,freeKiB:field("FREE"),storage:validHome?`${home}/material-buildroot`:null,...(records.find(record=>record.name===name)?.setupDiagnostics?{setupDiagnostics:records.find(record=>record.name===name).setupDiagnostics}:{})};
   }
   async function consent(message) {
     const choice = await dialog.showMessageBox(parentWindow,{type:"warning",buttons:["Cancel / 取消","Continue / 繼續"],defaultId:0,cancelId:0,title:"WSL setup / WSL 設定",message});
@@ -98,11 +99,46 @@ function createWslRuntime({ directory, run, dialog, parentWindow, openPath, plat
         const result=await linux(name,'set -eu; test "$(id -u)" -ne 0; test "$(readlink -f -- "$1")" = "$1"; test -d "$1/source"; test ! -L "$1/source"; test -z "$(find "$1/source" -mindepth 1 -maxdepth 1 -print -quit)"; exec git -c core.hooksPath=/dev/null -c protocol.file.allow=never clone --depth 1 -- https://gitlab.com/buildroot.org/buildroot.git "$1/source"',[status.storage],false,30*60*1000);
         return {state:result.state==="succeeded"?"source-ready":"source-download-incomplete",distribution:name};
       }
-      if(kind==="prerequisites") {
+      if(kind==="prerequisites" || kind==="appliancePrerequisites") {
+        const managed=records.find(record=>record.name===name);
+        if(kind==="appliancePrerequisites"&&!managed)return {state:"managed-appliance-distribution-required",distribution:name};
         if(!["debian","ubuntu"].includes(status.os) || status.state==="account-setup-required")return {state:"manual-prerequisites-required"};
-        if(!await consent(`Install Buildroot prerequisites in ${name} using the distribution package manager as root. Builds still run as the default non-root account. Downloads require network access.\n會以 root 安裝建置所需套件，建置仍使用非 root 帳戶；下載需要網絡。`))return {state:"cancelled"};
-        const installed=await linux(name,'set -eu; test "$(id -u)" -eq 0; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y -- "$@"',PACKAGES,true,30*60*1000);
-        return installed.state==="succeeded"?await inspect(name):{state:"prerequisite-install-incomplete",distribution:name};
+        if(!await consent(`Install Buildroot prerequisites${managed?" plus the standalone OS container and boot-verification tools":""} in ${name} using the distribution package manager as root. Builds still run as the default non-root account. Downloads require network access.${managed?" The dedicated materialbuilder account will join the Docker group, granting container administration within this managed Linux distribution; its Docker service will be started. Existing distributions are not changed.":""}\n會以 root 安裝建置所需套件，建置仍使用非 root 帳戶；下載需要網絡。`))return {state:"cancelled"};
+        const evidence=[];
+        const recordResult=(stage,result)=>{
+          const processState=['succeeded','failed','timed-out','output-limit','unavailable','cancelled','runtime-cleanup-failed'].includes(result.state)?result.state:'unknown';
+          const row={stage,processState,exitCode:Number.isInteger(result.code)?result.code:null,reason:processState==='succeeded'?'COMPLETE':processState==='output-limit'?'OUTPUT_LIMIT':processState==='timed-out'?'TIME_LIMIT':processState==='unavailable'?'PROCESS_UNAVAILABLE':'NONZERO_OR_INCOMPLETE_RESULT'};
+          if(processState!=='succeeded'&&processState!=='output-limit'){
+            const diagnostics=String(result.stdout||'')+'\n'+String(result.stderr||'');
+            const unavailable=[...PACKAGES,...APPLIANCE_PACKAGES].filter(name=>diagnostics.includes('Unable to locate package '+name)||diagnostics.includes("Package '"+name+"' has no installation candidate"));
+            if(unavailable.length){row.reason='PACKAGE_UNAVAILABLE';row.packages=unavailable;}
+            else if(/Could not get lock|Unable to acquire the dpkg frontend lock/.test(diagnostics))row.reason='PACKAGE_MANAGER_LOCKED';
+            else if(/dpkg was interrupted/.test(diagnostics))row.reason='PACKAGE_STATE_INTERRUPTED';
+            else if(/Failed to fetch|Temporary failure resolving|Could not resolve/.test(diagnostics))row.reason='PACKAGE_DOWNLOAD_UNAVAILABLE';
+          }
+          evidence.push(row);
+          if(managed){managed.setupDiagnostics={steps:[...evidence]};managed.setupAttempts=[...(managed.setupAttempts||[]),row].slice(-16);save();}
+          return row;
+        };
+        const packageOptions={maxBytes:16*1024*1024,maxCapturedCharacters:8192};
+        if(managed){
+          const recovered=await linux(name,'set -eu; test "$(id -u)" -eq 0; export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a',[],true,15*60*1000,packageOptions);
+          recordResult('recover-package-state',recovered);
+          if(recovered.state!=='succeeded')return {state:'prerequisite-recovery-incomplete',distribution:name,setupDiagnostics:{steps:evidence}};
+        }
+        const installed=await linux(name,'set -eu; test "$(id -u)" -eq 0; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y -- "$@"',[...PACKAGES,...(managed?APPLIANCE_PACKAGES:[])],true,30*60*1000,packageOptions);
+        recordResult('install-packages',installed);
+        if(installed.state!=='succeeded')return {state:'prerequisite-install-incomplete',distribution:name,setupDiagnostics:{steps:evidence}};
+        if(managed) {
+          const configured=await linux(name,'set -eu; test "$(id -u)" -eq 0; test "$(id -u materialbuilder)" -ne 0; getent group docker >/dev/null; usermod -aG docker materialbuilder; service docker start',[],true,60000);
+          recordResult('configure-container-access',configured);
+          if(configured.state!=="succeeded")return {state:"appliance-container-setup-incomplete",distribution:name,setupDiagnostics:{steps:evidence}};
+          const verified=await linux(name,'set -eu; test "$(id -u)" -ne 0; command -v qemu-system-x86_64 >/dev/null; command -v qemu-img >/dev/null; command -v mkfs.ext4 >/dev/null; docker compose version >/dev/null; docker info >/dev/null',[],false,30000);
+          recordResult('verify-container-tools',verified);
+          if(verified.state!=="succeeded")return {state:"appliance-container-access-incomplete",distribution:name,setupDiagnostics:{steps:evidence}};
+          managed.applianceReady=true;save();
+        }
+        return await inspect(name);
       }
       if(!status.storage) return status;
       if(kind==="storage") {

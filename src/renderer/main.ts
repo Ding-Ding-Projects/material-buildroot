@@ -1,3 +1,4 @@
+import './standalone-os-wizard';
 import './notification-centre';
 import {localizedCopy} from './language-wording';
 import {wording} from './language-wording-state';
@@ -77,6 +78,7 @@ class MaterialBuildroot extends LitElement {
   static properties = {
     state: { state: true },
     route: { state: true },
+    standaloneOsOpen: {state:true},
     connection: { state: true },
     saveState: { state: true },
     windowNotice: { state: true },
@@ -1516,17 +1518,18 @@ class MaterialBuildroot extends LitElement {
     const runtime=!this.activeProject?this.l('No project selected','未選擇專案',true):context?.state==='saved'?context.label:context?.state==='loading'?this.l('Reading saved configuration…','正在讀取已儲存設定…',true):context?.state==='none'?this.l('Not selected','未選擇',true):this.l('Unavailable','未能取得',true);
     return html`<div class="project-context" aria-label=${this.l('Current project and runtime','目前專案同執行環境',true)}><span>${this.l('Project','專案',true)}: <strong>${project?.name??this.l('No project selected','未選擇專案',true)}</strong></span><span>${this.l('Saved runtime (last read)','已儲存執行環境（上次讀取）',true)}: ${runtime}</span><md-text-button ?disabled=${!this.activeProject||context?.state==='loading'} @click=${this.refreshRuntimeContext}>${this.l('Refresh status','重新整理狀態',true)}</md-text-button></div>`;
   }
+  private standaloneOsOpen=false;
   private imagesView(){
     const rows=this.imageProjectRows();
     return html`<section class="images-workspace" aria-labelledby="images-projects-heading">
-      <div class="image-actions"><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
+      <div ?hidden=${this.standaloneOsOpen}><div class="image-actions"><md-filled-button data-image-action="standalone" ?disabled=${!window.studio?.operations} @click=${()=>{this.standaloneOsOpen=true;}}>${materialIcon('computer','icon')}${this.l('Create standalone OS','建立獨立 OS',true)}</md-filled-button><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
       ${this.creationDecision?html`<section class="panel"><p>${this.l('An image draft is already saved. Resume it or explicitly start another while keeping a recovery copy.','已有映像草稿。可以繼續，或者明確建立另一份並保留復原副本。',true)}</p><md-outlined-button @click=${()=>this.openImageProject('create')}>${this.l('Resume saved draft','繼續已儲存草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.creationBusy} @click=${this.createAnotherImage}>${this.l('Create another and keep previous','建立另一份並保留之前草稿',true)}</md-outlined-button></section>`:nothing}
       ${this.creationDraft?html`<md-outlined-button data-image-action="resume-draft" @click=${()=>this.openImageProject('create')}>${this.l('Resume image draft','繼續映像草稿',true)}</md-outlined-button><p>${this.creationDraft.name} · ${this.creationDraft.purpose} · ${this.l('Saved intent, not a verified image','已儲存意向，唔係已驗證映像',true)}</p>`:nothing}
       <section class="panel image-projects"><h2 id="images-projects-heading">${this.l('Image projects','映像專案',true)}</h2>
       ${this.projectCatalogueState==='loading'?html`<p role="status">${this.l('Loading saved projects…','正在載入已儲存專案…',true)}</p>`:nothing}
       ${this.projectCatalogueState==='unavailable'?html`<p role="status">${this.l('Project catalogue unavailable. Previously loaded rows may be stale; access is checked when opening.','專案目錄未能使用。先前載入記錄可能過時；開啟時會核對存取權。',true)}</p><md-outlined-button @click=${this.refreshImageProjects}>${this.l('Retry project catalogue','重試專案目錄',true)}</md-outlined-button>`:nothing}
       ${rows.length?html`<ul class="project-list">${rows.map(project=>html`<li><div><strong>${project.name}</strong><p>${project.authorized===false?this.l('Folder access renewal required','需要更新資料夾存取權',true):this.l('Project access is checked by the desktop host when opened.','開啟時由桌面主機核對專案存取權。',true)}</p></div><md-outlined-button data-resume-project=${project.id} ?disabled=${this.projectOpenBusy} @click=${()=>project.authorized===false?this.renewCatalogueProject(project.id):this.openCatalogueProject(project.id)}>${project.authorized===false?this.l('Renew folder access','更新資料夾存取權',true):this.l('Resume','繼續',true)}</md-outlined-button></li>`)}</ul>`:this.projectCatalogueState==='ready'?html`<p>${this.l('No saved projects. Create an image draft or open existing source.','未有已儲存專案。請建立映像草稿或開啟現有來源。',true)}</p>`:nothing}
-      </section></section>`;
+      </section></div><div ?hidden=${!this.standaloneOsOpen}><md-outlined-button @click=${()=>{this.standaloneOsOpen=false;}}>${this.l('Back to Images','返回映像',true)}</md-outlined-button><standalone-os-wizard .language=${this.effectiveLanguage}></standalone-os-wizard></div></section>`;
   }
   private runtimeName(value: string) {
     return value === "wsl" ? "WSL 2" : "Docker";

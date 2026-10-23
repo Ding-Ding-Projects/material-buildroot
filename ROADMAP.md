@@ -2,11 +2,25 @@
 
 ## Installer documentation path recovery, 2026-10-22
 
+- [x] Reconstruct the additional reviewed standalone OS source contribution without importing private historical ancestry; retain its five original snapshot branches.
+- [x] Verify integrated source seams: strict TypeScript, 35 Node cases, 46 Python passes with one POSIX-only skip, and 16 standalone renderer cases.
+
 - [x] Reproduce the genuine short-path alias rejection and retain native physical staging without weakening documentation admission.
 - [x] Verify the focused build/documentation cases: 29 passed, zero failed and three explicit file-symbolic-link skips.
 - [ ] Complete exact-source desktop and installer production through the root entrypoints.
 - [ ] Verify the repaired source on remote main and a successful replacement release workflow.
 - [ ] Verify any resulting normal release and matching accepted installed update separately.
+
+## Standalone container operating systems, 2026-10-22
+
+- [ ] Deliver the running desktop Images wizard for image/archive/Compose input, private personal-wording inclusion, storage, tunnel choices and source-bound production.
+- [x] Retain inspected native wizard and failed-preparation screenshots in the README with source, byte hashes, actual producing times and archived earlier evidence.
+- [ ] Verify saved-image identity binding with both classic and current container storage implementations; current native attempt stopped before compilation.
+- [ ] Complete non-root WSL production and independent boot through application-owned controls; verify kernel, runtime, workload, kiosk, LAN and persistent data separately.
+- [ ] Verify the private Job 2027 fork and its upstream source as separate workloads, preserving existing deployments and records.
+- [ ] Verify the custom Home Assistant frontend with its matching Core workload; distinguish container acceptance from Home Assistant OS Supervisor acceptance.
+- [ ] Export verified ISO, checksum and provenance to the current user's Downloads folder through the running application.
+
 
 ## Main-only integration closeout, 2026-10-19
 

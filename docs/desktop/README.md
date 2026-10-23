@@ -13,6 +13,7 @@ See [Server management](minecraft-manager.md) for typed targets, acquisition and
 - [Drop feedback sounds](personal-vocabulary-drop-sounds.md) and [native sound boundary](vocabulary-drop-sound.md)
 
 - [Easy ISO workflow](iso-workflow.md), [field explanations](iso-fields/README.md) and [production and validation boundaries](iso-production.md)
+- [Standalone container operating systems](standalone-os.md) · [香港粵語](standalone-os.zh-HK.md)
 
 - [Component domains and source trust](configuration-domains.md) · [香港粵語](configuration-domains.zh-HK.md)
 - [Typed controls and undo](typed-configuration-controls.md) · [香港粵語](typed-configuration-controls.zh-HK.md)

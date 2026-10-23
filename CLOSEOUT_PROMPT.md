@@ -1,5 +1,9 @@
 # Installer documentation path recovery
 
+The owner additionally requested the preserved standalone OS contribution. Its reviewed current-tree changes are integrated locally without private historical ancestry or private operational handoff records. Five original snapshot branches remain preserved; the unfinished console-web snapshot remains outside this selected contribution. Both README and roadmap conflicts were combined, preserving the native temporary-path repair.
+
+Integrated source verification: strict TypeScript passed; 35 Node service cases passed; Python cases recorded 46 passes and one POSIX-only skip; all 16 standalone renderer cases passed. Combined packaging/documentation checks recorded 29 passes and three file-link skips, admitting 406 documents, 55 assets and 46 source references. Historical screenshot pixels and hashes were checked, but original promotion receipts were unavailable and all imported rows remain historical.
+
 Complete the bounded packaging recovery from main dd07fb78454a8e6e9f8fbf629510efe3695f2449. Repair branch: codex/fix-installer-documentation-path. Preserve existing checkouts, output generations, installed data/settings and unrelated work. No host power/login action or visible desktop disruption is authorized.
 
 Three older documentation edits are preserved locally at 1e0de35 on ai/integration/20261018-roadmap-combined. Its remote preservation awaits the complete publication scan. The former source was 106 commits behind main, zero ahead, with no unresolved merge conflicts. Retain those earlier observations as historical, not as current acceptance.

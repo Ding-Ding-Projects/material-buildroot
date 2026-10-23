@@ -1,0 +1,40 @@
+"use strict";
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {createPreparationService}=require('../src/main/appliance/preparation.cjs');
+function shapeFiles(kind){
+ if(kind==='core')return {'pyproject.toml':'[project]\nname = "homeassistant"\n','homeassistant/__init__.py':'','homeassistant/components/frontend/manifest.json':'{}','homeassistant/package_constraints.txt':'','requirements.txt':''};
+ if(kind==='frontend')return {'pyproject.toml':'[project]\nname = "home-assistant-frontend"\nversion = "20260729.0"\n','package.json':'{"name":"home-assistant-frontend"}','yarn.lock':'','script/build_frontend':'','.yarn/releases/yarn-4.18.0.cjs':''};
+ const files={'backend/pyproject.toml':'[project]\nname = "job-2027-backend"\n','backend/src/job_backend/main.py':'','frontend/package.json':'{}','frontend/package-lock.json':'{}'};
+ if(kind==='fork'){files['build.bat']='fixture';files['scripts/hosting.py']='fixture';}return files;
+}
+function treeFor(kind){return Object.keys(shapeFiles(kind)).map(name=>'100644 blob '+'c'.repeat(40)+'\t'+name+'\0').join('');}
+function fixture(origin='https://github.com/fixture-owner/workload-host.git',kind='fork'){
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'appliance-prepare-test-')),source=path.join(directory,'source');fs.mkdirSync(source);fs.writeFileSync(path.join(source,'build.bat'),'tracked fixture');let dirty=false,starts=0;
+ const service=createPreparationService({directory,dialog:{showOpenDialog:async()=>({canceled:false,filePaths:[source]})},wslExecutable:'wsl.exe',linuxPath:value=>'/fixture/source',run:(_file,args)=>{let stdout='';if(args.includes('id'))stdout='1000\n';else if(args.includes('rev-parse'))stdout='a'.repeat(40)+'\n';else if(args.includes('status'))stdout=dirty?' M build.bat\n':'';else if(args.includes('remote'))stdout=origin+'\n';else if(args.includes('ls-tree'))stdout=treeFor(kind);else if(args.includes('show'))stdout=shapeFiles(kind)[args.at(-1).slice(41)]||'';else if(args.includes('python3'))starts++;return {completion:Promise.resolve({state:'succeeded',stdout})};}});
+ return {directory,service,setDirty:()=>{dirty=true},starts:()=>starts};
+}
+test('source preparation pins supported origin and revision and requires explicit consent',async()=>{
+ const f=fixture();try{const selected=await f.service.choose(),preview=await f.service.preview(selected.id,'Ubuntu');assert.equal(preview.supported,true);assert.equal(preview.completeWorkload,false);assert.equal(preview.endpoints.productiveUrl,'https://127.0.0.1:8443/');assert.equal(preview.endpoints.setupOrigin,'https://127.0.0.1:8444/');assert.equal(preview.source.untrackedOmitted,true);assert.equal(preview.source.revision,'a'.repeat(40));await assert.rejects(f.service.build(preview.previewId,false),{code:'SOURCE_CONSENT_REQUIRED'});f.setDirty();await assert.rejects(f.service.build(preview.previewId,true),{code:'APPLIANCE_TRACKED_SOURCE_CHANGED'});assert.equal(f.starts(),0);}finally{await f.service.dispose();fs.rmSync(f.directory,{recursive:true,force:true});}
+});
+test('upstream source remains a distinct admitted recipe adapter',async()=>{
+ const f=fixture('https://github.com/fixture-owner/workload-upstream.git','upstream');try{const selected=await f.service.choose(),preview=await f.service.preview(selected.id,'Ubuntu');assert.equal(preview.supported,true);assert.equal(preview.source.repository,'fixture-owner/workload-upstream');assert.equal(preview.adapter,'job-2027-upstream');assert.ok(preview.limitations.includes('SCRAPING_WORKER_DISABLED'));await assert.rejects(f.service.build(preview.previewId,false),{code:'SOURCE_CONSENT_REQUIRED'});assert.equal(f.starts(),0);}finally{await f.service.dispose();fs.rmSync(f.directory,{recursive:true,force:true});}
+});
+test('preparation restart retains interrupted job and reconciles only verified owned cleanup',async()=>{
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'appliance-prepare-restart-')),id=require('node:crypto').randomUUID(),folder=path.join(directory,'appliance-preparation',id);fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'state.json'),JSON.stringify({schemaVersion:1,id,state:'running',sourceRevision:'a'.repeat(40),distribution:'Ubuntu',logs:['Phase: building'],sequence:3}));
+ let controlled=false;const service=createPreparationService({directory,dialog:{},wslExecutable:'wsl.exe',scriptDirectory:directory,linuxPath:value=>'/fixture/process.json',run:()=>{controlled=true;return {completion:Promise.resolve({state:'succeeded',stdout:'{"state":"verified-stopped"}'})};}});
+ try{assert.equal(service.state(id).state,'interrupted');assert.equal((await service.cancel(id)).state,'cancelled');assert.equal(controlled,true);assert.equal(JSON.parse(fs.readFileSync(path.join(folder,'state.json'))).state,'cancelled');}finally{await service.dispose();fs.rmSync(directory,{recursive:true,force:true});}
+});
+test('custom Home Assistant requires separate admitted Core and frontend revisions',async()=>{
+ const core=fixture('https://github.com/sample-owner/core-source.git','core');try{const selected=await core.service.choose(),preview=await core.service.preview(selected.id,'Ubuntu');assert.equal(preview.adapter,'home-assistant-material');assert.equal(preview.supported,false);assert.equal(preview.code,'APPLIANCE_FRONTEND_SOURCE_REQUIRED');assert.equal(preview.needsFrontendSource,true);assert.equal(core.starts(),0);}finally{await core.service.dispose();fs.rmSync(core.directory,{recursive:true,force:true});}
+ const frontend=fixture('https://github.com/sample-owner/ui-source.git','frontend');try{const selected=await frontend.service.choose('frontend'),preview=await frontend.service.preview(selected.id,'Ubuntu');assert.equal(preview.supported,false);assert.equal(preview.code,'APPLIANCE_CORE_SOURCE_REQUIRED');}finally{await frontend.service.dispose();fs.rmSync(frontend.directory,{recursive:true,force:true});}
+});
+test('paired custom frontend preview binds two independently selected source heads',async()=>{
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'appliance-paired-source-')),core=path.join(directory,'core'),frontend=path.join(directory,'frontend');fs.mkdirSync(core);fs.mkdirSync(frontend);let choices=0;
+ const service=createPreparationService({directory,dialog:{showOpenDialog:async()=>({canceled:false,filePaths:[choices++===0?core:frontend]})},wslExecutable:'wsl.exe',linuxPath:value=>value,run:(_file,args)=>{let stdout='';const source=args[args.indexOf('-C')+1],isFrontend=source===frontend;if(args.includes('id'))stdout='1000\n';else if(args.includes('rev-parse'))stdout=(isFrontend?'b':'a').repeat(40)+'\n';else if(args.includes('remote'))stdout='https://github.com/sample-owner/'+(isFrontend?'ui-source':'core-source')+'.git\n';else if(args.includes('ls-tree'))stdout=treeFor(isFrontend?'frontend':'core');else if(args.includes('show'))stdout=shapeFiles(isFrontend?'frontend':'core')[args.at(-1).slice(41)]||'';return {completion:Promise.resolve({state:'succeeded',stdout})};}});
+ try{const selected=await service.choose(),paired=await service.choose('frontend'),preview=await service.preview(selected.id,'Ubuntu',paired.id);assert.equal(preview.supported,true);assert.equal(preview.source.revision,'a'.repeat(40));assert.equal(preview.source.frontendRevision,'b'.repeat(40));assert.equal(preview.needsFrontendSource,false);}finally{await service.dispose();fs.rmSync(directory,{recursive:true,force:true});}
+});
+test('malformed origins cannot reach source execution even when files match an adapter shape',async()=>{
+ for(const origin of ['https://user:pass@github.com/fixture-owner/workload','https://github.com.evil.test/fixture-owner/workload','https://github.com/fixture-owner/workload?branch=main']){
+  const f=fixture(origin);try{const selected=await f.service.choose();await assert.rejects(f.service.preview(selected.id,'Ubuntu'),{code:'APPLIANCE_SOURCE_ORIGIN_INVALID'});assert.equal(f.starts(),0);}finally{await f.service.dispose();fs.rmSync(f.directory,{recursive:true,force:true});}
+ }
+});

@@ -1,4 +1,5 @@
 .githooks/* text eol=lf
+scripts/appliance/** text eol=lf
 scripts/configuration/vendor/* -text
 design/archive/schedule-editor-20261016/source-files/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/planning/feature-coverage.md text eol=lf

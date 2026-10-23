@@ -1,5 +1,11 @@
 # Installer documentation path recovery, 2026-10-22
 
+## Additional requested standalone-source integration
+
+The owner additionally requested integration of the preserved standalone OS contribution. Its reviewed current-tree delta is being reconstructed on the fetched public baseline without importing private historical ancestry or private operational handoff files. All five original snapshot branches remain preserved, and the unfinished console-web snapshot is outside the selected source. README and roadmap conflicts were combined semantically; the native staging repair remains intact.
+
+The imported service/admission checks pass 35 Node cases. Producer/adapters/guest/enrollment Python checks pass 46 of 47 cases with one explicit POSIX-only process-ownership skip. All 16 focused standalone renderer cases and strict TypeScript checking pass. The combined packaging/documentation checks then passed 29 cases with three explicit file-link skips, admitting 406 documents, 55 assets and 46 source references without unresolved issues. These are integration fixtures, not a successful ISO, boot, LAN, workload, tunnel or installed update. Four unchanged historical screenshots were inspected and their hashes checked; complete original promotion receipts were unavailable, so no imported row is current integrated-build acceptance.
+
 The recovery source starts from public main `dd07fb78454a8e6e9f8fbf629510efe3695f2449`. Earlier local documentation edits are retained in recovery commit `1e0de35` on `ai/integration/20261018-roadmap-combined`; its remote preservation is pending the complete publication scan. The prior integration source was 106 commits behind main with zero unique commits and no unresolved merge conflicts. Existing checkouts and unrelated branches are retained.
 
 Release run `39218941053` failed offline-documentation admission after installer production. Ordinary Windows path resolution retained a short alias; native physical resolution admitted the same existing 548-article bundle. The producer now normalizes its temporary root before staging, while the documentation reader and all existing identity, containment, manifest and hash checks remain unchanged. A bounded diagnostic retains the rejection code without document content or machine paths.

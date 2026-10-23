@@ -39,10 +39,14 @@
     "productName": "Material Buildroot",
     "asar": true,
     "extraResources": [
-      { "from": "dist/documentation", "to": "documentation", "filter": ["**/*"] }
+      { "from": "dist/documentation", "to": "documentation", "filter": ["**/*"] },
+      { "from": "dist/appliance-guest", "to": "appliance-guest", "filter": ["**/*"] }
     ],
     "asarUnpack": [
-      "scripts/configuration/**/*"
+      "scripts/configuration/**/*",
+      "scripts/appliance/**/*",
+      "src/main/appliance/*.py",
+      "src/main/appliance/workload-endpoints.json"
     ],
     "directories": {
       "output": "release"
@@ -55,6 +59,7 @@
       "src/main/**/*",
       "src/shared/**/*",
       "scripts/configuration/**/*",
+      "scripts/appliance/**/*",
       "package.json",
       "assets/branding/icon.ico"
     ],
