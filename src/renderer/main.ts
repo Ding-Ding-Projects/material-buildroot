@@ -1,3 +1,7 @@
+import {visibleShellSettings} from './shell-settings-catalogue';
+import './shell-image-library';
+import {openAppearanceEditor} from './appearance-panel';
+import './standalone-os-wizard';
 import './notification-centre';
 import {localizedCopy} from './language-wording';
 import {wording} from './language-wording-state';
@@ -77,6 +81,7 @@ class MaterialBuildroot extends LitElement {
   static properties = {
     state: { state: true },
     route: { state: true },
+    standaloneOsOpen: {state:true},
     connection: { state: true },
     saveState: { state: true },
     windowNotice: { state: true },
@@ -146,6 +151,7 @@ class MaterialBuildroot extends LitElement {
 
   private settingsCategory='appearance';
   private settingsVisited=false;
+  private licenseShown=false;
   private densityRecord=readShellDensity();
   private density:ShellDensity=this.densityRecord.density;
   private densityIssue=this.densityRecord.available?'':'read';
@@ -158,7 +164,7 @@ class MaterialBuildroot extends LitElement {
     ...this.projectSessions.map(p=>({id:`project:${p.workspaceId}`,en:p.name,zh:p.name,icon:'folder_open'})),
     ...[['projects','Plans','計劃','dashboard'],['activity','Activity','活動','history'],['settings','Settings','設定','settings'],['about','About','關於','info']].map(([id,en,zh,icon])=>({id,en,zh,icon})),
     ...[['runtime','Projects & runtime','專案同執行環境','computer'],['source','Source','來源','code'],['config','Configuration','設定選項','tune'],['package','Package authoring','套件編寫','inventory_2'],['builds','Build queue and output','建置佇列同輸出','build'],['artifacts','Artifacts','輸出檔案','folder_open'],['guests','Virtual machines','虛擬機','memory'],['tools','Tools','工具','build'],['assistant','Local assistant','本機助理','help_outline'],['regex','Regex workbench','正規表達式工作台','code'],['authenticator','Authenticator','驗證器','key'],['companion','Browser companion','瀏覽器配對','link'],['updates','Updates','更新','download'],['documentation','Help and documentation','說明同文件','help_outline']].map(([id,en,zh,icon])=>({id:`operation:${id}`,en,zh,icon})),
-    ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
+    ...[['local','Trusted local tools','可信本機工具','build'],['convert','File converter','檔案轉換','description'],['pdf','PDF workspace','PDF 工作區','description'],['editor','External editor','外置編輯器','code'],['queue','File and model queue','檔案同模型佇列','history'],['server','Minecraft Java server','Minecraft Java 伺服器','computer']].map(([id,en,zh,icon])=>({id:`tool:${id}`,en,zh,icon})),
     ...this.settingsEntries().map(e=>({id:`setting:${e.id}`,en:e.text,zh:e.text,icon:'settings'})),
     {id:'new-plan',en:'New plan',zh:'新增計劃',icon:'add'},
     {id:'export-plans',en:'Export plans',zh:'匯出計劃',icon:'download'},
@@ -219,9 +225,6 @@ class MaterialBuildroot extends LitElement {
       if(!current()||panel!==this.activeOperations()||panel?.tab!==destination)return;
       await this.continueImageCreation(current);
     }
-  }
-  protected firstUpdated(){
-    try{if(!localStorage.getItem('material-buildroot.workspace-tabs.v1')){const tabs=this.tabsHost();if(tabs)tabs.edge='top';}}catch{const tabs=this.tabsHost();if(tabs)tabs.edge='top';}
   }
   private openAttention(event?:Event){this.renderRoot.querySelector<GuidedShellAttention>('guided-shell-attention')?.open(event?.currentTarget as HTMLElement|undefined);}
   private async closeWorkspaceTab(event:CustomEvent){
@@ -303,14 +306,7 @@ class MaterialBuildroot extends LitElement {
   private applySharedSnapshot(snapshot:SharedModeSnapshot|null){this.sharedSnapshot=snapshot;void vocabulary.setSchool(snapshot?.available===true&&typeof snapshot.active==='boolean'?(snapshot.active?'active':'inactive'):'unknown');this.syncDocumentLanguage();this.requestUpdate();}
   private syncDocumentLanguage(){document.documentElement.lang=this.effectiveLanguage==='en'?'en':'zh-HK';}
   private settingIds=['language','appearance','backups','vocabulary','shared','schedules','experience'];
-  private settingsEntries(){return [
-    ...(!this.restricted?[{id:'language',text:this.l('Language Interface language Humor English Cantonese Display name Rename','語言 介面語言 幽默 英文 粵語 顯示名稱 改名',true)}]:[]),
-    {id:'schedules',text:this.l('Scheduled preferences Rules Timezone History External source enrollment','偏好排程 規則 時區 歷史 外部來源登記',true)},
-    {id:'experience',text:this.l('Experience locks Local support tickets Credential policies Waiting challenges','體驗鎖 本機支援工單 憑證規則 等候挑戰',true)},
-    {id:'shared',text:this.l('Shared preference Exit credential Recovery','共用偏好 退出憑證 復原',true)},
-    {id:'appearance',text:this.l('Appearance Theme Density Comfortable Compact','外觀 主題 密度 舒適 緊密',true)},
-    {id:'backups',text:this.l('Workspace backups Snapshots Import','工作區備份 快照 匯入',true)},
-    ...(this.restricted?[]:[{id:'vocabulary',text:this.l('Personal vocabulary Import Replace Clear','個人詞彙 匯入 取代 清除',true)}])];}
+  private settingsEntries(){return visibleShellSettings(this.restricted).map(item=>({id:item.id,text:this.l(item.en+' '+item.keywords[0],item.zh+' '+item.keywords[1],true)}));}
   private owned(en:string,zh:string,kind:'ui-copy'|'accessible-name'='ui-copy'){return localizedCopy(en,zh,this.effectiveLanguage,true,kind);}
   private async loadSharedMode(){
     const bridge=window.studio;
@@ -1390,7 +1386,7 @@ class MaterialBuildroot extends LitElement {
       aria-current=${this.primaryDestination===destination.id?'page':'false'}
       aria-label=${this.owned(destination.en,destination.zh,'accessible-name')+(this.primaryDestination===destination.id?', '+this.owned('current workspace','目前工作區','accessible-name'):'')}
       @click=${()=>{if(dialog)this.closeDialog('navigation-dialog',true);void this.navigate(destination.id);}}
-      ><span class="navsymbol" aria-hidden="true">${materialIcon(destination.icon)}</span><span class="navlabel">${this.owned(destination.en,destination.zh)}</span></md-text-button>`)}`;
+      ><span class="nav-content"><span class="navsymbol" aria-hidden="true">${materialIcon(destination.icon)}</span><span class="navlabel">${this.owned(destination.en,destination.zh)}</span></span></md-text-button>`)}`;
   }
   private async persistCreation(patch:Partial<ImageCreationIntent>){
     const current=this.creationDraft??newCreationIntent();
@@ -1516,17 +1512,17 @@ class MaterialBuildroot extends LitElement {
     const runtime=!this.activeProject?this.l('No project selected','未選擇專案',true):context?.state==='saved'?context.label:context?.state==='loading'?this.l('Reading saved configuration…','正在讀取已儲存設定…',true):context?.state==='none'?this.l('Not selected','未選擇',true):this.l('Unavailable','未能取得',true);
     return html`<div class="project-context" aria-label=${this.l('Current project and runtime','目前專案同執行環境',true)}><span>${this.l('Project','專案',true)}: <strong>${project?.name??this.l('No project selected','未選擇專案',true)}</strong></span><span>${this.l('Saved runtime (last read)','已儲存執行環境（上次讀取）',true)}: ${runtime}</span><md-text-button ?disabled=${!this.activeProject||context?.state==='loading'} @click=${this.refreshRuntimeContext}>${this.l('Refresh status','重新整理狀態',true)}</md-text-button></div>`;
   }
+  private standaloneOsOpen=false;
   private imagesView(){
     const rows=this.imageProjectRows();
-    return html`<section class="images-workspace" aria-labelledby="images-projects-heading">
-      <div class="image-actions"><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
+    return html`<section class="images-workspace" aria-label=${this.l("Images workspace","映像工作區",true)}>
+      <div ?hidden=${this.standaloneOsOpen}><div class="image-actions"><md-filled-button data-image-action="standalone" ?disabled=${!window.studio?.operations} @click=${()=>{this.standaloneOsOpen=true;}}>${materialIcon('computer','icon')}${this.l('Create standalone OS','建立獨立 OS',true)}</md-filled-button><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
       ${this.creationDecision?html`<section class="panel"><p>${this.l('An image draft is already saved. Resume it or explicitly start another while keeping a recovery copy.','已有映像草稿。可以繼續，或者明確建立另一份並保留復原副本。',true)}</p><md-outlined-button @click=${()=>this.openImageProject('create')}>${this.l('Resume saved draft','繼續已儲存草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.creationBusy} @click=${this.createAnotherImage}>${this.l('Create another and keep previous','建立另一份並保留之前草稿',true)}</md-outlined-button></section>`:nothing}
       ${this.creationDraft?html`<md-outlined-button data-image-action="resume-draft" @click=${()=>this.openImageProject('create')}>${this.l('Resume image draft','繼續映像草稿',true)}</md-outlined-button><p>${this.creationDraft.name} · ${this.creationDraft.purpose} · ${this.l('Saved intent, not a verified image','已儲存意向，唔係已驗證映像',true)}</p>`:nothing}
-      <section class="panel image-projects"><h2 id="images-projects-heading">${this.l('Image projects','映像專案',true)}</h2>
-      ${this.projectCatalogueState==='loading'?html`<p role="status">${this.l('Loading saved projects…','正在載入已儲存專案…',true)}</p>`:nothing}
-      ${this.projectCatalogueState==='unavailable'?html`<p role="status">${this.l('Project catalogue unavailable. Previously loaded rows may be stale; access is checked when opening.','專案目錄未能使用。先前載入記錄可能過時；開啟時會核對存取權。',true)}</p><md-outlined-button @click=${this.refreshImageProjects}>${this.l('Retry project catalogue','重試專案目錄',true)}</md-outlined-button>`:nothing}
-      ${rows.length?html`<ul class="project-list">${rows.map(project=>html`<li><div><strong>${project.name}</strong><p>${project.authorized===false?this.l('Folder access renewal required','需要更新資料夾存取權',true):this.l('Project access is checked by the desktop host when opened.','開啟時由桌面主機核對專案存取權。',true)}</p></div><md-outlined-button data-resume-project=${project.id} ?disabled=${this.projectOpenBusy} @click=${()=>project.authorized===false?this.renewCatalogueProject(project.id):this.openCatalogueProject(project.id)}>${project.authorized===false?this.l('Renew folder access','更新資料夾存取權',true):this.l('Resume','繼續',true)}</md-outlined-button></li>`)}</ul>`:this.projectCatalogueState==='ready'?html`<p>${this.l('No saved projects. Create an image draft or open existing source.','未有已儲存專案。請建立映像草稿或開啟現有來源。',true)}</p>`:nothing}
-      </section></section>`;
+      <shell-image-library .language=${this.effectiveLanguage} .rows=${rows} .openIds=${this.projectSessions.map(project=>project.workspaceId)} .busy=${this.projectOpenBusy} .state=${this.projectCatalogueState}
+        @image-library-refresh=${this.refreshImageProjects}
+        @image-library-open=${(event:CustomEvent<{id:string;renew:boolean}>)=>{const project=this.imageProjectRows().find(row=>row.id===event.detail.id);if(project)void(project.authorized===false?this.renewCatalogueProject(project.id):this.openCatalogueProject(project.id));}}></shell-image-library>
+      </div><div ?hidden=${!this.standaloneOsOpen}><md-outlined-button @click=${()=>{this.standaloneOsOpen=false;}}>${this.l('Back to Images','返回映像',true)}</md-outlined-button><standalone-os-wizard .language=${this.effectiveLanguage}></standalone-os-wizard></div></section>`;
   }
   private runtimeName(value: string) {
     return value === "wsl" ? "WSL 2" : "Docker";
@@ -1712,12 +1708,7 @@ class MaterialBuildroot extends LitElement {
     </div>`;
   }
   private settingVisible(id:string){return this.settingIds.includes(id)&&this.settingsCategory===id;}
-  private settingsCategories(){return [
-    ...(!this.restricted?[{id:'language',en:'Language',zh:'語言'}]:[]),
-    {id:'appearance',en:'Appearance',zh:'外觀'}, {id:'schedules',en:'Schedules',zh:'排程'},
-    {id:'experience',en:'Experience',zh:'體驗'}, {id:'shared',en:'Shared preference',zh:'共用偏好'},
-    {id:'backups',en:'Backups',zh:'備份'}, ...(!this.restricted?[{id:'vocabulary',en:'Personal vocabulary',zh:'個人詞彙'}]:[])
-  ];}
+  private settingsCategories(){return visibleShellSettings(this.restricted);}
   private async selectSettingsCategory(id:string){
     if(id!==this.settingsCategory&&!(await this.confirmScheduleLeave()))return;
     this.settingsCategory=id;
@@ -1732,9 +1723,9 @@ class MaterialBuildroot extends LitElement {
     return description+' '+source.revision;
   }
   private settingsView() {
-    return html`<div class="settings-grid view">
+    return html`<div class="settings-grid view"><aside class="settings-sidebar"><h2>${this.l("Settings","設定",true)}</h2>
       <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;if(!this.settingIds.includes(this.settingsCategory))this.settingsCategory=this.settingIds[0]??'';this.requestUpdate();}}}></settings-search>
-      <div class="settings-categories" role="group" aria-label=${this.l('Settings categories','設定分類',true)}>${this.settingsCategories().filter(item=>this.settingIds.includes(item.id)).map(item=>html`<md-outlined-button class=${this.settingsCategory===item.id?"selected":""} aria-label=${this.l(item.en,item.zh,true)+(this.settingsCategory===item.id?", "+this.l("selected","已選取",true):"")} @click=${()=>this.selectSettingsCategory(item.id)}>${this.l(item.en,item.zh,true)}</md-outlined-button>`)}</div>
+      <nav class="settings-categories" aria-label=${this.l('Settings categories','設定分類',true)}>${this.settingsCategories().filter(item=>this.settingIds.includes(item.id)).map(item=>html`<md-outlined-button class=${this.settingsCategory===item.id?"selected":""} aria-label=${this.l(item.en,item.zh,true)+(this.settingsCategory===item.id?", "+this.l("selected","已選取",true):"")} @click=${()=>this.selectSettingsCategory(item.id)}>${materialIcon(item.icon,"icon")}${this.l(item.en,item.zh,true)}</md-outlined-button>`)}</nav></aside><div class="settings-content">
       ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。',true)}</p>`:nothing}
       ${!this.restricted?html`<section
         class="panel stack" ?hidden=${!this.settingVisible("language")}
@@ -1744,7 +1735,7 @@ class MaterialBuildroot extends LitElement {
         <p>
           ${this.l("Bilingual is the default. A successful save persists across application restarts.","預設使用雙語。成功儲存後，重新啟動都會保留。",true)}
         </p>
-        ${this.confirmedPreference()}<guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Interface language","介面語言",true),purpose:this.l("Choose English, Cantonese or both, then save explicitly. Discard choice restores the confirmed value. Scheduled overrides can temporarily change the effective language without overwriting the saved base.","選擇英文、粵語或雙語，再明確儲存。放棄選擇會還原已確認值。排程覆寫可暫時改變有效語言，但唔會覆蓋已儲存基礎值。",true),steps:[this.l("Try a sample language below. This practice does not change the interface.","喺下面試用語言範例，練習唔會改變介面。",true),this.l("Choose in the real selector, save, and read the confirmed result. If saving is unavailable, reconnect or reload before retrying.","喺真實選單選擇並儲存，再閱讀已確認結果。如無法儲存，請重新連接或載入再試。",true)],example:"bilingual",options:["en","zh-HK","bilingual"],expected:this.l("The example selection changes only; actual language requires Save language.","只會改變範例選項，真實語言須使用儲存語言。",true)}}></guided-forms><md-outlined-select
+        ${this.confirmedPreference()}<div class="expressive-connected" role="group" aria-label=${this.l('Language choices','語言選擇',true)}>${(['en','zh-HK','bilingual'] as const).map(value=>html`<md-outlined-button aria-pressed=${this.draft===value} ?disabled=${!this.canSave} @click=${()=>{this.draft=value;if(this.saveState!=='unknown'&&this.saveState!=='refresh-unavailable')this.saveState='idle';this.windowNotice=false;}}>${this.draft===value?materialIcon('check','icon'):nothing}${this.languageName(value)}</md-outlined-button>`)}</div><guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Interface language","介面語言",true),purpose:this.l("Choose English, Cantonese or both, then save explicitly. Discard choice restores the confirmed value. Scheduled overrides can temporarily change the effective language without overwriting the saved base.","選擇英文、粵語或雙語，再明確儲存。放棄選擇會還原已確認值。排程覆寫可暫時改變有效語言，但唔會覆蓋已儲存基礎值。",true),steps:[this.l("Try a sample language below. This practice does not change the interface.","喺下面試用語言範例，練習唔會改變介面。",true),this.l("Choose in the real selector, save, and read the confirmed result. If saving is unavailable, reconnect or reload before retrying.","喺真實選單選擇並儲存，再閱讀已確認結果。如無法儲存，請重新連接或載入再試。",true)],example:"bilingual",options:["en","zh-HK","bilingual"],expected:this.l("The example selection changes only; actual language requires Save language.","只會改變範例選項，真實語言須使用儲存語言。",true)}}></guided-forms><md-outlined-select
           id="language-select" data-experience-id="settings:language"
           .label=${this.l("Interface language","介面語言",true)}
           .value=${this.draft}
@@ -1788,11 +1779,11 @@ class MaterialBuildroot extends LitElement {
         <language-wording-panel .language=${this.effectiveLanguage}></language-wording-panel>
       </section>`:nothing}
       <section class="panel stack" ?hidden=${!this.settingVisible("appearance")} >
-        <h2>${this.owned("Appearance", "外觀")}</h2>
-        <div class="row" role="group" aria-label=${this.l('Workspace density','工作區密度',true)}>${(['comfortable','compact'] as const).map(value=>html`<md-outlined-button data-density=${value} class=${this.density===value?'selected':''} aria-label=${(value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true))+(this.density===value?', '+this.l('selected','已選取',true):'')} @click=${()=>this.setDensity(value)}>${value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true)}</md-outlined-button>`)}</div>
+        <h2>${this.owned("Appearance", "外觀")}</h2><p>${this.l("Choose the workspace palette and density, or edit the appearance of a specific element.","選擇工作區配色同密度，或者編輯指定元素外觀。",true)}</p><md-outlined-button @click=${()=>{const shell=this.renderRoot.querySelector<HTMLElement>(".shell");if(shell)openAppearanceEditor(shell,this.effectiveLanguage);}}>${materialIcon("preview","icon")}${this.l("Open appearance editor","開啟外觀編輯器",true)}</md-outlined-button>
+        <div class="row expressive-connected" role="group" aria-label=${this.l('Workspace density','工作區密度',true)}>${(['comfortable','compact'] as const).map(value=>html`<md-outlined-button data-density=${value} aria-pressed=${this.density===value} class=${this.density===value?'selected':''} aria-label=${(value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true))+(this.density===value?', '+this.l('selected','已選取',true):'')} @click=${()=>this.setDensity(value)}>${value==='comfortable'?this.l('Comfortable','舒適',true):this.l('Compact','緊密',true)}</md-outlined-button>`)}</div>
         <p class="muted">${this.l('Comfortable is the default. Compact reduces spacing while keeping controls at least 44 pixels tall. Saved on this device.','預設為舒適。緊密模式會減少間距，控制項保持最少 44 像素高。設定儲存喺呢部電腦。',true)}</p>
         ${this.densityIssue?html`<p role="status">${this.densityIssue==='read'?this.l('Saved density could not be read. Comfortable spacing is used until a new choice is saved.','未能讀取已儲存密度。儲存新選擇前會使用舒適間距。',true):this.l('Density was not saved. The previous spacing remains in use.','密度未儲存，繼續使用之前嘅間距。',true)}</p>`:nothing}
-        <p class="muted">${this.themeProvenance()} ${this.l("Current base value:","目前基礎值：",true)} ${this.theme}</p>
+        <div class="expressive-connected" role="group" aria-label=${this.l('Theme choices','主題選擇',true)}>${(['system','light','dark'] as const).map(value=>html`<md-outlined-button aria-pressed=${this.theme===value} @click=${()=>this.setTheme(value)}>${this.theme===value?materialIcon('check','icon'):nothing}${this.l(...({system:['System','系統'],light:['Light','淺色'],dark:['Dark','深色']} as Record<string,[string,string]>)[value],true)}</md-outlined-button>`)}</div><p class="muted">${this.themeProvenance()} ${this.l("Current base value:","目前基礎值：",true)} ${this.theme}</p>
         <guided-forms .language=${this.effectiveLanguage} .guide=${{title:this.l("Theme","主題",true),purpose:this.l("System follows the operating-system appearance; light and dark choose a fixed palette. This selector saves immediately when local workspace storage is available. A schedule may temporarily override the base palette.","跟隨系統會使用作業系統外觀，淺色同深色使用固定配色。本機工作區儲存可用時，此選單會即時儲存。排程可能暫時覆寫基礎配色。",true),steps:[this.l("Try a sample palette choice here; this isolated selection does not restyle or save the application.","喺呢度試用配色選項，獨立選擇唔會改變或儲存程式外觀。",true),this.l("Use the real selector below and wait for the save outcome. Choose the previous value to reverse the preference.","使用下方真實選單並等候儲存結果，選擇之前嘅值可還原偏好。",true)],example:"system",options:["system","light","dark"],expected:this.l("The practice choice is retained only while this guide is open.","練習選項只會喺此說明開啟期間保留。",true)}}></guided-forms>
         <md-outlined-select
           .label=${this.workspaceMode === "durable"
@@ -1823,8 +1814,10 @@ class MaterialBuildroot extends LitElement {
       <section class="panel stack" ?hidden=${!this.settingVisible('shared')}><shared-mode-panel .snapshot=${this.sharedSnapshot} .language=${this.effectiveLanguage} @shared-mode-snapshot=${(e:CustomEvent<SharedModeSnapshot>)=>this.applySharedSnapshot(e.detail)}></shared-mode-panel></section>
       <section class="panel stack" ?hidden=${!this.settingVisible('schedules')}><scheduled-preferences-panel .language=${this.effectiveLanguage} .restricted=${this.restricted} .snapshot=${this.scheduleSnapshot} .baseLanguage=${this.state?.language||"bilingual"} .baseTheme=${this.theme} @scheduled-snapshot=${(e:CustomEvent<ScheduledPreferencesSnapshot|null>)=>this.applyScheduledSnapshot(e.detail)}></scheduled-preferences-panel></section>
       <div ?hidden=${!this.settingVisible('backups')}>${this.historyPanel()}</div>
+      <section class="panel stack" ?hidden=${!this.settingVisible('attention')}><h2>${this.l('Accessibility and focus','無障礙同專注',true)}</h2><p>${this.l('Adjust five focus modes, narration and installed voices in the live attention controls. Preferences retain their existing local save and recovery behavior.','透過實際專注控制項調整五種專注模式、旁白同已安裝聲線。偏好保留現有本機儲存同復原方式。',true)}</p><md-filled-button @click=${this.openAttention}>${materialIcon('tune','icon')}${this.l('Open attention and narration','開啟專注同旁白',true)}</md-filled-button></section>
+      <section class="panel stack" ?hidden=${!this.settingVisible('updates')}><h2>${this.l('Updates and About','更新同關於',true)}</h2><update-panel .language=${this.effectiveLanguage} .canRestart=${()=>this.updateWorkSaved()}></update-panel><dl><dt>${this.l('Version','版本',true)}</dt><dd>${this.state?.version??this.l('Unavailable','未能取得',true)}</dd><dt>${this.l('Source','來源',true)}</dt><dd>${this.state?.source??this.l('Unavailable','未能取得',true)}</dd><dt>${this.l('Updated','更新時間',true)}</dt><dd>${this.buildTime()}</dd></dl><md-outlined-button @click=${()=>this.navigate('about')}>${this.l('About and licenses','關於同授權',true)}</md-outlined-button></section>
       ${!this.restricted?html`<section class="panel stack" ?hidden=${!this.settingVisible('vocabulary')}><personal-vocabulary-panel .language=${this.effectiveLanguage} .restricted=${this.restricted}></personal-vocabulary-panel></section>`:nothing}
-    </div>`;
+    </div></div>`;
   }
   private setupView() {
     return html`<span class="step"
@@ -1969,19 +1962,19 @@ class MaterialBuildroot extends LitElement {
         >
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">MB</span>
-          <strong>${wording.productName()}</strong
-          ><small>${this.l("Desktop workspace","桌面工作區",true)}</small>
+          <div class="brand-copy"><strong>${wording.productName()}</strong
+          ><small>${this.state?.version??this.l('Version unavailable','未能取得版本',true)} · ${this.l('Updated','更新時間',true)} ${this.buildTime()}</small></div>
         </div>
         <md-text-button
           class="command-search"
           aria-label=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)} title=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)}
           @click=${(e: Event) => this.openDialog("actions-dialog", e)}
           >${materialIcon("search","icon")}<span class="palette-label">
-            ${this.l("Actions","操作",true)} · Ctrl+Shift+F</span
+            <span class="command-copy">${this.l("Search commands, settings, articles","搜尋指令、設定、文章",true)}</span> <kbd>Ctrl+Shift+F</kbd></span
           ></md-text-button
         >
         <md-text-button id="attention-button" title=${this.l('Attention and narration','專注同旁白',true)} aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('tune')}</md-text-button>
-        <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
+        <md-text-button class="header-help" aria-label=${this.l("Help","說明",true)} title=${this.l("Help","說明",true)} @click=${()=>this.navigate("help")}>${materialIcon("help_outline")}</md-text-button><notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
           ${(["minimize", "maximize-restore", "close"] as const).map(
             (command, index) =>
               html`<md-text-button
@@ -1999,18 +1992,19 @@ class MaterialBuildroot extends LitElement {
         </div>
       </header>
       <div class="body">
-        <nav aria-label=${this.l("Workspace navigation","工作區導覽",true)}>
+        <nav aria-label=${this.l("Workspace navigation","工作區導覽",true)}><md-text-button class="rail-menu" aria-label=${this.l("Open navigation","開啟導覽",true)} @click=${(event:Event)=>this.openDialog("navigation-dialog",event)}>${materialIcon("menu")}</md-text-button>
+          <md-filled-tonal-button class="rail-create" aria-label=${this.l("Create image project","建立映像專案",true)} title=${this.l("Create image project","建立映像專案",true)} ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon("add")}</md-filled-tonal-button>
           ${this.navigation()}
           <div class="spacer"></div>
-          <md-text-button
+          <md-text-button class="rail-setup"
             aria-label=${this.l("Resume setup","繼續設定",true)}
             @click=${(e: Event) => this.openDialog("setup-dialog", e)}
-            ><span class="navsymbol" aria-hidden="true">${materialIcon("tune")}</span><span class="navlabel"
+            ><span class="nav-content"><span class="navsymbol" aria-hidden="true">${materialIcon("tune")}</span><span class="navlabel"
               >${this.l("Setup","開始設定",true)}</span
-            ></md-text-button
+            ></span></md-text-button
           >
         </nav>
-        <workspace-tabs .compactEmpty=${true} .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
+        <workspace-tabs .compactEmpty=${false} .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
         <main>
           <update-panel compact .language=${this.state?.language || "bilingual"} .canRestart=${() => this.updateWorkSaved()}></update-panel>
           <div class="toolbar" ?hidden=${this.route==='operations'||this.route==='image-creation'}>
@@ -2103,7 +2097,7 @@ class MaterialBuildroot extends LitElement {
                             </p>`}
                     </section>`
                   : html`<section class="panel view">
-                      <h2>${wording.productName()}</h2><details><summary>${this.l("Material Icons license","Material Icons 授權",true)}</summary><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></details>
+                      <h2>${wording.productName()}</h2><md-outlined-button aria-expanded=${this.licenseShown} aria-controls="material-license" @click=${()=>{this.licenseShown=!this.licenseShown;this.requestUpdate();}}>${this.l("Material Icons license","Material Icons 授權",true)}</md-outlined-button><section id="material-license" ?hidden=${!this.licenseShown}><p>Google Material Icons · Apache-2.0</p><pre style="white-space:pre-wrap;max-height:320px;overflow:auto" tabindex="0">${materialIconsLicense}</pre></section>
                       <dl>
                         <dt>${this.l("Version","版本",true)}</dt>
                         <dd>

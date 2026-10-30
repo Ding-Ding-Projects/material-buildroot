@@ -1,3 +1,5 @@
+import {overlayExpressiveStyles} from './overlay-expressive-styles';
+import {materialIcon} from './material-icons';
 import {localizedCopy} from './language-wording';
 import { LitElement, html, css } from 'lit';
 import '@material/web/dialog/dialog.js';
@@ -5,6 +7,7 @@ import '@material/web/checkbox/checkbox.js';
 import '@material/web/slider/slider.js';
 import '@material/web/button/text-button.js';
 import '@material/web/button/filled-button.js';
+import '@material/web/button/filled-tonal-button.js';
 
 export type DestructiveChallenge = {id:string;operation:string;destination:string;keys:[string,string];expires:number;rebuildRequired:boolean};
 export type DestructiveProof = {id:string;firstKey:string;secondKey:string;slider:number;rebuildConsent:boolean};
@@ -19,16 +22,16 @@ export class DestructiveConfirmation extends LitElement {
   private timeout?:ReturnType<typeof setTimeout>;
   private origin?:HTMLElement;
   private outcome:DestructiveProof|null=null;
-  static styles=css`
-    :host{font-family:inherit;color:inherit} md-dialog{max-width:min(36rem,calc(100vw - 24px));--md-dialog-container-color:var(--md-sys-color-surface-container-high)}
-    .content{display:grid;gap:16px;min-width:0} p{margin:0;overflow-wrap:anywhere} code{overflow-wrap:anywhere;white-space:pre-wrap}
+  static styles=[css`
+    :host{font-family:inherit;color:inherit} md-dialog{width:640px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);--md-dialog-container-shape:28px;--md-dialog-container-color:var(--md-sys-color-surface-container-high)}
+    [slot=headline]{display:flex;gap:12px;align-items:center;color:var(--md-sys-color-error)}.destination{padding:16px;border-radius:16px;background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container);display:grid;gap:8px}.safety-steps{display:grid;gap:12px}.confirmation-keys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.confirmation-keys md-filled-tonal-button{min-height:80px;--md-filled-tonal-button-container-shape:20px}.confirmation-keys [aria-pressed=true]{--md-filled-tonal-button-container-color:var(--md-sys-color-error);--md-filled-tonal-button-label-text-color:var(--md-sys-color-on-error)}.hero-icon{color:var(--md-sys-color-error)}[slot=headline]{justify-content:center;text-align:center;flex-direction:column}md-slider{--md-slider-active-track-color:var(--md-sys-color-error);--md-slider-handle-color:var(--md-sys-color-error);--md-slider-inactive-track-color:var(--md-sys-color-error-container)}.safety-steps label{padding:12px;border:1px solid var(--md-sys-color-outline-variant);border-radius:16px;background:var(--md-sys-color-surface-container)}.step-heading{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--md-sys-color-on-surface-variant)}[slot=actions]{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}md-text-button,md-filled-button{min-height:44px;white-space:normal}.content{display:grid;gap:16px;min-width:0} p{margin:0;overflow-wrap:anywhere} code{overflow-wrap:anywhere;white-space:pre-wrap}
     label{display:flex;align-items:center;gap:12px;min-height:48px;cursor:pointer} md-slider{width:100%}
     .meter{height:12px;border-radius:6px;overflow:hidden;background:var(--md-sys-color-surface-variant)}
     .fill{height:100%;background:var(--md-sys-color-error);transition:width .18s ease-out;transform-origin:left}
     .complete{animation:authorize .4s ease-out} @keyframes authorize{50%{transform:scaleY(1.8)}}
     :focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:3px}
     @media(prefers-reduced-motion:reduce){.fill{transition:none}.complete{animation:none}}
-  `;
+  `,overlayExpressiveStyles];
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}
   async request(origin?:HTMLElement):Promise<DestructiveProof|null>{
     this.origin=origin;
@@ -53,20 +56,19 @@ export class DestructiveConfirmation extends LitElement {
     await (this.renderRoot.querySelector('md-dialog') as Dialog).close();
     this.settle(proof);
   }
-  private key(which:'first'|'second',event:Event){this[which]=(event.target as HTMLInputElement).checked;this.progress=0;}
+  private key(which:'first'|'second'){if(this.expired||Date.now()>=this.challenge.expires)return;this[which]=!this[which];this.progress=0;}
   render(){
     if(!this.challenge)return html``;
     const ready=this.first&&this.second&&!this.expired;
     return html`<md-dialog @cancel=${(event:Event)=>{event.preventDefault();void this.close();}} @closed=${()=>this.settle(this.outcome)}>
-      <div slot="headline">${this.l('Confirm clean build output','確認清除建置輸出',true)}</div>
+      <div slot="headline"><span class="hero-icon">${materialIcon('security','icon')}</span>${this.l('Confirm clean build output','確認清除建置輸出',true)}</div>
       <div slot="content" class="content">
-        <p>${this.l('Operation','操作',true)}: <code>${this.challenge.operation}</code></p>
-        <p>${this.l('Exact affected output directory','確切受影響輸出目錄',true)}: <code>${this.challenge.destination}</code></p>
+        <div class="destination"><p>${this.l('Operation','操作',true)}: <code>${this.challenge.operation}</code></p>
+        <p>${this.l('Exact affected output directory','確切受影響輸出目錄',true)}: <code>${this.challenge.destination}</code></p></div>
         <p>${this.l('This runs the fixed Buildroot clean target in this output directory. Generated build output is removed. Source files and configuration are retained by the clean target. Removed output cannot be restored by undo.','此操作會喺此輸出目錄執行固定嘅 Buildroot clean 目標，移除產生嘅建置輸出。clean 目標會保留原始碼同設定。已移除輸出無法復原。',true)}</p>
-        <label><md-checkbox ?checked=${this.first} ?disabled=${this.expired} @change=${(e:Event)=>this.key('first',e)} aria-label=${this.l('Key one: affected destination reviewed','第一把鎖：已核對受影響位置',true)}></md-checkbox>${this.l('Key one: I reviewed the exact destination.','第一把鎖：已核對確切位置。',true)}</label>
-        <label><md-checkbox ?checked=${this.second} ?disabled=${this.expired} @change=${(e:Event)=>this.key('second',e)} aria-label=${this.l('Key two: output removal authorized','第二把鎖：授權移除輸出',true)}></md-checkbox>${this.l('Key two: I authorize removal of generated output.','第二把鎖：授權移除產生嘅輸出。',true)}</label>
+        <div class="safety-steps"><p class="step-heading">${this.l('1 · Review and authorize','1 · 核對及授權',true)}</p><div class="confirmation-keys"><md-filled-tonal-button data-confirmation-key="first" aria-pressed=${this.first} ?disabled=${this.expired} @click=${()=>this.key('first')}>${materialIcon(this.first?'check':'security','icon')}${this.l('Key one: destination reviewed','第一把鎖：已核對位置',true)}</md-filled-tonal-button><md-filled-tonal-button data-confirmation-key="second" aria-pressed=${this.second} ?disabled=${this.expired} @click=${()=>this.key('second')}>${materialIcon(this.second?'check':'security','icon')}${this.l('Key two: removal authorized','第二把鎖：授權移除',true)}</md-filled-tonal-button></div>
         <label><md-checkbox ?checked=${this.rebuild} ?disabled=${this.expired} @change=${(e:Event)=>{this.rebuild=(e.target as HTMLInputElement).checked;this.progress=0;}} aria-label=${this.l('Acknowledge separate rebuild consent','確認另行授權重建',true)}></md-checkbox>${this.l('I consent to cleaning this output and understand the next build must rebuild it. This action never starts that rebuild automatically.','同意清除此輸出，並明白下次建置需要重新產生輸出。此操作絕不會自動啟動重建。',true)}</label>
-        <md-slider min="0" max="100" step="1" .value=${this.progress} ?disabled=${!ready||!this.rebuild} labeled aria-label=${this.l('Move confirmation to one hundred percent','將確認滑桿移至百分之一百',true)} @input=${(e:Event)=>{if(ready&&this.rebuild)this.progress=Number((e.target as HTMLInputElement).value);}}></md-slider>
+        </div><p class="step-heading">${this.l('2 · Slide to confirm','2 · 滑動以確認',true)}</p><md-slider min="0" max="100" step="1" .value=${this.progress} ?disabled=${!ready||!this.rebuild} labeled aria-label=${this.l('Move confirmation to one hundred percent','將確認滑桿移至百分之一百',true)} @input=${(e:Event)=>{if(ready&&this.rebuild)this.progress=Number((e.target as HTMLInputElement).value);}}></md-slider>
         <div class="meter" aria-hidden="true"><div class=${this.progress===100?'fill complete':'fill'} style=${'width:'+this.progress+'%'}></div></div>
         <p role="status">${this.expired?this.l('Confirmation expired. Cancel and request again.','確認已過期，請取消並重新要求。',true):this.progress===100?this.l('Authorization ready. Confirm to queue the clean target.','授權準備完成，按確認以排入清除目標。',true):this.l('Both keys and the full slider are required.','必須操作兩把鎖並完成滑桿。',true)}</p>
       </div>

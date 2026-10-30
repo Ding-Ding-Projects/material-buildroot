@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appliance console</title>
+<link rel="stylesheet" href="/console.css">
+<script type="module" src="/console.js">
+</script>
+</head>
+<body>
+<header>
+<strong data-en="Appliance console" data-hk="裝置控制台">
+</strong>
+<div>
+<label for="language" data-en="Language" data-hk="語言">
+</label>
+<md-outlined-select id="language">
+<md-select-option value="en"><span slot="headline">English</span></md-select-option>
+<md-select-option value="zh-HK"><span slot="headline">廣東話</span></md-select-option>
+<md-select-option value="bilingual"><span slot="headline">English + 廣東話</span></md-select-option>
+</md-outlined-select>
+</div>
+</header>
+<main>
+<section id="locked" class="card">
+<h1 id="auth-title">
+</h1>
+<p data-en="Manage this operating system from its local console. Remote administration is disabled." data-hk="請喺本機控制台管理裝置，遙距管理暫未開放。">
+</p>
+<form id="auth">
+<label for="password" data-en="Owner password (at least 12 characters)" data-hk="擁有人密碼（最少 12 個字元）">
+</label>
+<div class="field">
+<md-outlined-text-field id="password" type="password" minlength="12" maxlength="1024" autocomplete="current-password" required></md-outlined-text-field>
+<md-filled-button type="button" data-clear="password" data-en="Clear password" data-hk="清除密碼">
+</md-filled-button>
+</div>
+<md-filled-button type="submit" id="sign-in">
+</md-filled-button>
+</form>
+</section>
+<section id="workspace" hidden>
+<nav aria-label="Console sections">
+<md-filled-button id="resume-setup" data-en="Setup" data-hk="設定精靈"></md-filled-button>
+<md-filled-button data-page="workload" data-en="Application" data-hk="應用程式">
+</md-filled-button>
+<md-filled-button data-page="access" data-en="Remote access" data-hk="遙距連線">
+</md-filled-button>
+<md-filled-button data-page="settings" data-en="Settings" data-hk="設定">
+</md-filled-button>
+<md-filled-button id="logout" data-en="Lock console" data-hk="鎖定控制台">
+</md-filled-button>
+</nav>
+<div class="panels">
+<section id="setup-flow" class="card" hidden>
+<h2 id="setup-heading" tabindex="-1"></h2>
+<md-linear-progress id="setup-progress" max="3" value="1" aria-label="Setup progress"></md-linear-progress>
+<p data-en="Your completed steps are saved on this device. You can lock the console and resume after signing in." data-hk="完成嘅步驟會儲存喺裝置，鎖定之後可登入繼續。"></p>
+<div class="actions">
+<md-outlined-button id="setup-back" data-en="Back" data-hk="上一步"></md-outlined-button>
+<md-filled-button id="setup-next" data-en="Verify application and continue" data-hk="驗證應用程式並繼續"></md-filled-button>
+<md-outlined-button id="setup-skip" data-en="Skip remote access" data-hk="略過遙距連線"></md-outlined-button>
+<md-filled-button id="setup-finish" data-en="Finish setup" data-hk="完成設定"></md-filled-button>
+</div></section>
+<section id="workload" class="card">
+<h1 data-en="Application workspace" data-hk="應用程式工作區">
+</h1>
+<h2 id="name">
+</h2>
+<section id="workload-enrollment" hidden>
+<h2 data-en="Workload owner setup" data-hk="工作負載擁有人設定"></h2>
+<p data-en="Open the protected enrollment flow through this local console. The workload verifies its own owner values; existing owner data is never replaced." data-hk="透過本機控制台開啟受保護設定，工作負載會驗證擁有人資料，唔會取代現有資料。"></p>
+<md-outlined-button id="start-enrollment" data-en="Start workload owner setup" data-hk="開始設定工作負載擁有人"></md-outlined-button>
+<form id="enrollment-form" hidden>
+<label for="workload-username" data-en="Workload username" data-hk="工作負載使用者名稱"></label>
+<div class="field"><md-outlined-text-field id="workload-username" required maxlength="128" autocomplete="off"></md-outlined-text-field><md-outlined-button type="button" data-clear="workload-username" data-en="Clear username" data-hk="清除使用者名稱"></md-outlined-button></div>
+<label for="workload-password" data-en="New workload password" data-hk="工作負載新密碼"></label>
+<div class="field"><md-outlined-text-field id="workload-password" type="password" required minlength="12" maxlength="1024" autocomplete="new-password"></md-outlined-text-field><md-outlined-button type="button" data-clear="workload-password" data-en="Clear password" data-hk="清除密碼"></md-outlined-button></div>
+<label for="workload-confirm" data-en="Repeat workload password" data-hk="再次輸入工作負載密碼"></label>
+<div class="field"><md-outlined-text-field id="workload-confirm" type="password" required minlength="12" maxlength="1024" autocomplete="new-password"></md-outlined-text-field><md-outlined-button type="button" data-clear="workload-confirm" data-en="Clear confirmation" data-hk="清除確認密碼"></md-outlined-button></div>
+<div class="actions"><md-filled-button id="submit-enrollment" type="submit" data-en="Save workload owner" data-hk="儲存工作負載擁有人"></md-filled-button><md-outlined-button id="cancel-enrollment" type="button" data-en="Cancel setup" data-hk="取消設定"></md-outlined-button></div>
+</form></section>
+<p id="scoped-tls-limit" hidden data-en="Workload TLS is verified only by this console's scoped client. Browser trust and public tunnel origin trust are not configured, so external opening and public access remain unavailable." data-hk="只有控制台限定客戶端會驗證工作負載 TLS。瀏覽器及公開隧道來源信任尚未設定，因此暫不能外部開啟或公開連線。"></p>
+<p id="container-state"></p>
+<p id="health">
+</p>
+<p id="target" class="literal">
+</p>
+<div class="actions">
+<md-filled-button id="refresh" data-en="Check status" data-hk="檢查狀態">
+</md-filled-button>
+<a id="open" class="button" target="_blank" rel="noopener noreferrer" data-en="Open application" data-hk="開啟應用程式">
+</a>
+</div>
+<p data-en="Application authentication is separate from this console. Configure it before enabling public access." data-hk="應用程式有獨立登入設定，開放公眾連線之前請先設定好。">
+</p>
+</section>
+<section id="access" class="card" hidden>
+<h1 data-en="Remote access" data-hk="遙距連線">
+</h1>
+<p data-en="Off by default. Enabling a tunnel can make the application reachable on the public Internet. The console remains local." data-hk="預設關閉。啟用隧道會令應用程式可以由互聯網連線，控制台仍只限本機使用。">
+</p>
+<md-outlined-button id="refresh-access" data-en="Check connection status" data-hk="檢查連線狀態"></md-outlined-button>
+<p id="tunnel-status">
+</p>
+<p id="public-address" class="literal">
+</p>
+<p id="no-web-access" hidden data-en="This workload has no web interface. Open application and public tunnels are unavailable; local settings remain usable." data-hk="此工作負載沒有網頁介面，無法開啟網頁或公開隧道；本機設定仍可使用。"></p>
+<form id="tunnel-form">
+<label for="mode" data-en="Connection mode" data-hk="連線模式">
+</label>
+<md-outlined-select id="mode" value="off">
+<md-select-option selected value="off" data-en="Off" data-hk="關閉"><span slot="headline">
+</span></md-select-option>
+<md-select-option value="quick" data-en="Temporary quick tunnel" data-hk="臨時快速隧道"><span slot="headline">
+</span></md-select-option>
+<md-select-option value="named" data-en="Named tunnel" data-hk="具名隧道"><span slot="headline">
+</span></md-select-option>
+</md-outlined-select>
+<div id="named" hidden>
+<label for="credential" data-en="Locally managed tunnel credential JSON" data-hk="本機管理隧道憑證 JSON">
+</label>
+<div class="field">
+<md-outlined-text-field id="credential" type="password" autocomplete="off" maxlength="8192"></md-outlined-text-field>
+<md-filled-button type="button" data-clear="credential" data-en="Clear credential" data-hk="清除憑證">
+</md-filled-button>
+</div>
+<p data-en="Paste the credentials JSON from a locally managed tunnel. Remote connector tokens are unsupported. Every ingress is fixed to this application. Configure its DNS route separately. Credentials are stored privately and never shown again." data-hk="請貼上本機管理隧道嘅憑證 JSON，暫不支援遙距連接器憑證。來源固定為本應用程式，DNS 路由須另外設定。憑證會私密儲存。">
+</p>
+</div>
+<label class="check">
+<md-checkbox id="auth-confirm"></md-checkbox>
+<span data-en="Application authentication is configured and tested" data-hk="已設定並測試應用程式登入保護">
+</span>
+</label>
+<label class="check">
+<md-checkbox id="public-confirm"></md-checkbox>
+<span data-en="Allow public access to this application" data-hk="允許由互聯網連線至應用程式">
+</span>
+</label>
+<md-filled-button id="apply-access" type="submit" data-en="Apply access mode" data-hk="套用連線模式">
+</md-filled-button>
+</form>
+<p data-en="A running tunnel process is not proof of public reachability or authentication. Verify the public endpoint separately." data-hk="隧道程序運行唔代表公眾連線或登入保護已驗證，請另外檢查公開地址。">
+</p>
+</section>
+<section id="settings" class="card" hidden>
+<h1 data-en="Settings" data-hk="設定">
+</h1>
+<label for="theme" data-en="Appearance" data-hk="外觀">
+</label>
+<md-outlined-select id="theme">
+<md-select-option value="system" data-en="System" data-hk="跟隨系統"><span slot="headline">
+</span></md-select-option>
+<md-select-option value="light" data-en="Light" data-hk="淺色"><span slot="headline">
+</span></md-select-option>
+<md-select-option value="dark" data-en="Dark" data-hk="深色"><span slot="headline">
+</span></md-select-option>
+</md-outlined-select>
+<h2 data-en="Personal wording" data-hk="個人用詞">
+</h2>
+<p data-en="Choose a local JSON file, or drop it anywhere in the unlocked console. Data remains in this browser's local storage. Clear restores original wording." data-hk="選擇本機 JSON 檔，或拖放到已解鎖控制台。資料只會保留喺瀏覽器本機儲存空間，清除後會還原原本用詞。">
+</p>
+<label for="vocabulary" data-en="Load or replace JSON" data-hk="載入或取代 JSON">
+</label>
+<input id="vocabulary" type="file" accept=".json,application/json">
+<p id="wording-state">
+</p>
+<md-filled-button id="clear-wording" data-en="Clear personal wording" data-hk="清除個人用詞">
+</md-filled-button>
+<p data-en="Local console only. Full appearance editing and advanced feature parity remain incomplete." data-hk="只限本機控制台。完整外觀編輯同進階功能仍未完成。">
+</p>
+</section>
+</div>
+</section>
+<md-linear-progress id="operation-progress" indeterminate hidden aria-label="Operation in progress"></md-linear-progress>
+<p id="notice" role="status" aria-live="polite">
+</p>
+<div id="celebration" role="status" aria-live="polite" hidden>
+</div>
+</main>
+</body>
+</html>

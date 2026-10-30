@@ -1,3 +1,8 @@
+import "@material/web/list/list.js";
+import "@material/web/list/list-item.js";
+import {expressiveComponentStyles} from './shell-expressive-components';
+import "./workspace-section";
+import {workspacePresentationStyles} from './workspace-presentation';
 import "./editor-transfer-panel";
 import "./settings-search";
 import {localizedCopy} from './language-wording';
@@ -28,38 +33,24 @@ type QueueItem = {
   startedAt?: string; finishedAt?: string;
   previousOutcomes?: {state:string;finishedAt?:string;result?:{code?:string;incompleteOutput?:{state:string;name?:string;publication:string}}}[];
 };
-const toolTasks=[['tool:local','Local tool setup','本機工具設定'],['tool:convert','Convert a file','轉換檔案'],['tool:pdf','PDF operations','PDF 操作'],['tool:queue','File/model queue','檔案／模型佇列'],['tool:server','Server management','伺服器管理']];
+const toolTasks=[['tool:local','Local tool setup','本機工具設定'],['tool:convert','Convert a file','轉換檔案'],['tool:pdf','PDF operations','PDF 操作'],['tool:queue','File/model queue','檔案／模型佇列'],['tool:server','Server management','伺服器管理'],['tool:editor','External editor','外部編輯器']];
+const relatedWorkspaces=[['artifacts','Images, flashing and SDK export','映像、燒錄同 SDK 匯出'],['assistant','Ollama and assistant','Ollama 同助理'],['companion','Download hand-off and connections','下載轉交同連接'],['regex','Regex workbench','正規表達式工作台'],['source','Source and publishing preparation','來源同發佈準備'],['package','Package authoring','套件編寫']];
 export class ToolsPanel extends LitElement {
-  static properties = { language: { type: String }, revision: { state: true }, selectedTask:{state:true} };
+  static properties = { language: { type: String }, revision: { state: true }, selectedTask:{state:true},toolsOpen:{state:true} };
   language = "bilingual";
-  selectedTask='tool:local';
+  selectedTask='tool:convert';
+  private toolsOpen=true;
+  private visibleTools?: string[];
   private navigationEpoch=0;
-  private pickerReturn?:{id:string;epoch:number};
   private taskLabel(id:string){const entry=toolTasks.find(([value])=>value===id);return entry?this.l(entry[1],entry[2],true):'';}
   /** Presentation-only navigation; no file picker or operation is invoked. */
   async openDestination(id:string){
     if(!toolTasks.some(([value])=>value===id))return false;
-    this.pickerReturn=undefined;
     const epoch=++this.navigationEpoch;this.selectedTask=id;await this.updateComplete;
     if(epoch!==this.navigationEpoch||this.selectedTask!==id||!this.isConnected||!this.checkVisibility())return false;
     const heading=this.renderRoot.querySelector<HTMLElement>('#tool-heading-'+id.slice(5));heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});return true;
   }
-  private chooseTask(event:Event){
-    const select=event.currentTarget as HTMLElement&{value:string};
-    const returnsFromPicker=!select.matches(':focus-within'),id=select.value;
-    void this.openDestination(id);
-    if(returnsFromPicker)this.pickerReturn={id,epoch:this.navigationEpoch};
-  }
-  private async taskPickerFocus(){
-    const pending=this.pickerReturn;this.pickerReturn=undefined;
-    if(!pending)return;await this.updateComplete;
-    // The shared picker restores its trigger after its closed event and close promise.
-    // Move focus once both restorations have settled, retaining the navigation epoch.
-    await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
-    if(pending.epoch!==this.navigationEpoch||pending.id!==this.selectedTask||!this.isConnected||!this.checkVisibility())return;
-    const heading=this.renderRoot.querySelector<HTMLElement>('#tool-heading-'+pending.id.slice(5));heading?.focus();heading?.scrollIntoView({block:'start',behavior:'auto'});
-  }
-  disconnectedCallback(){this.navigationEpoch++;this.pickerReturn=undefined;clearInterval(this.queuePoll);this.queuePoll=undefined;super.disconnectedCallback();}
+  disconnectedCallback(){this.navigationEpoch++;clearInterval(this.queuePoll);this.queuePoll=undefined;super.disconnectedCallback();}
   private get primaryAction(){
     if(this.selectedTask==='tool:local')return this.payloads.some(p=>!p.available)?'Choose executable':'Check tool availability';
     if(this.selectedTask==='tool:convert'){const format=this.categories.find(c=>c.category===this.category)?.formats.find(f=>f.format===this.format);return !(format?.available||format?.attemptAvailable)?'Load formats':!this.source?'Choose source':!this.destination?'Choose new output':format.attemptAvailable?'Attempt isolated conversion':'Convert now';}
@@ -114,6 +105,8 @@ export class ToolsPanel extends LitElement {
   private serverRunning: boolean | undefined;
   static styles = [
     workspaceStyles,
+    expressiveComponentStyles,
+    workspacePresentationStyles,
     css`
       :host {
         display: block;
@@ -137,6 +130,12 @@ export class ToolsPanel extends LitElement {
         --md-sys-color-secondary-container: inherit;
         --md-sys-color-on-secondary-container: inherit;
         --md-sys-color-error: inherit;
+        --md-sys-color-tertiary: inherit;
+        --md-sys-color-tertiary-container: inherit;
+        --md-sys-color-on-tertiary-container: inherit;
+        --md-sys-color-error-container: inherit;
+        --md-sys-color-on-error-container: inherit;
+        --md-sys-color-surface-container-highest: inherit;
       }
       :host([hidden]) {
         display: none;
@@ -146,7 +145,6 @@ export class ToolsPanel extends LitElement {
         gap: 16px;
       }
       [hidden]{display:none!important}
-      .task-selector{max-width:640px}
       .columns {
         display: contents;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -443,9 +441,17 @@ export class ToolsPanel extends LitElement {
     const requiresPages = ["split", "extract", "reorder", "rotate"].includes(
       this.pdfOperation,
     );
-    return html`<div class="stack" aria-busy=${this.pending}>
-      <md-outlined-select id="tool-task" class="task-selector" .label=${this.l('Choose a utility task','選擇工具工作',true)} .value=${this.selectedTask} .displayText=${this.taskLabel(this.selectedTask)} @change=${this.chooseTask} @focusin=${this.taskPickerFocus}>${toolTasks.map(([id,en,zh])=>html`<md-select-option value=${id}><div slot="headline">${this.l(en,zh,true)}</div></md-select-option>`)}</md-outlined-select>
-      <editor-transfer-panel .language=${this.language}></editor-transfer-panel>
+    return html`<div class="tools-workspace" data-drawer-open=${this.toolsOpen} aria-busy=${this.pending}>
+      <div class="tools-search-bar"><md-outlined-button aria-controls="tools-drawer" aria-expanded=${this.toolsOpen} @click=${()=>this.toolsOpen=!this.toolsOpen}>${materialIcon('menu','icon')}${this.l('Tools','工具')}</md-outlined-button>        <settings-search .language=${this.language} .label=${this.l('Search tools','搜尋工具')}
+          .entries=${[...toolTasks,...relatedWorkspaces].map(([id,en,zh])=>({id,text:this.l(en,zh,true)}))}
+          @settings-filter=${(e:CustomEvent<string[]>)=>{e.stopPropagation();if(JSON.stringify(this.visibleTools)!==JSON.stringify(e.detail)){this.visibleTools=e.detail;this.changed();}}}></settings-search></div>
+      <aside id="tools-drawer" class="workspace-sidebar" ?hidden=${!this.toolsOpen} aria-label=${this.l('Tool navigation','工具導覽')}>
+        ${[['Files and media','檔案同媒體',['tool:convert','tool:pdf','tool:queue']],['Environment and code','環境同程式碼',['tool:local','tool:server','tool:editor']]].map(([en,zh,ids])=>html`<section class="tool-group"><h3>${this.l(en as string,zh as string)}</h3><md-list class="expressive-list">${(ids as string[]).filter(id=>!this.visibleTools||this.visibleTools.includes(id)).map(id=>html`<md-list-item type="button" class="workspace-destination expressive-row" aria-current=${this.selectedTask===id?'page':'false'} @click=${()=>void this.openDestination(id)}>${materialIcon(id==='tool:server'?'computer':id==='tool:queue'?'history':id==='tool:editor'?'code':'build','start')}<div slot="headline">${this.taskLabel(id)}</div></md-list-item>`)}</md-list></section>`)}
+        <h3>${this.l('Project workspaces','專案工作區')}</h3>${relatedWorkspaces.filter(([id])=>!this.visibleTools||this.visibleTools.includes(id)).map(([id,en,zh])=>html`<md-text-button class="workspace-destination" @click=${()=>this.dispatchEvent(new CustomEvent('utility-workspace-open',{bubbles:true,composed:true,detail:{destination:id}}))}>${materialIcon('open_in_new','icon')}${this.l(en,zh)}</md-text-button>`)}
+        ${this.visibleTools?.length===0?html`<p>${this.l('No matching tools.','無符合工具。')}</p>`:nothing}
+      </aside>
+      <main class="workspace-body stack">
+      <section ?hidden=${this.selectedTask!=='tool:editor'} ?inert=${this.selectedTask!=='tool:editor'}><h2 id="tool-heading-editor" tabindex="-1">${this.taskLabel('tool:editor')}</h2><editor-transfer-panel .language=${this.language}></editor-transfer-panel></section>
       ${this.pending || this.runningQueue
         ? html`<md-linear-progress
             indeterminate
@@ -486,14 +492,15 @@ export class ToolsPanel extends LitElement {
       </section>
       <div class="columns">
         <section class="panel stack" data-destination="convert" ?hidden=${this.selectedTask!=='tool:convert'} ?inert=${this.selectedTask!=='tool:convert'} aria-labelledby="tool-heading-convert" data-experience-id="tools-section:convert" tabindex="-1">
-          <h2 id="tool-heading-convert" tabindex="-1">${this.l("Convert a file","轉換檔案",true)}</h2>
+          <header class="workspace-heading"><div><p class="eyebrow">${this.l('Files and media','檔案同媒體')}</p><h2 id="tool-heading-convert" tabindex="-1">${this.l("Convert a file","轉換檔案",true)}</h2><p>${this.l('Choose admitted files, review the format, then convert locally.','選擇已授權檔案，核對格式，再於本機轉換。')}</p></div><md-outlined-button @click=${()=>void this.openDestination('tool:queue')}>${materialIcon('history','icon')}${this.l('History and recovery','記錄同復原')}</md-outlined-button></header>
+          <ol class="conversion-stages" aria-label=${this.l('Conversion preparation','轉換準備')}><li data-ready=${!!this.source}>${this.l('1 · Source','1 · 來源')}: ${this.source?.name||this.l('Choose a file','選擇檔案')}</li><li data-ready=${!!formats?.length}>${this.l('2 · Format','2 · 格式')}: ${this.format.toUpperCase()}</li><li data-ready=${!!this.destination}>${this.l('3 · Output','3 · 輸出')}: ${this.destination?.name||this.l('Choose a new file','選擇新檔案')}</li></ol>
           ${this.button("Load formats", "載入格式", async () => {
             this.categories = (
               await this.tool({ action: "converter.catalog" })
             ).categories;
           })}
-          ${this.categories.map(c => html`<details ?open=${c.category === this.category}>
-            <summary>${this.categoryName(c.category)}</summary>
+          ${this.categories.map(c => html`<workspace-section ?open=${c.category === this.category}>
+            <span slot="heading">${this.categoryName(c.category)}</span>
             <settings-search .language=${this.language} .label=${this.l("Search formats","搜尋格式",true)}
               .entries=${c.formats.map(f=>({id:f.format,text:`${f.format} ${f.adapter} ${f.reason||""}`}))}
               @settings-filter=${(e:CustomEvent)=>{e.stopPropagation();const ids=e.detail as string[];if(JSON.stringify(this.visibleFormats[c.category])!==JSON.stringify(ids)){this.visibleFormats[c.category]=ids;this.changed();}}}></settings-search>
@@ -502,7 +509,8 @@ export class ToolsPanel extends LitElement {
                 @click=${()=>{this.category=c.category;this.format=f.format;this.changed();}}>${f.format.toUpperCase()}</md-outlined-button>
               <span>${f.adapter} · ${f.available?this.l("Available","可用",true):this.unavailable(f.reason)}</span>
             </div>`)}
-          </details>`)}
+          </workspace-section>`)}
+          <md-outlined-select .label=${this.l('Output format','輸出格式')} .value=${this.format} .displayText=${this.format.toUpperCase()} @change=${(event:Event)=>{const value=(event.target as HTMLSelectElement).value;if(formats?.some(f=>f.format===value&&(f.available||f.attemptAvailable))){this.format=value;this.changed();}}}>${(formats??[]).map(f=>html`<md-select-option value=${f.format} ?disabled=${!f.available&&!f.attemptAvailable}><div slot="headline">${f.format.toUpperCase()}</div><div slot="supporting-text">${f.available?this.l('Available','可用'):this.unavailable(f.reason)}</div></md-select-option>`)}</md-outlined-select>
           <p>${this.categoryName(this.category)} · ${this.format.toUpperCase()}</p>
           <p class="note">${this.disclosure(this.category)}</p>
           <p class="note">${this.l("Choose a new output name with the selected format extension. Sources remain unchanged. Conversion may change metadata or encoding as described above.","請為新輸出選擇符合格式嘅副檔名。來源保持不變，轉換可能按上述說明改變中繼資料或編碼。",true)}</p>
@@ -719,7 +727,7 @@ export class ToolsPanel extends LitElement {
                     await this.tool({ action: "queue.cancel", id: j.id });
                     await this.queuePage();
                   })
-                : nothing}${j.previousOutcomes?.length?html`<details><summary>${this.l("Earlier attempt outcomes","較早嘗試結果",true)}</summary><ul>${j.previousOutcomes.map(outcome=>html`<li>${outcome.state} · ${outcome.finishedAt||""} · ${outcome.result?.code||""} · ${outcome.result?.incompleteOutput?.state||""} ${outcome.result?.incompleteOutput?.publication||""} ${outcome.result?.incompleteOutput?.name||""}</li>`)}</ul></details>`:nothing}${["interrupted", "failed", "cancelled"].includes(
+                : nothing}${j.previousOutcomes?.length?html`<workspace-section><span slot="heading">${this.l("Earlier attempt outcomes","較早嘗試結果",true)}</span><ul>${j.previousOutcomes.map(outcome=>html`<li>${outcome.state} · ${outcome.finishedAt||""} · ${outcome.result?.code||""} · ${outcome.result?.incompleteOutput?.state||""} ${outcome.result?.incompleteOutput?.publication||""} ${outcome.result?.incompleteOutput?.name||""}</li>`)}</ul></workspace-section>`:nothing}${["interrupted", "failed", "cancelled"].includes(
                 j.state,
               )
                 && !(j.request.action==="ollama.pull"&&(j.state==="interrupted"||j.result?.incompleteOutput?.state==="unknown")) ? this.button("Retry job", "重試工作", async () => {
@@ -740,6 +748,7 @@ export class ToolsPanel extends LitElement {
           : nothing}
       </section>
       <section data-destination="server" ?hidden=${this.selectedTask!=='tool:server'} ?inert=${this.selectedTask!=='tool:server'} aria-labelledby="tool-heading-server" data-experience-id="tools-section:server" tabindex="-1"><h2 id="tool-heading-server" tabindex="-1">${this.taskLabel('tool:server')}</h2><minecraft-panel .language=${this.language}></minecraft-panel></section>
+      </main>
     </div>`;
   }
 }

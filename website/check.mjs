@@ -2,7 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { runInNewContext } from 'node:vm';
 import { documentSources } from './inventory.mjs';
+import { parseRoadmap } from './roadmap.mjs';
 import { verifyBeginnerDestinations } from './beginner-guide.js';
 import { verifyArticleLanguage } from './article-language.mjs';
 import { containedPath, sourceSnapshot, indexedSources, admittedSource } from './source-boundary.mjs';
@@ -34,6 +36,28 @@ for(const doc of inventory)if(!htmlFiles.includes(doc.url.slice(base.length)))fa
 for(const phase of roadmap.phases)if(!htmlFiles.includes('site/phases/'+phase.id.toLowerCase()+'.html'))failures.push(`${phase.id}: dedicated phase page missing.`);
 const htmlByFile=new Map();
 for(const file of htmlFiles)htmlByFile.set(file,await fs.readFile(path.join(docs,file),'utf8'));
+const dataScriptPath = 'site/assets/document-index.js';
+try {
+  const script = await fs.readFile(path.join(docs,dataScriptPath),'utf8');
+  const target = {textContent: ''};
+  runInNewContext(script,{document:{getElementById:id=>id==='document-index'?target:null}},{timeout:1000});
+  const sourcePhases = parseRoadmap(await fs.readFile(admittedSource(root,'ROADMAP.md',sourceIndex),'utf8'));
+  const expectedIndex = sourcePhases.map(p=>({title:p.id+' '+p.title,url:base+'site/phases/'+p.id.toLowerCase()+'.html',category:'Roadmap phase',text:p.body}));
+  for (const doc of inventory) {
+    const content = await fs.readFile(admittedSource(root,doc.source,sourceIndex),'utf8');
+    expectedIndex.push({title:doc.title,url:doc.url,category:doc.category,text:content.replace(/[#*`|>]/g,' ')});
+  }
+  if(JSON.stringify(JSON.parse(target.textContent))!==JSON.stringify(expectedIndex))failures.push('Shared documentation search data differs from the complete source inventory.');
+  const worker = await fs.readFile(path.join(docs,'service-worker.js'),'utf8');
+  if(!worker.includes(base+dataScriptPath))failures.push('Offline inventory omits shared search data.');
+} catch { failures.push('Shared documentation search data is unavailable or invalid.'); }
+for (const [file,html] of htmlByFile) {
+  const targets = [...html.matchAll(/<script type="application\/json" id="document-index">([\s\S]*?)<\/script>/g)];
+  const scripts = [...html.matchAll(/<script\b([^>]*)>/g)];
+  const data = scripts.filter(match=>match[1].includes(`src="${base}${dataScriptPath}"`));
+  const module = scripts.find(match=>match[1].includes(`src="${base}site/assets/app.js"`));
+  if(targets.length!==1||targets[0][1]!==''||data.length!==1||!module||/\b(?:async|defer|type)\s*(?:=|\s|$)/.test(data[0]?.[1]||'')||!/type="module"/.test(module?.[1]||'')||/\basync\b/.test(module?.[1]||'')||!(targets[0]?.index<data[0]?.index&&data[0].index<html.indexOf('</body>')))failures.push(`${file}: shared search data must load synchronously after one empty target and before deferred module execution.`);
+}
 for(const doc of inventory) {
   try { verifyArticleLanguage(doc.source, htmlByFile.get(doc.url.slice(base.length)) || ''); }
   catch(error) { failures.push(error.message); }

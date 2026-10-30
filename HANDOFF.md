@@ -1,5 +1,38 @@
 # Current main-only closeout checkpoint, 2026-10-19
 
+## GUI remake in progress, 2026-10-30
+
+The current task uses the new eight-artboard Material 3 Expressive design from public main revision `9223534b5cfd4f2d6daa62bff9670411931f0f3d`, design tree `c7d0a32219113128af79808b69d5eb8ff0c446fa`. The earlier attachment is no longer an implementation input. Source and file identities are recorded in `design/import-manifest.json`; earlier provenance is archived. Local merge `c6a8c6023286b4cb1a4c427a1678664292361c7b` reconciles that design with the reviewed public-lineage source. It has not been published by this task.
+
+Independent handoff review permits implementation with explicit requirements for complete inherited roles, reachable collapsed drawers, registered Material controls and preserved host authority. Three isolated lanes are adapting shell/Images/Settings/tabs, Builds/Tools/Help and overlays/confirmation/attention. The earlier desktop build and partial layout matrix cover the superseded design only. Current-design compilation, focused browser checks, native interaction, complete layout tuples and current screenshots remain pending. No new release, installer or ISO acceptance is claimed.
+
+The integration preserves reviewed current file contents without merging earlier private historical ancestry. Existing standalone-workflow source and its runtime gaps remain unchanged. Publication review is incomplete: complete scans exceeded their bounded observation interval, and scanner performance is being investigated separately without relaxing matching or privacy rules. Historical publication findings remain recorded; exiting the task's presentation state does not invalidate them.
+
+See docs/desktop/gui-remake.md and design/import-manifest.json.
+
+## Active standalone OS workflow, 2026-10-22
+
+### Preservation boundary at 10% remaining allowance
+
+Integrated runtime source is `a1b81a3fe22efb653101772e2f087954ab856123`. Its exact root desktop build passed; receipt SHA-256 is `31222fa17e9ed4e731f4531550624ac52926e0371f3f4151e6008c8d3dbf1be6`. It includes saved OCI descriptor/configuration/layer identity binding, a separate saved-image diagnostic, source-shape admission and scoped guest owner enrollment. Focused producer checks passed 28 of 29 with one POSIX ownership skip; independent identity review found no confirmed material blocker. Guest enrollment has six independently repeated scoped TLS checks, with live workload acceptance still absent.
+
+The native launch of that build succeeded, but two CDP startup proofs timed out before attachment. No preview, approval or ISO build ran on this candidate. The owned application closed normally and process/desktop absence was verified. Earlier source `28272e3` remains the last actual ISO attempt: it failed in preparation. No ISO, boot, Downloads export, current kiosk, LAN, persistence or tunnel acceptance is claimed.
+
+Unfinished console-web work is preserved separately at `efa3a3ff53763d04f0ebfda01cd1b20469c319e6`, outside the integrated runtime source. It adds an explicit optional console address and prevents stale or prepared addresses from silently opting in. TypeScript passed; the final focused renderer run had one pass and two failures (Vite startup and an internal Material control disabled-state assertion). Diagnose those results and actual interaction before integration. The integrated GUI still clears the URL in console mode; do not attempt a console-plus-web health test through hidden state.
+
+All five task lanes and the integrated source are preserved in a verified private recovery destination with workflow execution disabled. Current local history must remain private because earlier commits contain private origins. Public main remains `dd07fb78454a8e6e9f8fbf629510efe3695f2449`. The complete publication scan stopped at its one-hour observation limit without a verdict. A private bounded partition wrapper has small synthetic equivalence proof, but no full candidate verdict and unexercised final timeout branches. Its minimum three GiB headroom exceeds the last observed approximately 1.2 GiB available host memory. No public source delivery is claimed.
+
+Resume by resolving the console regressions, completing publication review, preparing a clean current-tree integration on the public baseline without private history, and driving the next changed-source ISO attempt through the actual application. Keep the registered task WSL profile/storage and every active lane. No cleanup or unregistration is authorized by this preservation boundary. The private Job 2027 fork, upstream workload and custom Home Assistant runtime remain unverified; productive browser/tunnel trust for the scoped self-signed profile is explicitly unfinished.
+
+The current task adds a guided independent Linux OS producer for container images, archives and supported Compose workloads. All production, boot verification and export acceptance must be driven through the running desktop application. The first target is the private Job 2027 fork, with upstream Job 2027 and the custom Home Assistant frontend/Core also required. Optional private personal-wording JSON can be included in private media; temporary and named Cloudflare tunnels enroll credentials only after guest boot. Existing deployments and unrelated changes remain preserved.
+
+Implementation is in progress. Focused backend and producer checks do not establish a bootable current ISO, healthy application, kiosk, LAN, tunnel or persistence. The final verified media and checksum must be exported to Downloads. See [standalone OS workflow](docs/desktop/standalone-os.md) and the current roadmap for explicit unfinished acceptance.
+
+Native candidate `28272e3098fc0eed14238df27ed896f7bd7bbdf4` completed a fresh pinned nginx preview and actual Build action. Preparation stopped with the validated diagnostic `SOURCE_IDENTITY_MISMATCH` (`python3`, exit 1). The saved source digest matched its fresh preview, so registry drift is not established. No ISO was produced. The [current diagnostic screenshot](docs/evidence/os-native/diagnostic-visible.png) passed source, executable, pixel, privacy, interaction and owned-teardown receipt validation. The earlier undetailed failure remains in the [evidence archive](docs/evidence/os-native/ARCHIVE.md). The task profile and registered WSL storage remain preserved.
+
+Public integration is pending a complete publication review. Existing local implementation history is preserved in an access-appropriate private recovery destination; it must not be merged or pushed directly into the public history. Current content is being corrected to detect source compatibility from native-selected pinned source structure instead of embedding private origins. Reconstruct a reviewed current-tree change on the fetched public baseline after that correction, without rewriting published history. Source backup and public delivery remain separate outcomes.
+
+
 ## Final integration and publication record
 
 For verdicts after this source checkpoint, read [Discussion2](https://github.com/Ding-Ding-Projects/material-buildroot/discussions/2), [issue1](https://github.com/Ding-Ding-Projects/material-buildroot/issues/1) and the newest workflow pinned to current main. Historical run IDs below do not authorize rerunning cancelled producers.

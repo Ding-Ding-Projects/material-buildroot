@@ -7,7 +7,7 @@
   },
   {
     "source": "CLOSEOUT_PROMPT.md",
-    "title": "Main-only integration closeout",
+    "title": "GUI remake continuation",
     "url": "/material-buildroot/site/articles/CLOSEOUT_PROMPT.html",
     "category": "Planning"
   },
@@ -48,6 +48,12 @@
     "category": "Planning"
   },
   {
+    "source": "design/IMPLEMENTATION_HANDOFF.md",
+    "title": "Material Buildroot GUI remake: design handoff",
+    "url": "/material-buildroot/site/articles/design/IMPLEMENTATION_HANDOFF.html",
+    "category": "Design"
+  },
+  {
     "source": "design/README.md",
     "title": "Application design handoff",
     "url": "/material-buildroot/site/articles/design/README.html",
@@ -63,6 +69,12 @@
     "source": "design/acceptance.md",
     "title": "Design and runtime acceptance plan",
     "url": "/material-buildroot/site/articles/design/acceptance.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/archive/20261030-superseded-design-overview.md",
+    "title": "Application design handoff",
+    "url": "/material-buildroot/site/articles/design/archive/20261030-superseded-design-overview.html",
     "category": "Design"
   },
   {
@@ -105,6 +117,12 @@
     "source": "design/archive/schedule-editor-in-progress/README.md",
     "title": "Unintegrated schedule editor recovery draft",
     "url": "/material-buildroot/site/articles/design/archive/schedule-editor-in-progress/README.html",
+    "category": "Design"
+  },
+  {
+    "source": "design/audit.md",
+    "title": "material-buildroot feature audit against FEATURES.md (111 ids)",
+    "url": "/material-buildroot/site/articles/design/audit.html",
     "category": "Design"
   },
   {
@@ -378,6 +396,18 @@
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/gui-remake.md",
+    "title": "Working with the redesigned desktop",
+    "url": "/material-buildroot/site/articles/docs/desktop/gui-remake.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/gui-remake.zh-HK.md",
+    "title": "使用重新設計嘅桌面工作區",
+    "url": "/material-buildroot/site/articles/docs/desktop/gui-remake.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
     "source": "docs/desktop/host-and-preferences.md",
     "title": "Host admission and preferences",
     "url": "/material-buildroot/site/articles/docs/desktop/host-and-preferences.html",
@@ -570,6 +600,18 @@
     "category": "Desktop"
   },
   {
+    "source": "docs/desktop/standalone-os.md",
+    "title": "Standalone container operating systems",
+    "url": "/material-buildroot/site/articles/docs/desktop/standalone-os.html",
+    "category": "Desktop"
+  },
+  {
+    "source": "docs/desktop/standalone-os.zh-HK.md",
+    "title": "獨立容器作業系統",
+    "url": "/material-buildroot/site/articles/docs/desktop/standalone-os.zh-HK.html",
+    "category": "Desktop"
+  },
+  {
     "source": "docs/desktop/typed-configuration-controls.md",
     "title": "Typed configuration controls",
     "url": "/material-buildroot/site/articles/docs/desktop/typed-configuration-controls.html",
@@ -657,6 +699,12 @@
     "source": "docs/evidence/native-windows-20261016/README.md",
     "title": "Native Windows continuation evidence, 2026-10-16",
     "url": "/material-buildroot/site/articles/docs/evidence/native-windows-20261016/README.html",
+    "category": "Evidence"
+  },
+  {
+    "source": "docs/evidence/os-native/ARCHIVE.md",
+    "title": "Earlier standalone OS evidence",
+    "url": "/material-buildroot/site/articles/docs/evidence/os-native/ARCHIVE.html",
     "category": "Evidence"
   },
   {

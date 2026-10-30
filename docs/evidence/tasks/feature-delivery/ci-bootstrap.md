@@ -32,7 +32,7 @@ bootstrap-gh always downloads/extracts without warm revalidation; initial checko
 
 Missing behavior: Complete per-job dependency or prerequisite inventory and negative discovery completeness gate absent. Publication CLI bootstrap warm/idempotent path absent.
 
-Missing proof: No current fresh-Gay-Hay bootstrap proof.
+Missing proof: No current fresh-runner bootstrap proof.
 
 Next action: Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.
 
@@ -52,7 +52,7 @@ bootstrap-gh always downloads/extracts without warm revalidation; initial checko
 
 Missing behavior: Complete per-job dependency or prerequisite inventory and negative discovery completeness gate absent. Publication CLI bootstrap warm/idempotent path absent.
 
-Missing proof: No current fresh-Gay-Hay bootstrap proof.
+Missing proof: No current fresh-runner bootstrap proof.
 
 Next action: Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.
 
@@ -72,7 +72,7 @@ bootstrap-gh always downloads/extracts without warm revalidation; initial checko
 
 Missing behavior: Complete per-job dependency or prerequisite inventory and negative discovery completeness gate absent. Publication CLI bootstrap warm/idempotent path absent.
 
-Missing proof: No current fresh-Gay-Hay bootstrap proof.
+Missing proof: No current fresh-runner bootstrap proof.
 
 Next action: Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.
 
@@ -92,7 +92,7 @@ bootstrap-gh always downloads/extracts without warm revalidation; initial checko
 
 Missing behavior: Complete per-job dependency or prerequisite inventory and negative discovery completeness gate absent. Publication CLI bootstrap warm/idempotent path absent.
 
-Missing proof: No current fresh-Gay-Hay bootstrap proof.
+Missing proof: No current fresh-runner bootstrap proof.
 
 Next action: Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.
 

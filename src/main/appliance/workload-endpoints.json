@@ -1,0 +1,32 @@
+{
+  "job-2027-fork": {
+    "productiveUrl": "https://127.0.0.1:8443/",
+    "healthUrl": "https://127.0.0.1:8443/healthz",
+    "setupOrigin": "https://127.0.0.1:8444/",
+    "setupRequiresPrivateRoute": true,
+    "setupRouteSource": { "service": "initialize", "path": "/run/owner/setup-access-url" },
+    "tunnelSetupAllowed": false,
+    "tls": {
+      "mode": "workload-certificate",
+      "service": "initialize",
+      "volume": "owner-config",
+      "certificatePath": "/run/owner/tls-cert.pem",
+      "serverName": "127.0.0.1",
+      "scope": "workload-only"
+    }
+  },
+  "job-2027-upstream": {
+    "productiveUrl": "http://127.0.0.1:8080/",
+    "setupOrigin": null,
+    "setupRequiresPrivateRoute": false,
+    "tunnelSetupAllowed": false,
+    "tls": { "mode": "none" }
+  },
+  "home-assistant-material": {
+    "productiveUrl": "http://127.0.0.1:8123/",
+    "setupOrigin": "http://127.0.0.1:8123/",
+    "setupRequiresPrivateRoute": false,
+    "tunnelSetupAllowed": false,
+    "tls": { "mode": "none" }
+  }
+}

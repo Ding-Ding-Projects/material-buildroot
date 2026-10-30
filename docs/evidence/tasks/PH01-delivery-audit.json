@@ -6158,7 +6158,7 @@
             "website/build.mjs"
           ],
           "actionTrace": [
-            "Documentation uses Markdown renderer, but no release/poke-guy/pull-request/README-preview universal consumer inventory.",
+            "Documentation uses Markdown renderer, but no release/issue/pull-request/README-preview universal consumer inventory.",
             "MarkdownIt html:false blocks raw markup; unsafeHTML places admitted output in same renderer, no separate isolated provider surface.",
             "Document source/base IDs and region label exist; emoji shortcode map is absent.",
             "Article unavailable states exist; universal no-notes-provided provider state absent.",
@@ -6166,7 +6166,7 @@
           ],
           "traceLimit": "Shared feature-level source observations may be repeated across surfaces. These references do not establish independent per-surface interaction, persistence or runtime proof.",
           "missingBehavior": [
-            "Documentation uses Markdown renderer, but no release/poke-guy/pull-request/README-preview universal consumer inventory.",
+            "Documentation uses Markdown renderer, but no release/issue/pull-request/README-preview universal consumer inventory.",
             "MarkdownIt html:false blocks raw markup; unsafeHTML places admitted output in same renderer, no separate isolated provider surface.",
             "Document source/base IDs and region label exist; emoji shortcode map is absent.",
             "Article unavailable states exist; universal no-notes-provided provider state absent.",
@@ -12040,7 +12040,7 @@
             "Publication CLI bootstrap warm/idempotent path absent."
           ],
           "missingCurrentProof": [
-            "No current fresh-Gay-Hay bootstrap proof."
+            "No current fresh-runner bootstrap proof."
           ],
           "nextAction": "Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.",
           "applicability": "This clause owns delivery machinery rather than a distinct application action.",
@@ -12067,7 +12067,7 @@
             "Publication CLI bootstrap warm/idempotent path absent."
           ],
           "missingCurrentProof": [
-            "No current fresh-Gay-Hay bootstrap proof."
+            "No current fresh-runner bootstrap proof."
           ],
           "nextAction": "Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.",
           "applicability": "Static GitHub Pages has no installed updater or native packaging action; presentation clauses remain separately listed.",
@@ -12094,7 +12094,7 @@
             "Publication CLI bootstrap warm/idempotent path absent."
           ],
           "missingCurrentProof": [
-            "No current fresh-Gay-Hay bootstrap proof."
+            "No current fresh-runner bootstrap proof."
           ],
           "nextAction": "Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.",
           "applicability": "The companion is an authenticated browser control surface, not a separately installed product.",
@@ -12121,7 +12121,7 @@
             "Publication CLI bootstrap warm/idempotent path absent."
           ],
           "missingCurrentProof": [
-            "No current fresh-Gay-Hay bootstrap proof."
+            "No current fresh-runner bootstrap proof."
           ],
           "nextAction": "Complete job-owned inventory and cache-miss/warm proof without adding tests to GitHub Actions.",
           "applicability": null,
@@ -17057,5 +17057,24 @@
     "release-dim-sum-photo",
     "agents-md-vocabulary-block",
     "roadmap-checklist"
+  ],
+  "editorialCorrections": [
+    {
+      "date": "2026-10-30",
+      "purpose": "Align duplicated explanatory prose with the corrected feature evidence articles.",
+      "changedPointers": [
+        "/rows/41/surfaces/0/actionTrace/0",
+        "/rows/41/surfaces/0/missingBehavior/0",
+        "/rows/83/surfaces/0/missingCurrentProof/0",
+        "/rows/83/surfaces/1/missingCurrentProof/0",
+        "/rows/83/surfaces/2/missingCurrentProof/0",
+        "/rows/83/surfaces/3/missingCurrentProof/0"
+      ],
+      "relatedSources": [
+        "docs/evidence/tasks/feature-delivery/rendered-provider-text.md",
+        "docs/evidence/tasks/feature-delivery/ci-bootstrap.md"
+      ],
+      "provenance": "Original source revision, ledger hash, evidence states, counts and all other audit values are preserved."
+    }
   ]
 }

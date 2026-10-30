@@ -1,0 +1,983 @@
+<!doctype html><html lang="en" data-language="both"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#4052d6"><title>material-buildroot feature audit against FEATURES.md (111 ids) · Material Buildroot</title><meta name="description" content="Explore the Material Buildroot implementation plan, decisions and phased checklist."><meta property="og:title" content="material-buildroot feature audit against FEATURES.md (111 ids) · Material Buildroot"><meta property="og:description" content="Explore the Material Buildroot implementation plan, decisions and phased checklist."><meta property="og:type" content="website"><meta property="og:site_name" content="Material Buildroot"><meta property="og:image" content="https://ding-ding-projects.github.io/material-buildroot/site/assets/icon.png"><meta property="og:image:alt" content="Material Buildroot project icon, not a screenshot"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="material-buildroot feature audit against FEATURES.md (111 ids) · Material Buildroot"><meta name="twitter:description" content="Explore the Material Buildroot implementation plan, decisions and phased checklist."><meta name="twitter:image" content="https://ding-ding-projects.github.io/material-buildroot/site/assets/icon.png"><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="icon" href="/material-buildroot/site/assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/material-buildroot/site/assets/app.css"><script type="module" src="/material-buildroot/site/assets/app.js"></script></head><body><a class="skip" href="#main">Skip to content</a><aside class="sidebar" id="navigation"><md-icon-button id="close-menu" aria-label="Close navigation"><md-icon><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></md-icon-button><a class="brand" href="/material-buildroot/"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M5 12 20 4l15 8-15 8Z" fill="#4052d6"/><path d="m5 21 15 8 15-8v9l-15 8-15-8Z" fill="#8e9bfa"/><path d="m5 12 15 8 15-8v9l-15 8-15-8Z" fill="#6677e8"/></svg><span>Material Buildroot<small>PROJECT DOCUMENTATION</small></span></a><div class="nav-label">Explore the project</div><nav aria-label="Main navigation"><md-list><md-list-item type="link" href="/material-buildroot/" ><span slot="start" class="nav-symbol" aria-hidden="true">✦</span><span slot="headline"><span class="en">Learn by doing</span><span class="zh" lang="zh-HK">逐步學習</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/visitor.html" ><span slot="start" class="nav-symbol" aria-hidden="true">✎</span><span slot="headline"><span class="en">Visitor workspace</span><span class="zh" lang="zh-HK">訪客工作區</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/roadmap.html" ><span slot="start" class="nav-symbol" aria-hidden="true">≡</span><span slot="headline"><span class="en">Roadmap</span><span class="zh" lang="zh-HK">開發路線</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/library.html" ><span slot="start" class="nav-symbol" aria-hidden="true">▤</span><span slot="headline"><span class="en">Reference library</span><span class="zh" lang="zh-HK">文件參考庫</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/planning.html" ><span slot="start" class="nav-symbol" aria-hidden="true">◇</span><span slot="headline"><span class="en">Planning</span><span class="zh" lang="zh-HK">規劃</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/design.html" class="active" aria-current="page"><span slot="start" class="nav-symbol" aria-hidden="true">▧</span><span slot="headline"><span class="en">Design</span><span class="zh" lang="zh-HK">設計</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/wiki.html" ><span slot="start" class="nav-symbol" aria-hidden="true">◎</span><span slot="headline"><span class="en">Wiki</span><span class="zh" lang="zh-HK">Wiki</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/evidence.html" ><span slot="start" class="nav-symbol" aria-hidden="true">✓</span><span slot="headline"><span class="en">Evidence</span><span class="zh" lang="zh-HK">驗證</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/status.html" ><span slot="start" class="nav-symbol" aria-hidden="true">↓</span><span slot="headline"><span class="en">Downloads & status</span><span class="zh" lang="zh-HK">下載同狀態</span></span></md-list-item></md-list></nav><div class="nav-label">Contribute</div><nav aria-label="Contributor navigation"><md-list><md-list-item type="link" href="/material-buildroot/site/articles/NEXT_SESSION.html"><span slot="start" class="nav-symbol" aria-hidden="true"><md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></span><span slot="headline">Next session</span></md-list-item><md-list-item type="link" href="https://github.com/Ding-Ding-Projects/material-buildroot"><span slot="start" class="nav-symbol" aria-hidden="true">⌘</span><span slot="headline">Source on GitHub</span></md-list-item></md-list></nav><div class="sidebar-foot"><span class="status-dot"></span>Implementation in progress<p>Built in the open.<br>One verified step at a time.</p></div></aside><div class="page"><header class="topbar"><md-icon-button id="menu" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation"><md-icon><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></md-icon-button><div class="search-wrap"><md-outlined-text-field id="doc-search" label="Search docs" type="search" aria-label="Search documentation" autocomplete="off"></md-outlined-text-field><div id="search-results" class="search-results" role="region" aria-label="Document search results" aria-live="polite" hidden></div></div><div class="top-controls"><md-outlined-select id="language" class="language-control" label="Headings" aria-label="Heading language"><md-select-option value="both" selected><div slot="headline">EN + 粵語</div></md-select-option><md-select-option value="en"><div slot="headline">English</div></md-select-option><md-select-option value="zh"><div slot="headline">粵語</div></md-select-option></md-outlined-select><label class="theme-control"><span class="theme-label">Dark theme</span><md-switch id="theme" icons aria-label="Use dark theme"></md-switch></label></div></header><main id="main" tabindex="-1"><div class="provenance"><span class="version-tag">Documentation v0.1.0</span><span>Source updated <time data-local datetime="2026-10-30T14:19:59-04:00">2026-10-30T14:19:59-04:00</time></span><span>Built <time data-local datetime="2026-10-30T18:20:13.888Z">2026-10-30T18:20:13.888Z</time></span><span>Source 887edbc4e79c</span><span title="SHA-256 of the exact documentation and website input snapshot">Snapshot 9ba16fd62d</span></div><div class="article-layout"><article class="article"><div class="breadcrumb"><a href="/material-buildroot/site/library.html">Reference library</a> / <a href="/material-buildroot/site/categories/design.html">Design</a></div><div class="article-meta"><span class="article-source-language" data-source-language="en"><span class="en" lang="en">Project record · English source</span><span class="zh" lang="zh-HK">項目記錄 · 英文原文</span></span><md-outlined-button class="article-bookmark" data-bookmark-url="/material-buildroot/site/articles/design/audit.html" data-bookmark-title="material-buildroot feature audit against FEATURES.md (111 ids)">Save reference</md-outlined-button><a href="https://github.com/Ding-Ding-Projects/material-buildroot/blob/main/design/audit.md">View source <md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></a></div><div class="article-body" lang="en"><h1 id="material-buildroot-feature-audit-against-featuresmd-111-ids">material-buildroot feature audit against FEATURES.md (111 ids)</h1>
+<p>Read-only audit. Nothing in either repo was changed. Renderer paths are relative to <code>src/renderer/</code>.</p>
+<h2 id="1-current-shell-map">1. Current shell map</h2>
+<p><strong>Entry HTML:</strong> <code>index.html</code> (lang <code>zh-HK</code>, strict CSP, <code>connect-src 'none'</code>). It mounts <code>&lt;material-buildroot&gt;</code> and loads <code>/src/renderer/main.ts</code>. A second page, <code>transfer-progress.html</code>, mounts <code>&lt;transfer-progress-view&gt;</code> (<code>transfer-progress.ts</code>) in its own always-on-top progress window.</p>
+<p><strong>Root element:</strong> <code>material-buildroot</code> (class <code>MaterialBuildroot</code>, <code>main.ts</code>, about 2,300 lines). It owns <code>route</code> (default <code>images</code>), <code>settingsCategory</code>, project sessions and dialogs.</p>
+<p><strong>Layout, from top to bottom:</strong></p>
+<ul>
+<li><code>&lt;guided-shell-attention&gt;</code> (<code>guided-shell-attention.ts</code>, which extends <code>AttentionModePanel</code> from <code>attention-mode-panel.ts</code>). It is a floating attention/ADHD/narration region opened by the top-bar &quot;tune&quot; button. It also renders <code>&lt;guided-shell-dim-sum&gt;</code> (extends <code>DimSumPanel</code>, <code>dim-sum-panel.ts</code>).</li>
+<li><strong>Top bar (<code>&lt;header&gt;</code>), a frameless custom title bar</strong> (<code>frame:false</code> in <code>src/main/index.cjs</code>). It contains:
+<ul>
+<li>Menu button, which opens <code>navigation-dialog</code>.</li>
+<li>Brand: the &quot;MB&quot; mark plus <code>wording.productName()</code> and &quot;Desktop workspace&quot;. A custom logo <code>&lt;img&gt;</code> is inserted by <code>appearance-logo.ts</code>.</li>
+<li>Command-search button &quot;Actions · Ctrl+Shift+F&quot;. Its click is intercepted by <code>command-surfaces.ts</code>, so it opens the palette.</li>
+<li>Attention button.</li>
+<li><code>&lt;notification-centre&gt;</code>.</li>
+<li>Minimize, maximize and close window controls (<code>window.studio</code>).</li>
+</ul>
+</li>
+<li><strong>Nav rail</strong> (<code>navigation()</code>): primary destinations come from <code>guided-shell.ts</code> <code>guidedDestinations</code>. These are Images, Builds, Tools, Help and Settings, plus a &quot;Setup&quot; button that opens <code>setup-dialog</code>.</li>
+<li><strong><code>&lt;workspace-tabs&gt;</code></strong> (<code>workspace-tabs.ts</code>) wraps <code>&lt;main&gt;</code>. It provides a browser-style tab strip with a &quot;New tab&quot; catalogue built from <code>workspaceDestinations()</code>, groups, pinning, edge choice, a master list and a regex filter.</li>
+<li><strong><code>&lt;main&gt;</code></strong> contains:
+<ul>
+<li><code>&lt;update-panel compact&gt;</code>, the persistent update banner.</li>
+<li>A toolbar heading for routes other than operations.</li>
+<li>The route content (see the table below).</li>
+<li>One <code>&lt;operations-panel presentation=&quot;guided&quot;&gt;</code> per open project session.</li>
+</ul>
+</li>
+<li><strong>Status bar</strong> (<code>.status</code>): <code>front-provenance</code> version and updated-at time, with seconds and the timezone.</li>
+<li><code>&lt;personal-vocabulary-drop&gt;</code>: a whole-window JSON drop target with a level-up celebration and a tada sound.</li>
+<li>Elements appended at runtime:
+<ul>
+<li><code>command-surfaces</code>: the palette, context menus and <code>searchable-picker</code>. It is appended to <code>.shell</code> on <code>whenDefined</code>.</li>
+<li><code>appearance-panel</code>: the per-element editor, appended to the app shadow root by <code>openAppearanceEditor</code>.</li>
+<li><code>experience-policy-panel[data-floating]</code>: element-lock wizard and unlock prompt, appended to <code>document.body</code>.</li>
+<li><code>destructive-confirmation</code>: appended by <code>requestDestructiveConfirmation</code>.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Route mapping.</strong> <code>go()</code> folds <code>builds</code>, <code>tools</code> and <code>help</code> into <code>route='operations'</code> and sets <code>operations-panel.tab</code>. <code>primaryForOperation()</code> chooses which rail item is highlighted.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>
+<thead>
+<tr>
+<th>Route / destination</th>
+<th>How it is reached</th>
+<th>Element (tag), file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>images</code></td>
+<td>Rail</td>
+<td>Inline <code>imagesView()</code> in <code>main.ts</code>. &quot;Create image&quot; goes to <code>image-creation</code>.</td>
+</tr>
+<tr>
+<td><code>image-creation</code></td>
+<td>From Images</td>
+<td><code>guided-image-creation</code>, <code>guided-shell-image-creation.ts</code>, plus <code>operations-panel</code> for the source stage</td>
+</tr>
+<tr>
+<td><code>builds</code> → operations <code>tab=builds</code></td>
+<td>Rail</td>
+<td><code>operations-panel</code> (<code>operations-panel.ts</code>) → <code>buildsView()</code> → <code>build-queue-panel</code> (→ <code>job-recovery-panel</code>)</td>
+</tr>
+<tr>
+<td><code>tools</code> → operations <code>tab=tools</code></td>
+<td>Rail</td>
+<td><code>tools-panel</code> (<code>tools-panel.ts</code>). Sub-tasks <code>tool:local</code>, <code>convert</code>, <code>pdf</code>, <code>queue</code> and <code>server</code> (<code>minecraft-panel</code> → <code>minecraft-remote-panel</code> and <code>minecraft-workflow-panel</code>), plus <code>editor-transfer-panel</code></td>
+</tr>
+<tr>
+<td><code>help</code> → operations <code>tab=documentation</code></td>
+<td>Rail</td>
+<td><code>documentation-panel</code> (<code>documentation-panel.ts</code>)</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td>Rail</td>
+<td>Inline <code>settingsView()</code> in <code>main.ts</code> (see settings below)</td>
+</tr>
+<tr>
+<td><code>projects</code> (Plans)</td>
+<td>Actions dialog, palette, tab catalogue only</td>
+<td>Inline <code>plansView()</code></td>
+</tr>
+<tr>
+<td><code>activity</code></td>
+<td>Actions dialog, palette, tab catalogue only</td>
+<td>Inline activity list</td>
+</tr>
+<tr>
+<td><code>about</code></td>
+<td>Actions dialog, palette, tab catalogue only</td>
+<td>Inline About: version, source, updated time, Material Icons licence</td>
+</tr>
+<tr>
+<td>operations <code>runtime</code> (Project &amp; runtime)</td>
+<td>Image sub-navigation and tabs</td>
+<td><code>project-workflow-panel</code>, <code>remote-runtime-panel</code>, <code>wsl-runtime-panel</code>, <code>execution-setup-panel</code> (→ <code>execution-workflow-panel</code> → <code>execution-jobs-panel</code>; <code>product-workflow-panel</code>)</td>
+</tr>
+<tr>
+<td>operations <code>config</code> (Image guide)</td>
+<td>Image sub-navigation</td>
+<td><code>image-presets-panel</code>. Sub-sections: <code>configuration-panel</code>, <code>defconfig-panel</code>, <code>account-provisioning-panel</code>, <code>named-targets-panel</code></td>
+</tr>
+<tr>
+<td>operations <code>source</code></td>
+<td>Image sub-navigation</td>
+<td><code>source-panel</code></td>
+</tr>
+<tr>
+<td>operations <code>package</code></td>
+<td>Image sub-navigation</td>
+<td><code>package-panel</code> (→ <code>package-discovery-panel</code>, <code>external-tree-panel</code>, <code>diagram-workbench</code>)</td>
+</tr>
+<tr>
+<td>operations <code>artifacts</code></td>
+<td>Image sub-navigation</td>
+<td><code>artifact-viewers</code> (→ <code>forge-publication-panel</code>, <code>flashing-panel</code>, <code>cloud-destinations-panel</code>, <code>sdk-export-panel</code>, <code>output-evidence</code>)</td>
+</tr>
+<tr>
+<td>operations <code>guests</code></td>
+<td>Tools select</td>
+<td><code>guest-panel</code> (→ <code>guest-topology</code> → <code>diagram-workbench</code>)</td>
+</tr>
+<tr>
+<td>operations <code>assistant</code></td>
+<td>Tools select</td>
+<td><code>assistant-plan-panel</code> plus <code>ollama-workspace-panel</code> (→ <code>managed-ollama-panel</code>, <code>ollama-catalogue-panel</code>, <code>ollama-evidence-panel</code>)</td>
+</tr>
+<tr>
+<td>operations <code>regex</code></td>
+<td>Tools select</td>
+<td><code>regex-workbench</code></td>
+</tr>
+<tr>
+<td>operations <code>authenticator</code></td>
+<td>Tools select</td>
+<td><code>authenticator-panel</code> (→ <code>authenticator-pairing</code>)</td>
+</tr>
+<tr>
+<td>operations <code>companion</code></td>
+<td>Tools select</td>
+<td><code>companion-panel</code></td>
+</tr>
+<tr>
+<td>operations <code>updates</code></td>
+<td>Tab catalogue only (rail highlight: Settings)</td>
+<td><code>update-panel</code> (full)</td>
+</tr>
+</tbody>
+</table></div>
+<p>In guided presentation, <code>operations-panel</code> hides the older layout: explorer, <code>md-tabs</code> and the jobs dock. Each panel above is still reached through <code>guidedNavigation()</code> (the image sub-navigation buttons or the Tools <code>md-outlined-select</code>), through the tab catalogue (<code>operation:*</code>, <code>tool:*</code>) or through palette teleport.</p>
+<p><strong>Settings organisation</strong> (<code>settingsCategories()</code> and <code>settingsEntries()</code> in <code>main.ts</code>):</p>
+<ul>
+<li><code>&lt;settings-search&gt;</code> (<code>settings-search.ts</code>, plain or regex search with <code>regex-workbench</code>) filters the categories.</li>
+<li>Category chips (<code>md-outlined-button</code>) switch a single visible section:
+<ul>
+<li><strong>Language:</strong> language select, plus <code>language-wording-panel</code> (humour sliders and display name).</li>
+<li><strong>Appearance:</strong> density, theme with provenance.</li>
+<li><strong>Schedules:</strong> <code>scheduled-preferences-panel</code>.</li>
+<li><strong>Experience:</strong> <code>experience-policy-panel</code>, which holds locks, Support Tickets and the ladder.</li>
+<li><strong>Shared preference:</strong> <code>shared-mode-panel</code> (School mode).</li>
+<li><strong>Backups:</strong> snapshots, import and restore.</li>
+<li><strong>Personal vocabulary:</strong> <code>personal-vocabulary-panel</code>.</li>
+</ul>
+</li>
+<li>School mode removes Language and Personal vocabulary.</li>
+<li>Each category is also a <code>setting:&lt;id&gt;</code> tab and palette destination.</li>
+</ul>
+<p><strong>Dialogs (<code>md-dialog</code> in <code>main.ts</code>):</strong> <code>navigation-dialog</code>, <code>new-plan-dialog</code>, <code>details-dialog</code>, <code>remove-dialog</code>, <code>leave-dialog</code>, <code>setup-dialog</code> (the three-step first-run wizard), <code>restore-dialog</code>, <code>import-dialog</code>, and <code>actions-dialog</code>. The actions dialog is the legacy route list: Plans, Operations, Activity, Settings and About, plus shared preference, schedules, vocabulary, Help, New plan, Export plans and Resume setup.</p>
+<p><strong>Separate overlays:</strong></p>
+<ul>
+<li>Command palette, context menus and searchable pickers come from <code>command-surfaces</code> (<code>command-surfaces.ts</code>). The palette opens on Ctrl+Shift+F, size is card or wide (persisted), and it teleports to targets. Context menus open on right-click, the context-menu key or a long touch; they have a filter and show shortcuts.</li>
+<li>Notification centre (<code>notification-centre.ts</code>): a fixed right-side sheet with three tabs (Notifications, Changelog, Connection status / Status Hub). It has regex search, <code>review-date-range</code>, bulk review and Markdown export.</li>
+<li>Attention panel (<code>guided-shell-attention</code>).</li>
+<li>Appearance editor (<code>appearance-panel</code>): draggable and resizable, with five tabs including colour, motion and logo.</li>
+<li>Experience-lock panel (<code>experience-policy-panel</code>).</li>
+<li>Destructive confirmation (<code>destructive-confirmation</code>).</li>
+</ul>
+<p><strong>Styling system:</strong></p>
+<ul>
+<li><code>workspace-styles.ts</code> exports <code>workspaceStyles</code>, a Lit <code>css</code>. It defines a hand-set <code>--md-sys-color-*</code> token set (about 15 tokens, primary <code>#315da8</code>, a <code>.dark</code> override) and the Roboto Variable / Noto Sans HK typefaces through <code>--md-ref-typeface-*</code>. It also holds the shell layout and responsive rules (<code>@media(max-width:699px)</code>, etc.).</li>
+<li><code>inherited-workspace-theme.ts</code> makes nested panels inherit the tokens.</li>
+<li>Fonts are vendored in <code>fonts.css</code> and <code>assets/roboto-latin.woff2</code>.</li>
+<li>Components are <code>@material/web</code> (<code>md-*</code>).</li>
+<li>Runtime appearance overrides are injected per shadow root by <code>appearance-panel.ts</code>. Low-stimulation overrides come from <code>attention-surfaces.ts</code>.</li>
+</ul>
+<p><strong>Reachability note:</strong> every custom element defined in <code>src/renderer</code> is instantiated from a chain that starts at <code>main.ts</code>. No defined element is orphaned. Plans, Activity and About are reachable only through the actions dialog, the palette or the tab catalogue; they are not on the nav rail.</p>
+<h2 id="2-feature-table">2. Feature table</h2>
+<p>Statuses: wired / partial / missing / unwired / n/a (gui but not applicable). &quot;—&quot; means non-gui.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>
+<thead>
+<tr>
+<th>id</th>
+<th>category</th>
+<th>status</th>
+<th>where</th>
+<th>gaps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>job-experience-document-label</td>
+<td>gui</td>
+<td>n/a</td>
+<td>—</td>
+<td>No job-related workflows in this app</td>
+</tr>
+<tr>
+<td>language</td>
+<td>gui</td>
+<td>wired</td>
+<td>main.ts Settings›Language (<code>#language-select</code>); language-wording.ts</td>
+<td>—</td>
+</tr>
+<tr>
+<td>funny-emoji</td>
+<td>gui</td>
+<td>partial</td>
+<td>language-wording-panel.ts <code>language-wording-panel</code> (Settings›Language)</td>
+<td>No dialog-emoji switch; no first-run disclosure</td>
+</tr>
+<tr>
+<td>personal-vocabulary</td>
+<td>gui</td>
+<td>wired</td>
+<td>personal-vocabulary-panel.ts <code>personal-vocabulary-panel</code> (Settings›Personal vocabulary, palette <code>wording:*</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>vocabulary-drop-apply</td>
+<td>gui</td>
+<td>wired</td>
+<td>personal-vocabulary-drop.ts <code>personal-vocabulary-drop</code> (+<code>personal-vocabulary-feedback</code>), mounted in main.ts; src/main/vocabulary-drop-sound.cjs</td>
+<td>—</td>
+</tr>
+<tr>
+<td>school-mode</td>
+<td>gui</td>
+<td>wired</td>
+<td>shared-mode-panel.ts <code>shared-mode-panel</code> (Settings›Shared preference); owned-copy.ts <code>vocabulary.school()</code></td>
+<td>Off-switch is PIN/password only (no passkey)</td>
+</tr>
+<tr>
+<td>narration</td>
+<td>gui</td>
+<td>wired</td>
+<td>attention-mode-panel.ts + narration.ts <code>LocalNarrator</code>, via <code>guided-shell-attention</code> (top-bar button)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>action-sound-effects</td>
+<td>gui</td>
+<td>missing</td>
+<td>Only the drop tada (personal-vocabulary-drop.ts)</td>
+<td>No action cues; no Settings switch</td>
+</tr>
+<tr>
+<td>scheduled-settings</td>
+<td>gui</td>
+<td>wired</td>
+<td>scheduled-preferences-panel.ts <code>scheduled-preferences-panel</code> (Settings›Schedules); appearance-schedule.ts</td>
+<td>—</td>
+</tr>
+<tr>
+<td>display-name</td>
+<td>gui</td>
+<td>partial</td>
+<td>language-wording-panel.ts (Settings›Language); language-wording-state.ts</td>
+<td>No append-only history record of renames</td>
+</tr>
+<tr>
+<td>adhd-modes</td>
+<td>gui</td>
+<td>wired</td>
+<td>attention-modes.ts, attention-mode-panel.ts via <code>guided-shell-attention</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>dim-sum</td>
+<td>gui</td>
+<td>wired</td>
+<td>guided-shell-dim-sum.ts <code>guided-shell-dim-sum</code> / dim-sum-panel.ts; host src/main/preferences/dim-sum.cjs (randomInt(10))</td>
+<td>—</td>
+</tr>
+<tr>
+<td>dim-sum-photo-source</td>
+<td>gui</td>
+<td>wired</td>
+<td>src/main/preferences/dim-sum.cjs (public catalogue + catalog-v1 assets, app-data cache)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>material-design</td>
+<td>gui</td>
+<td>partial</td>
+<td>@material/web throughout; workspace-styles.ts tokens</td>
+<td>Raw HTML controls remain (checkboxes, pre); hand-set non-Expressive tokens; no component inventory</td>
+</tr>
+<tr>
+<td>workflow-navigation</td>
+<td>gui</td>
+<td>wired</td>
+<td>main.ts header/nav, guided-shell.ts; frameless window in src/main/index.cjs</td>
+<td>Plans/Activity/About not on rail</td>
+</tr>
+<tr>
+<td>motion</td>
+<td>gui</td>
+<td>wired</td>
+<td>appearance-motion.ts <code>appearance-motion</code> (inside appearance-panel); reduced-motion in command-surfaces/attention-surfaces</td>
+<td>—</td>
+</tr>
+<tr>
+<td>appearance-editor</td>
+<td>gui</td>
+<td>partial</td>
+<td>appearance-panel.ts <code>appearance-panel</code>, <code>openAppearanceEditor()</code> via context menu &quot;Edit appearance…&quot;</td>
+<td>No layered image editing; Word/Photoshop depth unproven</td>
+</tr>
+<tr>
+<td>color-picker</td>
+<td>gui</td>
+<td>wired</td>
+<td>appearance-panel.ts colour tab; shared/appearance.ts (HEX/RGB/HSL/HSV/HWB/Lab/LCH/OKLCH/CMYK, rainbow)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>logo-customization</td>
+<td>gui</td>
+<td>wired</td>
+<td>appearance-panel.ts logo tab; appearance-logo.ts <code>applyLogo</code> + appearance-logo-worker.ts</td>
+<td>Default &quot;MB&quot; text mark still shown alongside</td>
+</tr>
+<tr>
+<td>overlay-panels</td>
+<td>gui</td>
+<td>partial</td>
+<td>appearance-panel drag/resize/persist; notification-centre, attention panel fixed</td>
+<td>Most panels not resizable or persisted</td>
+</tr>
+<tr>
+<td>collapse-filters</td>
+<td>gui</td>
+<td>partial</td>
+<td><code>&lt;details&gt;</code> in notification-centre/docs; workspace-tabs groups</td>
+<td>Search/filter rows not collapsible; no persistence</td>
+</tr>
+<tr>
+<td>accessibility-sizing</td>
+<td>gui</td>
+<td>missing</td>
+<td>Density only (Settings›Appearance)</td>
+<td>No accessibility-tools menu; text size and contrast controls absent</td>
+</tr>
+<tr>
+<td>functional-ui</td>
+<td>gui</td>
+<td>partial</td>
+<td>Plans route (<code>plansView</code>) is labelled &quot;not connected&quot;</td>
+<td>Plans are planning-only; discard is not history-recorded</td>
+</tr>
+<tr>
+<td>onboarding-wizard</td>
+<td>gui</td>
+<td>partial</td>
+<td>main.ts <code>setup-dialog</code> (<code>setupView</code>, 3 steps)</td>
+<td>Creates plans, not real projects; limited real setup</td>
+</tr>
+<tr>
+<td>tabs</td>
+<td>gui</td>
+<td>wired</td>
+<td>workspace-tabs.ts <code>workspace-tabs</code> (catalogue, regex, groups, pin)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>regex-search</td>
+<td>gui</td>
+<td>partial</td>
+<td>regex-workbench.ts <code>regex-workbench</code> (Tools›Regex; embedded in settings-search, notification-centre, docs, pickers)</td>
+<td>No dated RegexBuddy parity ledger found</td>
+</tr>
+<tr>
+<td>command-palette</td>
+<td>gui</td>
+<td>wired</td>
+<td>command-surfaces.ts <code>command-surfaces</code> <code>openPalette</code>, Ctrl+Shift+F, card/wide size</td>
+<td>—</td>
+</tr>
+<tr>
+<td>context-menus</td>
+<td>gui</td>
+<td>wired</td>
+<td>command-surfaces.ts <code>openContext</code> (filter, Edit appearance, Lock), touch long-press</td>
+<td>—</td>
+</tr>
+<tr>
+<td>menu-shortcuts</td>
+<td>gui</td>
+<td>wired</td>
+<td>command-surfaces.ts (<code>shortcut</code>, <code>aria-keyshortcuts</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>rich-controls</td>
+<td>gui</td>
+<td>partial</td>
+<td>Palette rows activate real controls</td>
+<td>Lists/results are mostly plain readouts; no virtualisation</td>
+</tr>
+<tr>
+<td>guided-forms</td>
+<td>gui</td>
+<td>partial</td>
+<td>guided-forms.ts <code>guided-forms</code> (language, theme, defconfig, package, diagram)</td>
+<td>Present on about 8 controls only</td>
+</tr>
+<tr>
+<td>info-icon-guidance</td>
+<td>gui</td>
+<td>partial</td>
+<td>guided-forms.ts <code>md-icon-button#entry</code></td>
+<td>Not on every control; no per-control inventory</td>
+</tr>
+<tr>
+<td>settings-explanations</td>
+<td>gui</td>
+<td>partial</td>
+<td>main.ts <code>themeProvenance()</code>; short paragraphs</td>
+<td>Provenance for theme only; no per-setting inventory</td>
+</tr>
+<tr>
+<td>blank-editors</td>
+<td>gui</td>
+<td>partial</td>
+<td>image-presets-panel.ts presets; appearance presets</td>
+<td>Not all blank editors have default-derived presets</td>
+</tr>
+<tr>
+<td>super-confirmation</td>
+<td>gui</td>
+<td>partial</td>
+<td>destructive-confirmation.ts <code>requestDestructiveConfirmation</code> (two keys, slider, Emergency exit)</td>
+<td>Used only for build clean; other deletes use plain dialogs</td>
+</tr>
+<tr>
+<td>element-locks</td>
+<td>gui</td>
+<td>wired</td>
+<td>experience-policies.ts <code>openExperiencePolicy</code>, experience-policy-panel.ts (six mixes) via context menu</td>
+<td>—</td>
+</tr>
+<tr>
+<td>support-tickets</td>
+<td>gui</td>
+<td>wired</td>
+<td>experience-policy-panel.ts (Settings›Experience, unlock prompt)</td>
+<td>Not linked from Help</td>
+</tr>
+<tr>
+<td>unlock-ladder</td>
+<td>gui</td>
+<td>wired</td>
+<td>experience-policy-panel.ts (dish, sums, <code>experience-mole-round</code>, clock); src/main/security/experience-policy.cjs</td>
+<td>—</td>
+</tr>
+<tr>
+<td>authenticator</td>
+<td>gui</td>
+<td>wired</td>
+<td>authenticator-panel.ts <code>authenticator-panel</code> (Tools›Authenticator); src/main/security/authenticator.cjs</td>
+<td>No camera capture</td>
+</tr>
+<tr>
+<td>qr-pairing</td>
+<td>gui</td>
+<td>wired</td>
+<td>authenticator-pairing.ts <code>authenticator-pairing</code> (authenticator + lock wizard)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>honest-monetization</td>
+<td>gui</td>
+<td>n/a</td>
+<td>No paid surfaces</td>
+<td>—</td>
+</tr>
+<tr>
+<td>local-history</td>
+<td>gui</td>
+<td>partial</td>
+<td>Settings›Backups snapshots/restore (main.ts); appearance history (appearance-panel)</td>
+<td>No unified history panel; no diff/prune/regex/date filter</td>
+</tr>
+<tr>
+<td>exports</td>
+<td>gui</td>
+<td>partial</td>
+<td>Plans, notifications (MD), appearance (JSON), artifacts, Activity</td>
+<td>Not every datum; no 7z or format choice</td>
+</tr>
+<tr>
+<td>bulk-actions</td>
+<td>gui</td>
+<td>partial</td>
+<td>notification-centre, authenticator, job-recovery-panel, tools queue</td>
+<td>Absent from most lists</td>
+</tr>
+<tr>
+<td>changelog</td>
+<td>gui</td>
+<td>partial</td>
+<td>notification-centre.ts Changelog tab (date range, regex, export)</td>
+<td>No commit SHAs; not under Help/About</td>
+</tr>
+<tr>
+<td>offline-docs</td>
+<td>gui</td>
+<td>wired</td>
+<td>documentation-panel.ts <code>documentation-panel</code> (Help); src/main/documentation/service.cjs</td>
+<td>—</td>
+</tr>
+<tr>
+<td>rendered-provider-text</td>
+<td>gui</td>
+<td>partial</td>
+<td>notification-centre/doc HTML via <code>unsafeHTML</code> of host-rendered Markdown</td>
+<td>Not an isolated renderer; no README/PR previews</td>
+</tr>
+<tr>
+<td>notifications</td>
+<td>gui</td>
+<td>partial</td>
+<td>notification-centre.ts <code>notification-centre</code> (review centre)</td>
+<td>No bottom-corner toasts</td>
+</tr>
+<tr>
+<td>file-converter</td>
+<td>gui</td>
+<td>wired</td>
+<td>tools-panel.ts <code>tool:convert</code>, <code>tool:pdf</code>; src/main/tools/*</td>
+<td>—</td>
+</tr>
+<tr>
+<td>minecraft-server-manager</td>
+<td>gui</td>
+<td>partial</td>
+<td>minecraft-panel.ts (+remote, workflow) under Tools›Server</td>
+<td>No Bedrock historical versions; Fabric/Paper only</td>
+</tr>
+<tr>
+<td>ollama-suite</td>
+<td>gui</td>
+<td>wired</td>
+<td>ollama-workspace-panel.ts, managed-ollama-panel.ts (Tools›Assistant)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>external-editor</td>
+<td>gui</td>
+<td>wired</td>
+<td>editor-transfer-panel.ts <code>editor-transfer-panel</code> (in tools-panel); src/main/tools/editor-transfer.cjs</td>
+<td>—</td>
+</tr>
+<tr>
+<td>download-handoff</td>
+<td>gui</td>
+<td>wired</td>
+<td>editor-transfer-panel.ts (Start download / Downloading / Download complete); transfer-progress.html <code>transfer-progress-view</code>; companion-panel.ts</td>
+<td>—</td>
+</tr>
+<tr>
+<td>forge-publishing</td>
+<td>gui</td>
+<td>partial</td>
+<td>forge-publication-panel.ts (Artifacts)</td>
+<td>No multi-account list with sign-out and set-active</td>
+</tr>
+<tr>
+<td>progress-recovery</td>
+<td>gui</td>
+<td>wired</td>
+<td>build-queue-panel / job-recovery-panel.ts; in-panel progress</td>
+<td>—</td>
+</tr>
+<tr>
+<td>completeness-parity</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>front-provenance</td>
+<td>gui</td>
+<td>wired</td>
+<td>main.ts status bar <code>.front-provenance</code> + <code>buildTime()</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>product-evidence</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>screen-recording</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>design-reference-parity</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>design-folder</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>layout-matrix</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>public-screenshot-gallery</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>landing-site</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>responsive-documentation</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>installer-download-button</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>feature-articles</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>vendored-fonts</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>shared-link-embed</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>homepage-link</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>vocabulary-unlock-boundary</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>private-site-app</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>status-hub</td>
+<td>gui</td>
+<td>partial</td>
+<td>notification-centre.ts Connection status tab; src/main/status-hub/service.cjs</td>
+<td>No emoji states; thin evidence</td>
+</tr>
+<tr>
+<td>discord-status-bridge</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>panic-webhooks</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>tidbyt-displays</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>build-entrypoints</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>fresh-build-run-command</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>dependency-fetcher</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>bundled-dependencies</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>squirrel-installer</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>self-signing</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>auto-updates</td>
+<td>gui</td>
+<td>wired</td>
+<td>update-panel.ts <code>update-panel</code> (compact banner in main + full panel at operation:updates)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>app-icon</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>release-workflow</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>release-timing</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>release-line-counts</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>release-dim-sum-photo</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>dim-sum-code-names</td>
+<td>gui</td>
+<td>missing</td>
+<td>—</td>
+<td>No code name in About or changelog</td>
+</tr>
+<tr>
+<td>ci-bootstrap</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>runner-selection</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>encrypted-public-builder</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>tabbed-readme</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>human-time-estimate</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>sanitized-instruction-copy</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>agents-md-vocabulary-block</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>vocabulary-hash-lock</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>roadmap-checklist</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>feature-docs</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>postman-collections</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>wiki-site-sync</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>handoff-record</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>closeout-prompt</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>discussion-records</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>project-board</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>operational-skill</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>readme-prompt-banner</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>uh-single-file-editions</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>project-profile</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>roblox-model-catalogue</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>roblox-visual-realism</td>
+<td>non-gui</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Counts:</strong> 111 ids in total. 59 are gui and 52 are non-gui. Of the 59 gui features: 30 wired, 24 partial, 3 missing, 0 unwired, 2 n/a.</p>
+<p><strong>Method caveat:</strong> &quot;partial&quot; judgements are based on reading the source and keyword checks. No built app was run.</p>
+</div></article><aside class="toc" aria-label="On this page"><strong>On this page</strong><a href="#1-current-shell-map">1. Current shell map</a><a href="#2-feature-table">2. Feature table</a></aside></div><footer class="foot"><div>Material Buildroot · Project documentation<br>Desktop implementation is in progress; release and companion acceptance remain separate.</div><div class="foot-links"><a href="/material-buildroot/site/build-info.json">Build provenance</a><a href="/material-buildroot/site/assets/fonts-manifest.json">Bundled font inventory</a><a href="https://github.com/Ding-Ding-Projects/material-buildroot">GitHub <md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></a><md-text-button id="system-theme">System theme</md-text-button></div></footer></main></div><script type="application/json" id="document-index"></script><script src="/material-buildroot/site/assets/document-index.js"></script></body></html>

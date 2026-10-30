@@ -1,10 +1,10 @@
 # material-buildroot feature audit against FEATURES.md (111 ids)
 
-Read-only audit. Nothing in either repo was changed. Renderer paths are relative to `/home/claude/material-buildroot/src/renderer/`.
+Read-only audit. Nothing in either repo was changed. Renderer paths are relative to `src/renderer/`.
 
 ## 1. Current shell map
 
-**Entry HTML:** `/home/claude/material-buildroot/index.html` (lang `zh-HK`, strict CSP, `connect-src 'none'`). It mounts `<material-buildroot>` and loads `/src/renderer/main.ts`. A second page, `/home/claude/material-buildroot/transfer-progress.html`, mounts `<transfer-progress-view>` (`transfer-progress.ts`) in its own always-on-top progress window.
+**Entry HTML:** `index.html` (lang `zh-HK`, strict CSP, `connect-src 'none'`). It mounts `<material-buildroot>` and loads `/src/renderer/main.ts`. A second page, `transfer-progress.html`, mounts `<transfer-progress-view>` (`transfer-progress.ts`) in its own always-on-top progress window.
 
 **Root element:** `material-buildroot` (class `MaterialBuildroot`, `main.ts`, about 2,300 lines). It owns `route` (default `images`), `settingsCategory`, project sessions and dialogs.
 
@@ -158,10 +158,10 @@ Statuses: wired / partial / missing / unwired / n/a (gui but not applicable). "�
 | screen-recording | non-gui | — | — | — |
 | design-reference-parity | non-gui | — | — | — |
 | design-folder | non-gui | — | — | — |
-| cheap-jor-matrix | non-gui | — | — | — |
+| layout-matrix | non-gui | — | — | — |
 | public-screenshot-gallery | non-gui | — | — | — |
 | landing-site | non-gui | — | — | — |
-| deen-wah-site | non-gui | — | — | — |
+| responsive-documentation | non-gui | — | — | — |
 | installer-download-button | non-gui | — | — | — |
 | feature-articles | non-gui | — | — | — |
 | vendored-fonts | non-gui | — | — | — |

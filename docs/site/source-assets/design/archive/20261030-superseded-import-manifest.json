@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "sourceArchive": "material-buildroot-gui-remake-design.zip",
+  "archiveSha256": "bbd7856a96d4ee5d9b71092311751869b856c76c8ba93c2a43d67e35df7cdbd6",
+  "files": [
+    {
+      "source": "audit.md",
+      "path": "audit.md",
+      "sourceBytes": 20698,
+      "sourceSha256": "a62f3a4a47fdfde1344d4419a662c628f476c1d642260175173f9e4d6ff61835",
+      "bytes": 20610,
+      "sha256": "e7368199afec252f4a76253bbcb678e4f2e31c06a77de39844566181272aa792"
+    },
+    {
+      "source": "current-screens/current-dark-help.png",
+      "path": "current-screens/current-dark-help.png",
+      "sourceBytes": 73256,
+      "sourceSha256": "5f7fc51be32989f55d440cb4640abc9da6dc3596b9c6c848a306a3d75a94d98e",
+      "bytes": 73256,
+      "sha256": "5f7fc51be32989f55d440cb4640abc9da6dc3596b9c6c848a306a3d75a94d98e"
+    },
+    {
+      "source": "current-screens/current-light-images.png",
+      "path": "current-screens/current-light-images.png",
+      "sourceBytes": 48516,
+      "sourceSha256": "998484124e2e9c06e7e92f6f30a3553bad8ac18694bf754477bfff1f2b914410",
+      "bytes": 48516,
+      "sha256": "998484124e2e9c06e7e92f6f30a3553bad8ac18694bf754477bfff1f2b914410"
+    },
+    {
+      "source": "current-screens/current-dark-images.png",
+      "path": "current-screens/current-dark-images.png",
+      "sourceBytes": 49555,
+      "sourceSha256": "83ebec491ede4a5af03b3259b5eef9869a6e4828f1c434c18348da8724045e6e",
+      "bytes": 49555,
+      "sha256": "83ebec491ede4a5af03b3259b5eef9869a6e4828f1c434c18348da8724045e6e"
+    },
+    {
+      "source": "current-screens/current-dark-settings.png",
+      "path": "current-screens/current-dark-settings.png",
+      "sourceBytes": 75794,
+      "sourceSha256": "2446e44c50e55bc00d6cb90c52cf2d88daddbd5e1345f35f71f98be55239e4e8",
+      "bytes": 75794,
+      "sha256": "2446e44c50e55bc00d6cb90c52cf2d88daddbd5e1345f35f71f98be55239e4e8"
+    },
+    {
+      "source": "current-screens/current-light-tools.png",
+      "path": "current-screens/current-light-tools.png",
+      "sourceBytes": 87503,
+      "sourceSha256": "cfb35eb842a1452a5b316d8ad117ce5730d644780d62fffc3b8449b904afc66a",
+      "bytes": 87503,
+      "sha256": "cfb35eb842a1452a5b316d8ad117ce5730d644780d62fffc3b8449b904afc66a"
+    },
+    {
+      "source": "current-screens/current-light-settings.png",
+      "path": "current-screens/current-light-settings.png",
+      "sourceBytes": 74681,
+      "sourceSha256": "d08c00660e8944d1a390d443175f20f0f04d571086652e146a7b55bfe9efc97d",
+      "bytes": 74681,
+      "sha256": "d08c00660e8944d1a390d443175f20f0f04d571086652e146a7b55bfe9efc97d"
+    },
+    {
+      "source": "current-screens/current-dark-builds.png",
+      "path": "current-screens/current-dark-builds.png",
+      "sourceBytes": 100567,
+      "sourceSha256": "c01b4700e86a8cc50bc5e16a62306820bbf9666bea1c6f04f494fcf375160cfd",
+      "bytes": 100567,
+      "sha256": "c01b4700e86a8cc50bc5e16a62306820bbf9666bea1c6f04f494fcf375160cfd"
+    },
+    {
+      "source": "current-screens/current-dark-tools.png",
+      "path": "current-screens/current-dark-tools.png",
+      "sourceBytes": 88037,
+      "sourceSha256": "3c9cdf8b670dac73ca94c08e3d4b7fec081efbbcf1f87a15dd6b5f2a36434525",
+      "bytes": 88037,
+      "sha256": "3c9cdf8b670dac73ca94c08e3d4b7fec081efbbcf1f87a15dd6b5f2a36434525"
+    },
+    {
+      "source": "current-screens/current-light-help.png",
+      "path": "current-screens/current-light-help.png",
+      "sourceBytes": 72717,
+      "sourceSha256": "bc14c39b6400ec0fdf609f66822d84e438093a069b92cf7024d2545fa9155cce",
+      "bytes": 72717,
+      "sha256": "bc14c39b6400ec0fdf609f66822d84e438093a069b92cf7024d2545fa9155cce"
+    },
+    {
+      "source": "current-screens/current-light-builds.png",
+      "path": "current-screens/current-light-builds.png",
+      "sourceBytes": 100622,
+      "sourceSha256": "2e06feccb8ba99afe78628c7b143dcfa77a6d1f912381b5d473c495377f75133",
+      "bytes": 100622,
+      "sha256": "2e06feccb8ba99afe78628c7b143dcfa77a6d1f912381b5d473c495377f75133"
+    },
+    {
+      "source": "project/Safety.dc.html",
+      "path": "Safety.dc.html",
+      "sourceBytes": 10801,
+      "sourceSha256": "058d076927353399f0b473f9eb66215d3e5e8c47c4f7a60fbc37029fffa6eb51",
+      "bytes": 10881,
+      "sha256": "3d4b67893806572550d62c955957b1975754e4e14a94b9b330ea4038056676f6"
+    },
+    {
+      "source": "project/Main.dc.html",
+      "path": "Main.dc.html",
+      "sourceBytes": 17531,
+      "sourceSha256": "231f8b0e9e9ed0fd6236da54ed407a0a2e1cc16ecc7b98f6e38e5baf751174fe",
+      "bytes": 17676,
+      "sha256": "163e6d0c1d56774a3c5ed0cf25b95787cfc53c59ffdf180219586e0e89c719ce"
+    },
+    {
+      "source": "project/Overlays.dc.html",
+      "path": "Overlays.dc.html",
+      "sourceBytes": 11620,
+      "sourceSha256": "73d4c1b847c9a850e9991bad57b69302d9476d3b02fcb6804d941d224d7e7deb",
+      "bytes": 11707,
+      "sha256": "f1b8ef9284523ac1cbf4dcf724056e6da097ab1ca158991b0180e7f6a8317a0a"
+    },
+    {
+      "source": "project/Builds.dc.html",
+      "path": "Builds.dc.html",
+      "sourceBytes": 14659,
+      "sourceSha256": "6717f7e98948f66a8c6902451cb8b9ebc6b12fc16da3f162b5bb7df860807c74",
+      "bytes": 14772,
+      "sha256": "89dc5e8685882dc9d9debdc3d3ec473ab9c4c896c3dc862e4b2a46a404caf701"
+    },
+    {
+      "source": "project/Settings.dc.html",
+      "path": "Settings.dc.html",
+      "sourceBytes": 19291,
+      "sourceSha256": "4492a80cd68cadd269ff4b87dabe56c8efb090b95347806766bcc2981dc31541",
+      "bytes": 19436,
+      "sha256": "e09da945dad0ead08a93206488f8faf9adbacc9d9e0bea2d25a119d898f90f9f"
+    },
+    {
+      "source": "project/Palette.dc.html",
+      "path": "Palette.dc.html",
+      "sourceBytes": 7599,
+      "sourceSha256": "fcf964eea25daaf489a15aa5e13a0d4ba551b6e0c6851478bd1f01f1e65352af",
+      "bytes": 7666,
+      "sha256": "2c62054d7aa4a6fa49cd7b55a8d96191ed279e0d8edecfc4893a574f293aa725"
+    },
+    {
+      "source": "project/Tools.dc.html",
+      "path": "Tools.dc.html",
+      "sourceBytes": 13782,
+      "sourceSha256": "1470b63b9d1ab5be6590b56630f8adba11422e674023b22957cc20dbfdade936",
+      "bytes": 13890,
+      "sha256": "6d4a4feee1de77bf3d14435da54af611db612af25504b5c5496582ea43ee4583"
+    },
+    {
+      "source": "project/canvas.json",
+      "path": "canvas.json",
+      "sourceBytes": 1374,
+      "sourceSha256": "610e5efb46e858e5b561249ff82a0c5fd2333d0151da81af222cafeb008d0e1e",
+      "bytes": 1375,
+      "sha256": "36b48b36bfc098f8bcd01391ca927dbd2112ae95cab77c9e3990c0a34aa0f2d4"
+    },
+    {
+      "source": "project/Help.dc.html",
+      "path": "Help.dc.html",
+      "sourceBytes": 12224,
+      "sourceSha256": "a6a84cefdfbd0338f3c754572a32bbe9c919a364cb5edcd617f040a8cacb4375",
+      "bytes": 12332,
+      "sha256": "b4222ee15691497c9b875b60136d8fe32ae1e047abdcde47be821a80c35db375"
+    },
+    {
+      "source": "IMPLEMENTATION_HANDOFF.md",
+      "path": "IMPLEMENTATION_HANDOFF.md",
+      "sourceBytes": 3793,
+      "sourceSha256": "c6f4bab9cb712eaaac4e332a819f142e8c6dfd72ef54787b6ef47fe4466dc229",
+      "bytes": 4001,
+      "sha256": "7f2529cc4bc607cb4c818d749243c8cb0a21b55341eb8fa4d7e48af325de0aa9"
+    }
+  ],
+  "note": "Source archive entries map to the design folder. The public handoff adjusts relative links; the audit uses repository-relative paths and neutral catalogue identities. Reference images and artboards do not prove runtime behavior."
+}

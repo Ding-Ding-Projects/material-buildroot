@@ -1,4 +1,6 @@
 [
+  "design/archive/20261030-superseded-import-manifest.json",
+  "design/import-manifest.json",
   "design/reference/states.json",
   "docs/evidence/desktop-shell/inventory.json",
   "docs/evidence/desktop-shell/projects-dark.png",
@@ -63,6 +65,11 @@
   "docs/evidence/native-windows-20261016/dialog-actions-e722cf1.receipt.json",
   "docs/evidence/native-windows-20261016/release-v0.1.0-build.42.1.json",
   "docs/evidence/native-windows-20261016/release-v0.1.0-build.49.1.json",
+  "docs/evidence/os-native/captures.json",
+  "docs/evidence/os-native/diagnostic-visible.png",
+  "docs/evidence/os-native/images-current.png",
+  "docs/evidence/os-native/job-visible.png",
+  "docs/evidence/os-native/standalone-source.png",
   "docs/evidence/startup-repair/installed-workspace-011.png",
   "docs/evidence/startup-repair/inventory.json",
   "docs/evidence/startup-repair/runtime-smoke.json",

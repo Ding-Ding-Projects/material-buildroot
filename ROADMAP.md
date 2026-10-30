@@ -1,5 +1,25 @@
 # Phased implementation roadmap
 
+## Current repository design remake, 2026-10-30
+
+- [x] Reconcile the eight current artboards and shared Expressive styles from main revision 9223534b5cfd4f2d6daa62bff9670411931f0f3d, record source identities and archive superseded attachment provenance.
+- [x] Independently review the updated handoff, including collapsed navigation, complete inherited roles, registered controls and actual record authority.
+- [ ] Complete and verify the updated Expressive shell, Images, Settings, tabs, Builds, Tools, Help and overlay presentation while retaining existing action consumers.
+- [ ] Pass integrated compilation and focused workflow checks.
+- [ ] Verify real built interaction and the normal/minimum language/theme/display-scale layout matrix.
+- [ ] Refresh current interface evidence and publish the reviewed integration on main.
+
+## Standalone container operating systems, 2026-10-22
+
+- [ ] Deliver the running desktop Images wizard for image/archive/Compose input, private personal-wording inclusion, storage, tunnel choices and source-bound production.
+- [x] Retain inspected native wizard and failed-preparation screenshots in the README with source, byte hashes, actual producing times and archived earlier evidence.
+- [ ] Verify saved-image identity binding with both classic and current container storage implementations; current native attempt stopped before compilation.
+- [ ] Complete non-root WSL production and independent boot through application-owned controls; verify kernel, runtime, workload, kiosk, LAN and persistent data separately.
+- [ ] Verify the private Job 2027 fork and its upstream source as separate workloads, preserving existing deployments and records.
+- [ ] Verify the custom Home Assistant frontend with its matching Core workload; distinguish container acceptance from Home Assistant OS Supervisor acceptance.
+- [ ] Export verified ISO, checksum and provenance to the current user's Downloads folder through the running application.
+
+
 ## Main-only integration closeout, 2026-10-19
 
 - [x] Reconcile all 77 actual non-main remote tips through six semantic ancestry merges, retaining guided workflows and leased ISO ownership.

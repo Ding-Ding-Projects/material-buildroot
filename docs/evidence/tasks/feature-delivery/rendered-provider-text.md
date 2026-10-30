@@ -22,7 +22,7 @@ Shared feature-level source observations may be repeated across surfaces. These 
 
 Source references: `src/main/documentation/service.cjs`, `src/renderer/documentation-panel.ts`, `src/renderer/source-panel.ts`, `website/build.mjs`
 
-Documentation uses Markdown renderer, but no release/poke-guy/pull-request/README-preview universal consumer inventory.
+Documentation uses Markdown renderer, but no release/issue/pull-request/README-preview universal consumer inventory.
 
 MarkdownIt html:false blocks raw markup; unsafeHTML places admitted output in same renderer, no separate isolated provider surface.
 
@@ -32,7 +32,7 @@ Article unavailable states exist; universal no-notes-provided provider state abs
 
 Admitted article/anchor links and external HTTPS IDs validated; complete malicious provider/runtime acceptance not run.
 
-Missing behavior: Documentation uses Markdown renderer, but no release/poke-guy/pull-request/README-preview universal consumer inventory. MarkdownIt html:false blocks raw markup; unsafeHTML places admitted output in same renderer, no separate isolated provider surface. Document source/base IDs and region label exist; emoji shortcode map is absent. Article unavailable states exist; universal no-notes-provided provider state absent. None asserted for this bounded slice; universal completeness remains separate.
+Missing behavior: Documentation uses Markdown renderer, but no release/issue/pull-request/README-preview universal consumer inventory. MarkdownIt html:false blocks raw markup; unsafeHTML places admitted output in same renderer, no separate isolated provider surface. Document source/base IDs and region label exist; emoji shortcode map is absent. Article unavailable states exist; universal no-notes-provided provider state absent. None asserted for this bounded slice; universal completeness remains separate.
 
 Missing proof: Current source/hash-bound real interaction, persistence/reload, language/funny-level matrix, accessibility and genuine screenshots are unverified.
 

@@ -213,6 +213,9 @@ async function main() {
   const template = installer ? target.installerCommand : target.command;
   if (!Array.isArray(template) || !template.length) throw new Error('Canonical package command is missing.');
   if (target.rendererCommand) execute(node,target.rendererCommand);
+  if (target.kind === 'desktop') {
+    execute(node, ['node_modules/vite/bin/vite.js', 'build', '--config', 'scripts/appliance/guest/vite.config.mjs']);
+  }
   const command = template.map(arg => arg.replaceAll('{output}',output));
   const childEnv = {...process.env, CSC_IDENTITY_AUTO_DISCOVERY:'false'};
   let packageVersion = null, packageVersionSource = null, delta = null, payloads = {status:'core-only',scope:'bundled-payload-inventory',bundledComplete:false,wholeToolsetOffline:false,externalTools:[]}, nativeBroker = {status:'not-produced',runtimeVerified:false}, squirrelHelper = null, setupPayload = null, genuineUpdater = null, squirrelTrace = null, squirrelHelperDirectory = null, setupEmbedding = null, flashingHelper = {status:'not-produced',runtimeVerified:false};

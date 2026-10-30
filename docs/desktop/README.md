@@ -13,6 +13,7 @@ See [Server management](minecraft-manager.md) for typed targets, acquisition and
 - [Drop feedback sounds](personal-vocabulary-drop-sounds.md) and [native sound boundary](vocabulary-drop-sound.md)
 
 - [Easy ISO workflow](iso-workflow.md), [field explanations](iso-fields/README.md) and [production and validation boundaries](iso-production.md)
+- [Standalone container operating systems](standalone-os.md) · [香港粵語](standalone-os.zh-HK.md)
 
 - [Component domains and source trust](configuration-domains.md) · [香港粵語](configuration-domains.zh-HK.md)
 - [Typed controls and undo](typed-configuration-controls.md) · [香港粵語](typed-configuration-controls.zh-HK.md)
@@ -44,3 +45,5 @@ The [task-oriented catalog](../features/README.md) connects project, build, outp
 
 - [Review exact configuration permission](configuration-domains.md#review-permission-from-the-iso-guide) · [核對配置權限](configuration-domains.zh-HK.md#由iso指南核對權限)
 - [Renderer exit diagnostics](renderer-exit-diagnostics.md) · [Renderer退出診斷](renderer-exit-diagnostics.zh-HK.md)
+
+- [Redesigned desktop workflows](gui-remake.md) / [廣東話](gui-remake.zh-HK.md)

@@ -1,3 +1,6 @@
+import {expressiveComponentStyles} from './shell-expressive-components';
+import "./workspace-section";
+import "./settings-search";
 import {localizedCopy} from './language-wording';
 import {vocabulary} from './owned-copy';
 import "./regex-workbench";
@@ -52,6 +55,8 @@ export class DocumentationPanel extends LitElement {
     revision: { state: true },
     articlePage:{state:true},
     category:{state:true},
+    topicsOpen:{state:true},
+    articleLanguage:{state:true},
   };
   restricted=false;
   guidedShortFlow=false;
@@ -60,8 +65,9 @@ export class DocumentationPanel extends LitElement {
   revision = 0;
   private articlePage=0;
   private category='';
+  private topicsOpen=true;
+  private articleLanguage:'en'|'zh-HK'|'bilingual'|null=null;
   private readonly pageSize=24;
-  private lastSearchKey='';
   private index?: Index;
   private document?: Document;
   private requestedLanguage?: "en" | "zh-HK" | "bilingual";
@@ -70,23 +76,13 @@ export class DocumentationPanel extends LitElement {
   private serial = 0;
   private history: Location[] = [{ id: "", anchor: "" }];
   private cursor = 0;
-  private query = "";
-  private pattern = "";
-  private flags = "i";
-  private mode = "literal";
-  private builder = false;
-  private literal = "";
-  private construct = "contains";
   private matchedIds?: Set<string>;
-  private searchFeedback = "";
-  private searching = false;
-  private worker?: Worker;
-  private timer?: ReturnType<typeof setTimeout>;
   /** Plain article text from the host, used only for local matching. */
   private bodies?: Map<string, string>;
   private bodyState: "idle" | "loading" | "ready" | "unavailable" = "idle";
   static styles = [
     workspaceStyles,
+    expressiveComponentStyles,
     css`
       :host {
         display: block;
@@ -227,46 +223,11 @@ export class DocumentationPanel extends LitElement {
         padding: 6px 10px;
         margin: 0;
       }
-      .search {
-        position: relative;
-        display: flex;
-        gap: 4px;
-        align-items: center;
-        max-width: 600px;
-        padding: 6px;
-      }
-      .search md-outlined-text-field {
-        flex: 1;
-        min-width: 0;
-      }
-      .builder {
-        position: absolute;
-        z-index: 20;
-        top: 100%;
-        left: 6px;
-        max-height: 65vh;
-        overflow: auto;
-        width: min(490px, calc(100vw - 100px));
-        padding: 14px;
-        background: var(--md-sys-color-surface-container-high);
-        border: 1px solid var(--md-sys-color-outline);
-        box-shadow: 0 8px 24px #0004;
-        display: grid;
-        gap: 10px;
-      }
-      .builder md-outlined-text-field,
-      .builder md-outlined-select {
-        width: 100%;
-      }
       .row {
         display: flex;
         gap: 8px;
         align-items: center;
         flex-wrap: wrap;
-      }
-      .flags label {
-        display: flex;
-        align-items: center;
       }
       .intro {
         max-width: 760px;
@@ -289,15 +250,6 @@ export class DocumentationPanel extends LitElement {
         background: var(--md-sys-color-surface-container);
         padding: 8px;
         margin: 10px 0;
-      }
-      .outline {
-        margin: 0 0 20px;
-        border-bottom: 1px solid var(--md-sys-color-outline-variant);
-        padding-bottom: 8px;
-      }
-      .outline a {
-        display: block;
-        font-size: 12px;
       }
       .empty {
         padding: 16px;
@@ -330,28 +282,33 @@ export class DocumentationPanel extends LitElement {
         .article {
           flex: 1;
         }
-        .builder {
-          width: min(440px, calc(100vw - 70px));
-        }
       }
       @media (max-height:500px) {
         :host([guided-short-flow]) {height:auto;overflow:visible}
         :host([guided-short-flow]) .reader {height:auto;min-height:0;display:block}
         :host([guided-short-flow]) .layout {display:block;flex:none;height:auto;min-height:0}
         :host([guided-short-flow]) .topics,:host([guided-short-flow]) .article {height:auto;max-height:none;flex:none;overflow:visible}
-        :host([guided-short-flow]) .search {flex-wrap:wrap;align-items:flex-start}
-        :host([guided-short-flow]) .search > md-outlined-text-field {flex:1 1 240px}
-        :host([guided-short-flow]) .builder {position:static;flex:1 0 100%;min-width:0;max-height:none!important;overflow:visible!important;width:100%!important}
       }
+    `,
+    css`
+      :host{container-type:inline-size}.reader{background:var(--md-sys-color-surface-container);padding:16px;gap:12px;box-sizing:border-box}.bar{border-radius:28px}.layout{gap:16px}.topics,.article{border-radius:28px;background:var(--md-sys-color-surface);border:0}
+      .bar{padding:8px 16px;background:var(--md-sys-color-surface-container-low);gap:8px}.bar strong{font-size:18px;font-weight:500}
+      .help-search{padding:12px 20px;max-width:900px;flex-shrink:0;position:relative;z-index:2}.help-search settings-search{display:block}
+      .layout{grid-template-columns:minmax(210px,270px) minmax(0,1fr)}.layout[data-topics-open=false]{grid-template-columns:minmax(0,1fr)}
+      .topics{padding:16px 12px}.topics[hidden]{display:none}.topics h2{font-size:18px;margin:0 8px 16px}.topic{--md-text-button-container-shape:24px;--md-text-button-label-text-size:14px;padding:4px 8px}.topic-row{margin-bottom:6px}.topic-row small{padding-left:20px;color:var(--md-sys-color-on-surface-variant)}
+      .article{padding:28px 32px;font-size:16px;line-height:1.7}.article h1{font-size:32px;font-weight:500}.article h2{font-size:24px;font-weight:500}.article-document{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}.article-copy{min-width:0;max-width:78ch}.reader-outline{border-top:1px solid var(--md-sys-color-outline-variant);padding-top:12px}.reader-outline h2{font-size:14px}.reader-outline md-text-button{display:block;width:100%;min-height:44px;text-align:left;white-space:normal}
+      .task{border:1px solid var(--md-sys-color-outline-variant);border-radius:20px;padding:16px;background:var(--md-sys-color-surface-container-low)}.task p{font-size:14px}.notice{padding:8px 20px;color:var(--md-sys-color-on-surface-variant)}
+      @container(min-width:1100px){.article-document{grid-template-columns:minmax(0,1fr) 190px}.reader-outline{border-top:0;border-left:1px solid var(--md-sys-color-outline-variant);padding:0 0 0 16px;align-self:start;position:sticky;top:0}}
+      @container(max-width:760px){.layout{display:flex;flex-direction:column}.topics{max-height:220px;flex-shrink:0}.article{padding:16px;min-height:180px}.help-search{padding:8px 12px}.tasks{grid-template-columns:minmax(0,1fr)}}
     `,
   ];
   private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
   private effectiveLanguage(): "en" | "zh-HK" | "bilingual" {
     return this.restricted || vocabulary.school() !== "inactive" ? "en"
-      : this.language === "en" || this.language === "zh-HK" ? this.language : "bilingual";
+      : this.articleLanguage??(this.language === "en" || this.language === "zh-HK" ? this.language : "bilingual");
   }
   protected updated(changed: PropertyValues) {
-    if(changed.has("restricted")){if(this.restricted)this.stopSearch();else if(this.index)this.search();}
+    if(changed.has("restricted")&&!this.restricted&&this.index)this.search();
     if ((changed.has("active")||changed.has("restricted")) && this.active && !this.restricted && !this.index && !this.loading)
       void this.refresh();
     if (this.active && !this.restricted && !this.loading && this.document && this.requestedLanguage !== this.effectiveLanguage()) {
@@ -362,7 +319,6 @@ export class DocumentationPanel extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.serial++;
-    this.stopSearch();
   }
   private async call<T>(
     action: string,
@@ -427,7 +383,6 @@ export class DocumentationPanel extends LitElement {
     const token = ++this.serial;
     this.loading = true;
     this.feedback = "";
-    this.builder = false;
     this.revision++;
     try {
       const document = await this.call<Document>("documentation.read", { id, language });
@@ -598,81 +553,10 @@ export class DocumentationPanel extends LitElement {
           ? this.l('titles and summaries; article text loads when you search','標題及摘要；搜尋時才載入文章內容',true)
           : this.l("titles and summaries only; article text is unavailable","只限標題及摘要；文章內容未能使用",true);
   }
-  private stopSearch() {
-    this.worker?.terminate();
-    this.worker = undefined;
-    if (this.timer) clearTimeout(this.timer);
-    this.searching = false;
-  }
+  /** Matching and expression validation belong to this reader's independent search control. */
   private search() {
-    this.stopSearch();
-    this.searchFeedback = "";
-    const articles = this.index?.articles || [];
-    const value=this.mode==='literal'?this.query:this.pattern,key=JSON.stringify([this.mode,value,this.flags]);
-    if(key!==this.lastSearchKey){this.articlePage=0;this.lastSearchKey=key;}
-    if(!value){this.matchedIds=undefined;this.revision++;return;}
-    if(this.index&&this.bodyState==='idle'&&!this.restricted)void this.loadBodies(this.index);
-    if (this.mode === "literal") {
-      const query = this.query.toLocaleLowerCase();
-      this.matchedIds = new Set(
-        articles
-          .filter((a) => this.searchable(a).toLocaleLowerCase().includes(query))
-          .map((a) => a.id),
-      );
-      this.revision++;
-      return;
-    }
-    this.matchedIds = new Set();
-    this.searching = true;
     this.revision++;
-    const worker = new Worker(
-      new URL("./documentation-search-worker.ts", import.meta.url),
-      { type: "module" },
-    );
-    this.worker = worker;
-    const done = (message: string, ids: string[] = []) => {
-      if (this.worker !== worker) return;
-      this.stopSearch();
-      this.searchFeedback = message;
-      this.matchedIds = new Set(ids);
-      this.revision++;
-    };
-    worker.onmessage = (e) =>
-      e.data.ok
-        ? done("", e.data.ids)
-        : done(
-            this.l("Invalid expression. Correct the pattern or flags.","表達式無效，請修正模式或旗標。",true),
-          );
-    worker.onerror = () =>
-      done(this.l("Search worker unavailable.","搜尋工作程序未能使用。",true));
-    this.timer = setTimeout(
-      () =>
-        done(
-          this.l("Expression timed out. Simplify it or use literal search.","表達式逾時，請簡化或使用文字搜尋。",true),
-        ),
-      600,
-    );
-    worker.postMessage({
-      pattern: this.pattern,
-      flags: this.flags,
-      articles: articles.map((a) => ({
-        id: a.id,
-        text: this.searchable(a),
-      })),
-    });
-  }
-  private build() {
-    const literal = this.literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    this.pattern =
-      this.construct === "start"
-        ? "^" + literal
-        : this.construct === "end"
-          ? literal + "$"
-          : this.construct === "exact"
-            ? "^" + literal + "$"
-            : literal;
-    this.mode = "regex";
-    this.search();
+    if(this.index&&this.bodyState==='idle'&&!this.restricted)void this.loadBodies(this.index);
   }
   private matchingArticles(){return (this.index?.articles??[]).filter(article=>!this.matchedIds||this.matchedIds.has(article.id));}
   private browseArticles(){return this.matchingArticles().filter(article=>!this.category||article.category===this.category);}
@@ -703,9 +587,9 @@ export class DocumentationPanel extends LitElement {
     if(this.restricted)return html`<section class="panel"><h1>Workspace help</h1><p>The full built-in article reader is unavailable while the shared preference is active or its status is unconfirmed. This limited guide does not expose the article index, history or search.</p><h2>Project workflow</h2><ol><li>Use Projects &amp; runtime to choose trusted source and output folders.</li><li>Use Source to inspect a revision before applying changes.</li><li>Review Configuration and build settings before starting a build.</li><li>Inspect returned jobs and output. An empty job list does not establish success.</li></ol><h2>Shared preference recovery</h2><p>Open Settings or use the Shared preference action to refresh the host state, verify exit or read manual recovery instructions. Your project records remain unchanged.</p></section>`;
     const articles=this.browseArticles(),page=this.pageFor(articles),pageCount=Math.max(1,Math.ceil(articles.length/this.pageSize));
     const pageArticles=articles.slice(page*this.pageSize,(page+1)*this.pageSize);
-    const browsing=!!this.category||!!(this.mode==='literal'?this.query:this.pattern);
+    const browsing=!!this.category||!!(this.matchedIds&&this.matchedIds.size!==(this.index?.articles.length??0));
     return html`<div class="reader">
-      <div class="bar">
+      <div class="bar"><div class="article-languages expressive-connected" role="group" aria-label=${this.l('Article language','文章語言')}>${([['en','English'],['zh-HK','廣東話'],['bilingual','English + 廣東話']] as const).map(([language,label])=>html`<md-outlined-button aria-pressed=${this.effectiveLanguage()===language} @click=${()=>{this.articleLanguage=language;}}>${label}</md-outlined-button>`)}</div>
         ${this.icon(
           "Back in documentation",
           "返回上一份文件",
@@ -720,7 +604,7 @@ export class DocumentationPanel extends LitElement {
           this.cursor >= this.history.length - 1 || this.loading,
         )}${this.icon("Documentation home", "文件首頁", "dashboard", () =>
           this.home(),
-        )}<strong>${this.l("Offline help","離線說明",true)}</strong>${this.icon(
+        )}<strong>${this.l("Offline help","離線說明",true)}</strong><md-text-button aria-expanded=${this.topicsOpen} aria-controls="help-topics" @click=${()=>this.topicsOpen=!this.topicsOpen}>${materialIcon('menu','icon')}${this.l('Topics','主題')}</md-text-button>${this.icon(
           "Reload documentation",
           "重新載入文件",
           "refresh",
@@ -728,92 +612,26 @@ export class DocumentationPanel extends LitElement {
           this.loading,
         )}
       </div>
-      <div class="search">
-        <md-outlined-text-field
-          .label=${this.l("Search documentation","搜尋文件",true)}
-          .value=${this.mode === "regex" ? this.pattern : this.query}
-          .supportingText=${this.l("Titles, topics and summaries; local only.","只喺本機搜尋標題、主題同摘要。",true)}
-          @input=${(e: Event) => {
-            this.query = (e.target as HTMLInputElement).value;
-            if (this.mode === "regex") this.pattern=this.query;
-            this.search();
-          }}
-        ></md-outlined-text-field
-        ><md-icon-button
-          aria-label=${this.l("Documentation regex builder","文件正規表達式建構器",true)}
-          title=${this.l("Documentation regex builder","文件正規表達式建構器",true)}
-          aria-expanded=${this.builder}
-          aria-controls="documentation-regex"
-          @click=${() => {
-            this.builder = !this.builder;
-            if(this.mode === "literal") this.pattern=this.query;
-            this.revision++;
-          }}
-          >${materialIcon("code")}</md-icon-button
-        >
-        ${this.builder
-          ? html`<section
-              class="builder" style="display:block;max-height:65vh;overflow:auto;width:min(760px,calc(100vw - 48px))"
-              id="documentation-regex"
-              role="region"
-              aria-label=${this.l("Documentation regex builder","文件正規表達式建構器",true)}
-              @keydown=${(e: KeyboardEvent) => {
-                if (e.key === "Escape") {
-                  e.stopPropagation();
-                  this.builder = false;
-                  this.revision++;
-                  this.renderRoot
-                    .querySelector<HTMLElement>(
-                      '[aria-controls="documentation-regex"]',
-                    )
-                    ?.focus();
-                }
-              }}
-            >
-              <div class="row">
-                <strong
-                  >${this.l("Local ECMAScript filter","本機 ECMAScript 篩選",true)}</strong
-                >${this.icon(
-                  "Close regex builder",
-                  "關閉表達式建構器",
-                  "close",
-                  () => {
-                    this.builder = false;
-                    this.revision++;
-                  },
-                )}
-              </div>
-              <regex-workbench .language=${this.language} .pattern=${this.pattern} .flags=${this.flags}
-                @pattern-change=${(e:CustomEvent)=>{e.stopPropagation();this.pattern=e.detail.pattern;this.query=this.pattern;this.flags=e.detail.flags;this.mode="regex";this.search();}}
-              ></regex-workbench>
-              <md-text-button
-                @click=${() => {
-                  this.mode = "literal";
-                  this.search();
-                }}
-                >${this.l("Use literal query","使用文字查詢",true)}</md-text-button
-              >
-            </section>`
-          : nothing}
-      </div>
+      <div class="help-search"><settings-search .language=${this.language} .label=${this.l('Search help offline','搜尋離線說明')}
+        .entries=${(this.index?.articles??[]).map(article=>({id:article.id,text:this.searchable(article)}))}
+        @settings-filter=${(event:CustomEvent<string[]>)=>{event.stopPropagation();const ids=event.detail;if(JSON.stringify([...(this.matchedIds??[])])!==JSON.stringify(ids)){this.matchedIds=new Set(ids);this.articlePage=0;this.revision++;}}}></settings-search></div>
       <p class="notice" role="status">
         ${this.feedback ||
-        this.searchFeedback ||
         this.l(
-          `${articles.length} articles · ${this.mode} search`,
-          `${articles.length} 篇文章 · ${this.mode === "regex" ? "表達式" : "文字"}搜尋`,
+          `${articles.length} articles`,
+          `${articles.length} 篇文章`,
         )}
         · ${this.l("Searching","搜尋範圍",true)}: ${this.scopeNotice()}
       </p>
-      ${this.loading || this.searching
+      ${this.loading
         ? html`<md-linear-progress
             indeterminate
             aria-label=${this.l("Loading documentation","載入文件",true)}
           ></md-linear-progress>`
         : nothing}
-      <div class="layout">
+      <div class="layout" data-topics-open=${this.topicsOpen}>
         <nav
-          class="topics"
+          class="topics" id="help-topics" ?hidden=${!this.topicsOpen}
           aria-label=${this.l("Documentation topics","文件主題",true)}
         >
           <h2 id="article-list-heading" tabindex="-1">${this.l('Browse articles','瀏覽文章',true)}</h2>
@@ -840,23 +658,8 @@ export class DocumentationPanel extends LitElement {
                   ${this.document.article.category} ·
                   ${this.document.article.language}
                 </div>
-                ${this.document.navigation.headings.length
-                  ? html`<details class="outline">
-                      <summary>${this.l("On this page","本頁內容",true)}</summary>
-                      ${this.document.navigation.headings.map(
-                        (h) =>
-                          html`<a
-                            href="#"
-                            @click=${(e: Event) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              this.followAnchor(h.id);
-                            }}
-                            >${h.text}</a
-                          >`,
-                      )}
-                    </details>`
-                  : nothing}${unsafeHTML(this.document.html)}`
+                <div class="article-document"><div class="article-copy">${unsafeHTML(this.document.html)}</div>
+                ${this.document.navigation.headings.length?html`<nav class="reader-outline" aria-label=${this.l('On this page','本頁內容')}><h2>${this.l('On this page','本頁內容')}</h2>${this.document.navigation.headings.map(h=>html`<md-text-button @click=${(e:Event)=>{e.stopPropagation();this.followAnchor(h.id);}}>${h.text}</md-text-button>`)}</nav>`:nothing}</div>`
             : html`<div class="intro">
                 <h1>${browsing?this.l('Find a guide','尋找指南',true):this.l('Work with your local project','使用本機專案',true)}</h1>
                 <p>${browsing?this.l('Choose a result from the paged article list. Search covers the full admitted index, not only this page.','請從分頁文章清單選擇結果。搜尋涵蓋完整已接納目錄，唔只目前頁面。',true):this.l('Choose a workflow below, or browse every admitted article by topic and page. Reading never starts a build or changes a project.','選擇下方流程，或按主題同頁面瀏覽全部已接納文章。閱讀唔會開始建置或更改專案。',true)}</p>
@@ -867,18 +670,18 @@ export class DocumentationPanel extends LitElement {
                     </p>`
                   : nothing}
               </div>`}${(this.document?.issues || this.index?.issues)?.length
-            ? html`<details class="issues">
-                <summary>
+            ? html`<workspace-section class="issues">
+                <span slot="heading">
                   ${this.l("Unavailable offline resources","未能離線使用嘅資源",true)}
                   (${(this.document?.issues || this.index?.issues)?.length})
-                </summary>
+                </span>
                 <ul>
                   ${(this.document?.issues || this.index?.issues)?.map(
                     (issue) =>
                       html`<li>${issue.reason} — ${issue.reference}</li>`,
                   )}
                 </ul>
-              </details>`
+              </workspace-section>`
             : nothing}
         </section>
       </div>

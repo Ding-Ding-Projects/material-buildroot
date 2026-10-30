@@ -1,3 +1,8 @@
+import {expressiveComponentStyles} from './shell-expressive-components';
+import "@material/web/chips/chip-set.js";
+import "@material/web/chips/filter-chip.js";
+import "./workspace-section";
+import "./settings-search";
 import {validateImageIntent,type ImageCreationIntent,type ImageIntentTransfer} from './image-workflow-draft';
 import {localizedCopy} from './language-wording';
 import "./named-targets-panel";
@@ -93,6 +98,10 @@ export class OperationsPanel extends LitElement {
     configPage: { state: true },
     dockHeight: { state: true },
     dockOpen: { state: true },
+    outputIds: {state:true},
+    followOutput: {state:true},
+    shortOwner: {state:true},
+    buildFilter:{state:true},
   };
   configurationGeneration=0;
   presentation = 'legacy';
@@ -103,6 +112,7 @@ export class OperationsPanel extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('guided-workflow-navigate', this.onGuidedNavigate);
+    void this.updateComplete.then(()=>{if(this.isConnected)this.observeOwner();});
   }
   private onGuidedNavigate = async (event: Event) => {
     const detail = (event as CustomEvent).detail;
@@ -177,14 +187,34 @@ export class OperationsPanel extends LitElement {
   model = "";
   prompt = "";
   configPage = 0;
-  dockHeight = 140;
+  dockHeight = 360;
+  private outputIds?: string[];
+  private followOutput = true;
+  private dockResizeCleanup?:()=>void;
+  private shortOwner=false;
+  private buildFilter='all';
+  private ownerObserver?:ResizeObserver;
+  private observedOwner?:HTMLElement;
+  private observeOwner(){
+    const owner=this.renderRoot.querySelector<HTMLElement>('.editor-frame');
+    if(!owner||this.observedOwner===owner)return;
+    this.ownerObserver?.disconnect();this.observedOwner=owner;
+    this.ownerObserver=new ResizeObserver(entries=>{
+      if(!this.isConnected||this.observedOwner!==owner)return;
+      const entry=entries.find(item=>item.target===owner),height=entry?.contentRect.height??0;
+      // Hidden workspaces report zero. Wait for a real owner measurement instead.
+      if(height<=0)return;
+      const short=height<520;if(this.shortOwner!==short)this.shortOwner=short;
+    });
+    this.ownerObserver.observe(owner);
+  }
   dockOpen = true;
   private logCursor = 0;
   private logMore = false;
   private confirmingClean = false;
   private configTrustEpoch=0;
   private isoPermission?:IsoPermissionContext;
-  disconnectedCallback(){this.navigationEpoch++;this.removeEventListener('guided-workflow-navigate',this.onGuidedNavigate);this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;super.disconnectedCallback();}
+  disconnectedCallback(){this.ownerObserver?.disconnect();this.ownerObserver=undefined;this.observedOwner=undefined;this.dockResizeCleanup?.();this.navigationEpoch++;this.removeEventListener('guided-workflow-navigate',this.onGuidedNavigate);this.configTrustEpoch++;this.isoPermission=undefined;this.configTrustPreview=undefined;this.configTrustAccepted=false;super.disconnectedCallback();}
   protected willUpdate(changed:Map<string,unknown>){
     if(['workspace','configDomain','configurationGeneration','tab'].some(key=>changed.has(key))){
       this.configTrustEpoch++;this.configTrustPreview=undefined;this.configTrustAccepted=false;
@@ -192,6 +222,9 @@ export class OperationsPanel extends LitElement {
     }
   }
   protected updated(changed: Map<string, unknown>) {
+    this.observeOwner();
+    if(this.followOutput&&(changed.has('logs')||changed.has('outputIds')||changed.has('dockOpen')||changed.has('followOutput'))){const output=this.renderRoot.querySelector<HTMLElement>('.dock-log');if(output)output.scrollTop=output.scrollHeight;}
+
     if (changed.has('tab') && changed.get('tab') !== undefined) this.dispatchEvent(new CustomEvent('operation-destination-changed',{bubbles:true,composed:true,detail:{destination:this.tab}}));
     if (!changed.has("workspace")) return;
     const workspaceId = this.workspace?.workspaceId;
@@ -205,6 +238,7 @@ export class OperationsPanel extends LitElement {
   }
   static styles = [
     workspaceStyles,
+    expressiveComponentStyles,
     css`
       :host {
         height: auto;
@@ -226,6 +260,12 @@ export class OperationsPanel extends LitElement {
         --md-sys-color-secondary-container: inherit;
         --md-sys-color-on-secondary-container: inherit;
         --md-sys-color-error: inherit;
+        --md-sys-color-tertiary: inherit;
+        --md-sys-color-tertiary-container: inherit;
+        --md-sys-color-on-tertiary-container: inherit;
+        --md-sys-color-error-container: inherit;
+        --md-sys-color-on-error-container: inherit;
+        --md-sys-color-surface-container-highest: inherit;
       }
       :host([presentation="guided"]) .ide {border:0}
       :host([creation-setup]) .document-toolbar{display:none}
@@ -372,6 +412,18 @@ export class OperationsPanel extends LitElement {
           grid-template-columns: 1fr;
         }
       }
+      :host([presentation="guided"]) .guided-builds .dock{display:flex}:host([presentation="guided"]) .guided-builds .dock-toggle{display:inline-flex}.operations > tools-panel,.operations > documentation-panel{padding:0}
+      .build-jobs{background:var(--md-sys-color-surface);border-radius:28px;padding:24px!important}.build-jobs .record:first-of-type{border-radius:20px 20px 4px 4px}.build-jobs .record:last-of-type{border-radius:4px 4px 20px 20px}.builds-admission{border-radius:28px;background:var(--md-sys-color-surface);padding:16px}.dock{border-radius:28px;margin:0 16px 16px;border-top:0}.dock-log{border-radius:16px;background:var(--md-sys-color-surface-container-highest)}
+      .builds-workspace{container-type:inline-size;min-width:0}.builds-heading{display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap;margin-bottom:24px}.builds-heading h2{font-size:30px;line-height:1.25;font-weight:500;margin:4px 0}.eyebrow{font-size:12px;color:var(--md-sys-color-primary)}
+      .builds-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:24px;align-items:start}.builds-admission{grid-column:2;grid-row:1;min-width:0;display:grid;gap:16px}.build-jobs{grid-column:1;grid-row:1;min-width:0}.build-jobs .record,.runtime-summary{border:1px solid var(--md-sys-color-outline-variant);border-radius:4px;padding:20px;margin:2px 0;background:var(--md-sys-color-surface-container)}.build-jobs .badge{background:var(--md-sys-color-secondary-container);border-radius:16px;padding:6px 12px}.runtime-summary{margin:0;overflow-wrap:anywhere}.runtime-summary p{font-size:13px}
+      .dock{max-height:60%;min-height:280px;overflow:auto;position:relative;overscroll-behavior:contain}.dock>.document-toolbar{flex:0 0 auto}.dock-resizer{height:44px;min-height:44px;touch-action:none;background:transparent;position:relative}.dock-resizer::after{content:'';position:absolute;left:calc(50% - 24px);width:48px;height:4px;top:20px;border-radius:2px;background:var(--md-sys-color-outline)}.dock-resizer:focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:-3px}.dock-filter{display:flex;flex:0 0 auto;gap:12px;align-items:center;flex-wrap:wrap;padding:4px 12px;min-height:min-content}.dock-filter settings-search{flex:1 1 240px;min-width:0}.dock-filter label{display:flex;align-items:center}.dock-content{background:var(--md-sys-color-surface);flex:1 0 100px;min-height:100px}.dock-jobs md-text-button{min-height:44px;white-space:normal;height:auto}.dock-log{margin:0;overscroll-behavior:contain}.dock-jobs{width:180px;flex-shrink:0}
+      @container(max-width:860px){.builds-layout{grid-template-columns:minmax(0,1fr)}.builds-admission,.build-jobs{grid-column:auto;grid-row:auto}.build-jobs{order:-1}}
+      @media(max-height:700px){.dock{max-height:50%;overflow:auto}.dock-filter{align-items:start}.dock-content{min-height:100px}}
+      .editor-frame[data-short-owner=true]{display:block;height:100%;overflow:auto;overscroll-behavior:contain;scroll-padding:12px;box-sizing:border-box}
+      .editor-frame[data-short-owner=true]>.operations{display:block;flex:none;min-height:0;overflow:visible}
+      .editor-frame[data-short-owner=true]>.operations>.content{overflow:visible;min-height:0}
+      .editor-frame[data-short-owner=true]>.dock{max-height:none;overflow:auto;min-height:280px}
+
     `,
   ];
   private l(en:string,zh:string,authored=false) {return localizedCopy(en,zh,this.language,authored);}
@@ -940,7 +992,7 @@ export class OperationsPanel extends LitElement {
     </div>`;
   }
   private buildsView() {
-    return html`<details class="build-admission" ?open=${this.presentation !== 'guided'}><summary>${this.l("Configure a new build","設定新建置",true)}</summary>${this.workspace
+    return html`<div class="builds-workspace"><header class="builds-heading"><div><p class="eyebrow">${this.l('Build workspace','建置工作區')}</p><h2>${this.l('Queue and execution','佇列同執行')}</h2><p>${this.l('Review recorded jobs, capacity and recovery before starting another build.','開始另一項建置前，請核對已記錄工作、容量同復原狀態。')}</p></div><md-outlined-button ?disabled=${this.pending} @click=${this.refreshJobs}>${materialIcon('refresh','icon')}${this.l('Refresh jobs','更新工作')}</md-outlined-button></header><div class="builds-layout"><aside class="builds-admission"><section class="runtime-summary"><h3>${this.l('Selected runtime','所選執行環境')}</h3><p>${this.workspace?this.runtimeKind==='wsl'?`WSL · ${this.distribution||this.l('Not selected','未選擇')}`:`Docker · ${this.image||this.l('Not selected','未選擇')}`:this.l('Adopt a project to select its runtime.','請先接入專案以選擇執行環境。')}</p><p>${this.l('Selection does not establish readiness. Admission verifies the current runtime.','選擇唔代表已準備就緒。接納時會驗證目前執行環境。')}</p></section><workspace-section class="build-admission" ?open=${this.presentation !== 'guided'}><span slot="heading">${this.l("Configure a new build","設定新建置",true)}</span>${this.workspace
         ? html`<section class="panel stack">
             <h2>${this.workspace.name}</h2>
             ${this.runtimeKind === "docker" ? html`<section class="panel stack" aria-label=${this.l("Container storage","容器儲存",true)}>
@@ -1016,17 +1068,18 @@ export class OperationsPanel extends LitElement {
               >${actionIcon('Start build')}${this.l("Start build","開始建置",true)}</md-filled-button
             >
           </section>`
-        : this.noProject()}</details>
+        : this.noProject()}</workspace-section>
       <section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
-      <section class="panel">
+      </aside><section class="panel build-jobs">
         <div class="row">
           <h2>${this.l("Build jobs","建置工作",true)}</h2>
           <md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}
             >${actionIcon('Refresh')}${this.l("Refresh","重新整理",true)}</md-text-button
           >
         </div>
+        <md-chip-set aria-label=${this.l('Filter recorded builds','篩選已記錄建置')}>${[['all','All','全部'],['active','Active','執行中'],['queued','Queued','排隊中'],['interrupted','Interrupted','已中斷'],['finished','Finished','已結束']].map(([id,en,zh])=>html`<md-filter-chip .label=${this.l(en,zh)} ?selected=${this.buildFilter===id} @click=${()=>this.buildFilter=id}></md-filter-chip>`)}</md-chip-set>
         ${this.jobs.length
-          ? this.jobs.map(
+          ? this.jobs.filter(job=>this.buildFilter==='all'||(this.buildFilter==='active'?job.state==='running':this.buildFilter==='finished'?['completed','failed','cancelled'].includes(job.state):job.state===this.buildFilter)).map(
               (job) =>
                 html`<div class="record">
                   <strong>${job.kind}</strong>
@@ -1092,7 +1145,7 @@ export class OperationsPanel extends LitElement {
                   >`
                 : nothing}`
           : nothing}
-      </section>`;
+      </section></div></div>`;
   }
   private async openIsoHelp(event:CustomEvent<{title:string}>) {
     const titles=['ISO profile and firmware','ISO runtime and resources','ISO configuration and recovery','ISO output and validation','Easy ISO board presets'];
@@ -1192,15 +1245,19 @@ export class OperationsPanel extends LitElement {
     return html`<section class="panel"><update-panel .language=${this.language}></update-panel><p>${this.l("Use the persistent update banner to restart after saving work.","儲存工作後，請使用持續顯示嘅更新提示重新啟動程式。",true)}</p></section>`;
   }  private resizeDock(event: PointerEvent) {
     const separator = event.currentTarget as HTMLElement;
+    this.dockResizeCleanup?.();
     const start = event.clientY, original = this.dockHeight;
     separator.setPointerCapture(event.pointerId);
-    const move = (e:PointerEvent) => this.dockHeight = Math.max(80,Math.min(400,original+start-e.clientY));
-    const end = () => { separator.removeEventListener("pointermove",move); separator.removeEventListener("pointerup",end); separator.removeEventListener("pointercancel",end); };
-    separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);
+    const move = (e:PointerEvent) => this.dockHeight = this.clampDock(original+start-e.clientY);
+    const end = () => { separator.removeEventListener("pointermove",move); separator.removeEventListener("pointerup",end); separator.removeEventListener("pointercancel",end); separator.removeEventListener("lostpointercapture",end);this.dockResizeCleanup=undefined; };
+    separator.addEventListener("pointermove",move); separator.addEventListener("pointerup",end); separator.addEventListener("pointercancel",end);separator.addEventListener("lostpointercapture",end);this.dockResizeCleanup=end;
   }
+  private clampDock(value:number){return Math.max(280,Math.min(560,Math.round(value)));}
+  private logText(record:any){return typeof record.value==='string'?record.value:record.value?.text??record.value?.message??this.l('Structured job event','結構化工作事件',true);}
+  private resizeDockKey(event:KeyboardEvent){const amounts:Record<string,number>={ArrowUp:20,ArrowDown:-20,PageUp:80,PageDown:-80};if(event.key in amounts||event.key==='Home'||event.key==='End'){event.preventDefault();this.dockHeight=this.clampDock(event.key==='Home'?280:event.key==='End'?560:this.dockHeight+amounts[event.key]);}}
   render() {
     this.visitedViews.add(this.tab);
-    return html`<div class=${this.presentation==='guided'&&this.tab==='tools'?'ide guided-tools':this.presentation==='guided'&&this.tab==='documentation'?'ide guided-help':'ide'}><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame"><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.operationHeadingLabel()}</h2>${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?html`<details class="advanced-project-tools"><summary>${this.l('Advanced project tools','進階專案工具')}</summary><div>${this.guidedNavigation()}${this.subnavigation('config',[['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']])}</div></details>`:nothing}<span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided'&&!(this.tab==='config'&&this.guidedConfiguration==='image')&&!this.creationSetup ? this.guidedNavigation() : nothing}<div class="operations">
+    return html`<div class=${this.presentation==='guided'&&this.tab==='builds'?'ide guided-builds':this.presentation==='guided'&&this.tab==='tools'?'ide guided-tools':this.presentation==='guided'&&this.tab==='documentation'?'ide guided-help':'ide'}><aside class="explorer" aria-label=${this.l("Project explorer","專案總管",true)}><h2>${this.l("Explorer","總管",true)}</h2><div class="project-name">${this.workspace?.name||this.l("No adopted project","未接入專案",true)}</div>${["runtime","source","config","package","builds","artifacts","guests","tools","assistant","regex","companion","authenticator","updates","documentation"].map(tab=>html`<md-text-button title=${this.label(tab)} class=${this.tab===tab?"active":""} aria-current=${this.tab===tab?"page":"false"} @click=${()=>this.tab=tab}> ${materialIcon(({runtime:"computer",source:"code",config:"tune",package:"inventory_2",builds:"build",artifacts:"folder_open",guests:"memory",tools:"build",assistant:"help_outline",regex:"code",companion:"link",authenticator:"key",updates:"download",documentation:"help_outline"} as Record<string,string>)[tab],"icon")}${this.label(tab)}</md-text-button>`)}</aside><div class="editor-frame" data-short-owner=${this.shortOwner}><div class="document-toolbar"><h2 id="operation-heading" tabindex="-1">${this.operationHeadingLabel()}</h2>${this.presentation==='guided'&&this.tab==='config'&&this.guidedConfiguration==='image'?html`<workspace-section class="advanced-project-tools"><span slot="heading">${this.l('Advanced project tools','進階專案工具')}</span><div>${this.guidedNavigation()}${this.subnavigation('config',[['image','Image guide','映像指南'],['settings','Configuration','設定'],['accounts','Accounts','帳戶'],['presets','Saved configurations','已儲存設定']])}</div></workspace-section>`:nothing}<span>${this.workspace?this.l("Trusted project","可信專案",true):this.l("No execution context","無執行內容",true)}</span><md-text-button class="dock-toggle" @click=${()=>this.dockOpen=!this.dockOpen}>${this.dockOpen?this.l("Hide jobs","隱藏工作",true):this.l("Show jobs","顯示工作",true)}</md-text-button></div>${this.presentation === 'guided'&&!(this.tab==='config'&&this.guidedConfiguration==='image')&&!this.creationSetup ? this.guidedNavigation() : nothing}<div class="operations">
       <md-tabs
         aria-label=${this.l("Project operations","專案操作",true)}
         .activeTabIndex=${[
@@ -1313,7 +1370,7 @@ export class OperationsPanel extends LitElement {
           this.changes = {};
         }}
       ></source-panel
-      ><tools-panel id="operation-content-tools" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-tools'}
+      ><tools-panel @utility-workspace-open=${async(event:CustomEvent<{destination:string}>)=>{event.stopPropagation();const destination=event.detail?.destination;if(!['artifacts','assistant','companion','regex','source','package'].includes(destination))return;const epoch=++this.navigationEpoch;this.tab=destination;await this.updateComplete;if(epoch===this.navigationEpoch&&this.tab===destination)(this.renderRoot.querySelector('#operation-heading') as HTMLElement|null)?.focus();}} id="operation-content-tools" role=${this.presentation === 'guided' ? 'region' : 'tabpanel'} aria-labelledby=${this.presentation === 'guided' ? 'operation-heading' : 'operation-tab-tools'}
         ?hidden=${this.tab !== "tools"}
         .language=${this.language}
       ></tools-panel
@@ -1324,7 +1381,7 @@ export class OperationsPanel extends LitElement {
       >${this.feedback
         ? html`<div class="status" role="status">${displayOwnedStatus(this,"feedback",this.feedback,this.language)}</div>`
         : nothing}
-    </div>${this.dockOpen?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板",true)}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小",true)} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="80" aria-valuemax="400" @pointerdown=${this.resizeDock} @keydown=${(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.dockHeight=Math.max(80,Math.min(400,this.dockHeight+(e.key==="ArrowUp"?20:-20)));}}}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出",true)}</strong><span>${this.jobs.length} ${this.l("loaded","已載入",true)}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${actionIcon('Refresh jobs')}${this.l("Refresh jobs","重新整理工作",true)}</md-text-button></div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出",true)}>${this.selectedJob?this.logs.map(record=>html`<div>${typeof record.value==="string"?record.value:record.value?.text??record.value?.message??this.l("Structured job event","結構化工作事件",true)}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。",true)}</span>`}</div></div></section>`:nothing}</div></div>`;
+    </div>${this.dockOpen&&(!["tools","documentation"].includes(this.tab))?html`<section class="dock" style=${`height:${this.dockHeight}px`} aria-label=${this.l("Jobs and output dock","工作同輸出面板",true)}><div class="dock-resizer" role="separator" tabindex="0" aria-label=${this.l("Resize jobs dock","調整工作面板大小",true)} aria-orientation="horizontal" aria-valuenow=${this.dockHeight} aria-valuemin="280" aria-valuemax="560" @pointerdown=${this.resizeDock} @keydown=${this.resizeDockKey}></div><div class="document-toolbar"><strong>${this.l("Jobs / output","工作／輸出",true)}</strong><span>${this.jobs.length} ${this.l("loaded","已載入",true)}</span><md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}>${actionIcon('Refresh jobs')}${this.l("Refresh jobs","重新整理工作",true)}</md-text-button></div><div class="dock-filter"><settings-search .language=${this.language} .label=${this.l('Filter recorded output','篩選已記錄輸出')} .entries=${this.logs.map((record,index)=>({id:String(index),text:this.logText(record)}))} @settings-filter=${(e:CustomEvent<string[]>)=>{e.stopPropagation();if(JSON.stringify(this.outputIds)!==JSON.stringify(e.detail))this.outputIds=e.detail;}}></settings-search><label><md-switch icons aria-label=${this.l('Follow loaded output','跟隨已載入輸出')} ?selected=${this.followOutput} @change=${(e:Event)=>{this.followOutput=(e.target as HTMLElement&{selected:boolean}).selected;}}></md-switch>${this.l('Follow loaded output','跟隨已載入輸出')}</label>${this.logMore?html`<md-text-button ?disabled=${this.pending} @click=${()=>{const job=this.jobs.find(j=>j.id===this.selectedJob);if(job)void this.readLogs(job,true);}}>${this.l('Read more','讀取更多')}</md-text-button>`:nothing}</div><div class="dock-content"><div class="dock-jobs">${this.jobs.map(job=>html`<md-text-button ?disabled=${this.pending} @click=${()=>this.readLogs(job)}>${job.kind} · ${job.state}</md-text-button>`)}</div><div class="dock-log" role="log" tabindex="0" aria-label=${this.l("Selected job output","所選工作輸出",true)}>${this.selectedJob?this.logs.map((record,index)=>({record,index})).filter(({index})=>!this.outputIds||this.outputIds.includes(String(index))).map(({record})=>html`<div>${this.logText(record)}</div>`):html`<span class="dock-empty">${this.l("Refresh recorded jobs, then select one to read its output. No job is running by implication.","重新整理工作記錄，再選擇工作以讀取輸出。唔會假設有工作執行中。",true)}</span>`}</div></div></section>`:nothing}</div></div>`;
   }
 }
 customElements.define("operations-panel", OperationsPanel);

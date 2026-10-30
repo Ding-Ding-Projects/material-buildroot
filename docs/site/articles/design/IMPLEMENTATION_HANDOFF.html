@@ -1,0 +1,144 @@
+<!doctype html><html lang="en" data-language="both"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#4052d6"><title>Material Buildroot GUI remake: design handoff · Material Buildroot</title><meta name="description" content="Explore the Material Buildroot implementation plan, decisions and phased checklist."><meta property="og:title" content="Material Buildroot GUI remake: design handoff · Material Buildroot"><meta property="og:description" content="Explore the Material Buildroot implementation plan, decisions and phased checklist."><meta property="og:type" content="website"><meta property="og:site_name" content="Material Buildroot"><meta property="og:image" content="https://ding-ding-projects.github.io/material-buildroot/site/assets/icon.png"><meta property="og:image:alt" content="Material Buildroot project icon, not a screenshot"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Material Buildroot GUI remake: design handoff · Material Buildroot"><meta name="twitter:description" content="Explore the Material Buildroot implementation plan, decisions and phased checklist."><meta name="twitter:image" content="https://ding-ding-projects.github.io/material-buildroot/site/assets/icon.png"><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="icon" href="/material-buildroot/site/assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/material-buildroot/site/assets/app.css"><script type="module" src="/material-buildroot/site/assets/app.js"></script></head><body><a class="skip" href="#main">Skip to content</a><aside class="sidebar" id="navigation"><md-icon-button id="close-menu" aria-label="Close navigation"><md-icon><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></md-icon-button><a class="brand" href="/material-buildroot/"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M5 12 20 4l15 8-15 8Z" fill="#4052d6"/><path d="m5 21 15 8 15-8v9l-15 8-15-8Z" fill="#8e9bfa"/><path d="m5 12 15 8 15-8v9l-15 8-15-8Z" fill="#6677e8"/></svg><span>Material Buildroot<small>PROJECT DOCUMENTATION</small></span></a><div class="nav-label">Explore the project</div><nav aria-label="Main navigation"><md-list><md-list-item type="link" href="/material-buildroot/" ><span slot="start" class="nav-symbol" aria-hidden="true">✦</span><span slot="headline"><span class="en">Learn by doing</span><span class="zh" lang="zh-HK">逐步學習</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/visitor.html" ><span slot="start" class="nav-symbol" aria-hidden="true">✎</span><span slot="headline"><span class="en">Visitor workspace</span><span class="zh" lang="zh-HK">訪客工作區</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/roadmap.html" ><span slot="start" class="nav-symbol" aria-hidden="true">≡</span><span slot="headline"><span class="en">Roadmap</span><span class="zh" lang="zh-HK">開發路線</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/library.html" ><span slot="start" class="nav-symbol" aria-hidden="true">▤</span><span slot="headline"><span class="en">Reference library</span><span class="zh" lang="zh-HK">文件參考庫</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/planning.html" ><span slot="start" class="nav-symbol" aria-hidden="true">◇</span><span slot="headline"><span class="en">Planning</span><span class="zh" lang="zh-HK">規劃</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/design.html" class="active" aria-current="page"><span slot="start" class="nav-symbol" aria-hidden="true">▧</span><span slot="headline"><span class="en">Design</span><span class="zh" lang="zh-HK">設計</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/wiki.html" ><span slot="start" class="nav-symbol" aria-hidden="true">◎</span><span slot="headline"><span class="en">Wiki</span><span class="zh" lang="zh-HK">Wiki</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/categories/evidence.html" ><span slot="start" class="nav-symbol" aria-hidden="true">✓</span><span slot="headline"><span class="en">Evidence</span><span class="zh" lang="zh-HK">驗證</span></span></md-list-item><md-list-item type="link" href="/material-buildroot/site/status.html" ><span slot="start" class="nav-symbol" aria-hidden="true">↓</span><span slot="headline"><span class="en">Downloads & status</span><span class="zh" lang="zh-HK">下載同狀態</span></span></md-list-item></md-list></nav><div class="nav-label">Contribute</div><nav aria-label="Contributor navigation"><md-list><md-list-item type="link" href="/material-buildroot/site/articles/NEXT_SESSION.html"><span slot="start" class="nav-symbol" aria-hidden="true"><md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></span><span slot="headline">Next session</span></md-list-item><md-list-item type="link" href="https://github.com/Ding-Ding-Projects/material-buildroot"><span slot="start" class="nav-symbol" aria-hidden="true">⌘</span><span slot="headline">Source on GitHub</span></md-list-item></md-list></nav><div class="sidebar-foot"><span class="status-dot"></span>Implementation in progress<p>Built in the open.<br>One verified step at a time.</p></div></aside><div class="page"><header class="topbar"><md-icon-button id="menu" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation"><md-icon><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></md-icon-button><div class="search-wrap"><md-outlined-text-field id="doc-search" label="Search docs" type="search" aria-label="Search documentation" autocomplete="off"></md-outlined-text-field><div id="search-results" class="search-results" role="region" aria-label="Document search results" aria-live="polite" hidden></div></div><div class="top-controls"><md-outlined-select id="language" class="language-control" label="Headings" aria-label="Heading language"><md-select-option value="both" selected><div slot="headline">EN + 粵語</div></md-select-option><md-select-option value="en"><div slot="headline">English</div></md-select-option><md-select-option value="zh"><div slot="headline">粵語</div></md-select-option></md-outlined-select><label class="theme-control"><span class="theme-label">Dark theme</span><md-switch id="theme" icons aria-label="Use dark theme"></md-switch></label></div></header><main id="main" tabindex="-1"><div class="provenance"><span class="version-tag">Documentation v0.1.0</span><span>Source updated <time data-local datetime="2026-10-30T14:19:59-04:00">2026-10-30T14:19:59-04:00</time></span><span>Built <time data-local datetime="2026-10-30T18:20:13.888Z">2026-10-30T18:20:13.888Z</time></span><span>Source 887edbc4e79c</span><span title="SHA-256 of the exact documentation and website input snapshot">Snapshot 9ba16fd62d</span></div><div class="article-layout"><article class="article"><div class="breadcrumb"><a href="/material-buildroot/site/library.html">Reference library</a> / <a href="/material-buildroot/site/categories/design.html">Design</a></div><div class="article-meta"><span class="article-source-language" data-source-language="en"><span class="en" lang="en">Project record · English source</span><span class="zh" lang="zh-HK">項目記錄 · 英文原文</span></span><md-outlined-button class="article-bookmark" data-bookmark-url="/material-buildroot/site/articles/design/IMPLEMENTATION_HANDOFF.html" data-bookmark-title="Material Buildroot GUI remake: design handoff">Save reference</md-outlined-button><a href="https://github.com/Ding-Ding-Projects/material-buildroot/blob/main/design/IMPLEMENTATION_HANDOFF.md">View source <md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></a></div><div class="article-body" lang="en"><h1 id="material-buildroot-gui-remake-design-handoff">Material Buildroot GUI remake: design handoff</h1>
+<p>Source design for the full renderer remake of <code>Ding-Ding-Projects/material-buildroot</code> (<code>src/renderer</code>). Frontend design only; no renderer behaviour was changed.</p>
+<h2 id="location">Location</h2>
+<p>In the repository these files live directly in <code>design/</code>: the eight artboards, <code>canvas.json</code>, the shared <code>m3.css</code> and <code>theme.css</code>, <code>audit.md</code> and <code>current-screens/</code>. The same canvas is also hosted as a private design project.</p>
+<h2 id="pure-material-3-expressive">Pure Material 3 Expressive</h2>
+<p>Every surface uses Material 3 component anatomy only. There are no native selects, range inputs, checkboxes, tables or disclosure widgets, and no custom widgets outside the Material catalogue. Implement each with the matching registered <code>@material/web</code> component where one exists, and follow the Material 3 Expressive specification where the library has not caught up yet.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="Scrollable data table"><table>
+<thead>
+<tr>
+<th>Surface need</th>
+<th>Material 3 component used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Window chrome</td>
+<td>Custom title bar with a search bar, icon buttons and window controls</td>
+</tr>
+<tr>
+<td>Destinations</td>
+<td>Navigation rail (Expressive, collapsed 96 dp) with menu button, FAB, active indicator and badges</td>
+</tr>
+<tr>
+<td>Layout</td>
+<td>Canonical list-detail and supporting-pane layouts: rounded panes on a surface-container window</td>
+</tr>
+<tr>
+<td>Tabs (left-docked)</td>
+<td>Navigation drawer items as a vertical tab list, with group headers</td>
+</tr>
+<tr>
+<td>Build output</td>
+<td>Resizable pane with drag handle, filter search bar and Follow switch</td>
+</tr>
+<tr>
+<td>Guide stages</td>
+<td>Filled and outlined cards with stage icons and linear progress</td>
+</tr>
+<tr>
+<td>Records</td>
+<td>Expressive segmented lists, one- to three-line items with leading icons or shaped avatars</td>
+</tr>
+<tr>
+<td>Choices of two to four</td>
+<td>Connected button groups (replacing segmented buttons)</td>
+</tr>
+<tr>
+<td>Choice lists</td>
+<td>Radio list items</td>
+</tr>
+<tr>
+<td>On/off</td>
+<td>Switches with handle icon</td>
+</tr>
+<tr>
+<td>Ranges</td>
+<td>Expressive slider: 16 dp track, bar handle, gaps and stop indicators</td>
+</tr>
+<tr>
+<td>Pickers</td>
+<td>Outlined exposed dropdown text fields</td>
+</tr>
+<tr>
+<td>Text entry</td>
+<td>Outlined and filled text fields with supporting text</td>
+</tr>
+<tr>
+<td>Filters</td>
+<td>Filter chips, plus assist chips for quick actions</td>
+</tr>
+<tr>
+<td>Primary actions</td>
+<td>Filled, tonal, outlined and text buttons (Expressive sizes with shape morph on press), split buttons, FAB</td>
+</tr>
+<tr>
+<td>Bulk actions</td>
+<td>Floating toolbar (vibrant)</td>
+</tr>
+<tr>
+<td>Progress</td>
+<td>Wavy linear progress, linear progress with stop indicator, loading indicator</td>
+</tr>
+<tr>
+<td>Section switching</td>
+<td>Primary tabs</td>
+</tr>
+<tr>
+<td>Context actions</td>
+<td>Expressive vertical menu with segmented groups, a filter field and shortcuts</td>
+</tr>
+<tr>
+<td>Confirmations and wizards</td>
+<td>Dialogs with hero icon</td>
+</tr>
+<tr>
+<td>Transient feedback</td>
+<td>Snackbar, badges, elevated card for the dim sum surprise</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="artboards">Artboards</h2>
+<p>Each <code>.dc.html</code> artboard links <code>theme.css</code> and <code>m3.css</code> and has a <code>dark</code> toggle in its script props. Layouts adapt to the expanded, medium and compact window size classes. In the compact class the rail becomes a navigation bar and secondary panes hide.</p>
+<ul>
+<li><code>Main.dc.html</code>: Images home.
+<ul>
+<li>Title bar with build provenance, Ctrl+Shift+F search with regex builder, runtime assist chip, notifications and accessibility tools.</li>
+<li>Rail with FAB and five destinations, plus a left-docked vertical tab list with groups, pin and lock state.</li>
+<li>Project cards with shaped icons, stage progress and a split Flash button, plus an error card for a missing source.</li>
+<li>Guided creation with an Easy/Advanced button group and the five stage cards.</li>
+</ul>
+</li>
+<li><code>Builds.dc.html</code>: running build with loading indicator and wavy progress, queued and interrupted items, admission and runtime lists, and a resizable output pane with filter and Follow switch.</li>
+<li><code>Tools.dc.html</code>: searchable tool list in segmented groups; file converter with drop card, per-file progress and resume, and output options using dropdown, text field and switches.</li>
+<li><code>Help.dc.html</code>: offline reader with topic drawer, search with regex builder, back and forward, English and Cantonese article button group, and on-this-page navigation.</li>
+<li><code>Settings.dc.html</code>: navigation drawer sections with search and regex, and segmented setting lists.
+<ul>
+<li>Language mode, the two funny-level Expressive sliders, emoji switch, application name.</li>
+<li>Narrator, voice dropdowns and action sounds.</li>
+<li>Theme, density, accent colour and the element appearance editor.</li>
+<li>The five focus modes.</li>
+</ul>
+</li>
+<li><code>Palette.dc.html</code>: command palette search view over a scrim, with regex builder chips, filter chips and live rows (switch, slider, article, locked item).</li>
+<li><code>Safety.dc.html</code>: dialogs for the two-key super confirmation with slider and Emergency exit; the lock wizard with PIN keypad; the unlock ladder (dim sum rung); and Support Tickets with the plain disclosure line.</li>
+<li><code>Overlays.dc.html</code>: segmented context menu with filter, shortcuts, Edit appearance and Lock this element; notification list; setup step; accessibility tools; About with code name; dim sum surprise card; snackbar.</li>
+</ul>
+<h2 id="design-tokens">Design tokens</h2>
+<p><code>theme.css</code> holds the full Material 3 colour role set generated from a blue seed, for light and dark: primary <code>#415F91</code>, secondary <code>#565F71</code>, tertiary <code>#705575</code>, error <code>#BA1A1A</code>, and the five surface-container tones. <code>m3.css</code> is shared with the Material Browser remake. It holds:</p>
+<ul>
+<li><strong>Type scale:</strong> the full Material 3 scale with emphasized weights, in Roboto Flex with Noto Sans HK for Cantonese.</li>
+<li><strong>Shapes:</strong> Expressive shapes, from rounded corners to the cookie and sunny forms.</li>
+<li><strong>Elevation:</strong> levels 1 to 3.</li>
+<li><strong>State layers:</strong> hover and press overlays.</li>
+<li><strong>Motion:</strong> shape morph on press, with a reduced-motion path.</li>
+</ul>
+<p>Icons are Material Symbols Rounded. The app keeps its vendored local icon set, with no CDN.</p>
+<h2 id="implementation-notes">Implementation notes</h2>
+<ul>
+<li>Build with registered <code>@material/web</code> components in Lit, matching this anatomy.</li>
+<li>Placeholders in brackets (<code>[UPDATED-AT]</code>, <code>[DATE]</code>, <code>[COMMIT]</code>, <code>[DIM SUM NAME]</code>, <code>[PHOTO]</code>, <code>[DISH PHOTO]</code>) must come from real data.</li>
+<li>Sample project names, sizes and counts are illustrative only; never ship invented records.</li>
+<li><code>audit.md</code> maps every required feature to the current renderer and is the wiring backlog.</li>
+</ul>
+</div></article><aside class="toc" aria-label="On this page"><strong>On this page</strong><a href="#location">Location</a><a href="#pure-material-3-expressive">Pure Material 3 Expressive</a><a href="#artboards">Artboards</a><a href="#design-tokens">Design tokens</a><a href="#implementation-notes">Implementation notes</a></aside></div><footer class="foot"><div>Material Buildroot · Project documentation<br>Desktop implementation is in progress; release and companion acceptance remain separate.</div><div class="foot-links"><a href="/material-buildroot/site/build-info.json">Build provenance</a><a href="/material-buildroot/site/assets/fonts-manifest.json">Bundled font inventory</a><a href="https://github.com/Ding-Ding-Projects/material-buildroot">GitHub <md-icon class="inline-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2"/></svg></md-icon></a><md-text-button id="system-theme">System theme</md-text-button></div></footer></main></div><script type="application/json" id="document-index"></script><script src="/material-buildroot/site/assets/document-index.js"></script></body></html>

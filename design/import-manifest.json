@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "source": {
+    "kind": "git",
+    "repository": "https://github.com/Ding-Ding-Projects/material-buildroot",
+    "ref": "refs/heads/main",
+    "revision": "9223534b5cfd4f2d6daa62bff9670411931f0f3d",
+    "designTree": "c7d0a32219113128af79808b69d5eb8ff0c446fa"
+  },
+  "files": [
+    {
+      "path": "canvas.json",
+      "sourceBlob": "0744777a0e475adfb91f673429c4ecd8adb12eca",
+      "sourceBytes": 1374,
+      "sourceSha256": "610e5efb46e858e5b561249ff82a0c5fd2333d0151da81af222cafeb008d0e1e",
+      "bytes": 1374,
+      "sha256": "610e5efb46e858e5b561249ff82a0c5fd2333d0151da81af222cafeb008d0e1e"
+    },
+    {
+      "path": "IMPLEMENTATION_HANDOFF.md",
+      "sourceBlob": "ca33bb095a14e02323f6540d9830585bf69ad334",
+      "sourceBytes": 5941,
+      "sourceSha256": "52fd162c3f4f4b7e6a67b4e59b0dc8fcca29f6cd0f5883359d84e3f94d7393cc",
+      "bytes": 5941,
+      "sha256": "52fd162c3f4f4b7e6a67b4e59b0dc8fcca29f6cd0f5883359d84e3f94d7393cc"
+    },
+    {
+      "path": "audit.md",
+      "sourceBlob": "da3aa089b4a5deba43f3e8efd29d47d30690a611",
+      "sourceBytes": 20698,
+      "sourceSha256": "a62f3a4a47fdfde1344d4419a662c628f476c1d642260175173f9e4d6ff61835",
+      "bytes": 20610,
+      "sha256": "e7368199afec252f4a76253bbcb678e4f2e31c06a77de39844566181272aa792",
+      "review": "Current public copy retains repository-relative paths and neutral catalogue identifiers."
+    },
+    {
+      "path": "m3.css",
+      "sourceBlob": "b0fe30ce1f4e03841b2db47d4fa98fa0e3704f9d",
+      "sourceBytes": 24434,
+      "sourceSha256": "14f711310c5f949342335481197927c89ae1b5c8f16a529bb70f7f3f39492b2e",
+      "bytes": 24434,
+      "sha256": "14f711310c5f949342335481197927c89ae1b5c8f16a529bb70f7f3f39492b2e"
+    },
+    {
+      "path": "theme.css",
+      "sourceBlob": "bf379c56e9ba1ec8e606e79eff1f2a2ab289e8fb",
+      "sourceBytes": 1955,
+      "sourceSha256": "3bfa5626166bee33f0d1391157001867924f7d330da91a42d6121eebea6d00e7",
+      "bytes": 1955,
+      "sha256": "3bfa5626166bee33f0d1391157001867924f7d330da91a42d6121eebea6d00e7"
+    },
+    {
+      "path": "Main.dc.html",
+      "sourceBlob": "09a79705fb888c0a017b03dbabc423ce471c3e1b",
+      "sourceBytes": 12260,
+      "sourceSha256": "4d9ec7eecd3f57ceaa9703e69d3f3169d4da1e3b173d308deb427915b011857c",
+      "bytes": 12260,
+      "sha256": "4d9ec7eecd3f57ceaa9703e69d3f3169d4da1e3b173d308deb427915b011857c"
+    },
+    {
+      "path": "Builds.dc.html",
+      "sourceBlob": "f6b3b33e0993f3c960baece581742ce840a9f718",
+      "sourceBytes": 10074,
+      "sourceSha256": "447538238f1424433e4be8ff9e67f186c9e4d067189698138ecd9a5c7fbf7d5e",
+      "bytes": 10074,
+      "sha256": "447538238f1424433e4be8ff9e67f186c9e4d067189698138ecd9a5c7fbf7d5e"
+    },
+    {
+      "path": "Tools.dc.html",
+      "sourceBlob": "5889a29b7cb1a75022baf513572836d972548647",
+      "sourceBytes": 10007,
+      "sourceSha256": "b5fe153eae8fc1e4faf1e35c42d597c0d7dda6a01accd33ecf53e005e9e704b4",
+      "bytes": 10007,
+      "sha256": "b5fe153eae8fc1e4faf1e35c42d597c0d7dda6a01accd33ecf53e005e9e704b4"
+    },
+    {
+      "path": "Help.dc.html",
+      "sourceBlob": "e9c306adb56f6cdc0aa3c9eddbc43d9cee1dc07f",
+      "sourceBytes": 7699,
+      "sourceSha256": "9a6e1d45f36ee53aa0aa607824375f30a8bd14db3b2d782495071f2e3c1e27c4",
+      "bytes": 7699,
+      "sha256": "9a6e1d45f36ee53aa0aa607824375f30a8bd14db3b2d782495071f2e3c1e27c4"
+    },
+    {
+      "path": "Settings.dc.html",
+      "sourceBlob": "8d161f2e6229b62aa4a4b750e7086fb1db2c9aef",
+      "sourceBytes": 14509,
+      "sourceSha256": "ba4146bd7d9abfd0bcdff3b74221453e6c447edee75aa58d4c28727665449dd8",
+      "bytes": 14509,
+      "sha256": "ba4146bd7d9abfd0bcdff3b74221453e6c447edee75aa58d4c28727665449dd8"
+    },
+    {
+      "path": "Palette.dc.html",
+      "sourceBlob": "d85c16e8115b1078843b2fe20efd484543a15557",
+      "sourceBytes": 5690,
+      "sourceSha256": "bbbf49eddc39bdb03ffe82b99f3eb20e3dfc19e7821d42789a97c69108c625a5",
+      "bytes": 5690,
+      "sha256": "bbbf49eddc39bdb03ffe82b99f3eb20e3dfc19e7821d42789a97c69108c625a5"
+    },
+    {
+      "path": "Safety.dc.html",
+      "sourceBlob": "2f6d671b433a9051e2873acad7b0083706036056",
+      "sourceBytes": 7775,
+      "sourceSha256": "792fdec6eb12a37f7c7aab668fadb731cd85f29a41386fe2affc80095483ca58",
+      "bytes": 7775,
+      "sha256": "792fdec6eb12a37f7c7aab668fadb731cd85f29a41386fe2affc80095483ca58"
+    },
+    {
+      "path": "Overlays.dc.html",
+      "sourceBlob": "08a89ea0bef96127c70fe7a9a5c60d873f7df8be",
+      "sourceBytes": 8903,
+      "sourceSha256": "b56a5de3c0af06ea6d57f7dea59151a847cf79a1f020d23d3949f0484967ef44",
+      "bytes": 8903,
+      "sha256": "b56a5de3c0af06ea6d57f7dea59151a847cf79a1f020d23d3949f0484967ef44"
+    }
+  ],
+  "note": "The design folder at this revision is the active implementation reference. Earlier attachment provenance is retained only in the archive and is not an implementation input. Artboards and historical reference images do not prove production runtime behavior. Recorded public-copy hashes use staged repository blob bytes, independent of working-copy line endings."
+}

@@ -237,13 +237,34 @@ document.querySelectorAll('.sidebar a, .sidebar md-list-item').forEach(a => a.ad
 
 const search = document.querySelector('#doc-search');
 const results = document.querySelector('#search-results');
-const documents = JSON.parse(document.querySelector('#document-index')?.textContent || '[]');
+// The local classic script populates this node before this deferred module runs.
+// An absent or malformed index is unavailable, never an empty search result.
+const documents = (() => {
+  const source = document.querySelector('#document-index')?.textContent;
+  if (typeof source !== 'string' || !source.trim()) return null;
+  try {
+    const value = JSON.parse(source);
+    if (!Array.isArray(value) || !value.every(entry => entry !== null && typeof entry === 'object'
+      && ['title', 'text', 'url', 'category'].every(key => typeof entry[key] === 'string'))) return null;
+    return value;
+  } catch { return null; }
+})();
+const searchCopy = (en, zh) => document.documentElement.dataset.language === 'zh' ? zh
+  : document.documentElement.dataset.language === 'both' ? `${en} · ${zh}` : en;
 const searchWrap = search?.closest('.search-wrap');
 const closeSearch = () => { if (results) results.hidden = true; };
 const showSearch = () => {
   if (!search || !results) return;
   const query = search.value.trim().toLocaleLowerCase();
   results.replaceChildren();
+  if (documents === null) {
+    const message = searchCopy('Documentation search is unavailable. Reload this page to retry loading its local index. You can still browse the navigation.', '文件搜尋暫時未能使用。請重新載入此頁以重試載入本機索引。你仍可使用導覽瀏覽文件。');
+    search.supportingText = message;
+    const notice = document.createElement('p');
+    notice.className = 'search-count'; notice.setAttribute('role', 'status'); notice.textContent = message;
+    results.append(notice); results.hidden = false;
+    return;
+  }
   results.hidden = !query;
   if (!query) return;
   const matches = documents.filter(d => (d.title + ' ' + d.text).toLocaleLowerCase().includes(query));
@@ -258,6 +279,8 @@ const showSearch = () => {
     link.append(title, caption); list.append(link); results.append(list);
   }
 };
+if (documents === null) showSearch();
+language?.addEventListener('change', showSearch);
 search?.addEventListener('input', showSearch);
 search?.addEventListener('focusin', showSearch);
 search?.addEventListener('keydown', async event => {
