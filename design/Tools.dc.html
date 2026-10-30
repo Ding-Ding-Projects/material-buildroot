@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Buildroot · Tools</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2D5DA1}a:hover{color:#1A4A8C}
+.mb{--p:#2D5DA1;--op:#FFFFFF;--pc:#D7E3FF;--opc:#001B3E;--s:#565F71;--sc:#DAE2F9;--osc:#131C2B;--t:#326B5B;--tc:#B6F0DC;--otc:#002019;--bg:#F9F9FF;--s0:#FFFFFF;--s1:#F3F3FA;--s2:#EDEDF4;--s3:#E7E8EE;--s4:#E2E2E9;--on:#191C20;--onv:#44474E;--ol:#74777F;--olv:#C4C6D0;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
+.mb.dark{--p:#AAC7FF;--op:#0A305F;--pc:#284777;--opc:#D7E3FF;--s:#BEC6DC;--sc:#3E4759;--osc:#DAE2F9;--t:#9AD3C1;--tc:#164F43;--otc:#B6F0DC;--bg:#111318;--s0:#0C0E13;--s1:#191C20;--s2:#1D2024;--s3:#282A2F;--s4:#33353A;--on:#E2E2E9;--onv:#C4C6D0;--ol:#8E9099;--olv:#44474E;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6}
+.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;font-feature-settings:'liga';user-select:none}
+.ib{width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--onv);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ib:hover{background:var(--s3)}
+.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+.fill{background:var(--p);color:var(--op)}.ton{background:var(--sc);color:var(--osc)}.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
+.rail a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--onv);font:500 12px/16px 'Roboto Flex',sans-serif}
+.rail a .pill{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.rail a.on{color:var(--on)}.rail a.on .pill{background:var(--sc);color:var(--osc)}
+.tl{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;border-radius:28px;color:var(--onv);font-size:14px;border:0;background:transparent;width:100%;text-align:left;font-family:inherit;cursor:pointer}
+.tl.on{background:var(--sc);color:var(--osc);font-weight:500}
+.tl small{display:block;font-size:12px;color:var(--onv);font-weight:400}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--olv);font-size:13px;color:var(--onv);background:transparent}
+.card{background:var(--s1);border-radius:16px}
+.lbl{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv)}
+</style>
+</helmet>
+<div class="mb {{theme}}" style="min-height: 960px; height: 100vh; display: flex; flex-direction: column; overflow: hidden">
+  <header style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; background: var(--s2); flex-shrink: 0">
+    <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--p); color: var(--op); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">MB</div>
+    <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; font-weight: 600">Material Buildroot</span><span style="font-size: 11px; color: var(--onv)">v0.1.1 · build 233.1 · updated [UPDATED-AT]</span></div>
+    <div style="flex: 1; display: flex; justify-content: center; min-width: 0"><button style="width: min(560px, 100%); height: 40px; border-radius: 20px; border: 0; background: var(--s4); color: var(--onv); display: flex; align-items: center; gap: 12px; padding: 0 16px; font: 14px 'Roboto Flex',sans-serif; cursor: pointer"><span class="ms" aria-hidden="true">search</span><span style="flex: 1; text-align: left">Search commands, settings, articles</span><kbd style="font: 500 12px 'Roboto Flex',sans-serif; background: var(--s1); border-radius: 6px; padding: 4px 8px">Ctrl+Shift+F</kbd></button></div>
+    <button class="ib" aria-label="Notifications"><span class="ms">notifications</span></button>
+    <button class="ib" aria-label="Help"><span class="ms">help</span></button>
+    <div style="display: flex; height: 56px; margin-left: 8px"><button class="ib" aria-label="Minimise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">remove</span></button><button class="ib" aria-label="Maximise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 18px">crop_square</span></button><button class="ib" aria-label="Close" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">close</span></button></div>
+  </header>
+  <div style="flex: 1; display: flex; min-height: 0">
+    <nav class="rail" aria-label="Destinations" style="width: 88px; flex-shrink: 0; background: var(--s2); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0">
+      <div style="height: 68px"></div>
+      <a href="Main.dc.html"><span class="pill"><span class="ms">deployed_code</span></span>Images</a>
+      <a href="Builds.dc.html"><span class="pill"><span class="ms">construction</span></span>Builds</a>
+      <a class="on" href="Tools.dc.html"><span class="pill"><span class="ms" style="font-variation-settings: 'FILL' 1">handyman</span></span>Tools</a>
+      <a href="Help.dc.html"><span class="pill"><span class="ms">menu_book</span></span>Help</a>
+      <a href="Settings.dc.html"><span class="pill"><span class="ms">settings</span></span>Settings</a>
+      <div style="flex: 1"></div>
+      <a href="Overlays.dc.html"><span class="pill"><span class="ms">school</span></span>Setup</a>
+    </nav>
+    <aside aria-label="Tools" style="width: 288px; flex-shrink: 0; background: var(--s1); display: flex; flex-direction: column; gap: 2px; padding: 16px 12px; overflow: auto">
+      <label style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px 0 16px; border-radius: 22px; background: var(--s4); margin-bottom: 12px"><span class="ms" style="font-size: 20px; color: var(--onv)">search</span><input aria-label="Search tools" placeholder="Search tools" style="flex: 1; min-width: 0; border: 0; background: transparent; color: var(--on); font: 14px 'Roboto Flex',sans-serif; outline: none"><button class="ib" aria-label="Regex builder for tool search" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">regular_expression</span></button></label>
+      <span class="lbl" style="padding: 8px 16px">Files and media</span>
+      <button class="tl on"><span class="ms">swap_horiz</span><span>File converter<small>Any local format to any other</small></span></button>
+      <button class="tl"><span class="ms">usb</span><span>Flash image<small>Write to SD card or USB</small></span></button>
+      <button class="tl"><span class="ms">download</span><span>Download hand-off<small>From the browser extension</small></span></button>
+      <span class="lbl" style="padding: 12px 16px 8px">Servers and models</span>
+      <button class="tl"><span class="ms">dns</span><span>Minecraft servers<small>Create, run and manage</small></span></button>
+      <button class="tl"><span class="ms">neurology</span><span>Ollama suite<small>Models, capacity, chat</small></span></button>
+      <span class="lbl" style="padding: 12px 16px 8px">Code and publishing</span>
+      <button class="tl"><span class="ms">code</span><span>External editor<small>VS Code hand-off</small></span></button>
+      <button class="tl"><span class="ms">publish</span><span>Publish to a forge<small>Repository and release</small></span></button>
+      <button class="tl"><span class="ms">regular_expression</span><span>Regex workbench<small>Build and test patterns</small></span></button>
+      <button class="tl"><span class="ms">account_tree</span><span>Diagram workbench<small>Packages and topology</small></span></button>
+      <button class="tl"><span class="ms">inventory</span><span>SDK export<small>Toolchain bundle</small></span></button>
+    </aside>
+    <main style="flex: 1; min-width: 0; overflow: auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap">
+        <div style="flex: 1; min-width: 260px"><h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 500">File converter</h1><p style="margin: 4px 0 0; color: var(--onv); font-size: 14px">Runs locally. Nothing leaves this computer.</p></div>
+        <button class="btn out"><span class="ms" style="font-size: 20px">history</span>History</button>
+        <button class="btn fill"><span class="ms" style="font-size: 20px">bolt</span>Convert 3 files</button>
+      </div>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap">
+        <section style="flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <button style="min-height: 160px; border: 2px dashed var(--ol); border-radius: 16px; background: var(--s0); color: var(--onv); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font: 14px 'Roboto Flex',sans-serif; cursor: pointer"><span class="ms" style="font-size: 40px; color: var(--p)">upload_file</span><span style="font-size: 16px; color: var(--on); font-weight: 500">Drop files here or choose files</span><span>Images, documents, audio, video, archives, disk images</span></button>
+          <div class="card" style="padding: 8px 0">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 20px"><span class="ms" style="color: var(--p)">image</span><div style="flex: 1; min-width: 0"><div style="font-weight: 500">splash.png</div><div style="font-size: 12px; color: var(--onv)">PNG to BMP · 1.2 MB</div></div><span class="chip" style="border-color: transparent; background: var(--tc); color: var(--otc)">Done</span><button class="ib" aria-label="Show in folder" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">folder_open</span></button></div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 20px"><span class="ms" style="color: var(--p)">description</span><div style="flex: 1; min-width: 0"><div style="font-weight: 500">board-notes.docx</div><div style="height: 6px; border-radius: 3px; background: var(--s4); margin-top: 6px; overflow: hidden" role="progressbar" aria-label="board-notes.docx progress" aria-valuenow="40"><div style="width: 40%; height: 6px; background: var(--p)"></div></div></div><span style="font-size: 12px; color: var(--onv)">40%</span><button class="ib" aria-label="Cancel conversion" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">close</span></button></div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: var(--ec); color: var(--oec)"><span class="ms">error</span><div style="flex: 1; min-width: 0"><div style="font-weight: 500">rootfs.ext4</div><div style="font-size: 12px">Stopped at 62% · partial output kept</div></div><button class="btn out" style="height: 36px; color: var(--oec); border-color: var(--oec)">Resume</button></div>
+          </div>
+        </section>
+        <aside class="card" style="flex: 1 1 280px; padding: 20px; display: flex; flex-direction: column; gap: 16px; align-self: flex-start">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 500">Output</h2>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--onv)">Convert to<select style="height: 48px; border-radius: 8px; border: 1px solid var(--ol); background: var(--s0); color: var(--on); padding: 0 12px; font: 15px 'Roboto Flex',sans-serif"><option>PDF</option></select></label>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--onv)">Save to<input value="Documents\Converted" style="height: 48px; border-radius: 8px; border: 1px solid var(--ol); background: var(--s0); color: var(--on); padding: 0 12px; font: 15px 'Roboto Flex',sans-serif"></label>
+          <label style="display: flex; align-items: center; gap: 12px; font-size: 14px"><input type="checkbox" checked style="width: 18px; height: 18px; accent-color: var(--p)">Keep originals</label>
+          <label style="display: flex; align-items: center; gap: 12px; font-size: 14px"><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--p)">Open folder when done</label>
+          <button class="btn txt" style="align-self: flex-start; padding: 0"><span class="ms" style="font-size: 18px">info</span>What each format keeps</button>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer style="height: 32px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--s2); color: var(--onv); font-size: 12px; flex-shrink: 0">
+    <span>Converter · 1 running · 1 to resume</span><div style="flex: 1"></div><span>English · Funny level 5</span><span>v0.1.1 · updated [UPDATED-AT]</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

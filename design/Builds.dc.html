@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Buildroot · Builds</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Roboto+Mono:wght@400&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2D5DA1}a:hover{color:#1A4A8C}
+.mb{--p:#2D5DA1;--op:#FFFFFF;--pc:#D7E3FF;--opc:#001B3E;--s:#565F71;--sc:#DAE2F9;--osc:#131C2B;--t:#326B5B;--tc:#B6F0DC;--otc:#002019;--bg:#F9F9FF;--s0:#FFFFFF;--s1:#F3F3FA;--s2:#EDEDF4;--s3:#E7E8EE;--s4:#E2E2E9;--on:#191C20;--onv:#44474E;--ol:#74777F;--olv:#C4C6D0;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
+.mb.dark{--p:#AAC7FF;--op:#0A305F;--pc:#284777;--opc:#D7E3FF;--s:#BEC6DC;--sc:#3E4759;--osc:#DAE2F9;--t:#9AD3C1;--tc:#164F43;--otc:#B6F0DC;--bg:#111318;--s0:#0C0E13;--s1:#191C20;--s2:#1D2024;--s3:#282A2F;--s4:#33353A;--on:#E2E2E9;--onv:#C4C6D0;--ol:#8E9099;--olv:#44474E;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6}
+.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;font-feature-settings:'liga';user-select:none}
+.ib{width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--onv);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ib:hover{background:var(--s3)}
+.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+.fill{background:var(--p);color:var(--op)}.ton{background:var(--sc);color:var(--osc)}.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
+.rail a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--onv);font:500 12px/16px 'Roboto Flex',sans-serif}
+.rail a .pill{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.rail a.on{color:var(--on)}.rail a.on .pill{background:var(--sc);color:var(--osc)}
+.tab{display:flex;align-items:center;gap:10px;height:40px;padding:0 8px 0 12px;border-radius:20px;color:var(--onv);font-size:14px}
+.tab.on{background:var(--s4);color:var(--on);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--olv);font-size:13px;color:var(--onv);background:transparent}
+.card{background:var(--s1);border-radius:16px}
+.lbl{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv)}
+.log{font:13px/20px 'Roboto Mono',monospace}
+</style>
+</helmet>
+<div class="mb {{theme}}" style="min-height: 960px; height: 100vh; display: flex; flex-direction: column; overflow: hidden">
+  <header style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; background: var(--s2); flex-shrink: 0">
+    <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--p); color: var(--op); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">MB</div>
+    <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; font-weight: 600">Material Buildroot</span><span style="font-size: 11px; color: var(--onv)">v0.1.1 · build 233.1 · updated [UPDATED-AT]</span></div>
+    <div style="flex: 1; display: flex; justify-content: center; min-width: 0"><button style="width: min(560px, 100%); height: 40px; border-radius: 20px; border: 0; background: var(--s4); color: var(--onv); display: flex; align-items: center; gap: 12px; padding: 0 16px; font: 14px 'Roboto Flex',sans-serif; cursor: pointer"><span class="ms" aria-hidden="true">search</span><span style="flex: 1; text-align: left">Search commands, settings, articles</span><kbd style="font: 500 12px 'Roboto Flex',sans-serif; background: var(--s1); border-radius: 6px; padding: 4px 8px">Ctrl+Shift+F</kbd></button></div>
+    <button class="ib" aria-label="Notifications"><span class="ms">notifications</span></button>
+    <button class="ib" aria-label="Help"><span class="ms">help</span></button>
+    <div style="display: flex; height: 56px; margin-left: 8px"><button class="ib" aria-label="Minimise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">remove</span></button><button class="ib" aria-label="Maximise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 18px">crop_square</span></button><button class="ib" aria-label="Close" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">close</span></button></div>
+  </header>
+  <div style="flex: 1; display: flex; min-height: 0">
+    <nav class="rail" aria-label="Destinations" style="width: 88px; flex-shrink: 0; background: var(--s2); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0">
+      <button class="btn" style="width: 56px; height: 56px; padding: 0; justify-content: center; border-radius: 16px; background: var(--tc); color: var(--otc); margin-bottom: 12px" aria-label="Start a build"><span class="ms">play_arrow</span></button>
+      <a href="Main.dc.html"><span class="pill"><span class="ms">deployed_code</span></span>Images</a>
+      <a class="on" href="Builds.dc.html"><span class="pill"><span class="ms" style="font-variation-settings: 'FILL' 1">construction</span></span>Builds</a>
+      <a href="Tools.dc.html"><span class="pill"><span class="ms">handyman</span></span>Tools</a>
+      <a href="Help.dc.html"><span class="pill"><span class="ms">menu_book</span></span>Help</a>
+      <a href="Settings.dc.html"><span class="pill"><span class="ms">settings</span></span>Settings</a>
+      <div style="flex: 1"></div>
+      <a href="Overlays.dc.html"><span class="pill"><span class="ms">school</span></span>Setup</a>
+    </nav>
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <div style="flex: 1; min-height: 0; overflow: auto; padding: 24px 32px; display: flex; gap: 24px; flex-wrap: wrap; align-content: flex-start">
+        <section style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap">
+            <div style="flex: 1; min-width: 240px"><h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 500">Builds</h1><p style="margin: 4px 0 0; color: var(--onv); font-size: 14px">Queue, admission and recovery for every output tree.</p></div>
+            <button class="btn out"><span class="ms" style="font-size: 20px">pause</span>Pause admission</button>
+            <button class="btn fill"><span class="ms" style="font-size: 20px">play_arrow</span>Start build</button>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="chip" style="background: var(--sc); color: var(--osc); border-color: transparent"><span class="ms" style="font-size: 18px">check</span>Active</button><button class="chip">Queued</button><button class="chip">Interrupted</button><button class="chip">Finished</button><div style="flex: 1"></div><button class="chip"><span class="ms" style="font-size: 18px">checklist</span>Select</button><button class="chip"><span class="ms" style="font-size: 18px">ios_share</span>Export</button></div>
+          <article class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; border: 2px solid var(--p); background: var(--s0)">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap"><span class="ms" style="color: var(--p)">autorenew</span><h2 style="margin: 0; font-size: 18px; font-weight: 500; flex: 1">qemu appliance · make all</h2><span class="chip" style="border-color: transparent; background: var(--pc); color: var(--opc)">Running · WSL 2</span><button class="btn txt" style="height: 36px">Cancel</button></div>
+            <div style="height: 8px; border-radius: 4px; background: var(--s4); overflow: hidden" role="progressbar" aria-label="Packages built" aria-valuenow="142" aria-valuemax="214"><div style="width: 66%; height: 8px; background: var(--p)"></div></div>
+            <div style="display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; color: var(--onv)"><span>142 of 214 packages</span><span>Elapsed 18 min</span><span>Current: host-gcc-final</span><span>Source a1b2c3d · config r14</span></div>
+          </article>
+          <article class="card" style="padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap"><span class="ms" style="color: var(--onv)">schedule</span><div style="flex: 1; min-width: 200px"><div style="font-weight: 500">kiosk rpi4 · sdcard image</div><div style="font-size: 13px; color: var(--onv)">Queued · waits for 8 GiB memory reservation</div></div><button class="ib" aria-label="Move up"><span class="ms">arrow_upward</span></button><button class="ib" aria-label="More actions"><span class="ms">more_vert</span></button></article>
+          <article class="card" style="padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--ec); color: var(--oec)"><span class="ms">sync_problem</span><div style="flex: 1; min-width: 200px"><div style="font-weight: 500">router lab · make linux</div><div style="font-size: 13px">Interrupted at 47%. Not verified stopped. Recovery picks up where it broke.</div></div><button class="btn" style="height: 36px; background: var(--e); color: var(--s0)">Verify cleanup</button><button class="btn out" style="height: 36px; color: var(--oec); border-color: var(--oec)">Retry</button></article>
+        </section>
+        <aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 16px">
+          <section class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px"><h2 style="margin: 0; font-size: 16px; font-weight: 500">Admission limits</h2>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>Parallel jobs</span><strong>2</strong></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>Memory reserved</span><strong>12 of 16 GiB</strong></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>Disk free (output)</span><strong>84 GiB</strong></div>
+            <button class="btn ton" style="align-self: flex-start; height: 36px"><span class="ms" style="font-size: 18px">refresh</span>Recheck admission</button>
+          </section>
+          <section class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 8px"><h2 style="margin: 0; font-size: 16px; font-weight: 500">Runtimes</h2>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px"><span class="ms" style="color: var(--t); font-size: 20px">check_circle</span><span style="flex: 1">WSL 2 · Ubuntu 24.04 · UID 1000</span></div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px"><span class="ms" style="color: var(--t); font-size: 20px">check_circle</span><span style="flex: 1">Docker · digest-pinned image</span></div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--onv)"><span class="ms" style="font-size: 20px">cloud_off</span><span style="flex: 1">Remote runner not set up</span></div>
+          </section>
+        </aside>
+      </div>
+      <section aria-label="Build output" style="height: 280px; flex-shrink: 0; border-top: 1px solid var(--olv); background: var(--s1); display: flex; flex-direction: column">
+        <div role="separator" aria-label="Resize output" aria-orientation="horizontal" style="height: 8px; display: flex; justify-content: center; align-items: center"><span style="width: 32px; height: 4px; border-radius: 2px; background: var(--ol)"></span></div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 0 16px 8px; flex-wrap: wrap">
+          <h2 style="margin: 0; font-size: 14px; font-weight: 500; flex: 1">Output · qemu appliance</h2>
+          <label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px; background: var(--s4); font-size: 13px; color: var(--onv)"><span class="ms" style="font-size: 18px">filter_alt</span><input aria-label="Filter output" placeholder="Filter output" style="border: 0; background: transparent; color: var(--on); font: 13px 'Roboto Flex',sans-serif; width: 180px; outline: none"></label>
+          <button class="ib" aria-label="Open regex builder for output filter" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">regular_expression</span></button>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px"><input type="checkbox" checked style="width: 18px; height: 18px; accent-color: var(--p)">Follow</label>
+          <button class="ib" aria-label="Open in external editor" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">open_in_new</span></button>
+        </div>
+        <pre class="log" style="flex: 1; margin: 0 16px 12px; padding: 12px 16px; border-radius: 12px; background: var(--s0); overflow: auto; color: var(--on)">&gt;&gt;&gt; host-gcc-final 13.3.0 Building
+&gt;&gt;&gt; host-gcc-final 13.3.0 Installing to host directory
+&gt;&gt;&gt; busybox 1.37.0 Configuring
+&gt;&gt;&gt; busybox 1.37.0 Building</pre>
+      </section>
+    </main>
+  </div>
+  <footer style="height: 32px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--s2); color: var(--onv); font-size: 12px; flex-shrink: 0">
+    <span style="display: flex; align-items: center; gap: 6px"><span class="ms" style="font-size: 16px; color: var(--p)">autorenew</span>1 running · 1 queued · 1 interrupted</span><div style="flex: 1"></div><span>English · Funny level 5</span><span>v0.1.1 · updated [UPDATED-AT]</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

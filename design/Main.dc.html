@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Buildroot · Images</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2D5DA1}a:hover{color:#1A4A8C}
+.mb{--p:#2D5DA1;--op:#FFFFFF;--pc:#D7E3FF;--opc:#001B3E;--s:#565F71;--sc:#DAE2F9;--osc:#131C2B;--t:#326B5B;--tc:#B6F0DC;--otc:#002019;--bg:#F9F9FF;--s0:#FFFFFF;--s1:#F3F3FA;--s2:#EDEDF4;--s3:#E7E8EE;--s4:#E2E2E9;--on:#191C20;--onv:#44474E;--ol:#74777F;--olv:#C4C6D0;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
+.mb.dark{--p:#AAC7FF;--op:#0A305F;--pc:#284777;--opc:#D7E3FF;--s:#BEC6DC;--sc:#3E4759;--osc:#DAE2F9;--t:#9AD3C1;--tc:#164F43;--otc:#B6F0DC;--bg:#111318;--s0:#0C0E13;--s1:#191C20;--s2:#1D2024;--s3:#282A2F;--s4:#33353A;--on:#E2E2E9;--onv:#C4C6D0;--ol:#8E9099;--olv:#44474E;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6}
+.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;-webkit-font-feature-settings:'liga';font-feature-settings:'liga';user-select:none}
+.ib{width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--onv);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ib:hover{background:var(--s3)}
+.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+.fill{background:var(--p);color:var(--op)}.ton{background:var(--sc);color:var(--osc)}.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
+.rail a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--onv);font:500 12px/16px 'Roboto Flex',sans-serif}
+.rail a .pill{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.rail a.on{color:var(--on)}.rail a.on .pill{background:var(--sc);color:var(--osc)}
+.tab{display:flex;align-items:center;gap:10px;height:40px;padding:0 8px 0 12px;border-radius:20px;color:var(--onv);font-size:14px}
+.tab.on{background:var(--s4);color:var(--on);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--olv);font-size:13px;color:var(--onv);background:transparent}
+.card{background:var(--s1);border-radius:16px}
+.lbl{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv);text-transform:none}
+</style>
+</helmet>
+<div class="mb {{theme}}" style="min-height: 960px; height: 100vh; display: flex; flex-direction: column; overflow: hidden">
+  <header style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; background: var(--s2); flex-shrink: 0">
+    <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--p); color: var(--op); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px" aria-hidden="true">MB</div>
+    <div style="display: flex; flex-direction: column; min-width: 0">
+      <span style="font-size: 15px; font-weight: 600">Material Buildroot</span>
+      <span style="font-size: 11px; color: var(--onv)">v0.1.1 · build 233.1 · updated [UPDATED-AT]</span>
+    </div>
+    <div style="flex: 1; display: flex; justify-content: center; min-width: 0">
+      <button style="width: min(560px, 100%); height: 40px; border-radius: 20px; border: 0; background: var(--s4); color: var(--onv); display: flex; align-items: center; gap: 12px; padding: 0 16px; font: 14px 'Roboto Flex',sans-serif; cursor: pointer">
+        <span class="ms" aria-hidden="true">search</span><span style="flex: 1; text-align: left">Search commands, settings, articles</span><kbd style="font: 500 12px 'Roboto Flex',sans-serif; background: var(--s1); border-radius: 6px; padding: 4px 8px">Ctrl+Shift+F</kbd>
+      </button>
+    </div>
+    <button class="ib" aria-label="Notifications, 2 unread" style="position: relative"><span class="ms">notifications</span><span style="position: absolute; top: 8px; right: 8px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--e); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center" aria-hidden="true">2</span></button>
+    <button class="ib" aria-label="Help"><span class="ms">help</span></button>
+    <div style="display: flex; height: 56px; margin-left: 8px">
+      <button class="ib" aria-label="Minimise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">remove</span></button>
+      <button class="ib" aria-label="Maximise" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 18px">crop_square</span></button>
+      <button class="ib" aria-label="Close" style="width: 56px; height: 56px; border-radius: 0"><span class="ms" style="font-size: 20px">close</span></button>
+    </div>
+  </header>
+  <div style="flex: 1; display: flex; min-height: 0">
+    <nav class="rail" aria-label="Destinations" style="width: 88px; flex-shrink: 0; background: var(--s2); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0">
+      <button class="btn ton" style="width: 56px; height: 56px; padding: 0; justify-content: center; border-radius: 16px; background: var(--tc); color: var(--otc); margin-bottom: 12px" aria-label="Create image project"><span class="ms">add</span></button>
+      <a class="on" href="Main.dc.html"><span class="pill"><span class="ms" style="font-variation-settings: 'FILL' 1">deployed_code</span></span>Images</a>
+      <a href="Builds.dc.html"><span class="pill"><span class="ms">construction</span></span>Builds</a>
+      <a href="Tools.dc.html"><span class="pill"><span class="ms">handyman</span></span>Tools</a>
+      <a href="Help.dc.html"><span class="pill"><span class="ms">menu_book</span></span>Help</a>
+      <a href="Settings.dc.html"><span class="pill"><span class="ms">settings</span></span>Settings</a>
+      <div style="flex: 1"></div>
+      <a href="Overlays.dc.html"><span class="pill"><span class="ms">school</span></span>Setup</a>
+    </nav>
+    <aside aria-label="Tabs" style="width: 248px; flex-shrink: 0; background: var(--s1); display: flex; flex-direction: column; gap: 4px; padding: 12px 8px; border-right: 1px solid var(--olv)">
+      <div style="display: flex; align-items: center; gap: 4px; padding: 0 4px 8px">
+        <span class="lbl" style="flex: 1">Tabs</span>
+        <button class="ib" aria-label="Search tabs" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">manage_search</span></button>
+        <button class="ib" aria-label="Dock tab strip to another edge" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">dock_to_left</span></button>
+        <button class="ib" aria-label="New tab" style="width: 36px; height: 36px"><span class="ms" style="font-size: 20px">add</span></button>
+      </div>
+      <span class="lbl" style="padding: 4px 12px">Pinned</span>
+      <div class="tab on"><span class="ms" style="font-size: 20px">deployed_code</span><span style="flex: 1">Images</span><span class="ms" style="font-size: 16px; color: var(--onv)" aria-label="Pinned">push_pin</span></div>
+      <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px"><span style="width: 10px; height: 10px; border-radius: 5px; background: var(--t)" aria-hidden="true"></span><span class="lbl" style="flex: 1">qemu appliance</span><span class="ms" style="font-size: 18px; color: var(--onv)" aria-hidden="true">expand_more</span></div>
+      <div class="tab"><span class="ms" style="font-size: 20px">folder_open</span><span style="flex: 1">Project</span></div>
+      <div class="tab"><span class="ms" style="font-size: 20px">tune</span><span style="flex: 1">Configuration</span></div>
+      <div class="tab"><span class="ms" style="font-size: 20px">account_tree</span><span style="flex: 1">Packages</span><span class="ms" style="font-size: 16px; color: var(--onv)" aria-label="Locked">lock</span></div>
+      <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px"><span style="width: 10px; height: 10px; border-radius: 5px; background: var(--p)" aria-hidden="true"></span><span class="lbl" style="flex: 1">Utilities</span><span class="ms" style="font-size: 18px; color: var(--onv)" aria-hidden="true">chevron_right</span></div>
+      <div style="flex: 1"></div>
+      <button class="btn txt" style="justify-content: flex-start"><span class="ms" style="font-size: 20px">tab_close</span>Close tabs containing…</button>
+    </aside>
+    <main style="flex: 1; min-width: 0; overflow: auto; padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+        <div style="flex: 1; min-width: 280px">
+          <h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 500">Images</h1>
+          <p style="margin: 4px 0 0; color: var(--onv); font-size: 14px">Create, resume and verify bootable images. Easy and Advanced share one draft.</p>
+        </div>
+        <button class="btn fill"><span class="ms" style="font-size: 20px">add</span>Create image</button>
+        <button class="btn out"><span class="ms" style="font-size: 20px">folder_open</span>Open project</button>
+        <button class="btn txt">Plans</button>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap">
+        <button class="chip" style="background: var(--sc); color: var(--osc); border-color: transparent"><span class="ms" style="font-size: 18px">check</span>All</button>
+        <button class="chip">Drafts</button><button class="chip">Built</button><button class="chip">Needs attention</button>
+        <div style="flex: 1"></div>
+        <button class="chip"><span class="ms" style="font-size: 18px">filter_list</span>Filters and statistics</button>
+        <button class="chip"><span class="ms" style="font-size: 18px">checklist</span>Select</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 16px">
+        <article class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 12px"><span class="ms" style="color: var(--p)">memory</span><h2 style="margin: 0; font-size: 18px; font-weight: 500; flex: 1">qemu appliance</h2><button class="ib" aria-label="More actions for qemu appliance" style="width: 36px; height: 36px"><span class="ms">more_vert</span></button></div>
+          <p style="margin: 0; font-size: 13px; color: var(--onv)">x86_64 · ISO · Buildroot 2025.02 · WSL 2</p>
+          <div style="display: flex; gap: 4px" aria-label="Guide stage 3 of 5"><span style="flex: 1; height: 6px; border-radius: 3px; background: var(--p)"></span><span style="flex: 1; height: 6px; border-radius: 3px; background: var(--p)"></span><span style="flex: 1; height: 6px; border-radius: 3px; background: var(--p)"></span><span style="flex: 1; height: 6px; border-radius: 3px; background: var(--s4)"></span><span style="flex: 1; height: 6px; border-radius: 3px; background: var(--s4)"></span></div>
+          <div style="display: flex; align-items: center; gap: 8px"><span style="font-size: 13px; flex: 1">Stage 3 of 5 · Configure</span><button class="btn ton" style="height: 36px">Resume</button></div>
+        </article>
+        <article class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 12px"><span class="ms" style="color: var(--t)">verified</span><h2 style="margin: 0; font-size: 18px; font-weight: 500; flex: 1">kiosk rpi4</h2><button class="ib" aria-label="More actions for kiosk rpi4" style="width: 36px; height: 36px"><span class="ms">more_vert</span></button></div>
+          <p style="margin: 0; font-size: 13px; color: var(--onv)">aarch64 · SD card · Docker</p>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--tc); color: var(--otc); font-size: 13px"><span class="ms" style="font-size: 18px">task_alt</span>Last build succeeded · image hash recorded</div>
+          <div style="display: flex; align-items: center; gap: 8px"><span style="font-size: 13px; flex: 1">Built [DATE]</span><button class="btn out" style="height: 36px">Flash</button></div>
+        </article>
+        <article class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 12px"><span class="ms" style="color: var(--e)">report</span><h2 style="margin: 0; font-size: 18px; font-weight: 500; flex: 1">router lab</h2><button class="ib" aria-label="More actions for router lab" style="width: 36px; height: 36px"><span class="ms">more_vert</span></button></div>
+          <p style="margin: 0; font-size: 13px; color: var(--onv)">arm · source folder not found</p>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--ec); color: var(--oec); font-size: 13px"><span class="ms" style="font-size: 18px">folder_off</span>The saved source folder moved or was removed.</div>
+          <div style="display: flex; align-items: center; gap: 8px"><span style="font-size: 13px; flex: 1">Outputs preserved</span><button class="btn ton" style="height: 36px">Locate source</button></div>
+        </article>
+      </div>
+      <section class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px; background: var(--s0); border: 1px solid var(--olv)">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 20px; font-weight: 500; flex: 1">Guided image creation</h2>
+          <div role="group" aria-label="Mode" style="display: inline-flex; border: 1px solid var(--ol); border-radius: 20px; overflow: hidden"><button style="height: 40px; padding: 0 16px; border: 0; background: var(--sc); color: var(--osc); font: 500 14px 'Roboto Flex',sans-serif; display: flex; align-items: center; gap: 6px"><span class="ms" style="font-size: 18px">check</span>Easy</button><button style="height: 40px; padding: 0 16px; border: 0; border-left: 1px solid var(--ol); background: transparent; color: var(--on); font: 500 14px 'Roboto Flex',sans-serif">Advanced</button></div>
+        </div>
+        <ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px">
+          <li style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: var(--pc); color: var(--opc)"><span class="ms">check_circle</span><span style="font-weight: 500; font-size: 14px">Purpose</span><span style="font-size: 12px">Appliance</span></li>
+          <li style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: var(--pc); color: var(--opc)"><span class="ms">check_circle</span><span style="font-weight: 500; font-size: 14px">Target</span><span style="font-size: 12px">QEMU x86_64</span></li>
+          <li style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; border: 2px solid var(--p)"><span class="ms" style="color: var(--p)">radio_button_checked</span><span style="font-weight: 500; font-size: 14px">Configure</span><span style="font-size: 12px; color: var(--onv)">Packages and size</span></li>
+          <li style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: var(--s2)"><span class="ms" style="color: var(--onv)">radio_button_unchecked</span><span style="font-weight: 500; font-size: 14px">Review</span><span style="font-size: 12px; color: var(--onv)">Exact draft</span></li>
+          <li style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: var(--s2)"><span class="ms" style="color: var(--onv)">radio_button_unchecked</span><span style="font-weight: 500; font-size: 14px">Build</span><span style="font-size: 12px; color: var(--onv)">WSL 2 or Docker</span></li>
+        </ol>
+      </section>
+    </main>
+  </div>
+  <footer style="height: 32px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--s2); color: var(--onv); font-size: 12px; flex-shrink: 0">
+    <span style="display: flex; align-items: center; gap: 6px"><span class="ms" style="font-size: 16px; color: var(--t)">check_circle</span>WSL 2 ready</span>
+    <span>No build running</span><div style="flex: 1"></div><span>English · Funny level 5</span><span>v0.1.1 · updated [UPDATED-AT]</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

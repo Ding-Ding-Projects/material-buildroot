@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Material Buildroot · Locks and confirmations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600&amp;family=Noto+Sans+HK:wght@400;500&amp;family=Roboto+Mono:wght@400&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&amp;display=swap">
+<style>
+body{margin:0}
+.mb{--p:#2D5DA1;--op:#FFFFFF;--pc:#D7E3FF;--opc:#001B3E;--sc:#DAE2F9;--osc:#131C2B;--t:#326B5B;--tc:#B6F0DC;--otc:#002019;--bg:#F9F9FF;--s0:#FFFFFF;--s1:#F3F3FA;--s2:#EDEDF4;--s3:#E7E8EE;--s4:#E2E2E9;--on:#191C20;--onv:#44474E;--ol:#74777F;--olv:#C4C6D0;--e:#BA1A1A;--ec:#FFDAD6;--oec:#410002;font-family:'Roboto Flex','Noto Sans HK',system-ui,sans-serif;color:var(--on);background:var(--bg)}
+.mb.dark{--p:#AAC7FF;--op:#0A305F;--pc:#284777;--opc:#D7E3FF;--sc:#3E4759;--osc:#DAE2F9;--t:#9AD3C1;--tc:#164F43;--otc:#B6F0DC;--bg:#111318;--s0:#0C0E13;--s1:#191C20;--s2:#1D2024;--s3:#282A2F;--s4:#33353A;--on:#E2E2E9;--onv:#C4C6D0;--ol:#8E9099;--olv:#44474E;--e:#FFB4AB;--ec:#93000A;--oec:#FFDAD6}
+.ms{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;font-weight:400;font-style:normal;display:inline-block;font-feature-settings:'liga';user-select:none}
+.btn{height:44px;padding:0 20px;border-radius:22px;border:0;font:500 14px/1 'Roboto Flex',sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.fill{background:var(--p);color:var(--op)}.ton{background:var(--sc);color:var(--osc)}.out{background:transparent;color:var(--p);border:1px solid var(--ol)}.txt{background:transparent;color:var(--p);padding:0 12px}
+.panel{background:var(--s1);border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.panel h2{margin:0;font-size:20px;font-weight:500;display:flex;align-items:center;gap:10px}
+.cap{font:500 12px/16px 'Roboto Flex',sans-serif;letter-spacing:.4px;color:var(--onv)}
+.key{height:52px;border-radius:16px;border:0;background:var(--s3);color:var(--on);font:500 20px 'Roboto Flex',sans-serif}
+.opt{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:12px;font-size:14px}
+.opt.on{background:var(--sc);color:var(--osc)}
+</style>
+</helmet>
+<div class="mb {{theme}}" style="min-height: 960px; padding: 32px; box-sizing: border-box; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-content: start">
+  <section class="panel" aria-label="Super confirmation">
+    <h2><span class="ms" style="color: var(--e)">delete_forever</span>Clean build output</h2>
+    <p style="margin: 0; font-size: 14px; line-height: 21px">This permanently removes <strong>output/qemu-appliance</strong> (4.2 GiB, 18,410 files). Your source and configuration are kept.</p>
+    <span class="cap">Turn both keys</span>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <button class="btn" aria-pressed="true" style="height: 72px; border-radius: 20px; background: var(--ec); color: var(--oec); flex-direction: column; gap: 4px"><span class="ms" style="font-variation-settings: 'FILL' 1">key</span>Key one · turned</button>
+      <button class="btn" aria-pressed="false" style="height: 72px; border-radius: 20px; background: var(--s3); color: var(--on); flex-direction: column; gap: 4px"><span class="ms">key</span>Key two</button>
+    </div>
+    <span class="cap">Then slide all the way</span>
+    <div style="height: 56px; border-radius: 28px; background: var(--s3); position: relative; opacity: 0.6" aria-label="Confirm slider, waiting for key two" role="slider" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-disabled="true"><div style="position: absolute; left: 4px; top: 4px; width: 48px; height: 48px; border-radius: 24px; background: var(--ol); color: var(--s0); display: flex; align-items: center; justify-content: center"><span class="ms">chevron_right</span></div><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--onv)">Slide to clean</span></div>
+    <button class="btn out" style="align-self: stretch"><span class="ms" style="font-size: 20px">logout</span>Emergency exit</button>
+  </section>
+  <section class="panel" aria-label="Lock this element">
+    <h2><span class="ms" style="color: var(--p)">lock</span>Lock “Packages” tab</h2>
+    <span class="cap">Choose exactly one way to unlock</span>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <div class="opt on"><span class="ms" style="font-size: 20px">radio_button_checked</span>PIN</div>
+      <div class="opt"><span class="ms" style="font-size: 20px">radio_button_unchecked</span>Password</div>
+      <div class="opt"><span class="ms" style="font-size: 20px">radio_button_unchecked</span>PIN and password</div>
+      <div class="opt"><span class="ms" style="font-size: 20px">radio_button_unchecked</span>Password and authenticator code</div>
+      <div class="opt"><span class="ms" style="font-size: 20px">radio_button_unchecked</span>PIN and authenticator code</div>
+      <div class="opt"><span class="ms" style="font-size: 20px">radio_button_unchecked</span>Password, PIN and authenticator code</div>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 12px; padding: 4px 0" aria-label="PIN, 2 of 6 digits"><span style="width: 14px; height: 14px; border-radius: 7px; background: var(--p)"></span><span style="width: 14px; height: 14px; border-radius: 7px; background: var(--p)"></span><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px solid var(--ol); box-sizing: border-box"></span><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px solid var(--ol); box-sizing: border-box"></span><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px solid var(--ol); box-sizing: border-box"></span><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px solid var(--ol); box-sizing: border-box"></span></div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><button class="key">1</button><button class="key">2</button><button class="key">3</button><button class="key">4</button><button class="key">5</button><button class="key">6</button><button class="key">7</button><button class="key">8</button><button class="key">9</button><button class="key" aria-label="Delete digit"><span class="ms">backspace</span></button><button class="key">0</button><button class="key" aria-label="Done" style="background: var(--p); color: var(--op)"><span class="ms">check</span></button></div>
+    <p style="margin: 0; font-size: 12px; color: var(--onv)">Just for fun, never security. Deleting the app data folder removes every lock.</p>
+  </section>
+  <section class="panel" aria-label="Unlock ladder">
+    <h2><span class="ms" style="color: var(--t)">stairs</span>Play your way out</h2>
+    <p style="margin: 0; font-size: 14px">Locked for 4 minutes after too many tries. Each rung clears waiting time, never the lock itself.</p>
+    <ol style="margin: 0; padding: 0; list-style: none; display: flex; gap: 6px" aria-label="Ladder progress"><li style="flex: 1; padding: 8px; border-radius: 10px; background: var(--pc); color: var(--opc); font-size: 12px; text-align: center">Dim sum</li><li style="flex: 1; padding: 8px; border-radius: 10px; background: var(--s3); font-size: 12px; text-align: center">10 sums</li><li style="flex: 1; padding: 8px; border-radius: 10px; background: var(--s3); font-size: 12px; text-align: center">Moles</li><li style="flex: 1; padding: 8px; border-radius: 10px; background: var(--s3); font-size: 12px; text-align: center">Clock</li></ol>
+    <div role="img" aria-label="[DISH PHOTO] from the public dim sum catalogue" style="height: 150px; border-radius: 16px; background: var(--s3); display: flex; align-items: center; justify-content: center; color: var(--onv); font-size: 13px">[DISH PHOTO]</div>
+    <span class="cap">Which dish is this?</span>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px"><button class="btn out" style="height: 56px; flex-direction: column; gap: 2px">Har gow<small style="font: 12px 'Noto Sans HK',sans-serif">蝦餃</small></button><button class="btn out" style="height: 56px; flex-direction: column; gap: 2px">Siu mai<small style="font: 12px 'Noto Sans HK',sans-serif">燒賣</small></button><button class="btn out" style="height: 56px; flex-direction: column; gap: 2px">Cheung fun<small style="font: 12px 'Noto Sans HK',sans-serif">腸粉</small></button><button class="btn out" style="height: 56px; flex-direction: column; gap: 2px">Lo mai gai<small style="font: 12px 'Noto Sans HK',sans-serif">糯米雞</small></button></div>
+    <span style="font-size: 12px; color: var(--onv)">2 ladder runs left this hour</span>
+  </section>
+  <section class="panel" aria-label="Support Tickets">
+    <h2><span class="ms" style="color: var(--p)">confirmation_number</span>Support Tickets</h2>
+    <div style="padding: 16px; border-radius: 16px; background: var(--s0); display: flex; flex-direction: column; gap: 8px"><div style="display: flex; align-items: center; gap: 8px"><strong style="flex: 1">Ticket #0007 · Locked out of Packages</strong><span style="font-size: 12px; padding: 4px 8px; border-radius: 8px; background: var(--tc); color: var(--otc)">Resolved</span></div><p style="margin: 0; font-size: 14px; line-height: 21px">Our very serious department of one has reviewed your case. Resolution: the app data folder, opened below. Remove it to reset every lock.</p><code style="font: 13px 'Roboto Mono',monospace; padding: 8px 10px; border-radius: 8px; background: var(--s3); overflow-wrap: anywhere">%APPDATA%\Material Buildroot</code><div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn fill" style="height: 40px"><span class="ms" style="font-size: 18px">folder_open</span>Open folder</button><button class="btn txt" style="height: 40px"><span class="ms" style="font-size: 18px">content_copy</span>Copy path</button></div></div>
+    <p style="margin: 0; font-size: 13px; color: var(--on)">Nothing is sent anywhere and nobody is reading these tickets.</p>
+    <button class="btn out" style="align-self: flex-start"><span class="ms" style="font-size: 20px">add</span>New ticket</button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : '' };
+  }
+}
+</script>
+</body>
+</html>
