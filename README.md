@@ -2,23 +2,21 @@
 
 A Material Design 3 desktop workspace for configuring and building embedded Linux systems through WSL 2 or Docker.
 
+## Current redesign and preservation state
+
+The current repository design is implemented and locally built at source `30dfb8481f83962c3a6b0e7a18d1126fa393cb64`. Final native interaction, current-source layout acceptance and release verification remain unfinished. See the [preservation handoff](CLOSEOUT_PROMPT.md) and [roadmap](ROADMAP.md).
+
+Earlier README screenshots and their original provenance are preserved in the [historical interface archive](docs/evidence/readme-interface-history-20261030.md). New verification previews belong to the [dedicated public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot-gallery/), with their actual source and limits. Final current screenshots remain an acceptance gap.
+
+最新設計已整合並喺本機建置；最終操作、版面同發佈驗證未完成。舊畫面按原有來源另外保留，唔會當成新版驗收。
+
 ## Standalone OS creation in the running desktop
 
 Images now has a direct **Create standalone OS** action. The guided workspace accepts container images, native-picked archives, supported Compose manifests and reviewed source preparation. It provides WSL setup, kiosk or console choices, persistent storage, optional private personal wording, tunnel options, real build status, boot verification and Downloads export. Implementation and runtime acceptance are separate; see the [workflow and remaining verification](docs/desktop/standalone-os.md).
 
-These genuine screenshots were produced from source `8ae5a66bbb39929c75ff4585b2a5fbeffda56140` on 2026-10-22. The native run opened the standalone creator through its actual Images action without an adopted project. The [capture inventory](docs/evidence/os-native/captures.json) binds the exact executable, screenshots, viewport and interaction evidence. A dedicated non-root WSL environment completed package setup through the application. The first registry workload attempt stopped during image preparation, before compilation; ISO production, boot, workload health, LAN, tunnels and persistence remain unverified.
 
-![Material Buildroot Images workspace with Create standalone OS in dark bilingual mode](docs/evidence/os-native/images-current.png)
 
-![Material Buildroot standalone OS Source controls in dark bilingual mode](docs/evidence/os-native/standalone-source.png)
-
-The later diagnostic build, source `28272e3098fc0eed14238df27ed896f7bd7bbdf4`, completed a fresh GUI preview and build attempt on 2026-10-22. It stopped before compilation with `SOURCE_IDENTITY_MISMATCH`. The selected registry digest remained unchanged, so this diagnostic does not establish registry drift. The visible explanation is being refined alongside archive identity compatibility. This is evidence of the current limit, not a successful ISO build:
-
-![Material Buildroot standalone OS preparation stopped with a validated source identity diagnostic](docs/evidence/os-native/diagnostic-visible.png)
-
-[Earlier standalone OS capture and provenance](docs/evidence/os-native/ARCHIVE.md).
-
-[Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Historical capture provenance](docs/evidence/ARCHIVE.md) · [Roadmap](ROADMAP.md)
+[Interactive documentation](https://ding-ding-projects.github.io/material-buildroot/) · [Latest Windows release](https://github.com/Ding-Ding-Projects/material-buildroot/releases/latest) · [Earlier screenshot gallery](https://ding-ding-projects.github.io/material-buildroot/gallery/) · [Historical capture provenance](docs/evidence/ARCHIVE.md) · [Roadmap](ROADMAP.md)
 
 The main-only integration pass reconciles preserved packaging, converter, queue, native file-broker, companion and inactive native-container histories. Strict renderer checking passes after repairing task-owned tool feedback and host-result boundaries. Integration is separate from release, installed update and live firmware acceptance; see the [verification record](docs/build/main-only-integration.md).
 
@@ -58,13 +56,7 @@ See [presentation provenance](docs/features/presentation-provenance.md) for sour
 
 The guided workspace organizes Images, Builds, Tools, Help and Settings around the image workflow. See [Create and resume an image](docs/features/guided-image-creation.md) for purpose and target selection, saved project access, the five-stage guide and recovery boundaries.
 
-The following native screenshots come from the exact desktop build at `4c5e9ec4d9ed505bd3b715a0dad2882b1b2a6067`, running on an isolated hidden Windows desktop. Both show dark bilingual mode at an observed 1440 by 962 CSS pixels and device pixel ratio 1.5. Navigation and state observation are verified; conversion execution, the complete layout matrix and installed-update acceptance remain incomplete. The [capture inventory](docs/evidence/main-closeout/captures.json) records exact source, executable and PNG identities.
 
-![Material Buildroot converter workspace in dark bilingual mode at 1440 by 962 CSS pixels](docs/evidence/main-closeout/converter.png)
-
-![Material Buildroot offline Help home in dark bilingual mode at 1440 by 962 CSS pixels](docs/evidence/main-closeout/help.png)
-
-[Historical interface screenshots and original provenance](docs/evidence/ARCHIVE.md) are retained separately. Earlier native startup, dialogs and ISO console images do not depict the current guided interface.
 
 The [feature delivery source audit](docs/evidence/tasks/PH01-delivery-audit.md) accounts for all 109 required identities and 436 surface rows, with one [audit article per identity](docs/evidence/tasks/feature-delivery/README.md). It finds no whole feature with complete current acceptance. The overview retains seven unresolved applicability records, shared-trace limits and the gap between 427 public requirement IDs and 1,908 detailed audit rows. It is a source inventory, not an implementation-completeness claim.
 

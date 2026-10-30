@@ -2,6 +2,9 @@
 
 ## Current repository design remake, 2026-10-30
 
+- [x] Preserve the implemented source and source-bound local build for an owner-requested incomplete-verification closeout.
+- [ ] Resume final runtime acceptance only after a new owner request.
+
 - [x] Reconcile the eight current artboards and shared Expressive styles from main revision 9223534b5cfd4f2d6daa62bff9670411931f0f3d, record source identities and archive superseded attachment provenance.
 - [x] Independently review the updated handoff, including collapsed navigation, complete inherited roles, registered controls and actual record authority.
 - [ ] Complete and verify the updated Expressive shell, Images, Settings, tabs, Builds, Tools, Help and overlay presentation while retaining existing action consumers.

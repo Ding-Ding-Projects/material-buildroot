@@ -1,3 +1,17 @@
+# Material Buildroot preservation handoff
+
+## Owner-requested closeout, 2026-10-30
+
+GUI verification is incomplete. The owner requested preservation and cleanup and cleared goal tracking. Current implemented source and exact local build evidence are recorded in [CLOSEOUT_PROMPT.md](CLOSEOUT_PROMPT.md). That file is a continuation handoff, not a completed-release claim.
+
+The final code build passed at `30dfb8481f83962c3a6b0e7a18d1126fa393cb64`. The complete 384-state matrix belongs to earlier source `957d49d`; final switch/bell, interaction/persistence and dark Help contrast acceptance remain pending. Source-based browser readiness is prepared but has not passed its first real case. Documentation functional/focus/target checks passed within their recorded scope; formal audits remain incomplete after automatic approval rejected removal of the task-owned profiles.
+
+Current source uses the repository design at `9223534b5cfd4f2d6daa62bff9670411931f0f3d`. The superseded attachment is retired. The local public-main snapshot excludes earlier private historical ancestry. Earlier local recovery branches and non-ancestor worktrees remain preserved.
+
+Generated documentation contains the reviewed 887edbc output. These closeout and image-archive records were written afterward and require a future documentation rebuild. No release, installer, installed update or ISO acceptance is claimed.
+
+## Earlier records, retained with their original scope
+
 # Current main-only closeout checkpoint, 2026-10-19
 
 ## GUI remake in progress, 2026-10-30
