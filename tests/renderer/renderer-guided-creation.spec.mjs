@@ -364,7 +364,7 @@ test('Purpose selects localize their selected text through Settings without chan
  await check('en');
  for(const [language,index] of [['zh-HK',1],['bilingual',2],['en',0]]){
   await app.locator('nav [data-primary="settings"]').click();
-  await app.locator('.settings-categories md-outlined-button').first().click();
+  await app.locator('.settings-categories button').first().click();
   await choose(app.locator('#language-select'),index);
   await app.locator('#language-select').locator('..').locator('md-filled-button').first().click();
   await expect.poll(()=>app.evaluate(el=>el.effectiveLanguage)).toBe(language);

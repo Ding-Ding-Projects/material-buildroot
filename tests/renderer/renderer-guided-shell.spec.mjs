@@ -374,7 +374,7 @@ test('retained Tools category localizes selected text through the real Settings 
  };
  await check('en');
  for(const [language,index] of [['zh-HK',1],['bilingual',2],['en',0]]){
-  await nav(app,'settings').click();await app.locator('.settings-categories md-outlined-button').first().click();
+  await nav(app,'settings').click();await app.locator('.settings-categories button').first().click();
   await app.locator('#language-select').click();
   const picker=page.locator('searchable-picker').filter({has:page.locator('md-dialog[open]')});
   await picker.locator('[data-option="'+index+'"]').click();await expect(picker.getByRole('dialog')).toBeHidden();
