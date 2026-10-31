@@ -70,7 +70,8 @@ export class WorkspaceTabs extends LitElement {
       aside,.top aside,.bottom aside{display:none}.drawer-open aside,.drawer-open.top aside,.drawer-open.bottom aside{display:flex;position:absolute;z-index:10;inset:56px auto 0 0;width:min(320px,calc(100% - 16px));max-width:none;max-height:none;flex-direction:column;box-shadow:var(--app-elevation-3);overflow:auto;padding:12px;background:var(--md-sys-color-surface-container-low)}
       .drawer-open .strip,.drawer-open .pinned{flex-direction:column;max-width:none}.drawer-open .tab{flex:0 0 auto}.drawer-close{display:inline-flex}.drawer-open .strip-search{flex:0 0 auto}.drawer-open .dock-heading{flex:0 0 auto}
     }
-    aside{flex:0 0 248px;padding:16px 12px;gap:2px;background:var(--surface);border-radius:28px}
+    aside{flex:0 0 248px;width:248px;max-width:248px;min-width:0;overflow:hidden;padding:16px 12px;gap:2px;background:var(--surface);border-radius:28px}
+    .strip{overflow-x:hidden}.wtab{min-width:0;max-width:100%}
     .tabs-head{display:flex;align-items:center;gap:0;padding:0 0 12px 12px;font-size:inherit;color:var(--on-surface)}
     .tabs-head .label{font-weight:500}
     .tabs-head .drawer-close{display:none}
@@ -86,7 +87,8 @@ export class WorkspaceTabs extends LitElement {
     .strip{gap:2px}
     .close-tabs{align-self:flex-start;margin-top:8px}
     .dock-empty{padding:8px 16px;color:var(--on-surface-variant);font-size:12px;line-height:16px}
-    .top aside,.bottom aside{border-radius:28px;padding:8px 12px}
+    .top aside,.bottom aside{border-radius:28px;padding:8px 12px;width:auto;max-width:none}
+    .top .strip,.bottom .strip{overflow-x:auto}
     .top .wtab,.bottom .wtab{flex:0 0 200px}
     .top .close-tabs,.bottom .close-tabs,.top .grow,.bottom .grow{display:none}
     @media(max-width:1180px){.drawer-open .tabs-head .drawer-close{display:inline-flex}.mobile-dock-bar{background:var(--surface);border-radius:999px}}

@@ -10,21 +10,21 @@ export const workspaceStyles = css`
       'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
     --md-ref-typeface-brand:
       'Roboto Variable','Noto Sans HK Variable',Roboto, "Segoe UI", "Microsoft JhengHei", sans-serif;
-    --md-sys-color-primary: #315da8;
-    --md-sys-color-on-primary: #fff;
-    --md-sys-color-primary-container: #dce8ff;
-    --md-sys-color-on-primary-container: #142e57;
-    --md-sys-color-surface: #f8fafc;
-    --md-sys-color-surface-container: #f1f5f9;
-    --md-sys-color-surface-container-low: #ffffff;
-    --md-sys-color-surface-container-high: #e8edf3;
-    --md-sys-color-on-surface: #17212f;
-    --md-sys-color-on-surface-variant: #526174;
-    --md-sys-color-outline: #748093;
-    --md-sys-color-outline-variant: #d8e0e9;
-    --md-sys-color-secondary-container: #e2eaf5;
-    --md-sys-color-on-secondary-container: #24354e;
-    --md-sys-color-error: #b3261e;
+    --md-sys-color-primary: var(--primary, #315da8);
+    --md-sys-color-on-primary: var(--on-primary, #fff);
+    --md-sys-color-primary-container: var(--primary-container, #dce8ff);
+    --md-sys-color-on-primary-container: var(--on-primary-container, #142e57);
+    --md-sys-color-surface: var(--surface, #f8fafc);
+    --md-sys-color-surface-container: var(--surface-container, #f1f5f9);
+    --md-sys-color-surface-container-low: var(--surface-container-low, #ffffff);
+    --md-sys-color-surface-container-high: var(--surface-container-high, #e8edf3);
+    --md-sys-color-on-surface: var(--on-surface, #17212f);
+    --md-sys-color-on-surface-variant: var(--on-surface-variant, #526174);
+    --md-sys-color-outline: var(--outline, #748093);
+    --md-sys-color-outline-variant: var(--outline-variant, #d8e0e9);
+    --md-sys-color-secondary-container: var(--secondary-container, #e2eaf5);
+    --md-sys-color-on-secondary-container: var(--on-secondary-container, #24354e);
+    --md-sys-color-error: var(--error, #b3261e);
     color: var(--md-sys-color-on-surface);
   }
   .operations-host[hidden] {
@@ -41,21 +41,21 @@ export const workspaceStyles = css`
     color: var(--md-sys-color-on-surface);
   }
   .dark {
-    --md-sys-color-primary: #a8c7ff;
-    --md-sys-color-on-primary: #0a305f;
-    --md-sys-color-primary-container: #244779;
-    --md-sys-color-on-primary-container: #dce8ff;
-    --md-sys-color-surface: #111821;
-    --md-sys-color-surface-container: #192330;
-    --md-sys-color-surface-container-low: #151e29;
-    --md-sys-color-surface-container-high: #243143;
-    --md-sys-color-on-surface: #e7edf6;
-    --md-sys-color-on-surface-variant: #b8c5d6;
-    --md-sys-color-outline: #8e9db2;
-    --md-sys-color-outline-variant: #465367;
-    --md-sys-color-secondary-container: #34445c;
-    --md-sys-color-on-secondary-container: #e2eaf5;
-    --md-sys-color-error: #f2b8b5;
+    --md-sys-color-primary: var(--primary, #a8c7ff);
+    --md-sys-color-on-primary: var(--on-primary, #0a305f);
+    --md-sys-color-primary-container: var(--primary-container, #244779);
+    --md-sys-color-on-primary-container: var(--on-primary-container, #dce8ff);
+    --md-sys-color-surface: var(--surface, #111821);
+    --md-sys-color-surface-container: var(--surface-container, #192330);
+    --md-sys-color-surface-container-low: var(--surface-container-low, #151e29);
+    --md-sys-color-surface-container-high: var(--surface-container-high, #243143);
+    --md-sys-color-on-surface: var(--on-surface, #e7edf6);
+    --md-sys-color-on-surface-variant: var(--on-surface-variant, #b8c5d6);
+    --md-sys-color-outline: var(--outline, #8e9db2);
+    --md-sys-color-outline-variant: var(--outline-variant, #465367);
+    --md-sys-color-secondary-container: var(--secondary-container, #34445c);
+    --md-sys-color-on-secondary-container: var(--on-secondary-container, #e2eaf5);
+    --md-sys-color-error: var(--error, #f2b8b5);
     color-scheme: dark;
   }
   header {
@@ -536,8 +536,8 @@ export const workspaceStyles = css`
     }
   }
   /* Remade desktop chrome. Workflow panels retain their own layout boundaries. */
-  :host{--md-sys-color-primary:#415F91;--md-sys-color-on-primary:#FFFFFF;--md-sys-color-primary-container:#D6E3FF;--md-sys-color-on-primary-container:#284777;--md-sys-color-secondary:#565F71;--md-sys-color-on-secondary:#FFFFFF;--md-sys-color-secondary-container:#DAE2F9;--md-sys-color-on-secondary-container:#3E4759;--md-sys-color-tertiary:#705575;--md-sys-color-on-tertiary:#FFFFFF;--md-sys-color-tertiary-container:#FAD8FD;--md-sys-color-on-tertiary-container:#573E5C;--md-sys-color-error:#BA1A1A;--md-sys-color-on-error:#FFFFFF;--md-sys-color-error-container:#FFDAD6;--md-sys-color-on-error-container:#93000A;--md-sys-color-surface:#F9F9FF;--md-sys-color-surface-dim:#D9D9E0;--md-sys-color-surface-bright:#F9F9FF;--md-sys-color-surface-container-lowest:#FFFFFF;--md-sys-color-surface-container-low:#F3F3FA;--md-sys-color-surface-container:#EDEDF4;--md-sys-color-surface-container-high:#E7E8EE;--md-sys-color-surface-container-highest:#E2E2E9;--md-sys-color-on-surface:#191C20;--md-sys-color-on-surface-variant:#44474E;--md-sys-color-outline:#74777F;--md-sys-color-outline-variant:#C4C6D0;--md-sys-color-inverse-surface:#2E3036;--md-sys-color-inverse-on-surface:#F0F0F7;--md-sys-color-inverse-primary:#AAC7FF;--md-sys-color-scrim:#000000;--app-elevation-1:0 1px 2px rgba(0,0,0,.3),0 1px 3px 1px rgba(0,0,0,.15);--app-elevation-2:0 1px 2px rgba(0,0,0,.3),0 2px 6px 2px rgba(0,0,0,.15);--app-elevation-3:0 1px 3px rgba(0,0,0,.3),0 4px 8px 3px rgba(0,0,0,.15);--md-filled-button-container-height:44px;--md-outlined-button-container-height:44px;--md-text-button-container-height:44px;--md-filled-tonal-button-container-height:44px}
-  .dark{--md-sys-color-primary:#AAC7FF;--md-sys-color-on-primary:#0A305F;--md-sys-color-primary-container:#284777;--md-sys-color-on-primary-container:#D6E3FF;--md-sys-color-secondary:#BEC6DC;--md-sys-color-on-secondary:#283141;--md-sys-color-secondary-container:#3E4759;--md-sys-color-on-secondary-container:#DAE2F9;--md-sys-color-tertiary:#DDBCE0;--md-sys-color-on-tertiary:#3F2844;--md-sys-color-tertiary-container:#573E5C;--md-sys-color-on-tertiary-container:#FAD8FD;--md-sys-color-error:#FFB4AB;--md-sys-color-on-error:#690005;--md-sys-color-error-container:#93000A;--md-sys-color-on-error-container:#FFDAD6;--md-sys-color-surface:#111318;--md-sys-color-surface-dim:#111318;--md-sys-color-surface-bright:#37393E;--md-sys-color-surface-container-lowest:#0C0E13;--md-sys-color-surface-container-low:#191C20;--md-sys-color-surface-container:#1D2024;--md-sys-color-surface-container-high:#282A2F;--md-sys-color-surface-container-highest:#33353A;--md-sys-color-on-surface:#E2E2E9;--md-sys-color-on-surface-variant:#C4C6D0;--md-sys-color-outline:#8E9099;--md-sys-color-outline-variant:#44474E;--md-sys-color-inverse-surface:#E2E2E9;--md-sys-color-inverse-on-surface:#2E3036;--md-sys-color-inverse-primary:#415F91;}
+  :host{--md-sys-color-primary:var(--primary, #415F91);--md-sys-color-on-primary:var(--on-primary, #FFFFFF);--md-sys-color-primary-container:var(--primary-container, #D6E3FF);--md-sys-color-on-primary-container:var(--on-primary-container, #284777);--md-sys-color-secondary:var(--secondary, #565F71);--md-sys-color-on-secondary:var(--on-secondary, #FFFFFF);--md-sys-color-secondary-container:var(--secondary-container, #DAE2F9);--md-sys-color-on-secondary-container:var(--on-secondary-container, #3E4759);--md-sys-color-tertiary:var(--tertiary, #705575);--md-sys-color-on-tertiary:var(--on-tertiary, #FFFFFF);--md-sys-color-tertiary-container:var(--tertiary-container, #FAD8FD);--md-sys-color-on-tertiary-container:var(--on-tertiary-container, #573E5C);--md-sys-color-error:var(--error, #BA1A1A);--md-sys-color-on-error:var(--on-error, #FFFFFF);--md-sys-color-error-container:var(--error-container, #FFDAD6);--md-sys-color-on-error-container:var(--on-error-container, #93000A);--md-sys-color-surface:var(--surface, #F9F9FF);--md-sys-color-surface-dim:var(--surface-dim, #D9D9E0);--md-sys-color-surface-bright:var(--surface-bright, #F9F9FF);--md-sys-color-surface-container-lowest:var(--surface-container-lowest, #FFFFFF);--md-sys-color-surface-container-low:var(--surface-container-low, #F3F3FA);--md-sys-color-surface-container:var(--surface-container, #EDEDF4);--md-sys-color-surface-container-high:var(--surface-container-high, #E7E8EE);--md-sys-color-surface-container-highest:var(--surface-container-highest, #E2E2E9);--md-sys-color-on-surface:var(--on-surface, #191C20);--md-sys-color-on-surface-variant:var(--on-surface-variant, #44474E);--md-sys-color-outline:var(--outline, #74777F);--md-sys-color-outline-variant:var(--outline-variant, #C4C6D0);--md-sys-color-inverse-surface:var(--inverse-surface, #2E3036);--md-sys-color-inverse-on-surface:var(--inverse-on-surface, #F0F0F7);--md-sys-color-inverse-primary:var(--inverse-primary, #AAC7FF);--md-sys-color-scrim:#000000;--app-elevation-1:0 1px 2px rgba(0,0,0,.3),0 1px 3px 1px rgba(0,0,0,.15);--app-elevation-2:0 1px 2px rgba(0,0,0,.3),0 2px 6px 2px rgba(0,0,0,.15);--app-elevation-3:0 1px 3px rgba(0,0,0,.3),0 4px 8px 3px rgba(0,0,0,.15);--md-filled-button-container-height:44px;--md-outlined-button-container-height:44px;--md-text-button-container-height:44px;--md-filled-tonal-button-container-height:44px}
+  .dark{--md-sys-color-primary:var(--primary, #AAC7FF);--md-sys-color-on-primary:var(--on-primary, #0A305F);--md-sys-color-primary-container:var(--primary-container, #284777);--md-sys-color-on-primary-container:var(--on-primary-container, #D6E3FF);--md-sys-color-secondary:var(--secondary, #BEC6DC);--md-sys-color-on-secondary:var(--on-secondary, #283141);--md-sys-color-secondary-container:var(--secondary-container, #3E4759);--md-sys-color-on-secondary-container:var(--on-secondary-container, #DAE2F9);--md-sys-color-tertiary:var(--tertiary, #DDBCE0);--md-sys-color-on-tertiary:var(--on-tertiary, #3F2844);--md-sys-color-tertiary-container:var(--tertiary-container, #573E5C);--md-sys-color-on-tertiary-container:var(--on-tertiary-container, #FAD8FD);--md-sys-color-error:var(--error, #FFB4AB);--md-sys-color-on-error:var(--on-error, #690005);--md-sys-color-error-container:var(--error-container, #93000A);--md-sys-color-on-error-container:var(--on-error-container, #FFDAD6);--md-sys-color-surface:var(--surface, #111318);--md-sys-color-surface-dim:var(--surface-dim, #111318);--md-sys-color-surface-bright:var(--surface-bright, #37393E);--md-sys-color-surface-container-lowest:var(--surface-container-lowest, #0C0E13);--md-sys-color-surface-container-low:var(--surface-container-low, #191C20);--md-sys-color-surface-container:var(--surface-container, #1D2024);--md-sys-color-surface-container-high:var(--surface-container-high, #282A2F);--md-sys-color-surface-container-highest:var(--surface-container-highest, #33353A);--md-sys-color-on-surface:var(--on-surface, #E2E2E9);--md-sys-color-on-surface-variant:var(--on-surface-variant, #C4C6D0);--md-sys-color-outline:var(--outline, #8E9099);--md-sys-color-outline-variant:var(--outline-variant, #44474E);--md-sys-color-inverse-surface:var(--inverse-surface, #E2E2E9);--md-sys-color-inverse-on-surface:var(--inverse-on-surface, #2E3036);--md-sys-color-inverse-primary:var(--inverse-primary, #415F91);}
   ${expressiveComponentStyles}
   .shell{overflow:hidden;min-height:0;background:var(--md-sys-color-surface-container)}.shell>[hidden],.shell main>[hidden],.settings-content>[hidden]{display:none!important}
   .shell>header{height:64px;min-height:64px;flex:0 0 64px;flex-wrap:nowrap;gap:8px;padding:0 0 0 12px;background:var(--md-sys-color-surface-container);border:0}

@@ -121,6 +121,7 @@ class CommandSurfaces extends LitElement {
  .results .row:hover,.results .row:focus-within{background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container)}
  md-filter-chip{--md-filter-chip-container-shape:8px}
  .results .row>div{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
+ .results .row md-text-button{width:auto;max-width:100%;align-self:flex-start}
  .results .row small{padding-inline:12px;color:var(--md-sys-color-on-surface-variant)}
  `,overlayExpressiveStyles];
   private l(en:string,zh:string,authored=false){return localizedCopy(en,zh,this.language,authored);}

@@ -1,14 +1,14 @@
 # Working with the redesigned desktop
 
-The desktop remake follows the current eight-artboard [design references](../../design/IMPLEMENTATION_HANDOFF.md) from repository revision `9223534b5cfd4f2d6daa62bff9670411931f0f3d`. The earlier attachment is retired as an implementation input. The renderer keeps the existing host API and its source, project, file-access and execution checks. The updated Expressive presentation is under implementation and verification.
+The desktop remake follows the current eight-artboard [design references](../../design/IMPLEMENTATION_HANDOFF.md) from repository revision `9223534b5cfd4f2d6daa62bff9670411931f0f3d`. The earlier attachment is retired as an implementation input. The renderer keeps the existing host API and its source, project, file-access and execution checks. The window shell, Images home, Tabs pane, Settings navigation, shared search bar and command palette now use the design folder's own `m3.css` component anatomy and `theme.css` colour roles, vendored under `src/renderer/design-system/`. Every Material Web component inside the existing workspaces reads the same roles through a token bridge, so Builds, Tools, Help and overlays share one palette in light and dark.
 
 ## Create or resume an image
 
-Images opens a searchable catalogue of saved projects. Filter by current folder access or an open workspace, select records without deleting them, and export the selected catalogue. Opening a project still renews its actual folder authority through the host. The five-stage creation guide retains its existing saved draft and Easy/Advanced controls.
+Images opens with filter chips (All, Drafts, Open, Needs attention) and one card per saved project from the host catalogue. A project whose folder access must be renewed shows an error card with **Locate source**. The saved image draft appears as its own card with its stage. **Search projects** reveals the full searchable catalogue with regex, selection and export. Guided image creation sits below, with Easy and Advanced sharing one draft and the five stages shown as cards. Opening a project still renews its actual folder authority through the host. The five-stage creation guide retains its existing saved draft and Easy/Advanced controls.
 
 ## Keep work visible
 
-The title bar presents real source/version provenance and the command search. The navigation rail opens Images, Builds, Tools, Help and Settings. New installations use the left workspace dock; an existing saved dock position is preserved. Utility tabs retain their owning project, and closing navigation does not delete a project or silently discard its draft.
+The title bar presents real version and update provenance, the command search (Ctrl+Shift+F opens the same palette), the saved runtime of the open project when known, notifications and accessibility tools. The navigation rail opens Images, Builds, Tools, Help and Settings. New installations use the left workspace dock; an existing saved dock position is preserved. Utility tabs retain their owning project, and closing navigation does not delete a project or silently discard its draft.
 
 ## Build, inspect and recover
 
