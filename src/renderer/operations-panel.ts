@@ -423,6 +423,13 @@ export class OperationsPanel extends LitElement {
       .editor-frame[data-short-owner=true]>.operations{display:block;flex:none;min-height:0;overflow:visible}
       .editor-frame[data-short-owner=true]>.operations>.content{overflow:visible;min-height:0}
       .editor-frame[data-short-owner=true]>.dock{max-height:none;overflow:auto;min-height:280px}
+      /* Destination heading and surfaces from the Builds, Tools and Help artboards. */
+      :host([presentation="guided"]) .document-toolbar{padding:24px 32px 8px;border-bottom:0;min-height:72px}
+      :host([presentation="guided"]) .document-toolbar h2,:host([presentation="guided"]) #operation-heading{font-size:32px;line-height:40px;font-weight:500;letter-spacing:-.25px}
+      :host([presentation="guided"]) .operations > .content{padding:16px 32px 24px;gap:20px}
+      :host([presentation="guided"]) .guided-navigation{border-bottom:0;padding:0 32px 8px}
+      :host([presentation="guided"]) .panel{border-radius:24px;background:var(--md-sys-color-surface-container-low)}
+      :host([presentation="guided"]) .dock{border-top:0;background:var(--md-sys-color-surface-container);border-radius:28px 28px 0 0}
 
     `,
   ];

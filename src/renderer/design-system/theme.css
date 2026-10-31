@@ -1,0 +1,24 @@
+/* Material Buildroot colour scheme: Material 3 tonal palette from a blue seed. */
+.m3{
+  --primary:#415F91;--on-primary:#FFFFFF;--primary-container:#D6E3FF;--on-primary-container:#284777;
+  --secondary:#565F71;--on-secondary:#FFFFFF;--secondary-container:#DAE2F9;--on-secondary-container:#3E4759;
+  --tertiary:#705575;--on-tertiary:#FFFFFF;--tertiary-container:#FAD8FD;--on-tertiary-container:#573E5C;
+  --error:#BA1A1A;--on-error:#FFFFFF;--error-container:#FFDAD6;--on-error-container:#93000A;
+  --surface:#F9F9FF;--surface-dim:#D9D9E0;--surface-bright:#F9F9FF;
+  --surface-container-lowest:#FFFFFF;--surface-container-low:#F3F3FA;--surface-container:#EDEDF4;--surface-container-high:#E7E8EE;--surface-container-highest:#E2E2E9;
+  --on-surface:#191C20;--on-surface-variant:#44474E;--outline:#74777F;--outline-variant:#C4C6D0;
+  --inverse-surface:#2E3036;--inverse-on-surface:#F0F0F7;--inverse-primary:#AAC7FF;--scrim:#000000;
+  --e1:0 1px 2px rgba(0,0,0,.3),0 1px 3px 1px rgba(0,0,0,.15);
+  --e2:0 1px 2px rgba(0,0,0,.3),0 2px 6px 2px rgba(0,0,0,.15);
+  --e3:0 1px 3px rgba(0,0,0,.3),0 4px 8px 3px rgba(0,0,0,.15);
+}
+.m3.dark{
+  --primary:#AAC7FF;--on-primary:#0A305F;--primary-container:#284777;--on-primary-container:#D6E3FF;
+  --secondary:#BEC6DC;--on-secondary:#283141;--secondary-container:#3E4759;--on-secondary-container:#DAE2F9;
+  --tertiary:#DDBCE0;--on-tertiary:#3F2844;--tertiary-container:#573E5C;--on-tertiary-container:#FAD8FD;
+  --error:#FFB4AB;--on-error:#690005;--error-container:#93000A;--on-error-container:#FFDAD6;
+  --surface:#111318;--surface-dim:#111318;--surface-bright:#37393E;
+  --surface-container-lowest:#0C0E13;--surface-container-low:#191C20;--surface-container:#1D2024;--surface-container-high:#282A2F;--surface-container-highest:#33353A;
+  --on-surface:#E2E2E9;--on-surface-variant:#C4C6D0;--outline:#8E9099;--outline-variant:#44474E;
+  --inverse-surface:#E2E2E9;--inverse-on-surface:#2E3036;--inverse-primary:#415F91;
+}

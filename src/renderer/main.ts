@@ -44,6 +44,8 @@ import './guided-shell-image-creation';
 import {readCreationRecord,saveCreationRecord,newCreationIntent,beginAnotherCreation} from './guided-shell-image-creation-state';
 import {validateImageIntent,type ImageCreationIntent} from './image-workflow-draft';
 import { workspaceStyles } from "./workspace-styles";
+import { m3Styles } from "./design-system/m3-styles";
+import { shellStyles, shellFocusStyles, shellHiddenStyles } from "./design-system/shell-styles";
 import {readShellDensity,saveShellDensity,type ShellDensity} from "./guided-shell-preferences";
 import { guidedDestinations, operationDestinations, primaryForOperation, type GuidedOperations } from "./guided-shell";
 
@@ -77,11 +79,15 @@ type SaveState =
   | "discarded";
 
 /** Production composite: Material Web controls with semantic internal anatomy. */
+/** Maps the catalogue's icon names to Material Symbols used by the design. */
+const settingSymbol=(id:string)=>({language:'translate',appearance:'palette',attention:'accessibility_new',shared:'school',vocabulary:'dictionary',experience:'lock',backups:'history',schedules:'event_repeat',updates:'system_update'} as Record<string,string>)[id]??'settings';
 class MaterialBuildroot extends LitElement {
   static properties = {
     state: { state: true },
     route: { state: true },
     standaloneOsOpen: {state:true},
+    imageFilter: {state:true},
+    librarySearch: {state:true},
     connection: { state: true },
     saveState: { state: true },
     windowNotice: { state: true },
@@ -264,7 +270,7 @@ class MaterialBuildroot extends LitElement {
     this.dark =
       this.effectiveTheme === "dark" || (this.effectiveTheme === "system" && this.media.matches);
   };
-  static styles = workspaceStyles;
+  static styles = [workspaceStyles, ...m3Styles, shellStyles, shellFocusStyles, shellHiddenStyles];
   private unregisterWorkspaceCommands?:()=>void;
   connectedCallback() {
     super.connectedCallback();
@@ -1033,6 +1039,11 @@ class MaterialBuildroot extends LitElement {
         this.openDialog("actions-dialog");
     }
   };
+  private openCommandPalette=(event:Event)=>{
+    const surface=this.renderRoot.querySelector('command-surfaces') as (HTMLElement&{openPalette?:(origin?:HTMLElement)=>Promise<void>})|null;
+    if(surface?.openPalette){void surface.openPalette(event.currentTarget as HTMLElement);return;}
+    void this.openDialog('actions-dialog',event);
+  };
   private async openDialog(id: string, e?: Event) {
     const active = e?.currentTarget as HTMLElement | undefined;
     this.dialogOpeners.set(
@@ -1048,7 +1059,7 @@ class MaterialBuildroot extends LitElement {
     (this.renderRoot.querySelector("#" + id) as any)?.close();
   }
   private focusWorkspaceHeading(){
-    const target=this.route==='operations'?this.activeOperations()?.shadowRoot?.querySelector<HTMLElement>('#operation-heading'):this.route==='image-creation'?this.renderRoot.querySelector<import('lit').LitElement>('guided-image-creation')?.shadowRoot?.querySelector<HTMLElement>('#creation-heading'):this.renderRoot.querySelector<HTMLElement>('#workspace-heading');
+    const target=this.route==='operations'?this.activeOperations()?.shadowRoot?.querySelector<HTMLElement>('#operation-heading'):this.route==='image-creation'?this.renderRoot.querySelector<import('lit').LitElement>('guided-image-creation')?.shadowRoot?.querySelector<HTMLElement>('#creation-heading'):this.renderRoot.querySelector<HTMLElement>(this.route==='settings'?'#settings-heading':'#workspace-heading');
     if(target?.checkVisibility())target.focus();
   }
   private restoreFocus(id: string) {
@@ -1378,15 +1389,24 @@ class MaterialBuildroot extends LitElement {
     this.operationDestination=event.detail.destination;void this.refreshRuntimeContext();
     this.requestUpdate();
   }
+  private routeDescription(){
+    if(this.route==='images')return this.l('Create, resume and verify bootable images.','建立、繼續同驗證可開機映像。',true);
+    if(this.route==='projects')return `${this.plans.length} ${this.l("plans","個計劃",true)} · ${this.scope()}`;
+    if(this.route==='activity')return this.workspaceMode==='durable'?this.l("Saved workspace changes, up to 100 events.","已儲存嘅工作區變更，最多保留 100 項。",true):this.l("Actual actions from this session, up to 200 events.","今次工作階段嘅實際操作，最多保留 200 項。",true);
+    if(this.route==='settings')return this.workspaceMode==='durable'?this.l(this.restricted?"Appearance is saved on this device.":"Language and theme are saved on this device.","語言同主題會儲存喺呢部電腦。"):this.l(this.restricted?"Appearance is session-only.":"Language is saved on this device. Appearance is session-only.","語言會儲存喺呢部電腦，外觀只限今次工作階段。");
+    if(this.route==='operations')return this.l("Trusted projects, configuration, builds and outputs.","可信專案、設定、建置同輸出。",true);
+    return this.l("Installed application provenance","已安裝應用程式嘅來源資料",true);
+  }
   private navigation(dialog = false) {
-    return html`${guidedDestinations.map(destination=>html`<md-text-button
+    const icons:Record<string,string>={images:'deployed_code',builds:'construction',tools:'handyman',help:'menu_book',settings:'settings'};
+    return html`${guidedDestinations.map(destination=>{const on=this.primaryDestination===destination.id;const label=this.owned(destination.en,destination.zh);return html`<button
+      class=${dialog?`ndi sl ${on?'on':''}`:`ri ${on?'on':''}`}
       data-experience-id=${'navigation:'+destination.id}
       data-primary=${destination.id}
-      class=${this.primaryDestination===destination.id?'selected':''}
-      aria-current=${this.primaryDestination===destination.id?'page':'false'}
-      aria-label=${this.owned(destination.en,destination.zh,'accessible-name')+(this.primaryDestination===destination.id?', '+this.owned('current workspace','目前工作區','accessible-name'):'')}
+      aria-current=${on?'page':'false'}
+      aria-label=${this.owned(destination.en,destination.zh,'accessible-name')+(on?', '+this.owned('current workspace','目前工作區','accessible-name'):'')}
       @click=${()=>{if(dialog)this.closeDialog('navigation-dialog',true);void this.navigate(destination.id);}}
-      ><span class="nav-content"><span class="navsymbol" aria-hidden="true">${materialIcon(destination.icon)}</span><span class="navlabel">${this.owned(destination.en,destination.zh)}</span></span></md-text-button>`)}`;
+      >${dialog?html`<span class="ms" aria-hidden="true">${icons[destination.id]}</span><span class="lbl">${label}</span>`:html`<span class="ind"><span class="ms" aria-hidden="true">${icons[destination.id]}</span></span><span class="navlabel">${label}</span>`}</button>`;})}`;
   }
   private async persistCreation(patch:Partial<ImageCreationIntent>){
     const current=this.creationDraft??newCreationIntent();
@@ -1513,16 +1533,70 @@ class MaterialBuildroot extends LitElement {
     return html`<div class="project-context" aria-label=${this.l('Current project and runtime','目前專案同執行環境',true)}><span>${this.l('Project','專案',true)}: <strong>${project?.name??this.l('No project selected','未選擇專案',true)}</strong></span><span>${this.l('Saved runtime (last read)','已儲存執行環境（上次讀取）',true)}: ${runtime}</span><md-text-button ?disabled=${!this.activeProject||context?.state==='loading'} @click=${this.refreshRuntimeContext}>${this.l('Refresh status','重新整理狀態',true)}</md-text-button></div>`;
   }
   private standaloneOsOpen=false;
+  private imageFilter:'all'|'draft'|'open'|'renewal'='all';
+  private librarySearch=false;
+  private purposeName(id:string){const labels:Record<string,[string,string]>={keep:['Keep existing contents','保留現有內容'],minimal:['Minimal Linux','精簡 Linux'],desktop:['Graphical desktop','圖像桌面'],server:['Small server','小型伺服器'],appliance:['Appliance','專用設備']};return labels[id]?this.l(labels[id][0],labels[id][1],true):this.l('Unverified choice','未核實選擇',true);}
   private imagesView(){
-    const rows=this.imageProjectRows();
+    const rows=this.imageProjectRows(),open=new Set(this.projectSessions.map(project=>project.workspaceId));
+    const draft=this.creationDraft,stage=draft?(draft.stage==='purpose'?0:draft.stage==='source'?1:2):-1;
+    const stages:Array<[string,string,string,string,string]>=[
+      ['Purpose','用途',draft?this.purposeName(draft.purpose):this.l('What the device does','裝置用途',true),'flag',''],
+      ['Source','來源',draft?.workspaceId?this.l('Project folders chosen','已選擇專案資料夾',true):this.l('Buildroot tree and runtime','Buildroot 來源同執行環境',true),'folder_open',''],
+      ['Configure','設定',this.l('Packages and size','套件同大細',true),'tune',''],
+      ['Build','建置',this.l('WSL 2 or Docker','WSL 2 或 Docker',true),'construction',''],
+      ['Verify','驗證',this.l('Output checks','輸出檢查',true),'verified',''],
+    ];
+    const shown=rows.filter(row=>this.imageFilter==='all'||(this.imageFilter==='open'&&open.has(row.id))||(this.imageFilter==='renewal'&&row.authorized===false));
+    const showDraft=!!draft&&(this.imageFilter==='all'||this.imageFilter==='draft');
+    const filters:Array<['all'|'draft'|'open'|'renewal',string,string]>=[['all','All','全部'],['draft','Drafts','草稿'],['open','Open','已開啟'],['renewal','Needs attention','需要處理']];
+    const nextStage=stage>=0?stages[Math.min(stage+(draft?.stage==='workspace'?0:0),4)]:stages[0];
     return html`<section class="images-workspace" aria-label=${this.l("Images workspace","映像工作區",true)}>
-      <div ?hidden=${this.standaloneOsOpen}><div class="image-actions"><md-filled-button data-image-action="standalone" ?disabled=${!window.studio?.operations} @click=${()=>{this.standaloneOsOpen=true;}}>${materialIcon('computer','icon')}${this.l('Create standalone OS','建立獨立 OS',true)}</md-filled-button><md-filled-button data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon('add','icon')}${this.l('Create image project','建立映像專案',true)}</md-filled-button><md-outlined-button data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}>${materialIcon('folder_open','icon')}${this.l('Open project','開啟專案',true)}</md-outlined-button><md-text-button @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</md-text-button></div>
-      ${this.creationDecision?html`<section class="panel"><p>${this.l('An image draft is already saved. Resume it or explicitly start another while keeping a recovery copy.','已有映像草稿。可以繼續，或者明確建立另一份並保留復原副本。',true)}</p><md-outlined-button @click=${()=>this.openImageProject('create')}>${this.l('Resume saved draft','繼續已儲存草稿',true)}</md-outlined-button><md-outlined-button ?disabled=${this.creationBusy} @click=${this.createAnotherImage}>${this.l('Create another and keep previous','建立另一份並保留之前草稿',true)}</md-outlined-button></section>`:nothing}
-      ${this.creationDraft?html`<md-outlined-button data-image-action="resume-draft" @click=${()=>this.openImageProject('create')}>${this.l('Resume image draft','繼續映像草稿',true)}</md-outlined-button><p>${this.creationDraft.name} · ${this.creationDraft.purpose} · ${this.l('Saved intent, not a verified image','已儲存意向，唔係已驗證映像',true)}</p>`:nothing}
-      <shell-image-library .language=${this.effectiveLanguage} .rows=${rows} .openIds=${this.projectSessions.map(project=>project.workspaceId)} .busy=${this.projectOpenBusy} .state=${this.projectCatalogueState}
-        @image-library-refresh=${this.refreshImageProjects}
-        @image-library-open=${(event:CustomEvent<{id:string;renew:boolean}>)=>{const project=this.imageProjectRows().find(row=>row.id===event.detail.id);if(project)void(project.authorized===false?this.renewCatalogueProject(project.id):this.openCatalogueProject(project.id));}}></shell-image-library>
-      </div><div ?hidden=${!this.standaloneOsOpen}><md-outlined-button @click=${()=>{this.standaloneOsOpen=false;}}>${this.l('Back to Images','返回映像',true)}</md-outlined-button><standalone-os-wizard .language=${this.effectiveLanguage}></standalone-os-wizard></div></section>`;
+      <div class="images-home" ?hidden=${this.standaloneOsOpen}>
+        <div class="chip-row">
+          <div class="chips" role="group" aria-label=${this.l('Filter images','篩選映像',true)}>${filters.map(([id,en,zh])=>{const on=this.imageFilter===id;return html`<button class="chip sl ${on?'on':''}" aria-pressed=${on} data-image-filter=${id} @click=${()=>{this.imageFilter=id;}}>${on?html`<span class="ms" aria-hidden="true">check</span>`:nothing}${this.l(en,zh,true)}</button>`;})}</div>
+          <span class="grow"></span>
+          <button class="chip sl" ?disabled=${this.projectCatalogueState==='loading'} @click=${this.refreshImageProjects}><span class="ms" aria-hidden="true">refresh</span>${this.l('Refresh','重新整理',true)}</button>
+          <button class="chip sl ${this.librarySearch?'on':''}" aria-pressed=${this.librarySearch} aria-controls="image-library" @click=${()=>{this.librarySearch=!this.librarySearch;}}><span class="ms" aria-hidden="true">manage_search</span>${this.l('Search projects','搜尋專案',true)}</button>
+        </div>
+        ${this.creationDecision?html`<div class="card tint-t decision" role="group" aria-label=${this.l('Saved draft decision','已儲存草稿決定',true)}><span class="ms" aria-hidden="true">info</span><p class="body-m">${this.l('An image draft is already saved. Resume it or explicitly start another while keeping a recovery copy.','已有映像草稿。可以繼續，或者明確建立另一份並保留復原副本。',true)}</p><button class="btn tonal sl" @click=${()=>this.openImageProject('create')}>${this.l('Resume saved draft','繼續已儲存草稿',true)}</button><button class="btn text sl" ?disabled=${this.creationBusy} @click=${this.createAnotherImage}>${this.l('Create another and keep previous','建立另一份並保留之前草稿',true)}</button></div>`:nothing}
+        ${this.projectCatalogueState==='unavailable'?html`<p class="body-m c-error" role="status">${this.l('Saved projects could not be read. Nothing was changed.','未能讀取已儲存專案，冇任何改動。',true)}</p>`:nothing}
+        <div class="project-grid" aria-busy=${this.projectCatalogueState==='loading'}>
+          ${showDraft&&draft?html`<article class="pcard card e1" data-image-action="resume-draft">
+            <div class="pc-head"><div class="av l shape-cookie p" aria-hidden="true"><span class="ms">memory</span></div><div class="txt"><h2 class="title-l">${draft.name}</h2><p class="body-s on-sv">${this.purposeName(draft.purpose)} · ${this.l('BIOS ISO','BIOS ISO',true)} · ${draft.mode==='easy'?this.l('Easy','簡易',true):this.l('Advanced','進階',true)}</p></div></div>
+            <div class="lp" role="progressbar" aria-label=${this.l('Saved setup stage, not build completion','已儲存設定階段，唔係建置完成程度',true)} aria-valuemin="0" aria-valuemax="5" aria-valuenow=${stage+1}><span class="act" style=${`width:calc(${(stage+1)*20}% - 4px)`}></span><span class="ina"></span></div>
+            <div class="pc-foot"><span class="body-m">${this.l('Stage','階段',true)} ${stage+1} / 5 · ${this.l(stages[stage][0],stages[stage][1],true)}</span><button class="btn tonal sl" @click=${()=>this.openImageProject('create')}>${this.l('Resume','繼續',true)}</button></div>
+            <p class="label-s on-sv">${this.l('Saved intent, not a verified image','已儲存意向，唔係已驗證映像',true)}</p>
+          </article>`:nothing}
+          ${shown.map(row=>row.authorized===false?html`<article class="pcard card tint-e">
+            <div class="pc-head"><div class="av l shape-sq err" aria-hidden="true"><span class="ms">folder_off</span></div><div class="txt"><h2 class="title-l">${row.name}</h2><p class="body-s">${this.l('Folder access needs renewal','資料夾存取權需要更新',true)}</p></div></div>
+            <p class="body-m">${this.l('Select the project folders again to keep working. The saved project record is kept.','重新選擇專案資料夾就可以繼續。已儲存嘅專案記錄會保留。',true)}</p>
+            <div class="pc-foot"><button class="btn error sl" ?disabled=${this.projectOpenBusy} @click=${()=>this.renewCatalogueProject(row.id)}><span class="ms" aria-hidden="true">search</span>${this.l('Locate source','搵返來源',true)}</button></div>
+          </article>`:html`<article class="pcard card e1">
+            <div class="pc-head"><div class="av l shape-sunny t" aria-hidden="true"><span class="ms">developer_board</span></div><div class="txt"><h2 class="title-l">${row.name}</h2><p class="body-s on-sv">${open.has(row.id)?this.l('Open in a tab','已喺分頁開啟',true):row.authorized?this.l('Folder access saved','已儲存資料夾存取權',true):this.l('This session','今次工作階段',true)}</p></div></div>
+            ${open.has(row.id)?html`<p class="body-s c-primary status-line"><span class="ms s16" aria-hidden="true">tab</span>${this.l('Workspace kept in your tabs','工作區保留喺分頁',true)}</p>`:html`<span></span>`}
+            <div class="pc-foot"><span class="body-m on-sv">${this.l('Project','專案',true)}</span><button class="btn tonal sl" ?disabled=${this.projectOpenBusy} @click=${()=>this.openCatalogueProject(row.id)}><span class="ms" aria-hidden="true">open_in_new</span>${this.l('Open','開啟',true)}</button></div>
+          </article>`)}
+          ${!showDraft&&!shown.length?html`<article class="pcard card outlined empty"><div class="pc-head"><div class="av l shape-arch s" aria-hidden="true"><span class="ms">add_photo_alternate</span></div><div class="txt"><h2 class="title-m">${this.projectCatalogueState==='loading'?this.l('Reading saved projects…','正在讀取已儲存專案…',true):this.imageFilter==='all'?this.l('No image projects yet','未有映像專案',true):this.l('Nothing matches this filter','冇項目符合呢個篩選',true)}</h2><p class="body-s on-sv">${this.l('Start a guided image or open an existing Buildroot tree.','開始引導式映像，或者開啟現有 Buildroot 來源。',true)}</p></div></div></article>`:nothing}
+        </div>
+        <div id="image-library" class="library" ?hidden=${!this.librarySearch}>
+          <shell-image-library .language=${this.effectiveLanguage} .rows=${rows} .openIds=${this.projectSessions.map(project=>project.workspaceId)} .busy=${this.projectOpenBusy} .state=${this.projectCatalogueState}
+            @image-library-refresh=${this.refreshImageProjects}
+            @image-library-open=${(event:CustomEvent<{id:string;renew:boolean}>)=>{const project=this.imageProjectRows().find(row=>row.id===event.detail.id);if(project)void(project.authorized===false?this.renewCatalogueProject(project.id):this.openCatalogueProject(project.id));}}></shell-image-library>
+        </div>
+        <section class="guide-card" aria-labelledby="guide-title">
+          <div class="guide-head">
+            <div><h2 id="guide-title" class="headline-s em">${this.l('Guided image creation','引導式建立映像',true)}</h2><p class="body-m on-sv">${this.l('Easy and Advanced share one draft. Switch at any time.','簡易同進階共用同一份草稿，隨時切換。',true)}</p></div>
+            <div class="cbg" role="group" aria-label=${this.l('Configuration mode','設定模式',true)}>${(['easy','advanced'] as const).map(mode=>{const on=(draft?.mode??'easy')===mode;return html`<button class=${on?'on':''} aria-pressed=${on} ?disabled=${this.creationBlocked||this.creationBusy} @click=${()=>void this.persistCreation({mode})}>${on?html`<span class="ms" aria-hidden="true">check</span>`:nothing}${mode==='easy'?this.l('Easy','簡易',true):this.l('Advanced','進階',true)}</button>`;})}</div>
+          </div>
+          <ol class="stage-grid" aria-label=${this.l('Image creation stages','映像建立階段',true)}>${stages.map(([en,zh,sup],index)=>{const state=index<stage?'done':index===stage||(stage<0&&index===0)?'current':'next';return html`<li class="stage ${state}" aria-current=${state==='current'?'step':'false'}>${state==='done'?html`<span class="ms fill" aria-hidden="true">check_circle</span>`:html`<span class="rb ${state==='current'?'on':''}" aria-hidden="true">${state==='current'?html`<span></span>`:nothing}</span>`}<span class="title-s">${this.l(en,zh,true)}</span><span class="body-s">${sup}</span></li>`;})}</ol>
+          <div class="guide-actions">
+            ${draft?html`<button class="btn m filled sl" ?disabled=${this.creationBusy} @click=${()=>this.openImageProject('create')}><span class="ms" aria-hidden="true">arrow_forward</span>${this.l('Continue to','繼續去',true)} ${this.l(nextStage[0],nextStage[1],true)}</button><button class="btn text sl" @click=${()=>this.openImageProject('create')}>${this.l('Review draft','檢視草稿',true)}</button>`:html`<button class="btn m filled sl" data-image-action="create" ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}><span class="ms" aria-hidden="true">add</span>${this.l('Create image project','建立映像專案',true)}</button>`}
+          </div>
+          ${this.creationBlocked?html`<p class="body-s c-error" role="status">${this.l('Saved image intent is unavailable. Existing data was retained.','已儲存映像意向未能取得，現有資料已保留。',true)}</p>`:nothing}
+        </section>
+      </div>
+      <div class="standalone" ?hidden=${!this.standaloneOsOpen}><button class="btn text sl" @click=${()=>{this.standaloneOsOpen=false;}}><span class="ms" aria-hidden="true">arrow_back</span>${this.l('Back to Images','返回映像',true)}</button><standalone-os-wizard .language=${this.effectiveLanguage}></standalone-os-wizard></div>
+    </section>`;
   }
   private runtimeName(value: string) {
     return value === "wsl" ? "WSL 2" : "Docker";
@@ -1723,9 +1797,9 @@ class MaterialBuildroot extends LitElement {
     return description+' '+source.revision;
   }
   private settingsView() {
-    return html`<div class="settings-grid view"><aside class="settings-sidebar"><h2>${this.l("Settings","設定",true)}</h2>
+    return html`<div class="settings-grid view"><aside class="settings-sidebar"><h2 id="settings-heading" class="title-l" tabindex="-1">${this.l("Settings","設定",true)}</h2>
       <settings-search .language=${this.effectiveLanguage} .restricted=${this.restricted} .entries=${this.settingsEntries()} @settings-filter=${(e:CustomEvent<string[]>)=>{if(JSON.stringify(this.settingIds)!==JSON.stringify(e.detail)){this.settingIds=e.detail;if(!this.settingIds.includes(this.settingsCategory))this.settingsCategory=this.settingIds[0]??'';this.requestUpdate();}}}></settings-search>
-      <nav class="settings-categories" aria-label=${this.l('Settings categories','設定分類',true)}>${this.settingsCategories().filter(item=>this.settingIds.includes(item.id)).map(item=>html`<md-outlined-button class=${this.settingsCategory===item.id?"selected":""} aria-label=${this.l(item.en,item.zh,true)+(this.settingsCategory===item.id?", "+this.l("selected","已選取",true):"")} @click=${()=>this.selectSettingsCategory(item.id)}>${materialIcon(item.icon,"icon")}${this.l(item.en,item.zh,true)}</md-outlined-button>`)}</nav></aside><div class="settings-content">
+      <nav class="settings-categories nd" aria-label=${this.l('Settings categories','設定分類',true)}>${this.settingsCategories().filter(item=>this.settingIds.includes(item.id)).map(item=>{const on=this.settingsCategory===item.id;return html`<button class="ndi c sl ${on?'on':''}" data-setting-category=${item.id} aria-current=${on?'page':'false'} aria-label=${this.l(item.en,item.zh,true)+(on?", "+this.l("selected","已選取",true):"")} @click=${()=>this.selectSettingsCategory(item.id)}><span class="ms s20" aria-hidden="true">${settingSymbol(item.id)}</span><span class="lbl">${this.l(item.en,item.zh,true)}</span></button>`;})}</nav></aside><div class="settings-content">
       ${!this.settingIds.length?html`<p>${this.l('No matching settings.','無符合嘅設定。',true)}</p>`:nothing}
       ${!this.restricted?html`<section
         class="panel stack" ?hidden=${!this.settingVisible("language")}
@@ -1951,102 +2025,52 @@ class MaterialBuildroot extends LitElement {
     >`;
   }
   render() {
-    return html`<div class="shell ${this.dark ? "dark" : ""} ${this.density}">
+    const version=this.state?.version??this.l('Version unavailable','未能取得版本',true);
+    const runtime=this.runtimeContext.projectId&&this.runtimeContext.projectId===this.activeProject?this.runtimeContext:null;
+    return html`<div class="shell m3 win ${this.dark ? "dark" : ""} ${this.density}" data-route=${this.route} data-primary-destination=${this.primaryDestination}>
       <guided-shell-attention .language=${this.effectiveLanguage} .restricted=${this.restricted} .startupEligible=${this.setupDone&&this.state?.origin==='saved'} data-experience-exempt></guided-shell-attention>
-      <header>
-        <md-text-button
-          class="menu"
-          aria-label=${this.l("Open navigation","開啟導覽",true)} title=${this.l("Open navigation","開啟導覽",true)}
-          @click=${(e: Event) => this.openDialog("navigation-dialog", e)}
-          >${materialIcon("menu")}</md-text-button
-        >
+      <header class="tbar">
+        <button class="ib sl menu" aria-label=${this.l("Open navigation","開啟導覽",true)} title=${this.l("Open navigation","開啟導覽",true)} @click=${(e: Event) => this.openDialog("navigation-dialog", e)}><span class="ms" aria-hidden="true">menu</span></button>
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">MB</span>
-          <div class="brand-copy"><strong>${wording.productName()}</strong
-          ><small>${this.state?.version??this.l('Version unavailable','未能取得版本',true)} · ${this.l('Updated','更新時間',true)} ${this.buildTime()}</small></div>
+          <div class="logo" aria-hidden="true"><span class="ms fill">deployed_code</span></div>
+          <div class="bt"><span class="title-m em">${wording.productName()}</span><span class="label-s on-sv">${version} · ${this.l('updated','更新',true)} ${this.buildTime()}</span></div>
         </div>
-        <md-text-button
-          class="command-search"
-          aria-label=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)} title=${this.l("Open actions, Control Shift F","開啟操作，Control Shift F",true)}
-          @click=${(e: Event) => this.openDialog("actions-dialog", e)}
-          >${materialIcon("search","icon")}<span class="palette-label">
-            <span class="command-copy">${this.l("Search commands, settings, articles","搜尋指令、設定、文章",true)}</span> <kbd>Ctrl+Shift+F</kbd></span
-          ></md-text-button
-        >
-        <md-text-button id="attention-button" title=${this.l('Attention and narration','專注同旁白',true)} aria-label=${this.l('Attention and narration','專注同旁白',true)} @click=${this.openAttention}>${materialIcon('tune')}</md-text-button>
-        <md-text-button class="header-help" aria-label=${this.l("Help","說明",true)} title=${this.l("Help","說明",true)} @click=${()=>this.navigate("help")}>${materialIcon("help_outline")}</md-text-button><notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre><div class="window">
-          ${(["minimize", "maximize-restore", "close"] as const).map(
-            (command, index) =>
-              html`<md-text-button
-                aria-label=${[
-                  this.l("Minimize","最小化",true),
-                  this.l("Maximize or restore","最大化或還原",true),
-                  this.l("Close application","關閉應用程式",true),
-                ][index]}
+        <div class="mid"><button class="search sm sl command-search" aria-keyshortcuts="Control+Shift+F" aria-label=${this.l("Search commands, settings and articles, Control Shift F","搜尋指令、設定同文章，Control Shift F",true)} title=${this.l("Search commands, settings and articles, Control Shift F","搜尋指令、設定同文章，Control Shift F",true)} @click=${this.openCommandPalette}><span class="ms" aria-hidden="true">search</span><span class="placeholder body-l">${this.l("Search commands, settings and articles","搜尋指令、設定同文章",true)}</span><span class="kbd" aria-hidden="true">Ctrl+Shift+F</span><span class="regex-mark" aria-hidden="true"><span class="ms s20">regular_expression</span></span></button></div>
+        ${runtime?.state==='saved'?html`<button class="chip assist sl hide-c runtime-chip" title=${this.l('Saved runtime for the open project (last read)','已開啟專案嘅已儲存執行環境（上次讀取）',true)} @click=${()=>this.workspaceDestination(new CustomEvent('workspace-destination',{detail:{destination:'operation:runtime'}}))}><span class="ms fill" aria-hidden="true">check_circle</span>${runtime.label}</button>`:nothing}
+        <notification-centre .language=${this.effectiveLanguage} .restricted=${this.restricted}></notification-centre>
+        <button class="ib sl" id="attention-button" aria-label=${this.l('Accessibility tools and attention','無障礙工具同專注',true)} title=${this.l('Accessibility tools and attention','無障礙工具同專注',true)} @click=${this.openAttention}><span class="ms" aria-hidden="true">accessibility_new</span></button>
+        <div class="wctl window">
+          ${(["minimize", "maximize-restore", "close"] as const).map((command, index) => html`<button
+                aria-label=${[this.l("Minimize","最小化",true),this.l("Maximize or restore","最大化或還原",true),this.l("Close application","關閉應用程式",true)][index]}
                 title=${[this.l("Minimize","最小化",true),this.l("Maximize or restore","最大化或還原",true),this.l("Close application","關閉應用程式",true)][index]}
                 ?disabled=${!window.studio}
                 @click=${() => void this.controlWindow(command)}
-                >${materialIcon(["remove", "crop_square", "close"][index])}</md-text-button
-              >`,
-          )}
+                ><span class=${index===1?'ms s18':'ms s20'} aria-hidden="true">${["minimize", "crop_square", "close"][index]}</span></button>`)}
         </div>
       </header>
       <div class="body">
-        <nav aria-label=${this.l("Workspace navigation","工作區導覽",true)}><md-text-button class="rail-menu" aria-label=${this.l("Open navigation","開啟導覽",true)} @click=${(event:Event)=>this.openDialog("navigation-dialog",event)}>${materialIcon("menu")}</md-text-button>
-          <md-filled-tonal-button class="rail-create" aria-label=${this.l("Create image project","建立映像專案",true)} title=${this.l("Create image project","建立映像專案",true)} ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}>${materialIcon("add")}</md-filled-tonal-button>
+        <nav class="rail" aria-label=${this.l("Workspace navigation","工作區導覽",true)}>
+          <button class="ib sl rail-x rail-menu" aria-label=${this.l("Open navigation","開啟導覽",true)} @click=${(event:Event)=>this.openDialog("navigation-dialog",event)}><span class="ms" aria-hidden="true">menu</span></button>
+          <button class="fab flat sl rail-x rail-create" aria-label=${this.l("Create image project","建立映像專案",true)} title=${this.l("Create image project","建立映像專案",true)} ?disabled=${!window.studio?.operations||this.creationBusy} @click=${this.beginNewImageCreation}><span class="ms" aria-hidden="true">add</span></button>
           ${this.navigation()}
-          <div class="spacer"></div>
-          <md-text-button class="rail-setup"
-            aria-label=${this.l("Resume setup","繼續設定",true)}
-            @click=${(e: Event) => this.openDialog("setup-dialog", e)}
-            ><span class="nav-content"><span class="navsymbol" aria-hidden="true">${materialIcon("tune")}</span><span class="navlabel"
-              >${this.l("Setup","開始設定",true)}</span
-            ></span></md-text-button
-          >
+          <div class="rail-x spacer"></div>
+          <button class="ri rail-x rail-setup" aria-label=${this.l("Resume setup","繼續設定",true)} @click=${(e: Event) => this.openDialog("setup-dialog", e)}><span class="ind"><span class="ms" aria-hidden="true">rocket_launch</span></span>${this.l("Setup","開始設定",true)}</button>
         </nav>
-        <workspace-tabs .compactEmpty=${false} .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
-        <main>
+        <workspace-tabs class="panes" .compactEmpty=${false} .language=${this.effectiveLanguage} .destinations=${this.workspaceDestinations()} @workspace-destination=${this.workspaceDestination} @workspace-close=${this.closeWorkspaceTab}>
+        <main class="pane main-pane" data-route=${this.route}>
           <update-panel compact .language=${this.state?.language || "bilingual"} .canRestart=${() => this.updateWorkSaved()}></update-panel>
-          <div class="toolbar" ?hidden=${this.route==='operations'||this.route==='image-creation'}>
+          <div class="toolbar page-head" ?hidden=${this.route==='operations'||this.route==='image-creation'||this.route==='settings'}>
             <div class="heading">
-              <h1 id="workspace-heading" tabindex="-1">
-                ${this.routeLabel(this.route)}
-              </h1>
-              <p class="muted">
-                ${this.route === "images" ? this.l("Create, open or resume an image project.","建立、開啟或繼續映像專案。",true) : this.route === "projects"
-                  ? `${this.plans.length} ${this.l("plans","個計劃",true)} · ${this.scope()}`
-                  : this.route === "activity"
-                    ? this.workspaceMode === "durable"
-                      ? this.l("Saved workspace changes, up to 100 events.","已儲存嘅工作區變更，最多保留 100 項。",true)
-                      : this.l("Actual actions from this session, up to 200 events.","今次工作階段嘅實際操作，最多保留 200 項。",true)
-                    : this.route === "settings"
-                      ? this.workspaceMode === "durable"
-                        ? this.l(
-                            this.restricted?"Appearance is saved on this device.":"Language and theme are saved on this device.",
-                            "語言同主題會儲存喺呢部電腦。",
-                          )
-                        : this.l(
-                            this.restricted?"Appearance is session-only.":"Language is saved on this device. Appearance is session-only.",
-                            "語言會儲存喺呢部電腦，外觀只限今次工作階段。",
-                          )
-                      : this.route === "operations"
-                        ? this.l("Trusted projects, configuration, builds and outputs.","可信專案、設定、建置同輸出。",true)
-                        : this.l("Installed application provenance","已安裝應用程式嘅來源資料",true)}
-              </p>
+              <h1 id="workspace-heading" class="headline-l em" tabindex="-1">${this.routeLabel(this.route)}</h1>
+              <p class="body-l on-sv">${this.routeDescription()}</p>
             </div>
-            ${!this.setupDone && this.route!=="projects"?html`<md-outlined-button @click=${(e:Event)=>this.openDialog("setup-dialog",e)}>${actionIcon('Start setup')}${this.l("Start setup","開始設定",true)}</md-outlined-button>`:nothing}
+            <div class="head-actions">
+            ${!this.setupDone && this.route!=="projects"?html`<button class="btn outlined sl" @click=${(e:Event)=>this.openDialog("setup-dialog",e)}><span class="ms" aria-hidden="true">rocket_launch</span>${this.l("Start setup","開始設定",true)}</button>`:nothing}
+            ${this.route==='images'&&!this.standaloneOsOpen?html`<button class="btn text sl" @click=${()=>this.navigate('projects')}>${this.l('Plans','計劃',true)}</button><button class="btn text sl" data-image-action="standalone" ?disabled=${!window.studio?.operations} @click=${()=>{this.standaloneOsOpen=true;}}><span class="ms" aria-hidden="true">computer</span>${this.l('Standalone OS','獨立 OS',true)}</button><button class="btn outlined sl" data-image-action="open" ?disabled=${!window.studio?.operations} @click=${()=>this.openImageProject('open')}><span class="ms" aria-hidden="true">folder_open</span>${this.l('Open project','開啟專案',true)}</button>`:nothing}
             ${this.route === "projects"
-              ? html`<md-outlined-button
-                    ?disabled=${!this.plans.length}
-                    @click=${this.exportPlans}
-                    >${actionIcon('Export plans')}${this.l("Export plans","匯出計劃",true)}</md-outlined-button
-                  ><md-filled-button
-                    ?disabled=${this.plans.length >= 100 ||
-                    !this.canEditWorkspace}
-                    @click=${(e: Event) => this.beginNew(e)}
-                    >${actionIcon('New plan')}${this.l("New plan","新增計劃",true)}</md-filled-button
-                  >`
+              ? html`<button class="btn outlined sl" ?disabled=${!this.plans.length} @click=${this.exportPlans}><span class="ms" aria-hidden="true">download</span>${this.l("Export plans","匯出計劃",true)}</button><button class="btn filled sl" ?disabled=${this.plans.length >= 100 || !this.canEditWorkspace} @click=${(e: Event) => this.beginNew(e)}><span class="ms" aria-hidden="true">add</span>${this.l("New plan","新增計劃",true)}</button>`
               : nothing}
+            </div>
           </div>
           ${this.route==='operations'&&this.activeProject&& !['tools','help'].includes(this.primaryDestination)?this.projectContext():nothing}
           ${this.creationNotice||this.creationBlocked?html`<div class="notice" role="status">${this.creationNotice||this.l('Saved image intent is unavailable. Existing data was retained.','已儲存映像意向未能取得，現有資料已保留。',true)}${this.creationBlocked?html`<md-outlined-button @click=${this.reloadCreation}>${this.l('Reload saved choices','重新載入已儲存選擇',true)}</md-outlined-button>`:nothing}</div>`:nothing}
@@ -2131,14 +2155,18 @@ class MaterialBuildroot extends LitElement {
             : nothing}
         </main></workspace-tabs>
       </div>
-      <div class="status" tabindex="0" aria-label=${this.l('Workspace status','工作區狀態',true)}><span class="front-provenance">${this.l('Version','版本',true)} ${this.state?.version??this.l('Unavailable','未能取得',true)} · ${this.l('Updated','更新時間',true)} ${this.buildTime()}</span><span role="status" aria-live="polite">
-        ${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}
-      </span></div>
+      <footer class="sbar status" tabindex="0" aria-label=${this.l('Workspace status','工作區狀態',true)}>
+        ${this.activeProject&&this.runtimeContext.projectId===this.activeProject&&this.runtimeContext.state==='saved'?html`<span class="stat"><span class="ms fill c-primary" aria-hidden="true">check_circle</span>${this.runtimeContext.label}</span>`:nothing}
+        <span class="status-message" role="status" aria-live="polite">${this.restricted?this.sharedSnapshot?.active===true?`${this.sharedSnapshot.displayName??""} · Active`:"Shared preference status unavailable.":this.statusMessage()}</span>
+        <span class="grow"></span>
+        <span class="hide-s">${this.languageName(this.effectiveLanguage)}</span>
+        <span class="front-provenance">${this.state?.version??this.l('Version unavailable','未能取得版本',true)} · ${this.l('updated','更新',true)} ${this.buildTime()}</span>
+      </footer>
       <personal-vocabulary-drop .language=${this.effectiveLanguage}></personal-vocabulary-drop>
       ${this.dialog(
         "navigation-dialog",
         this.l("Navigation","導覽",true),
-        html`<div class="dialog-nav">${this.navigation(true)}<md-text-button data-navigation-setup aria-label=${this.l("Resume setup","繼續設定",true)} @click=${async()=>{await this.openDialog('setup-dialog');const menu=this.renderRoot.querySelector<HTMLElement>('header .menu');if(menu)this.dialogOpeners.set('setup-dialog',menu);}}>${materialIcon('tune','icon')}${this.l('Setup','開始設定',true)}</md-text-button></div>`,
+        html`<div class="dialog-nav nd">${this.navigation(true)}<button class="ndi sl" data-navigation-actions @click=${async()=>{this.closeDialog('navigation-dialog',true);await this.openDialog('actions-dialog');}}><span class="ms" aria-hidden="true">apps</span><span class="lbl">${this.l('Workspace actions','工作區操作',true)}</span></button><md-text-button data-navigation-setup aria-label=${this.l("Resume setup","繼續設定",true)} @click=${async()=>{await this.openDialog('setup-dialog');const menu=this.renderRoot.querySelector<HTMLElement>('header .menu');if(menu)this.dialogOpeners.set('setup-dialog',menu);}}>${materialIcon('tune','icon')}${this.l('Setup','開始設定',true)}</md-text-button></div>`,
         this.closeButton("navigation-dialog"),
       )}
       ${this.dialog(

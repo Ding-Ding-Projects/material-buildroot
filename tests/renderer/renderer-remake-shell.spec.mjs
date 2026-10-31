@@ -76,12 +76,13 @@ for(const language of ['en','zh-HK','bilingual'])for(const width of [1440,960]){
     const search=page.locator('material-buildroot .command-search');
     const geometry=await search.evaluate(element=>{
       const bounds=node=>{const r=node.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
-      return {host:bounds(element),header:bounds(element.closest('header')),icon:bounds(element.querySelector('md-icon')),touch:bounds(element.shadowRoot.querySelector('.touch')),label:getComputedStyle(element.querySelector('.palette-label')).display,aria:element.getAttribute('aria-label'),title:element.title};
+      const next=element.closest('.mid').nextElementSibling;
+      return {host:bounds(element),header:bounds(element.closest('header')),icon:bounds(element.querySelector('.ms')),label:getComputedStyle(element.querySelector('.placeholder')).display,next:next?bounds(next):null,aria:element.getAttribute('aria-label'),title:element.title};
     });
     expect(geometry.header.height).toBe(64);
-    expect(geometry.host.height).toBe(width===1440?48:44);
+    expect(geometry.host.height).toBe(48);
     expect(geometry.host.width).toBeGreaterThanOrEqual(44);
-    for(const part of [geometry.host,geometry.touch]){
+    for(const part of [geometry.host]){
       expect(part.y).toBeGreaterThanOrEqual(geometry.header.y);
       expect(part.bottom).toBeLessThanOrEqual(geometry.header.bottom);
     }
@@ -89,8 +90,8 @@ for(const language of ['en','zh-HK','bilingual'])for(const width of [1440,960]){
     expect(geometry.icon.right).toBeLessThanOrEqual(geometry.host.right);
     expect(geometry.icon.y).toBeGreaterThanOrEqual(geometry.host.y);
     expect(geometry.icon.bottom).toBeLessThanOrEqual(geometry.host.bottom);
-    expect(geometry.label).toBe(width===960?'none':'flex');
-    if(width===960)expect(geometry.host.width).toBe(44);
+    expect(geometry.label).not.toBe('none');
+    if(geometry.next)expect(geometry.host.right).toBeLessThanOrEqual(geometry.next.x);
     expect(geometry.aria).toBeTruthy();expect(geometry.title).toBe(geometry.aria);
     expect(geometry.aria).toContain('Control Shift F');
     await search.focus();
@@ -124,8 +125,8 @@ test('compact shell keeps bottom navigation, window actions, search and provenan
   const shell=page.locator('material-buildroot');
   await expect(shell.locator('.shell>.body>nav')).toBeVisible();
   await expect(shell.locator('.command-search')).toBeVisible();
-  await expect(shell.locator('.window md-text-button')).toHaveCount(3);
-  for(const button of await shell.locator('.window md-text-button').all())await expect(button).toBeVisible();
+  await expect(shell.locator('.window button')).toHaveCount(3);
+  for(const button of await shell.locator('.window button').all())await expect(button).toBeVisible();
   await expect(shell.locator('.front-provenance')).toBeVisible();
   const bounds=await shell.evaluate(element=>{
     const root=element.shadowRoot,nav=root.querySelector('.shell>.body>nav').getBoundingClientRect(),main=root.querySelector('workspace-tabs').getBoundingClientRect();
