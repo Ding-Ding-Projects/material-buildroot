@@ -149,3 +149,14 @@ export const shellNarrowStyles = css`
     .win .stage-grid{grid-template-columns:minmax(0,1fr)}
   }
 `;
+export const shellShortStyles = css`
+  /* Very short renderer heights: the rail moves into the navigation menu. */
+  @media (max-height:500px){
+    .win > header.tbar{height:56px;min-height:56px}
+    .win > header.tbar .menu{display:inline-flex}
+    .win > header.tbar .wctl{height:56px}
+    .win > .body > nav.rail{display:none}
+    .win workspace-tabs.panes{padding:0 8px 8px}
+    .win main.main-pane{padding:16px}
+  }
+`;

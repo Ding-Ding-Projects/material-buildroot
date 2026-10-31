@@ -306,9 +306,9 @@ test.describe('short viewport shell',()=>{
   expect(measurements.main.bottom).toBeLessThanOrEqual(measurements.status.top+1);
   await expect(app.locator('.shell > .body > nav')).toBeHidden();
   const menu=app.locator('header .menu');await expect(menu).toBeVisible();
-  for(const trigger of [menu,app.locator('header .command-search'),app.locator('#attention-button'),app.locator('notification-centre #trigger'),...await app.locator('header .window md-text-button').all()]){
+  for(const trigger of [menu,app.locator('header .command-search'),app.locator('#attention-button'),app.locator('notification-centre #trigger'),...await app.locator('header .window button').all()]){
    const box=await trigger.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
-   await expect(trigger).toHaveAttribute('title',/.+/);await expect(trigger.getByRole('button')).toHaveAccessibleName(/.+/);
+   await expect(trigger).toHaveAttribute('title',/.+/);await expect(trigger).toHaveAccessibleName(/.+/);
   }
   const create=app.locator('[data-image-action="create"]');await create.focus();await create.scrollIntoViewIfNeeded();await create.click({trial:true});
   const action=await create.boundingBox();expect(action.y).toBeGreaterThanOrEqual(measurements.main.top);expect(action.y+action.height).toBeLessThanOrEqual(measurements.main.bottom+1);
@@ -338,7 +338,7 @@ test('normal desktop keeps labelled navigation and auto-height notification host
  await expect(app.locator('nav [data-primary]')).toHaveCount(5);
  const heights=await app.locator('notification-centre').evaluate(el=>({host:el.getBoundingClientRect().height,trigger:el.shadowRoot.querySelector('#trigger').getBoundingClientRect().height}));
  expect(heights.host).toBeLessThanOrEqual(heights.trigger+2);
- await expect(app.locator('notification-centre .trigger-label')).toBeVisible();
+ await expect(app.locator('notification-centre #trigger')).toHaveAccessibleName('Notifications & changes');
  await app.locator('[data-image-action="create"]').click();await expect(app.locator('guided-image-creation')).toBeVisible();
 });
 
