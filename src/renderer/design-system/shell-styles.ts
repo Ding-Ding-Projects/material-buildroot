@@ -120,3 +120,18 @@ export const shellFocusStyles = css`
 export const shellHiddenStyles = css`
   .win [hidden]{display:none!important}
 `;
+export const shellSizeStyles = css`
+  .win > header.tbar .mid .search.command-search{width:100%;min-width:0;max-width:640px;height:48px;padding:0 4px 0 16px}
+  .win nav.rail{scrollbar-width:none}
+  @media (max-width:1180px){
+    .win > header.tbar .brand{width:auto}
+    .win > header.tbar .search .kbd{display:none}
+  }
+  @media (max-height:760px){
+    .win nav.rail .rail-create{margin:0 0 8px}
+    .win nav.rail .ri{padding:2px 0}
+  }
+  @media (max-width:600px){
+    .win > header.tbar .mid .search.command-search{width:48px;padding:0;justify-content:center}
+  }
+`;

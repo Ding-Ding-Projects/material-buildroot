@@ -45,7 +45,7 @@ import {readCreationRecord,saveCreationRecord,newCreationIntent,beginAnotherCrea
 import {validateImageIntent,type ImageCreationIntent} from './image-workflow-draft';
 import { workspaceStyles } from "./workspace-styles";
 import { m3Styles } from "./design-system/m3-styles";
-import { shellStyles, shellFocusStyles, shellHiddenStyles } from "./design-system/shell-styles";
+import { shellStyles, shellFocusStyles, shellHiddenStyles, shellSizeStyles } from "./design-system/shell-styles";
 import {readShellDensity,saveShellDensity,type ShellDensity} from "./guided-shell-preferences";
 import { guidedDestinations, operationDestinations, primaryForOperation, type GuidedOperations } from "./guided-shell";
 
@@ -270,7 +270,7 @@ class MaterialBuildroot extends LitElement {
     this.dark =
       this.effectiveTheme === "dark" || (this.effectiveTheme === "system" && this.media.matches);
   };
-  static styles = [workspaceStyles, ...m3Styles, shellStyles, shellFocusStyles, shellHiddenStyles];
+  static styles = [workspaceStyles, ...m3Styles, shellStyles, shellFocusStyles, shellHiddenStyles, shellSizeStyles];
   private unregisterWorkspaceCommands?:()=>void;
   connectedCallback() {
     super.connectedCallback();
