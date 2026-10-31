@@ -26,7 +26,7 @@ test('five primary destinations do not manufacture utility tabs',async({page})=>
   for(const [id,title] of [['builds','Builds'],['tools','Tools'],['help','Help'],['settings','Settings'],['images','Images']]){
     await nav(app,id).click();
     await expect(app.locator('#workspace-heading')).toHaveText(title);
-    await expect(nav(app,id).locator('button')).toHaveAccessibleName(title+', current workspace');
+    await expect(nav(app,id)).toHaveAccessibleName(title+', current workspace');
   }
   expect(await app.locator('workspace-tabs').evaluate(t=>t.tabs.length)).toBe(0);
 });
