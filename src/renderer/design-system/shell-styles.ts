@@ -135,3 +135,17 @@ export const shellSizeStyles = css`
     .win > header.tbar .mid .search.command-search{width:48px;padding:0;justify-content:center}
   }
 `;
+export const shellNarrowStyles = css`
+  .win .project-grid{grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr))}
+  .win .page-head .heading{min-width:min(240px,100%)}
+  .win .images-workspace,.win .images-home,.win .guide-card,.win .pcard{min-width:0;max-width:100%}
+  .win .guide-actions .btn,.win .head-actions .btn,.win .decision .btn{max-width:100%;white-space:normal;height:auto;min-height:40px;text-align:center}
+  .win .guide-actions .btn.m{min-height:56px}
+  .win .cbg{max-width:100%}
+  @media (max-width:600px){
+    .win main.main-pane{padding:16px 12px}
+    .win .chip-row .grow{display:none}
+    .win .guide-card{padding:16px}
+    .win .stage-grid{grid-template-columns:minmax(0,1fr)}
+  }
+`;
