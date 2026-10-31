@@ -2,17 +2,26 @@
 
 A Material Design 3 desktop workspace for configuring and building embedded Linux systems through WSL 2 or Docker.
 
-## Current redesign and preservation state
+## Current desktop
 
-The current repository design is implemented and locally built at source `30dfb8481f83962c3a6b0e7a18d1126fa393cb64`. Final native interaction, current-source layout acceptance and release verification remain unfinished. See the [preservation handoff](CLOSEOUT_PROMPT.md) and [roadmap](ROADMAP.md).
+The renderer is rebuilt on the repository design: the window shell, Images home, Tabs pane, Settings navigation, shared search bar and command palette follow the [design artboards](design/IMPLEMENTATION_HANDOFF.md), and the design's own colour roles and component anatomy are carried into every nested workspace in light and dark. These are captures of the running application (real Electron shell, fresh profile, English); see [how they were produced](docs/evidence/desktop-m3-expressive/README.md).
 
-Earlier README screenshots and their original provenance are preserved in the [historical interface archive](docs/evidence/readme-interface-history-20261030.md). New verification previews belong to the [dedicated public screenshot gallery](https://ding-ding-projects.github.io/material-buildroot-gallery/), with their actual source and limits. Final current screenshots remain an acceptance gap.
+![Images home, light](docs/evidence/desktop-m3-expressive/images-light.png)
 
-最新設計已整合並喺本機建置；最終操作、版面同發佈驗證未完成。舊畫面按原有來源另外保留，唔會當成新版驗收。
+| | |
+| --- | --- |
+| ![Builds](docs/evidence/desktop-m3-expressive/builds-light.png) | ![Tools](docs/evidence/desktop-m3-expressive/tools-light.png) |
+| ![Help](docs/evidence/desktop-m3-expressive/help-light.png) | ![Settings](docs/evidence/desktop-m3-expressive/settings-light.png) |
+| ![Command palette](docs/evidence/desktop-m3-expressive/palette-light.png) | ![Images, dark](docs/evidence/desktop-m3-expressive/images-dark.png) |
+| ![Builds, dark](docs/evidence/desktop-m3-expressive/builds-dark.png) | ![Help, dark](docs/evidence/desktop-m3-expressive/help-dark.png) |
+
+Windows installer, display scaling, Windows font rendering and runtime acceptance with WSL or Docker remain unverified; see the [handoff](HANDOFF.md) and [roadmap](ROADMAP.md). Earlier README screenshots and their provenance are preserved in the [historical interface archive](docs/evidence/readme-interface-history-20261030.md).
+
+最新介面已經按設計資料夾重寫，以上係真正執行中應用程式嘅截圖。Windows 安裝、縮放同 WSL、Docker 執行仍未驗證。
 
 ## Standalone OS creation in the running desktop
 
-Images now has a direct **Create standalone OS** action. The guided workspace accepts container images, native-picked archives, supported Compose manifests and reviewed source preparation. It provides WSL setup, kiosk or console choices, persistent storage, optional private personal wording, tunnel options, real build status, boot verification and Downloads export. Implementation and runtime acceptance are separate; see the [workflow and remaining verification](docs/desktop/standalone-os.md).
+Images has a direct **Standalone OS** action in its header. The guided workspace accepts container images, native-picked archives, supported Compose manifests and reviewed source preparation. It provides WSL setup, kiosk or console choices, persistent storage, optional private personal wording, tunnel options, real build status, boot verification and Downloads export. Implementation and runtime acceptance are separate; see the [workflow and remaining verification](docs/desktop/standalone-os.md).
 
 
 

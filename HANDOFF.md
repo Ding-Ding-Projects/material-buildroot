@@ -1,5 +1,15 @@
 # Material Buildroot preservation handoff
 
+## Material 3 Expressive renderer rebuild, 2026-10-31
+
+The owner requested a full GUI rewrite from the repository design folder. The renderer now vendors `design/m3.css` and `design/theme.css` under `src/renderer/design-system/`, bundles Material Symbols Rounded, Roboto Flex and Roboto Mono locally, and bridges every Material Web token to the design colour roles. Shared workspace tokens now defer to those roles, which also fixes nested panels (including the Help language buttons) rendering light surfaces in dark mode.
+
+Rebuilt on the artboard anatomy: title bar (search opens the real command palette, notifications, accessibility, window controls), navigation rail, Tabs pane, rounded panes, status bar, Images home (filter chips, catalogue cards, renewal card, draft card, guided creation card), Settings navigation, the shared search bar and the palette rows. Builds, Tools and Help keep their existing inner structure with the design palette and type; Settings section content, Safety and Overlays dialogs keep their existing controls. These remain on the [roadmap](ROADMAP.md).
+
+Verified here: strict TypeScript and the production renderer build pass. The unit suite gives 765 passed and 9 failed; all 9 fail identically on the untouched previous source (WSL, Docker, appliance, schedule and documentation-packaging cases that need a Windows or container host). The real Electron application was driven on Linux under Xvfb with a fresh profile; eleven captures with hashes are in [the capture record](docs/evidence/desktop-m3-expressive/README.md) and the README. Shell browser specs were updated to the new markup; the wider renderer browser suite still needs a full serial comparison against the previous source.
+
+Not verified: Windows installer and update, native preference persistence, display scaling, Windows font rendering, and any WSL or Docker runtime.
+
 ## Owner-requested closeout, 2026-10-30
 
 GUI verification is incomplete. The owner requested preservation and cleanup and cleared goal tracking. Current implemented source and exact local build evidence are recorded in [CLOSEOUT_PROMPT.md](CLOSEOUT_PROMPT.md). That file is a continuation handoff, not a completed-release claim.

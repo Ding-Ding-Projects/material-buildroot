@@ -1,5 +1,18 @@
 # Phased implementation roadmap
 
+## Material 3 Expressive renderer rebuild, 2026-10-31
+
+- [x] Vendor the design folder's `m3.css` and `theme.css`, bundle Material Symbols Rounded, Roboto Flex and Roboto Mono locally, and bridge every Material Web token to the design colour roles.
+- [x] Rebuild the title bar, navigation rail, Tabs pane, rounded panes and status bar on the artboard anatomy.
+- [x] Rebuild the Images home: filter chips, catalogue cards, renewal card, draft card and the guided creation card with Easy/Advanced and five stages.
+- [x] Rebuild Settings navigation, the shared search bar, the notification trigger and route the title bar search to the real command palette.
+- [x] Make shared workspace tokens defer to the design roles so nested panels, including Help, follow light and dark correctly.
+- [x] Capture the running application in light and dark and place the captures in the README.
+- [ ] Rebuild the inner layouts of Builds (admission and runtime supporting pane), Tools (converter pane) and Help (three-pane reader) to their artboards; they currently keep their existing structure with the design palette and type.
+- [ ] Rebuild Settings section content as the artboard's segmented setting lists.
+- [ ] Rebuild the Safety and Overlays artboard dialogs (two-key confirmation, lock wizard, unlock ladder, Support Tickets, accessibility tools, About).
+- [ ] Verify on Windows: installer, native preference persistence, display scaling and font rendering.
+
 ## Current repository design remake, 2026-10-30
 
 - [x] Preserve the implemented source and source-bound local build for an owner-requested incomplete-verification closeout.
