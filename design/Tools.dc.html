@@ -15,7 +15,7 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">deployed_code</span></div><div class="bt"><span class="title-m em">Material Buildroot</span><span class="label-s on-sv">0.1.1 · build 233.1</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Buildroot</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search commands, settings and articles"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,7 +24,7 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <div class="rail-x" style="height: 76px"></div>
+      <button class="fab flat sl rail-x" aria-label="Create image" style="margin: 4px 0 20px"><span class="ms">add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">deployed_code</span></span>Images</a>
       <a class="ri" href="Builds.dc.html"><span class="ind"><span class="ms">construction</span></span>Builds</a>
       <a class="ri on" href="Tools.dc.html" aria-current="page"><span class="ind"><span class="ms">handyman</span></span>Tools</a>
@@ -72,7 +72,13 @@
             <div class="seglist">
               <div class="li tall"><div class="av p shape-sq" aria-hidden="true"><span class="ms">image</span></div><span class="txt"><span>splash.png</span><span class="sup">PNG to BMP · 1.2 MB</span></span><span class="stat c-primary"><span class="ms fill">task_alt</span>Done</span><button class="ib sl" aria-label="Show splash.png in folder"><span class="ms">folder_open</span></button></div>
               <div class="li tall" style="flex-wrap: wrap"><div class="av s shape-sq" aria-hidden="true"><span class="ms">description</span></div><span class="txt"><span>board-notes.docx</span><span class="sup">DOCX to PDF · 40%</span></span><button class="ib sl" aria-label="Cancel board-notes.docx"><span class="ms">close</span></button><div class="lp" role="progressbar" aria-label="board-notes.docx progress" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="flex-basis: 100%; padding-left: 56px"><span class="act" style="width: 40%"></span><span class="ina"></span></div></div>
-              <div class="li tall" style="background: var(--error-container); color: var(--on-error-container)"><div class="av shape-sq" aria-hidden="true" style="background: var(--error); color: var(--on-error)"><span class="ms">error</span></div><span class="txt"><span>rootfs.ext4</span><span class="sup" style="color: inherit">Stopped at 62% · partial output kept</span></span><button class="btn error sl">Resume</button></div>
+              <div class="li tall err"><div class="av shape-sq" aria-hidden="true" style="background: var(--error-container); color: var(--on-error-container)"><span class="ms">error</span></div><span class="txt"><span>rootfs.ext4</span><span class="sup err-t">Stopped at 62% · partial output kept</span></span><button class="btn error-tonal sl">Resume</button></div>
+            </div>
+            <h3 class="title-m" style="padding-top: 8px">Recent conversions</h3>
+            <div class="seglist">
+              <div class="li"><span class="ms">picture_as_pdf</span><span class="txt"><span>release-notes.md to PDF</span><span class="sup">Yesterday · 210 KB</span></span><button class="ib sl" aria-label="Show release-notes.pdf in folder"><span class="ms">folder_open</span></button></div>
+              <div class="li"><span class="ms">image</span><span class="txt"><span>boot-logo.svg to PNG</span><span class="sup">28 Oct 2026 · 48 KB</span></span><button class="ib sl" aria-label="Show boot-logo.png in folder"><span class="ms">folder_open</span></button></div>
+              <div class="li"><span class="ms">album</span><span class="txt"><span>rootfs.iso to IMG</span><span class="sup">27 Oct 2026 · 412 MB</span></span><button class="ib sl" aria-label="Show rootfs.img in folder"><span class="ms">folder_open</span></button></div>
             </div>
           </div>
           <aside class="card filled" aria-labelledby="out-h" style="flex: 1 1 280px; padding: 24px; border-radius: 28px; display: flex; flex-direction: column; gap: 20px; background: var(--surface-container); --tf-bg: var(--surface-container)">
@@ -87,7 +93,7 @@
       </section>
     </div>
   </div>
-  <footer class="sbar"><span class="stat"><span class="ms c-primary">swap_horiz</span>Converter · 1 running · 1 to resume</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated [UPDATED-AT]</span></footer>
+  <footer class="sbar"><span class="stat"><span class="ms c-primary">swap_horiz</span>Converter · 1 running · 1 to resume</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated 30 Oct 2026, 14:05</span></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>

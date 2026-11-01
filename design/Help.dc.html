@@ -15,7 +15,7 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">deployed_code</span></div><div class="bt"><span class="title-m em">Material Buildroot</span><span class="label-s on-sv">0.1.1 · build 233.1</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Buildroot</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search commands, settings and articles"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,7 +24,7 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <div class="rail-x" style="height: 76px"></div>
+      <button class="fab flat sl rail-x" aria-label="Create image" style="margin: 4px 0 20px"><span class="ms">add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">deployed_code</span></span>Images</a>
       <a class="ri" href="Builds.dc.html"><span class="ind"><span class="ms">construction</span></span>Builds</a>
       <a class="ri" href="Tools.dc.html"><span class="ind"><span class="ms">handyman</span></span>Tools</a>
@@ -54,18 +54,22 @@
         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-left: -12px">
           <button class="ib sl" aria-label="Back"><span class="ms">arrow_back</span></button>
           <button class="ib sl" aria-label="Forward"><span class="ms">arrow_forward</span></button>
-          <span class="label-l on-sv" style="flex: 1">Help · Get started</span>
+          <span class="label-l on-sv" style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Get started</span>
           <div class="cbg" role="radiogroup" aria-label="Article language"><button class="on" role="radio" aria-checked="true"><span class="ms">check</span>English</button><button role="radio" aria-checked="false">廣東話</button></div>
         </div>
         <div style="max-width: 720px; display: flex; flex-direction: column; gap: 16px">
           <h2 id="art-h" class="display-s em">Create your first image</h2>
-          <p class="label-l on-sv">10 min read · works offline · updated [DATE]</p>
+          <p class="label-l on-sv">10 min read · works offline · updated 28 Oct 2026</p>
           <p class="body-l">An image is a complete, bootable Linux system built from your choices. The guide walks you through five stages, and you can switch between Easy and Advanced without losing your draft.</p>
           <h3 id="purpose" class="headline-s" style="padding-top: 8px">1. Choose a purpose</h3>
           <p class="body-l">Pick what the device should do. The purpose sets sensible defaults for packages and size.</p>
           <div class="card tint" style="padding: 16px 20px; border-radius: 20px; display: flex; gap: 12px"><span class="ms">lightbulb</span><p class="body-m">Every control in the guide has an info button that opens the matching step in this article.</p></div>
           <h3 id="target" class="headline-s" style="padding-top: 8px">2. Pick a target</h3>
           <p class="body-l">Choose a board or a virtual machine. Board presets fill in the architecture and boot method.</p>
+          <h3 id="configure" class="headline-s" style="padding-top: 8px">3. Configure</h3>
+          <p class="body-l">Easy mode shows the size budget and the packages most images need. Advanced opens the full configuration with search and the regex builder. Both edit the same draft.</p>
+          <h3 id="build" class="headline-s" style="padding-top: 8px">4. Build and verify</h3>
+          <p class="body-l">Builds run in WSL 2 or Docker as your normal user, never as root. When a build finishes, the output hash is recorded and the image appears in Images, ready to flash.</p>
           <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn tonal sl"><span class="ms">open_in_new</span>Open the image guide</button><button class="btn text sl"><span class="ms">ios_share</span>Export article</button></div>
         </div>
       </article>
@@ -73,12 +77,12 @@
         <span class="title-s" style="padding: 0 16px 8px">On this page</span>
         <a class="ndi c on" href="#purpose"><span class="lbl">Choose a purpose</span></a>
         <a class="ndi c" href="#target"><span class="lbl">Pick a target</span></a>
-        <a class="ndi c" href="#purpose"><span class="lbl">Configure</span></a>
-        <a class="ndi c" href="#purpose"><span class="lbl">Build and verify</span></a>
+        <a class="ndi c" href="#configure"><span class="lbl">Configure</span></a>
+        <a class="ndi c" href="#build"><span class="lbl">Build and verify</span></a>
       </aside>
     </div>
   </div>
-  <footer class="sbar"><span class="stat"><span class="ms c-primary">offline_pin</span>Offline help · 64 articles</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated [UPDATED-AT]</span></footer>
+  <footer class="sbar"><span class="stat"><span class="ms c-primary">offline_pin</span>Offline help · 64 articles</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated 30 Oct 2026, 14:05</span></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>

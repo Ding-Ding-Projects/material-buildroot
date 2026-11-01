@@ -13,9 +13,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
 <style>body{margin:0}</style>
 </helmet>
-<div class="m3 win {{theme}}" style="min-height: 1240px; height: auto">
+<div class="m3 win {{theme}}" style="min-height: 1440px; height: auto">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">deployed_code</span></div><div class="bt"><span class="title-m em">Material Buildroot</span><span class="label-s on-sv">0.1.1 · build 233.1</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Buildroot</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search commands, settings and articles"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,7 +24,7 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <div class="rail-x" style="height: 76px"></div>
+      <button class="fab flat sl rail-x" aria-label="Create image" style="margin: 4px 0 20px"><span class="ms">add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">deployed_code</span></span>Images</a>
       <a class="ri" href="Builds.dc.html"><span class="ind"><span class="ms">construction</span></span>Builds</a>
       <a class="ri" href="Tools.dc.html"><span class="ind"><span class="ms">handyman</span></span>Tools</a>
@@ -50,7 +50,19 @@
       </aside>
       <section class="pane" aria-labelledby="lang-h" style="flex: 1; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 28px">
         <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap"><div style="flex: 1; min-width: 240px"><h2 id="lang-h" class="headline-l em">Language and voice</h2><p class="body-m on-sv">Saved on this device. Every change appears in local history.</p></div><button class="btn outlined sl"><span class="ms">restart_alt</span>Reset section</button></div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 28px; align-items: start">
+        <div class="cols">
+          <section style="display: flex; flex-direction: column; gap: 8px" aria-labelledby="g0">
+            <h3 id="g0" class="title-s c-primary" style="padding: 0 16px">Builds</h3>
+            <div class="seglist">
+              <div class="li tall" style="flex-wrap: wrap"><span class="ms">terminal</span><span class="txt"><span>Default runtime</span><span class="sup">Builds run as UID 1000, never as root</span></span>
+                <div class="cbg" role="radiogroup" aria-label="Default runtime"><button class="on" role="radio" aria-checked="true"><span class="ms">check</span>WSL 2</button><button role="radio" aria-checked="false">Docker</button></div></div>
+              <div class="li tall" style="flex-wrap: wrap"><span class="ms">stacks</span><span class="txt"><span>Parallel jobs</span><span class="sup">4 of 8 cores · applies to new builds</span></span>
+                <div class="slider" role="slider" tabindex="0" aria-label="Parallel jobs" aria-valuemin="1" aria-valuemax="8" aria-valuenow="4" style="flex-basis: 100%; padding-left: 40px"><span class="act" style="width: 46%"><i class="stop"></i><i class="stop"></i><i class="stop"></i><i class="stop"></i></span><span class="handle"></span><span class="ina"><i class="stop"></i><i class="stop"></i><i class="stop"></i><i class="stop"></i></span></div></div>
+              <div class="li tall"><span class="ms">folder_zip</span><span class="txt"><span>Download cache</span><span class="sup mono">D:\buildroot-dl · 18.4 GB</span></span><button class="btn text sl">Change</button></div>
+              <div class="li tall"><span class="ms">output</span><span class="txt"><span>Output folder</span><span class="sup mono">D:\buildroot-out</span></span><button class="btn text sl">Change</button></div>
+              <div class="li tall"><span class="ms">verified</span><span class="txt"><span>Buildroot release</span><span class="sup">2025.02 · digest-pinned</span></span><button class="btn text sl">Check</button></div>
+            </div>
+          </section>
           <section style="display: flex; flex-direction: column; gap: 8px" aria-labelledby="g1">
             <h3 id="g1" class="title-s c-primary" style="padding: 0 16px">Language</h3>
             <div class="seglist">
@@ -98,9 +110,10 @@
       </section>
     </div>
   </div>
+  <footer class="sbar"><span class="stat"><span class="ms fill c-primary">check_circle</span>WSL 2 ready</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · build 233.1 · updated 30 Oct 2026, 14:05</span></footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1240}}'>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1440}}'>
 class Component extends DCLogic {
   renderVals() {
     return { theme: this.props.dark ? 'dark' : '' };

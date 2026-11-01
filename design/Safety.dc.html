@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&amp;family=Roboto+Mono:wght@400;500&amp;family=Noto+Sans+HK:wght@400;500;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap">
 <style>body{margin:0}</style>
 </helmet>
-<div class="m3 {{theme}}" style="min-height: 960px; padding: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-content: start; --tf-bg: var(--surface-container-high)">
+<div class="m3 {{theme}}" style="min-height: 960px; padding: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; align-content: start; align-items: start; --tf-bg: var(--surface-container-high)">
   <section class="dialog" role="alertdialog" aria-labelledby="clean-h">
     <span class="ms s32 hero c-error">delete_forever</span>
     <h2 id="clean-h" class="headline-s" style="text-align: center">Clean build output?</h2>
@@ -25,7 +25,8 @@
     </div>
     <p class="label-l">Slide all the way to clean</p>
     <div class="slider" role="slider" tabindex="0" aria-label="Confirm clean" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60"><span class="act" style="width: 60%; background: var(--error)"></span><span class="handle" style="background: var(--error)"></span><span class="ina" style="background: var(--error-container)"></span></div>
-    <div class="acts"><button class="btn outlined sl"><span class="ms">logout</span>Emergency exit</button></div>
+    <p class="body-s on-sv">Release the slider at the end to clean. Nothing is removed before then.</p>
+    <div class="acts"><button class="btn outlined sl"><span class="ms">logout</span>Emergency exit</button><button class="btn error" disabled>Clean</button></div>
   </section>
   <section class="dialog" role="dialog" aria-labelledby="lock-h">
     <span class="ms s32 hero">lock</span>
@@ -50,7 +51,7 @@
       <button aria-disabled="true" style="flex: 1 1 auto; padding: 0 10px">Moles</button>
       <button aria-disabled="true" style="flex: 1 1 auto; padding: 0 10px">Clock</button>
     </div>
-    <div role="img" aria-label="[DISH PHOTO] from the public dim sum catalogue" class="card filled" style="height: 140px; border-radius: 24px; display: flex; align-items: center; justify-content: center"><span class="label-l on-sv">[DISH PHOTO]</span></div>
+    <div role="img" aria-label="Photo of a dish from the public dim sum catalogue" class="imgslot" style="height: 140px; border-radius: 24px"><span class="ms">image</span><span class="label-m">Dish photo · loads from the public catalogue</span></div>
     <p class="label-l">Which dish is this?</p>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
       <button class="btn outlined sl" style="height: 56px; flex-direction: column; gap: 0; color: var(--on-surface)">Har gow<span class="body-s on-sv">蝦餃</span></button>

@@ -59,6 +59,8 @@
 .btn.error-tonal{background:var(--error-container);color:var(--on-error-container)}
 .btn.tertiary{background:var(--tertiary);color:var(--on-tertiary)}
 
+.btn[disabled],.btn[aria-disabled="true"]{background:color-mix(in srgb,var(--on-surface) 12%,transparent);color:color-mix(in srgb,var(--on-surface) 38%,transparent);box-shadow:none;border-color:transparent;cursor:default}
+
 /* Icon buttons */
 .ib{position:relative;text-decoration:none;width:40px;height:40px;border:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--on-surface-variant);flex-shrink:0;transition:border-radius 250ms cubic-bezier(.3,0,0,1)}
 .ib:active{border-radius:12px}
@@ -237,15 +239,14 @@
 .grp-dot{width:12px;height:12px;border-radius:4px;flex-shrink:0}
 
 /* Menus (M3 Expressive vertical menu with segmented groups) */
-.menu{display:flex;flex-direction:column;gap:2px;min-width:240px}
-.menu>.mg{background:var(--surface-container);border-radius:4px;padding:4px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--e2)}
-.menu>.mg:first-child{border-top-left-radius:16px;border-top-right-radius:16px}
-.menu>.mg:last-child{border-bottom-left-radius:16px;border-bottom-right-radius:16px}
+.menu{display:flex;flex-direction:column;min-width:240px;background:var(--surface-container);border-radius:16px;padding:4px 0;box-shadow:var(--e2)}
+.menu>.mg{padding:4px;display:flex;flex-direction:column;gap:2px}
+.menu>.mg+.mg{border-top:1px solid var(--outline-variant);margin-top:4px;padding-top:8px}
 .mi{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:12px;border:0;background:transparent;color:var(--on-surface);font-size:14px;line-height:20px;font-weight:500;letter-spacing:.1px;width:100%;text-align:left}
 .mi>.ms{font-size:20px;color:var(--on-surface-variant)}
 .mi .k{margin-left:auto;font-size:12px;line-height:16px;font-weight:500;color:var(--on-surface-variant)}
-.mi.sel{background:var(--tertiary-container);color:var(--on-tertiary-container)}
-.mi.sel>.ms{color:var(--on-tertiary-container)}
+.mi.sel{background:var(--secondary-container);color:var(--on-secondary-container)}
+.mi.sel>.ms{color:var(--on-secondary-container)}
 .mi.danger,.mi.danger>.ms,.mi.danger .k{color:var(--error)}
 
 /* Dialogs, sheets, snackbars, tooltips */
@@ -275,7 +276,7 @@
 .tbar{height:64px;display:flex;align-items:center;gap:8px;padding:0 0 0 20px;flex-shrink:0}
 .tbar .brand{display:flex;align-items:center;gap:12px;min-width:0;width:260px}
 .tbar .bt{display:flex;flex-direction:column;min-width:0}
-.tbar .logo{width:36px;height:36px;border-radius:12px;background:var(--primary);color:var(--on-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tbar .logo{width:36px;height:36px;display:block;flex-shrink:0}
 .tbar .mid{flex:1;display:flex;justify-content:center;min-width:0;padding:0 16px}
 .tbar .mid .search{max-width:640px}
 .wctl{display:flex;align-self:stretch;margin-left:8px}
@@ -298,13 +299,35 @@
   .rail{width:100%;flex-direction:row;justify-content:space-around;padding:8px 0;gap:0;position:sticky;bottom:0;background:var(--surface-container);z-index:2}
   .rail .rail-x{display:none}
   .ri{width:auto;flex:1}
-  .panes{padding:0 8px 8px}
+  .panes{padding:0 8px 8px;flex-direction:column}
+  .panes>*{width:auto!important;max-width:none!important;flex:1 1 auto!important}
   .tbar{padding-left:12px}.tbar .kbd,.wctl,.sbar,.hide-c{display:none!important}
   .tbar .mid{justify-content:flex-end;padding:0}
   .tbar .search.sm{width:48px;padding:0;justify-content:center}
   .tbar .search.sm input,.tbar .search.sm .ib{display:none}
-  .li{flex-wrap:wrap}.li .txt{min-width:140px}
+  .li{flex-wrap:wrap;gap:12px}.li .txt{flex:1 1 140px;min-width:140px}.li .sup{overflow-wrap:anywhere}
+  .li>:last-child{margin-left:auto}
+  .li .cbt{display:none}
+  .li .tf,.li .cbg,.li .slider{flex-basis:100%!important;width:100%!important;padding-left:36px}
+  .li .stat{font-size:0;gap:0;letter-spacing:0}
+  .chiprow{flex-wrap:nowrap!important;overflow-x:auto}
+  .cols{columns:1}
+  .toasts{position:static!important;margin-top:16px}
 }
+
+/* Status tokens: one colour per state, used everywhere */
+.st-run{color:var(--primary)}.st-stop{color:var(--on-surface-variant)}.st-err{color:var(--error)}.st-ok{color:var(--primary)}
+
+/* Error rows keep a neutral surface; the icon, title and action carry the error */
+.li.err .ms:first-child,.li.err .err-t{color:var(--error)}
+
+/* Image slot for photos that load at run time from a public catalogue */
+.imgslot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--surface-container-highest);color:var(--on-surface-variant);text-align:center;padding:8px;flex-shrink:0}
+.imgslot .ms{font-size:28px}
+
+/* Settings: independent columns, so sections never leave bands */
+.cols{columns:2 420px;column-gap:28px}
+.cols>section{break-inside:avoid;margin-bottom:28px}
 
 /* Reduced motion */
 @media (prefers-reduced-motion:reduce){.m3 *{transition:none!important}}

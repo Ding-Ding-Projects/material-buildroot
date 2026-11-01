@@ -46,7 +46,7 @@
     <h2 id="setup-h" class="headline-s">Where should builds run?</h2>
     <p class="body-m on-sv">We checked this computer. You can change this later in Builds.</p>
     <div class="seglist" role="radiogroup" aria-labelledby="setup-h">
-      <button class="li tall sel sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="txt"><span>WSL 2</span><span class="sup">Ready · Ubuntu 24.04</span></span><span class="ms fill">check_circle</span></button>
+      <button class="li tall sel sl" role="radio" aria-checked="true"><span class="rb on"><span></span></span><span class="txt"><span>WSL 2</span><span class="sup">Ready · Ubuntu 24.04</span></span></button>
       <button class="li tall sl" role="radio" aria-checked="false"><span class="rb"></span><span class="txt"><span>Docker</span><span class="sup">Needs a pinned image</span></span></button>
     </div>
     <div class="acts"><button class="btn text sl">Back</button><button class="btn filled sl">Continue</button></div>
@@ -54,24 +54,24 @@
   <section class="dialog" role="dialog" aria-labelledby="a11y-h" style="align-self: start">
     <div style="display: flex; align-items: center; gap: 12px"><span class="ms c-primary">accessibility_new</span><h2 id="a11y-h" class="title-l">Accessibility tools</h2></div>
     <div class="seglist">
-      <div class="li"><span class="ms">format_size</span><span class="txt">Text size</span><button class="ib sl" aria-label="Smaller text"><span class="ms">text_decrease</span></button><span class="label-l">100%</span><button class="ib sl" aria-label="Larger text"><span class="ms">text_increase</span></button></div>
+      <div class="li" style="flex-wrap: wrap"><span class="ms">format_size</span><span class="txt"><span>Text size</span><span class="sup">100%</span></span><div class="cbg" role="group" aria-label="Text size"><button aria-label="Smaller text"><span class="ms">text_decrease</span></button><button aria-label="Larger text"><span class="ms">text_increase</span></button></div></div>
       <div class="li"><span class="ms">contrast</span><span class="txt">High contrast</span><button class="sw sl" role="switch" aria-checked="false" aria-label="High contrast"><span></span></button></div>
       <div class="li"><span class="ms">motion_photos_off</span><span class="txt"><span>Reduce motion</span><span class="sup">Following system</span></span><button class="sw sl" role="switch" aria-checked="true" aria-label="Reduce motion"><span><span class="ms">check</span></span></button></div>
       <div class="li"><span class="ms">touch_app</span><span class="txt">Larger targets</span><button class="sw sl" role="switch" aria-checked="false" aria-label="Larger targets"><span></span></button></div>
     </div>
   </section>
   <section class="card" aria-labelledby="about-h" style="padding: 24px; border-radius: 28px; display: flex; flex-direction: column; gap: 16px; align-self: start">
-    <div style="display: flex; align-items: center; gap: 16px"><div class="av xl p shape-cookie" aria-hidden="true"><span class="ms s32 fill">deployed_code</span></div><div><h2 id="about-h" class="title-l">Material Buildroot 0.1.1</h2><p class="body-m on-sv">Build 233.1 · code name [DIM SUM NAME]</p></div></div>
+    <div style="display: flex; align-items: center; gap: 16px"><div class="av xl p shape-cookie" aria-hidden="true"><span class="ms s32 fill">deployed_code</span></div><div><h2 id="about-h" class="title-l">Material Buildroot 0.1.1</h2><p class="body-m on-sv">Build 233.1 · code name Classic Har Gow 蝦餃</p></div></div>
     <div class="seglist">
-      <div class="li"><span class="ms">commit</span><span class="txt"><span class="ov">Source</span><span class="mono">[COMMIT]</span></span></div>
-      <div class="li"><span class="ms">update</span><span class="txt"><span class="ov">Updated</span><span>[UPDATED-AT]</span></span></div>
+      <div class="li"><span class="ms">commit</span><span class="txt"><span class="ov">Source</span><span class="mono">9223534</span></span></div>
+      <div class="li"><span class="ms">update</span><span class="txt"><span class="ov">Updated</span><span>30 Oct 2026, 14:05</span></span></div>
       <div class="li"><span class="ms">gavel</span><span class="txt"><span class="ov">Licence</span><span>GPL-3.0-or-later</span></span></div>
     </div>
     <div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn tonal sl">Changelog</button><button class="btn outlined sl">Licences</button></div>
   </section>
-  <div style="display: flex; flex-direction: column; gap: 12px; justify-content: flex-end; align-items: flex-end">
+  <div class="toasts" style="display: flex; flex-direction: column; gap: 12px; justify-content: flex-end; align-items: flex-end">
     <div role="status" aria-label="Dim sum surprise: Har gow" class="card" style="width: 360px; max-width: 100%; border-radius: 24px; display: flex; gap: 16px; padding: 12px; align-items: center; box-shadow: var(--e3)">
-      <div role="img" aria-label="Har gow, shrimp dumplings in a bamboo steamer" class="shape-cookie" style="width: 72px; height: 72px; background: var(--tertiary-container); color: var(--on-tertiary-container); display: flex; align-items: center; justify-content: center; flex-shrink: 0"><span class="label-s">[PHOTO]</span></div>
+      <div role="img" aria-label="Har gow, shrimp dumplings in a bamboo steamer, photo from the public dim sum catalogue" class="imgslot shape-cookie" style="width: 72px; height: 72px"><span class="ms">image</span><span class="label-s">Catalogue</span></div>
       <div style="flex: 1"><p class="title-m">Har gow · 蝦餃</p><p class="body-s on-sv">A dim sum surprise. Closes by itself.</p></div>
       <button class="ib sl" aria-label="Dismiss"><span class="ms">close</span></button>
     </div>

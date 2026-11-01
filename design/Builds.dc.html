@@ -15,7 +15,7 @@
 </helmet>
 <div class="m3 win {{theme}}">
   <header class="tbar">
-    <div class="brand"><div class="logo" aria-hidden="true"><span class="ms fill">deployed_code</span></div><div class="bt"><span class="title-m em">Material Buildroot</span><span class="label-s on-sv">0.1.1 · build 233.1</span></div></div>
+    <div class="brand"><img class="logo" src="./app-icon.png" alt="" width="36" height="36"><div class="bt"><span class="title-m em">Material Buildroot</span></div></div>
     <div class="mid"><label class="search sm"><span class="ms">search</span><input aria-label="Search everything" placeholder="Search commands, settings and articles"><span class="kbd">Ctrl+Shift+F</span><button class="ib" aria-label="Open regex builder for this search"><span class="ms">regular_expression</span></button></label></div>
     <button class="ib sl" aria-label="Notifications"><span class="ms">notifications</span></button>
     <button class="ib sl" aria-label="Accessibility tools"><span class="ms">accessibility_new</span></button>
@@ -24,7 +24,7 @@
   <div class="body">
     <nav class="rail" aria-label="Destinations">
       <button class="ib sl rail-x" aria-label="Expand navigation"><span class="ms">menu</span></button>
-      <button class="fab flat sl rail-x" aria-label="Start a build" style="margin: 4px 0 20px"><span class="ms">play_arrow</span></button>
+      <button class="fab flat sl rail-x" aria-label="Create image" style="margin: 4px 0 20px"><span class="ms">add</span></button>
       <a class="ri" href="Main.dc.html"><span class="ind"><span class="ms">deployed_code</span></span>Images</a>
       <a class="ri on" href="Builds.dc.html" aria-current="page"><span class="ind"><span class="ms">construction</span><span class="badge">1</span></span>Builds</a>
       <a class="ri" href="Tools.dc.html"><span class="ind"><span class="ms">handyman</span></span>Tools</a>
@@ -47,7 +47,8 @@
           </article>
           <div class="seglist">
             <div class="li tall"><span class="ms">schedule</span><span class="txt"><span>kiosk rpi4 · sdcard image</span><span class="sup">Queued · waits for an 8 GiB memory reservation</span></span><button class="ib sl" aria-label="Move up in queue"><span class="ms">arrow_upward</span></button><button class="ib sl" aria-label="More actions"><span class="ms">more_vert</span></button></div>
-            <div class="li tall" style="background: var(--error-container); color: var(--on-error-container)"><span class="ms" style="color: inherit">sync_problem</span><span class="txt"><span>router lab · make linux</span><span class="sup" style="color: inherit">Interrupted at 47% · not verified stopped</span></span><button class="btn error sl">Verify cleanup</button><button class="btn text sl" style="color: inherit">Retry</button></div>
+            <div class="li tall err"><span class="ms">sync_problem</span><span class="txt"><span>router lab · make linux</span><span class="sup err-t">Interrupted at 47% · not verified stopped</span></span><button class="btn error-tonal sl">Verify cleanup</button><button class="btn text sl">Retry</button></div>
+            <div class="li tall"><span class="ms st-ok">task_alt</span><span class="txt"><span>kiosk rpi4 · sdcard image</span><span class="sup">Finished 41 min · output hash recorded</span></span><button class="btn text sl">Open output</button></div>
           </div>
         </section>
         <section class="pane" aria-labelledby="out-h" style="height: 260px; flex-shrink: 0; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-container-low)">
@@ -58,10 +59,16 @@
             <span class="label-l">Follow</span><button class="sw sl" role="switch" aria-checked="true" aria-label="Follow output"><span><span class="ms">check</span></span></button>
             <button class="ib sl" aria-label="Open in external editor"><span class="ms">open_in_new</span></button>
           </div>
-          <pre class="mono body-m" style="flex: 1; margin: 0; padding: 12px 16px; border-radius: 16px; background: var(--surface-container-highest); overflow: auto; color: var(--on-surface)">&gt;&gt;&gt; host-gcc-final 13.3.0 Building
+          <pre class="mono body-m" style="flex: 1; margin: 0; white-space: pre; overflow-x: auto; padding: 12px 16px; border-radius: 16px; background: var(--surface-container-highest); overflow: auto; color: var(--on-surface)">&gt;&gt;&gt; host-gcc-final 13.3.0 Building
 &gt;&gt;&gt; host-gcc-final 13.3.0 Installing to host directory
 &gt;&gt;&gt; busybox 1.37.0 Configuring
-&gt;&gt;&gt; busybox 1.37.0 Building</pre>
+&gt;&gt;&gt; busybox 1.37.0 Building
+&gt;&gt;&gt; busybox 1.37.0 Installing to target
+&gt;&gt;&gt; dropbear 2024.86 Extracting
+&gt;&gt;&gt; dropbear 2024.86 Patching
+&gt;&gt;&gt; dropbear 2024.86 Configuring
+&gt;&gt;&gt; dropbear 2024.86 Building
+&gt;&gt;&gt; linux-headers 6.12.11 Installing to staging directory</pre>
         </section>
       </div>
       <aside class="pane scroll hide-s" aria-label="Admission and runtimes" style="width: 340px; flex-shrink: 0; padding: 28px 16px 16px; display: flex; flex-direction: column; gap: 16px">
@@ -78,10 +85,15 @@
           <div class="li"><span class="ms fill c-primary">check_circle</span><span class="txt"><span>Docker</span><span class="sup">Digest-pinned image</span></span></div>
           <div class="li"><span class="ms">cloud_off</span><span class="txt"><span>Remote runner</span><span class="sup">Not set up</span></span><button class="btn text sl">Set up</button></div>
         </div>
+        <h2 class="title-l" style="padding: 8px 8px 0">Recent results</h2>
+        <div class="seglist">
+          <div class="li"><span class="ms fill c-primary">task_alt</span><span class="txt"><span>kiosk rpi4</span><span class="sup">sdcard.img · 41 min · 28 Oct 2026</span></span></div>
+          <div class="li"><span class="ms fill c-primary">task_alt</span><span class="txt"><span>qemu appliance</span><span class="sup">rootfs.iso · 52 min · 28 Oct 2026</span></span></div>
+        </div>
       </aside>
     </div>
   </div>
-  <footer class="sbar"><span class="stat"><span class="ms c-primary">autorenew</span>1 running · 1 queued · 1 interrupted</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated [UPDATED-AT]</span></footer>
+  <footer class="sbar"><span class="stat"><span class="ms c-primary">autorenew</span>1 running · 1 queued · 1 interrupted</span><span style="flex: 1"></span><span>English · Funny level 5</span><span>0.1.1 · updated 30 Oct 2026, 14:05</span></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":960}}'>

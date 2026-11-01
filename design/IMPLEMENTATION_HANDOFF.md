@@ -4,7 +4,7 @@ Source design for the full renderer remake of `Ding-Ding-Projects/material-build
 
 ## Location
 
-In the repository these files live directly in `design/`: the eight artboards, `canvas.json`, the shared `m3.css` and `theme.css`, `audit.md` and `current-screens/`. The same canvas is also hosted as a private design project.
+In the repository these files live directly in `design/`: the eight artboards, `app-icon.png` (the product's own icon), `canvas.json`, the shared `m3.css` and `theme.css`, `audit.md` and `current-screens/`. The same canvas is also hosted as a private design project.
 
 ## Pure Material 3 Expressive
 
@@ -73,3 +73,43 @@ Icons are Material Symbols Rounded. The app keeps its vendored local icon set, w
 - Placeholders in brackets (`[UPDATED-AT]`, `[DATE]`, `[COMMIT]`, `[DIM SUM NAME]`, `[PHOTO]`, `[DISH PHOTO]`) must come from real data.
 - Sample project names, sizes and counts are illustrative only; never ship invented records.
 - `audit.md` maps every required feature to the current renderer and is the wiring backlog.
+
+## Stageshow pass, 1 November 2026
+
+This design was reworked with the Stageshow skill (`npx skills add benjitaylor/skills --skill stageshow`). The skill was installed fresh at upstream commit `802057409787133703c56001080169e347305572`, and the install matched the cached copy exactly.
+
+- **Read:** `SKILL.md`, `references/craft.md`, `references/review.md` and `references/verify.md`.
+- **Gold examples filmed for comparison:** `gmail` (list with real chrome), `finder` (full-height list app), `static-card` (restraint) and `dark-hero` (dark depth).
+- **Fresh-eye review:** done by a separate reviewer that had not seen the plan. It found 38 ranked findings; they are in `STAGESHOW_REVIEW.md` beside this file.
+
+### Fixed from the review
+
+- **Real app icon:** the product's own icon is in the title bar, in place of a glyph in a coloured square.
+- **Provenance once:** version and update time appear only in the status bar.
+- **No empty bands:** panes that stopped well above their bottom now carry real content (recent activity, history, the full article, recent builds and conversions). The tab list shows pinned, grouped and recently closed tabs.
+- **Product-specific Settings:** each Settings screen now leads with its own product's settings. They use independent columns, so no band appears under the shorter column.
+- **Placeholders:** placeholder tokens are replaced with plausible values. Dim sum photos remain image slots on purpose: the photo contract allows them only from the public catalogue's release URL at run time, never vendored into this repository.
+- **Calmer error tone:** error states use the error icon, text and tonal action on a neutral surface, never a full saturated fill.
+- **Consistent states:**
+  - Running status uses one token everywhere.
+  - Change kinds have their own colours.
+  - Menu focus uses the same selection role as every other list.
+- **Gated and destructive actions:**
+  - The gated Launch button is shown disabled with its reason.
+  - Destructive dialogs show the disabled destructive action that the slider unlocks.
+  - Dialogs hug their content.
+- **Rail FAB:** the rail keeps one FAB with the same action on every destination.
+- **Phone width:** panes stack; list rows keep the trailing control on the right; chip rows scroll; pickers, groups and sliders take a full row.
+- **Contradictory states removed:** the theme switch in the light frame, the doubled selection mark and the doubled ladder selection.
+
+### Stageshow rules that did not apply
+
+These screens are full application screens for implementation, not marketing illustrations. These rules were therefore not applied:
+
+- the 3 to 7 real-string budget and gray filler bars
+- stage cropping and bleed
+- the 38 px window chrome and the 14 to 16 px icon size, since Material 3 sizes are used
+- avoiding real headings, since the artboards are accessible documents
+- motion, loops and the filming gate, since there is no animation
+
+`REHEARSAL.md` belongs to Stageshow React demos, and none ships with this design.
