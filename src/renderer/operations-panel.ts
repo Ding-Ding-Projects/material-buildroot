@@ -416,9 +416,9 @@ export class OperationsPanel extends LitElement {
       :host([presentation="guided"]) .guided-builds .dock{display:flex}:host([presentation="guided"]) .guided-builds .dock-toggle{display:inline-flex}.operations > tools-panel,.operations > documentation-panel{padding:0}
       .build-jobs{background:var(--md-sys-color-surface);border-radius:28px;padding:24px!important}.build-jobs .record:first-of-type{border-radius:20px 20px 4px 4px}.build-jobs .record:last-of-type{border-radius:4px 4px 20px 20px}.builds-admission{border-radius:28px;background:var(--md-sys-color-surface);padding:16px}.dock{border-radius:28px;margin:0 16px 16px;border-top:0}.dock-log{border-radius:16px;background:var(--md-sys-color-surface-container-highest)}
       .builds-workspace{container-type:inline-size;min-width:0}.builds-heading{display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap;margin-bottom:24px}.builds-heading h2{font-size:30px;line-height:1.25;font-weight:500;margin:4px 0}.eyebrow{font-size:12px;color:var(--md-sys-color-primary)}
-      .builds-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:24px;align-items:start}.builds-admission{grid-column:2;grid-row:1;min-width:0;display:grid;gap:16px}.build-jobs{grid-column:1;grid-row:1;min-width:0}.build-jobs .record,.runtime-summary{border:1px solid var(--md-sys-color-outline-variant);border-radius:4px;padding:20px;margin:2px 0;background:var(--md-sys-color-surface-container)}.build-jobs .badge{background:var(--md-sys-color-secondary-container);border-radius:16px;padding:6px 12px}.runtime-summary{margin:0;overflow-wrap:anywhere}.runtime-summary p{font-size:13px}
+      .builds-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:24px;align-items:start}.builds-admission{grid-column:2;grid-row:1;min-width:0;display:grid;gap:16px}.builds-main{grid-column:1;grid-row:1;min-width:0;display:grid;gap:24px;align-content:start}.build-jobs{min-width:0}.haos-images{background:var(--md-sys-color-surface);border-radius:28px;padding:24px!important;min-width:0}.build-jobs .record,.runtime-summary{border:1px solid var(--md-sys-color-outline-variant);border-radius:4px;padding:20px;margin:2px 0;background:var(--md-sys-color-surface-container)}.build-jobs .badge{background:var(--md-sys-color-secondary-container);border-radius:16px;padding:6px 12px}.runtime-summary{margin:0;overflow-wrap:anywhere}.runtime-summary p{font-size:13px}
       .dock{max-height:60%;min-height:280px;overflow:auto;position:relative;overscroll-behavior:contain}.dock>.document-toolbar{flex:0 0 auto}.dock-resizer{height:44px;min-height:44px;touch-action:none;background:transparent;position:relative}.dock-resizer::after{content:'';position:absolute;left:calc(50% - 24px);width:48px;height:4px;top:20px;border-radius:2px;background:var(--md-sys-color-outline)}.dock-resizer:focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:-3px}.dock-filter{display:flex;flex:0 0 auto;gap:12px;align-items:center;flex-wrap:wrap;padding:4px 12px;min-height:min-content}.dock-filter settings-search{flex:1 1 240px;min-width:0}.dock-filter label{display:flex;align-items:center}.dock-content{background:var(--md-sys-color-surface);flex:1 0 100px;min-height:100px}.dock-jobs md-text-button{min-height:44px;white-space:normal;height:auto}.dock-log{margin:0;overscroll-behavior:contain}.dock-jobs{width:180px;flex-shrink:0}
-      @container(max-width:860px){.builds-layout{grid-template-columns:minmax(0,1fr)}.builds-admission,.build-jobs{grid-column:auto;grid-row:auto}.build-jobs{order:-1}}
+      @container(max-width:860px){.builds-layout{grid-template-columns:minmax(0,1fr)}.builds-admission,.builds-main{grid-column:auto;grid-row:auto}.builds-main{order:-1}}
       @media(max-height:700px){.dock{max-height:50%;overflow:auto}.dock-filter{align-items:start}.dock-content{min-height:100px}}
       .editor-frame[data-short-owner=true]{display:block;height:100%;overflow:auto;overscroll-behavior:contain;scroll-padding:12px;box-sizing:border-box}
       .editor-frame[data-short-owner=true]>.operations{display:block;flex:none;min-height:0;overflow:visible}
@@ -1077,8 +1077,8 @@ export class OperationsPanel extends LitElement {
             >
           </section>`
         : this.noProject()}</workspace-section>
-      <section class="panel"><haos-image-panel .language=${this.language}></haos-image-panel></section><section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
-      </aside><section class="panel build-jobs">
+      <section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
+      </aside><div class="builds-main"><section class="panel haos-images"><haos-image-panel .language=${this.language}></haos-image-panel></section><section class="panel build-jobs">
         <div class="row">
           <h2>${this.l("Build jobs","建置工作",true)}</h2>
           <md-text-button ?disabled=${this.pending} @click=${this.refreshJobs}
@@ -1153,7 +1153,7 @@ export class OperationsPanel extends LitElement {
                   >`
                 : nothing}`
           : nothing}
-      </section></div></div>`;
+      </section></div></div></div>`;
   }
   private async openIsoHelp(event:CustomEvent<{title:string}>) {
     const titles=['ISO profile and firmware','ISO runtime and resources','ISO configuration and recovery','ISO output and validation','Easy ISO board presets'];
