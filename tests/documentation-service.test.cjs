@@ -102,7 +102,7 @@ test("packaged Help selects physical extraResources and verifies every copied by
   fs.rmSync(directory, {recursive:true});
   assert.throws(() => verifyDocumentationResources(fixtureData.output, output));
   const packaging = require('../package.json').build;
-  assert.deepEqual(packaging.extraResources, [{from:'dist/documentation',to:'documentation',filter:['**/*']}]);
+  assert.deepEqual(packaging.extraResources, [{from:'dist/documentation',to:'documentation',filter:['**/*']},{from:'dist/appliance-guest',to:'appliance-guest',filter:['**/*']}]);
   for (const excluded of ['index.json', 'articles/**/*', 'references/**/*']) assert.ok(packaging.files.includes(`!dist/documentation/${excluded}`));
   assert.ok(packaging.files.includes('dist/**/*'));
   assert.ok(!packaging.files.some(pattern => pattern.startsWith('!') && pattern.includes('assets')));

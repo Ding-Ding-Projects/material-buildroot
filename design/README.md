@@ -2,7 +2,7 @@
 
 ## Current implementation reference
 
-The active visual direction is the complete `design/` folder from repository revision `9223534b5cfd4f2d6daa62bff9670411931f0f3d`, design tree `c7d0a32219113128af79808b69d5eb8ff0c446fa`. Use the [eight-artboard handoff](IMPLEMENTATION_HANDOFF.md), [shared component anatomy](m3.css), [light and dark color roles](theme.css), and [source identities](import-manifest.json). This revision supersedes the earlier attachment. The attachment is no longer an implementation input.
+The active visual direction is the complete `design/` folder from repository revision `9223534b5cfd4f2d6daa62bff9670411931f0f3d`, design tree `c7d0a32219113128af79808b69d5eb8ff0c446fa`. Use the [eight-artboard handoff](IMPLEMENTATION_HANDOFF.md), shared component anatomy (`src/renderer/design-system/m3.css`), light and dark color roles (`src/renderer/design-system/theme.css`), and [source identities](import-manifest.json). This revision supersedes the earlier attachment. The attachment is no longer an implementation input.
 
 The target is Material 3 Expressive in the real Lit renderer: a 64-pixel title bar, a 96-pixel rail, rounded supporting panes, segmented lists, connected choice groups and registered Material Web controls. Preserve real records, typed host authority, drafts, local assets, localization and keyboard access. Reference sample records never become production data.
 

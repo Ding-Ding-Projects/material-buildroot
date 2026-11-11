@@ -93,6 +93,7 @@ export interface StudioAPI {
   onWorkspaceTabActivate?(listener:(tabId:string)=>void):()=>void;
   onWorkspaceTabsChanged?(listener:()=>void):()=>void;
   dimSum?(request:{action:'catalog'|'photo'|'surprise';id?:string}):Promise<{ok:boolean;code?:string;source?:string;revision?:string;dishes?:Array<{id:string;en:string;zh:string;photo:string|null}>;dish?:{id:string;en:string;zh:string;photo:string|null;image?:string}|null}>;
+  haos?(request:{action:'status'|'choose-source'|'choose-output'|'start'|'cancel';kind?:'image'|'container';defconfig?:string}):Promise<{ok:boolean;code?:string;result?:import("./haos").HaosSummary}>;
   statusHub?(action: "read" | "refresh"): Promise<import("./status-hub").StatusHubReply>;
   appearanceHistory?(request:{action:string;[key:string]:unknown}):Promise<{ok:boolean;revision?:number;snapshot?:any;records?:Array<{revision:number;timestamp:string;elementCount:number;trackTargetCount:number}>;hasMore?:boolean;code?:string}>;
   appearanceFonts?(): Promise<{ok:true;fonts:string[];variableAxesAvailable:false}|{ok:false;code:string}>;

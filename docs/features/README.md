@@ -21,6 +21,7 @@ Choose a task below and read its permission, recovery and verification boundarie
 - [Component configuration domains](../desktop/configuration-domains.md) · [元件範疇](../desktop/configuration-domains.zh-HK.md)
 - [Kconfig evaluation and source trust](../desktop/kconfig-semantics.md) · [Kconfig 求值](../desktop/kconfig-semantics.zh-HK.md)
 - [Build targets](build-targets.md) · [建置目標](build-targets.zh-HK.md)
+- [Home Assistant OS and container images from an external tree](external-tree-images.md) · [外部樹映像](external-tree-images.zh-HK.md)
 - [Concurrent queues and job terminals](build-queues.md) · [建置佇列](build-queues.zh-HK.md)
 - [Exact-destination clean confirmation](destructive-confirmation.md) · [清理確認](destructive-confirmation.zh-HK.md)
 - [Pinned local container runtime](runtime-containers.md) · [Container 執行環境](runtime-containers.zh-HK.md)

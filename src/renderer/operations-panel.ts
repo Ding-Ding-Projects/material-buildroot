@@ -19,6 +19,7 @@ import "./ollama-evidence-panel";
 import "./ollama-workspace-panel";
 import "./assistant-plan-panel";
 import "./build-queue-panel";
+import "./haos-image-panel";
 import { requestDestructiveConfirmation } from "./destructive-confirmation";
 import "./ollama-catalogue-panel";
 import "./documentation-panel";
@@ -1076,7 +1077,7 @@ export class OperationsPanel extends LitElement {
             >
           </section>`
         : this.noProject()}</workspace-section>
-      <section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
+      <section class="panel"><haos-image-panel .language=${this.language}></haos-image-panel></section><section class="panel"><build-queue-panel .language=${this.language} .workspaceId=${this.workspace?.workspaceId||""} @queue-updated=${()=>this.refreshJobs()} @renew-project-access=${()=>{this.tab="runtime";void this.choose();}}></build-queue-panel></section>
       </aside><section class="panel build-jobs">
         <div class="row">
           <h2>${this.l("Build jobs","建置工作",true)}</h2>
