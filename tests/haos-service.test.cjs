@@ -68,3 +68,15 @@ test('the container plan follows the repository recipe and never pushes', () => 
   assert.throws(() => planContainerImageBuild({ recipe, stage, scratch, commit: 'HEAD' }), /container-commit-invalid/);
   assert.throws(() => planContainerImageBuild({ recipe, stage, scratch, commit: 'a'.repeat(40), tag: 'Bad Tag' }), /container-tag-invalid/);
 });
+
+test('stage cleanup removes read-only files such as Git pack files', () => {
+  const { removeTree } = require('../src/main/execution/haos-runner.cjs');
+  const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'haos-stage-'));
+  const packs = path.join(folder, '.git', 'objects', 'pack');
+  fs.mkdirSync(packs, { recursive: true });
+  const pack = path.join(packs, 'pack-1.pack');
+  fs.writeFileSync(pack, 'x');
+  fs.chmodSync(pack, 0o444);
+  removeTree(folder);
+  assert.equal(fs.existsSync(folder), false);
+});

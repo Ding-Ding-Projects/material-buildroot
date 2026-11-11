@@ -8,6 +8,20 @@ const { discoverContainerRecipe, planContainerImageBuild, STAGED_PATHS } = requi
 
 const cancelled = () => Object.assign(new Error("Cancelled"), { code: "cancelled" });
 
+/** Removes a folder even when Git has left read-only object files in it (Windows refuses those with EPERM). */
+function removeTree(folder) {
+  try { fs.rmSync(folder, { recursive: true, force: true, maxRetries: 3 }); return; }
+  catch (error) { if (error.code !== "EPERM" && error.code !== "EACCES") throw error; }
+  const writable = target => {
+    const stat = fs.lstatSync(target);
+    if (stat.isSymbolicLink()) return;
+    fs.chmodSync(target, stat.isDirectory() ? 0o777 : 0o666);
+    if (stat.isDirectory()) for (const name of fs.readdirSync(target)) writable(path.join(target, name));
+  };
+  writable(folder);
+  fs.rmSync(folder, { recursive: true, force: true, maxRetries: 3 });
+}
+
 function sha256File(file) {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash("sha256");
@@ -161,11 +175,16 @@ async function runContainerImageBuild({ source, work, commit = "HEAD", tag = "ho
       receipt.saved = { file: path.basename(save), bytes: fs.statSync(save).size, sha256: await sha256File(save) };
     }
   } catch (error) { failure = error; }
-  if (!keepStage) fs.rmSync(stage, { recursive: true, force: true });
-  fs.rmSync(scratch, { recursive: true, force: true });
+  for (const folder of keepStage ? [scratch] : [stage, scratch]) {
+    try { removeTree(folder); } catch (error) {
+      // Leftover files never overturn the build result; they are reported instead.
+      receipt.cleanupWarnings = [...(receipt.cleanupWarnings || []), `${path.basename(folder)}: ${error.code || error.message}`];
+      session.say(`cleanup: could not remove ${folder}: ${error.code || error.message}`);
+    }
+  }
   await session.close(failure ? (failure.code === "cancelled" ? "cancelled" : "failed") : "succeeded", failure);
   if (failure) throw failure;
   return receipt;
 }
 
-module.exports = { runHaosImageBuild, runContainerImageBuild };
+module.exports = { runHaosImageBuild, runContainerImageBuild, removeTree };
