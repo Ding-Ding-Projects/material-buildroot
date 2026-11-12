@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 const BEGIN='<!-- workflow-timing:begin -->',END='<!-- workflow-timing:end -->';
 const sha=/^[a-f0-9]{40}$/;
+const {packageIdentity}=require('../build/squirrel.cjs');
 function timestamp(value){if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(value)||!Number.isFinite(Date.parse(value)))throw Error('Exact UTC timing unavailable.');return new Date(value).toISOString();}
 function assertOriginal(run,jobs,repository){
  if(run.repository?.full_name!==repository||run.head_repository?.full_name!==repository||run.path!=='.github/workflows/release.yml'||!['push','workflow_dispatch'].includes(run.event)||run.status!=='completed'||run.conclusion!=='success'||!sha.test(run.head_sha||'')||![run.id,run.run_number,run.run_attempt].every(x=>Number.isSafeInteger(x)&&x>0))throw Error('Original release workflow identity is invalid.');
@@ -39,7 +40,8 @@ function annotate({repository,event,api,edit}){
  // Read package metadata as JSON only. Never execute triggering-branch code.
  const pkg=api(`repos/${repository}/contents/package.json?ref=${run.head_sha}`,true);
  if(typeof pkg.version!=='string'||!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(pkg.version))throw Error('Source version invalid.');
- const tag=`v${pkg.version}-build.${run.run_number}.${run.run_attempt}`;
+ // Hosted builds replace the patch number with the run number; derive the tag exactly as the build does.
+ const tag=`v${packageIdentity(pkg.version,{GITHUB_RUN_NUMBER:String(run.run_number)}).version}-build.${run.run_number}.${run.run_attempt}`;
  const release=api(`repos/${repository}/releases/tags/${tag}`);
  if(release.draft!==false||release.prerelease!==false||release.tag_name!==tag||!release.body?.includes(`Source: ${run.head_sha}`)||!release.body.includes(`Original workflow: ${run.id}, attempt ${run.run_attempt}`))throw Error('Release source identity mismatch.');
  let object=api(`repos/${repository}/git/ref/tags/${tag}`).object;const tags=new Set();for(let i=0;object?.type==='tag'&&i<5;i++){if(!sha.test(object.sha)||tags.has(object.sha))throw Error('Tag chain invalid.');tags.add(object.sha);object=api(`repos/${repository}/git/tags/${object.sha}`).object;}if(object?.type!=='commit'||object.sha!==run.head_sha)throw Error('Exact release tag mismatch.');
