@@ -43,6 +43,10 @@ This shows that the image boots, that the Supervisor starts, and that the Superv
 
 ![Landing page served by the booted ova image](ova-boot-landing.png)
 
+About 35 minutes after boot, the Supervisor had downloaded and started Core from the Home Assistant Material channel feed. Port 80 then redirected to `/onboarding.html`, and `/api/onboarding` listed the user, core configuration and integration steps as not done. Which Core build the feed named was not identified from outside the guest.
+
+![Onboarding served by the booted ova image](ova-boot-onboarding.png)
+
 ## Container image: `home-assistant-material:local`, recorded 2026-11-11
 
 Run with `node scripts/haos/build-container-image.cjs --source <repository> --work <folder> --save <file.tar>`.
@@ -92,5 +96,5 @@ Captures of the panel show local user paths, so they are kept outside this repos
 
 - A full container build completed from inside the desktop window. See the folder dialog crash above.
 - Boards other than `ova`, flashing hardware, and over-the-air updates.
-- The full core download and Home Assistant onboarding inside the booted operating system.
+- Completing Home Assistant onboarding inside the booted operating system.
 - A signed update bundle.

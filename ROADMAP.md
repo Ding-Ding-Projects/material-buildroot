@@ -5,7 +5,7 @@
 - [x] Detect a repository's `operating-system/` Buildroot external tree and list its boards.
 - [x] Build an image with the tree's own Makefile and builder container, from a `git archive` of the committed tree in a Docker volume, with SHA-256 receipts and cancellation.
 - [x] Build the Home Assistant Material container image locally from a shared clone, following its `build.sh`; never push.
-- [x] Build the `ova` board end to end (93 min) and boot the result under QEMU and UEFI to the Home Assistant landing page.
+- [x] Build the `ova` board end to end (93 min) and boot the result under QEMU and UEFI to the Home Assistant landing page, then to onboarding once Core was fetched.
 - [x] Run the locally built container image and confirm `/manifest.json` and onboarding.
 - [x] Add the Builds panel, desktop service and command-line drivers.
 - [x] Fix the CRLF archive, Windows tar path and read-only cleanup defects found by running the route.
