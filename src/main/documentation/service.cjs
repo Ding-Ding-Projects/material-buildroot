@@ -293,11 +293,15 @@ function createDocumentationService({ directory, openExternal } = {}) {
     throw new TypeError("A host-owned documentation directory is required.");
   function bytes(relative, max) {
     sourcePath(relative);
-    let cursor = directory;
+    // The root is compared in its fully resolved form: Windows can hand out an 8.3 short
+    // folder name (such as LONGNA~1) that realpath expands. Every part below the root
+    // must still resolve to exactly itself, so links inside the bundle are still rejected.
+    if (fs.lstatSync(directory).isSymbolicLink()) fail("INVALID_BUNDLE");
+    let cursor = directory, resolved = fs.realpathSync.native(directory);
     for (const part of [".", ...relative.split("/")]) {
-      if (part !== ".") cursor = path.join(cursor, part);
+      if (part !== ".") { cursor = path.join(cursor, part); resolved = path.join(resolved, part); }
       const info = fs.lstatSync(cursor);
-      if (info.isSymbolicLink() || fs.realpathSync.native(cursor) !== cursor)
+      if (info.isSymbolicLink() || fs.realpathSync.native(cursor) !== resolved)
         fail("INVALID_BUNDLE");
     }
     const info = fs.lstatSync(cursor);

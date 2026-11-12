@@ -664,3 +664,17 @@ test("current indexed documentation has no unresolved source links and every adm
   }
   t.diagnostic(JSON.stringify(result));
 });
+
+test("a bundle reached through a Windows 8.3 short path still opens", { skip: process.platform !== "win32" }, async (t) => {
+  const fixtureData = await fixture(t);
+  await fixtureData.build();
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), "documentation-short-"));
+  t.after(() => fs.rmSync(parent, { recursive: true, force: true }));
+  const longFolder = path.join(parent, "Long Bundle Folder Name");
+  fs.cpSync(fixtureData.output, longFolder, { recursive: true });
+  const shortFolder = require("node:child_process").execFileSync("powershell.exe", ["-NoProfile", "-Command",
+    `(New-Object -ComObject Scripting.FileSystemObject).GetFolder('${longFolder.replace(/'/g, "''")}').ShortPath`], { encoding: "utf8" }).trim();
+  if (shortFolder.toLowerCase() === longFolder.toLowerCase()) return t.skip("8.3 short names are disabled on this volume");
+  assert.notEqual(fs.realpathSync.native(shortFolder), shortFolder);
+  assert.equal(createDocumentationService({ directory: shortFolder }).list().complete, true);
+});
