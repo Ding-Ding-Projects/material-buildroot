@@ -1,5 +1,19 @@
 # Phased implementation roadmap
 
+## Home Assistant OS and container images from an external tree, 2026-11-11
+
+- [x] Detect a repository's `operating-system/` Buildroot external tree and list its boards.
+- [x] Build an image with the tree's own Makefile and builder container, from a `git archive` of the committed tree in a Docker volume, with SHA-256 receipts and cancellation.
+- [x] Build the Home Assistant Material container image locally from a shared clone, following its `build.sh`; never push.
+- [x] Build the `ova` board end to end (93 min) and boot the result under QEMU and UEFI to the Home Assistant landing page.
+- [x] Run the locally built container image and confirm `/manifest.json` and onboarding.
+- [x] Add the Builds panel, desktop service and command-line drivers.
+- [x] Fix the CRLF archive, Windows tar path and read-only cleanup defects found by running the route.
+- [ ] Complete a container build started from inside the desktop window. The last attempt ended when the application exited after a folder dialog driven by posted messages on a hidden desktop; see the evidence record.
+- [ ] Build and boot the Raspberry Pi boards and other defconfigs.
+- [ ] Sign update bundles with a provided release key and verify an over-the-air update.
+- [ ] Complete Home Assistant onboarding inside a booted image.
+
 ## Material 3 Expressive renderer rebuild, 2026-10-31
 
 - [x] Vendor the design folder's `m3.css` and `theme.css`, bundle Material Symbols Rounded, Roboto Flex and Roboto Mono locally, and bridge every Material Web token to the design colour roles.

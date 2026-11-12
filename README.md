@@ -19,6 +19,10 @@ Windows installer, display scaling, Windows font rendering and runtime acceptanc
 
 最新介面已經按設計資料夾重寫，以上係真正執行中應用程式嘅截圖。Windows 安裝、縮放同 WSL、Docker 執行仍未驗證。
 
+## Home Assistant OS images from an external tree
+
+Builds can now build a repository's own Buildroot external tree with that tree's builder, for example Home Assistant Material's `operating-system/`. It produced the `ova` image, which booted to the Home Assistant landing page, and a local `home-assistant-material:local` container image. See [external tree images](docs/features/external-tree-images.md) and [the verification record](docs/evidence/external-tree-images/README.md).
+
 ## Standalone OS creation in the running desktop
 
 Images has a direct **Standalone OS** action in its header. The guided workspace accepts container images, native-picked archives, supported Compose manifests and reviewed source preparation. It provides WSL setup, kiosk or console choices, persistent storage, optional private personal wording, tunnel options, real build status, boot verification and Downloads export. Implementation and runtime acceptance are separate; see the [workflow and remaining verification](docs/desktop/standalone-os.md).

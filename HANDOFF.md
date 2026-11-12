@@ -1,5 +1,27 @@
 # Material Buildroot preservation handoff
 
+## Home Assistant OS and container images from an external tree, 2026-11-11
+
+Builds now has an **Operating system and container images** panel, and `scripts/haos/` has matching command-line drivers. Both work on a repository that ships its own Buildroot external tree, such as Home Assistant Material's `operating-system/`. The source is exported with `git archive` into a Docker volume, the tree's own builder runs `make <board>`, and the `haos_*` files come back with SHA-256 receipts. A second action builds `home-assistant-material:local` from a shared clone. The code is in `src/main/execution/haos-*.cjs` and `src/renderer/haos-image-panel.ts`. The article is [external tree images](docs/features/external-tree-images.md).
+
+Verified (recorded in [the evidence record](docs/evidence/external-tree-images/README.md)):
+
+- The `ova` build succeeded in 93 minutes.
+- The image booted under QEMU with KVM and UEFI to the Home Assistant landing page.
+- The local container image served `/manifest.json` and onboarding.
+- 13 new unit tests passed, and the documentation tests are green again.
+
+Three Windows defects found by running the route are fixed: the CRLF archive, the tar drive-letter path, and read-only cleanup under Electron.
+
+Not verified:
+
+- A container build completed from inside the window. The last attempt ended with an access violation in the folder dialog's shell module after that dialog was driven by posted messages on a hidden desktop.
+- Other boards, hardware, signed update bundles, and onboarding inside the booted image.
+
+Under heavy load the full unit suite showed timeouts in `operations-service.test.cjs`; the same file passes 26 of 26 when run alone.
+
+由外部 Buildroot 樹建置 Home Assistant OS 同容器映像嘅路線已經做好，`ova` 真係整到出嚟同開到機。喺視窗入面完整行完一次容器建置仲未驗證。
+
 ## Material 3 Expressive renderer rebuild, 2026-10-31
 
 The owner requested a full GUI rewrite from the repository design folder. The renderer now vendors `design/m3.css` and `design/theme.css` under `src/renderer/design-system/`, bundles Material Symbols Rounded, Roboto Flex and Roboto Mono locally, and bridges every Material Web token to the design colour roles. Shared workspace tokens now defer to those roles, which also fixes nested panels (including the Help language buttons) rendering light surfaces in dark mode.
