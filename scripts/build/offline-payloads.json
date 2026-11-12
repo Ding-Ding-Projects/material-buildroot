@@ -756,7 +756,11 @@
       "id": "ebook-convert",
       "format": "calibre-portable",
       "version": "9.16.0",
-      "url": "https://github.com/kovidgoyal/calibre/releases/download/v9.16.0/calibre-portable-installer-9.16.0.exe",
+      "url": "https://download.calibre-ebook.com/9.16.0/calibre-portable-installer-9.16.0.exe",
+      "originUrl": "https://github.com/kovidgoyal/calibre/releases/download/v9.16.0/calibre-portable-installer-9.16.0.exe",
+      "redirectHosts": [
+        "download.calibre-ebook.com"
+      ],
       "sha256": "be3b24228133ec64148acf5e6a3244dbc88a9b509ae8992b7922c425da0f1aae",
       "bytes": 217118472,
       "executable": "Calibre Portable/Calibre/ebook-convert.exe",
@@ -824,10 +828,10 @@
       "id": "soffice",
       "format": "office-msi",
       "version": "26.8.1.1",
-      "url": "https://ftp.osuosl.org/pub/tdf/libreoffice/stable/26.8.1/win/x86_64/LibreOffice_26.8.1_Win_x86-64.msi",
+      "url": "https://downloadarchive.documentfoundation.org/libreoffice/old/26.8.1.1/win/x86_64/LibreOffice_26.8.1.1_Win_x86-64.msi",
       "originUrl": "https://download.documentfoundation.org/libreoffice/stable/26.8.1/win/x86_64/LibreOffice_26.8.1_Win_x86-64.msi",
       "redirectHosts": [
-        "ftp.osuosl.org"
+        "downloadarchive.documentfoundation.org"
       ],
       "sha256": "c6298b10cfa1748bcbedad94c62ce771e240e5021bfd6d7a967cd571b04b5312",
       "bytes": 374870016,
