@@ -10,6 +10,13 @@
 - [x] Derive the release-timing tag from the build's run-number version.
 - [ ] Run a conversion that needs an on-demand engine inside the installed application, with and without network access.
 
+## Operating system images embed images built from source, 2026-11-12
+
+- [x] Build the Supervisor and landing page from the repository at the same commit and embed them in the OS image instead of published copies, checked by digest (`ova`, 2026-11-12)
+- [x] Hand the pinned version file to the builder user
+- [ ] Build an ARM board (for example `rpi5_64`) with images built from source
+- [ ] Capture the Builds panel listing the embedded images
+
 ## Home Assistant OS and container images from an external tree, 2026-11-11
 
 - [x] Detect a repository's `operating-system/` Buildroot external tree and list its boards.

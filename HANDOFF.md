@@ -12,6 +12,12 @@ Verified: unit tests for listing without download, single shared download, failu
 
 最大嗰五個工具改咗第一次用先下載，安裝檔應該返到 1.4 GB 上限以下；要等下一次雲端建置先確認實際大小。
 
+## Operating system images embed images built from source, 2026-11-12
+
+When the repository also carries the sources of the images an OS image embeds (Home Assistant Material's `supervisor/` and `landingpage/`), the operating system route builds them from the same commit and the OS image holds those instead of published copies. `src/main/execution/haos-source-images.cjs` plans it: read the tree's update feed once, start a private registry on a build-only Docker network (no published port), build each image from a `git archive` of its folder under a build-only tag, copy it in with `skopeo` from the builder image, give the builder user a `registries.conf` that redirects only the repository's registry prefix, then check that the digests the recipe printed are the ones stored. The receipt lists the images built from source and the ones still downloaded (the upstream plug-ins). `--no-from-source` turns it off. The Builds panel lists the embedded images after a build. Also fixed: the pinned version file was unreadable to the builder user (`Permission denied`), which broke `--version-json` too.
+
+Verified: the `ova` board built from `311d3508` with both digests matched, and booted (software emulation; KVM was unavailable) to the landing page. See [the evidence record](docs/evidence/external-tree-images/README.md). Not verified: other boards, an ARM board through emulation, a boot with KVM, Core installed on the booted image, and the panel's new rows in a capture.
+
 ## Home Assistant OS and container images from an external tree, 2026-11-11
 
 Builds now has an **Operating system and container images** panel, and `scripts/haos/` has matching command-line drivers. Both work on a repository that ships its own Buildroot external tree, such as Home Assistant Material's `operating-system/`. The source is exported with `git archive` into a Docker volume, the tree's own builder runs `make <board>`, and the `haos_*` files come back with SHA-256 receipts. A second action builds `home-assistant-material:local` from a shared clone. The code is in `src/main/execution/haos-*.cjs` and `src/renderer/haos-image-panel.ts`. The article is [external tree images](docs/features/external-tree-images.md).

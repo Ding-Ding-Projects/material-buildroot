@@ -54,7 +54,7 @@ function workspaceNames(workspaceId) {
  * of the tree (rooted at the tree folder, committed bytes with no line-ending
  * conversion) is piped into that step.
  */
-function planHaosBuild({ tree, defconfig, workspaceId, versionJson = null }) {
+function planHaosBuild({ tree, defconfig, workspaceId, versionJson = null, registries = null, network = null }) {
   if (!tree?.defconfigs?.includes(defconfig)) fail("haos-defconfig-unknown", String(defconfig));
   const names = workspaceNames(workspaceId);
   const labels = ["--label", `${LABEL}=${workspaceId}`];
@@ -70,10 +70,20 @@ function planHaosBuild({ tree, defconfig, workspaceId, versionJson = null }) {
   if (versionJson !== null) {
     if (typeof versionJson !== "string" || versionJson.length > 1024 * 1024) fail("haos-version-json-invalid");
     JSON.parse(versionJson);
-    steps.push({ id: "version-pin", stdinFrom: "versionJson", args: ["run", "-i", ...helper, names.builderImage, "-c", "cp /dev/stdin /build/version-pinned.json"] });
+    // Written as root by the helper, so it is handed to the builder user that reads it during make.
+    steps.push({ id: "version-pin", stdinFrom: "versionJson", args: ["run", "-i", ...helper, names.builderImage, "-c",
+      `set -euo pipefail; cp /dev/stdin /build/version-pinned.json; chown ${BUILDER_UID}:${BUILDER_GID} /build/version-pinned.json`] });
   }
-  const make = versionJson !== null ? `make HAOS_VERSION_JSON=/build/version-pinned.json ${defconfig}` : `make ${defconfig}`;
-  steps.push({ id: "image-build", args: ["run", "--rm", "--privileged", ...labels,
+  // Images built from source reach the tree's skopeo through a registries.conf for the
+  // builder user (the builder's entry script runs make through sudo -H, which sets HOME).
+  if (registries !== null) {
+    if (typeof registries !== "string" || registries.length > 16 * 1024 || !/^[a-z0-9][a-z0-9_.-]{0,127}$/.test(network || "")) fail("haos-registries-invalid");
+    steps.push({ id: "registries", stdinFrom: "registries", args: ["run", "-i", ...helper, names.builderImage, "-c",
+      `set -euo pipefail; mkdir -p /build/.material-buildroot; cp /dev/stdin /build/.material-buildroot/registries.conf; chown -R ${BUILDER_UID}:${BUILDER_GID} /build/.material-buildroot`] });
+  }
+  let make = versionJson !== null ? `make HAOS_VERSION_JSON=/build/version-pinned.json ${defconfig}` : `make ${defconfig}`;
+  if (registries !== null) make = `mkdir -p ~/.config/containers && cp /build/.material-buildroot/registries.conf ~/.config/containers/registries.conf && ${make}`;
+  steps.push({ id: "image-build", args: ["run", "--rm", "--privileged", ...labels, ...(network ? ["--network", network] : []),
     "-e", `BUILDER_UID=${BUILDER_UID}`, "-e", `BUILDER_GID=${BUILDER_GID}`,
     "-v", `${names.buildVolume}:/build`, "-v", `${names.cacheVolume}:/cache`,
     names.builderImage, "bash", "-c", make] });

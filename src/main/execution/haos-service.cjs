@@ -5,6 +5,7 @@
 const fs = require("node:fs"), path = require("node:path");
 const { discoverHaosTree } = require("./haos-external-tree.cjs");
 const { discoverContainerRecipe } = require("./haos-container-image.cjs");
+const { discoverSourceImages } = require("./haos-source-images.cjs");
 const { runHaosImageBuild, runContainerImageBuild } = require("./haos-runner.cjs");
 
 const MAX_LINES = 400;
@@ -15,10 +16,11 @@ function createHaosService({ dialog, parentWindow, defaultOutput, notify }) {
 
   function summary() {
     return {
-      source: source && { path: source.root, defconfigs: source.tree?.defconfigs || [], treeVersion: source.tree?.version || null, externalName: source.tree?.externalName || null, containerRecipe: !!source.recipe, core: source.recipe?.core || null },
+      source: source && { path: source.root, defconfigs: source.tree?.defconfigs || [], treeVersion: source.tree?.version || null, externalName: source.tree?.externalName || null, containerRecipe: !!source.recipe, core: source.recipe?.core || null, sourceImages: !!source.sourceImages },
       output,
       job: job && { kind: job.kind, label: job.label, state: job.state, startedAt: job.startedAt, folder: job.folder, lines: job.lines.slice(-MAX_LINES), error: job.error || null,
-        artifacts: job.receipt?.artifacts || [], image: job.receipt?.image || null, commit: job.receipt?.source?.commit || null },
+        artifacts: job.receipt?.artifacts || [], image: job.receipt?.image || null, commit: job.receipt?.source?.commit || null,
+        fromSource: (job.receipt?.embeddedImages?.fromSource || []).map(({ id, reference, digest, matches }) => ({ id, reference, digest, matches })) },
     };
   }
 
@@ -63,7 +65,9 @@ function createHaosService({ dialog, parentWindow, defaultOutput, notify }) {
           if (folder) {
             const tree = discoverHaosTree(folder), recipe = discoverContainerRecipe(folder);
             if (!tree && !recipe) return { ok: false, code: "HAOS_SOURCE_UNRECOGNISED" };
-            source = { root: folder, tree, recipe };
+            let sourceImages = false;
+            try { sourceImages = !!(tree && (discoverSourceImages(folder) || discoverSourceImages(path.dirname(tree.osDir)))); } catch { sourceImages = false; }
+            source = { root: folder, tree, recipe, sourceImages };
           }
         } else if (value.action === "choose-output") {
           if (job?.state === "running") return { ok: false, code: "HAOS_JOB_RUNNING" };

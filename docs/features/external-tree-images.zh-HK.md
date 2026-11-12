@@ -26,6 +26,22 @@
 
 來源儲存庫只會被讀取，唔會寫入佢嘅工作樹。
 
+### 由原始碼建置嘅映像
+
+作業系統映像入面有第一次開機會啟動嘅容器：Supervisor、喺真正核心裝好之前頂住 Home Assistant Core 嘅登陸頁，同埋 DNS、Audio、CLI、Multicast、Observer 呢幾個外掛。樹嘅配方平時喺 `make` 期間用 `skopeo` 全部下載。
+
+如果儲存庫本身有其中一啲映像嘅原始碼，Material Buildroot 會用同一個提交建置佢哋，再放入作業系統映像代替下載版。Home Assistant Material 即係 `supervisor/` 同 `landingpage/`。喺 `make` 之前：
+
+1. 讀一次樹自己嘅更新來源（或者 `--version-json` 檔），等映像同建置用同一個版本。
+2. 喺一個只屬於今次建置嘅 Docker 網絡上，開一個私人登錄容器（`registry:3.0.0`，用摘要固定）。佢唔會喺呢部電腦發佈任何埠。
+3. 用每個資料夾已提交內容嘅 `git archive` 建置映像，跟板嘅平台同來源入面嘅版本（例如 Supervisor 用 `BUILD_VERSION=2026.11.0.132`），用只供建置嘅標籤，所以唔會遮住呢部電腦上同名嘅已發佈映像。
+4. 喺建置網絡上用樹嘅建置器映像入面嘅 `skopeo`，將每個映像複製入私人登錄，用來源寫明嘅名（例如 `ghcr.io/ding-ding-projects/amd64-hassio-supervisor`），同埋記低儲存咗嘅摘要。
+5. 畀建置用戶一個 `registries.conf`，只將儲存庫自己嘅登錄前綴轉去私人登錄，再喺建置網絡上行 `make`。
+
+之後樹嘅配方照常下載嗰啲名，攞到嘅就係由原始碼建置嘅映像。佢會印出放入作業系統映像嘅每個映像嘅摘要；只有每個由原始碼建置嘅映像都以儲存咗嘅摘要出現，建置先算成功。收據會列出由原始碼建置嘅映像、摘要同提交，同埋仍然要下載嘅映像。完咗之後，登錄、網絡同只供建置嘅標籤都會刪走。
+
+儲存庫冇原始碼嘅映像（上游外掛）照舊由樹嘅配方下載，收據會講明。第一次開機之後，Home Assistant Core 本身由 Supervisor 按更新來源安裝，同任何 Home Assistant OS 系統一樣，唔喺映像入面。指令列加 `--no-from-source` 就全部照樹自己嘅方法下載。
+
 ### 版本來源同簽署
 
 冇固定版本檔時，樹會讀取頻道嘅即時版本來源（Home Assistant Material 係公開嘅 `channel/stable.json`）。指令列可以用 `--version-json` 固定容器版本，同發佈流程一樣。
@@ -39,7 +55,7 @@
 ## 指令列
 
 ```powershell
-node scripts/haos/build-haos.cjs --source <儲存庫> --defconfig ova --output <資料夾>
+node scripts/haos/build-haos.cjs --source <儲存庫> --defconfig ova --output <資料夾> [--no-from-source]
 node scripts/haos/build-container-image.cjs --source <儲存庫> --work <資料夾>
 ```
 

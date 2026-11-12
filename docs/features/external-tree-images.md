@@ -26,6 +26,22 @@ Only one build runs at a time. The panel never accepts a command: the board must
 
 The source repository is only read. Nothing is written to its working tree.
 
+### Images built from source
+
+An operating system image holds the containers it starts on first boot: the Supervisor, the landing page that stands in for Home Assistant Core until the real core is installed, and the DNS, Audio, CLI, Multicast and Observer plug-ins. The tree's recipe normally downloads all of them with `skopeo` during `make`.
+
+When the repository also carries the sources of some of those images, Material Buildroot builds them from the same commit and puts those into the OS image instead. For Home Assistant Material that means `supervisor/` and `landingpage/`. The steps, before `make`:
+
+1. Read the tree's own update feed for the board's channel (or the `--version-json` file) once, so the images and the build agree on versions.
+2. Start a private registry container (`registry:3.0.0`, pinned by digest) on a Docker network that exists only for this build. It publishes no port on this computer.
+3. Build each image from a `git archive` of its committed folder, with the board's platform and the version from the feed (for example `BUILD_VERSION=2026.11.0.132` for the Supervisor), under a build-only tag so a published image of the same name on this computer is never shadowed.
+4. Copy each image into the private registry with `skopeo`, run in the tree's builder image on the build network, under the exact name the feed gives (for example `ghcr.io/ding-ding-projects/amd64-hassio-supervisor`), and record the stored digest.
+5. Give the builder user a `registries.conf` that redirects only the repository's own registry prefix to the private registry, and run `make` on the build network.
+
+The tree's recipe then fetches those names as usual and gets the images built from source. It prints the digest of every image it puts into the OS image, and the build only succeeds when each image built from source appears there with the digest that was stored. The receipt lists the images built from source with their digests and the commit, and the images that were still downloaded. Afterwards the registry, the network and the build-only tags are removed.
+
+Images whose sources are not in the repository (the upstream plug-ins) are downloaded by the tree's recipe as before, and the receipt says so. After the first boot, Home Assistant Core itself is installed by the Supervisor from the update feed, as on any Home Assistant OS system; it is not part of the image. `--no-from-source` on the command line keeps the tree's own downloads for everything.
+
 ### Version feed and signing
 
 Without a pinned version file, the tree fetches its channel's live version feed (for Home Assistant Material, the public `channel/stable.json`). The command-line route accepts `--version-json` to pin exact container versions, as the release workflow does.
@@ -47,7 +63,7 @@ The repository is staged with a `--shared` clone, so its working tree is not tou
 The same route runs without the window:
 
 ```powershell
-node scripts/haos/build-haos.cjs --source <repository> --defconfig ova --output <folder> [--commit HEAD] [--version-json <file>] [--keep-volume]
+node scripts/haos/build-haos.cjs --source <repository> --defconfig ova --output <folder> [--commit HEAD] [--version-json <file>] [--no-from-source] [--keep-volume]
 node scripts/haos/build-container-image.cjs --source <repository> --work <folder> [--tag home-assistant-material:local] [--save <file.tar>]
 ```
 

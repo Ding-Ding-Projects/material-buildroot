@@ -3,7 +3,8 @@
 // by the desktop service and the command-line scripts in scripts/haos/.
 const { spawn } = require("node:child_process");
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
-const { discoverHaosTree, planHaosBuild, planHaosCollect, planHaosCleanup, newWorkspaceId } = require("./haos-external-tree.cjs");
+const { discoverHaosTree, planHaosBuild, planHaosCollect, planHaosCleanup, newWorkspaceId, LABEL } = require("./haos-external-tree.cjs");
+const { discoverSourceImages, boardOf, selectImages, registriesConf, planSourceImages, planLoad, planSourceCleanup, verifyEmbedded, names: sourceImageNames } = require("./haos-source-images.cjs");
 const { discoverContainerRecipe, planContainerImageBuild, STAGED_PATHS } = require("./haos-container-image.cjs");
 
 const cancelled = () => Object.assign(new Error("Cancelled"), { code: "cancelled" });
@@ -97,18 +98,54 @@ async function resolveCommit(repository, commit = "HEAD") {
   return { gitRoot: path.resolve(gitRoot), commit: sha };
 }
 
-/** Builds one image with the external tree's own recipe and copies haos_* files to `output`. */
-async function runHaosImageBuild({ source, defconfig, output, commit = "HEAD", versionJson = null, keepVolume = false, onLine, signal }) {
+/** The tree's own update feed for the defconfig's channel, read once so the build and the images from source agree on versions. */
+async function readChannelFeed(tree, defconfig) {
+  const mk = fs.readFileSync(path.join(tree.osDir, "buildroot-external", "package", "hassio", "hassio.mk"), "utf8");
+  const base = /^HASSIO_VERSION_URL\s*=\s*"(https:\/\/[^"\s]+\/)"/m.exec(mk)?.[1];
+  if (!base) throw Object.assign(new Error("The tree names no update feed address"), { code: "haos-feed-unknown" });
+  const config = fs.readFileSync(path.join(tree.osDir, "buildroot-external", "configs", `${defconfig}_defconfig`), "utf8");
+  const channel = /^BR2_PACKAGE_HASSIO_CHANNEL_DEV=y/m.test(config) ? "dev" : /^BR2_PACKAGE_HASSIO_CHANNEL_BETA=y/m.test(config) ? "beta" : "stable";
+  const url = `${base}${channel}.json`;
+  const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
+  if (!response.ok) throw Object.assign(new Error(`The update feed ${url} answered ${response.status}`), { code: "haos-feed-unavailable" });
+  const text = await response.text();
+  JSON.parse(text);
+  return { url, text, capturedAt: new Date().toISOString() };
+}
+
+/**
+ * Builds one image with the external tree's own recipe and copies haos_* files to `output`.
+ * When the repository carries the sources of the images the OS embeds, those images are
+ * built from source first and the tree's fetch step is pointed at them (`fromSource`).
+ */
+async function runHaosImageBuild({ source, defconfig, output, commit = "HEAD", versionJson = null, fromSource = true, keepVolume = false, onLine, signal }) {
   const tree = discoverHaosTree(source);
   if (!tree) throw Object.assign(new Error("No Buildroot external tree with defconfigs was found"), { code: "haos-tree-missing" });
   const { gitRoot, commit: sha } = await resolveCommit(tree.osDir, commit);
   const treePath = path.relative(gitRoot, tree.osDir).split(path.sep).join("/") || ".";
   const workspaceId = newWorkspaceId();
-  const plan = planHaosBuild({ tree, defconfig, workspaceId, versionJson });
+  const discovered = fromSource ? discoverSourceImages(gitRoot) : null;
+  let versionPin = versionJson ? "provided" : "live channel feed", selection = null;
+  if (discovered) {
+    if (versionJson === null) {
+      const feed = await readChannelFeed(tree, defconfig);
+      versionJson = feed.text;
+      versionPin = `live channel feed ${feed.url}, captured ${feed.capturedAt}`;
+    }
+    const board = boardOf(tree.osDir, defconfig);
+    selection = { ...selectImages({ discovered, versionJson, arch: board.arch, machine: board.machine }), board };
+    if (!selection.fromSource.length) selection = null;
+  }
+  const names = selection ? sourceImageNames(workspaceId) : null;
+  const plan = planHaosBuild({ tree, defconfig, workspaceId, versionJson,
+    registries: selection ? registriesConf({ prefix: discovered.prefix, workspaceId }) : null, network: names?.network || null });
   const receipt = {
     version: 1, kind: "haos-external-tree-image", workspaceId, defconfig,
     source: { commit: sha, treePath, externalName: tree.externalName, treeVersion: tree.version },
-    versionPin: versionJson ? "provided" : "live channel feed",
+    versionPin,
+    embeddedImages: selection
+      ? { fromSource: [], fetched: selection.fetched, note: "Images whose sources are in the repository were built from that commit; the others are fetched by the tree's recipe." }
+      : { fromSource: [], fetched: "all", note: fromSource ? "The repository carries no sources for the images this OS embeds, so the tree's recipe fetches them." : "Building from source was turned off." },
     updateSigning: "Without the release signing key and certificate the tree's recipe signs update bundles with a one-time key.",
     startedAt: new Date().toISOString(), steps: [], artifacts: [], state: "running",
   };
@@ -116,13 +153,44 @@ async function runHaosImageBuild({ source, defconfig, output, commit = "HEAD", v
   // Archiving `commit:path` drops the repository's root .gitattributes, so a host
   // core.autocrlf=true would rewrite every text file to CRLF. Export the committed
   // bytes unchanged instead.
-  const archive = () => spawn("git", ["-c", "core.autocrlf=false", "-c", "core.eol=lf", "-C", gitRoot, "archive", "--format=tar", treePath === "." ? sha : `${sha}:${treePath}`], { windowsHide: true }).stdout;
+  const archiveOf = folder => spawn("git", ["-c", "core.autocrlf=false", "-c", "core.eol=lf", "-C", gitRoot, "archive", "--format=tar", folder === "." ? sha : `${sha}:${folder}`], { windowsHide: true }).stdout;
   session.say(`Building ${defconfig} from ${treePath} at ${sha} (workspace ${workspaceId})`);
+  const saveOf = tag => spawn("docker", ["save", tag], { windowsHide: true }).stdout;
+  const runStep = item => session.step(item.id, () => session.exec("docker", item.args, { stdin: item.stdinFrom === "archive" ? archiveOf(treePath) : undefined }));
   let failure = null;
   try {
-    for (const item of plan.steps) {
-      const stdin = item.stdinFrom === "archive" ? archive() : item.stdinFrom === "versionJson" ? versionJson : undefined;
+    // The builder image comes first: it also copies the images built from source into the registry.
+    const [builderStep, ...osSteps] = plan.steps;
+    await runStep(builderStep);
+    if (selection) {
+      session.say(`Building ${selection.fromSource.map(i => i.id).join(" and ")} from source; fetched by the tree's recipe: ${selection.fetched.join(", ") || "none"}`);
+      const before = planSourceImages({ selection, workspaceId, platform: selection.board.platform, commit: sha, labels: ["--label", `${LABEL}=${workspaceId}`] });
+      for (const item of before.steps) {
+        const stdin = item.stdinFrom?.startsWith("context:") ? archiveOf(item.stdinFrom.slice("context:".length)) : undefined;
+        await session.step(item.id, () => session.exec("docker", item.args, { stdin }));
+      }
+      for (const item of selection.fromSource) {
+        const load = planLoad({ item, prefix: discovered.prefix, workspaceId, builderImage: plan.names.builderImage });
+        const out = await session.step(load.step.id, () => session.exec("docker", load.step.args, { stdin: saveOf(load.step.stdinFrom.slice("save:".length)), capture: true }));
+        const digest = /^(sha256:[a-f0-9]{64})$/m.exec(out)?.[1];
+        if (!digest) throw Object.assign(new Error(`The registry reported no digest for ${item.id}`), { code: "haos-source-image-digest-missing" });
+        session.say(`Stored ${item.image}:${item.tag} from source as ${digest}`);
+        receipt.embeddedImages.fromSource.push({ id: item.id, reference: `${item.image}:${item.tag}`, digest, revision: sha });
+      }
+    }
+    for (const item of osSteps) {
+      const stdin = item.stdinFrom === "archive" ? archiveOf(treePath) : item.stdinFrom === "versionJson" ? versionJson : item.stdinFrom === "registries" ? registriesConf({ prefix: discovered.prefix, workspaceId }) : undefined;
       await session.step(item.id, () => session.exec("docker", item.args, { stdin }));
+    }
+    if (selection) {
+      // The tree's recipe prints the digest of every image it put into the OS image; each
+      // image built from source must appear there with the digest that was pushed.
+      const log = fs.readFileSync(path.join(output, "build.log"), "utf8");
+      const checked = verifyEmbedded({ log, built: receipt.embeddedImages.fromSource.map(i => ({ ...i, image: i.reference.slice(0, i.reference.lastIndexOf(":")), tag: i.reference.slice(i.reference.lastIndexOf(":") + 1) })) });
+      receipt.embeddedImages.fromSource = checked.map(({ id, reference, digest, revision, embeddedDigest, matches }) => ({ id, reference, digest, revision, embeddedDigest, matches }));
+      const missing = checked.filter(i => !i.matches);
+      if (missing.length) throw Object.assign(new Error(`The OS image does not hold the images built from source: ${missing.map(i => `${i.reference} (${i.embeddedDigest || "not fetched"})`).join(", ")}`), { code: "haos-source-image-not-embedded" });
+      session.say(`Embedded from source: ${checked.map(i => `${i.reference} ${i.digest}`).join(", ")}`);
     }
     const collect = planHaosCollect({ workspaceId, destination: output });
     await session.step(collect.id, () => session.exec("docker", collect.args));
@@ -131,9 +199,10 @@ async function runHaosImageBuild({ source, defconfig, output, commit = "HEAD", v
       receipt.artifacts.push({ name, bytes: fs.statSync(file).size, sha256: await sha256File(file) });
     }
   } catch (error) { failure = error; }
+  // Cleanup runs even after cancellation, so it uses its own unsignalled runner.
+  const cleanup = createSession({ folder: output, receipt, onLine });
+  if (selection) for (const item of planSourceCleanup({ workspaceId, selection })) await cleanup.step(item.id, () => cleanup.exec("docker", item.args)).catch(error => cleanup.say(`cleanup: ${error.message}`));
   if (!keepVolume) {
-    // Cleanup runs even after cancellation, so it uses its own unsignalled runner.
-    const cleanup = createSession({ folder: output, receipt, onLine });
     for (const item of planHaosCleanup({ workspaceId })) await cleanup.step(item.id, () => cleanup.exec("docker", item.args)).catch(error => cleanup.say(`cleanup: ${error.message}`));
   }
   await session.close(failure ? (failure.code === "cancelled" ? "cancelled" : "failed") : "succeeded", failure);

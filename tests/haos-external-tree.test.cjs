@@ -59,6 +59,8 @@ test('a pinned version feed is copied in and passed to make', () => {
   const tree = discoverHaosTree(fixture().root);
   const { steps } = planHaosBuild({ tree, defconfig: 'rpi5_64', workspaceId: 'abcdef012345', versionJson: '{"supervisor":"1"}' });
   assert.equal(steps.find(s => s.id === 'version-pin').stdinFrom, 'versionJson');
+  // make runs as the builder user, so the root-written file must be handed over.
+  assert.match(steps.find(s => s.id === 'version-pin').args.at(-1), /chown 1000:1000 \/build\/version-pinned\.json$/);
   assert.equal(steps.at(-1).args.at(-1), 'make HAOS_VERSION_JSON=/build/version-pinned.json rpi5_64');
   assert.throws(() => planHaosBuild({ tree, defconfig: 'ova', workspaceId: 'abcdef012345', versionJson: 'not json' }));
 });

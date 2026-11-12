@@ -47,6 +47,46 @@ About 35 minutes after boot, the Supervisor had downloaded and started Core from
 
 ![Onboarding served by the booted ova image](ova-boot-onboarding.png)
 
+## Operating system image with images built from source: `ova`, recorded 2026-11-12
+
+Run with `node scripts/haos/build-haos.cjs --source <repository> --defconfig ova --commit 311d3508ad61da723de1ab7a561de1c50f0c8ceb --output <folder>` on the same host. The source is the Home Assistant Material commit of release 2026.11.1.132. The live channel feed was read once at the start (`channel/stable.json`, Supervisor `2026.11.0.132`) and passed to `make` as the pinned version file.
+
+| Image | Built from | Digest stored and found in the OS image |
+| --- | --- | --- |
+| `ghcr.io/ding-ding-projects/amd64-hassio-supervisor:2026.11.0.132` | `supervisor/` at `311d3508` | `sha256:641c297b8330a091b099c22cd5ea5df9dda82073abe59b4c0382eacb6c3b3ac2` |
+| `ghcr.io/ding-ding-projects/qemux86-64-homeassistant:landingpage` | `landingpage/` at `311d3508` | `sha256:d2e69fe3851cd91760af4d4975c4b3e3f17bc3b7fa36149a08a4b25764841919` |
+
+The tree's recipe printed `Fetching image: … (digest …)` with exactly these digests, and the run checks that before it collects the files. The upstream plug-ins (`amd64-hassio-audio` 2026.10.0, `-cli` 2026.10.1, `-dns` 2026.10.0, `-multicast` 2026.10.0, `-observer` 2026.08.0) were downloaded by the recipe (here from its download cache).
+
+`make ova` took 44 min 22 s with the compiler cache from the earlier build.
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `haos_ova-18.5.ova` | 637,204,480 | `86a9f51ce4f89b94ad5e301615d3b2db89d3094b544f0da5626b5d8f42781d32` |
+| `haos_ova-18.5.qcow2.xz` | 565,641,376 | `6ddaaf78c1c88a7feb37d7290369c4d9c1814daad21d245cf724d59094587cd4` |
+| `haos_ova-18.5.raucb` | 235,052,571 | `e2441419f886bc91c43c6af1f01d33cfb23f4810170d65ccfd7e585a3b3135fd` |
+| `haos_ova-18.5.vdi.zip` | 621,509,634 | `a750cc856dd112ff8b559bcd02251693488d158b2bcdf47103b519b0cdf1774e` |
+| `haos_ova-18.5.vhdx.zip` | 621,789,197 | `3d12545afe59026966f90496d87f82ff70cbed873cf1204d1f29b8b0ede08bc7` |
+| `haos_ova-18.5.vmdk.zip` | 621,532,146 | `b6b275cfde0fd2ca8ad980613898815f93a180c5facb6f0a489c9e2036ed6478` |
+
+Afterwards the private registry, its network, the build-only tags, the build volume and the builder tag were gone; only the shared cache volume was left.
+
+Two earlier attempts on the same day failed and were fixed before this run:
+
+- Copying into the registry through a port published on this computer failed (`connection refused`): Docker Desktop's engine does not reach a port published on the Windows loopback. The images are now copied with `skopeo` inside the build network and no port is published.
+- `make` stopped with `cat: /build/version-pinned.json: Permission denied`. The pinned version file was written by root and read by the builder user. It is now handed to the builder user. This also affected `--version-json` before this change.
+
+### Boot check
+
+The decompressed `qcow2` was booted in a throwaway container with QEMU and UEFI (OVMF). KVM was not available to containers on this host that day, so QEMU ran with software emulation (TCG, 4 vCPUs).
+
+- Port 80 served the landing page about 4 minutes after start, and port 8123 redirected to it.
+- The page reported that the latest Home Assistant was being downloaded, and the Supervisor log showed it loading the add-on store.
+
+The Supervisor and landing page that answered are the ones built from source, since those are the only copies in the image. The download of Core that follows comes from the update feed and is not part of the image; it was not waited for.
+
+![Landing page served by the ova image with images built from source](ova-source-landing.png)
+
 ## Container image: `home-assistant-material:local`, recorded 2026-11-11
 
 Run with `node scripts/haos/build-container-image.cjs --source <repository> --work <folder> --save <file.tar>`.

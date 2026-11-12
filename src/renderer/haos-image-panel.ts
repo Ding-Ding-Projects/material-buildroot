@@ -43,7 +43,8 @@ export class HaosImagePanel extends LitElement{
   if(!s)return html`<p>${this.l('Choose a repository that contains an operating-system folder with its own Buildroot tree, such as Home Assistant Material. Its own Makefile and builder container are used; nothing is written to the repository.','請揀一個有 operating-system 資料夾同自己 Buildroot 樹嘅儲存庫，例如 Home Assistant Material。會用佢自己嘅 Makefile 同建置容器，唔會寫入儲存庫。',true)}</p>`;
   return html`<dl><dt>${this.l('Repository','儲存庫',true)}</dt><dd>${s.path}</dd>
    ${s.externalName?html`<dt>${this.l('Buildroot tree','Buildroot 樹',true)}</dt><dd>${s.externalName}${s.treeVersion?` ${s.treeVersion}`:''} · ${s.defconfigs.length} ${this.l('boards','個板',true)}</dd>`:nothing}
-   <dt>${this.l('Container image recipe','容器映像配方',true)}</dt><dd>${s.containerRecipe?this.l('Found','已找到',true)+(s.core?` · core ${s.core}`:''):this.l('Not in this repository','此儲存庫冇',true)}</dd></dl>`;
+   <dt>${this.l('Container image recipe','容器映像配方',true)}</dt><dd>${s.containerRecipe?this.l('Found','已找到',true)+(s.core?` · core ${s.core}`:''):this.l('Not in this repository','此儲存庫冇',true)}</dd>
+   ${s.externalName?html`<dt>${this.l('Images in the OS image','作業系統映像入面嘅映像',true)}</dt><dd>${s.sourceImages?this.l('Supervisor and landing page are built from this repository; the upstream plug-ins are downloaded','Supervisor 同登陸頁由呢個儲存庫建置；上游外掛照下載',true):this.l('Downloaded by the tree\'s recipe','由樹嘅配方下載',true)}</dd>`:nothing}</dl>`;
  }
  private job(){
   const j=this.state?.job;if(!j)return nothing;
@@ -55,6 +56,7 @@ export class HaosImagePanel extends LitElement{
    <p class="muted">${this.l('Saved to','儲存到',true)} ${j.folder}${j.commit?html` · ${this.l('commit','提交',true)} <code>${j.commit.slice(0,12)}</code>`:nothing}</p>
    ${j.error?html`<p class="warning">${j.error}</p>`:nothing}
    ${j.artifacts.length?html`<ul class="files">${j.artifacts.map(a=>html`<li><strong>${a.name}</strong><span>${this.size(a.bytes)}</span><code>${a.sha256}</code></li>`)}</ul>`:nothing}
+   ${j.fromSource?.length?html`<p>${this.l('Built from source and embedded','由原始碼建置並放入',true)}</p><ul class="files">${j.fromSource.map(i=>html`<li><strong>${i.reference}</strong><span>${i.matches===false?this.l('Not found in the OS image','作業系統映像入面搵唔到',true):i.matches?this.l('In the OS image','喺作業系統映像入面',true):this.l('Stored','已儲存',true)}</span><code>${i.digest}</code></li>`)}</ul>`:nothing}
    ${j.image?html`<p>${this.l('Local image','本機映像',true)} <code>${j.label}</code> · ${this.size(j.image.bytes)} · <code>${j.image.id.slice(0,19)}</code></p>`:nothing}
    <pre tabindex="0" aria-label=${this.l('Build log','建置記錄',true)}>${j.lines.slice(-200).join('\n')}</pre>
   </section>`;
