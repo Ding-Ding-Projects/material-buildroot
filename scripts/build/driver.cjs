@@ -407,4 +407,4 @@ async function main() {
 }
 
 module.exports = {contained,sourceIdentity,assertIdentity,inventory,nonempty,verifyDocumentationResources,verifyInstaller,verifiedOutput,outputJournal,recoverOutput,activateOutput};
-if (require.main === module) main().catch(error => {console.error(`Build stopped: ${error.message}`);process.exitCode=error.exitCode || 1;});
+if (require.main === module) main().catch(error => {console.error(`Build stopped: ${error.message}${typeof error.code === "string" && /^[A-Za-z0-9_.-]{1,80}$/.test(error.code) ? ` (code ${error.code})` : ""}`);process.exitCode=error.exitCode || 1;});
