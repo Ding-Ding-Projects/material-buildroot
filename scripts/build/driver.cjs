@@ -407,4 +407,11 @@ async function main() {
 }
 
 module.exports = {contained,sourceIdentity,assertIdentity,inventory,nonempty,verifyDocumentationResources,verifyInstaller,verifiedOutput,outputJournal,recoverOutput,activateOutput};
-if (require.main === module) main().catch(error => {console.error(`Build stopped: ${error.message}${typeof error.code === "string" && /^[A-Za-z0-9_.-]{1,80}$/.test(error.code) ? ` (code ${error.code})` : ""}`);process.exitCode=error.exitCode || 1;});
+// A coded error also names the check that raised it (file and line only, never a local path).
+function stopDetail(error) {
+  if (typeof error.code !== "string" || !/^[A-Za-z0-9_.-]{1,80}$/.test(error.code)) return "";
+  const frames = String(error.stack || "").split("\n").filter(line => !/\bat fail \(/.test(line)).map(line => /([A-Za-z0-9_.-]+\.c?js):(\d+):\d+\)?\s*$/.exec(line)).filter(Boolean);
+  const raised = frames.find(match => match[1] !== "driver.cjs") || frames[0];
+  return ` (code ${error.code}${raised ? ` at ${raised[1]}:${raised[2]}` : ""})`;
+}
+if (require.main === module) main().catch(error => {console.error(`Build stopped: ${error.message}${stopDetail(error)}`);process.exitCode=error.exitCode || 1;});
