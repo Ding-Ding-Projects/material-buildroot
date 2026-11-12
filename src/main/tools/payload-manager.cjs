@@ -72,15 +72,22 @@ function canonical(file, id) {
     .replace(/\.exe$/, "");
   if (!TOOLS[id].names.includes(name)) fail("EXECUTABLE_NAME_MISMATCH");
 }
+// onDemand: { ids, install(id) } for large tools that are not in the installer. They are
+// downloaded from their pinned source the first time an operation needs them, then
+// loaded and verified exactly like bundled payloads.
 function createPayloadManager({
   directory,
   bundledManifest,
+  onDemand,
   dialog,
   parentWindow,
 } = {}) {
   if (!directory || !path.isAbsolute(directory))
     fail("INVALID_PAYLOAD_DIRECTORY");
   bundledManifest ??= require("./bundled-payloads.cjs").loadBundledPayloads();
+  const onDemandIds = new Set(onDemand?.ids || []);
+  const onDemandRoot = path.join(directory, "on-demand");
+  const installing = new Map();
   const receiptFile = path.join(directory, "executable-receipts.json");
   let tail = Promise.resolve();
   function locked(work) {
@@ -162,7 +169,24 @@ function createPayloadManager({
     }
     return record;
   }
-  async function resolve(value) {
+  function installed(id) {
+    try {
+      return require("./bundled-payloads.cjs").loadPayloadManifest(path.join(onDemandRoot, id))[id] || null;
+    } catch (error) {
+      if (error.code === "ENOENT") return null;
+      throw error;
+    }
+  }
+  async function download(id) {
+    if (!installing.has(id))
+      installing.set(id, Promise.resolve().then(() => onDemand.install(id)).finally(() => installing.delete(id)));
+    try {
+      await installing.get(id);
+    } catch {
+      fail("ON_DEMAND_DOWNLOAD_FAILED");
+    }
+  }
+  async function resolve(value, { acquire = true } = {}) {
     const id = toolId(value),
       bundled = bundledManifest[id];
     if (bundled) {
@@ -178,14 +202,28 @@ function createPayloadManager({
     }
     const document = await read(),
       record = document.tools[id];
-    if (!record) fail("MISSING_VERIFIED_PAYLOAD");
-    return validate({ ...record, bundled: false }, id);
+    if (record) return validate({ ...record, bundled: false }, id);
+    if (onDemandIds.has(id)) {
+      let local = installed(id);
+      if (!local) {
+        if (!acquire) fail("ON_DEMAND_NOT_DOWNLOADED");
+        await download(id);
+        local = installed(id);
+        if (!local) fail("ON_DEMAND_DOWNLOAD_FAILED");
+      }
+      return validate(
+        { ...local, toolId: id, origin: "on-demand", bundled: true },
+        id,
+      );
+    }
+    fail("MISSING_VERIFIED_PAYLOAD");
   }
   async function list() {
     const result = [];
     for (const id of Object.keys(TOOLS)) {
       try {
-        const record = await resolve(id);
+        // Listing never starts a download.
+        const record = await resolve(id, { acquire: false });
         result.push({
           toolId: id,
           available: true,
@@ -198,6 +236,7 @@ function createPayloadManager({
         result.push({
           toolId: id,
           available: false,
+          onDemand: onDemandIds.has(id),
           code: /^[A-Z_]+$/.test(error.code || "")
             ? error.code
             : "PAYLOAD_UNAVAILABLE",

@@ -1181,8 +1181,13 @@ function createOperationsService({
     configuration: config,
     execute: id => { const item = project(id); return executeProject({ workspaceId: id, runtime: item.runtime, target: "material-save-defconfig", jobs: 1 }); },
   });
+  const payloadAssembly = require("../../scripts/build/payloads.cjs");
   const payloadManager = createPayloadManager({
     directory: path.join(directory, "payloads"),
+    onDemand: {
+      ids: payloadAssembly.onDemandToolIds(),
+      install: id => payloadAssembly.installOnDemandPayload({ id, directory: path.join(directory, "payloads", "on-demand"), cache: path.join(directory, "payloads", "downloads") }),
+    },
     dialog,
     parentWindow,
   });

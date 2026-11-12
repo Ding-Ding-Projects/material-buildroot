@@ -1,5 +1,6 @@
 "use strict";
-// Production assembly only. This module never executes a downloaded executable.
+// Pinned payload assembly, shared by installer production and the application's
+// on-demand download. Only the pinned archive extractors are ever executed.
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
@@ -231,24 +232,79 @@ async function unpackOffice(archive, output, tool, cache) {
   if (!systemRoot || !path.isAbsolute(systemRoot)) throw new Error("System PowerShell location unavailable.");
   const powershell = path.join(systemRoot, "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
   const destination = contained(output, tool.id);
-  const reconstructed = spawnSync(powershell, ["-NoProfile", "-NonInteractive", "-File", path.join(__dirname, "extract-office-msi.ps1"), "-Database", archive, "-ExtractedCab", cab, "-Output", destination], { windowsHide: true, stdio: "inherit", timeout: 20 * 60 * 1000 });
+  // Inside the installed application this module is read from the archive, but PowerShell needs the unpacked script file.
+  const script = path.join(__dirname.replace(/app\.asar(?=[\\/]|$)/, "app.asar.unpacked"), "extract-office-msi.ps1");
+  const reconstructed = spawnSync(powershell, ["-NoProfile", "-NonInteractive", "-File", script,"-Database", archive, "-ExtractedCab", cab, "-Output", destination], { windowsHide: true, stdio: "inherit", timeout: 20 * 60 * 1000 });
   if (reconstructed.error || reconstructed.status !== 0) throw new Error("Office MSI read-only reconstruction failed.");
   return walkFiles(destination, tool.id);
 }
-async function assemblePayloads({ output, cache, complete = true } = {}) {
-  if (!output || !cache || !path.isAbsolute(output) || !path.isAbsolute(cache)) throw new Error("Absolute payload output and cache directories are required.");
+function classification() {
   const declared = Object.keys(require("../../src/main/tools/payload-manager.cjs").TOOLS);
   const bundled = registry.requiredBundledToolIds;
+  const onDemand = registry.onDemandToolIds;
   const external = registry.externalTools;
-  if (!Array.isArray(bundled) || !bundled.length || !Array.isArray(external) || new Set(bundled).size !== bundled.length || new Set(external.map(tool => tool.id)).size !== external.length)
-    throw new Error("Explicit unique bundled and external tool classifications are required.");
-  const invalidExternal = external.some(tool => !declared.includes(tool.id) || bundled.includes(tool.id) || tool.classification !== "external-user-admitted" || tool.acquisition !== "user-selected-existing-installation" || tool.licenseBoundary !== "user-managed-installation-not-redistributed" || typeof tool.purpose !== "string" || !tool.purpose);
-  const unclassified = declared.filter(id => !bundled.includes(id) && !external.some(tool => tool.id === id));
-  if (invalidExternal || bundled.some(id => !declared.includes(id)) || unclassified.length)
+  if (!Array.isArray(bundled) || !bundled.length || !Array.isArray(onDemand) || !Array.isArray(external) || new Set([...bundled, ...onDemand]).size !== bundled.length + onDemand.length || new Set(external.map(tool => tool.id)).size !== external.length)
+    throw new Error("Explicit unique bundled, on-demand and external tool classifications are required.");
+  const pinned = [...bundled, ...onDemand];
+  const invalidExternal = external.some(tool => !declared.includes(tool.id) || pinned.includes(tool.id) || tool.classification !== "external-user-admitted" || tool.acquisition !== "user-selected-existing-installation" || tool.licenseBoundary !== "user-managed-installation-not-redistributed" || typeof tool.purpose !== "string" || !tool.purpose);
+  const unclassified = declared.filter(id => !pinned.includes(id) && !external.some(tool => tool.id === id));
+  if (invalidExternal || pinned.some(id => !declared.includes(id)) || unclassified.length)
     throw new Error("Declared tool distribution classification is missing or inconsistent: " + unclassified.join(", ") + ". No tool is automatically treated as external.");
-  if (new Set(registry.tools.map(tool => tool.id)).size !== registry.tools.length || registry.tools.some(tool => !bundled.includes(tool.id)))
-    throw new Error("Archive pins must belong uniquely to explicitly required bundled tools.");
-  const missing = bundled.filter(id => !registry.tools.some(tool => tool.id === id));
+  if (new Set(registry.tools.map(tool => tool.id)).size !== registry.tools.length || registry.tools.some(tool => !pinned.includes(tool.id)))
+    throw new Error("Archive pins must belong uniquely to explicitly bundled or on-demand tools.");
+  return { bundled, onDemand, external };
+}
+async function assembleTool(tool, staging, cacheRoot) {
+  const archive = await acquire(tool, cacheRoot);
+  const files = tool.format === "7z" ? await unpack7z(archive, staging, tool, cacheRoot) : tool.format === "7z-full" ? await unpackFull7z(archive, staging, tool, cacheRoot) : tool.format === "office-msi" ? await unpackOffice(archive, staging, tool, cacheRoot) : tool.format === "calibre-portable" ? await unpackCalibre(archive, staging, tool, cacheRoot) : await unpack(archive, staging, tool);
+  for (const supplement of tool.supplements || []) {
+    const source = contained(path.resolve(__dirname, "../.."), supplement.source);
+    const sourceStat = await fsp.lstat(source);
+    if (!sourceStat.isFile() || sourceStat.isSymbolicLink() || sourceStat.size > 1024 ** 2) throw new Error("Pinned original notice changed.");
+    // Source checkout newline conversion must not change the original text pin.
+    const notice = Buffer.from((await fsp.readFile(source, "utf8")).replaceAll("\r\n", "\n"), "utf8");
+    if (createHash("sha256").update(notice).digest("hex") !== supplement.sha256) throw new Error("Pinned original notice changed.");
+    const destination = contained(staging, tool.id + "/" + supplement.path);
+    await fsp.mkdir(path.dirname(destination), { recursive: true });
+    await fsp.writeFile(destination, notice, { flag: "wx" });
+    files.push({ path: tool.id + "/" + supplement.path, bytes: notice.length, sha256: supplement.sha256 });
+  }
+  const executable = tool.id + "/" + tool.executable;
+  if (!files.some(member => member.path === executable)) throw new Error("Payload executable absent: " + tool.id);
+  for (const license of tool.licenseFiles) {
+    if (!files.some(member => member.path === tool.id + "/" + license && member.bytes > 0)) throw new Error("Payload license absent: " + tool.id);
+  }
+  return { id: tool.id, classification: "bundled", runtimeVerified: false, version: tool.version, executable, files, license: tool.license, licenseFiles: tool.licenseFiles.map(name => tool.id + "/" + name), sourceUrl: tool.sourceUrl, profile: tool.profile || "declared-upstream-composition", composition: tool.composition || "Complete original archive", compositionSources: tool.compositionSources || [], excludedMembers: tool.excludedMembers || [], sourceInventory: tool.sourceInventory || null, archive: { url: tool.url, originUrl: tool.originUrl || tool.url, sha256: tool.sha256, bytes: tool.bytes } };
+}
+// Downloads, verifies and extracts one on-demand tool into <directory>/<id>, using the
+// same pins and composition rules as the installer. The result has the same manifest
+// layout as the bundled payload folder, so the application loads it the same way.
+async function installOnDemandPayload({ id, directory: root, cache } = {}) {
+  if (!root || !cache || !path.isAbsolute(root) || !path.isAbsolute(cache)) throw new Error("Absolute on-demand payload and cache directories are required.");
+  const { onDemand } = classification();
+  const tool = registry.tools.find(item => item.id === id);
+  if (!onDemand.includes(id) || !tool) throw new Error("Tool is not an on-demand payload.");
+  const parent = await directory(root), cacheRoot = await directory(cache);
+  const target = path.join(parent, id);
+  try { await fsp.lstat(target); return target; }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+  const staging = await fsp.mkdtemp(path.join(parent, ".install-"));
+  try {
+    const entry = await assembleTool(tool, staging, cacheRoot);
+    entry.classification = "on-demand";
+    const manifest = { schemaVersion: 1, platform: registry.platform, scope: "on-demand-payload", tools: [entry] };
+    await fsp.writeFile(path.join(staging, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", { flag: "wx" });
+    await fsp.rename(staging, target);
+    return target;
+  } catch (error) {
+    await fsp.rm(staging, { recursive: true, force: true });
+    throw error;
+  }
+}
+async function assemblePayloads({ output, cache, complete = true } = {}) {
+  if (!output || !cache || !path.isAbsolute(output) || !path.isAbsolute(cache)) throw new Error("Absolute payload output and cache directories are required.");
+  const { bundled, onDemand, external } = classification();
+  const missing = [...bundled, ...onDemand].filter(id => !registry.tools.some(tool => tool.id === id));
   if (complete && missing.length) throw new Error("Complete offline payload assembly is unavailable: " + missing.join(", ") + ". See scripts/build/offline-payloads.json. No complete package was produced.");
   const parent = await directory(path.dirname(output));
   const cacheRoot = await directory(cache);
@@ -267,34 +323,15 @@ async function assemblePayloads({ output, cache, complete = true } = {}) {
     runtimeVerified: false,
     provenance: { admissionRoute: "host-native-picker", receiptScope: "local-user-data", includedInPackage: false, executablePathIncluded: false },
   }));
-  const manifest = { schemaVersion: 1, platform: registry.platform, scope: "bundled-payload-inventory", bundledComplete, wholeToolsetOffline: bundledComplete && externalTools.length === 0, requiredBundledToolIds: [...bundled], externalTools, complete: bundledComplete, missing, tools: [] };
-  for (const tool of registry.tools) {
-    const archive = await acquire(tool, cacheRoot);
-    const files = tool.format === "7z" ? await unpack7z(archive, staging, tool, cacheRoot) : tool.format === "7z-full" ? await unpackFull7z(archive, staging, tool, cacheRoot) : tool.format === "office-msi" ? await unpackOffice(archive, staging, tool, cacheRoot) : tool.format === "calibre-portable" ? await unpackCalibre(archive, staging, tool, cacheRoot) : await unpack(archive, staging, tool);
-    for (const supplement of tool.supplements || []) {
-      const source = contained(path.resolve(__dirname, "../.."), supplement.source);
-      const sourceStat = await fsp.lstat(source);
-      if (!sourceStat.isFile() || sourceStat.isSymbolicLink() || sourceStat.size > 1024 ** 2) throw new Error("Pinned original notice changed.");
-      // Source checkout newline conversion must not change the original text pin.
-      const notice = Buffer.from((await fsp.readFile(source, "utf8")).replaceAll("\r\n", "\n"), "utf8");
-      if (createHash("sha256").update(notice).digest("hex") !== supplement.sha256) throw new Error("Pinned original notice changed.");
-      const destination = contained(staging, tool.id + "/" + supplement.path);
-      await fsp.mkdir(path.dirname(destination), { recursive: true });
-      await fsp.writeFile(destination, notice, { flag: "wx" });
-      files.push({ path: tool.id + "/" + supplement.path, bytes: notice.length, sha256: supplement.sha256 });
-    }
-    const executable = tool.id + "/" + tool.executable;
-    if (!files.some(member => member.path === executable)) throw new Error("Payload executable absent: " + tool.id);
-    for (const license of tool.licenseFiles) {
-      if (!files.some(member => member.path === tool.id + "/" + license && member.bytes > 0)) throw new Error("Payload license absent: " + tool.id);
-    }
-    manifest.tools.push({ id: tool.id, classification: "bundled", runtimeVerified: false, version: tool.version, executable, files, license: tool.license, licenseFiles: tool.licenseFiles.map(name => tool.id + "/" + name), sourceUrl: tool.sourceUrl, profile: tool.profile || "declared-upstream-composition", composition: tool.composition || "Complete original archive", compositionSources: tool.compositionSources || [], excludedMembers: tool.excludedMembers || [], sourceInventory: tool.sourceInventory || null, archive: { url: tool.url, originUrl: tool.originUrl || tool.url, sha256: tool.sha256, bytes: tool.bytes } });
-  }
+  const onDemandTools = registry.tools.filter(tool => onDemand.includes(tool.id)).map(tool => ({ id: tool.id, classification: "on-demand", version: tool.version, license: tool.license, sourceUrl: tool.sourceUrl, acquisition: "automatic-pinned-download-on-first-use", archive: { url: tool.url, originUrl: tool.originUrl || tool.url, sha256: tool.sha256, bytes: tool.bytes }, runtimeVerified: false }));
+  const manifest = { schemaVersion: 1, platform: registry.platform, scope: "bundled-payload-inventory", bundledComplete, wholeToolsetOffline: false, requiredBundledToolIds: [...bundled], onDemandToolIds: [...onDemand], onDemandTools, externalTools, complete: bundledComplete, missing, tools: [] };
+  for (const tool of registry.tools.filter(item => bundled.includes(item.id))) manifest.tools.push(await assembleTool(tool, staging, cacheRoot));
   await fsp.writeFile(path.join(staging, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", { flag: "wx" });
   const notices = manifest.tools.map(tool => [tool.id + " " + tool.version, tool.license, tool.sourceUrl, "Original notices: " + tool.licenseFiles.join(", "), "Original downloaded archive retained in the source cache; see manifest.json for package composition, exclusions and every retained member hash."].join("\n")).join("\n\n");
+  const onDemandNotices = onDemandTools.map(tool => [tool.id + " " + tool.version + " (downloaded on first use, not included in this package)", tool.license, tool.sourceUrl, "The application downloads the pinned original archive from its official source, verifies its length and SHA-256, and keeps the original notices beside the extracted tool."].join("\n")).join("\n\n");
   const externalNotices = externalTools.map(tool => [tool.id + " (external, not redistributed)", tool.purpose, "Existing user-managed installation and applicable licenses remain the user's responsibility.", "No installation, local receipt, availability check or runtime verification is included in this package."].join("\n")).join("\n\n");
-  await fsp.writeFile(path.join(staging, "THIRD-PARTY-NOTICES.txt"), notices + "\n\nExternal capabilities\n\n" + externalNotices + "\n", { flag: "wx" });
+  await fsp.writeFile(path.join(staging, "THIRD-PARTY-NOTICES.txt"), notices + "\n\nOn-demand capabilities\n\n" + onDemandNotices + "\n\nExternal capabilities\n\n" + externalNotices + "\n", { flag: "wx" });
   await fsp.rename(staging, output);
   return { directory: output, manifest, extraResources: { from: output, to: "offline-payloads", filter: ["**/*"] } };
 }
-module.exports = { assemblePayloads };
+module.exports = { assemblePayloads, installOnDemandPayload, onDemandToolIds: () => [...registry.onDemandToolIds] };

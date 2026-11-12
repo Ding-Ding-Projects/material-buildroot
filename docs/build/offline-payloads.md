@@ -2,7 +2,27 @@
 
 `scripts/build/payloads.cjs` exports `assemblePayloads({ output, cache, complete })` for the root build driver. Both directories must be absolute. The output must not already exist. The cache is content addressed and valid downloads are reused; a mismatching existing entry is retained and causes a failure rather than being overwritten. Normal installer production invokes the complete required-bundled inventory through the root entrypoint.
 
-The return value contains `directory`, `manifest`, and an `extraResources` mapping that places the tree at `resources/offline-payloads`. `complete` defaults to true and requires every ID in the explicit ten-engine `requiredBundledToolIds` list. An explicit false value permits an incomplete development package, whose manifest records missing bundled engines. It must never be described as the complete installer.
+The return value contains `directory`, `manifest`, and an `extraResources` mapping that places the tree at `resources/offline-payloads`. `complete` defaults to true and requires a pin for every ID in `requiredBundledToolIds` and `onDemandToolIds`. Only the bundled list is extracted into the installer. An explicit false value permits an incomplete development package, whose manifest records missing bundled engines. It must never be described as the complete installer.
+
+## Bundled and on-demand split
+
+With every engine bundled, the full Squirrel package measured 1,431,852,095 bytes, over the 1,400,000,000-byte production cap. The five largest engines by extracted size are therefore not placed in the installer:
+
+| Tool ID | Extracted size | Distribution |
+| --- | ---: | --- |
+| `soffice` (LibreOffice) | 1,521 MB | Downloaded on first use |
+| `ebook-convert` (calibre) | 696 MB | Downloaded on first use |
+| `tar` (Git for Windows) | 407 MB | Downloaded on first use |
+| `pandoc` | 236 MB | Downloaded on first use |
+| `ollama` | 70 MB | Downloaded on first use |
+| `magick`, `ffmpeg`, `qpdf` | 424 MB together | Bundled; the native file broker loads them only from installed resources |
+| `java`, `docker` | 195 MB together | Bundled |
+
+`onDemandToolIds` in `scripts/build/offline-payloads.json` lists the downloaded set. Those tools keep exactly the same pins, composition rules and notices as before; only the moment of acquisition moves. When an operation first needs one of them, the payload manager calls `installOnDemandPayload` from `scripts/build/payloads.cjs`, which downloads the pinned original archive from its recorded source, checks its length and SHA-256, extracts the same retained members into the application's private `payloads/on-demand/<id>` folder with a manifest in the bundled layout, and only then makes the tool available. Concurrent requests share one download. Listing tools never starts a download; an absent tool is listed as `ON_DEMAND_NOT_DOWNLOADED`. A failed download leaves nothing behind, reports `ON_DEMAND_DOWNLOAD_FAILED`, and can be retried. A downloaded file that later changes fails closed with `PAYLOAD_HASH_MISMATCH`, exactly like a bundled file.
+
+The installer's `THIRD-PARTY-NOTICES.txt` lists the on-demand tools and their sources, and each downloaded tool keeps its original notices beside it. The first use of an on-demand tool therefore needs network access to its official source; after that it works offline.
+
+The package also no longer stores a second copy of the offline documentation and the appliance guest page inside `app.asar`; the packaged application reads both from `resources`.
 
 ## Bundled and external capability classification
 
@@ -63,7 +83,7 @@ The explicit `ffmpeg-transcoder` profile therefore includes the original `ffmpeg
 
 The actual acquired ZIP inventory measures 43 retained files totaling 117,097,063 uncompressed bytes and two excluded independent utilities totaling 212,124,672 uncompressed bytes. These are source-inventory measurements, not predicted or produced installer bytes. All retained files are individually pinned. The manifest records the profile, exact exclusions and reasons, source inventory, complete original archive URL, unchanged archive length and unchanged archive SHA-256. The complete 114,768,076-byte downloaded archive remains preserved in the source cache.
 
-All ten required bundled IDs remain mandatory. No notice, documentation file, registered executable, codec DLL or required runtime companion is removed by this profile. The 1,400,000,000-byte production cap is unchanged. Only the next actual root producer can establish full/delta/Setup sizes and whether those produced files satisfy that cap; no size success is claimed by this source change.
+All ten pinned IDs remain mandatory, split between the bundled and on-demand lists. No notice, documentation file, registered executable, codec DLL or required runtime companion is removed by this profile. The 1,400,000,000-byte production cap is unchanged. Only the next actual root producer can establish full/delta/Setup sizes and whether those produced files satisfy that cap; no size success is claimed by this source change.
 
 ## Extraction and preservation
 
@@ -79,7 +99,7 @@ Original archives, complete retained directories and failure staging are preserv
 
 ## Bundled-first discovery and integrity
 
-The payload manager loads `resources/offline-payloads/manifest.json` by default. An engine with a bundled record is resolved before any user-selected executable receipt. A bundled hash or path failure does not fall back to a different executable. Executable and companion files are checked for regular-file identity, byte length, SHA-256 and symbolic-link changes. Paths are constrained to the resource tree. A missing bundled manifest retains the existing user-selected workflow for development builds.
+The payload manager loads `resources/offline-payloads/manifest.json` by default. An engine with a bundled record is resolved before any user-selected executable receipt, and a user-selected receipt is resolved before an on-demand download. A bundled hash or path failure does not fall back to a different executable. Executable and companion files are checked for regular-file identity, byte length, SHA-256 and symbolic-link changes. Paths are constrained to the resource tree. A missing bundled manifest retains the existing user-selected workflow for development builds.
 
 The generated manifest inventories every retained file and original archive, with notice locations and upstream source links. `THIRD-PARTY-NOTICES.txt` points to the retained original texts. The complete upstream directories preserve executable resources and icons. Installed product branding remains the responsibility of the installer packaging step.
 

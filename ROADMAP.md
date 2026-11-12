@@ -1,5 +1,14 @@
 # Phased implementation roadmap
 
+## Installer size: on-demand engines, 2026-11-12
+
+- [x] Restore release downloads that had moved (calibre and LibreOffice) without changing their pins.
+- [x] Open offline Help when Windows hands out an 8.3 short temporary path.
+- [x] Download LibreOffice, calibre, tar, pandoc and Ollama from their pinned sources on first use instead of bundling them, so the full package fits the 1.4 GB cap.
+- [x] Stop storing a second copy of the offline documentation and the appliance guest page inside `app.asar`.
+- [ ] Confirm the produced package size and a normal release from the next hosted build.
+- [ ] Run a conversion that needs an on-demand engine inside the installed application, with and without network access.
+
 ## Home Assistant OS and container images from an external tree, 2026-11-11
 
 - [x] Detect a repository's `operating-system/` Buildroot external tree and list its boards.

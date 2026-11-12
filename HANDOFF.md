@@ -1,5 +1,15 @@
 # Material Buildroot preservation handoff
 
+## Installer size: five engines now download on first use, 2026-11-12
+
+The hosted build had stopped on three things, in turn. Two release downloads had moved (calibre and LibreOffice; the new addresses serve the same pinned bytes). Offline Help was refused when Windows gave the build an 8.3 short temporary path. Finally, the full package came out at 1,431,852,095 bytes, over the 1,400,000,000-byte cap.
+
+The owner chose to stop bundling the largest engines. LibreOffice, calibre, tar (Git for Windows), pandoc and Ollama, about 2.9 GB extracted, are now listed in `onDemandToolIds`. The first operation that needs one downloads the pinned archive, checks its length and SHA-256, and extracts it into the private `payloads/on-demand/` folder with the same composition rules and notices. After that, it is verified on every use exactly like a bundled tool. ImageMagick, FFmpeg and qpdf stay bundled, because the native file broker loads them only from installed resources; Java and Docker stay bundled too. The details are in [offline payload assembly](docs/build/offline-payloads.md#bundled-and-on-demand-split).
+
+Verified: unit tests for listing without download, single shared download, failure and retry, and tamper detection; and a real run of `installOnDemandPayload` through the payload manager over the actual pinned archives from a local cache: LibreOffice reconstructed 19,279 files in 251 s, calibre 1,356, tar 9,611, pandoc 4 and Ollama 45 (the same counts as the earlier bundled assembly), and all five then listed as available with origin `on-demand`. That run used the source tree, not the packaged `app.asar`, so the unpacked PowerShell script path for LibreOffice inside an installed copy is still unproven. Not yet verified: the produced package size and release from the next hosted build, and a conversion inside the installed application that needs an on-demand engine.
+
+最大嗰五個工具改咗第一次用先下載，安裝檔應該返到 1.4 GB 上限以下；要等下一次雲端建置先確認實際大小。
+
 ## Home Assistant OS and container images from an external tree, 2026-11-11
 
 Builds now has an **Operating system and container images** panel, and `scripts/haos/` has matching command-line drivers. Both work on a repository that ships its own Buildroot external tree, such as Home Assistant Material's `operating-system/`. The source is exported with `git archive` into a Docker volume, the tree's own builder runs `make <board>`, and the `haos_*` files come back with SHA-256 receipts. A second action builds `home-assistant-material:local` from a shared clone. The code is in `src/main/execution/haos-*.cjs` and `src/renderer/haos-image-panel.ts`. The article is [external tree images](docs/features/external-tree-images.md).

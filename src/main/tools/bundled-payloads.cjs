@@ -9,9 +9,8 @@ function inside(root, relative) {
   if (!target.startsWith(path.resolve(root) + path.sep)) fail("INVALID_BUNDLED_MANIFEST");
   return target;
 }
-function loadBundledPayloads(resources = process.resourcesPath) {
-  if (!resources) return {};
-  const root = path.join(resources, "offline-payloads");
+// Reads one payload folder: the installed offline-payloads folder, or one downloaded on-demand tool.
+function loadPayloadManifest(root) {
   const file = path.join(root, "manifest.json");
   let stat;
   try { stat = fs.lstatSync(file); }
@@ -34,4 +33,8 @@ function loadBundledPayloads(resources = process.resourcesPath) {
   }
   return result;
 }
-module.exports = { loadBundledPayloads };
+function loadBundledPayloads(resources = process.resourcesPath) {
+  if (!resources) return {};
+  return loadPayloadManifest(path.join(resources, "offline-payloads"));
+}
+module.exports = { loadBundledPayloads, loadPayloadManifest };

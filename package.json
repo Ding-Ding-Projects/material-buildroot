@@ -61,22 +61,25 @@
       "scripts/configuration/**/*",
       "scripts/appliance/**/*",
       "src/main/appliance/*.py",
-      "src/main/appliance/workload-endpoints.json"
+      "src/main/appliance/workload-endpoints.json",
+      "scripts/build/extract-office-msi.ps1"
     ],
     "directories": {
       "output": "release"
     },
     "files": [
       "dist/**/*",
-      "!dist/documentation/index.json",
-      "!dist/documentation/articles/**/*",
-      "!dist/documentation/references/**/*",
       "src/main/**/*",
       "src/shared/**/*",
       "scripts/configuration/**/*",
       "scripts/appliance/**/*",
       "package.json",
-      "assets/branding/icon.ico"
+      "assets/branding/icon.ico",
+      "!dist/documentation/**/*",
+      "!dist/appliance-guest/**/*",
+      "scripts/build/payloads.cjs",
+      "scripts/build/offline-payloads.json",
+      "scripts/build/extract-office-msi.ps1"
     ],
     "win": {
       "target": [

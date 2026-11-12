@@ -41,20 +41,21 @@ function loadAdapterAdmission(root) {
     license:{declared:icons.license, redistribution:'unreviewed'}, compatibility:'unverified', runtime:'unverified',
     offline:{mode:'bundled-assets', completePayload:'unverified'}});
   const payloads = read('scripts/build/offline-payloads.json');
-  const bundledIds = new Set(payloads.requiredBundledToolIds);
-  if (bundledIds.size !== payloads.requiredBundledToolIds.length) throw new Error('Duplicate bundled adapter identity.');
+  const bundledIds = new Set(payloads.requiredBundledToolIds), onDemandIds = new Set(payloads.onDemandToolIds || []);
+  if (bundledIds.size !== payloads.requiredBundledToolIds.length || onDemandIds.size !== (payloads.onDemandToolIds || []).length || [...onDemandIds].some(id => bundledIds.has(id))) throw new Error('Duplicate bundled adapter identity.');
   const admittedIds = new Set();
   for (const entry of payloads.tools) {
-    if (!bundledIds.has(entry.id) || admittedIds.has(entry.id) || !entry.version || !/^[a-f0-9]{64}$/.test(entry.sha256 || '') || !entry.sourceUrl || !entry.license)
+    const onDemand = onDemandIds.has(entry.id);
+    if (!(bundledIds.has(entry.id) || onDemand) || admittedIds.has(entry.id) || !entry.version || !/^[a-f0-9]{64}$/.test(entry.sha256 || '') || !entry.sourceUrl || !entry.license)
       throw new Error('Bundled adapter provenance is incomplete or duplicated.');
     admittedIds.add(entry.id);
-    records.push({id:entry.id, kind:'bundled-tool', version:entry.version,
+    records.push({id:entry.id, kind:onDemand ? 'on-demand-tool' : 'bundled-tool', version:entry.version,
       provenance:{source:'scripts/build/offline-payloads.json', url:entry.url, sourceUrl:entry.sourceUrl, sha256:entry.sha256},
       license:{declared:entry.license, files:entry.licenseFiles || [], redistribution:'unreviewed'},
       composition:entry.composition || null, excludedMembers:entry.excludedMembers || [], sourceInventory:entry.sourceInventory || null,
-      compatibility:'unverified', runtime:'unverified', offline:{mode:'bundled-payload-required', completePayload:'unverified'}});
+      compatibility:'unverified', runtime:'unverified', offline:onDemand ? {mode:'pinned-download-on-first-use', completePayload:'unverified'} : {mode:'bundled-payload-required', completePayload:'unverified'}});
   }
-  if ([...bundledIds].some(id => !admittedIds.has(id))) throw new Error('Required bundled adapter has no source record.');
+  if ([...bundledIds, ...onDemandIds].some(id => !admittedIds.has(id))) throw new Error('Required bundled adapter has no source record.');
   for (const entry of payloads.externalTools || []) {
     if (admittedIds.has(entry.id)) throw new Error('Adapter has conflicting bundled and external classifications.');
     admittedIds.add(entry.id);

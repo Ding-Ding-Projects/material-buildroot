@@ -4,12 +4,14 @@
   "requiredBundledToolIds": [
     "ffmpeg",
     "magick",
+    "qpdf",
+    "java",
+    "docker"
+  ],
+  "onDemandToolIds": [
     "pandoc",
     "soffice",
     "ebook-convert",
-    "qpdf",
-    "java",
-    "docker",
     "tar",
     "ollama"
   ],
