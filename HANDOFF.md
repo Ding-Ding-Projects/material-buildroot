@@ -1,5 +1,11 @@
 # Material Buildroot preservation handoff
 
+## Appliance ISO builds Home Assistant Material from its single repository, 2026-11-13
+
+The appliance source preparation now recognizes a repository that carries Core in `core/`, the frontend in `frontend/` and versions in `versions.json` (Home Assistant Material), without a second frontend source. The recipe follows the repository's own container build and adds its `/manifest.json` health check. Bringing it up to a booting appliance needed five fixes in the shared producer, all of which also apply to the other adapters: a forced snapshot checkout of the same revision; `docker-buildx` in the managed distribution and BuildKit for recipes, because Ubuntu's Docker 29 saves classic-builder images without layers (preparation now refuses such an archive); gzip layers and no attestation, which the producer's identity check requires; the workload images as a file on the ISO instead of inside the initramfs, because GRUB's BIOS loader refuses an initramfs above 896 MiB; and `DOCKER_RAMDISK=true`, without which no container can start on the initramfs root.
+
+Verified: the ISO built from `311d3508` booted through GRUB under QEMU with KVM and reported the workload healthy in 2 min 41 s; the onboarding page answered. See [the evidence record](docs/evidence/external-tree-images/README.md). Not verified: the producer's own software-emulated verifier (it runs out of time loading the image), physical hardware and UEFI, the desktop window driving this route, kiosk mode, and an existing build distribution picking up `docker-buildx` (it needs the appliance prerequisites run again).
+
 ## Installer size: five engines now download on first use, 2026-11-12
 
 The hosted build had stopped on three things, in turn. Two release downloads had moved (calibre and LibreOffice; the new addresses serve the same pinned bytes). Offline Help was refused when Windows gave the build an 8.3 short temporary path. Finally, the full package came out at 1,431,852,095 bytes, over the 1,400,000,000-byte cap.

@@ -58,6 +58,14 @@ This follows the repository's `build.sh`:
 
 The repository is staged with a `--shared` clone, so its working tree is not touched. The result is a local image only; nothing is pushed.
 
+## Bootable appliance ISO
+
+The appliance route (Images, **Standalone OS**, **Build a container image from source**) also accepts this repository as one source. It recognizes the layout from the tracked files: Core in `core/` (project `homeassistant`), the Material frontend in `frontend/` (pnpm and gulp), and the upstream versions in `versions.json`. No second frontend repository is asked for; the frontend revision is the repository's own revision.
+
+Preparation takes a snapshot of the selected revision and copies only `core/` and `frontend/` into the build, leaving out symbolic links (agent notes) and listing them in the source receipt. It then builds one image with the same stages as the container image build above: the frontend wheel, the integration translations of the matching upstream release, and `core/Dockerfile` on the base image named in `versions.json`. The image is labelled with the revision, and the ISO producer checks that label before it embeds the image. The appliance runs it with host networking and a persistent `/config` volume on port 8123, with the repository's own health check (`/manifest.json`), so the console appliance can report when Home Assistant answers. The image travels on the ISO as a separate file checked by hash at boot, because it is too large to go inside the initramfs.
+
+Still downloaded: the upstream base image and the upstream Core image the translations are taken from. This is Home Assistant Core in a container; the appliance has no Supervisor and no add-on store.
+
 ## Command line
 
 The same route runs without the window:

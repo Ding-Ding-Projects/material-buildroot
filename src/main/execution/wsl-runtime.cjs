@@ -5,7 +5,8 @@ const crypto = require("node:crypto");
 const { admitWslProject, metadataPaths, linuxSelection } = require("./wsl-project.cjs");
 const DISTRO = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/;
 const PACKAGES = ["build-essential", "bc", "bison", "curl", "flex", "gettext", "help2man", "libssl-dev", "libelf-dev", "texinfo", "bash", "binutils", "bzip2", "cpio", "file", "findutils", "gawk", "git", "gzip", "libncurses-dev", "patch", "perl", "python3", "rsync", "sed", "tar", "unzip", "wget", "which", "xz-utils"];
-const APPLIANCE_PACKAGES = ["docker.io", "docker-compose-v2", "qemu-system-x86", "qemu-utils", "e2fsprogs"];
+// docker-buildx: with the containerd image store, images from the classic builder save without their layers.
+const APPLIANCE_PACKAGES = ["docker.io", "docker-buildx", "docker-compose-v2", "qemu-system-x86", "qemu-utils", "e2fsprogs"];
 const PROBE = `set -eu
  test "$(id -u)" -ne 0 || { echo non-root-required; exit 77; }
  printf 'USER=%s\\nHOME=%s\\n' "$(id -un)" "$HOME"
@@ -133,7 +134,7 @@ function createWslRuntime({ directory, run, dialog, parentWindow, openPath, plat
           const configured=await linux(name,'set -eu; test "$(id -u)" -eq 0; test "$(id -u materialbuilder)" -ne 0; getent group docker >/dev/null; usermod -aG docker materialbuilder; service docker start',[],true,60000);
           recordResult('configure-container-access',configured);
           if(configured.state!=="succeeded")return {state:"appliance-container-setup-incomplete",distribution:name,setupDiagnostics:{steps:evidence}};
-          const verified=await linux(name,'set -eu; test "$(id -u)" -ne 0; command -v qemu-system-x86_64 >/dev/null; command -v qemu-img >/dev/null; command -v mkfs.ext4 >/dev/null; docker compose version >/dev/null; docker info >/dev/null',[],false,30000);
+          const verified=await linux(name,'set -eu; test "$(id -u)" -ne 0; command -v qemu-system-x86_64 >/dev/null; command -v qemu-img >/dev/null; command -v mkfs.ext4 >/dev/null; docker compose version >/dev/null; docker buildx version >/dev/null; docker info >/dev/null',[],false,30000);
           recordResult('verify-container-tools',verified);
           if(verified.state!=="succeeded")return {state:"appliance-container-access-incomplete",distribution:name,setupDiagnostics:{steps:evidence}};
           managed.applianceReady=true;save();

@@ -21,7 +21,7 @@ Windows installer, display scaling, Windows font rendering and runtime acceptanc
 
 ## Home Assistant OS images from an external tree
 
-Builds can now build a repository's own Buildroot external tree with that tree's builder, for example Home Assistant Material's `operating-system/`. It produced the `ova` image, which booted to the Home Assistant landing page, and a local `home-assistant-material:local` container image. When the repository carries the sources of the Supervisor and the landing page, the OS image holds copies built from that commit instead of published ones, checked by digest. See [external tree images](docs/features/external-tree-images.md) and [the verification record](docs/evidence/external-tree-images/README.md).
+Builds can now build a repository's own Buildroot external tree with that tree's builder, for example Home Assistant Material's `operating-system/`. It produced the `ova` image, which booted to the Home Assistant landing page, and a local `home-assistant-material:local` container image. When the repository carries the sources of the Supervisor and the landing page, the OS image holds copies built from that commit instead of published ones, checked by digest. The standalone appliance ISO accepts the same repository as one source and builds Home Assistant Material from it; that ISO booted to a healthy Home Assistant. See [external tree images](docs/features/external-tree-images.md) and [the verification record](docs/evidence/external-tree-images/README.md).
 
 ## Standalone OS creation in the running desktop
 

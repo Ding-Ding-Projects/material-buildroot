@@ -24,10 +24,13 @@ function adapterForSource(origin, shape) {
     else if(!shape.paths.has('build.bat')&&!shape.paths.has('scripts/hosting.py'))matches.push({adapter:'job-2027-upstream',role:'primary'});
   }
   if(rootProject==='homeassistant'&&has('homeassistant/__init__.py','homeassistant/components/frontend/manifest.json','homeassistant/package_constraints.txt','requirements.txt'))matches.push({adapter:'home-assistant-material',role:'core'});
+  // One repository carrying both: Core under core/, the Material frontend under frontend/, versions in versions.json.
+  if(projectName(shape.coreProject)==='homeassistant'&&has('versions.json','core/Dockerfile','core/requirements.txt','core/requirements_all.txt','core/homeassistant/__init__.py','core/homeassistant/package_constraints.txt','core/homeassistant/components/frontend/manifest.json','frontend/package.json','frontend/pnpm-lock.yaml','frontend/pyproject.toml','frontend/gulpfile.js'))matches.push({adapter:'home-assistant-material',role:'repository'});
   if((rootProject==='home-assistant-frontend'||packageName==='home-assistant-frontend')&&has('pyproject.toml','package.json','yarn.lock','script/build_frontend','.yarn/releases/yarn-4.18.0.cjs')&&/^version\s*=\s*"([0-9.]+)"/m.test(shape.rootProject||''))matches.push({adapter:'home-assistant-material',role:'frontend'});
   return matches.length===1?{...matches[0],shapeTrusted:false,requiresExecutionConsent:true}:null;
 }
-function sourceRequirements(adapter) {
+function sourceRequirements(adapter,role) {
+  if(adapter==='home-assistant-material'&&role==='repository')return {primary:'repository',companion:null,mode:'core-container',limitations:['NO_SUPERVISOR_OR_HAOS']};
   if(adapter==='home-assistant-material')return {primary:'core',companion:'frontend',mode:'core-container',limitations:['NO_SUPERVISOR_OR_HAOS','CUSTOM_FRONTEND_RUNTIME_COMPATIBILITY_REQUIRES_VERIFICATION']};
   if(['job-2027-fork','job-2027-upstream'].includes(adapter))return {primary:'primary',companion:null,mode:'api-frontend-postgres',limitations:['SCRAPING_WORKER_DISABLED','PAID_AI_NOT_CONFIGURED','FRESH_DATA_ONLY']};
   throw Object.assign(new Error('APPLIANCE_ADAPTER_UNAVAILABLE'),{code:'APPLIANCE_ADAPTER_UNAVAILABLE'});

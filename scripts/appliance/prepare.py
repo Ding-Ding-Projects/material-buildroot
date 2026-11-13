@@ -71,6 +71,9 @@ def safe_diagnostic(error):
     return 'PRODUCER_INTERNAL_FAILED', 'producer', 1
 
 
+MEDIA_IMAGES = '/material/images.tar'
+
+
 def run(*args):
     try:
         return subprocess.run(args, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
@@ -341,9 +344,13 @@ def prepare(spec_path, output, here):
             images[index] = bundled
         selected_identities[image] = metadata['Id']
     inventory = [json.loads(run('docker', 'image', 'inspect', image))[0] for image in sorted(set(images))]
-    run('docker', 'save', '--output', str(app / 'images.tar'), *sorted(set(images)))
+    # The images go on the ISO beside the initramfs, not inside it: GRUB's BIOS loader
+    # refuses an initramfs that ends above 896 MiB, which one Home Assistant image exceeds.
+    media = output / 'media'
+    media.mkdir()
+    run('docker', 'save', '--output', str(media / 'images.tar'), *sorted(set(images)))
     try:
-        saved = inspect_archive(app / 'images.tar')
+        saved = inspect_archive(media / 'images.tar')
     except (ValueError, KeyError, TypeError, tarfile.TarError):
         raise SavedImageIdentityMismatch('Saved image archive cannot establish a valid content graph') from None
     if any(not saved.matches(reference, identity) for reference, identity in selected_identities.items()):
@@ -354,7 +361,10 @@ def prepare(spec_path, output, here):
                 raise SavedImageIdentityMismatch('Saved OCI graph cannot bind the selected registry descriptor')
     dump(app / 'image-inventory.json', [{'reference': [reference], 'sourceReference': original_references.get(reference, reference),
          'id': saved[reference], 'engineId': item['Id'], 'digests': item.get('RepoDigests', [])} for reference, item in zip(sorted(set(images)), inventory)])
+    with (media / 'images.tar').open('rb') as stream:
+        images_sha256 = hashlib.file_digest(stream, 'sha256').hexdigest()
     runtime = {'name': spec['name'], 'mode': spec['mode'], 'persistence': spec['persistence'],
+               'images': {'path': MEDIA_IMAGES, 'sha256': images_sha256, 'size': (media / 'images.tar').stat().st_size},
                'kioskUrl': spec.get('kioskUrl', ''), 'tunnel': spec['tunnel'],
                'compose': compose is not None, 'image': images[0], 'wording': bool(spec.get('wordingPath')),
                'guestPortal': guest.is_dir(), 'containerName': None if compose is not None else 'material-workload',
@@ -380,6 +390,10 @@ def prepare(spec_path, output, here):
         path.chmod(0o755)
     (overlay / 'etc/docker').mkdir(parents=True)
     dump(overlay / 'etc/docker/daemon.json', {'data-root': '/data/docker', 'log-driver': 'local'})
+    # The root filesystem is the initramfs, where runc's pivot_root fails ("invalid argument").
+    # Buildroot's S60dockerd sources this file; DOCKER_RAMDISK makes runc use chroot instead.
+    (overlay / 'etc/default').mkdir(parents=True)
+    (overlay / 'etc/default/dockerd').write_text('export DOCKER_RAMDISK=true\n')
     shutil.copyfile(here / 'kernel.fragment', output / 'kernel.fragment')
     shutil.copyfile(here / 'grub.cfg', output / 'grub.cfg')
     shutil.copyfile(here / 'runtime-setup.py', app / 'runtime-setup.py')
@@ -405,7 +419,13 @@ def manifest(output):
     if not source.is_file() or source.stat().st_size < 1024 * 1024:
         raise ValueError('Buildroot did not produce a bootable ISO')
     target = output / 'appliance.iso'
-    shutil.copyfile(source, target)
+    images = output / 'media/images.tar'
+    if images.is_file():
+        # Add the workload images as a file on the ISO and keep Buildroot's boot record.
+        run(str(output / 'work/host/bin/xorriso'), '-indev', str(source), '-outdev', str(target),
+            '-boot_image', 'any', 'replay', '-map', str(images), MEDIA_IMAGES)
+    else:
+        shutil.copyfile(source, target)
     digest = hashlib.file_digest(target.open('rb'), 'sha256').hexdigest()
     dump(output / 'manifest.json', {'schemaVersion': 1, 'status': 'built',
          'iso': {'path': str(target), 'sha256': digest, 'size': target.stat().st_size},

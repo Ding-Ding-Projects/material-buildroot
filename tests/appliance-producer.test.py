@@ -453,6 +453,13 @@ class ProducerTests(unittest.TestCase):
         self.assertIn('blkid -L MATERIAL_DATA', script)
         self.assertIn('mountpoint -q /data', script)
         self.assertIn('docker start material-workload', script)
+        # Images come from the boot medium and are checked against the recorded hash first.
+        self.assertIn('mount -t iso9660 -o ro', script)
+        self.assertLess(script.index('.images.sha256'), script.index('docker load'))
+        self.assertNotIn('/opt/material/images.tar', script)
+        source = (ROOT / 'scripts/appliance/prepare.py').read_text()
+        self.assertIn("'etc/default/dockerd'", source)
+        self.assertIn('export DOCKER_RAMDISK=true', source)
 
 
 if __name__ == '__main__':

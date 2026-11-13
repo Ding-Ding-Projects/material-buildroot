@@ -31,7 +31,31 @@ until docker info >/dev/null 2>&1; do
   [ "$attempt" -le 60 ] || { echo 'Container engine startup timed out.' >&2; exit 1; }
   sleep 1
 done
-docker load --input /opt/material/images.tar >/dev/null
+# The workload images are a file on the boot medium, checked against the hash this build
+# recorded inside the initramfs before anything is loaded.
+media=/run/material-media
+mkdir -p "$media"
+found=false
+attempt=0
+while [ "$found" = false ] && [ "$attempt" -lt 30 ]; do
+  attempt=$((attempt + 1))
+  for device in /dev/sr* /dev/vd* /dev/sd*; do
+    [ -b "$device" ] || continue
+    if mount -t iso9660 -o ro "$device" "$media" 2>/dev/null; then
+      if [ -f "$media$(value .images.path)" ]; then found=true; break; fi
+      umount "$media"
+    fi
+  done
+  [ "$found" = true ] || sleep 1
+done
+[ "$found" = true ] || { echo 'Workload stopped: the boot medium with the workload images was not found.' >&2; exit 1; }
+if [ "$(sha256sum "$media$(value .images.path)" | cut -d' ' -f1)" != "$(value .images.sha256)" ]; then
+  umount "$media"
+  echo 'Workload stopped: the image archive on the boot medium does not match this build.' >&2
+  exit 1
+fi
+docker load --input "$media$(value .images.path)" >/dev/null
+umount "$media"
 compose() {
   if [ -f /data/workload/runtime.env ]; then
     docker compose --project-name material-appliance --env-file /data/workload/runtime.env -f /opt/material/compose.json "$@"

@@ -87,6 +87,34 @@ The Supervisor and landing page that answered are the ones built from source, si
 
 ![Landing page served by the ova image with images built from source](ova-source-landing.png)
 
+## Appliance ISO from the single repository, recorded 2026-11-13
+
+Run with the producer scripts (`src/main/appliance/preparation-worker.py`, then `scripts/appliance/build-appliance.sh`) as the unprivileged user of the app-managed WSL build distribution (Ubuntu 24.04, Docker 29.1.3 with the containerd image store). The source was a fresh clone of the Home Assistant Material repository at `311d3508ad61da723de1ab7a561de1c50f0c8ceb`, the commit of release 2026.11.1.132; the working checkout on this computer was not used.
+
+Preparation recognized the single-repository layout, took the frontend revision from the same commit and copied only `core/` and `frontend/`. The six symbolic links in those folders (agent notes) were left out and listed in the source receipt. It built one image from source: the frontend wheel (`20261028.5`, pnpm and gulp), the integration translations of upstream `2026.11.1`, and `core/Dockerfile` on base `2026.10.3`.
+
+| Item | Value |
+| --- | --- |
+| Prepared image | `sha256:357fddc69114ae86d109ecdffeef78b47eced9935d8968ab4e2709f907ee4920`, labelled with the commit as source and frontend revision |
+| Saved archive | 883,681,280 bytes, SHA-256 `c2a87eb9473a2bd3e6e9329d2227a6516b173e8401f3a0ae033c8daf7dad3c90`, all 25 layers gzip |
+| Downloaded, not built | `amd64-homeassistant-base:2026.10.3`, `amd64-homeassistant:2026.11.1` (translations only) |
+| ISO | `appliance.iso`, 1,016,004,608 bytes, SHA-256 `1a9a6dd5a0de7dfa7df67c1c4ac0c5b2c72e211aa8843f5c620a1ac894bcbad4`, built in 48 min 33 s with the compiler cache of earlier runs |
+
+### Boot check
+
+The ISO was booted through its own GRUB with QEMU (q35, KVM, 4 vCPUs, 6 GiB) and an empty data disk labelled `MATERIAL_DATA`, with guest port 8123 forwarded. The initramfs was 113 MB. The guest found the boot medium, checked the image archive against the recorded hash, loaded it and started the Compose service. The serial console printed `MATERIAL_APPLIANCE_WORKLOAD_STARTED` and then `MATERIAL_APPLIANCE_WORKLOAD_HEALTHY` (the container's own health check of `/manifest.json`) within 2 min 41 s of power-on. `/manifest.json` and `/onboarding.html` returned 200 over the forwarded port, and the onboarding page rendered in a browser:
+
+![Home Assistant Material onboarding served by the appliance ISO](appliance-onboarding.png)
+
+The producer's own boot verifier (`verify-boot.py`) uses software emulation with two vCPUs and a 10-minute limit. On this ISO it recorded the kernel and the runtime as up, but loading the 880 MB image from the emulated CD did not finish in time, so it reported `bootVerified: false`. The KVM boot above is the runtime evidence; the verifier result is unchanged and not counted as a pass.
+
+Five earlier attempts on the same day failed and were fixed before this run:
+
+- The snapshot checkout refused 118 files of the extracted revision as untracked files it would overwrite, although they were identical. The checkout of the same revision is now forced; the status check after it still proves the tree matches.
+- `docker save` wrote a 13 KB archive with a manifest naming 24 layers and none of their files, and exited 0. With the containerd image store, images from the classic builder save without their layers. The managed distribution now installs `docker-buildx`, recipes build with BuildKit, and preparation refuses an archive missing any file its manifest names.
+- The producer refused the archive: 12 layers were zstd (the upstream base images are published that way) and BuildKit had added a provenance attestation. Recipes now force gzip layers and add no attestation.
+- The first ISO (1,013,469,184 bytes) never got past GRUB's handover: `error: the size of initrd is bigger than addr_max`. GRUB 2.12's BIOS loader keeps the initramfs below 896 MiB, and the image inside it made the initramfs 999 MB. The images are now a separate file on the ISO, checked by hash at boot. The next ISO booted, but the container could not start (`runc ... pivot_root .: invalid argument`) because the root filesystem is the initramfs; `dockerd` now runs with `DOCKER_RAMDISK=true`.
+
 ## Container image: `home-assistant-material:local`, recorded 2026-11-11
 
 Run with `node scripts/haos/build-container-image.cjs --source <repository> --work <folder> --save <file.tar>`.

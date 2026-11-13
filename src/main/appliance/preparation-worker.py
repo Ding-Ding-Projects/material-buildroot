@@ -40,22 +40,33 @@ def stop_owned_children():
             time.sleep(1)
 
 
-def snapshot_source(source,revision,workspace,name,git):
+def snapshot_source(source,revision,workspace,name,git,allow_links=False):
     archive=workspace/(name+'.tar')
     subprocess.run(git+['-C',str(source),'archive','--format=tar','--output',str(archive),revision],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     import tarfile
     snapshot=workspace/name
     snapshot.mkdir()
     with tarfile.open(archive) as stream:
+        members=[]
         for member in stream.getmembers():
-            if not (member.isfile() or member.isdir()) or member.name.startswith('/') or '..' in Path(member.name).parts:
+            if member.name.startswith('/') or '..' in Path(member.name).parts:
                 raise ValueError('Unsupported source archive member')
-        stream.extractall(snapshot,filter='data')
+            # Symbolic links are left out here; the checkout below restores them and the
+            # recipe that allows them copies only regular files.
+            if allow_links and member.issym():
+                continue
+            if not (member.isfile() or member.isdir()):
+                raise ValueError('Unsupported source archive member')
+            members.append(member)
+        stream.extractall(snapshot,members=members,filter='data')
     # The owning build requires its real revision. Fetch only that exact local
     # commit into a fresh administrative directory; no original settings/hooks.
     subprocess.run(git+['init',str(snapshot)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     subprocess.run(git+['-C',str(snapshot),'-c','protocol.file.allow=always','fetch','--depth=1','--no-tags',str(source),revision],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-    subprocess.run(git+['-C',str(snapshot),'checkout','--detach','FETCH_HEAD'],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    # The extracted files are that same revision, but Git can still refuse some of them as
+    # untracked files it would overwrite. Forcing writes only the revision's own content;
+    # the status check below proves the tree matches.
+    subprocess.run(git+['-C',str(snapshot),'checkout','--force','--detach','FETCH_HEAD'],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     if command(git+['-C',str(snapshot),'status','--porcelain','--untracked-files=no']):
         raise ValueError('Snapshot is not the selected revision')
     return snapshot
@@ -89,10 +100,12 @@ def main():
         raise ValueError('Source revision changed')
     print('APPLIANCE_PHASE:preparing',flush=True)
     workspace=Path(tempfile.mkdtemp(prefix='material-appliance-source-'))
-    snapshot=snapshot_source(source,args.revision,workspace,'source',git)
+    # One repository carrying Core and the frontend: the recipe reads both from this one snapshot.
+    repository=args.adapter=='home-assistant-material' and not args.frontend_source and args.frontend_revision==args.revision
+    snapshot=snapshot_source(source,args.revision,workspace,'source',git,allow_links=repository)
     if args.adapter!='job-2027-fork':
         frontend_snapshot=None
-        if args.adapter=='home-assistant-material':
+        if args.adapter=='home-assistant-material' and not repository:
             if not args.frontend_source or not re.fullmatch('[a-f0-9]{40}',args.frontend_revision or ''):
                 raise ValueError('Paired frontend source required')
             frontend=Path(args.frontend_source)

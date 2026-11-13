@@ -4,6 +4,7 @@ This module does not start builds or accept shell fragments. The application wor
 executes the returned argument vectors only after source and operation admission.
 """
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -41,6 +42,8 @@ def materialize(adapter, snapshot, output, operation, revision,
                'runtimeVerified': False, 'sourceModified': False, 'snapshotAdjustments': []}
     if adapter == 'job-2027-upstream':
         recipe = _job(source, output, operation, revision, receipt)
+    elif frontend_snapshot is None and frontend_revision == revision:
+        recipe = _home_assistant_repository(source, output, operation, revision, receipt)
     else:
         if not re.fullmatch(r'[a-f0-9]{40}', frontend_revision or ''):
             raise ValueError('Custom frontend revision is required')
@@ -61,6 +64,14 @@ for command in plan['buildCommands']:
     _write(output, 'build-plan.json', json.dumps(recipe, indent=2) + '\n')
     _write(output, 'compose.json', json.dumps(recipe['compose'], indent=2) + '\n')
     return recipe
+
+
+def _build(image, dockerfile='Dockerfile'):
+    # BuildKit writes every layer gzip-compressed and adds no attestation, so the saved
+    # archive holds only what the ISO producer's identity check and the guest engine read.
+    # (Upstream Home Assistant base images are published with zstd layers.)
+    return ['docker', 'build', '--platform', 'linux/amd64', '-f', dockerfile, '--provenance=false', '--sbom=false',
+            '--output', 'type=image,name=' + image + ',compression=gzip,force-compression=true', '.']
 
 
 def _copy(source, destination):
@@ -136,11 +147,110 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
                          'paidAiConfigured': False, 'existingEnvironmentImported': False,
                          'existingDataImported': False}
     return {'images': [api, frontend, 'postgres:18-bookworm'], 'compose': compose,
-            'buildCommands': [['docker', 'build', '--platform', 'linux/amd64', '-f', 'api.Dockerfile', '-t', api, '.'],
-                              ['docker', 'build', '--platform', 'linux/amd64', '-f', 'frontend.Dockerfile', '-t', frontend, '.'],
+            'buildCommands': [_build(api, 'api.Dockerfile'),
+                              _build(frontend, 'frontend.Dockerfile'),
                               ['docker', 'pull', '--platform', 'linux/amd64', 'postgres:18-bookworm']],
             'runtimeSetup': {'requiredEnvironment': ['JOB_POSTGRES_PASSWORD'], 'freshDataOnly': True},
             'limitations': ['SCRAPING_WORKER_DISABLED', 'PAID_AI_NOT_CONFIGURED', 'READ_ONLY_API_PREVIEW', 'RUNTIME_NOT_VERIFIED']}
+
+
+def _copy_regular(source, destination):
+    # Copies regular files only. Symbolic links (agent notes in the repository) are
+    # left out and listed, so the receipt says what was not copied.
+    forbidden = {'.git', '.env', '.hosting', 'node_modules', '__pycache__'}
+    skip = lambda name: name in forbidden or name.startswith('.env.') and name != '.env.example'
+    omitted = []
+    for root, folders, names in os.walk(source):
+        here = Path(root)
+        for name in list(folders):
+            if skip(name) or (here / name).is_symlink():
+                folders.remove(name)
+                if (here / name).is_symlink():
+                    omitted.append(str((here / name).relative_to(source)))
+        for name in names:
+            path = here / name
+            if skip(name):
+                continue
+            if path.is_symlink():
+                omitted.append(str(path.relative_to(source)))
+            elif path.is_file():
+                target = destination / path.relative_to(source)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, target)
+    return sorted(omitted)
+
+
+def _home_assistant_repository(source, output, operation, revision, receipt):
+    # Home Assistant Material keeps Core in core/ and its Material frontend in frontend/,
+    # with the upstream versions it follows in versions.json.
+    _required(source, ['versions.json', 'core/Dockerfile', 'core/pyproject.toml', 'core/requirements.txt',
+                       'core/requirements_all.txt', 'core/homeassistant/package_constraints.txt',
+                       'frontend/package.json', 'frontend/pnpm-lock.yaml', 'frontend/pyproject.toml',
+                       'frontend/gulpfile.js'])
+    versions = json.loads((source / 'versions.json').read_text())
+    core, base = versions.get('core'), versions.get('core_base_image')
+    for value in (core, base):
+        if not isinstance(value, str) or not re.fullmatch(r'[0-9]{4}\.[0-9]{1,2}\.[0-9]{1,3}', value):
+            raise ValueError('Core or base image version unavailable in versions.json')
+    match = re.search(r'^version\s*=\s*"([0-9.]+)"', (source / 'frontend/pyproject.toml').read_text(), re.M)
+    if not match:
+        raise ValueError('Frontend package version unavailable')
+    omitted = []
+    for part in ('core', 'frontend'):
+        omitted += [part + '/' + name for name in _copy_regular(source / part, output / part)]
+    receipt['frontendRevision'] = revision
+    receipt['frontendVersion'] = match[1]
+    receipt['coreVersion'] = core
+    receipt['layout'] = 'One repository: Core in core/, the frontend in frontend/'
+    receipt['mode'] = 'Home Assistant Core container, not Home Assistant OS or Supervisor'
+    receipt['downloadedImages'] = ['ghcr.io/home-assistant/amd64-homeassistant-base:' + base,
+                                   'ghcr.io/home-assistant/amd64-homeassistant:' + core + ' (integration translations only)']
+    if omitted:
+        receipt['snapshotAdjustments'].append({'reason': 'Symbolic links are not copied into the build', 'files': omitted})
+    image = 'material-buildroot/home-assistant:' + operation
+    # The same stages as the repository's own build: the frontend wheel (build/frontend.Dockerfile),
+    # the integration translations of the matching upstream release (build/translations.Dockerfile),
+    # then core/Dockerfile reading from the assembled tree.
+    _write(output, 'Dockerfile', f'''FROM node:24.22.1-bookworm AS frontend
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv git && rm -rf /var/lib/apt/lists/* && corepack enable
+WORKDIR /src
+COPY frontend/ .
+ENV HUSKY=0 CI=1 NODE_OPTIONS=--max_old_space_size=6144 SKIP_FETCH_NIGHTLY_TRANSLATIONS=1 HA_BUILD_WORKERS=4
+RUN pnpm install --frozen-lockfile
+RUN ./node_modules/.bin/gulp build-app || HA_BUILD_WORKERS=2 ./node_modules/.bin/gulp build-app
+RUN python3 -m venv /venv && /venv/bin/pip install --no-cache-dir build && rm -rf dist home_assistant_frontend.egg-info && /venv/bin/python -m build -q --wheel
+FROM ghcr.io/home-assistant/amd64-homeassistant:{core} AS translations
+RUN mkdir /out && cd /usr/src/homeassistant/homeassistant && find components -path '*/translations/*.json' | tar cf - -T - | tar xf - -C /out
+FROM scratch AS source
+COPY core/ /
+COPY --from=frontend /src/dist/ /
+COPY --from=translations /out/ /homeassistant/
+FROM ghcr.io/home-assistant/amd64-homeassistant-base:{base}
+LABEL io.hass.type="core" io.hass.arch="amd64" io.hass.version="{core}" org.opencontainers.image.title="Home Assistant Material" org.opencontainers.image.revision="{revision}" org.material-buildroot.frontend-revision="{revision}" org.opencontainers.image.licenses="Apache-2.0"
+ENV S6_SERVICES_GRACETIME=240000 UV_SYSTEM_PYTHON=true UV_NO_CACHE=true
+WORKDIR /usr/src
+COPY --from=source /rootfs/ /
+RUN echo "source;{revision};material-buildroot;appliance" > /OFFICIAL_IMAGE
+COPY --from=ghcr.io/alexxit/go2rtc:1.9.15@sha256:e098de5c2f8040dc3d4784ed2d5cfdac3b0979f9349afe587ef6a670a14b9f4d /usr/local/bin/go2rtc /bin/go2rtc
+COPY --from=source /requirements.txt homeassistant/
+COPY --from=source /homeassistant/package_constraints.txt homeassistant/homeassistant/
+RUN go2rtc --version && pip3 install --no-cache-dir "uv==$(awk -F'==' '/^uv==/{{print $2}}' homeassistant/requirements.txt)" && uv pip install --no-build -r homeassistant/requirements.txt
+COPY --from=source /requirements_all.txt /home_assistant_frontend-*.whl homeassistant/
+RUN uv pip install homeassistant/home_assistant_frontend-*.whl && uv pip install --no-build -r homeassistant/requirements_all.txt
+COPY --from=source /LICENSE.md /README.rst /pyproject.toml homeassistant/
+COPY --from=source /homeassistant/ homeassistant/homeassistant/
+RUN uv pip install -e ./homeassistant && python3 -m compileall -q homeassistant/homeassistant && python3 -c "import importlib.metadata as m; assert m.version('home-assistant-frontend') == '{match[1]}'"
+WORKDIR /config
+''')
+    # The same check as the repository's compose.yaml, so a console appliance can report readiness.
+    health = {'test': ['CMD', 'curl', '--fail', '--silent', '--max-time', '5', 'http://127.0.0.1:8123/manifest.json'],
+              'interval': '10s', 'timeout': '10s', 'retries': 6, 'start_period': '120s'}
+    return {'images': [image], 'buildCommands': [_build(image)],
+            'compose': {'services': {'homeassistant': {'image': image, 'network_mode': 'host',
+                'volumes': ['homeassistant-config:/config'], 'restart': 'unless-stopped', 'healthcheck': health}},
+                'volumes': {'homeassistant-config': {}}},
+            'limitations': ['NO_SUPERVISOR_OR_HAOS', 'NO_IMPLICIT_PRIVILEGED_OR_USB_ACCESS',
+                            'UPSTREAM_BASE_AND_TRANSLATION_IMAGES_DOWNLOADED']}
 
 
 def _home_assistant(source, frontend, output, operation, revision, frontend_revision, receipt):
@@ -197,7 +307,7 @@ RUN pip install --no-cache-dir /wheels/*.whl && pip install --no-cache-dir -r re
 WORKDIR /config
 ENTRYPOINT ["python", "-m", "homeassistant", "--config", "/config"]
 ''')
-    return {'images': [image], 'buildCommands': [['docker', 'build', '--platform', 'linux/amd64', '-t', image, '.']],
+    return {'images': [image], 'buildCommands': [_build(image)],
             'compose': {'services': {'homeassistant': {'image': image, 'network_mode': 'host',
                 'volumes': ['homeassistant-config:/config'], 'restart': 'unless-stopped'}},
                 'volumes': {'homeassistant-config': {}}},

@@ -14,6 +14,14 @@ test('source shape detection rejects ambiguous products and does not promote com
  const combined={paths:new Set([...shape.paths,'pyproject.toml','homeassistant/__init__.py','homeassistant/components/frontend/manifest.json','homeassistant/package_constraints.txt','requirements.txt']),backendProject:shape.backendProject,rootProject:'[project]\nname = "homeassistant"\n'};
  assert.equal(adapterForSource('https://github.com/fixture-owner/combined',combined),null);const recognized=adapterForSource('https://github.com/fixture-owner/workload',shape);assert.equal(recognized.shapeTrusted,false);assert.equal(recognized.requiresExecutionConsent,true);
 });
+test('one repository carrying Core and the frontend is recognized without a companion source',()=>{
+ const origin='https://github.com/fixture-owner/material-home';
+ const complete={paths:new Set(['versions.json','core/Dockerfile','core/requirements.txt','core/requirements_all.txt','core/homeassistant/__init__.py','core/homeassistant/package_constraints.txt','core/homeassistant/components/frontend/manifest.json','frontend/package.json','frontend/pnpm-lock.yaml','frontend/pyproject.toml','frontend/gulpfile.js']),coreProject:'[project]\nname = "homeassistant"\n'};
+ const found=adapterForSource(origin,complete);assert.equal(found.adapter,'home-assistant-material');assert.equal(found.role,'repository');assert.equal(found.shapeTrusted,false);
+ const plan=sourceRequirements('home-assistant-material','repository');assert.equal(plan.primary,'repository');assert.equal(plan.companion,null);assert.ok(plan.limitations.includes('NO_SUPERVISOR_OR_HAOS'));
+ for(const missing of complete.paths){const paths=new Set(complete.paths);paths.delete(missing);assert.equal(adapterForSource(origin,{...complete,paths}),null,missing);}
+ assert.equal(adapterForSource(origin,{...complete,coreProject:'[project]\nname = "other"\n'}),null);
+});
 test('frontend compatibility requires the actual recipe inputs and a source version',()=>{
  const origin='https://github.com/fixture-owner/frontend-source';
  const complete={paths:new Set(['pyproject.toml','package.json','yarn.lock','script/build_frontend','.yarn/releases/yarn-4.18.0.cjs']),rootProject:'[project]\nname = "home-assistant-frontend"\nversion = "20260729.0"\n',packageJson:'{"name":"home-assistant-frontend"}'};

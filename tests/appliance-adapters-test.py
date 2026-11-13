@@ -68,6 +68,52 @@ class AdapterRecipes(unittest.TestCase):
         self.assertNotIn('privileged', service)
         self.assertNotIn('devices', service)
 
+    def repository_files(self):
+        pin = 'home-assistant-frontend==20261028.5'
+        self.files(self.source, {'versions.json': json.dumps({'core': '2026.11.1', 'core_base_image': '2026.10.3'}),
+            'core/Dockerfile': '', 'core/pyproject.toml': '', 'core/requirements.txt': 'uv==0.9.0',
+            'core/requirements_all.txt': '', 'core/homeassistant/package_constraints.txt': pin,
+            'core/homeassistant/components/frontend/manifest.json': json.dumps({'requirements': [pin]}),
+            'frontend/package.json': '{}', 'frontend/pnpm-lock.yaml': '', 'frontend/gulpfile.js': '',
+            'frontend/pyproject.toml': 'version = "20261028.5"', 'operating-system/Makefile': 'NOT_COPIED',
+            'frontend/.env': 'DO_NOT_COPY'})
+
+    def test_one_repository_builds_core_and_frontend_from_the_same_revision(self):
+        self.repository_files()
+        (self.source / 'core/CLAUDE.md').symlink_to('AGENTS.md')
+        result = self.materialize('home-assistant-material', frontend_revision='b' * 40)
+        dockerfile = (self.root / 'recipe/Dockerfile').read_text()
+        self.assertIn('pnpm install --frozen-lockfile', dockerfile)
+        self.assertIn('gulp build-app', dockerfile)
+        self.assertIn('amd64-homeassistant-base:2026.10.3', dockerfile)
+        self.assertIn('amd64-homeassistant:2026.11.1 AS translations', dockerfile)
+        self.assertIn('org.material-buildroot.frontend-revision="' + 'b' * 40 + '"', dockerfile)
+        self.assertIn("== '20261028.5'", dockerfile)
+        self.assertIn("{print $2}", dockerfile)
+        self.assertTrue((self.root / 'recipe/core/requirements.txt').is_file())
+        self.assertTrue((self.root / 'recipe/frontend/gulpfile.js').is_file())
+        self.assertFalse((self.root / 'recipe/frontend/.env').exists())
+        self.assertFalse((self.root / 'recipe/operating-system').exists())
+        self.assertFalse((self.root / 'recipe/core/CLAUDE.md').exists())
+        receipt = result['receipt']
+        self.assertEqual(receipt['frontendRevision'], 'b' * 40)
+        self.assertEqual(receipt['frontendVersion'], '20261028.5')
+        self.assertIn('core/CLAUDE.md', receipt['snapshotAdjustments'][0]['files'])
+        self.assertEqual(result['images'], ['material-buildroot/home-assistant:' + 'a' * 36])
+        command = result['buildCommands'][0]
+        self.assertIn('--provenance=false', command)
+        self.assertIn('type=image,name=material-buildroot/home-assistant:' + 'a' * 36 + ',compression=gzip,force-compression=true', command)
+        service = result['compose']['services']['homeassistant']
+        self.assertEqual(service['network_mode'], 'host')
+        self.assertNotIn('privileged', service)
+        self.assertIn('http://127.0.0.1:8123/manifest.json', service['healthcheck']['test'])
+
+    def test_one_repository_requires_readable_versions(self):
+        self.repository_files()
+        (self.source / 'versions.json').write_text(json.dumps({'core': 'latest', 'core_base_image': '2026.10.3'}))
+        with self.assertRaises(ValueError):
+            self.materialize('home-assistant-material', frontend_revision='b' * 40)
+
     def test_renderer_adapter_and_reused_output_are_rejected(self):
         with self.assertRaises(ValueError):
             self.materialize('arbitrary-command')

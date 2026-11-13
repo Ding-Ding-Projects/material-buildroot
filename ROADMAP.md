@@ -1,5 +1,16 @@
 # Phased implementation roadmap
 
+## Appliance ISO from the single Home Assistant Material repository, 2026-11-13
+
+- [x] Recognize Core, frontend and versions in one repository and build them from one revision (`311d3508`, 2026-11-13)
+- [x] Build recipes with BuildKit and refuse a saved archive that is missing layers
+- [x] Keep workload images out of the initramfs so large workloads pass GRUB, and check them by hash at boot
+- [x] Start containers on the initramfs root (`DOCKER_RAMDISK`)
+- [x] Boot the ISO under QEMU with KVM to a healthy Home Assistant (2026-11-13)
+- [ ] Let the producer's boot verifier wait long enough for a large image under software emulation, or use KVM when available
+- [ ] Drive this route from the desktop window and capture it
+- [ ] Boot on physical hardware
+
 ## Installer size: on-demand engines, 2026-11-12
 
 - [x] Restore release downloads that had moved (calibre and LibreOffice) without changing their pins.

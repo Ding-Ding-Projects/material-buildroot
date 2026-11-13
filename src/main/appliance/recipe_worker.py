@@ -9,6 +9,19 @@ import shutil
 import subprocess
 
 
+def complete_archive(archive):
+    # docker save can exit 0 with a manifest naming layers it did not write (classic
+    # builder images under the containerd image store). Refuse such an archive here.
+    import tarfile
+    with tarfile.open(archive) as stream:
+        names=set(stream.getnames())
+        manifest=json.load(stream.extractfile('manifest.json'))
+    needed=[name for item in manifest for name in [item['Config'],*item['Layers']]]
+    missing=[name for name in needed if name not in names]
+    if not manifest or missing:
+        raise ValueError('Saved image archive is missing %d of %d layer and configuration files'%(len(missing),len(needed)))
+
+
 def build_recipe(args, snapshot, frontend_snapshot, workspace, output, stop_children):
     script=Path(args.adapter_script)
     if not script.is_absolute() or script.is_symlink() or script.name!='recipes.py':
@@ -58,6 +71,7 @@ def build_recipe(args, snapshot, frontend_snapshot, workspace, output, stop_chil
         archive=output/'prepared-image.tar'
         with archive.open('xb') as stream:
             subprocess.run(['docker','save',*recipe['images']],check=True,stdout=stream,stderr=subprocess.DEVNULL,timeout=600)
+        complete_archive(archive)
         with archive.open('rb') as stream:
             archive_hash=hashlib.file_digest(stream,'sha256').hexdigest()
         files=[]
