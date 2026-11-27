@@ -1,15 +1,35 @@
-# Startup repair closeout
+# Material Buildroot task handoff
 
-## Verified startup repair and runtime checks, 2026-10-17
+## Scope
 
-Normal release [v0.1.1-build.232.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.232.1), source 00bca0993c22a30c6c5071458489c01331c67d2e, completed production successfully. The downloaded Setup.exe SHA-256 is 808cfce7b6662771d563793193df95f03d0bb98fca28a00ddae281c2e322f672. A user-scoped demand-only installer helper completed with exit zero. Independent native file-handle readback verified the physical normal installation, version 0.1.1 and exact embedded source, outside package-local redirection. The installed executable SHA-256 matches the producer inventory: 5700e24dbdfeeb5b718eb9bd316d16fdbf6c19956978d13fc355598c6b930e6c.
+Refresh the existing public screenshot gallery with inspected, source-bound documentation captures. Preserve the previous live-delivery evidence and keep incomplete native-interface imagery out of public content.
 
-The installed executable reached a complete document, navigated to About and returned to the productive workspace using a separate verification profile. The bounded observation recorded zero console errors, unhandled exceptions and page errors. The current inspected workspace capture is indexed in docs/evidence/startup-repair/inventory.json, with exact source and hashes; its full private receipts are retained separately. The owned installed verification process and hidden desktop then exited through the normal close path.
+## Current source state
 
-Execution tests now report 20 passed, 0 failed and 6 skipped. Source-preview startup regression: 1 passed. Real non-root WSL 2 and Docker execution through ExecutionService passed olddefconfig and show-info against Buildroot 2025.02 source aa2d7ca53f704af901f6c33c13e4bb1591886700, with independently verified process/container cleanup. See docs/evidence/startup-repair/runtime-smoke.json. These are configuration and package-metadata checks, not a full firmware-image build; Windows source-link transfer limitations remain explicit.
+The gallery inventory and its deployable `docs/gallery` copy each contain 77 PNGs across 14 groups. Ten documentation captures were added from source `948363dd098bafde1209e4d179124238ffb79408`, bound to build receipt SHA-256 `768cc0b5dff838589d0e6f31f3c742a5aac180288c55e8f22c4307d7b20c5cbd` and output-manifest SHA-256 `259022ce1c3b16c4f961c6cf9285fc006bdc5098eabf3a9381f06aa225c6dcfb`. All 77 listed images match their manifest hashes in both source and deployment trees.
 
-The source repairs are complete for this bounded startup/runtime task. Final test-fixture/evidence preservation and remote closeout follow this record. A further automatic metadata-only release is a separate publication state, not retroactive evidence for build 232. Existing settings, installations, unrelated applications and other-session work were preserved. No visible desktop switch was required.
+The project README still links to `https://ding-ding-projects.github.io/material-buildroot/gallery/`. The public About homepage remains `https://ding-ding-projects.github.io/material-buildroot/`.
 
-Retained follow-up: the tab catalog has an oversized layout in the inspected state, and a direct diagnostic close did not supply a complete later observation. This is outside the bounded startup repair and remains part of broader interface acceptance in issue #1. It does not negate the separately verified installed About-and-return workflow. Wiki publication is unavailable: the wiki remote reports Repository not found despite the repository capability flag. Do not claim wiki synchronization or whole-product acceptance.
+## Evidence limits
 
-The requested goal is active until the final preservation push, release readback and task-owned teardown settle. Continue only the remaining closeout, retain verified scope limits, and do not adopt the broader product backlog.
+The ten new images are built documentation candidate captures. Their individual capture times were not recorded. Their receipts do not establish live deployment or native backend behavior. One additional keyboard-focus image lacks a source, build and capture receipt binding, so it was excluded. Native application images inspected during this pass expose host-local update metadata and were withheld. Broader cached PNG material includes bundled assets, fixtures, copied captures and failed-run output; a complete candidate inventory has not been established. No native interface or complete display-matrix acceptance is claimed.
+
+The currently verified live gallery remains the prior 67-image delivery at source `71bb94dd2d8482a55a0bea51061a7f154c2ad92a`. The 77-image source candidate has not yet been deployed or live-verified. The earlier delivery receipt remains unchanged as historical evidence for that 67-image version.
+
+## Verification performed
+
+- Confirmed 77 unique capture IDs and image hashes across 14 groups.
+- Read back and hash-matched all 77 source/deployment image pairs.
+- Visually inspected and receipt-validated the ten new documentation captures.
+- Checked their pixel dimensions, labels, visible content and PNG text metadata.
+- Read back the exact public gallery backlink and About homepage.
+- Scanned changed public text files against the local private-term dictionary; no aliases were found.
+- No application build, installer, product runtime or native GUI verification was run for this gallery-only change.
+
+## Next steps
+
+1. Review the exact diff and commit the completed gallery-only source change on the task branch.
+2. Confirm `main` still points to the verified base before fast-forwarding only this completed gallery update.
+3. Read back the exact `main` ref and wait for its Pages deployment.
+4. Verify the live gallery, all 77 image responses and their hashes. Keep source publication and hosted verification as separate results.
+5. Update the existing issue #1 thread with the source and deployment evidence. Preserve unrelated work.

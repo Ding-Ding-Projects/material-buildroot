@@ -2,6 +2,7 @@
 
 ## Preservation boundary, 2026-10-16
 
+- [ ] Publish the 77-image gallery refresh and verify the live gallery and all image responses. Ten added documentation captures are source-bound; native application imagery remains withheld where pixels expose host-local update metadata, so broader visual acceptance remains open.
 - [x] Preserve the current source units and integrate the completed desktop/documentation candidates with remote proof. This is source preservation, not complete feature acceptance.
 - [ ] Complete genuine full-installer embedding and the changed-source production retry.
 - [ ] Complete the source gaps retained in the assignment queue and feature articles, including the remaining translation inventory.

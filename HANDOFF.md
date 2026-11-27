@@ -1,3 +1,11 @@
+## Public capture-gallery refresh, 2026-10-18
+
+The source inventory now has 77 reviewed images across 14 groups. Ten documentation captures were added from built source `948363dd098bafde1209e4d179124238ffb79408`, bound to build receipt SHA-256 `768cc0b5dff838589d0e6f31f3c742a5aac180288c55e8f22c4307d7b20c5cbd` and output-manifest SHA-256 `259022ce1c3b16c4f961c6cf9285fc006bdc5098eabf3a9381f06aa225c6dcfb`. Individual capture times were unavailable; receipt-check times remain separate. The source set does not verify production deployment or native backend operations.
+
+The deployable `docs/gallery` mirror and its ten original PNGs now match the updated gallery inventory. The source README still contains the exact gallery backlink. A separate keyboard-focus image was excluded because its observation has no source, build or capture receipt binding. New native application images were withheld because the reviewed pixels expose host-local update metadata. This candidate does not complete native interface or display-matrix acceptance.
+
+The live gallery still has the previously verified 67-image delivery at revision `71bb94dd2d8482a55a0bea51061a7f154c2ad92a`. The 77-image source refresh is not yet deployed or live-verified. Next steps are to integrate and publish the completed gallery-only change, read back the actual Pages run and live route, and verify all 77 image responses against the manifest. Preserve the prior delivery receipt as history and update the current delivery record only after the new live readback succeeds.
+
 ## Verified startup repair and runtime checks, 2026-10-17
 
 Normal release [v0.1.1-build.232.1](https://github.com/Ding-Ding-Projects/material-buildroot/releases/tag/v0.1.1-build.232.1), source 00bca0993c22a30c6c5071458489c01331c67d2e, completed production successfully. The downloaded Setup.exe SHA-256 is 808cfce7b6662771d563793193df95f03d0bb98fca28a00ddae281c2e322f672. A user-scoped demand-only installer helper completed with exit zero. Independent native file-handle readback verified the physical normal installation, version 0.1.1 and exact embedded source, outside package-local redirection. The installed executable SHA-256 matches the producer inventory: 5700e24dbdfeeb5b718eb9bd316d16fdbf6c19956978d13fc355598c6b930e6c.
